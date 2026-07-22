@@ -1,4 +1,4 @@
-# Design: команда `drill` и конвейер поиска ниш
+# Design: конвейер поиска ниш
 
 Статус: дизайн (v4). Термины кода — на английском, пояснения — на русском. Алгоритмы —
 прозой; из «кода» только SQL-схема и компактные JSON-контракты. Детальные промпты LLM — в
@@ -146,30 +146,32 @@ stateDiagram-v2
 score, verdict, note`. `score`/`verdict` теперь заполняет пайплайн (перезаписывает); `note` —
 **ручная** пометка пользователя, пайплайн её не трогает.
 
-Добавляет миграция (`ALTER TABLE node ADD COLUMN …`, node уже существует) — по одной колонке:
-```sql
-status           TEXT NOT NULL DEFAULT 'NEW'  -- FSM §2: 'FULLY_LOADED' | 'TRANSACTIONAL' | 'ANALYZED' | …
-kind             TEXT     -- 'transactional' | 'informational' | 'navigational' | 'category' | NULL
-freq_band        TEXT     -- 'LOW'(<50) | 'EVAL'(50–30k) | 'HEAD'(>30k); производное от freq
-classify_conf    REAL     -- уверенность LLM 0–1
-classify_reason  TEXT     -- 'дети — модификаторы (…онлайн/…бесплатно): один интент → transactional'
-score_weights    TEXT     -- JSON весов в момент оценки (провенанс оригинала): {"yandex":0.6,"google":0.4}
-competition_yandex  INTEGER   -- 0–100, сырая конкуренция по Яндексу
-competition_google  INTEGER   -- 0–100, сырая конкуренция по Google
-description      TEXT     -- фраза Haiku про гэп: 'ищут убрать фон с видео на телефоне; в топе десктоп+статьи'
-signals_json     TEXT     -- JSON сигналов Haiku: [{"code":"NO_DEDICATED_TOOL","weight":40,"evidence":"…"}]
-verdict_score    REAL     -- Opus 0–100 «стоит строить» (спрос ÷ конкуренция × лёгкость)
-error            TEXT     -- текст последней ошибки: 'HTTP 500 от XMLRiver (Google)'
-error_stage      TEXT     -- стадия ошибки: 'search'
-task_id          TEXT     -- id текущей задачи (= task.id); пока не NULL — узел заблокирован
-classified_at    INTEGER  -- unix-таймстемпы стадий
-searched_at      INTEGER
-scored_at        INTEGER
-analyzed_at      INTEGER
-```
-`score` (`REAL`, Haiku 0–100 итог) и `verdict` (`TEXT` `'BUILD'|'MAYBE'|'SKIP'` = бакет от
-`verdict_score`) уже существуют — в `ALTER` не входят, пайплайн их перезаписывает. Ссылки на
-отчёт в `node` нет — отчёт узла ищется по `report.node = phrase` (см. таблицу `report`).
+Добавляет миграция (`ALTER TABLE node ADD COLUMN`) — каждая колонка отдельно:
+
+| Колонка | Тип | Назначение / пример |
+|---|---|---|
+| `status` | `TEXT NOT NULL DEFAULT 'NEW'` | состояние FSM (§2): `'FULLY_LOADED'`, `'TRANSACTIONAL'`, `'ANALYZED'`… |
+| `kind` | `TEXT` | `'transactional'`\|`'informational'`\|`'navigational'`\|`'category'`\|`NULL` |
+| `freq_band` | `TEXT` | `'LOW'`(<50)\|`'EVAL'`(50–30k)\|`'HEAD'`(>30k); производное от `freq` |
+| `classify_conf` | `REAL` | уверенность LLM 0–1 |
+| `classify_reason` | `TEXT` | `'дети — модификаторы (…онлайн/…бесплатно): один интент → transactional'` |
+| `score_weights` | `TEXT` | JSON весов в момент оценки (провенанс): `{"yandex":0.6,"google":0.4}` |
+| `competition_yandex` | `INTEGER` | 0–100, сырая конкуренция по Яндексу |
+| `competition_google` | `INTEGER` | 0–100, сырая конкуренция по Google |
+| `description` | `TEXT` | фраза Haiku про гэп: `'ищут убрать фон с видео на телефоне; в топе десктоп+статьи'` |
+| `signals_json` | `TEXT` | JSON сигналов Haiku: `[{"code":"NO_DEDICATED_TOOL","weight":40,"evidence":"…"}]` |
+| `verdict_score` | `REAL` | Opus 0–100 «стоит строить» (спрос ÷ конкуренция × лёгкость) |
+| `error` | `TEXT` | текст последней ошибки: `'HTTP 500 от XMLRiver (Google)'` |
+| `error_stage` | `TEXT` | стадия ошибки: `'search'` |
+| `task_id` | `TEXT` | id текущей задачи (= `task.id`); пока не `NULL` — узел заблокирован |
+| `classified_at` | `INTEGER` | unix-таймстемп classify |
+| `searched_at` | `INTEGER` | unix-таймстемп search |
+| `scored_at` | `INTEGER` | unix-таймстемп score |
+| `analyzed_at` | `INTEGER` | unix-таймстемп analyze |
+
+`score` (`REAL`, Haiku 0–100 итог) и `verdict` (`TEXT` `'BUILD'|'MAYBE'|'SKIP'`, бакет от
+`verdict_score`) уже существуют — не добавляем, пайплайн их перезаписывает. Ссылки на отчёт в
+`node` нет — отчёт узла ищется по `report.node = phrase` (см. таблицу `report`).
 
 ### `serp` — кэш выдачи
 ```sql
