@@ -1,11 +1,8 @@
-# Terraform
-.terraform/
-*.tfstate
-*.tfstate.backup
-*.tfvars
-.terraform.lock.hcl
-
-# Secrets
-*.pem
-*.key
 .env
+__pycache__/
+*.pyc
+*.db
+*.csv
+.venv/
+node_modules/
+frontend/dist/

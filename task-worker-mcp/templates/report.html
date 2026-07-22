@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  Шаблон отчёта Opus по нише. Opus возвращает ГОТОВЫЙ HTML по этой структуре
+  (см. prompts/analyze.md, поле report_html). Плейсхолдеры {{...}} — заполнить;
+  секции можно опускать, если данных нет (но не выдумывать). Стили inline, без внешних
+  ресурсов — файл открывается как есть в новой вкладке.
+-->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ниша: {{phrase}}</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { max-width: 820px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 system-ui, sans-serif; }
+  .verdict { display: inline-block; padding: .2em .7em; border-radius: .5em;
+             font-weight: 700; color: #fff; }
+  .BUILD { background: #1a7f37; } .MAYBE { background: #b58100; } .SKIP { background: #a40e26; }
+  .score { font-size: 2.2rem; font-weight: 800; }
+  .muted { color: #666; } h1 { margin-bottom: .2em; }
+  table { border-collapse: collapse; width: 100%; margin: .5em 0; }
+  th, td { border: 1px solid #8884; padding: .4em .6em; text-align: left; vertical-align: top; }
+  th { width: 30%; white-space: nowrap; }
+  code { background: #8882; padding: 0 .3em; border-radius: .3em; }
+  ul { margin: .3em 0; } .serp li { margin-bottom: .4em; }
+</style>
+</head>
+<body>
+
+<h1>{{phrase}}</h1>
+<p>
+  <span class="verdict {{recommendation}}">{{recommendation}}</span>
+  &nbsp;<span class="score">{{verdict_score}}</span><span class="muted">/100 · уверенность {{confidence}}</span>
+</p>
+<p class="muted">base-freq Вордстата: {{freq}} (реальный спрос кратно ниже — см. ниже)</p>
+
+<h2>Незакрытая потребность</h2>
+<p>{{opportunity}}</p>
+
+<h2>Реальный захватываемый спрос</h2>
+<p>{{real_demand_est}}</p>
+
+<h2>Почему выдача слабая</h2>
+<ul>{{#why_serp_weak}}<li>{{.}}</li>{{/why_serp_weak}}</ul>
+
+<h2>Реализация</h2>
+<table>
+  <tr><th>Тип продукта</th><td>{{implementation.type}}</td></tr>
+  <tr><th>Объём работ</th><td>{{implementation.effort}} (~{{implementation.est_person_weeks}} чел.-недель)</td></tr>
+  <tr><th>Стек</th><td>{{implementation.stack}}</td></tr>
+  <tr><th>Ключевые фичи</th><td>{{implementation.key_features}}</td></tr>
+  <tr><th>Риски</th><td>{{implementation.risks}}</td></tr>
+  <tr><th>Монетизация</th><td>{{implementation.monetization}}</td></tr>
+</table>
+
+<h2>Опорная выдача</h2>
+<p class="muted">Что стоит в топе сейчас (основание для вывода о конкуренции):</p>
+<ul class="serp">{{#serp_top}}<li><b>{{rank}}.</b> {{title}} — <span class="muted">{{url}}</span></li>{{/serp_top}}</ul>
+
+</body>
+</html>
