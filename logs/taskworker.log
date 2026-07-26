@@ -1,3 +1,0 @@
-2026-07-26 17:00:31 taskworker.mcp INFO: mcp: старт stdio-сервера (APP_URL=http://127.0.0.1:8000)
-2026-07-26 17:04:51 taskworker.wait INFO: wait-jobs: ждём джобы (max_jobs=10, timeout=30.0)
-2026-07-26 17:04:51 taskworker.wait INFO: wait-jobs: джобов 1: 9063e91279134e8cafccab4f8fd55caa:0(classify)
