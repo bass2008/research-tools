@@ -34,8 +34,8 @@
 1. **`full_load`** — рекурсивно грузит узел и все подузлы (§4) → `FULLY_LOADED`.
 2. **`classify`** — размечает поддерево по интенту: `transactional` → `TRANSACTIONAL`;
    `category`/`informational`/`navigational` → одноимённые терминалы.
-3. По каждому **`TRANSACTIONAL`**: **`search`** → `SEARCHED`, **`score`** → `SCORED` (`score ≥ порога`)
-   либо `LOW_SCORED` (`<`), и для `SCORED` — **`analyze`** → `ANALYZED`.
+3. По каждому **`TRANSACTIONAL`**: **`search`** → `SEARCHED`, **`score`** → `SCORED` (`score > порога`)
+   либо `LOW_SCORED` (`≤`), и для `SCORED` — **`analyze`** → `ANALYZED`.
 
 `drill` — **не транзакция**: выполняется до куда смог; упавший шаг → ошибка в лог, узел
 остаётся в текущем (согласованном) статусе, остальное поддерево продолжает. Резюмируем
@@ -43,7 +43,7 @@
 подтверждение с оценкой объёма (§8).
 
 **5 чистых терминалов:** `CATEGORY` (зонтик, интент не определён) · `INFORMATIONAL` ·
-`NAVIGATIONAL` (интент не наш — паркуем на будущее) · `LOW_SCORED` (`score` < порога) ·
+`NAVIGATIONAL` (интент не наш — паркуем на будущее) · `LOW_SCORED` (`score ≤ порога`) ·
 `ANALYZED` (перспективно, разобрано). Исход читается по статусу — без `WHERE score > N`.
 
 ## 2. Конечный автомат узла (FSM)
@@ -111,6 +111,20 @@ stateDiagram-v2
 Пайплайн односторонний, кнопок «Re-» нет. Любой шаг при падении → ошибка в лог, статус не
 меняется (повторить = запустить операцию снова, она идемпотентна по данным).
 
+**`score` не удалось посчитать.** Если оценить нечего (обе выдачи пусты — `prompts/score.md`
+возвращает `score = null`), узел **остаётся `SEARCHED`**, в лог идёт ошибка. Отдельного терминала
+нет: случай редкий, а такой узел разумнее переоценить позже, чем похоронить. Следствие: `drill`
+на таком узле дальше не пойдёт и оставит его нетерминальным — это осознанно, по общему правилу
+«упало → статус не меняется».
+
+**Инвариант `kind` ↔ `status`.** Они не дублируют друг друга, у них разные роли: **`kind` — вечная
+метка интента** (её ставит `classify`, правит `Fix kind`), **`status` — позиция в пайплайне**.
+Для трёх припаркованных интентов они совпадают по смыслу (`kind='category'` ⇄ `CATEGORY`), для
+`transactional` расходятся: `kind` остаётся `transactional`, а `status` уходит дальше по цепочке
+(`SEARCHED` → `SCORED` → `ANALYZED`). Правило: **`Fix kind` меняет оба согласованно** —
+промежуточного состояния «новый `kind`, старый статус» не бывает; при возврате в `transactional`
+статус откатывается к `TRANSACTIONAL`, ранее собранные выдача/скор/отчёт не удаляются.
+
 ### Кнопки по статусу
 Показываются ТОЛЬКО разрешённые. Во время идущей операции кнопки затронутых узлов
 **заблокированы** (не Cancel — просто disabled; см. §8). Отмены и ретрая нет.
@@ -146,13 +160,12 @@ stateDiagram-v2
 score, verdict, note`. `score`/`verdict` теперь заполняет пайплайн (перезаписывает); `note` —
 **ручная** пометка пользователя, пайплайн её не трогает.
 
-Добавляет миграция (`ALTER TABLE node ADD COLUMN`) — каждая колонка отдельно:
+Добавляются к схеме (пайплайн ещё не работал — колонки просто заводятся, см. §10):
 
 | Колонка | Тип | Назначение / пример |
 |---|---|---|
 | `status` | `TEXT NOT NULL DEFAULT 'NEW'` | состояние FSM (§2): `'FULLY_LOADED'`, `'TRANSACTIONAL'`, `'ANALYZED'`… |
 | `kind` | `TEXT` | `'transactional'`\|`'informational'`\|`'navigational'`\|`'category'`\|`NULL` |
-| `freq_band` | `TEXT` | `'LOW'`(<50)\|`'EVAL'`(50–30k)\|`'HEAD'`(>30k); производное от `freq` |
 | `classify_conf` | `REAL` | уверенность LLM 0–1 |
 | `classify_reason` | `TEXT` | `'дети — модификаторы (…онлайн/…бесплатно): один интент → transactional'` |
 | `score_weights` | `TEXT` | JSON весов в момент оценки (провенанс): `{"yandex":0.6,"google":0.4}` |
@@ -177,11 +190,12 @@ score, verdict, note`. `score`/`verdict` теперь заполняет пай�
 ```sql
 CREATE TABLE IF NOT EXISTS serp (
   phrase TEXT NOT NULL, engine TEXT NOT NULL,      -- 'yandex' | 'google'
-  found INTEGER, docs_json TEXT NOT NULL,          -- [{rank,url,title,snippet}]
+  found INTEGER,                                   -- всего найдено (задел, в оценке пока не участвует)
+  docs_json TEXT NOT NULL,                         -- [{rank,url,title,snippet}]
   fetched_at INTEGER NOT NULL, PRIMARY KEY (phrase, engine));
 ```
 
-### `task` — задачи Celery (для вкладки Task + трекинга)
+### `task` — журнал операций (для вкладки Task + трекинга)
 ```sql
 CREATE TABLE IF NOT EXISTS task (
   id TEXT PRIMARY KEY, type TEXT NOT NULL,         -- full_load|classify|search|score|analyze
@@ -189,8 +203,8 @@ CREATE TABLE IF NOT EXISTS task (
   node TEXT, params TEXT, result TEXT,
   created_at INTEGER, started_at INTEGER, finished_at INTEGER, error TEXT);
 ```
-`node` = фраза (напр. `'нейросеть видео'`); `id` = Celery uuid; `error` напр.
-`'таймаут ожидания результата LLM (BRPOP)'`. `params`/`result` — JSON, напр.:
+`node` = фраза (напр. `'нейросеть видео'`); `id` — уникальный идентификатор задачи; `error` напр.
+`'таймаут ожидания результата LLM'`. `params`/`result` — JSON, напр.:
 - `params` (classify): `{"root":"нейросеть видео","nodes":[{"phrase":"нейросеть видео из фото","freq":1200,"children":["…"]}]}`
 - `result` (score): `{"results":[{"phrase":"…","score":85,"competition_yandex":20,"competition_google":30,"weights":{"yandex":0.6,"google":0.4}}]}`
 
@@ -231,34 +245,22 @@ CREATE TABLE IF NOT EXISTS report (
   фетч ~0.5–1 с и упирается в сеть (I/O-bound), поэтому 6 одновременных ускоряют краул в
   ~6× при вежливой нагрузке. Тредов достаточно (не CPU). Чисто оптимизация скорости.
 
-## 5. Исполнение задач: Celery + `task-worker-mcp` + Claude Code
+## 5. Исполнение операций (асинхронные задачи)
 
-Все операции — **задачи Celery** (очередь/оркестрация; таблица `task` §3). Два класса:
-- **Не-LLM** (`full_load`, `search`) — Celery-воркер делает сам (HTTP к XMLRiver).
-- **LLM** (`classify`, `search`→нет, `score`, `analyze`) — Celery-воркер **сам Anthropic не
-  зовёт**, а проталкивает задачу в **`task-worker-mcp`** и ждёт результат.
+Все операции — **асинхронные фоновые задачи**: не блокируют UI, трекинг — таблица `task` (§3).
+Два класса по тому, кто делает работу:
+- **Не-LLM** (`full_load`, `search`) — система выполняет сама (обращения к XMLRiver).
+- **LLM** (`classify`, `score`, `analyze`) — система **сама модель не зовёт**, а делегирует
+  работу внешнему **LLM-агенту** и ждёт результат.
 
-**`task-worker-mcp`** (`/home/sergey/Personal/research/task-worker-mcp/`, форк скелета
-`assistant-mcp`): MCP-сервер, к которому подключён **Claude Code**. Обмен — **через
-сообщения MCP, не файлы**: у Claude есть асинхронный `watch` (ждёт появления задач) и
-`SendMessage()` (шлёт результат). Т.е. `assistant-mcp`-идиом «wait-question» превращается в
-`watch`-канал задач.
-
-- `task-worker-mcp` **НЕ зависит от `anthropic`** — LLM это сам Claude Code (как в
-  `assistant-mcp` интеллект = Claude на том конце трубы).
-- **Claude Code запускается через workflow** и потому НЕ одно-задачный: `watch` может
-  отдать пачку задач, а Claude оркестрирует агентов и гонит их параллельно, выбирая модель
-  под тип: **`classify` → Sonnet, `score` → Haiku, `analyze` → Opus 1M xhigh**.
-- Результаты Claude шлёт назад через `SendMessage()` → `task-worker-mcp` → Celery помечает
-  задачу `DONE` и пишет результат в модель.
+**Решение уровня дизайна — какая «голова» делает какую работу.** LLM-агент получает задачи
+пачкой, оркестрирует их параллельно и под **каждый тип берёт свою модель** (баланс цена/качество):
+**`classify` → Sonnet**, **`score` → Haiku**, **`analyze` → Opus 1M xhigh**. *Как* агент
+подключён и *как* задачи до него доходят/возвращаются — вопрос реализации (`tech-design.md` §3,
+§7), в дизайне не фиксируем.
 
 Промпты классификации/скоринга/анализа — в **`task-worker-mcp/prompts/{classify,score,
-analyze}.md`** (как `prompts/answer.md` в `assistant-mcp`). В спеке не дублируем.
-
-**Форк-план (что берём из `assistant-mcp`):** src-layout `pyproject`, `core/config.py`,
-`logsetup.py`, скелет `cli.py`, `prompts/`, идиом `wait-question` → `watch`. **Выкидываем**
-всё аудио (`audio/live/engines/hotkeys`, `faster-whisper`, `PySide6`, `parec`/`spectacle`).
-**Добавляем** только транспорт задач (watch/SendMessage) — **без `anthropic`**.
+analyze}.md`**; в спеке не дублируем.
 
 ## 6. Типы задач
 Пишут в `node`/`serp`. Модель — источник истины.
@@ -301,10 +303,11 @@ analyze}.md`** (как `prompts/answer.md` в `assistant-mcp`). В спеке н
 - `POST /api/node/load` `{phrase}` — браузинг 1 уровень.
 - `POST /api/node/full-load` `{phrase}` — краул поддерева.
 - `POST /api/node/op` `{phrase, op: classify|search|score|analyze}` — один шаг.
-- `POST /api/node/drill` `{phrase, analyze_min_score?}` — оркестратор (§1).
+- `POST /api/node/drill` `{phrase}` — оркестратор (§1). Анализируются все `SCORED`: отдельной
+  ручки-порога нет, планку задаёт порог `score`.
 - `POST /api/node/kind` `{phrase, kind}` — ручной оверрайд `Fix kind`.
 
-Команды ставят задачу в Celery (узел получает `task_id`, кнопки блокируются) и сразу
+Команды запускают фоновую задачу (узел получает `task_id`, кнопки блокируются) и сразу
 возвращают ack; прогресс/результат прилетают по websocket.
 
 ## 8. Требования к UI
@@ -314,11 +317,13 @@ analyze}.md`** (как `prompts/answer.md` в `assistant-mcp`). В спеке н
 - **Четыре вкладки:**
   1. **Главная** — дерево запросов (текущее приложение).
   2. **Лог** — окно логов. Детали — **§9 «Требования к логам»**.
-  3. **Task** — таблица задач Celery (`task` §3): тип, узел, статус, время, ошибка.
+  3. **Task** — таблица задач (`task` §3): тип, узел, статус, время, ошибка.
   4. **Отчёты** — список готовых отчётов (`report JOIN node`): фраза-заголовок узла, вердикт,
      `verdict_score`, дата, ссылка (открыть в новой вкладке). Сортировка по `verdict_score`.
 - **`Drill` / `Full load`** — перед запуском **диалог подтверждения** «Вы уверены? Загрузит
-  ~N узлов / ~X запросов» (Да/Нет). Без потолков — просто предупреждение об объёме.
+  не менее ~N узлов / ~X запросов, может оказаться больше» (Да/Нет). Оценка считается по уже
+  загруженному поддереву, поэтому для незагруженного узла близка к нулю — это **предупреждение об
+  объёме, а не обещание числа**. Потолков нет.
 - **Real-time:** статусы узлов и логи обновляются по websocket по мере выполнения (без
   перезагрузки/поллинга на фронте).
 - **Блокировка на время операции:** пока по узлу идёт задача (`task_id`), заблокированы
@@ -350,15 +355,17 @@ analyze}.md`** (как `prompts/answer.md` в `assistant-mcp`). В спеке н
 - **Формат строки одинаков** в UI и файле: `время · уровень · стадия · узел · сообщение`.
 - При открытии вкладки показываем недавнюю историю (хвост файла), дальше — живой стрим.
 
-Механика (файл, единственный писатель, эндпоинт очистки) — в `implementation-drill.md §6.1`.
+Механика (файл, эндпоинт очистки) — в `tech-design.md §6`.
 
 ## 10. Порядок реализации (фазы)
-1. Миграция схемы: колонки `node` (§3), таблицы `serp`,`task`; `_maybe_backfill` (`freq_band`).
+1. Схема: новые колонки `node` (§3) и таблицы `serp`,`task`,`report`. Пайплайн ещё не
+   работал, поэтому `node`/`edge` пересобираются из `cache` — миграция не нужна. **`cache` и
+   `keywords` не трогаем.** После первого прогона пайплайна схему менять только аддитивно.
 2. WebSocket read-канал (`/ws`): снимок дерева + апдейты + логи. Перевести чтение дерева на него.
-3. `full_load` как Celery-задача + `POST /api/node/full-load`; прогресс/статусы по websocket.
-4. `search` (Яндекс+Google) как Celery-задача (не-LLM).
-5. `task-worker-mcp` (форк, §5): `watch`/`SendMessage`, очередь LLM-задач; Celery→MCP мост.
-6. `classify` (Sonnet), `score` (Haiku, порог 60) через Claude Code/workflow; промпты в файлах.
+3. `full_load` как фоновая задача + `POST /api/node/full-load`; прогресс/статусы по websocket.
+4. `search` (Яндекс+Google) как фоновая задача (не-LLM).
+5. Делегирование LLM-задач внешнему агенту (§5): очередь задач + возврат результата, промпты в файлах.
+6. `classify` (Sonnet), `score` (Haiku, порог 60) через LLM-агента; промпты в файлах.
 7. `analyze` (Opus 1M xhigh) + отчёт на всю страницу (новая вкладка).
 8. Оркестратор `drill` + диалог подтверждения.
 9. UI: 4 вкладки (вкл. «Отчёты»), кнопки по FSM (§2, §8), блокировки, отчёт.
