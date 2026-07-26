@@ -1,48 +1,670 @@
 #!/usr/bin/env python3
 """
-FastAPI-сервер поверх модели (nodes+edges в semcore.db).
+FastAPI-сервер конвейера drill: команды (HTTP), чтение (WebSocket), очередь фоновых
+задач, шина событий, внутренние эндпоинты для task-worker-mcp и статика.
 
-GET /api/expand?q=<фраза>
-  -> если пул фразы ещё не запрашивался, тянет XMLRiver (кэш) и пишет в модель;
-     затем отдаёт ПРОЕКЦИЮ пула из модели: локальная вложенность по словам +
-     метки cached(queried)/childCount(total_refinements) для двухцветного "+".
-  Модель персистентна: раскрытое переживает перезапуск; узлы — задел под скоринг.
+Решения, которые здесь зафиксированы (tech-design §2, §6):
+- всё серверное живёт в одном процессе на asyncio; брокера и воркеров нет;
+- единственное соединение с БД используется ТОЛЬКО из event-loop-треда, блокирующая
+  сеть уходит в executor (см. tasks.py);
+- команда ставит задачу, вешает node.task_id и сразу отвечает ack {task_id};
+- ожидание LLM не блокирует разбор очереди: каждая задача — своя корутина;
+- чтение по WS ничего не подгружает (CQRS): root/expand — чистая проекция модели;
+- логи дублируются в logs/drill.log теми же полями, что в событии log.
 
-GET /  -> собранный React-фронт (frontend/dist).
-
-Запуск: conda run -n research3.12 uvicorn server:app --port 8000 --reload
+Запуск: conda run -n research3.12 uvicorn server:app --port 8000
 """
+import asyncio
+import json
+import os
+import time
+from collections import deque
+from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
+import tasks
 import wscore
 
-app = FastAPI(title="Wordstat tree")
 ROOT = Path(__file__).parent
+LOGS = ROOT / "logs"
+LOG_FILE = LOGS / "drill.log"
+REPORTS = tasks.REPORTS
 DIST = ROOT / "frontend" / "dist"
 
+LOG_TAIL = 300            # строк хвоста лога отдаём клиенту при subscribe
+LOG_SEP = " · "           # формат строки: время · уровень · стадия · узел · сообщение
+TS_FMT = "%Y-%m-%dT%H:%M:%S"
+LLM_OFFLINE_AFTER = 60    # нет watch дольше минуты -> петля offline (tech §6 «Правила»)
+LLM_CHECK_EVERY = 10
+XMLRIVER_LIMIT = 4        # одновременных обращений к XMLRiver вне краула
+CRAWL_LIMIT = 1           # одновременных краулов (внутри каждого — wscore.WORKERS фетчей)
+CLIENT_QUEUE = 5000       # события на клиента; переполнилось — клиент слишком медленный
+ROOTS_LIMIT = 50
 
-@app.get("/api/expand")
-def expand(q: str = Query(..., description="Фраза-маркер")):
-    qn = wscore.normalize(q)
-    con = wscore.connect()
-    try:
-        row = con.execute(
-            "SELECT queried, freq, total_refinements FROM node WHERE phrase = ?", (qn,)
-        ).fetchone()
-        if not row or not row[0]:
-            own_freq, total = wscore.load_phrase(con, qn)  # ещё не запрашивали -> тянем
+# кто может дёрнуть операцию из текущего статуса (design §2, «Кнопки по статусу»)
+ALLOWED = {
+    "load": ("NEW",),
+    "full_load": ("NEW", "LOADED"),
+    "classify": ("FULLY_LOADED",),
+    "search": ("TRANSACTIONAL",),
+    "score": ("SEARCHED",),
+    "analyze": ("SCORED",),
+    "drill": tuple(s for s in wscore.STATUSES if s not in wscore.TERMINALS),
+}
+OPS_HTTP = ("classify", "search", "score", "analyze")   # значения поля op в /api/node/op
+ERRORS = {401: "unauthorized", 404: "not_found", 409: "conflict", 422: "invalid"}
+
+CTX = None   # рантайм процесса, создаётся в lifespan
+
+
+# ---------- шина событий, блокировки, состояние LLM ----------
+
+class Ctx:
+    """Рантайм: БД, шина событий, очередь задач, семафоры, обмен с LLM, блокировки узлов."""
+
+    def __init__(self, con):
+        self.con = con
+        self.db = wscore.db_path_of(con)
+        self.clients = set()                       # очереди WS-клиентов
+        self.log_q = asyncio.Queue()               # строки для писателя лог-файла
+        self.queue = asyncio.Queue()               # очередь задач: task_id
+        self.net = asyncio.Semaphore(XMLRIVER_LIMIT)
+        self.crawl = asyncio.Semaphore(CRAWL_LIMIT)
+        self.llm = LlmBroker(self)
+        self.last_watch = 0.0                      # когда петля последний раз приходила
+        self.watchers = 0                          # висящих сейчас watch-ожиданий
+        self.running = set()                       # живые корутины задач (иначе их съест GC)
+        self._locks = {}                           # phrase -> стек task_id (drill + его шаги)
+        self._online = None
+
+    # --- шина событий ---
+
+    def publish(self, kind, data):
+        """Конверт {type, data} — каждому WS-клиенту (tech §6.2)."""
+        env = {"type": kind, "data": data}
+        for q in list(self.clients):
+            try:
+                q.put_nowait(env)
+            except asyncio.QueueFull:
+                pass
+        return env
+
+    def log(self, level, stage, node, msg):
+        """Строка лога: событие log + запись в файл (одинаковые поля, tech §6).
+        ts — локальное время в ISO-форме: и человеку читаемо, и Date.parse на фронте."""
+        row = {"ts": time.strftime(TS_FMT), "level": level,
+               "stage": stage or "", "node": node or "", "msg": str(msg)}
+        self.publish("log", row)
+        self.log_q.put_nowait(row)
+        return row
+
+    def spawn(self, coro):
+        """Фоновая корутина со ссылкой в ctx.running (иначе задачу соберёт GC)."""
+        t = asyncio.ensure_future(coro)
+        self.running.add(t)
+        t.add_done_callback(self.running.discard)
+        return t
+
+    # --- блокировки узлов (tech §6 «Правила») ---
+
+    def _write_lock(self, phrase, task_id):
+        try:
+            self.publish("node", wscore.set_status(self.con, phrase, None, task_id=task_id))
+        except KeyError:
+            pass   # узла нет (тестовая задача без узла) — блокировать нечего
+
+    def acquire(self, phrases, task_id):
+        """Занять узлы шагом. Стек владельцев: drill держит корень, а его шаг —
+        свой узел; снятие шага возвращает узел предыдущему владельцу."""
+        for p in phrases:
+            self._locks.setdefault(p, []).append(task_id)
+            self._write_lock(p, task_id)
+
+    def release(self, phrases, task_id):
+        for p in phrases:
+            stack = self._locks.get(p) or []
+            if task_id in stack:
+                stack.reverse()
+                stack.remove(task_id)
+                stack.reverse()
+            owner = stack[-1] if stack else None
+            if not stack:
+                self._locks.pop(p, None)
+            self._write_lock(p, owner)
+
+    def busy(self, phrase):
+        """Занят ли узел сам или любой его предок. -> фраза занятого узла или None."""
+        seen = {phrase}
+        stack = [phrase]
+        while stack:
+            p = stack.pop()
+            row = self.con.execute("SELECT task_id FROM node WHERE phrase = ?", (p,)).fetchone()
+            if row and row[0]:
+                return p
+            for r in self.con.execute("SELECT parent FROM edge WHERE child = ?", (p,)):
+                if r[0] not in seen:
+                    seen.add(r[0])
+                    stack.append(r[0])
+        return None
+
+    # --- состояние LLM-петли ---
+
+    def llm_online(self):
+        return self.watchers > 0 or (time.time() - self.last_watch) <= LLM_OFFLINE_AFTER
+
+    def check_llm(self, force=False):
+        """Публикует llm_status при смене состояния (и предупреждение в лог, если offline)."""
+        online = self.llm_online()
+        if not force and online == self._online:
+            return online
+        self._online = online
+        self.publish("llm_status", {"online": online,
+                                    "last_seen_at": int(self.last_watch) or None})
+        if online:
+            self.log("INFO", "llm", None, "LLM-петля на связи")
         else:
-            own_freq, total = row[1], row[2]
-        children = wscore.project(con, qn)
-        return {"query": qn, "freq": own_freq, "total": total,
-                "count": len(children), "children": children}
+            self.log("WARN", "llm", None,
+                     "LLM-петля не приходила за джобами больше минуты — "
+                     "операции classify/score/analyze провалятся по таймауту")
+        return online
+
+
+class LlmBroker:
+    """Очередь LLM-джобов (tech §3, §6.3): watch отдаёт короткий сигнал, данные выдаются
+    отдельно по job_id, результат резолвит ожидание операции. Резервирования и ретраев нет —
+    страховка одна: таймаут операции."""
+
+    def __init__(self, ctx):
+        self.ctx = ctx
+        self.jobs = {}            # job_id -> {job_id, task_id, type, params, prompt, future}
+        self.pending = deque()    # job_id, по которым сигнал ещё не выдан
+        self.arrival = asyncio.Event()
+
+    def waiting(self):
+        return len(self.pending)
+
+    def _add(self, job):
+        job["future"] = asyncio.get_running_loop().create_future()
+        self.jobs[job["job_id"]] = job
+        self.pending.append(job["job_id"])
+        self.arrival.set()
+
+    def _drop(self, job_ids):
+        """Конец операции (или её таймаут): данные джобов больше недоступны."""
+        for jid in job_ids:
+            self.jobs.pop(jid, None)
+        left = [j for j in self.pending if j in self.jobs]
+        self.pending.clear()
+        self.pending.extend(left)
+
+    async def watch(self, max_jobs, timeout):
+        """Блокируется, пока джобов нет. -> [{job_id, type}] (только сигнал, без данных)."""
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + max(0.0, timeout)
+        while True:
+            out = []
+            while self.pending and len(out) < max_jobs:
+                jid = self.pending.popleft()
+                job = self.jobs.get(jid)
+                if job and not job["future"].done():
+                    out.append({"job_id": jid, "type": job["type"]})
+            if out:
+                return out
+            rest = deadline - loop.time()
+            if rest <= 0:
+                return []
+            self.arrival.clear()
+            try:
+                await asyncio.wait_for(self.arrival.wait(), rest)
+            except asyncio.TimeoutError:
+                return []
+
+    def data(self, job_id):
+        """Полные данные джоба или None (неизвестен/просрочен)."""
+        job = self.jobs.get(job_id)
+        if job is None or job["future"].done():
+            return None
+        return {"job_id": job_id, "type": job["type"], "params": job["params"],
+                "prompt": job["prompt"]}
+
+    def submit(self, job_id, ok, result=None, error=None):
+        """Результат от агента. -> accepted: False, если джоб просрочен или неизвестен."""
+        job = self.jobs.get(job_id)
+        if job is None or job["future"].done():
+            return False
+        fut = job["future"]
+        if not ok:
+            fut.set_exception(RuntimeError(f"агент вернул ошибку: {error or 'без описания'}"))
+            return True
+        if isinstance(result, str):
+            try:
+                result = json.loads(result)
+            except ValueError as e:
+                fut.set_exception(ValueError(f"невалидный JSON от агента: {e}"))
+                return True
+        fut.set_result(result)
+        return True
+
+    async def run(self, jobs, timeout, on_done=None):
+        """Отправить джобы и дождаться ВСЕХ частей. Любой отказ или таймаут -> исключение.
+        Данные джобов живут до выхода отсюда (tech §6.3 «Время жизни джоба»)."""
+        loop = asyncio.get_running_loop()
+        for j in jobs:
+            self._add(j)
+        pending = {j["future"] for j in jobs}
+        deadline = loop.time() + timeout
+        done_n = 0
+        try:
+            while pending:
+                rest = deadline - loop.time()
+                if rest <= 0:
+                    raise TimeoutError(f"таймаут ожидания результата LLM ({timeout:.0f} c)")
+                done, pending = await asyncio.wait(pending, timeout=rest,
+                                                   return_when=asyncio.FIRST_COMPLETED)
+                if not done:
+                    raise TimeoutError(f"таймаут ожидания результата LLM ({timeout:.0f} c)")
+                for f in done:
+                    f.result()          # ошибка агента / невалидный JSON поднимется здесь
+                    done_n += 1
+                if on_done:
+                    on_done(done_n)
+            return [j["future"].result() for j in jobs]
+        finally:
+            self._drop([j["job_id"] for j in jobs])
+
+
+# ---------- фоновые петли процесса ----------
+
+async def dispatcher(ctx):
+    """Разбор очереди задач: каждая задача уходит своей корутиной, поэтому ожидание LLM
+    не мешает разбирать очередь (tech §2)."""
+    while True:
+        task_id = await ctx.queue.get()
+        ctx.spawn(tasks.execute(ctx, task_id))
+
+
+def log_line(row):
+    return LOG_SEP.join((row["ts"], row["level"], row["stage"] or "", row["node"] or "", row["msg"]))
+
+
+async def log_writer(ctx):
+    """Дублирование лога в файл — пишется всегда, даже без открытого браузера (design §9)."""
+    while True:
+        rows = [await ctx.log_q.get()]
+        while not ctx.log_q.empty():
+            rows.append(ctx.log_q.get_nowait())
+        try:
+            LOGS.mkdir(parents=True, exist_ok=True)
+            with open(LOG_FILE, "a", encoding="utf-8") as f:
+                for r in rows:
+                    f.write(log_line(r) + "\n")
+        except OSError:
+            pass   # лог-файл недоступен — не роняем сервер из-за журнала
+
+
+async def llm_monitor(ctx):
+    """Индикатор петли: помним время последнего watch, дольше минуты -> online:false."""
+    while True:
+        ctx.check_llm()
+        await asyncio.sleep(LLM_CHECK_EVERY)
+
+
+def log_tail(n=LOG_TAIL):
+    """Хвост лог-файла, разобранный в те же поля, что у события log."""
+    if not LOG_FILE.exists():
+        return []
+    try:
+        with open(LOG_FILE, encoding="utf-8", errors="replace") as f:
+            lines = deque(f, maxlen=n)
+    except OSError:
+        return []
+    out = []
+    for line in lines:
+        parts = line.rstrip("\n").split(LOG_SEP, 4)
+        if len(parts) == 5:
+            out.append({"ts": parts[0], "level": parts[1], "stage": parts[2],
+                        "node": parts[3], "msg": parts[4]})
+    return out
+
+
+@asynccontextmanager
+async def lifespan(app):
+    global CTX
+    LOGS.mkdir(parents=True, exist_ok=True)
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    wscore.load_env()
+    con = wscore.connect()
+    freed = wscore.clear_stale_locks(con)   # рестарт не оставляет залипших блокировок
+    CTX = Ctx(con)
+    app.state.ctx = CTX
+    loops = [CTX.spawn(log_writer(CTX)), CTX.spawn(dispatcher(CTX)), CTX.spawn(llm_monitor(CTX))]
+    CTX.log("INFO", "server", None,
+            f"сервер запущен, снято зависших блокировок: {freed}")
+    try:
+        yield
     finally:
+        for t in loops:
+            t.cancel()
+        for t in list(CTX.running):
+            t.cancel()
+        await asyncio.gather(*CTX.running, *loops, return_exceptions=True)
         con.close()
 
 
-# Фронт (React build). Монтируется последним, чтобы не перехватывать /api.
+app = FastAPI(title="Niche finder", lifespan=lifespan)
+
+
+# ---------- ошибки одним телом {error, detail} ----------
+
+@app.exception_handler(HTTPException)
+async def http_error(request, exc):
+    return JSONResponse(status_code=exc.status_code,
+                        content={"error": ERRORS.get(exc.status_code, "error"),
+                                 "detail": exc.detail})
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request, exc):
+    return JSONResponse(status_code=422, content={"error": "invalid", "detail": str(exc)})
+
+
+# ---------- команды (tech §6.1) ----------
+
+class PhraseIn(BaseModel):
+    phrase: str
+
+
+class OpIn(BaseModel):
+    phrase: str
+    op: str
+
+
+class KindIn(BaseModel):
+    phrase: str
+    kind: str
+
+
+# Fix kind разрешён только там, где интент уже определён (design §2):
+# intent-терминалы и TRANSACTIONAL. Из NEW/LOADED/FULLY_LOADED/SEARCHED/... — 422.
+FIX_KIND_FROM = frozenset({"TRANSACTIONAL", "CATEGORY", "INFORMATIONAL", "NAVIGATIONAL"})
+
+
+def _node_or_404(phrase):
+    row = wscore.get_node(CTX.con, phrase)
+    if row is None:
+        raise HTTPException(404, f"фраза неизвестна: {phrase!r}")
+    return row
+
+
+def _free_or_409(phrase):
+    busy = CTX.busy(phrase)
+    if busy:
+        raise HTTPException(409, f"занят операцией узел {busy!r}"
+                                 + ("" if busy == phrase else " (предок)"))
+
+
+def _command(op, phrase, params=None):
+    p = wscore.normalize(phrase)
+    row = _node_or_404(p)
+    _free_or_409(p)
+    if row["status"] not in ALLOWED[op]:
+        raise HTTPException(422, f"операция {op} недопустима из статуса {row['status']}")
+    return {"task_id": tasks.enqueue(CTX, op, p, params)}
+
+
+@app.post("/api/node/load")
+async def cmd_load(body: PhraseIn):
+    return _command("load", body.phrase)
+
+
+@app.post("/api/node/full-load")
+async def cmd_full_load(body: PhraseIn):
+    return _command("full_load", body.phrase)
+
+
+@app.post("/api/node/op")
+async def cmd_op(body: OpIn):
+    if body.op not in OPS_HTTP:
+        raise HTTPException(422, f"неизвестный op: {body.op!r}")
+    return _command(body.op, body.phrase)
+
+
+@app.post("/api/node/drill")
+async def cmd_drill(body: PhraseIn):
+    return _command("drill", body.phrase)
+
+
+@app.post("/api/node/kind")
+async def cmd_kind(body: KindIn):
+    """Fix kind — синхронно, без задачи: kind и status меняются вместе (design §2)."""
+    p = wscore.normalize(body.phrase)
+    row = _node_or_404(p)
+    _free_or_409(p)
+    kind = wscore.normalize(body.kind)
+    if kind not in wscore.KIND_STATUS:
+        raise HTTPException(422, f"неизвестный kind: {body.kind!r}")
+    # Fix kind правит ошибочную метку, а не служит способом перескочить пайплайн (design §2):
+    # интент должен быть уже определён, иначе узел прыгнул бы в TRANSACTIONAL минуя classify.
+    cur = row["status"]
+    if cur not in FIX_KIND_FROM:
+        raise HTTPException(422, f"Fix kind недопустим из статуса {cur}: метка правится "
+                                 f"только у {', '.join(sorted(FIX_KIND_FROM))}")
+    delta = wscore.override_kind(CTX.con, p, kind)
+    CTX.publish("node", delta)
+    CTX.log("INFO", "kind", p, f"Fix kind: kind={kind}, status={delta['status']}")
+    return {"phrase": p, "kind": delta["kind"], "status": delta["status"]}
+
+
+@app.post("/api/logs/clear")
+async def cmd_logs_clear():
+    """Единственная операция, стирающая лог: чистит и файл, и представление."""
+    while not CTX.log_q.empty():
+        CTX.log_q.get_nowait()
+    try:
+        LOGS.mkdir(parents=True, exist_ok=True)
+        with open(LOG_FILE, "w", encoding="utf-8"):
+            pass
+    except OSError as e:
+        raise HTTPException(422, f"не удалось очистить лог-файл: {e}")
+    CTX.publish("log_cleared", {})
+    return {"ok": True}
+
+
+@app.get("/api/estimate")
+async def api_estimate(phrase: str = Query(...)):
+    """Нижняя оценка объёма full_load/drill по уже известному поддереву."""
+    _node_or_404(wscore.normalize(phrase))
+    return wscore.estimate_subtree(CTX.con, phrase)
+
+
+# ---------- чтение: WebSocket /ws (tech §6.2) ----------
+
+def _snapshot(phrase):
+    obj = wscore.node_object(CTX.con, phrase)
+    if obj is None:   # чистое чтение: незагруженная фраза отдаётся пустым поддеревом
+        obj = {"phrase": phrase, "freq": 0, "status": "NEW", "kind": None, "score": None,
+               "verdict": None, "verdict_score": None, "task_id": None, "error": None,
+               "cached": False, "childCount": 0}
+    return {"root": obj, "children": wscore.project(CTX.con, phrase)}
+
+
+def recent_tasks(limit=200):
+    """Последние строки журнала задач — вкладка Task при подписке."""
+    rows = CTX.con.execute(
+        "SELECT id, type, node, status, created_at, started_at, finished_at, error "
+        "FROM task ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+async def _ws_action(q, req):
+    """Действия клиента: subscribe / root / expand. Ничего не подгружают (CQRS)."""
+    action = (req.get("action") or "").strip()
+    phrase = wscore.normalize(req.get("phrase") or "")
+    if action == "subscribe":
+        # roots + хвост лога (§6.2), плюс накопленные задачи и отчёты: читать их больше
+        # негде — вкладки Task и «Отчёты» живут только на этом канале
+        q.put_nowait({"type": "roots", "data": {"roots": wscore.root_candidates(CTX.con, ROOTS_LIMIT)}})
+        tail = log_tail()
+        if tail:
+            q.put_nowait({"type": "log", "data": tail})
+        rows = recent_tasks()
+        if rows:
+            q.put_nowait({"type": "task", "data": rows})
+        reports = wscore.list_reports(CTX.con)
+        if reports:
+            q.put_nowait({"type": "report", "data": reports})
+        q.put_nowait({"type": "llm_status",
+                      "data": {"online": CTX.llm_online(), "last_seen_at": int(CTX.last_watch) or None}})
+    elif action == "root":
+        q.put_nowait({"type": "snapshot", "data": _snapshot(phrase)})
+    elif action == "expand":
+        q.put_nowait({"type": "children",
+                      "data": {"parent": phrase, "children": wscore.project(CTX.con, phrase)}})
+    else:
+        q.put_nowait({"type": "log", "data": {"ts": time.strftime(TS_FMT), "level": "WARN",
+                                              "stage": "ws", "node": "",
+                                              "msg": f"неизвестное действие: {action!r}"}})
+
+
+async def _ws_sender(websocket, q):
+    while True:
+        env = await q.get()
+        await websocket.send_text(json.dumps(env, ensure_ascii=False))
+
+
+@app.websocket("/ws")
+async def ws_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    q = asyncio.Queue(maxsize=CLIENT_QUEUE)
+    CTX.clients.add(q)
+    sender = asyncio.ensure_future(_ws_sender(websocket, q))
+    try:
+        while True:
+            msg = await websocket.receive_text()
+            try:
+                req = json.loads(msg)
+            except ValueError:
+                continue
+            if isinstance(req, dict):
+                await _ws_action(q, req)
+    except (WebSocketDisconnect, RuntimeError):
+        pass
+    finally:
+        CTX.clients.discard(q)
+        sender.cancel()
+
+
+# ---------- внутренние эндпоинты для task-worker-mcp (tech §6.3) ----------
+
+class ResultIn(BaseModel):
+    job_id: str
+    ok: bool = True
+    result: Any = None
+    error: str | None = None
+
+
+class TestJobIn(BaseModel):
+    type: str
+    params: Any = None
+
+
+def _auth(token):
+    want = os.environ.get("INTERNAL_TOKEN")
+    if not want or token != want:
+        raise HTTPException(401, "неверный или отсутствующий X-Internal-Token")
+
+
+# кто дёрнул внутренний эндпоинт — из заголовка X-Caller (его шлёт task-worker-mcp).
+# Без чтения заголовка правило «диспетчер за данными джоба не ходит» непроверяемо (§1.2).
+_CALLERS = {"dispatcher": "диспетчер", "agent": "агент"}
+
+
+def _caller(x_caller, default):
+    if not x_caller:
+        return f"{default}?"                 # заголовка нет — не выдаём догадку за факт
+    return _CALLERS.get(x_caller.strip().lower(), f"неизвестный ({x_caller})")
+
+
+@app.get("/internal/llm/watch")
+async def llm_watch(max_jobs: int = Query(8, ge=1, le=100),
+                    timeout: float = Query(300.0, ge=0, le=3600),
+                    x_internal_token: str | None = Header(default=None),
+                    x_caller: str | None = Header(default=None)):
+    """Ожидание работы: блокируется, пока джобов нет; отдаёт ТОЛЬКО сигнал без данных.
+    Зовёт диспетчер — по этому и различаем вызывающего в логе (testing-plan §1.2)."""
+    _auth(x_internal_token)
+    CTX.last_watch = time.time()
+    CTX.check_llm()
+    CTX.log("INFO", "llm", None,
+            f"внутренний вызов watch (вызвал: {_caller(x_caller, 'диспетчер')}): max_jobs={max_jobs}, "
+            f"timeout={timeout:.0f} c, в очереди {CTX.llm.waiting()}")
+    CTX.watchers += 1
+    try:
+        jobs = await CTX.llm.watch(max_jobs, timeout)
+    finally:
+        CTX.watchers -= 1
+        CTX.last_watch = time.time()
+    if jobs:
+        CTX.log("INFO", "llm", None, "сигнал диспетчеру: "
+                + ", ".join(f"{j['job_id']}({j['type']})" for j in jobs))
+    return jobs
+
+
+@app.get("/internal/llm/job/{job_id}")
+async def llm_job(job_id: str, x_internal_token: str | None = Header(default=None),
+                  x_caller: str | None = Header(default=None)):
+    """Полные данные джоба. Зовёт агент-исполнитель, не диспетчер (tech §6.3)."""
+    _auth(x_internal_token)
+    CTX.log("INFO", "llm", None,
+            f"внутренний вызов get_job {job_id} (вызвал: {_caller(x_caller, 'агент')})")
+    data = CTX.llm.data(job_id)
+    if data is None:
+        CTX.log("WARN", "llm", None, f"get_job {job_id}: джоб неизвестен или просрочен")
+        raise HTTPException(404, f"джоб {job_id} неизвестен или просрочен")
+    return data
+
+
+@app.post("/internal/llm/result")
+async def llm_result(body: ResultIn, x_internal_token: str | None = Header(default=None),
+                     x_caller: str | None = Header(default=None)):
+    """Результат джоба. Зовёт агент-исполнитель. Опоздавший или неизвестный job_id —
+    accepted:false и предупреждение в лог; сервер при этом жив."""
+    _auth(x_internal_token)
+    accepted = CTX.llm.submit(body.job_id, body.ok, body.result, body.error)
+    kind = "результат" if body.ok else f"ошибка ({body.error})"
+    who = _caller(x_caller, "агент")
+    if accepted:
+        CTX.log("INFO", "llm", None,
+                f"внутренний вызов result {body.job_id} (вызвал: {who}): {kind} принят")
+    else:
+        CTX.log("WARN", "llm", None,
+                f"внутренний вызов result {body.job_id} (вызвал: {who}): {kind} ОТБРОШЕН — "
+                "джоб просрочен или неизвестен")
+    return {"accepted": accepted}
+
+
+@app.post("/internal/test/enqueue-job")
+async def test_enqueue_job(body: TestJobIn, x_internal_token: str | None = Header(default=None)):
+    """Тестовая постановка джоба с готовыми params — без краула и без LLM (testing-plan §1.1)."""
+    _auth(x_internal_token)
+    try:
+        task_id, job_id = tasks.enqueue_bare_job(CTX, body.type, body.params)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    CTX.log("INFO", "llm", None, f"тестовый джоб {job_id} ({body.type}) поставлен в очередь")
+    return {"task_id": task_id, "job_id": job_id}
+
+
+# ---------- статика: отчёты и собранный фронт ----------
+
+# /reports монтируем ДО корня, иначе Mount("/") перехватит путь
+app.mount("/reports", StaticFiles(directory=str(REPORTS), html=True, check_dir=False), name="reports")
 if DIST.exists():
     app.mount("/", StaticFiles(directory=str(DIST), html=True), name="app")

@@ -1,0 +1,382 @@
+"""Unit-ядро (testing-plan §4) и слой данных (§5): границы порогов, пересбор из кэша,
+неприкосновенность `cache`/`keywords`, поведение краула.
+
+Всё здесь — без сервера и без LLM: чистые функции, прямые вызовы `wscore` и операции
+`tasks.*` на заглушке рантайма (`StubCtx`).
+"""
+import pytest
+
+import tasks
+import wscore
+from conftest import (SNAP, StubCtx, counts, node_row, seed_cache, table_rows, wipe_model)
+
+
+# ---------------------------------------------------------------- §4 чистые функции
+
+def test_normalize():
+    assert wscore.normalize("  Убрать   ФОН \n") == "убрать фон"
+    assert wscore.normalize(None) == ""
+    assert wscore.normalize("Фон") == "фон"
+
+
+def test_stem_cuts_endings_but_keeps_short_stems():
+    assert wscore.stem("видео") == "виде"
+    assert wscore.stem("фона") == "фон"
+    assert wscore.stem("фон") == "фон"
+    assert wscore.stem("ая") == "ая", "основа короче трёх букв не режется"
+
+
+def test_words_of_is_stemmed_set():
+    assert wscore.words_of("Убрать  фона") == wscore.words_of("убрать фон")
+    assert wscore.words_of("убрать фон видео") > wscore.words_of("убрать фон")
+
+
+def test_parse_popular_reads_pairs_and_survives_garbage():
+    data = {"popular": [{"text": "Убрать фон", "value": "500"},
+                        {"text": "фон видео", "value": None},
+                        {"text": "  ", "value": 10},
+                        {"text": "фон онлайн", "value": "мусор"}]}
+    assert wscore.parse_popular(data) == [("убрать фон", 500), ("фон видео", 0), ("фон онлайн", 0)]
+    assert wscore.parse_popular({}) == []
+    assert wscore.parse_popular({"popular": None}) == []
+
+
+def test_refinements_only_strict_supersets():
+    data = {"popular": [{"text": "убрать фон", "value": 100},      # сам запрос — не уточнение
+                        {"text": "фон убрать", "value": 90},       # тот же набор слов — не строгое
+                        {"text": "убрать фон видео", "value": 50},  # супермножество
+                        {"text": "убрать логотип", "value": 30}]}   # не содержит запрос
+    assert wscore.refinements("убрать фон", data) == [("убрать фон видео", 50)]
+
+
+def test_build_forest_nests_by_words():
+    roots = wscore.build_forest([("фон", 100), ("убрать фон", 50), ("убрать фон видео", 20),
+                                 ("логотип", 10)])
+    assert sorted(r["phrase"] for r in roots) == ["логотип", "фон"]
+    top = next(r for r in roots if r["phrase"] == "фон")
+    assert [c["phrase"] for c in top["children"]] == ["убрать фон"]
+    assert [c["phrase"] for c in top["children"][0]["children"]] == ["убрать фон видео"]
+
+
+def test_thresholds_are_the_agreed_ones():
+    assert wscore.FLOOR == 50                 # граница рекурсии краула (design §4)
+    assert wscore.SCORE_THRESHOLD == 60       # > 60 -> SCORED, <= 60 -> LOW_SCORED
+    assert tasks.HEAD_FREQ == 30000           # freq > 30000 -> CATEGORY (design §2)
+    assert len(wscore.STATUSES) == 11
+    assert set(wscore.TERMINALS) < set(wscore.STATUSES)
+
+
+# ---------------------------------------------------------------- §4 границы порогов
+
+async def test_floor_boundary_49_not_drilled_50_drilled(empty_db, fetch_spy):
+    """FLOOR=50: 49 вглубь не бурим, 50 бурим; оба узла и рёбра всё равно записаны."""
+    con = wscore.connect(empty_db)
+    seed_cache(con, {"тест фон": [("тест фон", 1000), ("тест фон много", 50), ("тест фон мало", 49)]})
+    res = await wscore.crawl_subtree(con, "тест фон")
+
+    assert fetch_spy == ["тест фон", "тест фон много"], "узел с freq=49 фетчить нельзя"
+    assert res["fetched"] == 2
+    assert node_row(con, "тест фон мало")["queried"] == 0
+    assert node_row(con, "тест фон много")["queried"] == 1
+    edges = {tuple(r) for r in con.execute("SELECT parent, child FROM edge")}
+    assert edges == {("тест фон", "тест фон много"), ("тест фон", "тест фон мало")}
+    # лист ниже FLOOR — тоже FULLY_LOADED, иначе classify его не обработает (tech §5)
+    assert node_row(con, "тест фон мало")["status"] == "FULLY_LOADED"
+    assert wscore.net_calls() == 0
+    con.close()
+
+
+async def test_score_threshold_60_low_61_scored(snapshot_db):
+    """Порог score: 60 -> LOW_SCORED, 61 -> SCORED (граница в LOW_SCORED, tech §4)."""
+    con = wscore.connect(snapshot_db)
+    low, high = SNAP["LOW_SCORED"], SNAP["SEARCHED"]
+    con.execute("UPDATE node SET status = 'SEARCHED', score = NULL WHERE phrase IN (?, ?)",
+                (low, high))
+    con.commit()
+    scores = {high: 61, low: 60}
+    ctx = StubCtx(con, answer=lambda job: {"results": [
+        {"phrase": it["phrase"], "score": scores[it["phrase"]], "competition_yandex": 30,
+         "competition_google": 40, "weights": {"yandex": 0.6, "google": 0.4},
+         "description": "проверка границы"} for it in job["params"]["items"]]})
+    task_id = tasks.create_task(ctx, "score", high, {"phrases": [high, low]})
+
+    assert await tasks.execute(ctx, task_id) is True
+    assert node_row(con, high)["status"] == "SCORED"
+    assert node_row(con, low)["status"] == "LOW_SCORED"
+    assert node_row(con, high)["score"] == 61
+    assert node_row(con, low)["score"] == 60
+    # сырые входы и веса сохранены — формулу можно перекалибровать без прогона LLM
+    assert node_row(con, high)["competition_yandex"] == 30
+    assert node_row(con, high)["competition_google"] == 40
+    assert "yandex" in node_row(con, high)["score_weights"]
+    con.close()
+
+
+async def test_score_null_keeps_node_searched(snapshot_db):
+    """score=null: узел остаётся SEARCHED, ошибка в лог, отдельного терминала нет (design §2)."""
+    con = wscore.connect(snapshot_db)
+    phrase = SNAP["SEARCHED"]
+    ctx = StubCtx(con, answer=lambda job: {"results": [
+        {"phrase": phrase, "score": None, "competition_yandex": None, "competition_google": None}]})
+    task_id = tasks.create_task(ctx, "score", phrase, None)
+
+    assert await tasks.execute(ctx, task_id) is True
+    assert node_row(con, phrase)["status"] == "SEARCHED"
+    assert node_row(con, phrase)["error_stage"] == "score"
+    assert any(r["level"] == "ERROR" and "score=null" in r["msg"] for r in ctx.logs)
+    con.close()
+
+
+async def test_head_freq_over_30000_becomes_category(snapshot_db):
+    """freq > 30000 -> classify всегда CATEGORY, что бы ни ответила LLM (design §2)."""
+    con = wscore.connect(snapshot_db)
+    head, border = SNAP["HEAD"], SNAP["FULLY_LOADED"]
+    con.execute("UPDATE node SET freq = 30000 WHERE phrase = ?", (border,))
+    con.commit()
+    ctx = StubCtx(con, answer=lambda job: {"results": [
+        {"phrase": n["phrase"], "kind": "transactional", "confidence": 0.9, "reason": "-"}
+        for n in job["params"]["nodes"]]})
+
+    assert await tasks.execute(ctx, tasks.create_task(ctx, "classify", head, None)) is True
+    assert node_row(con, head)["status"] == "CATEGORY"
+    assert node_row(con, head)["kind"] == "category"
+
+    assert await tasks.execute(ctx, tasks.create_task(ctx, "classify", border, None)) is True
+    assert node_row(con, border)["status"] == "TRANSACTIONAL", "ровно 30000 — ещё не голова"
+    con.close()
+
+
+# ---------------------------------------------------------------- §5 схема и пересбор
+
+def test_schema_is_idempotent(empty_db):
+    """Заведение схемы — идемпотентно (инвариант §10.4)."""
+    con = wscore.connect(empty_db)
+    tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+    assert {"cache", "node", "edge", "serp", "task", "report"} <= tables
+    con.close()
+    con = wscore.connect(empty_db)
+    assert counts(con)["node"] == 0
+    con.close()
+
+
+def test_rebuild_from_cache_gives_the_same_tree(real_db):
+    """Пересбор модели из кэша даёт то же дерево: те же узлы, те же связи, дефолтный статус."""
+    con = wscore.connect(real_db)
+    before_nodes = {p: f for p, f in con.execute("SELECT phrase, COALESCE(freq, 0) FROM node")}
+    before_edges = {tuple(r) for r in con.execute("SELECT parent, child FROM edge")}
+    assert before_nodes and before_edges, "копия боевой БД должна быть непустой"
+
+    wipe_model(con)
+    wscore.rebuild_model_from_cache(con)
+    after_nodes = {p: f for p, f in con.execute("SELECT phrase, COALESCE(freq, 0) FROM node")}
+    after_edges = {tuple(r) for r in con.execute("SELECT parent, child FROM edge")}
+
+    assert after_nodes == before_nodes
+    assert after_edges == before_edges
+    statuses = {r[0] for r in con.execute("SELECT DISTINCT status FROM node")}
+    assert statuses == {"NEW"}, "пересобранные узлы получают дефолтный статус"
+
+    wscore.rebuild_model_from_cache(con)          # повторный запуск ничего не ломает
+    assert counts(con)["node"] == len(after_nodes)
+    assert counts(con)["edge"] == len(after_edges)
+    con.close()
+
+
+def test_cache_and_keywords_are_never_touched(real_db):
+    """`cache` и `keywords` неприкосновенны: ни строки не потеряно и не перезаписано (tech §5)."""
+    con = wscore.connect(real_db)
+    cache_before, kw_before = table_rows(con, "cache"), table_rows(con, "keywords")
+    assert cache_before and kw_before
+
+    wipe_model(con)
+    wscore.rebuild_model_from_cache(con)
+    wscore.connect(real_db).close()               # повторное подключение (со схемой и бэкфиллом)
+
+    assert table_rows(con, "cache") == cache_before
+    assert table_rows(con, "keywords") == kw_before
+    con.close()
+
+
+def test_connect_backfills_model_from_cache(real_db):
+    """Пустой `node` + непустой `cache` -> модель пересобирается сама (ловушка §3.1)."""
+    con = wscore.connect(real_db)
+    n_before = counts(con)["node"]
+    wipe_model(con)
+    con.close()
+
+    con = wscore.connect(real_db, backfill=False)
+    assert counts(con)["node"] == 0, "backfill=False обязан оставить дерево пустым"
+    con.close()
+
+    con = wscore.connect(real_db)
+    assert counts(con)["node"] == n_before
+    con.close()
+
+
+# ---------------------------------------------------------------- §5 краул
+
+async def test_crawl_dedups_phrase_with_two_parents(empty_db, fetch_spy):
+    """Дедуп по DAG: фраза у двух родителей фетчится один раз, ребро — от каждого."""
+    con = wscore.connect(empty_db)
+    seed_cache(con, {
+        "фон": [("фон", 1000), ("убрать фон", 500), ("фон видео", 400)],
+        "убрать фон": [("убрать фон", 500), ("убрать фон видео", 300)],
+        "фон видео": [("фон видео", 400), ("убрать фон видео", 300)],
+        "убрать фон видео": [("убрать фон видео", 300)],
+    })
+    res = await wscore.crawl_subtree(con, "фон")
+
+    assert len(fetch_spy) == len(set(fetch_spy)) == 4, "каждая фраза фетчится один раз"
+    assert res["fetched"] == 4 and res["errors"] == []
+    edges = {tuple(r) for r in con.execute("SELECT parent, child FROM edge")}
+    assert ("убрать фон", "убрать фон видео") in edges
+    assert ("фон видео", "убрать фон видео") in edges
+    assert len(wscore.subtree_phrases(con, "фон")) == 4, "обход DAG не зацикливается"
+    con.close()
+
+
+async def test_cache_works_under_parallel_crawl(empty_db, fetch_spy):
+    """Кэш работает при параллельном крауле: внутри одной волны фетчей (WORKERS=6) общая
+    фраза берётся один раз (tech §5, проверяется счётчиком обращений к фетчу)."""
+    con = wscore.connect(empty_db)
+    kids = [("фон один", 100), ("фон два", 100), ("фон три", 100), ("фон четыре", 100),
+            ("фон пять", 100), ("фон шесть", 100), ("фон семь", 100)]
+    pools = {"фон": [("фон", 1000), *kids]}
+    for phrase, freq in kids:
+        pools[phrase] = [(phrase, freq)]
+    pools["фон один"].append(("фон один два", 90))     # общий ребёнок двух родителей,
+    pools["фон два"].append(("фон один два", 90))      # оба фетчатся в одной волне
+    pools["фон один два"] = [("фон один два", 90)]
+    seed_cache(con, pools)
+
+    res = await wscore.crawl_subtree(con, "фон")
+
+    assert len(fetch_spy) == len(set(fetch_spy)) == 9
+    assert res["fetched"] == 9 and res["errors"] == []
+    parents = {r[0] for r in con.execute("SELECT parent FROM edge WHERE child = 'фон один два'")}
+    assert parents == {"фон один", "фон два"}
+    assert wscore.net_calls() == 0
+    con.close()
+
+
+async def test_crawl_marks_whole_subtree_fully_loaded(empty_db):
+    """После краула всё поддерево FULLY_LOADED, включая листы ниже FLOOR (tech §5)."""
+    con = wscore.connect(empty_db)
+    seed_cache(con, {
+        "фон": [("фон", 1000), ("убрать фон", 500), ("фон мелочь", 10)],
+        "убрать фон": [("убрать фон", 500), ("убрать фон видео", 90)],
+        "убрать фон видео": [("убрать фон видео", 90)],
+    })
+    await wscore.crawl_subtree(con, "фон")
+
+    statuses = dict(con.execute("SELECT phrase, status FROM node"))
+    assert statuses == {"фон": "FULLY_LOADED", "убрать фон": "FULLY_LOADED",
+                        "фон мелочь": "FULLY_LOADED", "убрать фон видео": "FULLY_LOADED"}
+    con.close()
+
+
+async def test_second_crawl_spends_no_fetches(empty_db, fetch_spy):
+    """Повторный краул не дублирует данные и не тратит запросов (инвариант §10.4)."""
+    con = wscore.connect(empty_db)
+    seed_cache(con, {
+        "фон": [("фон", 1000), ("убрать фон", 500)],
+        "убрать фон": [("убрать фон", 500), ("убрать фон видео", 300)],
+        "убрать фон видео": [("убрать фон видео", 300)],
+    })
+    await wscore.crawl_subtree(con, "фон")
+    before = counts(con)
+    fetch_spy.clear()
+
+    res = await wscore.crawl_subtree(con, "фон")
+
+    assert fetch_spy == [] and res["fetched"] == 0
+    assert counts(con) == before
+    assert wscore.net_calls() == 0
+    con.close()
+
+
+async def test_crawl_keeps_pipeline_statuses(empty_db):
+    """Идемпотентность краула: узлы, ушедшие дальше по пайплайну, не откатываются."""
+    con = wscore.connect(empty_db)
+    seed_cache(con, {"фон": [("фон", 1000), ("убрать фон", 500)],
+                     "убрать фон": [("убрать фон", 500)]})
+    await wscore.crawl_subtree(con, "фон")
+    wscore.set_status(con, "убрать фон", "TRANSACTIONAL", kind="transactional")
+
+    await wscore.crawl_subtree(con, "фон")
+    assert node_row(con, "убрать фон")["status"] == "TRANSACTIONAL"
+    con.close()
+
+
+def test_estimate_subtree_counts_pending_fetches(empty_db):
+    """Оценка объёма — нижняя граница: считает нефетченные узлы с freq >= FLOOR."""
+    con = wscore.connect(empty_db)
+    wscore.upsert_node(con, "фон", freq=1000, queried=True)
+    for phrase, freq in (("убрать фон", 500), ("фон мелочь", 10)):
+        wscore.upsert_node(con, phrase, freq=freq)
+        con.execute("INSERT OR IGNORE INTO edge(parent, child) VALUES ('фон', ?)", (phrase,))
+    con.commit()
+
+    est = wscore.estimate_subtree(con, "фон")
+    assert est == {"nodes": 3, "requests": 1}
+    assert wscore.estimate_subtree(con, "неизвестная фраза") == {"nodes": 1, "requests": 1}
+    con.close()
+
+
+# ---------------------------------------------------------------- §5 serp и отчёты
+
+def test_save_serp_is_all_or_nothing(empty_db):
+    """Нет частичной выдачи: одна выдача -> ValueError и в БД не попало ничего (§10.2)."""
+    con = wscore.connect(empty_db)
+    wscore.upsert_node(con, "фон", freq=100)
+    with pytest.raises(ValueError):
+        wscore.save_serp(con, "фон", {"yandex": {"docs": [{"rank": 1}]}})
+    assert wscore.load_serp(con, "фон") == {}
+
+    wscore.save_serp(con, "фон", {"yandex": {"found": 1, "docs": []}, "google": {"docs": []}})
+    assert set(wscore.load_serp(con, "фон")) == {"yandex", "google"}
+    con.close()
+
+
+def test_node_object_shape_and_report_link(snapshot_db):
+    """Объект узла — ровно поля контракта tech §6.2; report_link только при наличии отчёта."""
+    con = wscore.connect(snapshot_db)
+    obj = wscore.node_object(con, SNAP["ANALYZED"])
+    assert set(obj) == {"phrase", "freq", "status", "kind", "score", "verdict", "verdict_score",
+                        "task_id", "error", "cached", "childCount", "report_link"}
+    assert obj["status"] == "ANALYZED" and obj["report_link"].startswith("reports/")
+    assert "report_link" not in wscore.node_object(con, SNAP["NEW"])
+    con.close()
+
+
+def test_override_kind_moves_kind_and_status_together(snapshot_db):
+    """Fix kind правит метку и статус вместе; собранные данные не удаляются (design §2)."""
+    con = wscore.connect(snapshot_db)
+    phrase = SNAP["LOW_SCORED"]
+    before = node_row(con, phrase)
+    delta = wscore.override_kind(con, phrase, "transactional")
+
+    assert (delta["kind"], delta["status"]) == ("transactional", "TRANSACTIONAL")
+    after = node_row(con, phrase)
+    assert after["score"] == before["score"], "скор не удаляется"
+    assert wscore.load_serp(con, phrase), "выдача не удаляется"
+    with pytest.raises(ValueError):
+        wscore.override_kind(con, phrase, "мусор")
+    con.close()
+
+
+def test_clear_stale_locks_frees_nodes(snapshot_db):
+    """Рестарт: незавершённые задачи -> FAILED, блокировки узлов снимаются (tech §2)."""
+    con = wscore.connect(snapshot_db)
+    con.execute("INSERT INTO task(id, type, status, node, created_at) VALUES "
+                "('stuck-1', 'classify', 'RUNNING', ?, 0)", (SNAP["FULLY_LOADED"],))
+    wscore.set_status(con, SNAP["FULLY_LOADED"], None, task_id="stuck-1")
+
+    freed = wscore.clear_stale_locks(con)
+
+    assert freed == 1
+    assert node_row(con, SNAP["FULLY_LOADED"])["task_id"] is None
+    assert node_row(con, SNAP["FULLY_LOADED"])["status"] == "FULLY_LOADED", "статус не тронут"
+    row = con.execute("SELECT status, error FROM task WHERE id = 'stuck-1'").fetchone()
+    assert row[0] == "FAILED" and row[1]
+    con.close()

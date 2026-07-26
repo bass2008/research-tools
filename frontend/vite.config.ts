@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // Дев-сервер Vite (5173) проксирует /api на FastAPI (8000):
@@ -10,5 +10,13 @@ export default defineConfig({
     proxy: {
       '/api': 'http://127.0.0.1:8000',
     },
+  },
+  // Компонентные тесты (testing-plan §7): матрица кнопок и редьюсер событий.
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/__tests__/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    restoreMocks: true,
+    unstubGlobals: true,
   },
 })

@@ -1,0 +1,13 @@
+pyproject.toml
+src/taskworker/__init__.py
+src/taskworker/app_client.py
+src/taskworker/cli.py
+src/taskworker/config.py
+src/taskworker/logsetup.py
+src/taskworker/mcp_server.py
+src/taskworker.egg-info/PKG-INFO
+src/taskworker.egg-info/SOURCES.txt
+src/taskworker.egg-info/dependency_links.txt
+src/taskworker.egg-info/entry_points.txt
+src/taskworker.egg-info/requires.txt
+src/taskworker.egg-info/top_level.txt
