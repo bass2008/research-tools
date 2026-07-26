@@ -74,6 +74,17 @@ def get_job(job_id: str) -> dict:
     `params` — входные данные, `prompt` — самодостаточная инструкция: работай строго по ней, за
     промптами в репозиторий не ходи. Если в ответе есть поле `error` — данные не получены
     (джоб просрочен или нет связи), работу не выдумывай."""
+    from . import needs
+
+    if needs.is_local(job_id):     # лаборатория промптов: джоб лежит файлом, сервер не нужен
+        try:
+            job = needs.job_for_agent(job_id)
+        except (LookupError, OSError) as exc:
+            log.warning("tool get_job(%s) -> локального джоба нет: %s", job_id, exc)
+            return {"job_id": job_id, "error": f"локального джоба нет: {job_id}"}
+        log.info("tool get_job(%s) -> локальный, type=%s, вход файлом: %s",
+                 job_id, job.get("type"), job["params"]["input_file"])
+        return job
     try:
         job = app_client.get_job(job_id, caller="agent")
     except app_client.JobUnknown as exc:
@@ -98,8 +109,24 @@ def submit_result(job_id: str, result: Any = None, error: str | None = None) -> 
     не хватает данных, ошибка). Ретраить и выдумывать данные нельзя: нет уверенного ответа — это
     `error`.
 
-    Возвращает `{accepted}`. `accepted: false` — джоб просрочен или неизвестен, повторять
-    бессмысленно: сообщи об этом диспетчеру."""
+    **Если у джоба есть `result_file`** (большой ответ): запиши JSON в ЭТОТ файл и вызови
+    `submit_result(job_id)` без `result` — обвязка прочитает файл сама. Так ответ не поедет
+    через вызов инструмента и не обрежется по длине. Свой путь подставлять нельзя.
+
+    Возвращает `{accepted}`. `accepted: false` — смотри `problems`: там перечислено, что не так
+    (потерянные или выдуманные фразы, несходящиеся счётчики). Это можно починить и вызвать снова.
+    Если джоб просрочен или неизвестен — повторять бессмысленно, сообщи диспетчеру."""
+    from . import needs
+
+    if needs.is_local(job_id):
+        try:
+            answer = needs.save_result(job_id, result=result, error=error)
+        except (LookupError, OSError) as exc:
+            log.warning("tool submit_result(%s) -> локального джоба нет: %s", job_id, exc)
+            return {"accepted": False, "error": f"локального джоба нет: {job_id}"}
+        log.info("tool submit_result(%s) -> accepted=%s%s", job_id, answer.get("accepted"),
+                 "" if answer.get("accepted") else f", проблем: {len(answer.get('problems', []))}")
+        return answer
     if result is None and error is None:
         log.warning("tool submit_result(%s) -> ни result, ни error", job_id)
         return {"accepted": False, "error": "передай либо result, либо error"}

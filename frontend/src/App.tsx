@@ -3,14 +3,16 @@ import './App.css'
 import * as api from './api'
 import { fmt, fmtTime, fmtWhen, reportHref } from './api'
 import type { Kind, ReportRow, TaskRow } from './api'
+import { NeedsPane } from './NeedsPane'
 import { TreeNode } from './TreeNode'
 import { TreeCtx, applyEvent, initialState } from './store'
 import type { Cmd, LogRow, TreeApi } from './store'
 
-type Tab = 'main' | 'log' | 'tasks' | 'reports'
+type Tab = 'main' | 'needs' | 'log' | 'tasks' | 'reports'
 
 const TABS: [Tab, string, string][] = [
   ['main', 'Главная', 'tab-main'],
+  ['needs', 'Дерево потребностей', 'tab-needs'],
   ['log', 'Лог', 'tab-log'],
   ['tasks', 'Task', 'tab-tasks'],
   ['reports', 'Отчёты', 'tab-reports'],
@@ -107,13 +109,18 @@ export default function App() {
     () =>
       st.root ? (
         <TreeNode key={st.root} phrase={st.root} isRoot />
+      ) : st.missing !== null ? (
+        // Узел не сочиняем: иначе на опечатке появляется фальшивый узел с платными кнопками
+        <div className="empty" data-testid="tree-missing">
+          Фразы «{st.missing}» в дереве нет — проверьте написание. Дерево строится только по
+          фразам, которые уже в нём есть.
+        </div>
       ) : (
         <div className="empty">
-          Дерево пусто. Введите фразу и нажмите «Загрузить корень» — если её пул ещё не
-          загружен, начните с команды <b>Load</b> на узле.
+          Дерево пусто. Впишите фразу, которая уже есть в дереве, и нажмите Enter.
         </div>
       ),
-    [st.root],
+    [st.root, st.missing],
   )
 
   const pr = st.progress
@@ -137,15 +144,18 @@ export default function App() {
           ))}
         </nav>
         <div className="tools">
-          <input
-            value={phrase}
-            data-testid="root-input"
-            onChange={(e) => setPhrase(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') loadRoot(phrase)
-            }}
-            placeholder="корневой запрос — Enter, чтобы построить дерево…"
-          />
+          {/* поле корня — контрол экрана дерева запросов; на прочих вкладках оно ни при чём */}
+          {tab === 'main' && (
+            <input
+              value={phrase}
+              data-testid="root-input"
+              onChange={(e) => setPhrase(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') loadRoot(phrase)
+              }}
+              placeholder="корневой запрос — Enter, чтобы построить дерево…"
+            />
+          )}
           <span
             className={'llm ' + (st.llm.online ? 'on' : 'off')}
             data-testid="llm-status"
@@ -189,6 +199,10 @@ export default function App() {
             узел и всё его поддерево заблокированы.
           </div>
           {tree}
+        </section>
+
+        <section className="pane" style={{ display: tab === 'needs' ? '' : 'none' }}>
+          <NeedsPane active={tab === 'needs'} />
         </section>
 
         <section className="pane" style={{ display: tab === 'log' ? '' : 'none' }}>

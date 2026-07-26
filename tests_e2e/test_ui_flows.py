@@ -440,3 +440,49 @@ def test_18_llm_offline(page, server):
     tab(page, "main")
     expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED")   # узел не тронут
     expect(btn(page, seed.ROOT_A, "btn-classify")).to_be_enabled()
+
+
+# ---------- 19. Вкладка «Дерево потребностей» ----------
+
+def test_19_needs_tree_tab(page, server):
+    """§8.19 — таблица деревьев из папки; клик открывает дерево, «Назад» возвращает.
+
+    Второй слой конвейером не производится: дерево лежит файлом, поэтому проверяем показ —
+    работы с частотами, щель, занятость, раскрытие фраз и сегмента."""
+    open_app(page, server)
+    tab(page, "needs")
+
+    rows = page.get_by_test_id("needs-row")
+    expect(rows).to_have_count(1)
+    expect(rows.first).to_contain_text(seed.NEEDS_ID)
+    expect(rows.first).to_contain_text(seed.ROOT_A)
+    expect(page.get_by_test_id("needs-tree")).to_have_count(0)
+
+    rows.first.click()
+
+    tree = page.get_by_test_id("needs-tree")
+    expect(tree).to_be_visible()
+    expect(page.get_by_test_id("needs-condition")).to_contain_text("онлайн · бесплатно")
+    expect(rows).to_have_count(0)                       # таблицы больше нет
+
+    works = page.get_by_test_id("needs-work")
+    expect(works).to_have_count(2)
+    first = works.filter(has_text=seed.NEEDS_WORK).first
+    expect(first.locator("[data-testid=needs-occupied]")).to_contain_text(seed.NEEDS_OCCUPIED)
+    gap = works.filter(has_text=seed.NEEDS_GAP_WORK).first
+    expect(gap.locator("[data-testid=needs-gap]")).to_have_text("ЩЕЛЬ")
+
+    # фразы появляются только по клику, вместе с сегментом
+    expect(page.get_by_test_id("needs-phrase")).to_have_count(0)
+    first.locator("[data-testid=needs-toggle]").click()
+    expect(first.get_by_test_id("needs-phrase")).to_have_count(4)   # 3 свои + 1 из сегмента
+    expect(first.get_by_test_id("needs-segment")).to_contain_text(seed.NEEDS_SEGMENT)
+    expect(first.get_by_test_id("needs-phrase").first).to_contain_text("1 000")
+
+    # исключённые фразы — отдельным раскрытием
+    page.get_by_test_id("needs-excluded-toggle").click()
+    expect(page.get_by_test_id("needs-excluded")).to_contain_text("условие")
+
+    page.get_by_test_id("needs-back").click()
+    expect(rows).to_have_count(1)
+    expect(page.get_by_test_id("needs-tree")).to_have_count(0)

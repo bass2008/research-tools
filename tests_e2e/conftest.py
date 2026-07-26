@@ -114,6 +114,10 @@ def instance(tmp_path, template_db, built_frontend):
     reports.mkdir()
     for name, html in seed.REPORT_FILES.items():   # засеянные отчёты — файлами на диске
         (reports / name).write_text(html, encoding="utf-8")
+    for name, text in seed.needs_files().items():  # деревья потребностей — тоже файлами
+        f = inst / "logs" / "needs-lab" / name
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text, encoding="utf-8")
     (inst / ".env").write_text(ENV_FILE, encoding="utf-8")
     return inst
 

@@ -489,14 +489,139 @@ async def api_estimate(phrase: str = Query(...)):
     return wscore.estimate_subtree(CTX.con, phrase)
 
 
+# ---------- деревья потребностей: чтение папки (пока без конвейера) ----------
+#
+# Второй слой (толкование) ещё не часть конвейера: деревья складывает лаборатория
+# `task-worker-mcp` в NEEDS_DIR, здесь их только показываем. Поэтому обе ручки — чистое
+# чтение файлов, ни модели, ни БД они не касаются.
+
+NEEDS_DIR = LOGS / "needs-lab"
+
+
+def _needs_files():
+    """{id: (файл дерева, файл входа или None)}. Два вида раскладки: каталог джоба
+    лаборатории (`<id>/accepted.json` рядом с `params.json`) и просто json-файл в папке."""
+    found = {}
+    if not NEEDS_DIR.is_dir():
+        return found
+    for p in sorted(NEEDS_DIR.iterdir()):
+        if p.is_dir() and (p / "accepted.json").is_file():
+            params = p / "params.json"
+            found[p.name] = (p / "accepted.json", params if params.is_file() else None)
+        elif p.is_file() and p.suffix == ".json":
+            found[p.stem] = (p, None)
+    return found
+
+
+def _needs_load(path):
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise HTTPException(422, f"дерево не читается ({path.name}): {e}")
+    if not isinstance(data, dict):
+        raise HTTPException(422, f"дерево {path.name}: ожидался объект")
+    return data
+
+
+def _needs_freqs(params_file):
+    if params_file is None:
+        return {}, {}
+    try:
+        p = json.loads(params_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}, {}
+    meta = {"root": p.get("root"), "root_freq": p.get("root_freq"),
+            "phrase_count": len(p.get("nodes") or [])}
+    return {n["phrase"]: n.get("freq") for n in p.get("nodes") or []}, meta
+
+
+def _needs_counts(tree):
+    works = [w for w in (tree.get("works") or []) if isinstance(w, dict)]
+    segs = sum(len(w.get("segments") or []) for w in works)
+    phrases = sum(len(w.get("phrases") or []) +
+                  sum(len(s.get("phrases") or []) for s in (w.get("segments") or []))
+                  for w in works)
+    return {"works": len(works), "segments": segs, "phrases": phrases,
+            "excluded": len(tree.get("excluded") or []),
+            "gaps": sum(1 for w in works if w.get("gap_candidate")),
+            "occupied": sum(1 for w in works if w.get("occupied_by")),
+            "needs_serp": sum(1 for w in works if w.get("needs_serp"))}
+
+
+@app.get("/api/needs/trees")
+async def api_needs_trees():
+    """Список деревьев в папке — строки таблицы вкладки «Дерево потребностей»."""
+    rows = []
+    for tid, (tree_file, params_file) in _needs_files().items():
+        try:
+            tree = _needs_load(tree_file)
+        except HTTPException as e:
+            rows.append({"id": tid, "error": e.detail, "condition": None, "root": None,
+                         "root_freq": None, "created_at": None,
+                         **{k: 0 for k in ("works", "segments", "phrases", "excluded",
+                                           "gaps", "occupied", "needs_serp")}})
+            continue
+        _, meta = _needs_freqs(params_file)
+        rows.append({"id": tid, "error": None, "condition": tree.get("condition"),
+                     "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+                     "created_at": int(tree_file.stat().st_mtime), **_needs_counts(tree)})
+    rows.sort(key=lambda r: (r["created_at"] or 0), reverse=True)
+    return {"trees": rows}
+
+
+@app.get("/api/needs/tree/{tree_id}")
+async def api_needs_tree(tree_id: str):
+    """Одно дерево целиком. Фразам подставляем частоты из входа того же джоба — без них
+    список фраз почти ничего не говорит.
+
+    `tree_id` не склеиваем с путём: берём его как ключ уже найденного набора файлов,
+    иначе получим чтение произвольного файла по строке из запроса."""
+    files = _needs_files()
+    if tree_id not in files:
+        raise HTTPException(404, f"дерева нет: {tree_id}")
+    tree_file, params_file = files[tree_id]
+    tree = _needs_load(tree_file)
+    freqs, meta = _needs_freqs(params_file)
+
+    def phrases(items):
+        return sorted(({"phrase": p, "freq": freqs.get(p)} for p in (items or [])),
+                      key=lambda x: (-(x["freq"] or 0), x["phrase"]))
+
+    works = []
+    for w in tree.get("works") or []:
+        if not isinstance(w, dict):
+            continue
+        works.append({**{k: w.get(k) for k in
+                         ("name", "top_freq", "phrase_count", "occupied_by", "unclear",
+                          "gap_candidate", "needs_serp", "serp_question", "why")},
+                      "phrases": phrases(w.get("phrases")),
+                      "segments": [{**{k: s.get(k) for k in
+                                       ("name", "gap_candidate", "why")},
+                                    "phrases": phrases(s.get("phrases"))}
+                                   for s in (w.get("segments") or []) if isinstance(s, dict)]})
+    works.sort(key=lambda w: -(w.get("top_freq") or 0))
+    excluded = [{"phrase": e.get("phrase"), "why": e.get("why"), "note": e.get("note"),
+                 "freq": freqs.get(e.get("phrase"))}
+                for e in (tree.get("excluded") or []) if isinstance(e, dict)]
+    excluded.sort(key=lambda e: (str(e["why"]), -(e["freq"] or 0)))
+    return {"id": tree_id, "condition": tree.get("condition"),
+            "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+            "created_at": int(tree_file.stat().st_mtime),
+            "counts": _needs_counts(tree), "works": works, "excluded": excluded}
+
+
 # ---------- чтение: WebSocket /ws (tech §6.2) ----------
 
 def _snapshot(phrase):
+    """Проекция поддерева. Фразы нет в дереве — отдаём `root: null`.
+
+    Раньше на любую строку сочинялся узел `NEW` с частотой 0, и на опечатке вроде «авааав»
+    появлялся живой узел с кнопками `Load`/`Full load`/`Drill` — то есть предложение уйти в
+    платный запрос по абракадабре. Фронтир (узел есть, но не запрошен) от этого отличается тем,
+    что узел в дереве ЕСТЬ; ему и положены кнопки загрузки."""
     obj = wscore.node_object(CTX.con, phrase)
-    if obj is None:   # чистое чтение: незагруженная фраза отдаётся пустым поддеревом
-        obj = {"phrase": phrase, "freq": 0, "status": "NEW", "kind": None, "score": None,
-               "verdict": None, "verdict_score": None, "task_id": None, "error": None,
-               "cached": False, "childCount": 0}
+    if obj is None:
+        return {"root": None, "missing": phrase, "children": []}
     return {"root": obj, "children": wscore.project(CTX.con, phrase)}
 
 

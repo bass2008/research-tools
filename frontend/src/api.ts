@@ -86,7 +86,8 @@ export interface Estimate {
 // может прислать пачку (хвост лога, накопленные задачи и отчёты при подписке).
 export type WsEvent =
   | { type: 'roots'; data: { roots: Node[] } }
-  | { type: 'snapshot'; data: { root: Node; children: Node[] } }
+  // root: null — такой фразы в дереве нет (в `missing` то, что искали)
+  | { type: 'snapshot'; data: { root: Node | null; missing?: string; children: Node[] } }
   | { type: 'children'; data: { parent: string; children: Node[] } }
   | { type: 'node'; data: Partial<Node> & { phrase: string } }
   | { type: 'progress'; data: Progress }
@@ -223,6 +224,75 @@ export const clearLogs = (): Promise<{ ok: boolean }> => post('/api/logs/clear')
 
 export const estimate = (phrase: string): Promise<Estimate> =>
   req(`/api/estimate?phrase=${encodeURIComponent(phrase)}`)
+
+// ---------- деревья потребностей (второй слой; пока читаются из папки) ----------
+
+export interface NeedsCounts {
+  works: number
+  segments: number
+  phrases: number
+  excluded: number
+  gaps: number
+  occupied: number
+  needs_serp: number
+}
+
+// строка таблицы: счётчики плоско, чтобы таблица читалась без вложенности
+export interface NeedsRow extends NeedsCounts {
+  id: string
+  condition: string | null
+  root: string | null
+  root_freq: number | null
+  created_at: number | null
+  error: string | null
+}
+
+export interface NeedsPhrase {
+  phrase: string
+  freq: number | null
+}
+
+export interface NeedsSegment {
+  name: string | null
+  gap_candidate: boolean | null
+  why: string | null
+  phrases: NeedsPhrase[]
+}
+
+export interface NeedsWork {
+  name: string | null
+  top_freq: number | null
+  phrase_count: number | null
+  occupied_by: string | null
+  unclear: boolean | null
+  gap_candidate: boolean | null
+  needs_serp: boolean | null
+  serp_question: string | null
+  why: string | null
+  phrases: NeedsPhrase[]
+  segments: NeedsSegment[]
+}
+
+export interface NeedsExcluded extends NeedsPhrase {
+  why: string | null
+  note: string | null
+}
+
+export interface NeedsTree {
+  id: string
+  condition: string | null
+  root: string | null
+  root_freq: number | null
+  created_at: number | null
+  counts: NeedsCounts
+  works: NeedsWork[]
+  excluded: NeedsExcluded[]
+}
+
+export const needsTrees = (): Promise<{ trees: NeedsRow[] }> => req('/api/needs/trees')
+
+export const needsTree = (id: string): Promise<NeedsTree> =>
+  req(`/api/needs/tree/${encodeURIComponent(id)}`)
 
 // ---------- форматирование ----------
 

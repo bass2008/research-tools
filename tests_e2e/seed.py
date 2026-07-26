@@ -160,6 +160,48 @@ REPORT_FILES = {
     f"{REP_LO_ID}.html": report_html(REP_LO, "MAYBE", REP_LO_SCORE),
 }
 
+# ---------- дерево потребностей (второй слой) ----------
+# Лежит файлами в logs/needs-lab, конвейером не производится — сценарий 19 проверяет только
+# показ. Фразы берём из дерева A, чтобы фикстура не противоречила сама себе.
+
+NEEDS_ID = "e2e-needs-001"
+NEEDS_WORK = "убрать фон с картинки"
+NEEDS_GAP_WORK = "убрать фон на видео"
+NEEDS_SEGMENT = "с телефона"
+NEEDS_OCCUPIED = "remove.bg"
+
+NEEDS_TREE = {
+    "condition": "онлайн · бесплатно",
+    "works": [
+        {"name": NEEDS_WORK, "phrases": [ROOT_A, A_ONLINE, A_PNG],
+         "top_freq": 1000, "phrase_count": 4, "occupied_by": NEEDS_OCCUPIED,
+         "gap_candidate": False, "needs_serp": True,
+         "serp_question": "кто в топе по «убрать фон»",
+         "why": "одна работа: снять фон со статичной картинки",
+         "segments": [{"name": NEEDS_SEGMENT, "phrases": [A_ONLINE_FREE],
+                       "gap_candidate": False, "why": "тот же результат, другой вход"}]},
+        {"name": NEEDS_GAP_WORK, "phrases": [A_VIDEO, A_VIDEO_2024],
+         "top_freq": 40, "phrase_count": 2, "occupied_by": None,
+         "gap_candidate": True, "needs_serp": False, "serp_question": None,
+         "why": "узкая работа: в выдаче только статьи",
+         "segments": []},
+    ],
+    "excluded": [{"phrase": A_ONLINE_FAST, "why": "condition", "note": "работы не называет"}],
+}
+
+NEEDS_PARAMS = {
+    "root": ROOT_A, "root_freq": 1000, "min_freq": 50, "max_freq": None,
+    "nodes": [{"phrase": p, "freq": f, "children": []} for p, f in
+              ((ROOT_A, 1000), (A_ONLINE, 500), (A_ONLINE_FREE, 200), (A_ONLINE_FAST, 90),
+               (A_VIDEO, 40), (A_VIDEO_2024, 30), (A_PNG, 40))],
+}
+
+
+def needs_files():
+    """{относительный путь: содержимое} — раскладка каталога джоба, как её читает сервер."""
+    return {f"{NEEDS_ID}/accepted.json": json.dumps(NEEDS_TREE, ensure_ascii=False),
+            f"{NEEDS_ID}/params.json": json.dumps(NEEDS_PARAMS, ensure_ascii=False)}
+
 
 def build(db_path):
     """Собрать засеянную БД по пути db_path (файла ещё нет). Схему заводит wscore."""

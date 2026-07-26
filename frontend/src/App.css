@@ -426,3 +426,106 @@
   gap: 8px;
   justify-content: flex-end;
 }
+
+/* ---------- дерево потребностей (второй слой) ---------- */
+
+.tbl td.num,
+.tbl th.num {
+  text-align: right;
+  white-space: nowrap;
+}
+.tbl tr.clickable {
+  cursor: pointer;
+}
+.tbl tr.clickable:hover {
+  background: var(--accbg);
+}
+.tbl tr.bad td {
+  color: var(--bad);
+}
+
+.ntree {
+  font-size: 13px;
+}
+.nwork {
+  border-bottom: 1px solid var(--line);
+  padding: 3px 0;
+}
+.nwork > .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.nbody {
+  padding: 4px 0 8px 26px;
+}
+.nwhy {
+  color: var(--mut);
+  padding: 2px 0 4px;
+}
+.nseg {
+  padding: 4px 0 4px 12px;
+  border-left: 2px solid var(--line);
+  margin: 4px 0;
+}
+.nseg > .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.nphrases {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0;
+}
+.nphrase {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.nphrase .fr {
+  color: var(--mut);
+  font-variant-numeric: tabular-nums;
+}
+.nex {
+  padding: 10px 0 0;
+}
+.gap {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--ok);
+  border: 1px solid var(--ok);
+  white-space: nowrap;
+}
+.occ,
+.serp {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--mut);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.nhead {
+  padding: 6px 0 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.nroot,
+.ncond {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nroot {
+  padding-bottom: 4px;
+}
+.small {
+  font-size: 11px;
+}

@@ -5,6 +5,7 @@ src/taskworker/cli.py
 src/taskworker/config.py
 src/taskworker/logsetup.py
 src/taskworker/mcp_server.py
+src/taskworker/needs.py
 src/taskworker.egg-info/PKG-INFO
 src/taskworker.egg-info/SOURCES.txt
 src/taskworker.egg-info/dependency_links.txt

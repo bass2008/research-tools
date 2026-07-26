@@ -71,14 +71,31 @@ def test_expand_returns_children_of_that_node(client):
     assert {c["phrase"] for c in data["children"]} == {SNAP["FULLY_LOADED"], SNAP["HEAD"]}
 
 
-def test_root_of_unknown_phrase_is_empty_not_an_error(client):
-    """Чистое чтение: незагруженная фраза отдаётся пустым поддеревом, а не подгружается."""
+def test_root_of_unknown_phrase_is_missing_not_a_made_up_node(client):
+    """Чистое чтение и без выдумывания: фразы нет в дереве — `root: null`, а не узел `NEW`.
+
+    Сочинённый узел выглядел живым (статус `NEW`, кнопки `Load`/`Full load`/`Drill`), то есть
+    на опечатке предлагал уйти в платный запрос по несуществующей фразе. Фронтир — это узел,
+    который в дереве ЕСТЬ, но не запрошен; ему кнопки загрузки и положены."""
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"action": "root", "phrase": "неизвестная фраза для чтения"})
         kind, data = recv(ws)
 
     assert kind == "snapshot"
-    assert data["root"]["status"] == "NEW" and data["children"] == []
+    assert data["root"] is None
+    assert data["missing"] == "неизвестная фраза для чтения"
+    assert data["children"] == []
+
+
+def test_root_of_known_but_unloaded_phrase_still_works(client):
+    """Фронтир не задет: узел в дереве есть, но не запрошен — отдаётся как обычно."""
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"action": "root", "phrase": SNAP["NEW"]})
+        kind, data = recv(ws)
+
+    assert kind == "snapshot"
+    assert data["root"] is not None and data["root"]["phrase"] == SNAP["NEW"]
+    assert data["root"]["status"] == "NEW"
 
 
 def test_reading_does_not_mutate(client, snap_con):

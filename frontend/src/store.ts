@@ -15,6 +15,7 @@ export interface LogRow extends LogLine {
 export interface State {
   roots: string[] // корни-кандидаты (отправные фразы)
   root: string | null // корень текущего дерева
+  missing: string | null // искали такую фразу, а в дереве её нет
   nodes: Record<string, Node> // данные узлов по фразе
   kids: Record<string, Node[]> // реальные дети по фразе
   logs: LogRow[]
@@ -28,6 +29,7 @@ export interface State {
 export const initialState: State = {
   roots: [],
   root: null,
+  missing: null,
   nodes: {},
   kids: {},
   logs: [],
@@ -104,12 +106,21 @@ export function applyEvent(s: State, ev: WsEvent): State {
       return { ...s, roots: ev.data.roots.map((n) => n.phrase), nodes }
     }
     case 'snapshot': {
-      // ЗАМЕНЯЕТ дерево целиком
+      // ЗАМЕНЯЕТ дерево целиком; root === null — такой фразы в дереве нет
+      if (!ev.data.root) {
+        return { ...s, root: null, missing: ev.data.missing ?? '' }
+      }
       const nodes = { ...s.nodes }
       const kids = ev.data.children ?? []
       collect([ev.data.root], nodes)
       collect(kids, nodes)
-      return { ...s, root: ev.data.root.phrase, kids: { [ev.data.root.phrase]: kids }, nodes }
+      return {
+        ...s,
+        root: ev.data.root.phrase,
+        missing: null,
+        kids: { [ev.data.root.phrase]: kids },
+        nodes,
+      }
     }
     case 'children': {
       const nodes = { ...s.nodes }
