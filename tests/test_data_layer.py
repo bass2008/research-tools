@@ -4,6 +4,7 @@
 Всё здесь — без сервера и без LLM: чистые функции, прямые вызовы `wscore` и операции
 `tasks.*` на заглушке рантайма (`StubCtx`).
 """
+import json
 import pytest
 
 import tasks
@@ -380,3 +381,139 @@ def test_clear_stale_locks_frees_nodes(snapshot_db):
     row = con.execute("SELECT status, error FROM task WHERE id = 'stuck-1'").fetchone()
     assert row[0] == "FAILED" and row[1]
     con.close()
+
+
+# ------------------------------------------------- аддитивность схемы (tech §5, боль из практики)
+
+def test_new_column_does_not_wipe_pipeline_results(tmp_path):
+    """Добавление колонки НЕ должно пересоздавать node: результаты пайплайна оплачены.
+
+    Прецедент: колонку внесли в признак «схема старая» — node/edge пересоздались из cache,
+    и разметка classify исчезла. Пересоздание допустимо ТОЛЬКО для схемы этапа 1-2 (нет status).
+    """
+    db = tmp_path / "s.db"
+    con = wscore.connect(db)
+    wscore.upsert_node(con, "фраза", freq=500)
+    wscore.set_status(con, "фраза", "TRANSACTIONAL", kind="transactional")
+    con.close()
+
+    # имитируем «в схеме появилась новая колонка, которой в файле БД ещё нет»
+    saved = wscore._NODE_LATE_COLS
+    wscore._NODE_LATE_COLS = saved + (("probe_col", "TEXT"),)
+    try:
+        con = wscore.connect(db)
+        cols = {c[1] for c in con.execute("PRAGMA table_info(node)")}
+        assert "probe_col" in cols, "новая колонка должна добавляться ALTER TABLE"
+        row = wscore.get_node(con, "фраза")
+        assert row is not None, "узел не должен исчезнуть при добавлении колонки"
+        assert (row["status"], row["kind"]) == ("TRANSACTIONAL", "transactional"), \
+            "разметка пайплайна должна выжить"
+        con.close()
+    finally:
+        wscore._NODE_LATE_COLS = saved
+
+
+def test_pre_pipeline_schema_is_still_rebuilt(tmp_path):
+    """Схема этапа 1-2 (без status) — единственный случай, когда node/edge пересобираются."""
+    db = tmp_path / "old.db"
+    con = wscore.connect(db)
+    con.execute("DROP TABLE node")
+    con.execute("CREATE TABLE node (phrase TEXT PRIMARY KEY, freq INTEGER, queried INTEGER "
+                "NOT NULL DEFAULT 0, total_refinements INTEGER NOT NULL DEFAULT 0, "
+                "queried_at INTEGER, score REAL, verdict TEXT, note TEXT)")
+    con.execute("INSERT INTO node(phrase, freq, queried) VALUES ('старая', 100, 1)")
+    con.commit()
+    con.close()
+
+    con = wscore.connect(db)
+    cols = {c[1] for c in con.execute("PRAGMA table_info(node)")}
+    assert {"status", "kind", "task_id"} <= cols, "схема должна стать полной"
+
+
+# ------------------------------------------------- отказ XMLRiver (боль из практики: 97 записей)
+
+def test_xmlriver_error_body_is_not_cached_and_not_an_empty_pool(empty_db, monkeypatch):
+    """XMLRiver отдаёт отказ с HTTP 200 и телом {"code":500,...}.
+
+    Прецедент: такие ответы осели в кэше как «уточнений нет» — 97 записей, 12% кэша,
+    и 97 узлов навсегда стали листьями. Отказ обязан быть исключением, а не пустым пулом.
+    """
+    # автофикстура держит «только кэш» и запрещает сеть; здесь клиент замокан,
+    # реального запроса нет — снимаем оба ограничения, счётчик обнулим в конце.
+    monkeypatch.setattr(wscore, "cache_only", lambda: False)
+    calls = {"n": 0}
+
+    class Resp:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return {"code": 500, "error": "Выполните перезапрос."}
+
+    monkeypatch.setattr(wscore, "RETRY_DELAYS", ())          # без задержек в тесте
+    monkeypatch.setattr(wscore._client, "get", lambda *a, **k: (calls.__setitem__("n", calls["n"] + 1), Resp())[1])
+
+    con = wscore.connect(empty_db)
+    with pytest.raises(wscore.XmlRiverError):
+        wscore.fetch_wordstat("проба", con)
+    assert calls["n"] == 1, "без RETRY_DELAYS — одна попытка"
+    assert con.execute("SELECT COUNT(*) FROM cache").fetchone()[0] == 0, \
+        "отказ НЕ должен попадать в кэш"
+
+    wscore.reset_net_calls()   # запросов по сети не было: клиент замокан
+
+def test_transient_error_is_retried_then_succeeds(empty_db, monkeypatch):
+    """code=500 «Выполните перезапрос» повторяется; успех на повторе кэшируется."""
+    # автофикстура держит «только кэш» и запрещает сеть; здесь клиент замокан,
+    # реального запроса нет — снимаем оба ограничения, счётчик обнулим в конце.
+    monkeypatch.setattr(wscore, "cache_only", lambda: False)
+    seq = [{"code": 500, "error": "Выполните перезапрос."},
+           {"popular": [{"text": "проба глубже", "value": 100}]}]
+
+    class Resp:
+        def __init__(self, body): self.body = body
+        def raise_for_status(self): pass
+        def json(self): return self.body
+
+    monkeypatch.setattr(wscore, "RETRY_DELAYS", (0,))
+    monkeypatch.setattr(wscore._client, "get", lambda *a, **k: Resp(seq.pop(0)))
+
+    con = wscore.connect(empty_db)
+    data = wscore.fetch_wordstat("проба", con)
+    assert wscore.parse_popular(data), "второй попыткой должен прийти результат"
+    assert con.execute("SELECT COUNT(*) FROM cache").fetchone()[0] == 1, "успех кэшируется"
+
+    wscore.reset_net_calls()   # запросов по сети не было: клиент замокан
+
+def test_non_transient_error_is_not_retried(empty_db, monkeypatch):
+    """Ошибка в параметрах (code=104) повторяться не должна — это не транзиентный отказ."""
+    # автофикстура держит «только кэш» и запрещает сеть; здесь клиент замокан,
+    # реального запроса нет — снимаем оба ограничения, счётчик обнулим в конце.
+    monkeypatch.setattr(wscore, "cache_only", lambda: False)
+    calls = {"n": 0}
+
+    class Resp:
+        def raise_for_status(self): pass
+        def json(self): return {"code": 104, "error": "Неверный параметр loc!"}
+
+    monkeypatch.setattr(wscore, "RETRY_DELAYS", (0, 0, 0))
+    monkeypatch.setattr(wscore._client, "get",
+                        lambda *a, **k: (calls.__setitem__("n", calls["n"] + 1), Resp())[1])
+
+    con = wscore.connect(empty_db)
+    with pytest.raises(wscore.XmlRiverError):
+        wscore.fetch_wordstat("проба", con)
+    assert calls["n"] == 1, "непереходную ошибку повторять бессмысленно"
+
+    wscore.reset_net_calls()   # запросов по сети не было: клиент замокан
+
+def test_old_poisoned_cache_entry_is_dropped_on_read(empty_db, monkeypatch):
+    """Отрава, осевшая в кэше раньше, при чтении выбрасывается, а не выдаётся за результат."""
+    con = wscore.connect(empty_db)
+    con.execute("INSERT INTO cache(query, response, ts) VALUES (?, ?, 0)",
+                ("проба", json.dumps({"code": 500, "error": "Выполните перезапрос."})))
+    con.commit()
+    monkeypatch.setattr(wscore, "RETRY_DELAYS", ())
+    monkeypatch.setattr(wscore, "cache_only", lambda: True)   # в сеть не пойдём
+
+    data = wscore.fetch_wordstat("проба", con)
+    assert wscore.parse_popular(data) == [], "в кэш-онли вернётся пустой пул"
+    assert con.execute("SELECT COUNT(*) FROM cache").fetchone()[0] == 0, "отрава удалена"

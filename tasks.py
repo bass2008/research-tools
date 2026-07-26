@@ -265,9 +265,18 @@ def _serp_request(engine, phrase):
     params = {"user": os.environ.get("XMLRIVER_USER", ""), "key": os.environ.get("XMLRIVER_KEY", ""),
               "query": phrase, "groupby": SERP_TOP}
     params["lr" if engine == "yandex" else "loc"] = YANDEX_LR if engine == "yandex" else GOOGLE_LOC
-    r = _serp_client.get(url, params=params)
-    r.raise_for_status()
-    return _parse_serp(r.text)
+    last = None
+    for attempt in range(len(wscore.RETRY_DELAYS) + 1):
+        if attempt:
+            time.sleep(wscore.RETRY_DELAYS[attempt - 1])   # 10 c, 30 c, 60 c
+        try:
+            r = _serp_client.get(url, params=params)
+            r.raise_for_status()
+            return _parse_serp(r.text)
+        except (wscore.XmlRiverError, httpx.TransportError, httpx.HTTPStatusError) as e:
+            last = e                                        # транзиентно: пробуем снова
+    raise RuntimeError(f"выдача {engine} по {phrase!r} не получена за "
+                       f"{len(wscore.RETRY_DELAYS) + 1} попыток: {last}")
 
 
 def _text(el):
@@ -285,7 +294,12 @@ def _parse_serp(xml):
         raise RuntimeError(f"XMLRiver вернул не XML: {e}") from None
     err = root.find(".//error")
     if err is not None:
-        raise RuntimeError(f"XMLRiver: {_text(err) or 'ошибка'} (code={err.get('code')})")
+        code = err.get("code")
+        msg = f"XMLRiver: {_text(err) or 'ошибка'} (code={code})"
+        # code=500 «Выполните перезапрос» — источник сам просит повторить (design §0)
+        if str(code) in {str(c) for c in wscore.XMLRIVER_TRANSIENT_CODES}:
+            raise wscore.XmlRiverError(msg)
+        raise RuntimeError(msg)
     found_el = root.find(".//found")
     found = None
     if found_el is not None and (found_el.text or "").strip().isdigit():

@@ -41,7 +41,9 @@ DIST = ROOT / "frontend" / "dist"
 LOG_TAIL = 300            # строк хвоста лога отдаём клиенту при subscribe
 LOG_SEP = " · "           # формат строки: время · уровень · стадия · узел · сообщение
 TS_FMT = "%Y-%m-%dT%H:%M:%S"
-LLM_OFFLINE_AFTER = 60    # нет watch дольше минуты -> петля offline (tech §6 «Правила»)
+LLM_OFFLINE_AFTER = 240   # нет watch дольше 4 минут -> петля offline (tech §6 «Правила»).
+                          # Порог терпимый специально: пока диспетчер раздаёт агентов,
+                          # висящего watch нет, и при коротком пороге индикатор мигал.
 LLM_CHECK_EVERY = 10
 XMLRIVER_LIMIT = 4        # одновременных обращений к XMLRiver вне краула
 CRAWL_LIMIT = 1           # одновременных краулов (внутри каждого — wscore.WORKERS фетчей)
@@ -342,11 +344,14 @@ async def lifespan(app):
     wscore.load_env()
     con = wscore.connect()
     freed = wscore.clear_stale_locks(con)   # рестарт не оставляет залипших блокировок
+    # инвариант: FULLY_LOADED только если всё поддерево загружено (узлы могли стать
+    # незагруженными позже — например при выбрасывании отравленной записи кэша)
+    repaired = wscore.repair_fully_loaded(con)
     CTX = Ctx(con)
     app.state.ctx = CTX
     loops = [CTX.spawn(log_writer(CTX)), CTX.spawn(dispatcher(CTX)), CTX.spawn(llm_monitor(CTX))]
     CTX.log("INFO", "server", None,
-            f"сервер запущен, снято зависших блокировок: {freed}")
+            f"сервер запущен, снято зависших блокировок: {freed}, исправлено ложных FULLY_LOADED: {repaired}")
     try:
         yield
     finally:

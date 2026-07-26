@@ -318,3 +318,46 @@ def test_restart_fails_running_tasks_and_frees_locks(serve, snapshot_db):
     assert client.post("/api/node/op", json={"phrase": SNAP["FULLY_LOADED"],
                                              "op": "classify"}).status_code == 200
     probe.close()
+
+
+# ------------------------------- FULLY_LOADED только при загруженном поддереве (боль из практики)
+
+def test_fully_loaded_is_repaired_when_descendant_becomes_unloaded(empty_db):
+    """Узел не может быть FULLY_LOADED, если в поддереве есть незагруженный >= FLOOR.
+
+    Прецедент: выбросили 97 отравленных записей кэша, узлы стали queried=0 — и 72 предка
+    продолжали утверждать «загружено полностью». full_load по ним даже не запускался:
+    операция разрешена только из NEW/LOADED.
+    """
+    con = wscore.connect(empty_db)
+    for phrase, freq in (("корень", 5000), ("корень ветка", 1000), ("корень ветка лист", 300)):
+        wscore.upsert_node(con, phrase, freq=freq, queried=True)
+    con.execute("INSERT INTO edge(parent, child) VALUES ('корень', 'корень ветка')")
+    con.execute("INSERT INTO edge(parent, child) VALUES ('корень ветка', 'корень ветка лист')")
+    for phrase in ("корень", "корень ветка", "корень ветка лист"):
+        wscore.set_status(con, phrase, "FULLY_LOADED")
+    con.commit()
+
+    assert wscore.repair_fully_loaded(con) == 0, "всё загружено — исправлять нечего"
+
+    # самый глубокий узел стал незагруженным (как при выбрасывании отравы из кэша)
+    con.execute("UPDATE node SET queried = 0 WHERE phrase = 'корень ветка лист'")
+    con.commit()
+
+    assert wscore.repair_fully_loaded(con) == 3, "и сам узел, и оба предка больше не FULLY_LOADED"
+    for phrase in ("корень", "корень ветка", "корень ветка лист"):
+        assert wscore.get_node(con, phrase)["status"] == "LOADED", phrase
+    assert wscore.repair_fully_loaded(con) == 0, "починка идемпотентна"
+
+
+def test_repair_ignores_descendants_below_floor(empty_db):
+    """Незагруженный лист НИЖЕ FLOOR — не нарушение: вглубь мы его и не бурим (design §4)."""
+    con = wscore.connect(empty_db)
+    wscore.upsert_node(con, "корень", freq=5000, queried=True)
+    wscore.upsert_node(con, "корень мелочь", freq=wscore.FLOOR - 1)     # queried=0, ниже порога
+    con.execute("INSERT INTO edge(parent, child) VALUES ('корень', 'корень мелочь')")
+    wscore.set_status(con, "корень", "FULLY_LOADED")
+    con.commit()
+
+    assert wscore.repair_fully_loaded(con) == 0
+    assert wscore.get_node(con, "корень")["status"] == "FULLY_LOADED"

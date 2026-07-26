@@ -9,6 +9,11 @@
 
 Деревья (каждый корень — корень-кандидат, т.е. ни у кого не ребёнок):
 
+Засев обязан быть достижимым состоянием: `build` проверяет инвариант `FULLY_LOADED`
+(design §2) и падает, если засеял ложь. Отсюда два правила по дереву A: узел ≥ `FLOOR`
+внутри `FULLY_LOADED` поддерева обязан быть `queried=1`, а фронтир (`NEW`, не запрошен)
+живёт **ниже** `FLOOR` — именно так его оставляет настоящий краул.
+
 | Корень | Зачем |
 |---|---|
 | `убрать фон` | пайплайн: поддерево `FULLY_LOADED` + выдача; ветка «видео» — фронтир (`NEW`) |
@@ -72,11 +77,13 @@ REPORT_SECTIONS = ("Скоркарта", "Спрос и рынок", "Конку
 # первая пара — сама фраза (своя частота), остальные — уточнения (супермножества слов).
 # Фраз, которых здесь нет, в кэше нет намеренно: в режиме «только кэш» они станут листьями.
 
+# Частоты ветки «видео» — ниже FLOOR: краул туда не идёт, поэтому она законно остаётся
+# фронтиром внутри загруженного поддерева (см. правила в docstring модуля).
 CACHE = {
     ROOT_A: [(ROOT_A, 1000), (A_ONLINE, 500), (A_ONLINE_FREE, 200),
-             (A_VIDEO, 300), (A_VIDEO_2024, 120), (A_PNG, 40)],
+             (A_VIDEO, 40), (A_VIDEO_2024, 30), (A_PNG, 40)],
     A_ONLINE: [(A_ONLINE, 500), (A_ONLINE_FREE, 200), (A_ONLINE_FAST, 90)],
-    A_VIDEO: [(A_VIDEO, 300), (A_VIDEO_2024, 120), (A_VIDEO_PHONE, 80)],
+    A_VIDEO: [(A_VIDEO, 40), (A_VIDEO_2024, 30), (A_VIDEO_PHONE, 20)],
 }
 
 # ---------- модель: (фраза, freq, status, queried, total_refinements, доп. колонки) ----------
@@ -85,11 +92,11 @@ NODES = [
     # A: пайплайн. Ветка «онлайн» загружена (синий +), ветка «видео» — фронтир (серый +)
     (ROOT_A, 1000, "FULLY_LOADED", 1, 5, {}),
     (A_ONLINE, 500, "FULLY_LOADED", 1, 2, {}),
-    (A_ONLINE_FREE, 200, "FULLY_LOADED", 0, 0, {}),
-    (A_ONLINE_FAST, 90, "FULLY_LOADED", 0, 0, {}),
-    (A_VIDEO, 300, "NEW", 0, 0, {}),
-    (A_VIDEO_2024, 120, "NEW", 0, 0, {}),
-    (A_PNG, 40, "FULLY_LOADED", 0, 0, {}),
+    (A_ONLINE_FREE, 200, "FULLY_LOADED", 1, 0, {}),   # >= FLOOR -> обязан быть запрошен
+    (A_ONLINE_FAST, 90, "FULLY_LOADED", 1, 0, {}),    # то же
+    (A_VIDEO, 40, "NEW", 0, 0, {}),                   # < FLOOR -> законный фронтир
+    (A_VIDEO_2024, 30, "NEW", 0, 0, {}),
+    (A_PNG, 40, "FULLY_LOADED", 0, 0, {}),            # < FLOOR: лист, краул его не фетчит
     # B: пагинация вширь
     (ROOT_B, 5000, "LOADED", 1, B_KIDS, {}),
     # C: поддерево под drill — уже загружено, вся выдача есть
@@ -176,6 +183,15 @@ def build(db_path):
         wscore.save_report(con, REP_HI_ID, REP_HI, f"reports/{REP_HI_ID}.html", created_at=TS)
         wscore.save_report(con, REP_LO_ID, REP_LO, f"reports/{REP_LO_ID}.html", created_at=TS + 1)
         con.commit()
+        # Засеяли достижимое состояние? Сервер чинит инвариант FULLY_LOADED на старте, и
+        # незаметно переписанный засев ломает браузерные сценарии таймаутами вместо
+        # понятной ошибки. Ловим здесь: тронутые строки = засев соврал.
+        lied = wscore.repair_fully_loaded(con)
+        if lied:
+            raise AssertionError(
+                f"засев нарушает инвариант FULLY_LOADED: {lied} узлов; "
+                f"узел >= FLOOR={wscore.FLOOR} внутри загруженного поддерева должен быть "
+                f"queried=1, фронтир (NEW) — ниже FLOOR")
     finally:
         con.close()
     return db_path

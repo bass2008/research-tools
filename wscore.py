@@ -34,12 +34,11 @@ WORKERS = 6              # одновременных фетчей во врем
 CLASSIFY_CHUNK = 120     # узлов в одном classify-джобе (tech §3)
 
 STATUSES = ("NEW", "LOADED", "FULLY_LOADED", "TRANSACTIONAL", "CATEGORY", "INFORMATIONAL",
-            "NAVIGATIONAL", "MISSPELLED", "SEARCHED", "SCORED", "LOW_SCORED", "ANALYZED")
-TERMINALS = ("CATEGORY", "INFORMATIONAL", "NAVIGATIONAL", "MISSPELLED", "LOW_SCORED", "ANALYZED")
+            "NAVIGATIONAL", "SEARCHED", "SCORED", "LOW_SCORED", "ANALYZED")
+TERMINALS = ("CATEGORY", "INFORMATIONAL", "NAVIGATIONAL", "LOW_SCORED", "ANALYZED")
 # инвариант kind <-> status (design §2)
 KIND_STATUS = {"transactional": "TRANSACTIONAL", "category": "CATEGORY",
-               "informational": "INFORMATIONAL", "navigational": "NAVIGATIONAL",
-               "misspelled": "MISSPELLED"}
+               "informational": "INFORMATIONAL", "navigational": "NAVIGATIONAL"}
 SERP_ENGINES = ("yandex", "google")
 
 _client = httpx.Client(timeout=30)
@@ -94,8 +93,6 @@ _SQL_NODE = """CREATE TABLE IF NOT EXISTS node (
     kind TEXT,                                   -- transactional|informational|navigational|category
     classify_conf REAL,
     classify_reason TEXT,
-    meant TEXT,                -- для misspelled: какая фраза вероятно подразумевалась
-
     score_weights TEXT,                          -- JSON весов на момент оценки
     competition_yandex INTEGER,                  -- 0-100, сырой вход score
     competition_google INTEGER,                  -- 0-100, сырой вход score
@@ -142,14 +139,19 @@ _SQL_INDEXES = (
 
 # колонки node, которые можно писать через set_status(**fields)
 _NODE_WRITABLE = frozenset("""freq queried total_refinements queried_at score verdict note
-    status kind classify_conf classify_reason meant score_weights competition_yandex competition_google
+    status kind classify_conf classify_reason score_weights competition_yandex competition_google
     description signals_json verdict_score error error_stage task_id
     classified_at searched_at scored_at analyzed_at""".split())
 
-# новые колонки: их отсутствие = старая схема -> node/edge пересобираются из cache
-_NODE_NEW_COLS = frozenset("""status kind classify_conf classify_reason meant score_weights
-    competition_yandex competition_google description signals_json verdict_score error
-    error_stage task_id classified_at searched_at scored_at analyzed_at""".split())
+# Признак схемы ДО конвейера (этап 1-2): нет колонки status. ТОЛЬКО он даёт право
+# пересобрать node/edge из cache. Расширять этот признак НЕЛЬЗЯ: любая новая колонка
+# добавляется АДДИТИВНО (_NODE_LATE_COLS + _add_missing_cols), иначе пересоздание сотрёт
+# оплаченные результаты пайплайна — правило «после первого прогона только аддитивно» (tech §5).
+_PRE_PIPELINE_MARKER = "status"
+
+# Колонки, добавленные ПОСЛЕ первого прогона пайплайна: только через ALTER TABLE.
+# Новую колонку дописывать СЮДА, а не в признак схемы выше.
+_NODE_LATE_COLS = ()
 
 # статус -> колонка таймстемпа операции (ставится автоматически)
 _STATUS_TS = {"TRANSACTIONAL": "classified_at", "CATEGORY": "classified_at",
@@ -167,15 +169,25 @@ def connect(db_path=None, backfill=True):
     con.execute("PRAGMA journal_mode=WAL")
     con.execute(_SQL_CACHE)  # сырой кэш ответов XMLRiver — только создаём, никогда не сносим
     cols = {r[1] for r in con.execute("PRAGMA table_info(node)")}
-    if cols and not _NODE_NEW_COLS <= cols:
-        con.execute("DROP TABLE IF EXISTS edge")
+    if cols and _PRE_PIPELINE_MARKER not in cols:
+        con.execute("DROP TABLE IF EXISTS edge")   # схема этапа 1-2: пересобираем из cache
         con.execute("DROP TABLE IF EXISTS node")
     for sql in (_SQL_NODE, _SQL_EDGE, _SQL_SERP, _SQL_TASK, _SQL_REPORT, *_SQL_INDEXES):
         con.execute(sql)
+    _add_missing_cols(con)
     con.commit()
     if backfill:
         _maybe_backfill(con)
     return con
+
+
+def _add_missing_cols(con):
+    """Догнать схему node аддитивно: чего нет — добавить ALTER TABLE, ничего не теряя.
+    Так новая колонка не приводит к пересозданию таблицы и потере данных (tech §5)."""
+    have = {r[1] for r in con.execute("PRAGMA table_info(node)")}
+    for name, decl in _NODE_LATE_COLS:
+        if name not in have:
+            con.execute(f"ALTER TABLE node ADD COLUMN {name} {decl}")
 
 
 def db_path_of(con):
@@ -202,6 +214,62 @@ def _chunks(seq, size):
 
 # ---------- фетч (сеть/кэш) ----------
 
+# XMLRiver сам просит переспросить (code=500 «Выполните перезапрос»). Это единственный
+# случай, когда мы повторяем: отказ помечен источником как транзиентный (design §0).
+XMLRIVER_TRANSIENT_CODES = frozenset({500})
+RETRY_DELAYS = (10, 30, 60)      # секунды между попытками
+
+
+class XmlRiverError(RuntimeError):
+    """Отказ XMLRiver. Приходит с HTTP 200 и телом {"code":…, "error":…}, поэтому
+    raise_for_status его НЕ ловит. Такой ответ нельзя ни кэшировать, ни считать пустым пулом:
+    прецедент — 97 записей «code=500 Выполните перезапрос» осели в кэше как «уточнений нет»,
+    и 97 узлов навсегда стали листьями."""
+
+
+def _check_xmlriver(data, query):
+    """Ответ XMLRiver — отказ? Тогда исключение, чтобы вызывающий пометил узел незагруженным."""
+    if isinstance(data, dict) and (data.get("error") or data.get("code")):
+        raise XmlRiverError(f"XMLRiver отказал по {query!r}: "
+                            f"code={data.get('code')}, {data.get('error')}")
+
+
+def _fetch_with_retry(q):
+    """Один запрос к Вордстату с повтором на транзиентных отказах: 10 c, 30 c, 60 c.
+    Повторяем ТОЛЬКО то, что источник сам просит повторить (code=500) и обрывы связи;
+    ошибку в параметрах повторять бессмысленно. Каждая попытка считается платной."""
+    global _net_calls
+    params = {"user": os.environ["XMLRIVER_USER"], "key": os.environ["XMLRIVER_KEY"], "query": q}
+    last = None
+    for attempt in range(len(RETRY_DELAYS) + 1):
+        if attempt:
+            time.sleep(RETRY_DELAYS[attempt - 1])
+        with _net_lock:
+            _net_calls += 1
+        try:
+            r = _client.get(BASE_URL, params=params)
+            r.raise_for_status()
+            data = r.json()
+        except (httpx.TransportError, httpx.HTTPStatusError, json.JSONDecodeError) as e:
+            last = e                              # обрыв связи/таймаут — тоже транзиентно
+            continue
+        if not is_transient(data):
+            return data                           # результат либо НЕтранзиентная ошибка
+        last = XmlRiverError(f"code={data.get('code')}: {data.get('error')}")
+    raise XmlRiverError(f"XMLRiver не ответил по {q!r} за {len(RETRY_DELAYS) + 1} попыток: {last}")
+
+
+def is_error_response(data):
+    """Отравленная запись кэша (сохранённый отказ), а не результат."""
+    return isinstance(data, dict) and bool(data.get("error") or data.get("code"))
+
+
+def is_transient(data):
+    """Отказ, который источник просит повторить (а не наша ошибка в параметрах)."""
+    return (isinstance(data, dict)
+            and data.get("code") in XMLRIVER_TRANSIENT_CODES)
+
+
 def fetch_wordstat(query, con=None):
     """Ответ XMLRiver по фразе. Кэш в semcore.db: повторный запрос бесплатен.
     В режиме cache_only() промах кэша НЕ идёт в сеть — отдаём пустой ответ, чтобы
@@ -214,19 +282,16 @@ def fetch_wordstat(query, con=None):
     try:
         row = con.execute("SELECT response FROM cache WHERE query = ?", (q,)).fetchone()
         if row:
-            return json.loads(row[0])
+            cached = json.loads(row[0])
+            if not is_error_response(cached):
+                return cached
+            con.execute("DELETE FROM cache WHERE query = ?", (q,))   # старая отрава: выбросить
+            con.commit()
         if cache_only():
             return {"popular": []}
         load_env()
-        with _net_lock:
-            _net_calls += 1
-        r = _client.get(BASE_URL, params={
-            "user": os.environ["XMLRIVER_USER"],
-            "key": os.environ["XMLRIVER_KEY"],
-            "query": q,
-        })
-        r.raise_for_status()
-        data = r.json()
+        data = _fetch_with_retry(q)
+        _check_xmlriver(data, q)   # отказ XMLRiver приходит с HTTP 200 — в кэш его НЕЛЬЗЯ
         con.execute("INSERT OR REPLACE INTO cache (query, response, ts) VALUES (?, ?, strftime('%s','now'))",
                     (q, json.dumps(data, ensure_ascii=False)))
         con.commit()
@@ -596,6 +661,26 @@ def clear_stale_locks(con):
                 "error = COALESCE(error, 'прервано перезапуском сервера') "
                 "WHERE status IN ('QUEUED', 'RUNNING')", (int(time.time()),))
     cur = con.execute("UPDATE node SET task_id = NULL WHERE task_id IS NOT NULL")
+    con.commit()
+    return cur.rowcount
+
+
+def repair_fully_loaded(con):
+    """Инвариант: узел НЕ может быть FULLY_LOADED, если в его поддереве есть незагруженный
+    узел с freq >= FLOOR. Нарушители сбрасываются в LOADED. -> сколько исправлено.
+
+    Зачем: статус FULLY_LOADED ставит краул на всё поддерево, но узлы могут стать
+    незагруженными ПОЗЖЕ — например при выбрасывании отравленной записи кэша. Тогда предки
+    продолжают утверждать «загружено полностью», хотя это уже ложь, и full_load по ним
+    даже не запустить (операция разрешена только из NEW/LOADED).
+    Прецедент: чистка 97 сохранённых отказов XMLRiver оставила 72 таких предка."""
+    cur = con.execute(f"""
+        UPDATE node SET status = 'LOADED'
+        WHERE status = 'FULLY_LOADED' AND EXISTS (
+          WITH RECURSIVE sub(p) AS (
+            SELECT node.phrase UNION SELECT e.child FROM edge e JOIN sub ON e.parent = sub.p)
+          SELECT 1 FROM node n JOIN sub ON n.phrase = sub.p
+          WHERE n.queried = 0 AND COALESCE(n.freq, 0) >= {FLOOR})""")
     con.commit()
     return cur.rowcount
 

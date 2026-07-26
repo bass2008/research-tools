@@ -15,8 +15,10 @@ LLM подменён фальшивым воркером (`e2e_worker.py`), XMLR
 Артефакты падения (трассировка, скриншот, видео Playwright плюс `drill.log`,
 вывод uvicorn и состояние воркера) складываются в каталог `--output`.
 """
+import ctypes
 import os
 import shutil
+import signal
 import socket
 import subprocess
 import sys
@@ -131,6 +133,21 @@ def _read(path):
         return ""
 
 
+PR_SET_PDEATHSIG = 1
+
+
+def _die_with_parent():   # выполняется в ребёнке между fork и exec
+    """Просим ядро прибить сервер, когда умрёт pytest.
+
+    `Server.stop()` снимает процесс при нормальном завершении, но убитый снаружи прогон
+    (`timeout`, `kill`) до teardown не доходит и оставляет uvicorn сиротой: один такой
+    случай оставил 17 живых серверов на несколько часов. PDEATHSIG срабатывает независимо
+    от того, как умер родитель."""
+    if sys.platform != "linux":
+        return
+    ctypes.CDLL("libc.so.6", use_errno=True).prctl(PR_SET_PDEATHSIG, signal.SIGTERM, 0, 0, 0)
+
+
 class Server:
     """uvicorn в отдельном процессе: старт, перезапуск (сценарий 17), остановка."""
 
@@ -151,7 +168,8 @@ class Server:
             self.proc = subprocess.Popen(
                 [sys.executable, "-m", "uvicorn", "e2e_app:app",
                  "--host", "127.0.0.1", "--port", str(self.port), "--log-level", "warning"],
-                cwd=str(self.inst), env=env, stdout=log, stderr=subprocess.STDOUT)
+                cwd=str(self.inst), env=env, stdout=log, stderr=subprocess.STDOUT,
+                preexec_fn=_die_with_parent)
         self._wait_ready()
         return self
 

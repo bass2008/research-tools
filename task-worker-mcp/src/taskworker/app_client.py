@@ -55,7 +55,7 @@ def _request(method: str, path: str, *, caller: str, read_timeout: float,
         raise AppError(f"{method} {path}: ответ не JSON ({response.text[:200]})") from exc
 
 
-def watch(max_jobs: int = 10, timeout: float = 45.0, caller: str = "dispatcher") -> list[dict]:
+def watch(max_jobs: int = 10, timeout: float = 200.0, caller: str = "dispatcher") -> list[dict]:
     """Ожидание джобов: сервер держит запрос, пока их нет. Возвращает `[{job_id, type}]`.
 
     Серверный `timeout` никогда не отдаём нулём (у нуля легко получить смысл «ждать вечно»),
