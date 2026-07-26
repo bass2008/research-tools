@@ -6,33 +6,11 @@ import { TreeCtx, emptyNode } from '../store'
 import type { TreeApi } from '../store'
 import { TreeNode } from '../TreeNode'
 
-/** Все 11 статусов FSM (design §2) — источник для параметризованных тестов. */
-export const STATUSES: Status[] = [
-  'NEW',
-  'LOADED',
-  'FULLY_LOADED',
-  'TRANSACTIONAL',
-  'CATEGORY',
-  'INFORMATIONAL',
-  'NAVIGATIONAL',
-  'SEARCHED',
-  'SCORED',
-  'LOW_SCORED',
-  'ANALYZED',
-]
+/** Статусы дерева запросов: только загрузка. Выводы живут во втором слое (работы). */
+export const STATUSES: Status[] = ['NEW', 'LOADED', 'FULLY_LOADED']
 
 /** Все возможные кнопки узла — чтобы проверять «и никаких лишних». */
-export const ALL_BTNS = [
-  'btn-load',
-  'btn-full-load',
-  'btn-drill',
-  'btn-classify',
-  'btn-search',
-  'btn-score',
-  'btn-analyze',
-  'btn-fix-kind',
-  'btn-search-view',
-]
+export const ALL_BTNS = ['btn-load', 'btn-full-load', 'btn-needs-build']
 
 export function node(phrase: string, over: Partial<Node> = {}): Node {
   return { ...emptyNode(phrase), freq: 1000, ...over }
@@ -51,7 +29,6 @@ export function renderTree(opts: {
     kids: opts.kids ?? {},
     expand: vi.fn(),
     run: vi.fn(),
-    setKind: vi.fn(),
   }
   const r = render(
     <TreeCtx.Provider value={api}>

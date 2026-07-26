@@ -1,27 +1,20 @@
-// Матрица «статус → кнопки» (design §2, testing-plan §7) — проверяется ЦЕЛИКОМ:
-// рендерятся только разрешённые кнопки и никаких лишних. Плюс Link и блокировки.
+// Матрица «статус → кнопки» — проверяется ЦЕЛИКОМ: рендерятся только разрешённые кнопки и
+// никаких лишних. Дерево запросов отвечает за загрузку, поэтому статусов три; выводы (интент,
+// конкуренция, отчёт) переехали во второй слой, где единица — работа.
 import { describe, expect, it } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 import type { Status } from '../api'
 import { ALL_BTNS, STATUSES, actionEls, actionsOf, node, nodeEl, renderTree } from './helpers'
 
-// Таблица-источник (design §2 «Кнопки по статусу»).
+// Таблица-источник.
 const MATRIX: Record<Status, string[]> = {
-  NEW: ['btn-load', 'btn-full-load', 'btn-drill'],
-  LOADED: ['btn-full-load', 'btn-drill'],
-  FULLY_LOADED: ['btn-classify', 'btn-drill'],
-  TRANSACTIONAL: ['btn-search', 'btn-drill', 'btn-fix-kind'],
-  SEARCHED: ['btn-score', 'btn-drill'],
-  SCORED: ['btn-analyze', 'btn-drill', 'btn-search-view'],
-  CATEGORY: ['btn-fix-kind'],
-  INFORMATIONAL: ['btn-fix-kind'],
-  NAVIGATIONAL: ['btn-fix-kind'],
-  LOW_SCORED: ['btn-search-view'],
-  ANALYZED: [],
+  NEW: ['btn-load', 'btn-full-load'],
+  LOADED: ['btn-full-load'],
+  FULLY_LOADED: ['btn-needs-build'],
 }
 
-describe('матрица «статус → кнопки» (design §2)', () => {
-  it('таблица покрывает все 11 статусов', () => {
+describe('матрица «статус → кнопки»', () => {
+  it('таблица покрывает все статусы', () => {
     expect(Object.keys(MATRIX).sort()).toEqual([...STATUSES].sort())
   })
 
@@ -34,8 +27,10 @@ describe('матрица «статус → кнопки» (design §2)', () => 
       if (want.includes(t)) expect(screen.getByTestId(t)).toBeInTheDocument()
       else expect(screen.queryByTestId(t)).toBeNull()
     }
-    // без отчёта Link не показывается ни при каком статусе
-    expect(screen.queryByTestId('btn-link')).toBeNull()
+    // выводов по фразе на узле больше нет: ни скор, ни вердикт, ни ссылка на отчёт
+    for (const gone of ['node-score', 'node-verdict', 'btn-link']) {
+      expect(screen.queryByTestId(gone)).toBeNull()
+    }
   })
 
   it.each(STATUSES)('%s — статус отображается на узле', (status) => {
@@ -45,86 +40,20 @@ describe('матрица «статус → кнопки» (design §2)', () => 
     )
   })
 
-  it('нетерминальные статусы имеют Drill, терминальные — нет', () => {
-    const terminals: Status[] = [
-      'CATEGORY',
-      'INFORMATIONAL',
-      'NAVIGATIONAL',
-      'LOW_SCORED',
-      'ANALYZED',
-    ]
-    for (const s of STATUSES) {
-      const has = MATRIX[s].includes('btn-drill')
-      expect(has).toBe(!terminals.includes(s))
-    }
-  })
-
-  it('Fix kind открывает выбор из остальных интентов и вызывает setKind', () => {
-    const { api } = renderTree({
-      root: 'p',
-      nodes: [node('p', { status: 'CATEGORY', kind: 'category' })],
-    })
-    expect(screen.queryByTestId('btn-kind-transactional')).toBeNull()
-
-    fireEvent.click(screen.getByTestId('btn-fix-kind'))
-    expect(screen.getByTestId('btn-kind-transactional')).toBeInTheDocument()
-    expect(screen.getByTestId('btn-kind-informational')).toBeInTheDocument()
-    expect(screen.getByTestId('btn-kind-navigational')).toBeInTheDocument()
-    // текущий kind в списке не предлагается
-    expect(screen.queryByTestId('btn-kind-category')).toBeNull()
-
-    fireEvent.click(screen.getByTestId('btn-kind-transactional'))
-    expect(api.setKind).toHaveBeenCalledWith('p', 'transactional')
-  })
-
   it('кнопка операции запускает команду через контекст', () => {
-    const { api } = renderTree({ root: 'p', nodes: [node('p', { status: 'SEARCHED' })] })
-    fireEvent.click(screen.getByTestId('btn-score'))
-    expect(api.run).toHaveBeenCalledWith('p', 'score')
+    const { api } = renderTree({ root: 'p', nodes: [node('p', { status: 'FULLY_LOADED' })] })
+    fireEvent.click(screen.getByTestId('btn-needs-build'))
+    expect(api.run).toHaveBeenCalledWith('p', 'needs_build')
   })
 
-  it('Search view раскрывает панель выдачи, а не команду', () => {
-    const { api } = renderTree({ root: 'p', nodes: [node('p', { status: 'LOW_SCORED', score: 12 })] })
-    expect(screen.queryByTestId('node-serp')).toBeNull()
-    fireEvent.click(screen.getByTestId('btn-search-view'))
-    expect(screen.getByTestId('node-serp')).toBeInTheDocument()
-    expect(api.run).not.toHaveBeenCalled()
-  })
-})
-
-describe('Link (design §2: только при наличии отчёта, при любом статусе)', () => {
-  it.each(STATUSES)('%s + отчёт → Link виден', (status) => {
-    renderTree({
-      root: 'p',
-      nodes: [node('p', { status, report_link: 'reports/abc.html' })],
-    })
-    const link = screen.getByTestId('btn-link')
-    expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute('href', '/reports/abc.html')
-    expect(link).toHaveAttribute('target', '_blank')
-  })
-
-  it.each(STATUSES)('%s без отчёта → Link не виден', (status) => {
-    renderTree({ root: 'p', nodes: [node('p', { status })] })
-    expect(screen.queryByTestId('btn-link')).toBeNull()
-  })
-
-  it('report_link = null трактуется как «отчёта нет»', () => {
-    renderTree({ root: 'p', nodes: [node('p', { status: 'ANALYZED', report_link: null })] })
-    expect(screen.queryByTestId('btn-link')).toBeNull()
-  })
-
-  it('ANALYZED без отчёта — вообще без кнопок', () => {
-    const { container } = renderTree({ root: 'p', nodes: [node('p', { status: 'ANALYZED' })] })
-    expect(actionsOf(container, 'p')).toEqual([])
-  })
-
-  it('абсолютная ссылка не портится префиксом', () => {
-    renderTree({
-      root: 'p',
-      nodes: [node('p', { status: 'ANALYZED', report_link: '/reports/x.html' })],
-    })
-    expect(screen.getByTestId('btn-link')).toHaveAttribute('href', '/reports/x.html')
+  it('загруженная ветка ведёт к сборке потребностей, а не к разметке узлов', () => {
+    renderTree({ root: 'p', nodes: [node('p', { status: 'FULLY_LOADED' })] })
+    // classify/drill/score/analyze с узла убраны: выводы делает второй слой по работе
+    for (const gone of ['btn-classify', 'btn-drill', 'btn-score', 'btn-analyze',
+                        'btn-search', 'btn-fix-kind', 'btn-search-view']) {
+      expect(screen.queryByTestId(gone)).toBeNull()
+    }
+    expect(screen.getByTestId('btn-needs-build')).toBeInTheDocument()
   })
 })
 
@@ -135,10 +64,13 @@ describe('блокировка занятого узла и его поддер�
       root: 'root',
       nodes: [
         node('root', { status: 'NEW', task_id: rootBusy }),
-        node('kid', { status: 'TRANSACTIONAL', task_id: childBusy }),
-        node('grand', { status: 'SCORED' }),
+        node('kid', { status: 'LOADED', task_id: childBusy }),
+        node('grand', { status: 'FULLY_LOADED' }),
       ],
-      kids: { root: [node('kid', { status: 'TRANSACTIONAL', task_id: childBusy })], kid: [node('grand', { status: 'SCORED' })] },
+      kids: {
+        root: [node('kid', { status: 'LOADED', task_id: childBusy })],
+        kid: [node('grand', { status: 'FULLY_LOADED' })],
+      },
     })
 
   it('свободное дерево: кнопки узла и поддерева активны', () => {
@@ -154,7 +86,7 @@ describe('блокировка занятого узла и его поддер�
   it('узел занят → его кнопки disabled', () => {
     const { container } = tree('task-1')
     const els = actionEls(container, 'root')
-    expect(els.length).toBe(3)
+    expect(els.length).toBe(2)   // NEW: Load + Full load
     for (const e of els) expect(e).toBeDisabled()
     expect(nodeEl(container, 'root').className).toContain('busy')
   })
@@ -195,9 +127,9 @@ describe('блокировка занятого узла и его поддер�
   it('ошибка узла видна и не меняет набор кнопок', () => {
     const { container } = renderTree({
       root: 'p',
-      nodes: [node('p', { status: 'TRANSACTIONAL', error: 'HTTP 500 от XMLRiver (Google)' })],
+      nodes: [node('p', { status: 'LOADED', error: 'ReadTimeout: timed out' })],
     })
-    expect(screen.getByTestId('node-error')).toHaveTextContent('XMLRiver')
-    expect([...actionsOf(container, 'p')].sort()).toEqual([...MATRIX.TRANSACTIONAL].sort())
+    expect(screen.getByTestId('node-error')).toHaveTextContent('ReadTimeout')
+    expect([...actionsOf(container, 'p')].sort()).toEqual([...MATRIX.LOADED].sort())
   })
 })

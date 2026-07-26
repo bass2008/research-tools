@@ -197,10 +197,25 @@ NEEDS_PARAMS = {
 }
 
 
-def needs_files():
-    """{относительный путь: содержимое} — раскладка каталога джоба, как её читает сервер."""
-    return {f"{NEEDS_ID}/accepted.json": json.dumps(NEEDS_TREE, ensure_ascii=False),
-            f"{NEEDS_ID}/params.json": json.dumps(NEEDS_PARAMS, ensure_ascii=False)}
+# засеянные разборы работ: вкладка «Отчёты» показывает их, а не узлы
+NEEDS_ANALYSES = [
+    {"work": NEEDS_WORK, "verdict": "BUILD", "verdict_score": 91.0, "confidence": 0.8,
+     "report_link": f"reports/{REP_HI_ID}.html", "task_id": REP_HI_ID,
+     "created_at": TS, "searched": [ROOT_A], "phrases": 4},
+    {"work": NEEDS_GAP_WORK, "verdict": "MAYBE", "verdict_score": 42.0, "confidence": 0.5,
+     "report_link": f"reports/{REP_LO_ID}.html", "task_id": REP_LO_ID,
+     "created_at": TS + 1, "searched": [A_VIDEO], "phrases": 2},
+]
+
+
+def needs_files(with_analyses=True):
+    """{относительный путь: содержимое} — раскладка каталога сборки, как её читает сервер."""
+    out = {f"{NEEDS_ID}/accepted.json": json.dumps(NEEDS_TREE, ensure_ascii=False),
+           f"{NEEDS_ID}/params.json": json.dumps(NEEDS_PARAMS, ensure_ascii=False)}
+    if with_analyses:
+        for a in NEEDS_ANALYSES:
+            out[f"{NEEDS_ID}/analysis/{a['task_id']}.json"] = json.dumps(a, ensure_ascii=False)
+    return out
 
 
 def build(db_path):

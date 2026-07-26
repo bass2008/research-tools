@@ -152,6 +152,26 @@ class FakeWorker:
                  "signals": [{"code": "NO_DEDICATED_TOOL", "weight": 40,
                               "evidence": "фальшивый воркер"}]}
                 for it in params.get("items", [])]}
+        if job["type"] == "needs":
+            # сборка потребностей: собираем ОДНУ работу из всех фраз и ничего не теряем —
+            # правило полноты проверяет сервер, и подделка обязана его выдержать
+            phrases = [n["phrase"] for n in params.get("nodes", [])]
+            root = params.get("root")
+            body = [p for p in phrases if p != root]
+            return {"condition": "онлайн · бесплатно",
+                    "works": [{"name": seed.NEEDS_WORK, "phrases": body,
+                               "top_freq": params.get("root_freq") or 0,
+                               "phrase_count": len(body), "occupied_by": None,
+                               "unclear": False, "gap_candidate": True, "needs_serp": True,
+                               "serp_question": "кто в топе", "why": "заготовка",
+                               "segments": []}],
+                    "excluded": [{"phrase": root, "why": "condition",
+                                  "note": "корень ветки работы не называет"}]}
+        if job["type"] == "analyze_work":
+            name = (params.get("work") or {}).get("name", "")
+            return {"recommendation": self.verdict, "verdict_score": self.verdict_score,
+                    "confidence": 0.7,
+                    "report_html": seed.report_html(name, self.verdict, self.verdict_score)}
         if job["type"] == "analyze":
             phrase = params.get("phrase", "")
             return {"recommendation": self.verdict, "verdict_score": self.verdict_score,

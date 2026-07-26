@@ -1,7 +1,7 @@
 // Редьюсер событий WS (tech §6.2, testing-plan §7): roots / snapshot / children / node /
 // progress / log_cleared. Чистая функция — проверяем без DOM.
 import { describe, expect, it } from 'vitest'
-import type { LogLine, Node, ReportRow, TaskRow, WsEvent } from '../api'
+import type { LogLine, Node, TaskRow, WsEvent } from '../api'
 import { applyEvent, emptyNode, initialState } from '../store'
 import type { State } from '../store'
 
@@ -120,7 +120,7 @@ describe('node', () => {
       type: 'snapshot',
       data: {
         root: n('a', { status: 'FULLY_LOADED' }),
-        children: [n('a1', { status: 'TRANSACTIONAL', kind: 'transactional', freq: 500 })],
+        children: [n('a1', { status: 'LOADED', freq: 500 })],
       },
     },
   ])
@@ -128,23 +128,23 @@ describe('node', () => {
   it('обновляет узел на месте, прочие поля сохраняются', () => {
     const s = applyEvent(base, {
       type: 'node',
-      data: { phrase: 'a1', status: 'SEARCHED', task_id: null },
+      data: { phrase: 'a1', status: 'FULLY_LOADED', task_id: null },
     })
-    expect(s.nodes['a1'].status).toBe('SEARCHED')
-    expect(s.nodes['a1'].kind).toBe('transactional')
+    expect(s.nodes['a1'].status).toBe('FULLY_LOADED')
     expect(s.nodes['a1'].freq).toBe(500) // дельта не обнуляет то, чего в ней нет
   })
 
   it('не двигает структуру дерева', () => {
-    const s = applyEvent(base, { type: 'node', data: { phrase: 'a1', status: 'SEARCHED' } })
+    const s = applyEvent(base, { type: 'node', data: { phrase: 'a1', status: 'LOADED' } })
     expect(s.kids).toBe(base.kids)
     expect(s.root).toBe('a')
   })
 
   it('дельта по неизвестной фразе создаёт узел с дефолтами', () => {
-    const s = applyEvent(base, { type: 'node', data: { phrase: 'zz', score: 77 } })
+    const s = applyEvent(base, { type: 'node', data: { phrase: 'zz', freq: 77 } })
     expect(s.nodes['zz'].status).toBe('NEW')
-    expect(s.nodes['zz'].score).toBe(77)
+    expect(s.nodes['zz'].freq).toBe(77)
+    expect(s.nodes['zz'].task_id).toBeNull()
   })
 
   it('доносит блокировку и снятие блокировки', () => {
@@ -154,12 +154,9 @@ describe('node', () => {
     expect(free.nodes['a'].task_id).toBeNull()
   })
 
-  it('доносит отчёт: report_link появляется на узле', () => {
-    const s = applyEvent(base, {
-      type: 'node',
-      data: { phrase: 'a1', status: 'ANALYZED', report_link: 'reports/1.html' },
-    })
-    expect(s.nodes['a1'].report_link).toBe('reports/1.html')
+  it('доносит смену статуса загрузки на месте', () => {
+    const s = applyEvent(base, { type: 'node', data: { phrase: 'a1', status: 'FULLY_LOADED' } })
+    expect(s.nodes['a1'].status).toBe('FULLY_LOADED')
   })
 })
 
@@ -243,7 +240,7 @@ describe('log / log_cleared', () => {
   })
 })
 
-describe('task / report', () => {
+describe('task', () => {
   const task = (over: Partial<TaskRow> & { id: string }): TaskRow => ({
     type: 'classify',
     node: 'a',
@@ -252,15 +249,6 @@ describe('task / report', () => {
     started_at: null,
     finished_at: null,
     error: null,
-    ...over,
-  })
-  const rep = (over: Partial<ReportRow> & { id: string }): ReportRow => ({
-    node: 'a',
-    title: null,
-    verdict: 'MAYBE',
-    verdict_score: 50,
-    link: 'reports/a.html',
-    created_at: 1,
     ...over,
   })
 
@@ -282,16 +270,6 @@ describe('task / report', () => {
     expect(s.tasks.map((t) => t.id)).toEqual(['t2', 't3', 't1'])
   })
 
-  it('отчёты сортируются по verdict_score (design §8)', () => {
-    const s = run([
-      { type: 'report', data: [rep({ id: 'r1', verdict_score: 40 }), rep({ id: 'r2', verdict_score: 90 })] },
-      { type: 'report', data: rep({ id: 'r3', verdict_score: 70 }) },
-    ])
-    expect(s.reports.map((r) => r.id)).toEqual(['r2', 'r3', 'r1'])
-  })
-})
-
-describe('llm_status', () => {
   it('обновляет индикатор петли', () => {
     const s = run([{ type: 'llm_status', data: { online: true, last_seen_at: 1_700_000_000 } }])
     expect(s.llm).toEqual({ online: true, last_seen_at: 1_700_000_000 })

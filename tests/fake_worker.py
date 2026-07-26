@@ -66,6 +66,11 @@ def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, conf
         phrase = params.get("phrase", "")
         return {"recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.7,
                 "report_html": report_html(phrase, verdict, verdict_score)}
+    if job["type"] == "analyze_work":
+        # единица разбора — работа: в отчёт идёт её имя, а не фраза
+        name = (params.get("work") or {}).get("name", "")
+        return {"recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.7,
+                "report_html": report_html(name, verdict, verdict_score)}
     raise AssertionError(f"фальшивый воркер не знает тип джоба: {job['type']!r}")
 
 

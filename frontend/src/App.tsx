@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import './App.css'
 import * as api from './api'
 import { fmt, fmtTime, fmtWhen, reportHref } from './api'
-import type { Kind, ReportRow, TaskRow } from './api'
+import type { ReportRow, TaskRow } from './api'
 import { NeedsPane } from './NeedsPane'
 import { TreeNode } from './TreeNode'
 import { TreeCtx, applyEvent, initialState } from './store'
@@ -52,15 +52,14 @@ export default function App() {
     try {
       if (cmd === 'load') await api.loadNode(p)
       else if (cmd === 'full_load') await api.fullLoad(p)
-      else if (cmd === 'drill') await api.drill(p)
-      else await api.nodeOp(p, cmd)
+      else await api.needsBuild(p)
       setErr('')
     } catch (e) {
       setErr(errText(e))
     }
   }
 
-  // Drill / Full load — только через подтверждение с оценкой объёма (design §8)
+  // Full load — только через подтверждение с оценкой объёма (design §8)
   async function confirmVolume(p: string, cmd: Cmd) {
     let text: string
     try {
@@ -88,17 +87,8 @@ export default function App() {
       kids: st.kids,
       expand: (p) => sock.current?.send({ action: 'expand', phrase: p }),
       run: (p, cmd) => {
-        if (cmd === 'drill' || cmd === 'full_load') void confirmVolume(p, cmd)
+        if (cmd === 'full_load') void confirmVolume(p, cmd)
         else void post(p, cmd)
-      },
-      setKind: async (p: string, kind: Kind) => {
-        try {
-          const r = await api.fixKind(p, kind)
-          dispatch({ type: 'node', data: r }) // синхронный ответ: kind+status сразу на месте
-          setErr('')
-        } catch (e) {
-          setErr(errText(e))
-        }
       },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,7 +129,7 @@ export default function App() {
             >
               {label}
               {id === 'tasks' && st.tasks.length ? ` (${st.tasks.length})` : ''}
-              {id === 'reports' && st.reports.length ? ` (${st.reports.length})` : ''}
+
             </button>
           ))}
         </nav>
@@ -194,15 +184,15 @@ export default function App() {
         <section id="tree" style={{ display: tab === 'main' ? '' : 'none' }}>
           <div className="hint">
             <b>+</b> раскрывает уже загруженное и ничего не догружает: бирюзовый — локальные из пула
-            родителя, синий <b>⚡</b> — реальные уточнения. Загрузка — только команды{' '}
-            <b>Load</b> / <b>Full load</b> / <b>Drill</b>. Кнопки узла зависят от статуса; занятый
-            узел и всё его поддерево заблокированы.
+            родителя, синий <b>⚡</b> — реальные уточнения. Догрузка — команды <b>Load</b> и{' '}
+            <b>Full load</b>. По загруженной ветке (<b>FULLY_LOADED</b>) собирается{' '}
+            <b>дерево потребностей</b> — работы, а не фразы; выводы и отчёты живут там.
           </div>
           {tree}
         </section>
 
         <section className="pane" style={{ display: tab === 'needs' ? '' : 'none' }}>
-          <NeedsPane active={tab === 'needs'} />
+          <NeedsPane active={tab === 'needs'} tasks={st.tasks} />
         </section>
 
         <section className="pane" style={{ display: tab === 'log' ? '' : 'none' }}>
@@ -214,16 +204,14 @@ export default function App() {
         </section>
 
         <section className="pane" style={{ display: tab === 'reports' ? '' : 'none' }}>
-          <ReportPane rows={st.reports} />
+          <ReportPane active={tab === 'reports'} tasks={st.tasks} />
         </section>
       </main>
 
       {ask && (
         <div className="modal">
           <div className="dlg" data-testid="confirm-dialog">
-            <b>
-              {ask.cmd === 'drill' ? 'Drill' : 'Full load'}: {ask.phrase}
-            </b>
+            <b>Full load: {ask.phrase}</b>
             <p>Вы уверены? {ask.text}</p>
             <div className="dlg-btns">
               <button
@@ -309,7 +297,18 @@ function TaskPane({ rows }: { rows: TaskRow[] }) {
             <td>{t.type}</td>
             <td className="ph">{t.node ?? '—'}</td>
             <td>
-              <span className={'ts ts-' + t.status}>{t.status}</span>
+              <span
+                className={'ts ts-' + t.status}
+                title={
+                  t.status === 'WAITING'
+                    ? 'джоб отдан в очередь LLM, исполнитель его пока не взял'
+                    : t.status === 'RUNNING'
+                      ? 'работа реально идёт'
+                      : ''
+                }
+              >
+                {t.status}
+              </span>
             </td>
             <td>{fmtWhen(t.created_at)}</td>
             <td>{fmtWhen(t.started_at)}</td>
@@ -322,14 +321,30 @@ function TaskPane({ rows }: { rows: TaskRow[] }) {
   )
 }
 
-function ReportPane({ rows }: { rows: ReportRow[] }) {
+function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
+  const [rows, setRows] = useState<ReportRow[] | null>(null)
+  const done = tasks.filter((t) => t.type === 'needs_analyze' && t.status === 'DONE').length
+
+  useEffect(() => {
+    if (!active) return
+    api
+      .needsReports()
+      .then((r) => setRows(r.reports))
+      .catch(() => setRows([]))
+  }, [active, done])
+
+  if (rows === null) return <div className="mut">загружаем…</div>
   return (
     <table className="tbl">
       <thead>
         <tr>
-          <th>фраза</th>
+          <th>работа</th>
+          <th>ветка</th>
+          <th className="num">частота</th>
+          <th className="num">фраз</th>
           <th>вердикт</th>
-          <th>verdict_score</th>
+          <th className="num">score</th>
+          <th className="num">увер.</th>
           <th>дата</th>
           <th>отчёт</th>
         </tr>
@@ -337,29 +352,38 @@ function ReportPane({ rows }: { rows: ReportRow[] }) {
       <tbody>
         {rows.length === 0 && (
           <tr>
-            <td colSpan={5} className="mut">
-              отчётов пока нет
+            <td colSpan={9} className="mut">
+              отчётов пока нет — разбор запускается кнопкой Analyze на работе
             </td>
           </tr>
         )}
         {rows.map((r) => (
-          <tr key={r.id} data-testid="report-row">
-            <td className="ph">{r.title || r.node}</td>
+          <tr key={r.tree_id + '/' + r.work} data-testid="report-row">
+            <td className="ph">
+              <div>{r.work}</div>
+              {r.gap_candidate && <span className="gap">ЩЕЛЬ</span>}
+            </td>
+            <td className="ph">{r.root ?? '—'}</td>
+            <td className="num">{fmt(r.top_freq)}</td>
+            <td className="num">{r.phrases ?? '—'}</td>
             <td>
               <span className={'vd vd-' + r.verdict}>{r.verdict ?? '—'}</span>
             </td>
-            <td>{r.verdict_score ?? '—'}</td>
+            <td className="num">{r.verdict_score ?? '—'}</td>
+            <td className="num">{r.confidence ?? '—'}</td>
             <td>{fmtWhen(r.created_at)}</td>
             <td>
-              <a
-                className="act act-link"
-                data-testid="report-link"
-                href={reportHref(r.link)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Link
-              </a>
+              {r.report_link && (
+                <a
+                  className="act act-link"
+                  data-testid="report-link"
+                  href={reportHref(r.report_link)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Link
+                </a>
+              )}
             </td>
           </tr>
         ))}

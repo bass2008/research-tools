@@ -1,22 +1,12 @@
 // API-слой: команды — HTTP POST (tech §6.1), чтение — WebSocket /ws (tech §6.2).
 // Чтение не мутирует: root/expand только проецируют уже загруженное, ничего не догружают.
 
-export type Status =
-  | 'NEW'
-  | 'LOADED'
-  | 'FULLY_LOADED'
-  | 'TRANSACTIONAL'
-  | 'CATEGORY'
-  | 'INFORMATIONAL'
-  | 'NAVIGATIONAL'
-  | 'SEARCHED'
-  | 'SCORED'
-  | 'LOW_SCORED'
-  | 'ANALYZED'
-
-export type Kind = 'transactional' | 'informational' | 'navigational' | 'category'
-export type Op = 'classify' | 'search' | 'score' | 'analyze'
-export type TaskStatus = 'QUEUED' | 'RUNNING' | 'DONE' | 'FAILED'
+// Дерево запросов — только загрузка. Выводы (интент, конкуренция, разбор ниши) переехали во
+// второй слой, где единица — работа; поэтому статусов три, а не одиннадцать.
+export type Status = 'NEW' | 'LOADED' | 'FULLY_LOADED'
+// WAITING — джоб отдан в очередь LLM, но исполнитель его ещё не взял: сервер свою
+// часть сделал, работы никто не делает. RUNNING = работа реально идёт.
+export type TaskStatus = 'QUEUED' | 'WAITING' | 'RUNNING' | 'DONE' | 'FAILED'
 
 // Объект узла (tech §6.2). children — ЛОКАЛЬНЫЕ дети из пула родителя (вложенность
 // по словам), приходят вместе с родителем; реальные дети — событием children.
@@ -24,11 +14,6 @@ export interface Node {
   phrase: string
   freq: number | null
   status: Status
-  kind: Kind | null
-  score: number | null
-  verdict: string | null
-  verdict_score: number | null
-  report_link?: string | null // только при наличии отчёта
   task_id: string | null // ≠ null -> узел занят операцией
   error: string | null
   cached: boolean // фраза запрашивалась отдельно -> есть свой (глубже) пул
@@ -55,15 +40,23 @@ export interface TaskRow {
   error: string | null
 }
 
+// Отчёт принадлежит РАБОТЕ второго слоя, а не узлу дерева запросов.
 export interface ReportRow {
-  id: string
-  node: string
-  title: string | null
+  tree_id: string
+  work: string
+  root: string | null
+  condition: string | null
+  top_freq: number | null
+  phrases: number | null
+  gap_candidate: boolean | null
   verdict: string | null
   verdict_score: number | null
-  link: string
+  confidence: number | null
+  report_link: string | null
   created_at: number | null
 }
+
+export const needsReports = (): Promise<{ reports: ReportRow[] }> => req('/api/needs/reports')
 
 export interface Progress {
   stage: string
@@ -93,7 +86,6 @@ export type WsEvent =
   | { type: 'progress'; data: Progress }
   | { type: 'log'; data: LogLine | LogLine[] }
   | { type: 'task'; data: TaskRow | TaskRow[] }
-  | { type: 'report'; data: ReportRow | ReportRow[] }
   | { type: 'log_cleared'; data: Record<string, never> }
   | { type: 'llm_status'; data: LlmStatus }
 
@@ -208,17 +200,9 @@ export const loadNode = (phrase: string): Promise<{ task_id: string }> =>
 export const fullLoad = (phrase: string): Promise<{ task_id: string }> =>
   post('/api/node/full-load', { phrase })
 
-export const nodeOp = (phrase: string, op: Op): Promise<{ task_id: string }> =>
-  post('/api/node/op', { phrase, op })
-
-export const drill = (phrase: string): Promise<{ task_id: string }> =>
-  post('/api/node/drill', { phrase })
-
-export const fixKind = (
-  phrase: string,
-  kind: Kind,
-): Promise<{ phrase: string; kind: Kind; status: Status }> =>
-  post('/api/node/kind', { phrase, kind })
+/** Сборка дерева потребностей по ветке — замена узловым classify/drill. */
+export const needsBuild = (phrase: string): Promise<{ task_id: string }> =>
+  post('/api/needs/build', { phrase })
 
 export const clearLogs = (): Promise<{ ok: boolean }> => post('/api/logs/clear')
 
@@ -239,6 +223,7 @@ export interface NeedsCounts {
 
 // строка таблицы: счётчики плоско, чтобы таблица читалась без вложенности
 export interface NeedsRow extends NeedsCounts {
+  analyzed: number
   id: string
   condition: string | null
   root: string | null
@@ -259,6 +244,15 @@ export interface NeedsSegment {
   phrases: NeedsPhrase[]
 }
 
+export interface NeedsAnalysis {
+  verdict: string | null
+  verdict_score: number | null
+  confidence: number | null
+  report_link: string | null
+  created_at: number | null
+  searched: string[] | null
+}
+
 export interface NeedsWork {
   name: string | null
   top_freq: number | null
@@ -271,6 +265,7 @@ export interface NeedsWork {
   why: string | null
   phrases: NeedsPhrase[]
   segments: NeedsSegment[]
+  analysis: NeedsAnalysis | null
 }
 
 export interface NeedsExcluded extends NeedsPhrase {
@@ -293,6 +288,10 @@ export const needsTrees = (): Promise<{ trees: NeedsRow[] }> => req('/api/needs/
 
 export const needsTree = (id: string): Promise<NeedsTree> =>
   req(`/api/needs/tree/${encodeURIComponent(id)}`)
+
+/** Разбор работы: выдача по её частотным фразам, затем Opus. Возвращает ack с task_id. */
+export const needsAnalyze = (tree_id: string, work: string): Promise<{ task_id: string }> =>
+  post('/api/needs/analyze', { tree_id, work })
 
 // ---------- форматирование ----------
 

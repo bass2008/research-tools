@@ -19,6 +19,7 @@ const row = (over: Partial<NeedsRow> = {}): NeedsRow => ({
   gaps: 8,
   occupied: 4,
   needs_serp: 11,
+  analyzed: 0,
   error: null,
   ...over,
 })
@@ -45,6 +46,7 @@ const TREE: NeedsTree = {
         { phrase: 'оживить фото нейросеть бесплатно без регистрации', freq: 11081 },
         { phrase: 'оживление фото нейросеть бесплатно без регистрации', freq: 734 },
       ],
+      analysis: null,
       segments: [
         {
           name: 'через Алису',
@@ -65,6 +67,7 @@ const TREE: NeedsTree = {
       serp_question: null,
       why: 'узкая аудитория, мейнстрим не обслуживает',
       phrases: [{ phrase: 'генератор фанфиков нейросеть бесплатно без регистрации', freq: 589 }],
+      analysis: null,
       segments: [],
     },
   ],

@@ -122,37 +122,34 @@ describe('дерево: snapshot / children / node', () => {
       type: 'snapshot',
       data: { root: n('a', { status: 'FULLY_LOADED' }), children: [] },
     })
-    expect(screen.getByTestId('btn-classify')).toBeInTheDocument()
+    expect(screen.getByTestId('btn-needs-build')).toBeInTheDocument()
 
-    emit({ type: 'node', data: { phrase: 'a', status: 'TRANSACTIONAL', kind: 'transactional' } })
+    emit({ type: 'node', data: { phrase: 'a', status: 'LOADED' } })
     expect(within(screen.getByTestId('node-a')).getByTestId('node-status')).toHaveTextContent(
-      'TRANSACTIONAL',
+      'LOADED',
     )
-    expect(screen.queryByTestId('btn-classify')).toBeNull()
-    expect(screen.getByTestId('btn-search')).toBeInTheDocument()
+    expect(screen.queryByTestId('btn-needs-build')).toBeNull()
+    expect(screen.getByTestId('btn-full-load')).toBeInTheDocument()
   })
 
   it('блокировка приходит событием node и снимается им же — вместе с поддеревом', () => {
     const { emit } = mount()
     emit({ type: 'snapshot', data: { root: n('a'), children: [n('a1')] } })
-    expect(screen.getAllByTestId('btn-drill')[0]).not.toBeDisabled()
+    expect(screen.getAllByTestId('btn-full-load')[0]).not.toBeDisabled()
 
     emit({ type: 'node', data: { phrase: 'a', task_id: 'task-9' } })
-    for (const b of screen.getAllByTestId('btn-drill')) expect(b).toBeDisabled()
+    for (const b of screen.getAllByTestId('btn-full-load')) expect(b).toBeDisabled()
 
     emit({ type: 'node', data: { phrase: 'a', task_id: null } })
-    for (const b of screen.getAllByTestId('btn-drill')) expect(b).not.toBeDisabled()
+    for (const b of screen.getAllByTestId('btn-full-load')) expect(b).not.toBeDisabled()
   })
 
-  it('Link на узле появляется вместе с отчётом', () => {
+  it('на узле нет ни отчёта, ни выводов: они принадлежат работе второго слоя', () => {
     const { emit } = mount()
-    emit({ type: 'snapshot', data: { root: n('a', { status: 'SCORED' }), children: [] } })
-    expect(screen.queryByTestId('btn-link')).toBeNull()
-    emit({
-      type: 'node',
-      data: { phrase: 'a', status: 'ANALYZED', report_link: 'reports/7.html' },
-    })
-    expect(screen.getByTestId('btn-link')).toHaveAttribute('href', '/reports/7.html')
+    emit({ type: 'snapshot', data: { root: n('a', { status: 'FULLY_LOADED' }), children: [] } })
+    for (const gone of ['btn-link', 'node-score', 'node-verdict']) {
+      expect(screen.queryByTestId(gone)).toBeNull()
+    }
   })
 
   it('мусор в канале не ломает приложение', () => {
@@ -221,11 +218,11 @@ describe('ошибки команд показываются пользоват�
   it('409 (узел или предок заняты) — код, сообщение и деталь видны', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
-    openTree(emit, 'TRANSACTIONAL')
+    openTree(emit, 'FULLY_LOADED')
     fetchMock.mockResolvedValueOnce(
       res(409, { error: 'node is busy', detail: 'занят предок: нейросеть' }),
     )
-    await user.click(screen.getByTestId('btn-search'))
+    await user.click(screen.getByTestId('btn-needs-build'))
 
     const box = await screen.findByTestId('cmd-error')
     expect(box).toHaveTextContent('409')
@@ -233,7 +230,7 @@ describe('ошибки команд показываются пользоват�
     expect(box).toHaveTextContent('занят предок: нейросеть')
     // статус узла не изменился
     expect(within(screen.getByTestId('node-a')).getByTestId('node-status')).toHaveTextContent(
-      'TRANSACTIONAL',
+      'FULLY_LOADED',
     )
   })
 
@@ -242,9 +239,9 @@ describe('ошибки команд показываются пользоват�
     const { emit } = mount()
     openTree(emit, 'FULLY_LOADED')
     fetchMock.mockResolvedValueOnce(
-      res(422, { error: 'bad transition', detail: 'classify недоступен из NEW' }),
+      res(422, { error: 'bad transition', detail: 'сборка возможна только из FULLY_LOADED' }),
     )
-    await user.click(screen.getByTestId('btn-classify'))
+    await user.click(screen.getByTestId('btn-needs-build'))
     const box = await screen.findByTestId('cmd-error')
     expect(box).toHaveTextContent('422')
     expect(box).toHaveTextContent('bad transition')
@@ -264,7 +261,7 @@ describe('ошибки команд показываются пользоват�
   it('ошибка без тела не теряется', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
-    openTree(emit, 'SEARCHED')
+    openTree(emit, 'FULLY_LOADED')
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 500,
@@ -272,81 +269,54 @@ describe('ошибки команд показываются пользоват�
         throw new Error('no body')
       },
     })
-    await user.click(screen.getByTestId('btn-score'))
+    await user.click(screen.getByTestId('btn-needs-build'))
     expect(await screen.findByTestId('cmd-error')).toHaveTextContent('500')
   })
 
   it('сетевой сбой показывается, а не глотается', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
-    openTree(emit, 'SEARCHED')
+    openTree(emit, 'FULLY_LOADED')
     fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'))
-    await user.click(screen.getByTestId('btn-score'))
+    await user.click(screen.getByTestId('btn-needs-build'))
     expect(await screen.findByTestId('cmd-error')).toHaveTextContent('Failed to fetch')
-  })
-
-  it('ошибка Fix kind видна', async () => {
-    const user = userEvent.setup()
-    const { emit } = mount()
-    openTree(emit, 'CATEGORY')
-    fetchMock.mockResolvedValueOnce(res(422, { error: 'unknown kind', detail: 'kind=wat' }))
-    await user.click(screen.getByTestId('btn-fix-kind'))
-    await user.click(screen.getByTestId('btn-kind-transactional'))
-    expect(await screen.findByTestId('cmd-error')).toHaveTextContent('422')
-  })
-
-  it('успешный Fix kind меняет метку и статус на месте', async () => {
-    const user = userEvent.setup()
-    const { emit } = mount()
-    openTree(emit, 'CATEGORY')
-    fetchMock.mockResolvedValueOnce(
-      res(200, { phrase: 'a', kind: 'transactional', status: 'TRANSACTIONAL' }),
-    )
-    await user.click(screen.getByTestId('btn-fix-kind'))
-    await user.click(screen.getByTestId('btn-kind-transactional'))
-    await waitFor(() =>
-      expect(within(screen.getByTestId('node-a')).getByTestId('node-status')).toHaveTextContent(
-        'TRANSACTIONAL',
-      ),
-    )
-    expect(lastBody()).toEqual({ phrase: 'a', kind: 'transactional' })
   })
 
   it('ошибку можно скрыть, а успешная команда её сбрасывает', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
-    openTree(emit, 'TRANSACTIONAL')
+    openTree(emit, 'FULLY_LOADED')
     fetchMock.mockResolvedValueOnce(res(409, { error: 'busy', detail: '' }))
-    await user.click(screen.getByTestId('btn-search'))
+    await user.click(screen.getByTestId('btn-needs-build'))
     const box = await screen.findByTestId('cmd-error')
     await user.click(within(box).getByTitle('скрыть'))
     expect(screen.queryByTestId('cmd-error')).toBeNull()
 
     fetchMock.mockResolvedValueOnce(res(409, { error: 'busy', detail: '' }))
-    await user.click(screen.getByTestId('btn-search'))
+    await user.click(screen.getByTestId('btn-needs-build'))
     await screen.findByTestId('cmd-error')
     fetchMock.mockResolvedValueOnce(res(200, { task_id: 't2' }))
-    await user.click(screen.getByTestId('btn-search'))
+    await user.click(screen.getByTestId('btn-needs-build'))
     await waitFor(() => expect(screen.queryByTestId('cmd-error')).toBeNull())
   })
 
-  it('команда уходит на свой эндпоинт с фразой и операцией', async () => {
+  it('команда уходит на свой эндпоинт с фразой', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
-    openTree(emit, 'TRANSACTIONAL')
-    await user.click(screen.getByTestId('btn-search'))
-    await waitFor(() => expect(lastUrl()).toBe('/api/node/op'))
-    expect(lastBody()).toEqual({ phrase: 'a', op: 'search' })
+    openTree(emit, 'FULLY_LOADED')
+    await user.click(screen.getByTestId('btn-needs-build'))
+    await waitFor(() => expect(lastUrl()).toBe('/api/needs/build'))
+    expect(lastBody()).toEqual({ phrase: 'a' })
   })
 })
 
-describe('подтверждение объёма для Drill / Full load (design §8)', () => {
+describe('подтверждение объёма для Full load (design §8)', () => {
   it('«Нет» ничего не запускает', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
     emit({ type: 'snapshot', data: { root: n('a', { status: 'NEW' }), children: [] } })
     fetchMock.mockResolvedValueOnce(res(200, { nodes: 120, requests: 34 }))
-    await user.click(screen.getByTestId('btn-drill'))
+    await user.click(screen.getByTestId('btn-full-load'))
 
     const dlg = await screen.findByTestId('confirm-dialog')
     expect(dlg).toHaveTextContent('120')
@@ -371,14 +341,14 @@ describe('подтверждение объёма для Drill / Full load (desi
 })
 
 describe('вкладки Task и Отчёты', () => {
-  it('задачи и отчёты попадают в таблицы, отчёт открывается новой вкладкой', async () => {
+  it('задачи попадают в таблицу вкладки Task', async () => {
     const user = userEvent.setup()
     const { emit } = mount()
     emit({
       type: 'task',
       data: {
         id: 't1',
-        type: 'classify',
+        type: 'needs_build',
         node: 'a',
         status: 'RUNNING',
         created_at: 1_700_000_000,
@@ -387,28 +357,40 @@ describe('вкладки Task и Отчёты', () => {
         error: null,
       },
     })
-    emit({
-      type: 'report',
-      data: {
-        id: 'r1',
-        node: 'a',
-        title: 'убрать фон с видео',
-        verdict: 'BUILD',
-        verdict_score: 82,
-        link: 'reports/r1.html',
-        created_at: 1_700_000_002,
-      },
-    })
-
     await user.click(screen.getByTestId('tab-tasks'))
     const task = screen.getByTestId('task-row')
-    expect(task).toHaveTextContent('classify')
+    expect(task).toHaveTextContent('needs_build')
     expect(task).toHaveTextContent('RUNNING')
+  })
 
+  it('вкладка «Отчёты» показывает разборы РАБОТ, а не узлов', async () => {
+    const user = userEvent.setup()
+    mount()
+    fetchMock.mockResolvedValueOnce(
+      res(200, {
+        reports: [
+          {
+            tree_id: 'tree-1',
+            work: 'создать песню или музыку',
+            root: 'нейросеть бесплатно без регистрации',
+            condition: 'бесплатно',
+            top_freq: 7106,
+            phrases: 31,
+            gap_candidate: true,
+            verdict: 'SKIP',
+            verdict_score: 30,
+            confidence: 0.6,
+            report_link: 'reports/r1.html',
+            created_at: 1_700_000_002,
+          },
+        ],
+      }),
+    )
     await user.click(screen.getByTestId('tab-reports'))
-    const row = screen.getByTestId('report-row')
-    expect(row).toHaveTextContent('убрать фон с видео')
-    expect(row).toHaveTextContent('82')
+    const row = await screen.findByTestId('report-row')
+    expect(row).toHaveTextContent('создать песню или музыку')
+    expect(row).toHaveTextContent('SKIP')
+    expect(row).toHaveTextContent('30')
     const link = within(row).getByTestId('report-link')
     expect(link).toHaveAttribute('href', '/reports/r1.html')
     expect(link).toHaveAttribute('target', '_blank')
@@ -422,10 +404,10 @@ describe('DAG: одна фраза под разными родителями', 
     emit({ type: 'children', data: { parent: 'a1', children: [n('y')] } })
     expect(screen.getAllByTestId('node-y')).toHaveLength(2)
 
-    emit({ type: 'node', data: { phrase: 'y', status: 'SCORED', score: 88 } })
+    emit({ type: 'node', data: { phrase: 'y', status: 'FULLY_LOADED' } })
     for (const el of screen.getAllByTestId('node-y')) {
-      expect(within(el).getByTestId('node-status')).toHaveTextContent('SCORED')
-      expect(within(el).getByTestId('node-score')).toHaveTextContent('88')
+      expect(within(el).getByTestId('node-status')).toHaveTextContent('FULLY_LOADED')
+      expect(within(el).getByTestId('btn-needs-build')).toBeInTheDocument()
     }
   })
 })

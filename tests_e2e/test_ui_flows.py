@@ -195,23 +195,22 @@ def test_06_full_load_confirm(page, server):
 
 def test_07_lock_node_and_subtree(page, server, worker):
     """§8.7 — во время операции кнопки узла И поддерева disabled, после — снова активны."""
-    worker.start("hold")                                  # держим результат classify
+    worker.start("hold")                                  # держим результат сборки
     open_app(page, server, seed.ROOT_A)
-    btn(page, seed.ROOT_A, "btn-classify").click()
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
 
-    expect(btn(page, seed.ROOT_A, "btn-classify")).to_be_disabled()
+    expect(btn(page, seed.ROOT_A, "btn-needs-build")).to_be_disabled()
     expect(node(page, seed.ROOT_A)).to_have_class(re.compile(r"\bbusy\b"))
     # поддерево тоже: правило выводится по предкам (tech §6 «Правила»)
-    expect(btn(page, seed.A_ONLINE, "btn-classify")).to_be_disabled()
+    expect(btn(page, seed.A_ONLINE, "btn-needs-build")).to_be_disabled()
     expect(btn(page, seed.A_VIDEO, "btn-load")).to_be_disabled()
-    expect(btn(page, seed.A_ONLINE_FREE, "btn-drill")).to_be_disabled()
 
     worker.release()
 
-    expect(status_of(page, seed.ROOT_A)).to_have_text("TRANSACTIONAL")
-    expect(btn(page, seed.ROOT_A, "btn-search")).to_be_enabled()
+    expect(node(page, seed.ROOT_A)).not_to_have_class(re.compile(r"\bbusy\b"), timeout=SLOW)
+    expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED")
+    expect(btn(page, seed.ROOT_A, "btn-needs-build")).to_be_enabled()
     expect(btn(page, seed.A_VIDEO, "btn-load")).to_be_enabled()
-    expect(node(page, seed.ROOT_A)).not_to_have_class(re.compile(r"\bbusy\b"))
 
 
 # ---------- 8. Живой прогресс ----------
@@ -221,89 +220,58 @@ def test_08_live_progress_without_reload(page, server, worker):
     worker.start("hold")
     open_app(page, server, seed.ROOT_A)
     page.evaluate("window.__e2e_alive = 1")               # маркер живой страницы
-    btn(page, seed.ROOT_A, "btn-classify").click()
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
 
     prog = page.get_by_test_id("progress")
-    expect(prog).to_contain_text("classify")
+    expect(prog).to_contain_text("needs")
     expect(prog).to_contain_text("0/1")
 
     worker.release()
 
     expect(prog).to_contain_text("1/1")
-    expect(status_of(page, seed.ROOT_A)).to_have_text("TRANSACTIONAL")
+    expect(node(page, seed.ROOT_A)).not_to_have_class(re.compile(r"\bbusy\b"), timeout=SLOW)
     assert page.evaluate("window.__e2e_alive") == 1, "страница перезагружалась — это не real-time"
 
 
-# ---------- 9. Цепочка classify -> search -> score ----------
+# ---------- 9. Загруженная ветка -> сборка дерева потребностей ----------
 
-def test_09_status_chain(page, server, worker):
-    """§8.9 — статусы узла меняются по цепочке в реальном времени."""
+def test_09_needs_build_from_loaded_branch(page, server, worker):
+    """§8.9 — на `FULLY_LOADED` одна команда: собрать потребности. Дерево появляется на
+    своей вкладке, статус узла при этом не меняется — второй слой в модель не пишет."""
     worker.start()
     open_app(page, server, seed.ROOT_A)
+    expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED")
 
-    btn(page, seed.ROOT_A, "btn-classify").click()
-    expect(status_of(page, seed.ROOT_A)).to_have_text("TRANSACTIONAL")
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
 
-    btn(page, seed.ROOT_A, "btn-search").click()          # выдача уже в serp: в сеть не идём
-    expect(status_of(page, seed.ROOT_A)).to_have_text("SEARCHED")
-
-    btn(page, seed.ROOT_A, "btn-score").click()
-    expect(status_of(page, seed.ROOT_A)).to_have_text("SCORED")
-    expect(row(page, seed.ROOT_A).locator("[data-testid=node-score]")).to_have_text("80")
-    expect(btn(page, seed.ROOT_A, "btn-analyze")).to_be_visible()
-
-
-# ---------- 10. Drill до терминалов ----------
-
-def test_10_drill_to_terminals(page, server, worker):
-    """§8.10 — `Drill` доводит поддерево до терминалов, полу-статусов не остаётся."""
-    worker.start()
-    open_app(page, server, seed.ROOT_C)
-
-    btn(page, seed.ROOT_C, "btn-drill").click()
-    expect(page.get_by_test_id("confirm-dialog")).to_contain_text("Drill")
-    page.get_by_test_id("confirm-yes").click()
-
-    for phrase in seed.C_ALL:
-        expect(status_of(page, phrase)).to_have_text("ANALYZED", timeout=SLOW)
-    for st in ("FULLY_LOADED", "TRANSACTIONAL", "SEARCHED", "SCORED"):
-        expect(page.locator(f"#tree .st-{st}")).to_have_count(0)
-    expect(btn(page, seed.ROOT_C, "btn-link")).to_be_visible()
-    expect(row(page, seed.ROOT_C).locator("[data-testid=node-verdict]")).to_contain_text("BUILD")
-
-
-# ---------- 11. Fix kind на терминале ----------
-
-def test_11_fix_kind_on_terminal(page, server):
-    """§8.11 — метка и статус изменились согласованно, узел вернулся в пайплайн."""
-    open_app(page, server, seed.ROOT_E)
-    expect(status_of(page, seed.ROOT_E)).to_have_text("CATEGORY")
-    expect(status_of(page, seed.ROOT_E)).to_have_attribute("title", "kind: category")
-    expect(btn(page, seed.ROOT_E, "btn-drill")).to_have_count(0)   # у терминала операций нет
-
-    btn(page, seed.ROOT_E, "btn-fix-kind").click()
-    node(page, seed.ROOT_E).locator("[data-testid=btn-kind-transactional]").click()
-
-    expect(status_of(page, seed.ROOT_E)).to_have_text("TRANSACTIONAL")
-    expect(status_of(page, seed.ROOT_E)).to_have_attribute("title", "kind: transactional")
-    expect(btn(page, seed.ROOT_E, "btn-search")).to_be_visible()
-    expect(btn(page, seed.ROOT_E, "btn-drill")).to_be_visible()
+    tab(page, "tasks")
+    expect(task_rows(page, "needs_build").locator(".ts")).to_have_text("DONE", timeout=SLOW)
+    tab(page, "needs")
+    rows = page.get_by_test_id("needs-row").filter(has_text=seed.ROOT_A)
+    expect(rows).to_have_count(2)          # засеянное дерево плюс только что собранное
+    tab(page, "main")
+    expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED")
 
 
 # ---------- 12. Link открывает отчёт в новой вкладке ----------
 
 def test_12_link_opens_report(page, server):
-    """§8.12 — `Link` открывает новую вкладку с готовым HTML; разделы шаблона на месте."""
-    open_app(page, server, seed.REP_HI)
-    expect(status_of(page, seed.REP_HI)).to_have_text("ANALYZED")
+    """§8.12 — `Link` у РАБОТЫ открывает новую вкладку с готовым HTML; разделы на месте.
+
+    Отчёт принадлежит работе второго слоя, а не узлу дерева запросов."""
+    open_app(page, server)
+    tab(page, "needs")
+    page.get_by_test_id("needs-row").first.click()
+    work = page.get_by_test_id("needs-work").filter(has_text=seed.NEEDS_WORK).first
+    expect(work.locator("[data-testid=needs-verdict]")).to_contain_text("BUILD")
 
     with page.expect_popup() as popup:
-        btn(page, seed.REP_HI, "btn-link").click()
+        work.locator("[data-testid=needs-report]").click()
     report = popup.value
     report.wait_for_load_state()
 
     assert report.url.endswith(f"/reports/{seed.REP_HI_ID}.html"), report.url
-    expect(report.locator("h1")).to_have_text(seed.REP_HI)
+    expect(report.locator("h1")).to_have_text(seed.REP_HI)   # засеянный файл отчёта
     for section in seed.REPORT_SECTIONS:
         expect(report.locator("body")).to_contain_text(section)
 
@@ -312,22 +280,21 @@ def test_12_link_opens_report(page, server):
 
 def test_13_log_tab_live_and_clear(page, server, instance):
     """§8.13 — при открытии виден хвост, строки капают живьём, «Удалить всё» чистит."""
-    open_app(page, server, seed.ROOT_E)
+    open_app(page, server, seed.A_VIDEO)
     tab(page, "log")
     expect(log_lines(page, "сервер запущен")).to_have_count(1)     # хвост файла при подписке
     tab(page, "main")
 
-    btn(page, seed.ROOT_E, "btn-fix-kind").click()                 # что-нибудь пишущее в лог
-    node(page, seed.ROOT_E).locator("[data-testid=btn-kind-transactional]").click()
-    expect(status_of(page, seed.ROOT_E)).to_have_text("TRANSACTIONAL")
+    btn(page, seed.A_VIDEO, "btn-load").click()                    # что-нибудь пишущее в лог
+    expect(status_of(page, seed.A_VIDEO)).to_have_text("LOADED")
 
     tab(page, "log")
-    expect(log_lines(page, "Fix kind")).to_have_count(1)           # живой поток
-    assert "Fix kind" in server.log_text()                         # и то же самое в файле
+    expect(log_lines(page, "load").first).to_be_visible()          # живой поток
+    assert "load" in server.log_text()                             # и то же самое в файле
 
     page.get_by_test_id("log-clear").click()
     expect(log_lines(page)).to_have_count(0)
-    assert "Fix kind" not in server.log_text(), "очистка не тронула лог-файл"
+    assert "load" not in server.log_text(), "очистка не тронула лог-файл"
 
 
 # ---------- 14. Вкладка Task ----------
@@ -339,40 +306,37 @@ def test_14_task_tab(page, server, worker):
 
     btn(page, seed.A_VIDEO, "btn-load").click()
     expect(status_of(page, seed.A_VIDEO)).to_have_text("LOADED")
-    btn(page, seed.ROOT_A, "btn-classify").click()
-    expect(status_of(page, seed.ROOT_A)).to_have_text("TRANSACTIONAL")
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
 
     tab(page, "tasks")
     expect(task_rows(page)).to_have_count(2)
     load_row = task_rows(page, seed.A_VIDEO)
     expect(load_row).to_contain_text("load")
     expect(load_row.locator(".ts")).to_have_text("DONE")
-    # групповая операция (одна строка на всё поддерево) подписана корнем — читаемо (tech §4)
-    group = task_rows(page, "classify")
+    # операция по всей ветке — одна строка, подписана корнем ветки (читаемо, tech §4)
+    group = task_rows(page, "needs_build")
     expect(group).to_contain_text(seed.ROOT_A)
-    expect(group.locator(".ts")).to_have_text("DONE")
+    expect(group.locator(".ts")).to_have_text("DONE", timeout=SLOW)
 
 
 # ---------- 15. Вкладка Отчёты ----------
 
 def test_15_reports_tab_sorted(page, server):
-    """§8.15 — сортировка по `verdict_score`, ссылка открывает отчёт."""
+    """§8.15 — отчёты РАБОТ, по убыванию verdict_score; ссылка открывает готовый файл."""
     open_app(page, server)
     tab(page, "reports")
 
     rows = page.get_by_test_id("report-row")
     expect(rows).to_have_count(2)
-    expect(rows.nth(0)).to_contain_text(seed.REP_HI)          # 91 выше 42
+    expect(rows.nth(0)).to_contain_text(seed.NEEDS_WORK)        # 91 выше
     expect(rows.nth(0)).to_contain_text(str(seed.REP_HI_SCORE))
-    expect(rows.nth(1)).to_contain_text(seed.REP_LO)
-    expect(rows.nth(1)).to_contain_text(str(seed.REP_LO_SCORE))
+    expect(rows.nth(1)).to_contain_text(seed.NEEDS_GAP_WORK)    # 42 ниже
+    # у каждой строки видно, по какой ветке собрана работа
+    expect(rows.nth(0)).to_contain_text(seed.ROOT_A)
 
     with page.expect_popup() as popup:
-        rows.nth(0).get_by_test_id("report-link").click()
-    report = popup.value
-    report.wait_for_load_state()
-    assert report.url.endswith(f"/reports/{seed.REP_HI_ID}.html"), report.url
-    expect(report.locator("h1")).to_have_text(seed.REP_HI)
+        rows.nth(0).locator("[data-testid=report-link]").click()
+    assert popup.value.url.endswith(f"/reports/{seed.REP_HI_ID}.html")
 
 
 # ---------- 16. Упавшая операция ----------
@@ -381,16 +345,16 @@ def test_16_failed_op_keeps_status(page, server, worker):
     """§8.16 — ошибка видна в логе, статус узла не изменился, кнопки разблокированы."""
     worker.start("error")
     open_app(page, server, seed.ROOT_A)
-    btn(page, seed.ROOT_A, "btn-classify").click()
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
 
     tab(page, "tasks")
-    expect(task_rows(page, "classify").locator(".ts")).to_have_text("FAILED")
+    expect(task_rows(page, "needs_build").locator(".ts")).to_have_text("FAILED", timeout=SLOW)
     tab(page, "log")
     expect(log_lines(page, "намеренная ошибка").first).to_be_visible()
 
     tab(page, "main")
     expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED")   # узел остался как был
-    expect(btn(page, seed.ROOT_A, "btn-classify")).to_be_enabled()
+    expect(btn(page, seed.ROOT_A, "btn-needs-build")).to_be_enabled()
     expect(btn(page, seed.A_VIDEO, "btn-load")).to_be_enabled()
 
 
@@ -400,8 +364,8 @@ def test_17_reconnect_after_restart(page, server, worker):
     """§8.17 — клиент переподключился, дерево живое, зависших блокировок нет."""
     worker.start("hold")
     open_app(page, server, seed.ROOT_A)
-    btn(page, seed.ROOT_A, "btn-classify").click()
-    expect(btn(page, seed.ROOT_A, "btn-classify")).to_be_disabled()     # узел заблокирован
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
+    expect(btn(page, seed.ROOT_A, "btn-needs-build")).to_be_disabled()     # узел заблокирован
 
     server.restart()
 
@@ -409,7 +373,7 @@ def test_17_reconnect_after_restart(page, server, worker):
     expect(node(page, seed.ROOT_A)).to_be_visible()                    # дерево перезапрошено
     expect(node(page, seed.A_ONLINE)).to_be_visible()
     expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED", timeout=SLOW)
-    expect(btn(page, seed.ROOT_A, "btn-classify")).to_be_enabled(timeout=SLOW)
+    expect(btn(page, seed.ROOT_A, "btn-needs-build")).to_be_enabled(timeout=SLOW)
 
     worker.release()          # опоздавший результат: сервер жив, задача не воскресает
     tab(page, "log")
@@ -429,17 +393,17 @@ def test_18_llm_offline(page, server):
     expect(llm).to_have_text("LLM: офлайн")
     expect(llm).to_have_attribute("title", "петля ещё не приходила за задачами")
 
-    btn(page, seed.ROOT_A, "btn-classify").click()
+    btn(page, seed.ROOT_A, "btn-needs-build").click()
 
     tab(page, "log")
     expect(log_lines(page, "LLM-петля не на связи")).to_have_count(1)
     expect(log_lines(page, "таймаут ожидания результата LLM").first).to_be_visible(timeout=SLOW)
 
     tab(page, "tasks")
-    expect(task_rows(page, "classify").locator(".ts")).to_have_text("FAILED")
+    expect(task_rows(page, "needs_build").locator(".ts")).to_have_text("FAILED", timeout=SLOW)
     tab(page, "main")
     expect(status_of(page, seed.ROOT_A)).to_have_text("FULLY_LOADED")   # узел не тронут
-    expect(btn(page, seed.ROOT_A, "btn-classify")).to_be_enabled()
+    expect(btn(page, seed.ROOT_A, "btn-needs-build")).to_be_enabled()
 
 
 # ---------- 19. Вкладка «Дерево потребностей» ----------

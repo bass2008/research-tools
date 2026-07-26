@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import * as api from './api'
-import { fmt, fmtWhen } from './api'
-import type { NeedsPhrase, NeedsRow, NeedsTree, NeedsWork } from './api'
+import { fmt, fmtWhen, reportHref } from './api'
+import type { NeedsPhrase, NeedsRow, NeedsTree, NeedsWork, TaskRow } from './api'
 
 // Второй слой — толкование: работы и сегменты, а не фразы. Дерево здесь только смотрят:
 // оно собрано вне приложения и лежит файлом в папке, поэтому ни команд, ни статусов тут нет.
@@ -21,11 +21,12 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
-export function NeedsPane({ active }: { active: boolean }) {
+export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: TaskRow[] }) {
   const [rows, setRows] = useState<NeedsRow[] | null>(null)
   const [open, setOpen] = useState<string | null>(null)
   const [tree, setTree] = useState<NeedsTree | null>(null)
   const [err, setErr] = useState('')
+  const [busy, setBusy] = useState<Record<string, string>>({}) // работа -> task_id разбора
 
   useEffect(() => {
     if (!active || rows) return
@@ -43,6 +44,33 @@ export function NeedsPane({ active }: { active: boolean }) {
       .then(setTree)
       .catch((e) => setErr(errText(e)))
   }, [open])
+
+  // Разбор — фоновая задача; её финал ловим по вкладке Task (тот же поток событий WS) и
+  // перечитываем дерево: вердикт и ссылка на отчёт лежат рядом с ним файлом.
+  useEffect(() => {
+    const done = Object.entries(busy).filter(([, id]) =>
+      tasks.some((t) => t.id === id && (t.status === 'DONE' || t.status === 'FAILED')),
+    )
+    if (!done.length) return
+    setBusy((b) => {
+      const next = { ...b }
+      for (const [work] of done) delete next[work]
+      return next
+    })
+    if (open) api.needsTree(open).then(setTree).catch((e) => setErr(errText(e)))
+    setRows(null)
+  }, [tasks, busy, open])
+
+  async function analyze(work: string) {
+    if (!open) return
+    try {
+      const { task_id } = await api.needsAnalyze(open, work)
+      setBusy((b) => ({ ...b, [work]: task_id }))
+      setErr('')
+    } catch (e) {
+      setErr(errText(e))
+    }
+  }
 
   if (err) {
     return (
@@ -75,7 +103,11 @@ export function NeedsPane({ active }: { active: boolean }) {
           </span>
           <span className="mut">{open}</span>
         </div>
-        {tree ? <TreeView tree={tree} /> : <div className="mut">загружаем дерево…</div>}
+        {tree ? (
+          <TreeView tree={tree} busy={busy} onAnalyze={analyze} />
+        ) : (
+          <div className="mut">загружаем дерево…</div>
+        )}
       </>
     )
   }
@@ -103,13 +135,14 @@ function TreeTable({ rows, onOpen }: { rows: NeedsRow[] | null; onOpen: (id: str
             <th className="num">исключ.</th>
             <th className="num">щели</th>
             <th className="num">занято</th>
+            <th className="num">разобрано</th>
             <th>собрано</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
             <tr>
-              <td colSpan={9} className="mut">
+              <td colSpan={10} className="mut">
                 деревьев пока нет — положите json в logs/needs-lab
               </td>
             </tr>
@@ -133,6 +166,7 @@ function TreeTable({ rows, onOpen }: { rows: NeedsRow[] | null; onOpen: (id: str
               <td className="num">{r.excluded}</td>
               <td className="num">{r.gaps ? <span className="gap">{r.gaps}</span> : '—'}</td>
               <td className="num">{r.occupied || '—'}</td>
+              <td className="num">{r.analyzed || '—'}</td>
               <td>{r.error ? <span className="err">{r.error}</span> : fmtWhen(r.created_at)}</td>
             </tr>
           ))}
@@ -156,9 +190,18 @@ function Phrases({ items }: { items: NeedsPhrase[] }) {
   )
 }
 
-function Work({ w }: { w: NeedsWork }) {
+function Work({
+  w,
+  busy,
+  onAnalyze,
+}: {
+  w: NeedsWork
+  busy: boolean
+  onAnalyze: () => void
+}) {
   const [open, setOpen] = useState(false)
   const segs = w.segments ?? []
+  const a = w.analysis
   return (
     <div className="nwork" data-testid="needs-work">
       <div className="row">
@@ -196,11 +239,48 @@ function Work({ w }: { w: NeedsWork }) {
             занято: {w.occupied_by}
           </span>
         )}
-        {w.needs_serp && (
+        {w.needs_serp && !a && (
           <span className="serp" title={w.serp_question ?? 'нужна проверка выдачей'}>
             ?выдача
           </span>
         )}
+        {a?.verdict && (
+          <span className={'vd vd-' + a.verdict} data-testid="needs-verdict" title="вердикт разбора">
+            {a.verdict}
+            {a.verdict_score != null ? ' ' + a.verdict_score : ''}
+          </span>
+        )}
+        <span className="acts">
+          {/* одна кнопка на всю цепочку: выдача по частотным фразам работы, затем Opus */}
+          <button
+            className="act act-analyze"
+            data-testid="needs-analyze"
+            disabled={busy}
+            title={
+              busy
+                ? 'разбор идёт'
+                : a
+                  ? 'разобрать заново: выдача уже оплачена, повторный запрос бесплатен'
+                  : 'собрать выдачу по частотным фразам работы и разобрать нишу (Opus)'
+            }
+            onClick={onAnalyze}
+          >
+            {a ? 'Re-analyze' : 'Analyze'}
+          </button>
+          {a?.report_link && (
+            <a
+              className="act act-link"
+              data-testid="needs-report"
+              href={reportHref(a.report_link)}
+              target="_blank"
+              rel="noreferrer"
+              title="открыть отчёт по нише"
+            >
+              Link
+            </a>
+          )}
+          {busy && <span className="spin" title="идёт разбор" />}
+        </span>
       </div>
       {open && (
         <div className="nbody">
@@ -232,7 +312,15 @@ function Work({ w }: { w: NeedsWork }) {
   )
 }
 
-function TreeView({ tree }: { tree: NeedsTree }) {
+function TreeView({
+  tree,
+  busy,
+  onAnalyze,
+}: {
+  tree: NeedsTree
+  busy: Record<string, string>
+  onAnalyze: (work: string) => void
+}) {
   const [showEx, setShowEx] = useState(false)
   const byWhy = new Map<string, typeof tree.excluded>()
   for (const e of tree.excluded) {
@@ -259,7 +347,12 @@ function TreeView({ tree }: { tree: NeedsTree }) {
         </div>
       </div>
       {tree.works.map((w) => (
-        <Work key={w.name ?? Math.random()} w={w} />
+        <Work
+          key={w.name ?? Math.random()}
+          w={w}
+          busy={!!(w.name && busy[w.name])}
+          onAnalyze={() => w.name && onAnalyze(w.name)}
+        />
       ))}
       {tree.excluded.length > 0 && (
         <div className="nex">

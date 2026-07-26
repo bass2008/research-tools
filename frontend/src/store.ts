@@ -4,9 +4,9 @@
 // самих payload-объектов (локальные дети из пула родителя, зависят от контекста родителя).
 
 import { createContext } from 'react'
-import type { Kind, LlmStatus, LogLine, Node, Progress, ReportRow, TaskRow, WsEvent } from './api'
+import type { LlmStatus, LogLine, Node, Progress, TaskRow, WsEvent } from './api'
 
-export type Cmd = 'load' | 'full_load' | 'drill' | 'classify' | 'search' | 'score' | 'analyze'
+export type Cmd = 'load' | 'full_load' | 'needs_build'
 
 export interface LogRow extends LogLine {
   seq: number
@@ -21,7 +21,6 @@ export interface State {
   logs: LogRow[]
   logSeq: number
   tasks: TaskRow[]
-  reports: ReportRow[]
   progress: Progress | null
   llm: LlmStatus
 }
@@ -35,7 +34,6 @@ export const initialState: State = {
   logs: [],
   logSeq: 0,
   tasks: [],
-  reports: [],
   progress: null,
   llm: { online: false, last_seen_at: null },
 }
@@ -47,10 +45,6 @@ export function emptyNode(phrase: string): Node {
     phrase,
     freq: null,
     status: 'NEW',
-    kind: null,
-    score: null,
-    verdict: null,
-    verdict_score: null,
     task_id: null,
     error: null,
     cached: false,
@@ -153,16 +147,6 @@ export function applyEvent(s: State, ev: WsEvent): State {
         ...s,
         tasks: upsert(s.tasks, asList(ev.data), (a, b) => (b.created_at ?? 0) - (a.created_at ?? 0)),
       }
-    case 'report':
-      // сортировка по verdict_score (design §8)
-      return {
-        ...s,
-        reports: upsert(
-          s.reports,
-          asList(ev.data),
-          (a, b) => (b.verdict_score ?? -1) - (a.verdict_score ?? -1),
-        ),
-      }
     case 'log_cleared':
       return { ...s, logs: [] }
     case 'llm_status':
@@ -178,8 +162,7 @@ export interface TreeApi {
   nodes: Record<string, Node>
   kids: Record<string, Node[]>
   expand(phrase: string): void // чистое чтение: раскрыть уже загруженное
-  run(phrase: string, cmd: Cmd): void // команда (для drill/full_load — через подтверждение)
-  setKind(phrase: string, kind: Kind): void // Fix kind
+  run(phrase: string, cmd: Cmd): void // команда (full_load — через подтверждение объёма)
 }
 
 export const TreeCtx = createContext<TreeApi>({
@@ -187,5 +170,4 @@ export const TreeCtx = createContext<TreeApi>({
   kids: {},
   expand: () => {},
   run: () => {},
-  setKind: () => {},
 })

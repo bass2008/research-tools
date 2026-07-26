@@ -529,3 +529,8 @@
 .small {
   font-size: 11px;
 }
+
+.ts-WAITING {
+  color: var(--warn);
+  border-color: var(--warn);
+}

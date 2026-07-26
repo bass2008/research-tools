@@ -39,7 +39,8 @@ TOKEN = "e2e-internal-token"          # общий секрет внутренн
 LLM_TIMEOUT = "20"                    # секунд: фальшивый воркер отвечает мгновенно
 SERVER_START = 40                     # секунд на старт uvicorn
 POLL = 0.05
-LINKED = ("server.py", "tasks.py", "wscore.py", "task-worker-mcp", "frontend")
+LINKED = ("server.py", "tasks.py", "wscore.py", "needs_layer.py",
+          "task-worker-mcp", "frontend")
 
 ENV_FILE = """# .env тестового экземпляра: боевых ключей здесь нет и быть не может
 XMLRIVER_USER=e2e

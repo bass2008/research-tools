@@ -29,6 +29,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import needs_layer
 import tasks
 import wscore
 
@@ -84,6 +85,7 @@ class Ctx:
         self.watchers = 0                          # висящих сейчас watch-ожиданий
         self.running = set()                       # живые корутины задач (иначе их съест GC)
         self._locks = {}                           # phrase -> стек task_id (drill + его шаги)
+        self.needs_busy = set()                    # (дерево, работа) — разбор уже идёт
         self._online = None
 
     # --- шина событий ---
@@ -229,10 +231,19 @@ class LlmBroker:
                 return []
 
     def data(self, job_id):
-        """Полные данные джоба или None (неизвестен/просрочен)."""
+        """Полные данные джоба или None (неизвестен/просрочен).
+
+        Момент, когда исполнитель забрал данные, — единственная достоверная отметка «работа
+        реально началась»: сигнал мог получить диспетчер и не раздать. Поэтому здесь задача
+        и переводится из `WAITING` в `RUNNING`."""
         job = self.jobs.get(job_id)
         if job is None or job["future"].done():
             return None
+        if not job.get("taken_at"):
+            job["taken_at"] = time.time()
+            tasks.set_task_status(self.ctx, job["task_id"], "RUNNING")
+            self.ctx.log("INFO", "llm", None,
+                         f"джоб {job_id} взят исполнителем — задача перешла в RUNNING")
         return {"job_id": job_id, "type": job["type"], "params": job["params"],
                 "prompt": job["prompt"]}
 
@@ -489,125 +500,84 @@ async def api_estimate(phrase: str = Query(...)):
     return wscore.estimate_subtree(CTX.con, phrase)
 
 
-# ---------- деревья потребностей: чтение папки (пока без конвейера) ----------
+# ---------- деревья потребностей: второй слой (needs_layer) ----------
 #
-# Второй слой (толкование) ещё не часть конвейера: деревья складывает лаборатория
-# `task-worker-mcp` в NEEDS_DIR, здесь их только показываем. Поэтому обе ручки — чистое
-# чтение файлов, ни модели, ни БД они не касаются.
-
-NEEDS_DIR = LOGS / "needs-lab"
+# Слой файловый: сборку делает LLM вне конвейера, разбор работы — операция needs_analyze.
+# Чтение идёт по HTTP, а не по WS: второй слой ещё не часть конвейера, тянуть его в протокол
+# подписки рано (прецедент — GET /api/estimate).
 
 
-def _needs_files():
-    """{id: (файл дерева, файл входа или None)}. Два вида раскладки: каталог джоба
-    лаборатории (`<id>/accepted.json` рядом с `params.json`) и просто json-файл в папке."""
-    found = {}
-    if not NEEDS_DIR.is_dir():
-        return found
-    for p in sorted(NEEDS_DIR.iterdir()):
-        if p.is_dir() and (p / "accepted.json").is_file():
-            params = p / "params.json"
-            found[p.name] = (p / "accepted.json", params if params.is_file() else None)
-        elif p.is_file() and p.suffix == ".json":
-            found[p.stem] = (p, None)
-    return found
+class NeedsAnalyzeIn(BaseModel):
+    tree_id: str
+    work: str
 
 
-def _needs_load(path):
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        raise HTTPException(422, f"дерево не читается ({path.name}): {e}")
-    if not isinstance(data, dict):
-        raise HTTPException(422, f"дерево {path.name}: ожидался объект")
-    return data
+class PhraseIn2(BaseModel):
+    phrase: str
 
 
-def _needs_freqs(params_file):
-    if params_file is None:
-        return {}, {}
-    try:
-        p = json.loads(params_file.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}, {}
-    meta = {"root": p.get("root"), "root_freq": p.get("root_freq"),
-            "phrase_count": len(p.get("nodes") or [])}
-    return {n["phrase"]: n.get("freq") for n in p.get("nodes") or []}, meta
+@app.post("/api/needs/build")
+async def cmd_needs_build(body: PhraseIn2, caller: str = Header(None, alias="X-Caller")):
+    """Собрать дерево потребностей по загруженной ветке. Заменяет узловой classify."""
+    p = wscore.normalize(body.phrase)
+    row = _node_or_404(p)
+    if row["status"] != "FULLY_LOADED":
+        raise HTTPException(422, f"сборка возможна только из FULLY_LOADED, а узел в {row['status']}")
+    busy = CTX.busy(p)
+    if busy:
+        raise HTTPException(409, f"узел занят операцией: {busy}")
+    task_id = tasks.enqueue(CTX, "needs_build", p)
+    CTX.log("INFO", "needs_build", p, f"сборку заказал {_caller(caller, 'ui')}")
+    return {"task_id": task_id}
 
 
-def _needs_counts(tree):
-    works = [w for w in (tree.get("works") or []) if isinstance(w, dict)]
-    segs = sum(len(w.get("segments") or []) for w in works)
-    phrases = sum(len(w.get("phrases") or []) +
-                  sum(len(s.get("phrases") or []) for s in (w.get("segments") or []))
-                  for w in works)
-    return {"works": len(works), "segments": segs, "phrases": phrases,
-            "excluded": len(tree.get("excluded") or []),
-            "gaps": sum(1 for w in works if w.get("gap_candidate")),
-            "occupied": sum(1 for w in works if w.get("occupied_by")),
-            "needs_serp": sum(1 for w in works if w.get("needs_serp"))}
+@app.get("/api/needs/reports")
+async def api_needs_reports():
+    """Разборы работ по всем деревьям — вкладка «Отчёты». Отчёт принадлежит работе."""
+    return {"reports": needs_layer.all_analyses()}
 
 
 @app.get("/api/needs/trees")
 async def api_needs_trees():
     """Список деревьев в папке — строки таблицы вкладки «Дерево потребностей»."""
-    rows = []
-    for tid, (tree_file, params_file) in _needs_files().items():
-        try:
-            tree = _needs_load(tree_file)
-        except HTTPException as e:
-            rows.append({"id": tid, "error": e.detail, "condition": None, "root": None,
-                         "root_freq": None, "created_at": None,
-                         **{k: 0 for k in ("works", "segments", "phrases", "excluded",
-                                           "gaps", "occupied", "needs_serp")}})
-            continue
-        _, meta = _needs_freqs(params_file)
-        rows.append({"id": tid, "error": None, "condition": tree.get("condition"),
-                     "root": meta.get("root"), "root_freq": meta.get("root_freq"),
-                     "created_at": int(tree_file.stat().st_mtime), **_needs_counts(tree)})
-    rows.sort(key=lambda r: (r["created_at"] or 0), reverse=True)
-    return {"trees": rows}
+    return {"trees": needs_layer.rows()}
 
 
 @app.get("/api/needs/tree/{tree_id}")
 async def api_needs_tree(tree_id: str):
-    """Одно дерево целиком. Фразам подставляем частоты из входа того же джоба — без них
-    список фраз почти ничего не говорит.
+    """Одно дерево целиком: работы с частотами фраз и прицепленными разборами.
 
-    `tree_id` не склеиваем с путём: берём его как ключ уже найденного набора файлов,
-    иначе получим чтение произвольного файла по строке из запроса."""
-    files = _needs_files()
-    if tree_id not in files:
-        raise HTTPException(404, f"дерева нет: {tree_id}")
-    tree_file, params_file = files[tree_id]
-    tree = _needs_load(tree_file)
-    freqs, meta = _needs_freqs(params_file)
+    `tree_id` не склеиваем с путём — он ключ уже найденного набора файлов, иначе получим
+    чтение произвольного файла по строке из запроса."""
+    try:
+        return needs_layer.detail(tree_id)
+    except needs_layer.NeedsError as e:
+        raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
 
-    def phrases(items):
-        return sorted(({"phrase": p, "freq": freqs.get(p)} for p in (items or [])),
-                      key=lambda x: (-(x["freq"] or 0), x["phrase"]))
 
-    works = []
-    for w in tree.get("works") or []:
-        if not isinstance(w, dict):
-            continue
-        works.append({**{k: w.get(k) for k in
-                         ("name", "top_freq", "phrase_count", "occupied_by", "unclear",
-                          "gap_candidate", "needs_serp", "serp_question", "why")},
-                      "phrases": phrases(w.get("phrases")),
-                      "segments": [{**{k: s.get(k) for k in
-                                       ("name", "gap_candidate", "why")},
-                                    "phrases": phrases(s.get("phrases"))}
-                                   for s in (w.get("segments") or []) if isinstance(s, dict)]})
-    works.sort(key=lambda w: -(w.get("top_freq") or 0))
-    excluded = [{"phrase": e.get("phrase"), "why": e.get("why"), "note": e.get("note"),
-                 "freq": freqs.get(e.get("phrase"))}
-                for e in (tree.get("excluded") or []) if isinstance(e, dict)]
-    excluded.sort(key=lambda e: (str(e["why"]), -(e["freq"] or 0)))
-    return {"id": tree_id, "condition": tree.get("condition"),
-            "root": meta.get("root"), "root_freq": meta.get("root_freq"),
-            "created_at": int(tree_file.stat().st_mtime),
-            "counts": _needs_counts(tree), "works": works, "excluded": excluded}
+@app.post("/api/needs/analyze")
+async def cmd_needs_analyze(body: NeedsAnalyzeIn, caller: str = Header(None, alias="X-Caller")):
+    """Разбор работы: выдача по её самым частотным фразам -> Opus -> отчёт по нише."""
+    tree_id, work = body.tree_id.strip(), body.work.strip()
+    try:
+        tree, _, _ = needs_layer.load_tree(tree_id)
+        w = needs_layer.find_work(tree, work)
+    except needs_layer.NeedsError as e:
+        raise HTTPException(404, str(e))
+    key = (tree_id, needs_layer._norm(work))
+    if key in CTX.needs_busy:
+        raise HTTPException(409, f"разбор работы {work!r} уже идёт")
+    phrases = needs_layer.work_phrases(w)
+    if not phrases:
+        raise HTTPException(422, f"в работе {work!r} нет фраз")
+    CTX.needs_busy.add(key)
+    task_id = tasks.create_task(CTX, "needs_analyze", work,
+                                {"tree_id": tree_id, "work": work})
+    CTX.queue.put_nowait(task_id)
+    CTX.log("INFO", "needs_analyze", work,
+            f"задача {task_id[:8]} поставлена в очередь ({_caller(caller, 'ui')}), "
+            f"дерево {tree_id}, фраз {len(phrases)}")
+    return {"task_id": task_id}
 
 
 # ---------- чтение: WebSocket /ws (tech §6.2) ----------
