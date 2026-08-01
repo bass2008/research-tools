@@ -38,6 +38,11 @@ const WHY: Record<string, string> = {
   other: 'прочее',
 }
 
+/** Закрыть выпадающее меню после выбора пункта. */
+function closeMenu(e: { currentTarget: HTMLElement }) {
+  e.currentTarget.closest('details')?.removeAttribute('open')
+}
+
 function errText(e: unknown): string {
   if (e instanceof api.ApiError) return `${e.status} · ${e.message}${e.detail ? ' — ' + e.detail : ''}`
   return e instanceof Error ? e.message : String(e)
@@ -389,9 +394,10 @@ function Work({
         )}
         <span className="acts">
           {/* всё в одном меню: действий три, а отчётов копится сколько угодно */}
+          {/* меню закрывается по любому выбору: иначе оно перекрывает соседние работы */}
           <details className="menu" data-testid="needs-menu">
             <summary className="act">Действие ▾</summary>
-            <div className="menu-body">
+            <div className="menu-body" onClick={closeMenu}>
               {(['analyze', 'season', 'adjacent'] as NeedsAction[]).map((act) => {
                 const done = (w.artifacts ?? []).filter((x) => x.kind === act).length
                 const wait = busy.has((w.name ?? '') + '|' + act)

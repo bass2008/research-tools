@@ -226,6 +226,22 @@ describe('меню действий', () => {
     }
   })
 
+  it('после выбора действия меню закрывается', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/season')
+        ? res(200, { task_id: 't9' })
+        : url.includes('/api/needs/tree/')
+          ? res(200, TREE)
+          : res(200, { trees: [row()] }),
+    )
+    const work = await opened()
+    const menu = within(work).getByTestId('needs-menu')
+    expect(menu).toHaveAttribute('open')
+
+    await userEvent.click(within(work).getByTestId('needs-run-season'))
+    expect(menu).not.toHaveAttribute('open')
+  })
+
   it('первый запуск идёт сразу, повторный — через подтверждение', async () => {
     fetchMock.mockImplementation(async (url: string) => {
       if (url.includes('/api/needs/season')) return res(200, { task_id: 't9' })
