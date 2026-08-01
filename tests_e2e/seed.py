@@ -173,14 +173,16 @@ NEEDS_OCCUPIED = "remove.bg"
 NEEDS_TREE = {
     "condition": "онлайн · бесплатно",
     "works": [
-        {"name": NEEDS_WORK, "phrases": [ROOT_A, A_ONLINE, A_PNG],
+        {"name": NEEDS_WORK, "score": 45, "score_why": "занято remove.bg, но угол возможен",
+         "phrases": [ROOT_A, A_ONLINE, A_PNG],
          "top_freq": 1000, "phrase_count": 4, "occupied_by": NEEDS_OCCUPIED,
          "gap_candidate": False, "needs_serp": True,
          "serp_question": "кто в топе по «убрать фон»",
          "why": "одна работа: снять фон со статичной картинки",
          "segments": [{"name": NEEDS_SEGMENT, "phrases": [A_ONLINE_FREE],
                        "gap_candidate": False, "why": "тот же результат, другой вход"}]},
-        {"name": NEEDS_GAP_WORK, "phrases": [A_VIDEO, A_VIDEO_2024],
+        {"name": NEEDS_GAP_WORK, "score": 90, "score_why": "в выдаче только статьи",
+         "phrases": [A_VIDEO, A_VIDEO_2024],
          "top_freq": 40, "phrase_count": 2, "occupied_by": None,
          "gap_candidate": True, "needs_serp": False, "serp_question": None,
          "why": "узкая работа: в выдаче только статьи",

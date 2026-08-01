@@ -31,7 +31,7 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("classify", "score", "analyze", "needs", "analyze_work")
+LLM_TYPES = ("classify", "score", "analyze", "needs", "analyze_work", "season", "adjacent")
 SCORE_BATCH = 12            # фраз в одном score-джобе (tech §3: батч 8-15)
 DRILL_WIDTH = 4             # кандидатов drill параллельно (СВОЙ семафор, не очередь задач)
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
@@ -43,13 +43,16 @@ YANDEX_LR = 225             # Россия (Яндекс)
 GOOGLE_LOC = 2643           # Россия (geo target Google)
 HEAD_FREQ = 30000           # freq выше -> classify всегда CATEGORY (design §2)
 NEEDS_SERP_TOP = 1          # по скольким самым частотным фразам работы покупаем выдачу
+ADJACENT_FIRST = 8          # смежных корней в первом заходе
+ADJACENT_MORE = 4           # добор во втором заходе, если всплыл пропущенный корень
 VERDICTS = ("BUILD", "MAYBE", "SKIP")
 
 # Ожидание LLM: (база на операцию, добавка на каждую следующую часть), секунды.
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
 # (tech §3): минуты для classify/score, десятки минут для analyze.
 LLM_TIMEOUT = {"classify": (300, 90), "score": (300, 90), "analyze": (2400, 0),
-               "needs": (2400, 0), "analyze_work": (2400, 0)}
+               "needs": (2400, 0), "analyze_work": (2400, 0),
+               "season": (600, 0), "adjacent": (900, 300)}
 
 _serp_client = httpx.Client(timeout=60)
 _prompts = {}
@@ -175,6 +178,13 @@ async def execute(ctx, task_id, lock=None):
         return False
     finally:
         ctx.release(nodes, task_id)
+        # занятость работы во втором слое снимаем здесь же: иначе новая операция легко
+        # забудет это сделать и работа останется навсегда «занятой»
+        act = {"needs_analyze": "analyze", "needs_season": "season",
+               "needs_adjacent": "adjacent"}.get(op)
+        if act and isinstance(params, dict) and params.get("tree_id"):
+            ctx.needs_busy.discard((params["tree_id"],
+                                    needs_layer._norm(params.get("work")), act))
 
 
 def _brief(result):
@@ -350,8 +360,8 @@ async def _fetch_serp(ctx, engine, phrase):
 
 async def load(ctx, task_id, phrase, params):
     """Пул одной фразы — один уровень вниз, браузинг (NEW -> LOADED)."""
-    qn, own_freq, refs = await _fetch_pool(ctx, phrase)
-    wscore.save_phrase(ctx.con, qn, own_freq, refs)
+    qn, own_freq, refs, pool_ts = await _fetch_pool(ctx, phrase)
+    wscore.save_phrase(ctx.con, qn, own_freq, refs, pool_ts=pool_ts)
     ctx.publish("node", wscore.set_status(ctx.con, qn, "LOADED"))
     ctx.publish("children", {"parent": qn, "children": wscore.project(ctx.con, qn)})
     ctx.log("INFO", "load", qn, f"пул загружен: freq={own_freq}, уточнений {len(refs)}")
@@ -382,10 +392,18 @@ async def full_load(ctx, task_id, phrase, params):
         raise RuntimeError(f"не удалось загрузить сам корень: {dict(res['errors'])[root]}")
     _publish_node(ctx, root)
     ctx.publish("children", {"parent": root, "children": wscore.project(ctx.con, root)})
-    ctx.log("INFO", "full_load", root,
+    extra = ""
+    if res.get("rechecked"):
+        # частота узла могла пересечь FLOOR уже после решения по нему — тогда краул делает
+        # ещё круг; видеть это полезно, иначе цифра фетчей выглядит необъяснимо большой
+        extra += f", кругов перепроверки {res['rechecked']}"
+    if res.get("left"):
+        extra += f", НЕ ЗАГРУЖЕНО узлов >= FLOOR: {res['left']}"
+    ctx.log("INFO" if not res.get("left") else "WARN", "full_load", root,
             f"поддерево загружено: узлов {res['nodes']}, фетчей {res['fetched']}, "
-            f"ошибок {len(res['errors'])} -> FULLY_LOADED")
-    return {"nodes": res["nodes"], "fetched": res["fetched"], "errors": len(res["errors"])}
+            f"ошибок {len(res['errors'])}{extra} -> FULLY_LOADED")
+    return {"nodes": res["nodes"], "fetched": res["fetched"], "errors": len(res["errors"]),
+            "rechecked": res.get("rechecked", 0), "left": res.get("left", 0)}
 
 
 async def _ensure_serp(ctx, qn, stage="search"):
@@ -618,6 +636,64 @@ async def needs_build(ctx, task_id, phrase, params):
 
 # ---------- разбор работы (второй слой) ----------
 
+def _with_inputs(html, jp):
+    """Дописать в отчёт свёрнутый блок «Входные данные».
+
+    Печатает его СЕРВЕР, а не модель: иначе отчёт может разойтись с тем, что реально пришло
+    на вход, и проверить вывод будет нечем. Здесь же честно перечислено, чего НЕ было."""
+    c = jp.get("context") or {}
+    se, ad = c.get("season"), c.get("adjacent")
+    w = jp.get("work") or {}
+    ph = jp.get("phrases") or []
+    rows = "".join(f"<tr><td>{x['phrase']}</td><td style='text-align:right'>{x['freq']}</td></tr>"
+                   for x in ph[:20])
+    more = f"<p>…и ещё {len(ph) - 20} формулировок.</p>" if len(ph) > 20 else ""
+    serp = "<br>".join(
+        f"«{k}» — " + ", ".join(f"{e}: {len(v)} док." for e, v in s.items())
+        for k, s in (jp.get("serps") or {}).items()) or "<b>не покупалась</b>"
+    if se:
+        st = se.get("stats") or {}
+        season = (f"{'есть' if se.get('seasonal') else 'нет'} · размах ×{st.get('amplitude')} · "
+                  f"пик {', '.join(st.get('peak_months') or []) or '—'} · "
+                  f"дно {', '.join(st.get('trough_months') or []) or '—'} · "
+                  f"сейчас «{se.get('phase') or '—'}» · год к году ×{st.get('yoy')} · "
+                  f"{st.get('points')} мес. по фразе «{se.get('phrase')}»")
+    else:
+        season = ("<b>не считалась</b> — спрос взят как есть, без поправки на месяц замера")
+    if ad:
+        keys = ", ".join(f"{k} ({v})" for k, v in
+                         sorted((ad.get("keys") or {}).items(), key=lambda kv: -(kv[1] or 0))[:12])
+        adj = (f"{len(ad.get('keys') or {})} корней, суммарно {ad.get('total_freq')} против "
+               f"{ad.get('ours')} в нашей ветке, покрытие по оценке модели "
+               f"{ad.get('covered', '—')}%<br>{keys}")
+    else:
+        adj = ("<b>не собирались</b> — измерен спрос только со словом-технологией, "
+               "настоящий размер ниши может быть кратно больше")
+    prev = ", ".join(f"{x.get('verdict')} {x.get('verdict_score')}"
+                     for x in (c.get("previous_verdicts") or [])) or "нет, это первый"
+    block = f"""
+<details style="margin-top:32px;border-top:1px solid #e3e6ea;padding-top:12px">
+<summary style="cursor:pointer;font-weight:600">Входные данные</summary>
+<div style="font-size:14px">
+<p>Что было у модели в момент разбора — на этом и только на этом стоят выводы выше.</p>
+<p><b>Работа:</b> {w.get('name')} · формулировок {len(ph)} ·
+условие ветки: {jp.get('condition') or '—'} · ветка: {jp.get('root') or '—'}</p>
+<p><b>Гипотезы сборки:</b> оценка {w.get('score')} ·
+щель: {'да' if w.get('gap_candidate') else 'нет'} ·
+занято: {w.get('occupied_by') or 'не названо'}</p>
+<p><b>Выдача:</b><br>{serp}</p>
+<p><b>Сезонность:</b> {season}</p>
+<p><b>Смежные ключи:</b> {adj}</p>
+<p><b>Прошлые разборы этой работы:</b> {prev}</p>
+<h2>Ядро ключей</h2>
+<table style="border-collapse:collapse;width:100%">
+<tr><th style="text-align:left">формулировка</th><th style="text-align:right">частота</th></tr>
+{rows}</table>{more}
+</div></details>
+"""
+    return html.replace("</body>", block + "</body>") if "</body>" in html else html + block
+
+
 async def needs_analyze(ctx, task_id, phrase, params):
     """`Analyze` на работе дерева потребностей: выдача -> Opus -> отчёт по нише.
 
@@ -632,10 +708,7 @@ async def needs_analyze(ctx, task_id, phrase, params):
     work_name = str((params or {}).get("work") or "").strip()
     if not tree_id or not work_name:
         raise RuntimeError("нужны tree_id и work")
-    try:
-        return await _needs_analyze(ctx, task_id, tree_id, work_name)
-    finally:
-        ctx.needs_busy.discard((tree_id, needs_layer._norm(work_name)))
+    return await _needs_analyze(ctx, task_id, tree_id, work_name)
 
 
 async def _needs_analyze(ctx, task_id, tree_id, work_name):
@@ -651,8 +724,22 @@ async def _needs_analyze(ctx, task_id, tree_id, work_name):
         s = wscore.load_serp(ctx.con, qn)
         serps[qn] = {e: s.get(e, {}).get("docs", []) for e in wscore.SERP_ENGINES}
 
+    # накопленное по работе: разбор идёт по ВСЕМ данным, что появились к этому моменту —
+    # в этом и смысл повторного запуска
+    prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
+    season = next((a for a in prev if a.get("kind") == "season"), None)
+    adjacent = next((a for a in prev if a.get("kind") == "adjacent"), None)
+    context = {
+        "season": {k: season.get(k) for k in ("stats", "seasonal", "phase", "comment", "phrase")}
+        if season else None,
+        "adjacent": {k: adjacent.get(k) for k in
+                     ("keys", "total_freq", "ours", "covered", "comment")} if adjacent else None,
+        "previous_verdicts": [{"verdict": a.get("verdict"), "verdict_score": a.get("verdict_score"),
+                               "created_at": a.get("created_at")}
+                              for a in prev if a.get("kind") == "analyze"],
+    }
     jparams = {**{k: data[k] for k in ("condition", "root", "work", "segments", "phrases")},
-               "serps": serps}
+               "serps": serps, "context": context}
     res = (await _run_llm(ctx, "analyze_work", work_name,
                           [_job(task_id, 0, "analyze_work", jparams)]))[0]
     if not isinstance(res, dict):
@@ -668,9 +755,9 @@ async def _needs_analyze(ctx, task_id, tree_id, work_name):
         raise ValueError("analyze_work не вернул report_html")
 
     REPORTS.mkdir(parents=True, exist_ok=True)
-    (REPORTS / f"{task_id}.html").write_text(html, encoding="utf-8")
+    (REPORTS / f"{task_id}.html").write_text(_with_inputs(html, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
-    needs_layer.save_analysis(tree_id, work_name, {
+    needs_layer.save_artifact(tree_id, work_name, "analyze", {
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1),
         "report_link": link, "task_id": task_id, "created_at": _now(),
@@ -680,6 +767,174 @@ async def _needs_analyze(ctx, task_id, tree_id, work_name):
             f"выдача по {len(data['search'])} фраз(ам)")
     return {"verdict": verdict, "verdict_score": vscore, "link": link,
             "tree_id": tree_id, "work": work_name}
+
+
+# ---------- сезонность и смежные ключи ----------
+
+def _work_ctx(tree_id, work_name):
+    """Работа и её данные из второго слоя (общее начало у season/adjacent)."""
+    if not tree_id or not work_name:
+        raise RuntimeError("нужны tree_id и work")
+    data = needs_layer.work_input(tree_id, work_name, NEEDS_SERP_TOP)
+    if not data["phrases"]:
+        raise RuntimeError(f"в работе {work_name!r} нет фраз")
+    return data
+
+
+def _chart(series, cap=560, h=120):
+    """Столбики истории прямо в отчёте: SVG строим сами, у LLM просим только смысл."""
+    if not series:
+        return ""
+    mx = max(v["y"] for v in series) or 1
+    w = max(6, cap // max(1, len(series)) - 4)
+    bars, labels = [], []
+    for i, v in enumerate(series):
+        bh = max(1, round(v["y"] / mx * (h - 18)))
+        x = i * (w + 4)
+        bars.append(f'<rect x="{x}" y="{h - bh}" width="{w}" height="{bh}" fill="#5b9bff">'
+                    f'<title>{v["ym"]}: {v["y"]}</title></rect>')
+        if v["ym"].endswith(("-01", "-09")):
+            labels.append(f'<text x="{x}" y="{h + 12}" font-size="9" fill="#888">{v["ym"]}</text>')
+    return (f'<svg viewBox="0 0 {len(series) * (w + 4)} {h + 16}" width="100%" height="160">'
+            + "".join(bars) + "".join(labels) + "</svg>")
+
+
+def _mini_report(title, subtitle, body):
+    return (f"<!doctype html><html lang=ru><head><meta charset=utf-8><title>{title}</title>"
+            "<style>body{font:15px/1.5 system-ui;max-width:820px;margin:40px auto;padding:0 16px}"
+            "h1{font-size:22px;margin:0 0 4px}.sub{color:#888;margin:0 0 24px}"
+            "table{border-collapse:collapse;width:100%;font-size:14px}"
+            "td,th{border-bottom:1px solid #e3e6ea;padding:5px 8px;text-align:left}"
+            ".num{text-align:right}blockquote{background:#f6f8fa;border:0;margin:18px 0;"
+            "padding:14px 16px;border-radius:8px}</style></head><body>"
+            f"<h1>{title}</h1><p class=sub>{subtitle}</p>{body}</body></html>")
+
+
+async def needs_season(ctx, task_id, phrase, params):
+    """Сезонность работы: история частоты по ОДНОЙ её самой частотной фразе.
+
+    По одной намеренно: формулировки одной работы колеблются вместе, и профиль у них общий —
+    платить за двадцать копий незачем. Один платный запрос на работу."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    data = _work_ctx(tree_id, work_name)
+    top = data["phrases"][0]["phrase"]
+    _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name, "phrase": top})
+
+    loop = asyncio.get_running_loop()
+    async with ctx.net:
+        series = await loop.run_in_executor(None, wscore.fetch_history, top,
+                                            wscore.HISTORY_MONTHS, ctx.db)
+    stats = wscore.season_stats(series)
+    ctx.log("INFO", "needs_season", work_name,
+            f"история по {top!r}: точек {stats.get('points')}, размах x{stats.get('amplitude')}, "
+            f"пики {stats.get('peak_months')}, год к году x{stats.get('yoy')}")
+
+    res = (await _run_llm(ctx, "season", work_name, [_job(task_id, 0, "season", {
+        "work": work_name, "phrase": top, "series": series, "stats": stats})]))[0]
+    if not isinstance(res, dict) or not (res.get("comment") or "").strip():
+        raise ValueError("season не вернул comment")
+
+    rows = "".join(f"<tr><td>{v['ym']}</td><td class=num>{v['y']}</td></tr>" for v in series)
+    body = (f"<blockquote>{res['comment']}</blockquote>"
+            f"<p><b>Сезонность:</b> {'есть' if res.get('seasonal') else 'нет'} · "
+            f"размах ×{res.get('amplitude_x') or stats.get('amplitude')} · "
+            f"сейчас {res.get('phase') or '—'} · пик {res.get('peak') or '—'} · "
+            f"дно {res.get('trough') or '—'} · тренд {res.get('trend') or '—'}</p>"
+            + _chart(series) +
+            f"<h2>Ряд</h2><table><tr><th>месяц</th><th class=num>показов</th></tr>{rows}</table>")
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    (REPORTS / f"{task_id}.html").write_text(
+        _mini_report(f"Сезонность: {work_name}", f"по фразе «{top}», {len(series)} месяцев", body),
+        encoding="utf-8")
+    link = f"reports/{task_id}.html"
+    needs_layer.save_artifact(tree_id, work_name, "season", {
+        "task_id": task_id, "created_at": _now(), "report_link": link, "phrase": top,
+        "series": series, "stats": stats,
+        "summary": f"{'сезонность есть' if res.get('seasonal') else 'сезонности нет'}, "
+                   f"размах ×{res.get('amplitude_x') or stats.get('amplitude')}, "
+                   f"сейчас {res.get('phase') or '—'}",
+        "seasonal": bool(res.get("seasonal")), "phase": res.get("phase"),
+        "comment": _str(res.get("comment"))})
+    ctx.log("INFO", "needs_season", work_name, f"отчёт {link}")
+    return {"seasonal": bool(res.get("seasonal")), "amplitude": stats.get("amplitude"),
+            "link": link}
+
+
+async def needs_adjacent(ctx, task_id, phrase, params):
+    """Смежные ключи работы: как ту же работу ищут БЕЗ слова-технологии.
+
+    Дерево выросло из одной ветки, поэтому мерит спрос только среди тех, кто уже думает про
+    технологию. Берём пул каждого предложенного корня — он сразу даёт его уточнения с
+    частотами, поэтому 6-8 запросов покрывают нишу, а не дают 8 чисел. Второй заход —
+    добор корня, который всплыл в пулах: он и страхует от «просрали нишу»."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    data = _work_ctx(tree_id, work_name)
+    base = {"work": work_name, "why": data["work"].get("why"), "phrases": data["phrases"][:25]}
+    _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name})
+
+    first = (await _run_llm(ctx, "adjacent", work_name,
+                            [_job(task_id, 0, "adjacent", {**base, "measured": {}})]))[0]
+    keys = [wscore.normalize(k) for k in (first or {}).get("keys") or []][:ADJACENT_FIRST]
+    if not keys:
+        raise ValueError("adjacent не предложил ни одного корня")
+
+    measured = {}
+
+    async def measure(batch):
+        for k in batch:
+            if k in measured:
+                continue
+            qn, own, refs, _ts = await _fetch_pool(ctx, k)
+            measured[qn] = {"freq": own or 0,
+                            "top": [{"phrase": p, "freq": f} for p, f in refs[:12]],
+                            "refinements": len(refs)}
+            # пул куплен в общий кэш, но деревом запросов не является: без пометки
+            # пересборка модели из кэша втянула бы его уточнения в факты
+            wscore.mark_probe(ctx.con, [qn], "adjacent")
+
+    await measure(keys)
+    ctx.log("INFO", "needs_adjacent", work_name,
+            f"первый заход: {len(measured)} корней, сумма частот "
+            f"{sum(m['freq'] for m in measured.values())}")
+
+    second = (await _run_llm(ctx, "adjacent", work_name,
+                             [_job(task_id, 1, "adjacent", {**base, "measured": measured})]))[0]
+    more = [wscore.normalize(k) for k in (second or {}).get("more_keys") or []][:ADJACENT_MORE]
+    if more:
+        await measure(more)
+        ctx.log("INFO", "needs_adjacent", work_name, f"добор: +{len(more)} корней")
+        second = (await _run_llm(ctx, "adjacent", work_name,
+                                 [_job(task_id, 2, "adjacent", {**base, "measured": measured})]))[0]
+
+    ours = max((p["freq"] or 0) for p in data["phrases"])
+    total = sum(m["freq"] for m in measured.values())
+    rows = "".join(
+        f"<tr><td>{k}</td><td class=num>{m['freq']}</td><td class=num>{m['refinements']}</td></tr>"
+        for k, m in sorted(measured.items(), key=lambda kv: -kv[1]["freq"]))
+    body = (f"<blockquote>{(second or {}).get('comment') or ''}</blockquote>"
+            f"<p><b>Наша ветка:</b> {ours} (самая частотная формулировка со словом-технологией)."
+            f" <b>Смежные корни:</b> {total} суммарно — "
+            f"×{round(total / ours, 1) if ours else '—'} от измеренного."
+            f" Покрытие по оценке модели: {(second or {}).get('covered', '—')}%.</p>"
+            f"<h2>Корни</h2><table><tr><th>фраза</th><th class=num>частота</th>"
+            f"<th class=num>уточнений</th></tr>{rows}</table>")
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    (REPORTS / f"{task_id}.html").write_text(
+        _mini_report(f"Смежные ключи: {work_name}",
+                     f"{len(measured)} корней без слова-технологии", body), encoding="utf-8")
+    link = f"reports/{task_id}.html"
+    needs_layer.save_artifact(tree_id, work_name, "adjacent", {
+        "task_id": task_id, "created_at": _now(), "report_link": link,
+        "keys": {k: m["freq"] for k, m in measured.items()}, "total_freq": total,
+        "ours": ours, "covered": (second or {}).get("covered"),
+        "summary": f"{len(measured)} корней, суммарно {total} — "
+                   f"×{round(total / ours, 1) if ours else '—'} от нашей ветки",
+        "comment": _str((second or {}).get("comment"))})
+    ctx.log("INFO", "needs_adjacent", work_name,
+            f"корней {len(measured)}, суммарно {total} против {ours} у нас, отчёт {link}")
+    return {"keys": len(measured), "total_freq": total, "ours": ours, "link": link}
 
 
 # ---------- drill ----------
@@ -784,6 +1039,7 @@ async def drill(ctx, task_id, phrase, params):
 
 OPS = {"load": load, "full_load": full_load, "search": search,
        "needs_build": needs_build, "needs_analyze": needs_analyze,
+       "needs_season": needs_season, "needs_adjacent": needs_adjacent,
        "classify": classify, "score": score, "analyze": analyze, "drill": drill}
 
 

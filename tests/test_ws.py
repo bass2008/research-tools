@@ -200,7 +200,11 @@ def test_crawl_progress_flows_and_total_may_grow(crawl_client):
     assert totals == sorted(totals), "total не должен уменьшаться"
     assert dones == sorted(dones)
     assert totals[-1] >= 2 and totals[-1] > totals[0], "total растёт по ходу краула"
-    assert dones[-1] == totals[-1] == need
+    assert dones[-1] == totals[-1], "к концу краула сделано столько, сколько и планировалось"
+    # фетчей может выйти БОЛЬШЕ, чем видно на старте: частота узла ползёт, и по ходу краула
+    # часть узлов пересекает FLOOR — их краул догружает перепроверкой фронтира
+    assert dones[-1] >= need, f"сделано {dones[-1]}, на старте было видно {need}"
+    assert wscore.unqueried_frontier(probe, root) == [], "поддерево осталось недогруженным"
 
     assert wscore.net_calls() == 0
     # завершение краула клиент получает как progress + обновление корня, а не поток дельт

@@ -555,26 +555,33 @@ async def api_needs_tree(tree_id: str):
         raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
 
 
-@app.post("/api/needs/analyze")
-async def cmd_needs_analyze(body: NeedsAnalyzeIn, caller: str = Header(None, alias="X-Caller")):
-    """Разбор работы: выдача по её самым частотным фразам -> Opus -> отчёт по нише."""
+@app.post("/api/needs/{action}")
+async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
+                         caller: str = Header(None, alias="X-Caller")):
+    """Действие над работой: `analyze` (выдача -> Opus -> отчёт), `season` (история частоты),
+    `adjacent` (смежные ключи без слова-технологии).
+
+    Повторный запуск разрешён: каждый прогон копит свой артефакт, и смысл повтора в том, что
+    данных стало больше. Запрещён только ПАРАЛЛЕЛЬНЫЙ прогон той же операции по той же работе."""
+    ops = {"analyze": "needs_analyze", "season": "needs_season", "adjacent": "needs_adjacent"}
+    if action not in ops:
+        raise HTTPException(404, f"нет такого действия: {action}")
     tree_id, work = body.tree_id.strip(), body.work.strip()
     try:
         tree, _, _ = needs_layer.load_tree(tree_id)
         w = needs_layer.find_work(tree, work)
     except needs_layer.NeedsError as e:
         raise HTTPException(404, str(e))
-    key = (tree_id, needs_layer._norm(work))
+    key = (tree_id, needs_layer._norm(work), action)
     if key in CTX.needs_busy:
-        raise HTTPException(409, f"разбор работы {work!r} уже идёт")
+        raise HTTPException(409, f"«{action}» по работе {work!r} уже идёт")
     phrases = needs_layer.work_phrases(w)
     if not phrases:
         raise HTTPException(422, f"в работе {work!r} нет фраз")
     CTX.needs_busy.add(key)
-    task_id = tasks.create_task(CTX, "needs_analyze", work,
-                                {"tree_id": tree_id, "work": work})
+    task_id = tasks.create_task(CTX, ops[action], work, {"tree_id": tree_id, "work": work})
     CTX.queue.put_nowait(task_id)
-    CTX.log("INFO", "needs_analyze", work,
+    CTX.log("INFO", ops[action], work,
             f"задача {task_id[:8]} поставлена в очередь ({_caller(caller, 'ui')}), "
             f"дерево {tree_id}, фраз {len(phrases)}")
     return {"task_id": task_id}

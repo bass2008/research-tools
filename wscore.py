@@ -12,6 +12,7 @@
 """
 import asyncio
 import inspect
+import datetime
 import json
 import os
 import re
@@ -28,6 +29,7 @@ BASE_URL = "http://xmlriver.com/wordstat/new/json"
 DB_PATH = ROOT / "semcore.db"
 
 FLOOR = 50               # граница рекурсии краула: ниже вглубь не бурим (design §4)
+RECHECK_ROUNDS = 5       # кругов перепроверки фронтира за один краул (страховка от петли)
 SCORE_THRESHOLD = 60     # score > порога -> SCORED, <= -> LOW_SCORED (design §6.3)
 LIMIT = 2000             # весь пул фразы: потолок самого XMLRiver
 WORKERS = 6              # одновременных фетчей во время краула
@@ -79,13 +81,25 @@ def cache_only():
 _SQL_CACHE = """CREATE TABLE IF NOT EXISTS cache (
     query TEXT PRIMARY KEY, response TEXT NOT NULL, ts INTEGER NOT NULL)"""
 
+# Запросы, купленные не для дерева, а для замера рядом с ним (смежные ключи второго слоя).
+# Кэш общий и оплаченный, дерево — нет: без этой пометки пересборка модели из кэша втянула бы
+# чужие пулы в факты и дерево выросло бы на тысячи узлов, которых никто не краулил.
+_SQL_PROBE = """CREATE TABLE IF NOT EXISTS probe (
+    query TEXT PRIMARY KEY, kind TEXT, created_at INTEGER NOT NULL)"""
+
 # node: базовые колонки (этап 1-2) + поля конвейера (design §3)
+_SQL_HISTORY = """CREATE TABLE IF NOT EXISTS history (
+    phrase TEXT PRIMARY KEY,
+    series_json TEXT NOT NULL,                   -- [{"ym":"2025-09","y":1247}, ...] по месяцам
+    fetched_at INTEGER NOT NULL)"""
+
 _SQL_NODE = """CREATE TABLE IF NOT EXISTS node (
     phrase TEXT PRIMARY KEY,
     freq INTEGER,
     queried INTEGER NOT NULL DEFAULT 0,          -- пул фразы уже запрашивался
     total_refinements INTEGER NOT NULL DEFAULT 0,
     queried_at INTEGER,
+    freq_at INTEGER,                             -- когда снят пул, из которого взята freq
     score REAL,                                  -- итог score (Haiku 0-100)
     verdict TEXT,                                -- BUILD|MAYBE|SKIP (analyze)
     note TEXT,                                   -- ручная пометка, пайплайн не трогает
@@ -151,7 +165,7 @@ _PRE_PIPELINE_MARKER = "status"
 
 # Колонки, добавленные ПОСЛЕ первого прогона пайплайна: только через ALTER TABLE.
 # Новую колонку дописывать СЮДА, а не в признак схемы выше.
-_NODE_LATE_COLS = ()
+_NODE_LATE_COLS = (("freq_at", "INTEGER"),)
 
 # статус -> колонка таймстемпа операции (ставится автоматически)
 _STATUS_TS = {"TRANSACTIONAL": "classified_at", "CATEGORY": "classified_at",
@@ -168,17 +182,44 @@ def connect(db_path=None, backfill=True):
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
     con.execute(_SQL_CACHE)  # сырой кэш ответов XMLRiver — только создаём, никогда не сносим
+    fresh_probe = not list(con.execute("PRAGMA table_info(probe)"))
     cols = {r[1] for r in con.execute("PRAGMA table_info(node)")}
     if cols and _PRE_PIPELINE_MARKER not in cols:
         con.execute("DROP TABLE IF EXISTS edge")   # схема этапа 1-2: пересобираем из cache
         con.execute("DROP TABLE IF EXISTS node")
-    for sql in (_SQL_NODE, _SQL_EDGE, _SQL_SERP, _SQL_TASK, _SQL_REPORT, *_SQL_INDEXES):
+    for sql in (_SQL_NODE, _SQL_EDGE, _SQL_SERP, _SQL_TASK, _SQL_REPORT, _SQL_HISTORY,
+                _SQL_PROBE, *_SQL_INDEXES):
         con.execute(sql)
     _add_missing_cols(con)
     con.commit()
+    if fresh_probe:
+        _mark_orphan_probes(con)
     if backfill:
         _maybe_backfill(con)
     return con
+
+
+def mark_probe(con, phrases, kind):
+    """Запомнить, что эти запросы куплены для замера, а не для дерева."""
+    now = int(time.time())
+    con.executemany("INSERT OR IGNORE INTO probe(query, kind, created_at) VALUES (?, ?, ?)",
+                    [(normalize(p), kind, now) for p in phrases])
+    con.commit()
+
+
+def _mark_orphan_probes(con):
+    """Разовая разметка замеров, сделанных до появления таблицы `probe`.
+
+    Признак — запрос есть в кэше, а его фразы нет в дереве: краул всегда пишет узел сразу
+    после фетча, поэтому осиротеть может только покупка второго слоя. Делаем один раз при
+    создании таблицы и только при непустом дереве: на пустом node признак разметил бы весь
+    кэш, а на живой базе тот же признак ловил бы окно между фетчем и записью узла."""
+    if con.execute("SELECT COUNT(*) FROM node").fetchone()[0] == 0:
+        return
+    rows = con.execute("SELECT query FROM cache WHERE NOT EXISTS ("
+                       "SELECT 1 FROM node WHERE node.phrase = cache.query)").fetchall()
+    if rows:
+        mark_probe(con, [r[0] for r in rows], "adjacent")
 
 
 def _add_missing_cols(con):
@@ -234,12 +275,13 @@ def _check_xmlriver(data, query):
                             f"code={data.get('code')}, {data.get('error')}")
 
 
-def _fetch_with_retry(q):
+def _fetch_with_retry(q, extra=None):
     """Один запрос к Вордстату с повтором на транзиентных отказах: 10 c, 30 c, 60 c.
     Повторяем ТОЛЬКО то, что источник сам просит повторить (code=500) и обрывы связи;
     ошибку в параметрах повторять бессмысленно. Каждая попытка считается платной."""
     global _net_calls
-    params = {"user": os.environ["XMLRIVER_USER"], "key": os.environ["XMLRIVER_KEY"], "query": q}
+    params = {"user": os.environ["XMLRIVER_USER"], "key": os.environ["XMLRIVER_KEY"], "query": q,
+              **(extra or {})}
     last = None
     for attempt in range(len(RETRY_DELAYS) + 1):
         if attempt:
@@ -372,24 +414,101 @@ def cached_child_count(phrase, con):
 
 # ---------- модель (nodes + edges) ----------
 
-def upsert_node(con, phrase, freq=None, queried=False, total=None):
+def upsert_node(con, phrase, freq=None, queried=False, total=None, freq_at=None):
+    """Записать узел. `freq_at` — когда снят пул, откуда взята частота.
+
+    Частоту переписывает только НЕ БОЛЕЕ СТАРЫЙ пул. Раньше побеждал тот, что обработали
+    последним, а порядок обхода к возрасту данных отношения не имеет: пул от 21.07 затирал
+    свежий от 26.07. Частота — измерение во времени (у Вордстата она ползёт: одна и та же
+    фраза за пять дней ушла с 49 на 59), поэтому «свежее» и есть «вернее».
+    `freq_at=None` — возраст неизвестен, считаем значение свежим (обычно это живой фетч)."""
     p = normalize(phrase)
-    row = con.execute("SELECT freq, queried, total_refinements FROM node WHERE phrase = ?", (p,)).fetchone()
+    row = con.execute("SELECT freq, queried, total_refinements, freq_at FROM node "
+                      "WHERE phrase = ?", (p,)).fetchone()
     if row is None:
         con.execute(
-            "INSERT INTO node(phrase, freq, queried, total_refinements, queried_at) "
-            "VALUES (?, ?, ?, ?, strftime('%s','now'))",
-            (p, freq or 0, 1 if queried else 0, total or 0))
-    else:
-        cur_freq, cur_q, cur_total = row[0], row[1], row[2]
-        con.execute(
-            "UPDATE node SET freq = ?, queried = ?, total_refinements = ?, "
-            "queried_at = CASE WHEN ? = 1 THEN strftime('%s','now') ELSE queried_at END "
-            "WHERE phrase = ?",
-            (freq if freq is not None else cur_freq,
-             1 if (queried or cur_q) else 0,
-             total if total is not None else cur_total,
-             1 if queried else 0, p))
+            "INSERT INTO node(phrase, freq, queried, total_refinements, queried_at, freq_at) "
+            "VALUES (?, ?, ?, ?, strftime('%s','now'), ?)",
+            (p, freq or 0, 1 if queried else 0, total or 0, freq_at))
+        return
+    cur_freq, cur_q, cur_total, cur_at = row[0], row[1], row[2], row[3]
+    stale = (freq is not None and freq_at is not None and cur_at is not None
+             and freq_at < cur_at)
+    con.execute(
+        "UPDATE node SET freq = ?, freq_at = ?, queried = ?, total_refinements = ?, "
+        "queried_at = CASE WHEN ? = 1 THEN strftime('%s','now') ELSE queried_at END "
+        "WHERE phrase = ?",
+        (cur_freq if (freq is None or stale) else freq,
+         cur_at if (freq is None or stale) else (freq_at if freq_at is not None else cur_at),
+         1 if (queried or cur_q) else 0,
+         total if total is not None else cur_total,
+         1 if queried else 0, p))
+
+
+# ---------- история частот (сезонность) ----------
+
+HISTORY_MONTHS = 24        # окно истории: два года — видно и сезон, и рост год к году
+
+
+def fetch_history(phrase, months=HISTORY_MONTHS, db_path=None):
+    """Помесячная история частоты фразы. -> [{"ym": "2025-09", "y": 1247}, ...].
+
+    Тот же эндпоинт, что и пул, отличается `pagetype=history`. Две ловушки провайдера:
+    `end` в будущем -> «неверный период» (данные отстают на месяцы), а без периода
+    отдаётся минимальное окно в три точки вместо истории."""
+    qn = normalize(phrase)
+    con = _cache_con(db_path)
+    try:
+        row = con.execute("SELECT series_json FROM history WHERE phrase = ?", (qn,)).fetchone()
+    except sqlite3.OperationalError:
+        con.execute(_SQL_HISTORY)
+        row = None
+    if row:
+        con.close()
+        return json.loads(row[0])
+    if cache_only():
+        con.close()
+        raise RuntimeError("режим только кэш: истории для фразы нет")
+    # верхняя граница — прошлый месяц: у провайдера данные отстают, будущее он отвергает
+    end = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+    start = (end.replace(day=1) - datetime.timedelta(days=31 * (months - 1))).replace(day=1)
+    data = _fetch_with_retry(qn, extra={"pagetype": "history", "period": "month",
+                                        "start": start.strftime("%d.%m.%Y"),
+                                        "end": end.strftime("%d.%m.%Y")})
+    _check_xmlriver(data, qn)
+    ts = (((data.get("graph") or {}).get("images") or {}).get("timeSeries") or {}) \
+        .get("preparedValues", {}).get("absolute") or []
+    series = [{"ym": f"{v['year']}-{v['month'] + 1:02d}", "y": int(v.get("y") or 0)}
+              for v in ts if isinstance(v, dict) and "year" in v]
+    if not series:
+        con.close()
+        raise RuntimeError(f"история пуста для {qn!r}")
+    con.execute(_SQL_HISTORY)
+    con.execute("INSERT OR REPLACE INTO history(phrase, series_json, fetched_at) VALUES (?, ?, ?)",
+                (qn, json.dumps(series, ensure_ascii=False), int(time.time())))
+    con.commit()
+    con.close()
+    return series
+
+
+def season_stats(series):
+    """Сводка по ряду: размах, пики, провалы, рост год к году."""
+    ys = [v["y"] for v in series if v.get("y") is not None]
+    if not ys:
+        return {}
+    lo, hi = min(ys), max(ys)
+    by_month = {}
+    for v in series:
+        by_month.setdefault(v["ym"][-2:], []).append(v["y"])
+    avg = {m: sum(x) / len(x) for m, x in by_month.items()}
+    order = sorted(avg, key=lambda m: -avg[m])
+    yoy = None
+    if len(series) >= 24:
+        first, last = sum(ys[:12]), sum(ys[-12:])
+        yoy = round(last / first, 2) if first else None
+    return {"min": lo, "max": hi, "amplitude": round(hi / lo, 1) if lo else None,
+            "peak_months": order[:3], "trough_months": order[-3:],
+            "last": ys[-1], "yoy": yoy, "points": len(ys)}
 
 
 def _parse_pool(qn, data, limit):
@@ -402,25 +521,29 @@ def _parse_pool(qn, data, limit):
 
 def fetch_phrase(phrase, limit=LIMIT, db_path=None):
     """ТОЛЬКО сеть/кэш + разбор, без записи в модель — можно гонять в executor-треде.
-    Открывает собственное соединение к cache. -> (phrase, own_freq, refs)."""
+    Открывает собственное соединение к cache. -> (phrase, own_freq, refs, pool_ts).
+
+    `pool_ts` — когда снят пул: по нему решается, вправе ли он переписать частоту (см.
+    `upsert_node`). Кэш может быть старым, сеть — всегда свежая."""
     qn = normalize(phrase)
     con = _cache_con(db_path)
     try:
         data = fetch_wordstat(qn, con)
+        row = con.execute("SELECT ts FROM cache WHERE query = ?", (qn,)).fetchone()
     finally:
         con.close()
     own_freq, refs = _parse_pool(qn, data, limit)
-    return qn, own_freq, refs
+    return qn, own_freq, refs, (row[0] if row else None)
 
 
-def save_phrase(con, phrase, own_freq, refs):
+def save_phrase(con, phrase, own_freq, refs, pool_ts=None):
     """Запись результата фетча в модель (только loop-тред): узел queried=1 + рёбра к
     уточнениям. Статус не трогает — переходы FSM идут через set_status().
-    -> (own_freq, total)."""
+    `pool_ts` — возраст пула, из которого взяты частоты. -> (own_freq, total)."""
     qn = normalize(phrase)
-    upsert_node(con, qn, freq=own_freq, queried=True, total=len(refs))
+    upsert_node(con, qn, freq=own_freq, queried=True, total=len(refs), freq_at=pool_ts)
     for p, f in refs:
-        upsert_node(con, p, freq=f)
+        upsert_node(con, p, freq=f, freq_at=pool_ts)
         con.execute("INSERT OR IGNORE INTO edge(parent, child) VALUES (?, ?)", (qn, p))
     con.commit()
     return own_freq, len(refs)
@@ -431,7 +554,8 @@ def load_phrase(con, phrase, limit=LIMIT):
     уточнениям (весь пул, до limit). Возвращает (own_freq, total)."""
     qn = normalize(phrase)
     own_freq, refs = _parse_pool(qn, fetch_wordstat(qn, con), limit)
-    return save_phrase(con, qn, own_freq, refs)
+    row = con.execute("SELECT ts FROM cache WHERE query = ?", (qn,)).fetchone()
+    return save_phrase(con, qn, own_freq, refs, pool_ts=row[0] if row else None)
 
 
 def _child_phrases(con, parent):
@@ -468,6 +592,19 @@ def estimate_subtree(con, phrase, floor=FLOOR):
     if (root is None or not root[0]) and requests == 0:
         requests = 1  # сам корень фетчится всегда, какая бы у него ни была частота
     return {"nodes": len(phrases), "requests": requests}
+
+
+def unqueried_frontier(con, root, floor=FLOOR):
+    """Узлы поддерева, которые ОБЯЗАНЫ быть запрошены, но не запрошены: freq >= floor.
+
+    Это же условие проверяет `repair_fully_loaded` — там оно ловит следствие, здесь служит
+    условием остановки краула. -> список фраз по убыванию частоты."""
+    return [r[0] for r in con.execute(f"""
+        WITH RECURSIVE sub(ph) AS (
+          SELECT ? UNION SELECT e.child FROM sub JOIN edge e ON e.parent = sub.ph)
+        SELECT n.phrase FROM sub JOIN node n ON n.phrase = sub.ph
+        WHERE n.queried = 0 AND COALESCE(n.freq, 0) >= ?
+        ORDER BY COALESCE(n.freq, 0) DESC""", (normalize(root), floor))]
 
 
 # ---------- краул поддерева (full_load) ----------
@@ -507,8 +644,10 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
     running = {}           # task -> phrase
     done = total = 0
     errors = []
+    rounds = 0
 
-    while queue or running:
+    while True:
+      while queue or running:
         while queue:
             p = queue.popleft()
             row = con.execute("SELECT queried, COALESCE(freq, 0) FROM node WHERE phrase = ?",
@@ -530,17 +669,31 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
             p = running.pop(t)
             done += 1
             try:
-                qn, own_freq, refs = t.result()
+                qn, own_freq, refs, pool_ts = t.result()
             except Exception as e:  # фетч упал: узел остаётся как был, идём дальше
                 errors.append((p, f"{type(e).__name__}: {e}"))
                 await progress(done, total, p)
                 continue
-            save_phrase(con, qn, own_freq, refs)
+            save_phrase(con, qn, own_freq, refs, pool_ts=pool_ts)
             for ch, _f in refs:
                 if ch not in seen:
                     seen.add(ch)
                     queue.append(ch)
             await progress(done, total, qn)
+
+      # Перепроверка фронтира перед тем, как объявить поддерево загруженным. Частота узла
+      # могла пересечь FLOOR уже ПОСЛЕ решения по нему: фраза приходит из разных пулов с
+      # разными значениями (у Вордстата они ползут), и решение принималось по первому
+      # увиденному. Один раз это оставило 26 незапрошенных узлов под статусом FULLY_LOADED.
+      failed_now = {p for p, _ in errors}
+      late = [p for p in unqueried_frontier(con, root, floor)
+              if p != root and p not in failed_now]
+      if not late or rounds >= RECHECK_ROUNDS:
+          break
+      rounds += 1
+      await progress(done, total, f"перепроверка фронтира: +{len(late)} узлов")
+      seen.update(late)
+      queue.extend(late)
 
     phrases = subtree_phrases(con, root)
     failed = {p for p, _ in errors}
@@ -555,7 +708,10 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
     con.executemany("UPDATE node SET error = ?, error_stage = 'full_load' WHERE phrase = ?",
                     [(msg, p) for p, msg in errors])
     con.commit()
-    return {"fetched": done, "nodes": len(phrases), "errors": errors}
+    # `rechecked` — сколько кругов перепроверки понадобилось, `left` — что осталось
+    # незапрошенным (не ноль = либо фетчи падали, либо кончились круги)
+    return {"fetched": done, "nodes": len(phrases), "errors": errors, "rechecked": rounds,
+            "left": len(unqueried_frontier(con, root, floor))}
 
 
 # ---------- данные для classify ----------
@@ -793,6 +949,7 @@ def project(con, phrase):
 
 def rebuild_model_from_cache(con, limit=LIMIT):
     """Пересбор модели (node/edge) из уже накопленного кэша ответов. Идемпотентен."""
+    probes = {r[0] for r in con.execute("SELECT query FROM probe")}
     for row in con.execute("SELECT query, response FROM cache").fetchall():
         q, resp = row[0], row[1]
         try:
@@ -800,6 +957,8 @@ def rebuild_model_from_cache(con, limit=LIMIT):
         except (ValueError, TypeError):
             continue
         qn = normalize(q)
+        if qn in probes:
+            continue
         own_freq, refs = _parse_pool(qn, data, limit)
         upsert_node(con, qn, freq=own_freq, queried=True, total=len(refs))
         for p, f in refs:

@@ -265,8 +265,9 @@ def test_12_link_opens_report(page, server):
     work = page.get_by_test_id("needs-work").filter(has_text=seed.NEEDS_WORK).first
     expect(work.locator("[data-testid=needs-verdict]")).to_contain_text("BUILD")
 
+    work.locator("[data-testid=needs-menu] summary").click()   # отчёты живут в меню действий
     with page.expect_popup() as popup:
-        work.locator("[data-testid=needs-report]").click()
+        work.locator("[data-testid=needs-report-analyze]").click()
     report = popup.value
     report.wait_for_load_state()
 

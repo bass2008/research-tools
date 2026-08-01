@@ -24,11 +24,11 @@
 
 .tabs {
   display: flex;
-  gap: 6px;
-  margin: 0 0 8px;
+  gap: 7px;
+  margin: 0 0 10px;
 }
 .tab {
-  padding: 4px 12px;
+  padding: 5px 14px;
   border: 1px solid var(--line);
   border-radius: 6px 6px 0 0;
   border-bottom-color: transparent;
@@ -50,8 +50,8 @@
 .llm,
 .ws {
   flex: none;
-  font-size: 12px;
-  padding: 2px 10px;
+  font-size: 14px;
+  padding: 2px 12px;
   border-radius: 10px;
   border: 1px solid var(--line);
   white-space: nowrap;
@@ -77,17 +77,17 @@
 }
 
 .prog {
-  margin-top: 6px;
-  font-size: 12px;
+  margin-top: 7px;
+  font-size: 14px;
   color: var(--mut);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 .prog .bar {
   flex: 1;
-  max-width: 320px;
-  height: 6px;
+  max-width: 384px;
+  height: 7px;
   border-radius: 3px;
   background: var(--line);
   overflow: hidden;
@@ -100,14 +100,14 @@
 }
 
 .cerr {
-  margin-top: 6px;
-  padding: 4px 10px;
+  margin-top: 7px;
+  padding: 5px 12px;
   border: 1px solid var(--bad);
   border-radius: 6px;
   color: var(--bad);
-  font-size: 12px;
+  font-size: 14px;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 .cerr .x {
@@ -121,19 +121,19 @@
 /* ---------- дерево: статусы, скоры, кнопки ---------- */
 
 #tree .hint {
-  margin: 0 0 10px;
-  max-width: 900px;
+  margin: 0 0 12px;
+  max-width: 1080px;
 }
 .roots {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
 }
 .chip {
-  padding: 2px 10px;
+  padding: 2px 12px;
   border: 1px dashed var(--acc);
   border-radius: 12px;
   background: transparent;
@@ -146,14 +146,14 @@
 }
 .empty {
   color: var(--mut);
-  padding: 24px 0;
+  padding: 29px 0;
 }
 
 .st {
   flex: none;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.02em;
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 4px;
   border: 1px solid var(--line);
   color: var(--mut);
@@ -190,18 +190,18 @@
 
 .sc {
   flex: none;
-  font-size: 11px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--ok);
   border: 1px solid var(--ok);
   border-radius: 10px;
-  padding: 0 7px;
+  padding: 0 8px;
 }
 .vd {
   flex: none;
-  font-size: 11px;
+  font-size: 13px;
   border-radius: 10px;
-  padding: 0 7px;
+  padding: 0 8px;
   border: 1px solid var(--line);
 }
 .vd-BUILD {
@@ -219,20 +219,20 @@
 
 .acts {
   display: flex;
-  gap: 4px;
+  gap: 5px;
   flex: none;
   align-items: center;
 }
 .act {
   flex: none;
-  padding: 2px 10px;
-  height: 22px;
+  padding: 2px 12px;
+  height: 26px;
   border: 1px solid var(--acc);
   border-radius: 5px;
   background: var(--bg);
   color: var(--acc);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   text-decoration: none;
   display: inline-flex;
@@ -283,8 +283,8 @@
 
 .spin {
   flex: none;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border: 2px solid var(--line);
   border-top-color: var(--acc);
   border-radius: 50%;
@@ -302,18 +302,18 @@
 .kindpick,
 .serp {
   display: flex;
-  gap: 6px;
+  gap: 7px;
   align-items: center;
   flex-wrap: wrap;
-  margin: 2px 0 4px 32px;
-  font-size: 12px;
+  margin: 2px 0 5px 38px;
+  font-size: 14px;
 }
 .serp a {
   color: var(--acc);
 }
 .nerr {
-  margin: 0 0 4px 32px;
-  font-size: 12px;
+  margin: 0 0 5px 38px;
+  font-size: 14px;
   color: var(--bad);
   word-break: break-word;
 }
@@ -321,23 +321,23 @@
 /* ---------- панели (лог, задачи, отчёты) ---------- */
 
 .pane {
-  padding: 10px var(--pad-x) 40px;
+  padding: 12px var(--pad-x) 48px;
 }
 .bar-row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .logbox {
   max-height: calc(100vh - 220px);
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 7px 12px;
   background: var(--card);
   font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
+  font-size: 14px;
 }
 .logline {
   white-space: pre-wrap;
@@ -362,12 +362,12 @@
 .tbl {
   border-collapse: collapse;
   width: 100%;
-  font-size: 13px;
+  font-size: 16px;
 }
 .tbl th,
 .tbl td {
   text-align: left;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
@@ -380,8 +380,8 @@
   color: var(--bad);
 }
 .ts {
-  font-size: 11px;
-  padding: 1px 6px;
+  font-size: 13px;
+  padding: 1px 7px;
   border-radius: 4px;
   border: 1px solid var(--line);
   white-space: nowrap;
@@ -411,19 +411,19 @@
   z-index: 20;
 }
 .dlg {
-  max-width: 460px;
-  padding: 16px 18px;
+  max-width: 552px;
+  padding: 19px 22px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--bg);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 .dlg p {
-  margin: 10px 0 14px;
+  margin: 12px 0 17px;
 }
 .dlg-btns {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   justify-content: flex-end;
 }
 
@@ -445,7 +445,7 @@
 }
 
 .ntree {
-  font-size: 13px;
+  font-size: 16px;
 }
 .nwork {
   border-bottom: 1px solid var(--line);
@@ -454,25 +454,25 @@
 .nwork > .row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .nbody {
-  padding: 4px 0 8px 26px;
+  padding: 5px 0 10px 31px;
 }
 .nwhy {
   color: var(--mut);
-  padding: 2px 0 4px;
+  padding: 2px 0 5px;
 }
 .nseg {
-  padding: 4px 0 4px 12px;
+  padding: 5px 0 5px 14px;
   border-left: 2px solid var(--line);
-  margin: 4px 0;
+  margin: 5px 0;
 }
 .nseg > .row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .nphrases {
@@ -483,7 +483,7 @@
 }
 .nphrase {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: baseline;
 }
 .nphrase .fr {
@@ -491,12 +491,12 @@
   font-variant-numeric: tabular-nums;
 }
 .nex {
-  padding: 10px 0 0;
+  padding: 12px 0 0;
 }
 .gap {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 4px;
   color: var(--ok);
   border: 1px solid var(--ok);
@@ -504,33 +504,153 @@
 }
 .occ,
 .serp {
-  font-size: 11px;
-  padding: 1px 6px;
+  font-size: 13px;
+  padding: 1px 7px;
   border-radius: 4px;
   color: var(--mut);
   border: 1px solid var(--line);
   white-space: nowrap;
 }
 .nhead {
-  padding: 6px 0 10px;
+  padding: 7px 0 12px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 .nroot,
 .ncond {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 .nroot {
-  padding-bottom: 4px;
+  padding-bottom: 5px;
 }
 .small {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .ts-WAITING {
   color: var(--warn);
   border-color: var(--warn);
+}
+
+/* шанс: оценка сборки, что разбор найдёт незакрытую потребность */
+.chance {
+  display: inline-block;
+  min-width: 31px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.ch-high {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.ch-mid {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+.ch-low {
+  color: var(--mut);
+}
+
+/* легенда дерева: образцы кнопок и значков рядом с объяснением */
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 7px;
+}
+.legend > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.legend .tg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+.legend .ct {
+  flex: none;
+}
+
+/* «?» у заголовка колонки: расшифровка при наведении */
+.q {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  color: var(--mut);
+  cursor: help;
+  user-select: none;
+}
+.q:hover {
+  color: var(--acc);
+  border-color: var(--acc);
+}
+
+/* легенда меток внутри дерева потребностей: в одну строку, переносом */
+.nlegend {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 2px 0 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.nlegend > div {
+  gap: 5px;
+}
+
+/* меню действий у работы */
+.menu {
+  display: inline-block;
+  position: relative;
+}
+.menu > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.menu > summary::-webkit-details-marker {
+  display: none;
+}
+.menu-body {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  white-space: nowrap;
+}
+.menu-body .act {
+  text-align: left;
+}
+
+.menu-sep {
+  margin: 3px 0 1px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--mut);
 }

@@ -53,9 +53,15 @@ async def test_crawl_from_cache_rebuilds_subtree_without_network(cleaned, fetch_
         assert len(fetch_spy) == len(set(fetch_spy)), f"{root}: фраза фетчилась дважды"
         assert set(fetch_spy) <= set(phrases), f"{root}: фетчили что-то вне поддерева"
         # пересечения поддеревьев уже загружены прошлым корнем и заново не фетчатся
-        assert res["fetched"] == need - len(already)
-        assert set(wscore.subtree_phrases(con, root)) == set(phrases), \
-            f"{root}: краул из кэша собрал другое поддерево"
+        # фетчей может выйти БОЛЬШЕ видимого на старте: частота ползёт, и часть узлов
+        # пересекает FLOOR уже по ходу краула — их добирает перепроверка фронтира
+        assert res["fetched"] >= need - len(already)
+        assert wscore.unqueried_frontier(con, root) == [], \
+            f"{root}: поддерево осталось недогруженным"
+        # поддерево может ВЫРАСТИ: догруженные перепроверкой узлы приносят своих детей.
+        # Требуем, чтобы ничего не потерялось, а не точного совпадения со снимком до краула.
+        assert set(phrases) <= set(wscore.subtree_phrases(con, root)), \
+            f"{root}: краул из кэша потерял часть поддерева"
         statuses = {p: wscore.get_node(con, p)["status"] for p in phrases}
         assert set(statuses.values()) == {"FULLY_LOADED"}, f"{root}: {statuses}"
         # фронтир опустел: фетчить в поддереве больше нечего

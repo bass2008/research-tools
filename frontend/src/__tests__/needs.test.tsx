@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NeedsPane } from '../NeedsPane'
-import type { NeedsRow, NeedsTree } from '../api'
+import type { NeedsRow, NeedsTree, TaskRow } from '../api'
 
 const row = (over: Partial<NeedsRow> = {}): NeedsRow => ({
   id: 'local-needs-001-runA',
@@ -19,6 +19,7 @@ const row = (over: Partial<NeedsRow> = {}): NeedsRow => ({
   gaps: 8,
   occupied: 4,
   needs_serp: 11,
+  best_score: 88,
   analyzed: 0,
   error: null,
   ...over,
@@ -30,10 +31,12 @@ const TREE: NeedsTree = {
   root: 'нейросеть бесплатно без регистрации',
   root_freq: 86201,
   created_at: 1785091133,
-  counts: { works: 2, segments: 1, phrases: 4, excluded: 2, gaps: 1, occupied: 1, needs_serp: 1 },
+  counts: { works: 2, best_score: 88, segments: 1, phrases: 4, excluded: 2, gaps: 1, occupied: 1, needs_serp: 1 },
   works: [
     {
       name: 'оживить фото',
+      score: 35,
+      score_why: 'спрос большой, но работу держит Алиса',
       top_freq: 11081,
       phrase_count: 3,
       occupied_by: 'Яндекс Алиса',
@@ -46,6 +49,7 @@ const TREE: NeedsTree = {
         { phrase: 'оживить фото нейросеть бесплатно без регистрации', freq: 11081 },
         { phrase: 'оживление фото нейросеть бесплатно без регистрации', freq: 734 },
       ],
+      artifacts: [],
       analysis: null,
       segments: [
         {
@@ -58,6 +62,8 @@ const TREE: NeedsTree = {
     },
     {
       name: 'написать фанфик',
+      score: 88,
+      score_why: 'узкая аудитория, профильных продуктов нет',
       top_freq: 589,
       phrase_count: 1,
       occupied_by: null,
@@ -67,6 +73,7 @@ const TREE: NeedsTree = {
       serp_question: null,
       why: 'узкая аудитория, мейнстрим не обслуживает',
       phrases: [{ phrase: 'генератор фанфиков нейросеть бесплатно без регистрации', freq: 589 }],
+      artifacts: [],
       analysis: null,
       segments: [],
     },
@@ -143,6 +150,15 @@ describe('вкладка «Дерево потребностей»', () => {
     expect(within(work).getByText(/анимировать статичный снимок/)).toBeTruthy()
   })
 
+  it('шанс виден на работе и объясняется при наведении', async () => {
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const works = await screen.findAllByTestId('needs-work')
+    const score = within(works[0]).getByTestId('needs-score')
+    expect(score).toHaveTextContent('35')
+    expect(score).toHaveAttribute('title', 'спрос большой, но работу держит Алиса')
+  })
+
   it('щель и занятость видны на строке работы', async () => {
     render(<NeedsPane active />)
     await userEvent.click(await screen.findByTestId('needs-row'))
@@ -189,5 +205,121 @@ describe('вкладка «Дерево потребностей»', () => {
     fetchMock.mockImplementation(async () => res(200, { trees: [] }))
     render(<NeedsPane active />)
     expect(await screen.findByText(/деревьев пока нет/)).toBeTruthy()
+  })
+})
+
+describe('меню действий', () => {
+  const opened = async () => {
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const work = (await screen.findAllByTestId('needs-work'))[0]
+    await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
+    return work
+  }
+
+  it('три действия с подсказками', async () => {
+    const work = await opened()
+    for (const a of ['analyze', 'season', 'adjacent']) {
+      const b = within(work).getByTestId('needs-run-' + a)
+      expect(b).toBeEnabled()
+      expect(b.getAttribute('title')!.length).toBeGreaterThan(40)
+    }
+  })
+
+  it('первый запуск идёт сразу, повторный — через подтверждение', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url.includes('/api/needs/season')) return res(200, { task_id: 't9' })
+      if (url.includes('/api/needs/tree/')) {
+        return res(200, {
+          ...TREE,
+          works: [
+            {
+              ...TREE.works[0],
+              artifacts: [
+                {
+                  kind: 'analyze',
+                  created_at: 1,
+                  report_link: 'reports/r1.html',
+                  task_id: 'r1',
+                  verdict: 'SKIP',
+                  verdict_score: 30,
+                  summary: null,
+                },
+              ],
+            },
+            TREE.works[1],
+          ],
+        })
+      }
+      return res(200, { trees: [row()] })
+    })
+    const work = await opened()
+
+    // сезонности ещё не было — запускается без вопросов
+    await userEvent.click(within(work).getByTestId('needs-run-season'))
+    expect(screen.queryByTestId('needs-confirm')).toBeNull()
+
+    // разбор уже был: счётчик на кнопке и подтверждение вместо запуска
+    await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
+    const again = within(work).getByTestId('needs-run-analyze')
+    expect(again).toHaveTextContent('(1)')
+    await userEvent.click(again)
+    expect(await screen.findByTestId('needs-confirm')).toHaveTextContent('уже делали')
+  })
+
+  it('все отчёты остаются ссылками, а не заменяют друг друга', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/tree/')
+        ? res(200, {
+            ...TREE,
+            works: [
+              {
+                ...TREE.works[0],
+                artifacts: [
+                  { kind: 'analyze', created_at: 3, report_link: 'reports/a2.html', task_id: 'a2', verdict: 'MAYBE', verdict_score: 55, summary: null },
+                  { kind: 'analyze', created_at: 2, report_link: 'reports/a1.html', task_id: 'a1', verdict: 'SKIP', verdict_score: 30, summary: null },
+                  { kind: 'season', created_at: 1, report_link: 'reports/s1.html', task_id: 's1', verdict: null, verdict_score: null, summary: 'сезонность есть, размах ×11.9' },
+                ],
+              },
+              TREE.works[1],
+            ],
+          })
+        : res(200, { trees: [row()] }),
+    )
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const work = (await screen.findAllByTestId('needs-work'))[0]
+    // ссылки живут внутри того же меню, что и действия: их может накопиться много
+    await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
+    expect(within(work).getByTestId('needs-report-season').closest('.menu-body')).not.toBeNull()
+
+    const analyze = within(work).getAllByTestId('needs-report-analyze')
+    expect(analyze).toHaveLength(2)
+    expect(analyze[0]).toHaveTextContent('Разбор 1')
+    expect(analyze[1]).toHaveTextContent('Разбор 2')
+    const season = within(work).getByTestId('needs-report-season')
+    expect(season).toHaveAttribute('href', '/reports/s1.html')
+    expect(season.getAttribute('title')).toContain('размах')
+  })
+
+  // отчёт появляется файлом рядом с деревом, а событий второго слоя по WS нет: единственный
+  // сигнал «готово» — смена статуса в журнале задач, и она приходит независимо от того, кто
+  // задачу запускал. После перезагрузки страницы запуск «наш» уже неотличим от чужого.
+  it('перечитывает дерево, когда чужая задача второго слоя завершилась', async () => {
+    const task = (status: string): TaskRow => ({
+      id: 's7', type: 'needs_season', node: 'оживить фото', status: status as TaskRow['status'],
+      created_at: 1, started_at: 1, finished_at: null, error: null,
+    })
+    const { rerender } = render(<NeedsPane active tasks={[task('RUNNING')]} />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    await screen.findAllByTestId('needs-work')
+    const before = fetchMock.mock.calls.filter((c) => String(c[0]).includes('/api/needs/tree/')).length
+
+    rerender(<NeedsPane active tasks={[task('DONE')]} />)
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter((c) => String(c[0]).includes('/api/needs/tree/')).length,
+      ).toBe(before + 1),
+    )
   })
 })

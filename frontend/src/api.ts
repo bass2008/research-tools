@@ -213,6 +213,7 @@ export const estimate = (phrase: string): Promise<Estimate> =>
 
 export interface NeedsCounts {
   works: number
+  best_score: number
   segments: number
   phrases: number
   excluded: number
@@ -253,8 +254,24 @@ export interface NeedsAnalysis {
   searched: string[] | null
 }
 
+export type NeedsAction = 'analyze' | 'season' | 'adjacent'
+
+/** Прогон над работой: разбор, сезонность или смежные ключи. Копятся, не перезаписываются. */
+export interface NeedsArtifact {
+  kind: NeedsAction
+  created_at: number | null
+  report_link: string | null
+  task_id: string | null
+  verdict: string | null
+  verdict_score: number | null
+  summary: string | null
+}
+
 export interface NeedsWork {
   name: string | null
+  // 0-100: шанс, что разбор найдёт незакрытую потребность. Ставит сборка (LLM), не формула.
+  score: number | null
+  score_why: string | null
   top_freq: number | null
   phrase_count: number | null
   occupied_by: string | null
@@ -265,6 +282,7 @@ export interface NeedsWork {
   why: string | null
   phrases: NeedsPhrase[]
   segments: NeedsSegment[]
+  artifacts: NeedsArtifact[]
   analysis: NeedsAnalysis | null
 }
 
@@ -289,9 +307,12 @@ export const needsTrees = (): Promise<{ trees: NeedsRow[] }> => req('/api/needs/
 export const needsTree = (id: string): Promise<NeedsTree> =>
   req(`/api/needs/tree/${encodeURIComponent(id)}`)
 
-/** Разбор работы: выдача по её частотным фразам, затем Opus. Возвращает ack с task_id. */
-export const needsAnalyze = (tree_id: string, work: string): Promise<{ task_id: string }> =>
-  post('/api/needs/analyze', { tree_id, work })
+/** Действие над работой. Повторный запуск разрешён: каждый прогон копит свой артефакт. */
+export const needsRun = (
+  action: NeedsAction,
+  tree_id: string,
+  work: string,
+): Promise<{ task_id: string }> => post('/api/needs/' + action, { tree_id, work })
 
 // ---------- форматирование ----------
 
@@ -308,15 +329,22 @@ function toDate(ts: number | string | null | undefined): Date | null {
 }
 
 /** ЧЧ:ММ:СС — для строк лога. */
-export function fmtTime(ts: number | string | null | undefined): string {
+/** Только время — для мест, где дата и так очевидна. */
+export function fmtClock(ts: number | string | null | undefined): string {
   const d = toDate(ts)
   return d ? `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` : '—'
+}
+
+/** Дата и время: в логе одного времени мало — прогон мог идти вчера. */
+export function fmtTime(ts: number | string | null | undefined): string {
+  const d = toDate(ts)
+  return d ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)} ${fmtClock(ts)}` : '—'
 }
 
 /** ДД.ММ ЧЧ:ММ:СС — для таблиц задач и отчётов. */
 export function fmtWhen(ts: number | string | null | undefined): string {
   const d = toDate(ts)
-  return d ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)} ${fmtTime(ts)}` : '—'
+  return d ? fmtTime(ts) : '—'
 }
 
 /** Ссылка на отчёт: в БД лежит относительный путь вида reports/{id}.html. */

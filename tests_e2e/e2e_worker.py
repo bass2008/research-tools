@@ -159,7 +159,8 @@ class FakeWorker:
             root = params.get("root")
             body = [p for p in phrases if p != root]
             return {"condition": "онлайн · бесплатно",
-                    "works": [{"name": seed.NEEDS_WORK, "phrases": body,
+                    "works": [{"name": seed.NEEDS_WORK, "score": 77,
+                               "score_why": "заготовка", "phrases": body,
                                "top_freq": params.get("root_freq") or 0,
                                "phrase_count": len(body), "occupied_by": None,
                                "unclear": False, "gap_candidate": True, "needs_serp": True,

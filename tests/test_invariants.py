@@ -4,6 +4,8 @@ FSM, отсутствие частичной выдачи, неразрушаю�
 «дальше идёт только transactional», чтение не мутирует, тяжёлые данные не идут через
 диспетчера. Всё на моках: ни сети, ни LLM.
 """
+import asyncio
+
 import pytest
 
 import server
@@ -361,3 +363,52 @@ def test_repair_ignores_descendants_below_floor(empty_db):
 
     assert wscore.repair_fully_loaded(con) == 0
     assert wscore.get_node(con, "корень")["status"] == "FULLY_LOADED"
+
+
+def test_stale_pool_does_not_overwrite_fresh_freq(empty_db):
+    """Частоту переписывает только не более старый пул.
+
+    Раньше побеждал тот, что обработали последним, а порядок обхода к возрасту данных
+    отношения не имеет: пул от 21.07 затирал свежий от 26.07, и решение по FLOOR принималось
+    по устаревшему числу."""
+    con = wscore.connect(empty_db, backfill=False)
+    wscore.upsert_node(con, "фраза", freq=59, freq_at=2_000)      # свежий пул
+    wscore.upsert_node(con, "фраза", freq=49, freq_at=1_000)      # старый пул — не должен победить
+    assert wscore.get_node(con, "фраза")["freq"] == 59
+
+    wscore.upsert_node(con, "фраза", freq=71, freq_at=3_000)      # ещё свежее — побеждает
+    assert wscore.get_node(con, "фраза")["freq"] == 71
+
+    wscore.upsert_node(con, "фраза", freq=12)                     # возраст неизвестен = свежий
+    assert wscore.get_node(con, "фраза")["freq"] == 12
+    con.close()
+
+
+def test_crawl_rechecks_frontier_before_declaring_loaded(empty_db, monkeypatch):
+    """Краул не объявляет поддерево загруженным, пока в нём есть незапрошенные узлы >= FLOOR.
+
+    Воспроизводим сам дефект: фраза сначала приходит из пула со значением НИЖЕ FLOOR (краул
+    её пропускает), а из следующего пула — выше. Без перепроверки фронтира она осталась бы
+    незапрошенной под статусом FULLY_LOADED."""
+    con = wscore.connect(empty_db, backfill=False)
+    LOW, HIGH = wscore.FLOOR - 1, wscore.FLOOR + 9
+    pools = {
+        "корень": (1000, [("корень старый", LOW), ("корень второй", 500)]),
+        "корень второй": (500, [("корень старый", HIGH)]),   # то же слово, значение выше порога
+        "корень старый": (HIGH, []),
+    }
+
+    def fake(phrase, limit=wscore.LIMIT, db_path=None):
+        qn = wscore.normalize(phrase)
+        own, refs = pools.get(qn, (0, []))
+        return qn, own, refs, 1_000
+
+    monkeypatch.setattr(wscore, "fetch_phrase", fake)
+    res = asyncio.run(wscore.crawl_subtree(con, "корень", workers=1))
+
+    assert wscore.unqueried_frontier(con, "корень") == [], "остался незапрошенный узел >= FLOOR"
+    assert wscore.get_node(con, "корень старый")["queried"] == 1, \
+        "узел, чья частота пересекла FLOOR после решения, обязан быть догружен"
+    assert res["fetched"] == 3
+    assert wscore.repair_fully_loaded(con) == 0, "краул оставил нарушение инварианта"
+    con.close()

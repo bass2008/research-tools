@@ -22,11 +22,13 @@ GAP_WORK = "убрать фон на видео"
 def tree_doc(phrases, gap_phrases):
     return {"condition": "онлайн · бесплатно",
             "works": [
-                {"name": WORK, "phrases": phrases, "top_freq": 1000, "phrase_count": len(phrases),
+                {"name": WORK, "score": 40, "score_why": "занято, но выдачу стоит глянуть",
+                 "phrases": phrases, "top_freq": 1000, "phrase_count": len(phrases),
                  "occupied_by": "remove.bg", "unclear": False, "gap_candidate": False,
                  "needs_serp": True, "serp_question": "кто в топе", "why": "одна работа",
                  "segments": []},
-                {"name": GAP_WORK, "phrases": gap_phrases, "top_freq": 40,
+                {"name": GAP_WORK, "score": 85, "score_why": "узко и никем не закрыто",
+                 "phrases": gap_phrases, "top_freq": 40,
                  "phrase_count": len(gap_phrases), "occupied_by": None, "unclear": False,
                  "gap_candidate": True, "needs_serp": False, "serp_question": None,
                  "why": "узко", "segments": []},

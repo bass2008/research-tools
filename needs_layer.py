@@ -6,7 +6,8 @@
 
     <id>/accepted.json      дерево (ответ сборки)
     <id>/params.json        вход сборки: фразы с частотами
-    <id>/analysis/<slug>.json   разбор одной работы: вердикт + ссылка на отчёт
+    <id>/artifacts/<slug>/<kind>-<task>.json   что сделали по работе: разбор, сезонность,
+                                               смежные ключи — каждый прогон отдельным файлом
 
 Выдача при разборе кладётся в общую таблицу `serp` (ключ «фраза+движок»), а не сюда:
 за неё заплачено, и переплачивать при пересборке слоя незачем.
@@ -25,8 +26,11 @@ NEEDS_DIR = ROOT / "logs" / "needs-lab"
 FLOOR = wscore.FLOOR        # ниже в сборку не берём: вглубь мы там и не бурим
 HEAD_FREQ = 30000           # выше — голова, интент размыт по определению
 
-WORK_KEYS = ("name", "top_freq", "phrase_count", "occupied_by", "unclear",
-             "gap_candidate", "needs_serp", "serp_question", "why")
+# `score` ставит САМА сборка (0-100: шанс, что разбор найдёт незакрытую потребность) — это
+# суждение, а не формула по признакам: занятость рынка и кустарность обслуживания из четырёх
+# флагов не выводятся. Порядок работ на экране — по этому числу.
+WORK_KEYS = ("name", "score", "score_why", "top_freq", "phrase_count", "occupied_by",
+             "unclear", "gap_candidate", "needs_serp", "serp_question", "why")
 SEGMENT_KEYS = ("name", "gap_candidate", "why")
 
 
@@ -119,9 +123,12 @@ def find_work(tree, name):
     raise NeedsError(f"работы нет в дереве: {name}")
 
 
-def counts(tree):
+def counts(tree, analyzed=()):
     ws = works(tree)
+    done = {_norm(n) for n in analyzed}
+    fresh = [w.get("score") or 0 for w in ws if _norm(w.get("name")) not in done]
     return {"works": len(ws),
+            "best_score": max(fresh) if fresh else 0,
             "segments": sum(len(w.get("segments") or []) for w in ws),
             "phrases": sum(len(work_phrases(w)) for w in ws),
             "excluded": len(tree.get("excluded") or []),
@@ -132,32 +139,38 @@ def counts(tree):
 
 # ---------- разборы работ ----------
 
-def analysis_dir(tree_id):
-    d = NEEDS_DIR / tree_id / "analysis"
+ARTIFACT_KINDS = ("analyze", "season", "adjacent")
+
+
+def save_artifact(tree_id, work_name, kind, data):
+    """Артефакт работы: разбор, сезонность или смежные ключи.
+
+    Каждый прогон — отдельный файл: старые не перезаписываются. Смысл в том, что повторный
+    разбор идёт по данным, которых раньше не было (появилась сезонность, добрали смежные
+    ключи), и сравнить прогоны важнее, чем хранить последний."""
+    d = NEEDS_DIR / tree_id / "artifacts" / slug(work_name)
     d.mkdir(parents=True, exist_ok=True)
-    return d
-
-
-def save_analysis(tree_id, work_name, data):
-    f = analysis_dir(tree_id) / f"{slug(work_name)}.json"
-    f.write_text(json.dumps({"work": work_name, **data}, ensure_ascii=False, indent=1),
+    f = d / f"{kind}-{data.get('task_id', 'x')}.json"
+    f.write_text(json.dumps({"work": work_name, "kind": kind, **data}, ensure_ascii=False, indent=1),
                  encoding="utf-8")
     return f
 
 
-def analyses(tree_id):
-    """{имя работы: разбор} — по имени, а не по slug: имя и есть ключ работы в дереве."""
-    d = NEEDS_DIR / tree_id / "analysis"
-    if not d.is_dir():
-        return {}
+def work_artifacts(tree_id):
+    """{работа: [артефакт, ...]} — новые сверху. Читает и старую раскладку `analysis/`."""
     out = {}
-    for f in sorted(d.glob("*.json")):
+    root = NEEDS_DIR / tree_id
+    for f in sorted((root / "artifacts").glob("*/*.json")) + sorted((root / "analysis").glob("*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        if isinstance(data, dict) and data.get("work"):
-            out[_norm(data["work"])] = data
+        if not isinstance(data, dict) or not data.get("work"):
+            continue
+        data.setdefault("kind", "analyze")
+        out.setdefault(_norm(data["work"]), []).append(data)
+    for lst in out.values():
+        lst.sort(key=lambda a: -(a.get("created_at") or 0))
     return out
 
 
@@ -173,7 +186,10 @@ def all_analyses():
             continue
         _, meta = _input(params_file)
         by_name = {_norm(w.get("name")): w for w in works(tree)}
-        for name, a in analyses(tid).items():
+        for name, arts in work_artifacts(tid).items():
+            a = next((x for x in arts if x.get("kind") == "analyze"), None)
+            if a is None:
+                continue
             w = by_name.get(name) or {}
             out.append({"tree_id": tid, "work": a.get("work"), "root": meta.get("root"),
                         "condition": tree.get("condition"),
@@ -200,10 +216,14 @@ def rows():
                                           "gaps", "occupied", "needs_serp")}})
             continue
         _, meta = _input(params_file)
+        arts = work_artifacts(tid)
         out.append({"id": tid, "error": None, "condition": tree.get("condition"),
                     "root": meta.get("root"), "root_freq": meta.get("root_freq"),
                     "created_at": int(tree_file.stat().st_mtime),
-                    "analyzed": len(analyses(tid)), **counts(tree)})
+                    "analyzed": sum(1 for v in arts.values()
+                                     if any(x.get("kind") == "analyze" for x in v)),
+                    **counts(tree, [k for k, v in arts.items()
+                                    if any(x.get("kind") == "analyze" for x in v)])})
     out.sort(key=lambda r: (r["created_at"] or 0), reverse=True)
     return out
 
@@ -212,7 +232,7 @@ def detail(tree_id):
     """Одно дерево целиком: работы с частотами фраз и прицепленными разборами."""
     tree, tree_file, params_file = load_tree(tree_id)
     freqs, meta = _input(params_file)
-    done = analyses(tree_id)
+    arts = work_artifacts(tree_id)
 
     def with_freq(items):
         return sorted(({"phrase": p, "freq": freqs.get(p)} for p in (items or [])),
@@ -220,17 +240,23 @@ def detail(tree_id):
 
     out_works = []
     for w in works(tree):
-        a = done.get(_norm(w.get("name")))
+        mine = arts.get(_norm(w.get("name")), [])
+        a = next((x for x in mine if x.get("kind") == "analyze"), None)
         out_works.append({**{k: w.get(k) for k in WORK_KEYS},
                           "phrases": with_freq(w.get("phrases")),
                           "segments": [{**{k: s.get(k) for k in SEGMENT_KEYS},
                                         "phrases": with_freq(s.get("phrases"))}
                                        for s in (w.get("segments") or [])
                                        if isinstance(s, dict)],
+                          "artifacts": [{k: x.get(k) for k in
+                                         ("kind", "created_at", "report_link", "task_id",
+                                          "verdict", "verdict_score", "summary")}
+                                        for x in mine],
                           "analysis": {k: a.get(k) for k in
                                        ("verdict", "verdict_score", "report_link",
                                         "created_at", "searched", "confidence")} if a else None})
-    out_works.sort(key=lambda w: -(w.get("top_freq") or 0))
+    # самое потенциально интересное сверху — по оценке сборки
+    out_works.sort(key=lambda w: (-(w.get("score") or 0), -(w.get("top_freq") or 0)))
     excluded = [{"phrase": e.get("phrase"), "why": e.get("why"), "note": e.get("note"),
                  "freq": freqs.get(e.get("phrase"))}
                 for e in (tree.get("excluded") or []) if isinstance(e, dict)]
@@ -238,7 +264,8 @@ def detail(tree_id):
     return {"id": tree_id, "condition": tree.get("condition"),
             "root": meta.get("root"), "root_freq": meta.get("root_freq"),
             "created_at": int(tree_file.stat().st_mtime),
-            "counts": counts(tree), "works": out_works, "excluded": excluded}
+            "counts": counts(tree, [k for k, v in arts.items()
+                                    if any(x.get("kind") == "analyze" for x in v)]), "works": out_works, "excluded": excluded}
 
 
 def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
@@ -296,6 +323,10 @@ def validate_tree(payload, tree):
             continue
         if not (w.get("name") or "").strip():
             out.append(f"works[{i}]: пустое name")
+        sc = w.get("score")
+        if not isinstance(sc, (int, float)) or not 0 <= sc <= 100:
+            out.append(f"works[{i}] ({w.get('name')}): score должен быть числом 0-100, "
+                       f"получено {sc!r}")
         for ph in work_phrases(w):
             n = _norm(ph)
             dup.append(ph) if n in seen else seen.add(n)
