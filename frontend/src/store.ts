@@ -91,9 +91,15 @@ function upsert<T extends { id: string }>(cur: T[], add: T[], cmp: (a: T, b: T) 
   return [...by.values()].sort(cmp)
 }
 
+/** Локальное действие экрана: вернуться к списку корней (сервер об этом не знает). */
+export type LocalEvent = { type: 'forest' }
+
 /** Применение события WS к состоянию. Чистая функция. */
-export function applyEvent(s: State, ev: WsEvent): State {
+export function applyEvent(s: State, ev: WsEvent | LocalEvent): State {
   switch (ev.type) {
+    // дерево запросов — лес: ни одна ветка не выбрана, показываем все корни
+    case 'forest':
+      return { ...s, root: null, missing: null }
     case 'roots': {
       const nodes = { ...s.nodes }
       collect(ev.data.roots, nodes)

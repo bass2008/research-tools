@@ -239,8 +239,6 @@ def build(db_path):
         for phrase in SERP_PHRASES:
             wscore.save_serp(con, phrase, {e: {"found": 10_000, "docs": _docs(phrase, e)}
                                            for e in wscore.SERP_ENGINES})
-        wscore.save_report(con, REP_HI_ID, REP_HI, f"reports/{REP_HI_ID}.html", created_at=TS)
-        wscore.save_report(con, REP_LO_ID, REP_LO, f"reports/{REP_LO_ID}.html", created_at=TS + 1)
         con.commit()
         # Засеяли достижимое состояние? Сервер чинит инвариант FULLY_LOADED на старте, и
         # незаметно переписанный засев ломает браузерные сценарии таймаутами вместо

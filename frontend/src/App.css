@@ -149,6 +149,13 @@
   padding: 29px 0;
 }
 
+.empty-act {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
 .st {
   flex: none;
   font-size: 12px;
@@ -653,4 +660,50 @@
   border-top: 1px solid var(--line);
   font-size: 11px;
   color: var(--mut);
+}
+
+/* ---------- стоп-слова ---------- */
+
+.stop-block {
+  margin: 22px 0;
+}
+
+.stop-block h3 {
+  font-size: 15px;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.stop-cols {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stop-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.stop-cap {
+  color: var(--mut);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.stop-col select {
+  width: 100%;
+  font: inherit;
+  padding: 4px;
+}
+
+.stop-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none;
+}
+
+.stop-btns button {
+  min-width: 44px;
 }

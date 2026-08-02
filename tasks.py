@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Операции конвейера drill (tech-design §4): load, full_load, search, classify, score,
-analyze, drill.
+Операции конвейера (tech-design §4): загрузка дерева запросов (load, full_load), разбор слов
+на исключения (stopwords_scan) и второй слой (needs_build, needs_analyze, needs_season,
+needs_adjacent).
 
 Правила, общие для всех операций:
 - одна операция = одна строка `task` (дробление на LLM-джобы — деталь транспорта, tech §3);
@@ -31,9 +32,7 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("classify", "score", "analyze", "needs", "analyze_work", "season", "adjacent")
-SCORE_BATCH = 12            # фраз в одном score-джобе (tech §3: батч 8-15)
-DRILL_WIDTH = 4             # кандидатов drill параллельно (СВОЙ семафор, не очередь задач)
+LLM_TYPES = ("needs", "analyze_work", "analyze_adv", "season", "adjacent", "stopwords")
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
 PROGRESS_EVERY = 0.5        # progress краула — не чаще, чем раз в N секунд
 LOG_EVERY = 50              # строка в лог на каждые N фетчей краула
@@ -41,18 +40,20 @@ SERP_TOP = 10               # топ-10 выдачи (design §6.2)
 SERP_REGION = "ru"
 YANDEX_LR = 225             # Россия (Яндекс)
 GOOGLE_LOC = 2643           # Россия (geo target Google)
-HEAD_FREQ = 30000           # freq выше -> classify всегда CATEGORY (design §2)
 NEEDS_SERP_TOP = 1          # по скольким самым частотным фразам работы покупаем выдачу
 ADJACENT_FIRST = 8          # смежных корней в первом заходе
 ADJACENT_MORE = 4           # добор во втором заходе, если всплыл пропущенный корень
 VERDICTS = ("BUILD", "MAYBE", "SKIP")
+DUMP_ANGLES = 5             # запросов на выгрузку: топы по близким фразам пересекаются на 70-80%
+DUMP_MAX_PAGES = 40         # страниц за одну выгрузку
+DUMP_THIN = 1500            # текста меньше — считаем, что страницу рисует скрипт, и рендерим
+DUMP_WORKERS = 8
 
 # Ожидание LLM: (база на операцию, добавка на каждую следующую часть), секунды.
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
-# (tech §3): минуты для classify/score, десятки минут для analyze.
-LLM_TIMEOUT = {"classify": (300, 90), "score": (300, 90), "analyze": (2400, 0),
-               "needs": (2400, 0), "analyze_work": (2400, 0),
-               "season": (600, 0), "adjacent": (900, 300)}
+# (tech §3): минуты на толкование готовых чисел, десятки минут на сборку и разбор.
+LLM_TIMEOUT = {"needs": (2400, 0), "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
+               "season": (600, 0), "adjacent": (900, 300), "stopwords": (900, 0)}
 
 _serp_client = httpx.Client(timeout=60)
 _prompts = {}
@@ -136,16 +137,6 @@ def enqueue(ctx, op, phrase, params=None):
     return task_id
 
 
-async def run_step(ctx, op, phrase, params=None, lock=None):
-    """Шаг drill ИНЛАЙН (await, не через очередь — иначе вложенные ожидания делят пул).
-    Своя строка task и своя блокировка на своих узлах. -> True, если шаг удался."""
-    node = wscore.normalize(phrase)
-    task_id = create_task(ctx, op, node, params)
-    nodes = [wscore.normalize(p) for p in (lock if lock is not None else [node])]
-    ctx.acquire(nodes, task_id)
-    return await execute(ctx, task_id, lock=nodes)
-
-
 async def execute(ctx, task_id, lock=None):
     """Выполнить задачу: RUNNING -> DONE|FAILED, события/лог, снятие блокировки.
     Исключение операции не всплывает наружу: это штатный отказ (task FAILED + лог)."""
@@ -180,8 +171,9 @@ async def execute(ctx, task_id, lock=None):
         ctx.release(nodes, task_id)
         # занятость работы во втором слое снимаем здесь же: иначе новая операция легко
         # забудет это сделать и работа останется навсегда «занятой»
-        act = {"needs_analyze": "analyze", "needs_season": "season",
-               "needs_adjacent": "adjacent"}.get(op)
+        act = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
+               "needs_season": "season", "needs_adjacent": "adjacent",
+               "needs_dump": "dump"}.get(op)
         if act and isinstance(params, dict) and params.get("tree_id"):
             ctx.needs_busy.discard((params["tree_id"],
                                     needs_layer._norm(params.get("work")), act))
@@ -406,7 +398,7 @@ async def full_load(ctx, task_id, phrase, params):
             "rechecked": res.get("rechecked", 0), "left": res.get("left", 0)}
 
 
-async def _ensure_serp(ctx, qn, stage="search"):
+async def _ensure_serp(ctx, qn, stage="needs_analyze"):
     """Выдача по фразе есть в `serp` — иначе купить и сохранить. -> {движок: сколько док.}.
 
     Инвариант: пишем ОБЕ выдачи или ни одной — падение движка не оставляет частичной.
@@ -426,182 +418,6 @@ async def _ensure_serp(ctx, qn, stage="search"):
     ctx.log("INFO", stage, qn,
             f"выдача сохранена: yandex {counts['yandex']} док., google {counts['google']} док.")
     return counts
-
-
-async def search(ctx, task_id, phrase, params):
-    """Выдача Яндекс+Google, топ-10, регион ru (TRANSACTIONAL -> SEARCHED)."""
-    qn = wscore.normalize(phrase)
-    _save_params(ctx, task_id, {"phrase": qn, "engines": list(wscore.SERP_ENGINES),
-                                "top": SERP_TOP, "region": SERP_REGION})
-    counts = await _ensure_serp(ctx, qn)
-    ctx.publish("node", wscore.set_status(ctx.con, qn, "SEARCHED"))
-    return {"yandex": counts["yandex"], "google": counts["google"]}
-
-
-# ---------- операции: LLM ----------
-
-async def classify(ctx, task_id, phrase, params):
-    """Разметка поддерева по интенту чанками по ~120 узлов (FULLY_LOADED -> интент).
-    task.node — корень поддерева, чтобы строка в журнале была читаемой (tech §4)."""
-    root = wscore.normalize(phrase)
-    chunks = wscore.subtree_for_classify(ctx.con, root)
-    nodes = [n for c in chunks for n in c]
-    if not nodes:
-        raise RuntimeError("нечего классифицировать: поддерево пусто")
-    # в журнал кладём лёгкую сводку: сами nodes уходят в params джобов, а не в БД
-    _save_params(ctx, task_id, {"root": root, "nodes": len(nodes), "jobs": len(chunks)})
-    jobs = [_job(task_id, i, "classify", {"root": root, "nodes": c}) for i, c in enumerate(chunks)]
-    answers = await _run_llm(ctx, "classify", root, jobs)
-
-    marks = {}
-    for res in answers:
-        for it in _results(res):
-            p = wscore.normalize(it.get("phrase") or "")
-            if p:
-                marks[p] = it
-    counts, missing, skipped, sent = {}, 0, 0, 0
-    for n in nodes:
-        p = n["phrase"]
-        it = marks.get(p)
-        if it is None:
-            missing += 1
-            continue
-        kind = wscore.normalize(it.get("kind") or "")
-        if kind not in wscore.KIND_STATUS:
-            ctx.log("WARN", "classify", p, f"неизвестный kind от LLM: {it.get('kind')!r}")
-            missing += 1
-            continue
-        row = wscore.get_node(ctx.con, p)
-        if row is None or row["status"] != "FULLY_LOADED":
-            skipped += 1          # идемпотентность: уже размечен или ушёл дальше
-            continue
-        if (row["freq"] or 0) > HEAD_FREQ and kind != "category":
-            ctx.log("INFO", "classify", p,
-                    f"freq={row['freq']} > {HEAD_FREQ}: {kind} -> category (голова, интент размыт)")
-            kind = "category"
-        delta = wscore.set_status(ctx.con, p, wscore.KIND_STATUS[kind], kind=kind,
-                                  classify_conf=_num(it.get("confidence"), 0, 1),
-                                  classify_reason=_str(it.get("reason")))
-        counts[kind] = counts.get(kind, 0) + 1
-        if sent < MAX_NODE_DELTAS:   # тысячи дельт затопили бы канал (tech §6.2)
-            ctx.publish("node", delta)
-            sent += 1
-    _publish_node(ctx, root)
-    marked = sum(counts.values())
-    ctx.log("INFO", "classify", root,
-            f"размечено {marked} из {len(nodes)}: "
-            + (", ".join(f"{k}={v}" for k, v in sorted(counts.items())) or "—")
-            + f"; пропущено {skipped}, без разметки {missing}")
-    # Ничего не разметили, хотя узлы ждали разметки — это отказ, а не успех: иначе
-    # сломанный промпт выглядел бы как выполненная операция (design §0 «никаких немых падений»).
-    # Случай «всё уже размечено ранее» (marked=0, missing=0, skipped>0) отказом НЕ считаем.
-    if marked == 0 and missing:
-        raise RuntimeError(f"не разметлен ни один узел из {len(nodes)} "
-                           f"(без разметки {missing}): похоже, сломан промпт или схема ответа")
-    return {"nodes": len(nodes), "jobs": len(jobs), "marked": marked,
-            "skipped": skipped, "missing": missing, **counts}
-
-
-async def score(ctx, task_id, phrase, params):
-    """Оценка по выдаче батчами 8-15 фраз (SEARCHED -> SCORED|LOW_SCORED).
-    params может нести список фраз (drill оценивает пачку одной операцией); task.node —
-    первая фраза батча, полный список в params, чтобы UI показал «фраза +N»."""
-    phrases = [wscore.normalize(p) for p in ((params or {}).get("phrases") or [phrase])]
-    _save_params(ctx, task_id, {"phrases": phrases})
-    items, skipped = [], 0
-    for p in phrases:
-        row = wscore.get_node(ctx.con, p)
-        if row is None:
-            continue
-        if row["status"] != "SEARCHED":
-            skipped += 1          # идемпотентность: уже оценён или ещё не искали
-            continue
-        serp = wscore.load_serp(ctx.con, p)
-        if not all(e in serp for e in wscore.SERP_ENGINES):
-            ctx.log("ERROR", "score", p, "нет сохранённой выдачи — оценивать нечего")
-            continue
-        items.append({"phrase": p, "freq": row["freq"] or 0,
-                      "yandex": serp["yandex"]["docs"], "google": serp["google"]["docs"]})
-    if not items:
-        raise RuntimeError(f"нет фраз с выдачей для оценки (пропущено {skipped})")
-    batches = list(_chunks(items, SCORE_BATCH))
-    jobs = [_job(task_id, i, "score", {"items": b}) for i, b in enumerate(batches)]
-    answers = await _run_llm(ctx, "score", items[0]["phrase"], jobs)
-
-    wanted = {i["phrase"] for i in items}
-    high = low = nulls = 0
-    for res in answers:
-        for it in _results(res):
-            p = wscore.normalize(it.get("phrase") or "")
-            if p not in wanted:
-                ctx.log("WARN", "score", p or None, "LLM вернул фразу, которой не было во входе")
-                continue
-            cy = _num(it.get("competition_yandex"), 0, 100)
-            cg = _num(it.get("competition_google"), 0, 100)
-            weights = it.get("weights") if isinstance(it.get("weights"), dict) else None
-            raw = {"competition_yandex": None if cy is None else int(cy),
-                   "competition_google": None if cg is None else int(cg),
-                   "score_weights": _dump(weights),
-                   "description": _str(it.get("description")),
-                   "signals_json": _dump(it.get("signals") if isinstance(it.get("signals"), list) else None)}
-            sc = _num(it.get("score"), 0, 100)
-            head = f"y={raw['competition_yandex']}, g={raw['competition_google']}, веса {weights}"
-            if sc is None:
-                # оценить нечего: узел остаётся SEARCHED, ошибка в лог (design §2)
-                nulls += 1
-                ctx.log("ERROR", "score", p, f"{head} -> score=null, оценить нечего, узел остаётся SEARCHED")
-                ctx.publish("node", wscore.set_status(
-                    ctx.con, p, None, error="score = null: оценить нечего", error_stage="score", **raw))
-                continue
-            status = "SCORED" if sc > wscore.SCORE_THRESHOLD else "LOW_SCORED"
-            ctx.publish("node", wscore.set_status(ctx.con, p, status, score=sc, **raw))
-            ctx.log("INFO", "score", p, f"{head} -> score={sc:g} -> {status}")
-            high += status == "SCORED"
-            low += status == "LOW_SCORED"
-    # Ни одна фраза не обработана, хотя ждали оценки — отказ, а не успех (см. classify).
-    if high + low + nulls == 0 and not skipped:
-        raise RuntimeError(f"не оценена ни одна из {len(items)} фраз: "
-                           "похоже, сломан промпт или схема ответа")
-    return {"phrases": len(items), "jobs": len(jobs), "scored": high, "low_scored": low,
-            "nulls": nulls, "skipped": skipped}
-
-
-async def analyze(ctx, task_id, phrase, params):
-    """Разбор ниши одним джобом (SCORED -> ANALYZED): HTML-отчёт на диск + строка report.
-    Имя файла и report.id = id этой операции (tech §6 «Правила»)."""
-    qn = wscore.normalize(phrase)
-    row = wscore.get_node(ctx.con, qn)
-    if row is None:
-        raise RuntimeError("узел исчез из модели")
-    serp = wscore.load_serp(ctx.con, qn)
-    jparams = {"phrase": qn, "freq": row["freq"] or 0, "score": row["score"],
-               "description": row["description"],
-               "yandex": serp.get("yandex", {}).get("docs", []),
-               "google": serp.get("google", {}).get("docs", [])}
-    _save_params(ctx, task_id, {k: v for k, v in jparams.items() if k not in ("yandex", "google")})
-    res = (await _run_llm(ctx, "analyze", qn, [_job(task_id, 0, "analyze", jparams)]))[0]
-    if not isinstance(res, dict):
-        raise ValueError("analyze вернул не объект")
-    verdict = str(res.get("recommendation") or "").strip().upper()
-    if verdict not in VERDICTS:
-        raise ValueError(f"неизвестный recommendation: {res.get('recommendation')!r}")
-    vscore = _num(res.get("verdict_score"), 0, 100)
-    if vscore is None:
-        raise ValueError("analyze не вернул verdict_score")
-    html = res.get("report_html")
-    if not isinstance(html, str) or len(html.strip()) < 100:
-        raise ValueError("analyze не вернул report_html")
-
-    REPORTS.mkdir(parents=True, exist_ok=True)
-    (REPORTS / f"{task_id}.html").write_text(html, encoding="utf-8")
-    link = f"reports/{task_id}.html"
-    wscore.save_report(ctx.con, task_id, qn, link)
-    ctx.publish("node", wscore.set_status(ctx.con, qn, "ANALYZED",
-                                          verdict=verdict, verdict_score=vscore))
-    ctx.publish("report", wscore.report_row(ctx.con, task_id))
-    ctx.log("INFO", "analyze", qn,
-            f"вердикт {verdict}, verdict_score={vscore:g}, отчёт {link} ({len(html)} симв.)")
-    return {"verdict": verdict, "verdict_score": vscore, "link": link}
 
 
 # ---------- второй слой: сборка дерева потребностей и разбор работы ----------
@@ -711,7 +527,11 @@ async def needs_analyze(ctx, task_id, phrase, params):
     return await _needs_analyze(ctx, task_id, tree_id, work_name)
 
 
-async def _needs_analyze(ctx, task_id, tree_id, work_name):
+async def _analyze_input(ctx, task_id, tree_id, work_name, stage):
+    """Общий вход обоих разборов: работа, её фразы, выдача и накопленное по работе.
+
+    Выдача берётся из общего оплаченного кэша, поэтому второй разбор по уже разобранной
+    работе не стоит ни одного запроса. -> (data, jparams)."""
     data = needs_layer.work_input(tree_id, work_name, NEEDS_SERP_TOP)
     if not data["phrases"]:
         raise RuntimeError(f"в работе {work_name!r} нет фраз")
@@ -720,7 +540,7 @@ async def _needs_analyze(ctx, task_id, tree_id, work_name):
                                 "phrases": len(data["phrases"]), "search": data["search"]})
     serps = {}
     for qn in data["search"]:
-        await _ensure_serp(ctx, qn, stage="needs_analyze")
+        await _ensure_serp(ctx, qn, stage=stage)
         s = wscore.load_serp(ctx.con, qn)
         serps[qn] = {e: s.get(e, {}).get("docs", []) for e in wscore.SERP_ENGINES}
 
@@ -736,26 +556,88 @@ async def _needs_analyze(ctx, task_id, tree_id, work_name):
                      ("keys", "total_freq", "ours", "covered", "comment")} if adjacent else None,
         "previous_verdicts": [{"verdict": a.get("verdict"), "verdict_score": a.get("verdict_score"),
                                "created_at": a.get("created_at")}
-                              for a in prev if a.get("kind") == "analyze"],
+                              for a in prev if a.get("kind") in ("analyze", "analyze_adv")],
     }
     jparams = {**{k: data[k] for k in ("condition", "root", "work", "segments", "phrases")},
                "serps": serps, "context": context}
-    res = (await _run_llm(ctx, "analyze_work", work_name,
-                          [_job(task_id, 0, "analyze_work", jparams)]))[0]
+    return data, jparams
+
+
+def _verdict_of(res, op):
+    """Общая проверка ответа разбора: вердикт, оценка, непустой отчёт."""
     if not isinstance(res, dict):
-        raise ValueError("analyze_work вернул не объект")
+        raise ValueError(f"{op} вернул не объект")
     verdict = str(res.get("recommendation") or "").strip().upper()
     if verdict not in VERDICTS:
         raise ValueError(f"неизвестный recommendation: {res.get('recommendation')!r}")
     vscore = _num(res.get("verdict_score"), 0, 100)
     if vscore is None:
-        raise ValueError("analyze_work не вернул verdict_score")
+        raise ValueError(f"{op} не вернул verdict_score")
     html = res.get("report_html")
     if not isinstance(html, str) or len(html.strip()) < 100:
-        raise ValueError("analyze_work не вернул report_html")
+        raise ValueError(f"{op} не вернул report_html")
+    return verdict, vscore, html
+
+
+async def needs_analyze_adv(ctx, task_id, phrase, params):
+    """`Analyze Adv`: второй разбор той же работы с другим вопросом (design §4.5).
+
+    Обычный разбор спрашивает «можно ли перехватить поисковый трафик» и делит спрос на
+    конкуренцию. Этот спрашивает «какую ОДНУ функцию тут можно сделать, найдут ли её из поиска
+    и платит ли за неё кто-то уже сегодня» — занятость ниши в нём не знаменатель, а
+    подтверждение спроса. Выдача берётся из кэша, поэтому по разобранной работе он бесплатен."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    if not tree_id or not work_name:
+        raise RuntimeError("нужны tree_id и work")
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name, "needs_analyze_adv")
+
+    res = (await _run_llm(ctx, "analyze_adv", work_name,
+                          [_job(task_id, 0, "analyze_adv", jparams)]))[0]
+    verdict, vscore, html = _verdict_of(res, "analyze_adv")
+    funcs = res.get("functions")
+    if not isinstance(funcs, list) or not funcs:
+        raise ValueError("analyze_adv не вернул ни одной функции")
+    keep = ("name", "io", "entry_query", "entry_freq", "paid_proof", "edge", "channel",
+            "effort_weeks", "score", "why", "kill_test")
+    funcs = [{k: f.get(k) for k in keep} for f in funcs if isinstance(f, dict) and f.get("name")]
+    if not funcs:
+        raise ValueError("в functions нет ни одной записи с именем")
+    funcs.sort(key=lambda f: -(_num(f.get("score"), 0, 100) or 0))
+
+    best = funcs[0]
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    page = _report_page(f"Разбор Adv: {work_name}",
+                        f"функций {len(funcs)} · лучшая «{best.get('name')}» "
+                        f"· уверенность {_num(res.get('confidence'), 0, 1)}",
+                        html, verdict, vscore)
+    (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
+    link = f"reports/{task_id}.html"
+    needs_layer.save_artifact(tree_id, work_name, "analyze_adv", {
+        "verdict": verdict, "verdict_score": vscore,
+        "confidence": _num(res.get("confidence"), 0, 1),
+        "report_link": link, "task_id": task_id, "created_at": _now(),
+        "searched": data["search"], "functions": funcs,
+        "summary": f"{len(funcs)} функц.: «{best.get('name')}» — {best.get('score')}"})
+    ctx.log("INFO", "needs_analyze_adv", work_name,
+            f"функций {len(funcs)}, лучшая «{best.get('name')}» ({best.get('score')}), "
+            f"вердикт {verdict} {vscore:g}, отчёт {link}")
+    return {"verdict": verdict, "verdict_score": vscore, "functions": len(funcs),
+            "best": best.get("name"), "link": link, "tree_id": tree_id, "work": work_name}
+
+
+async def _needs_analyze(ctx, task_id, tree_id, work_name):
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name, "needs_analyze")
+    res = (await _run_llm(ctx, "analyze_work", work_name,
+                          [_job(task_id, 0, "analyze_work", jparams)]))[0]
+    verdict, vscore, html = _verdict_of(res, "analyze_work")
 
     REPORTS.mkdir(parents=True, exist_ok=True)
-    (REPORTS / f"{task_id}.html").write_text(_with_inputs(html, jparams), encoding="utf-8")
+    page = _report_page(f"Ниша: {work_name}",
+                        f"уверенность {_num(res.get('confidence'), 0, 1)} · "
+                        f"top-freq {data['work'].get('top_freq')} · "
+                        f"{len(data['phrases'])} формулировок", html, verdict, vscore)
+    (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
     needs_layer.save_artifact(tree_id, work_name, "analyze", {
         "verdict": verdict, "verdict_score": vscore,
@@ -799,15 +681,47 @@ def _chart(series, cap=560, h=120):
             + "".join(bars) + "".join(labels) + "</svg>")
 
 
-def _mini_report(title, subtitle, body):
-    return (f"<!doctype html><html lang=ru><head><meta charset=utf-8><title>{title}</title>"
-            "<style>body{font:15px/1.5 system-ui;max-width:820px;margin:40px auto;padding:0 16px}"
-            "h1{font-size:22px;margin:0 0 4px}.sub{color:#888;margin:0 0 24px}"
-            "table{border-collapse:collapse;width:100%;font-size:14px}"
-            "td,th{border-bottom:1px solid #e3e6ea;padding:5px 8px;text-align:left}"
-            ".num{text-align:right}blockquote{background:#f6f8fa;border:0;margin:18px 0;"
-            "padding:14px 16px;border-radius:8px}</style></head><body>"
-            f"<h1>{title}</h1><p class=sub>{subtitle}</p>{body}</body></html>")
+_CSS_CACHE = {}
+
+
+def _report_css():
+    """Стили отчёта — из `templates/report.html`, единственного места, где они описаны."""
+    if "css" not in _CSS_CACHE:
+        try:
+            t = (PROMPTS.parent / "templates" / "report.html").read_text(encoding="utf-8")
+            _CSS_CACHE["css"] = re.search(r"<style>(.*?)</style>", t, re.S).group(1)
+        except (OSError, AttributeError):
+            _CSS_CACHE["css"] = ("body{font:16px/1.6 system-ui;max-width:900px;margin:2rem auto;"
+                                 "padding:0 1rem}table{border-collapse:collapse;width:100%}"
+                                 "td,th{border-bottom:1px solid #8884;padding:.4em .6em}")
+    return _CSS_CACHE["css"]
+
+
+def _mini_report(title, subtitle, body, verdict=None, score=None):
+    """Готовая страница отчёта: оболочка и стили НАШИ, от модели приходит только тело.
+
+    Модель регулярно возвращает фрагмент без <html> и <style> — в браузере это нечитаемо.
+    Полагаться на то, что она соберёт документ, нельзя: шаблон лежит в репозитории, а агент
+    в репозиторий за файлами не ходит. Шапка с крупным вердиктом — из того же шаблона: по ней
+    отчёт читается с первого экрана, не вчитываясь в текст."""
+    hero = ""
+    if verdict:
+        hero = (f'<div class="hero"><span class="verdict {verdict}">{verdict}</span>'
+                f'<span><span class="bigscore">{score:g}</span>'
+                f'<span class="muted">/100</span></span>'
+                f'<span class="muted">{subtitle}</span></div>')
+    else:
+        hero = f'<p class="muted sub">{subtitle}</p>'
+    return (f"<!doctype html><html lang=ru><head><meta charset=utf-8>"
+            f"<meta name=viewport content=\"width=device-width, initial-scale=1\">"
+            f"<title>{title}</title><style>{_report_css()}</style></head><body>"
+            f"<h1>{title}</h1>{hero}{body}</body></html>")
+
+
+def _report_page(title, subtitle, html, verdict=None, score=None):
+    """Ответ модели -> страница. Полный документ оставляем как есть, фрагмент заворачиваем."""
+    return (html if "<html" in html[:2000].lower()
+            else _mini_report(title, subtitle, html, verdict, score))
 
 
 async def needs_season(ctx, task_id, phrase, params):
@@ -937,110 +851,253 @@ async def needs_adjacent(ctx, task_id, phrase, params):
     return {"keys": len(measured), "total_freq": total, "ours": ours, "link": link}
 
 
-# ---------- drill ----------
+# ---------- выгрузка выдачи (полные страницы, без LLM) ----------
 
-def _subtree_with(ctx, root, statuses):
-    """Узлы поддерева в указанных статусах, по убыванию частоты."""
-    phrases = wscore.subtree_phrases(ctx.con, root)
-    found = []
-    for chunk in _chunks(phrases, 400):
-        qs = ",".join("?" * len(chunk))
-        ss = ",".join("?" * len(statuses))
-        found += ctx.con.execute(
-            f"SELECT phrase, COALESCE(freq, 0) FROM node "
-            f"WHERE phrase IN ({qs}) AND status IN ({ss})", (*chunk, *statuses)).fetchall()
-    found.sort(key=lambda r: -r[1])
-    return [r[0] for r in found]
+def _clean_text(html):
+    h = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", html)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h)).strip()
 
 
-async def drill(ctx, task_id, phrase, params):
-    """Оркестратор (tech §4): full_load -> classify -> по каждому TRANSACTIONAL
-    search -> score -> по каждому SCORED analyze. Отдельной ручки-порога нет: планку
-    задаёт порог score. Каждый шаг изолирован (падение -> лог, идём дальше),
-    идемпотентен (узлы в целевом статусе пропускаются) и заводит свою строку task;
-    блокировку на корне drill держит до конца."""
-    root = wscore.normalize(phrase)
-    width = asyncio.Semaphore(DRILL_WIDTH)   # ОТДЕЛЬНЫЙ семафор фан-аута, не очередь задач
-    prog = {"done": 0, "total": 0}
-    stats = {"search": 0, "score": 0, "analyze": 0, "failed": 0}
+def _http_page(url, timeout=15):
+    """Обычная загрузка. -> (html, статус). Дёшево и покрывает большинство страниц."""
+    import urllib.request
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+        "Accept-Language": "ru,en;q=0.8"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read(2_000_000).decode("utf-8", "ignore"), r.status
 
-    def bump(total=0, done=0):
-        prog["total"] += total
-        prog["done"] += done
-        ctx.publish("progress", {"stage": "drill", "node": root, **prog})
 
-    async def step(op, node, sparams=None, lock=None):
+def _render_page(url, timeout=25000):
+    """Догрузка браузером — только для страниц, которые скрипт рисует на клиенте.
+
+    Замерено на реальной выдаче: сырым HTTP читаются 17 ссылок из 18, и не читается ровно
+    та, где живёт инструмент. Статьи отдаются как есть, SPA-инструменты — нет."""
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as pw:
+        b = pw.chromium.launch(headless=True)
         try:
-            ok = await run_step(ctx, op, node, sparams, lock)
-        except Exception as e:   # сам шаг ошибку уже залогировал; тут — страховка
-            ctx.log("ERROR", "drill", node, f"шаг {op} упал: {type(e).__name__}: {e}")
-            ok = False
-        if not ok:
-            stats["failed"] += 1
-        bump(done=1)
-        return ok
-
-    # 1. загрузка поддерева
-    if _subtree_with(ctx, root, ("NEW", "LOADED")):
-        bump(total=1)
-        await step("full_load", root)
-    else:
-        ctx.log("INFO", "drill", root, "поддерево уже загружено — full_load пропущен")
-
-    # 2. разметка по интенту
-    if _subtree_with(ctx, root, ("FULLY_LOADED",)):
-        bump(total=1)
-        await step("classify", root)
-    else:
-        ctx.log("INFO", "drill", root, "нечего классифицировать — classify пропущен")
-
-    # 3. выдача по всем transactional-узлам поддерева
-    cands = _subtree_with(ctx, root, ("TRANSACTIONAL",))
-    ctx.log("INFO", "drill", root, f"кандидатов на search: {len(cands)}")
-    if cands:
-        bump(total=len(cands))
-
-        async def one_search(p):
-            async with width:
-                if await step("search", p):
-                    stats["search"] += 1
-
-        await asyncio.gather(*(one_search(p) for p in cands))
-
-    # 4. оценка: одна операция на всю пачку (батчи 8-15 фраз внутри)
-    ready = _subtree_with(ctx, root, ("SEARCHED",))
-    ctx.log("INFO", "drill", root, f"кандидатов на score: {len(ready)}")
-    if ready:
-        bump(total=1)
-        if await step("score", ready[0], {"phrases": ready}, lock=ready):
-            stats["score"] = len(ready) - len(_subtree_with(ctx, root, ("SEARCHED",)))
-
-    # 5. разбор всех перспективных
-    good = _subtree_with(ctx, root, ("SCORED",))
-    ctx.log("INFO", "drill", root, f"кандидатов на analyze: {len(good)}")
-    if good:
-        bump(total=len(good))
-
-        async def one_analyze(p):
-            async with width:
-                if await step("analyze", p):
-                    stats["analyze"] += 1
-
-        await asyncio.gather(*(one_analyze(p) for p in good))
-
-    left = _subtree_with(ctx, root, ("NEW", "LOADED", "FULLY_LOADED", "TRANSACTIONAL",
-                                     "SEARCHED", "SCORED"))
-    _publish_node(ctx, root)
-    ctx.log("INFO", "drill", root,
-            f"итог: search {stats['search']}, score {stats['score']}, analyze {stats['analyze']}, "
-            f"неудачных шагов {stats['failed']}, нетерминальных узлов осталось {len(left)}")
-    return {**stats, "non_terminal_left": len(left)}
+            page = b.new_page(user_agent="Mozilla/5.0 (X11; Linux x86_64) Chrome/120")
+            page.goto(url, wait_until="networkidle", timeout=timeout)
+            return page.content(), 200
+        finally:
+            b.close()
 
 
-OPS = {"load": load, "full_load": full_load, "search": search,
+def _fetch_page(url):
+    """Страница целиком: сначала HTTP, при отказе или пустоте — браузер.
+    -> {html, status, text_len, method}."""
+    try:
+        html, status = _http_page(url)
+        if len(_clean_text(html)) >= DUMP_THIN:
+            return {"html": html, "status": status, "text_len": len(_clean_text(html)),
+                    "method": "http"}
+        thin = html
+    except Exception as e:
+        thin, status = "", f"{type(e).__name__}"
+    try:
+        html, _ = _render_page(url)
+        return {"html": html, "status": 200, "text_len": len(_clean_text(html)),
+                "method": "render"}
+    except Exception as e:
+        return {"html": thin, "status": status if thin else f"{type(e).__name__}",
+                "text_len": len(_clean_text(thin)), "method": "http" if thin else "failed"}
+
+
+_MARKERS = (("как", ("как", "инструкц", "пошагов", "самом")),
+            ("бесплатно", ("бесплатн", "без регистрац", "онлайн бесплатн")),
+            ("деньги", ("цена", "стоимость", "купить", "сервис", "подписк", "тариф")))
+
+
+def _dump_queries(ctx, tree_id, work_name, data):
+    """Углы выгрузки: не все формулировки работы, а разные ИНТЕНТЫ.
+
+    Топ-10 по шести близким фразам пересекается на 70-80% — платить шесть раз за одни и те же
+    домены незачем. Ценность даёт разный интент: головная фраза, фраза кандидата из Adv-разбора,
+    «как это делают руками», «бесплатно», коммерческая."""
+    picked, seen = [], set()
+
+    def add(ph, why):
+        ph = wscore.normalize(ph or "")
+        if ph and ph not in seen:
+            seen.add(ph)
+            picked.append({"query": ph, "why": why})
+
+    phrases = data["phrases"]
+    add(phrases[0]["phrase"], "головная фраза работы")
+
+    prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
+    adv = next((a for a in prev if a.get("kind") == "analyze_adv"), None)
+    if adv and (adv.get("functions") or []):
+        add((adv["functions"][0] or {}).get("entry_query"), "входная фраза кандидата (Adv)")
+
+    # остальные углы ищем среди фраз ветки: они уже собраны краулом, искать в сети нечего
+    _, tree_file, params_file = needs_layer.load_tree(tree_id)
+    branch, _ = needs_layer._input(params_file)
+    core = wscore.words_of(phrases[0]["phrase"])
+    pool = sorted(((p, f or 0) for p, f in branch.items()), key=lambda x: -x[1])
+    for label, marks in _MARKERS:
+        for p, f in pool:
+            if len(picked) >= DUMP_ANGLES:
+                break
+            if any(m in p for m in marks) and len(wscore.words_of(p) & core) >= 2:
+                add(p, f"угол «{label}» ({f})")
+                break
+    for p in phrases[1:]:
+        if len(picked) >= DUMP_ANGLES:
+            break
+        add(p["phrase"], "вторая по частоте формулировка")
+    return picked[:DUMP_ANGLES]
+
+
+def _dump_index(root, work_name, queries, saved):
+    """index.html рядом с выгрузкой: по нему её открывают из интерфейса."""
+    rows = "".join(
+        f"<tr><td>{i['engine']}</td><td class=num>{i['rank']}</td>"
+        f"<td><a href=\"{i['file']}\">{i['domain']}</a></td>"
+        f"<td class=muted>{i['query']}</td><td class=num>{i['text_len']}</td>"
+        f"<td class=muted>{i['method']} · {i['status']}</td></tr>" for i in saved)
+    qs = "".join(f"<li><b>{q['query']}</b> — {q['why']}</li>" for q in queries)
+    body = (f"<h2>Запросы ({len(queries)})</h2><ul>{qs}</ul>"
+            f"<h2>Страницы ({len(saved)})</h2><table><tr><th>движок</th><th class=num>поз.</th>"
+            f"<th>домен</th><th>запрос</th><th class=num>текста</th><th>как взято</th></tr>"
+            f"{rows}</table>")
+    (root / "index.html").write_text(
+        _mini_report(f"Выгрузка выдачи: {work_name}",
+                     f"{len(saved)} страниц по {len(queries)} запросам", body),
+        encoding="utf-8")
+
+
+async def needs_dump(ctx, task_id, phrase, params):
+    """Полная выгрузка топ-10: страницы целиком, чтобы их читал человек или модель.
+
+    Операция без LLM: выбрать углы, докупить выдачу, скачать страницы, разложить по папкам
+    `reports/<работа>/<движок>/<запрос>/`. Скачивание бесплатно — платит только выдача."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    if not tree_id or not work_name:
+        raise RuntimeError("нужны tree_id и work")
+    data = needs_layer.work_input(tree_id, work_name, NEEDS_SERP_TOP)
+    if not data["phrases"]:
+        raise RuntimeError(f"в работе {work_name!r} нет фраз")
+
+    queries = _dump_queries(ctx, tree_id, work_name, data)
+    _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name,
+                                "queries": [q["query"] for q in queries]})
+    ctx.log("INFO", "needs_dump", work_name,
+            "углы: " + "; ".join(f"{q['query']} — {q['why']}" for q in queries))
+
+    targets = {}
+    for q in queries:
+        # угол, по которому выдачу не достать (нет в кэше в режиме cache-only, отказ источника),
+        # пропускаем: одна недоступная фраза не должна ронять всю выгрузку
+        try:
+            await _ensure_serp(ctx, q["query"], stage="needs_dump")
+        except Exception as e:
+            q["error"] = f"{type(e).__name__}: {e}"
+            ctx.log("WARN", "needs_dump", work_name, f"угол «{q['query']}» пропущен: {e}")
+            continue
+        serp = wscore.load_serp(ctx.con, q["query"])
+        for engine in wscore.SERP_ENGINES:
+            for doc in serp.get(engine, {}).get("docs", []):
+                url = doc.get("url")
+                if url and url not in targets and len(targets) < DUMP_MAX_PAGES:
+                    targets[url] = {"engine": engine, "rank": doc.get("rank"),
+                                    "query": q["query"], "title": doc.get("title", "")}
+
+    if not targets:
+        raise RuntimeError("ни по одному углу не удалось получить выдачу")
+    root = REPORTS / needs_layer.slug(work_name)
+    loop = asyncio.get_running_loop()
+    got = await asyncio.gather(*[loop.run_in_executor(None, _fetch_page, u) for u in targets])
+
+    saved = []
+    for (url, meta), page in zip(targets.items(), got):
+        dom = re.sub(r"^https?://(www\.)?([^/]+).*", r"\2", url)
+        d = root / meta["engine"] / needs_layer.slug(meta["query"])
+        d.mkdir(parents=True, exist_ok=True)
+        name = f"{meta['rank'] or 0:02d}-{needs_layer.slug(dom)}.html"
+        (d / name).write_text(page["html"] or "", encoding="utf-8")
+        saved.append({**meta, "url": url, "domain": dom, "status": page["status"],
+                      "text_len": page["text_len"], "method": page["method"],
+                      "file": f"{meta['engine']}/{needs_layer.slug(meta['query'])}/{name}"})
+    saved.sort(key=lambda i: (i["engine"], i["query"], i["rank"] or 0))
+    (root / "index.json").write_text(json.dumps(
+        {"work": work_name, "tree_id": tree_id, "created_at": _now(),
+         "queries": queries, "pages": saved}, ensure_ascii=False, indent=1), encoding="utf-8")
+    _dump_index(root, work_name, queries, saved)
+
+    ok = sum(1 for i in saved if i["method"] != "failed")
+    rendered = sum(1 for i in saved if i["method"] == "render")
+    link = f"reports/{needs_layer.slug(work_name)}/index.html"
+    needs_layer.save_artifact(tree_id, work_name, "dump", {
+        "task_id": task_id, "created_at": _now(), "report_link": link,
+        "queries": [q["query"] for q in queries], "pages": len(saved), "ok": ok,
+        "summary": f"{ok} из {len(saved)} страниц, {rendered} через браузер, "
+                   f"{len(queries)} запросов"})
+    ctx.log("INFO", "needs_dump", work_name,
+            f"выгружено {ok}/{len(saved)} страниц ({rendered} рендером) в {root.name}/")
+    return {"pages": len(saved), "ok": ok, "rendered": rendered, "queries": len(queries),
+            "link": link, "dir": str(root)}
+
+
+# ---------- стоп-слова ----------
+
+STOP_WORDS_CAP = 400        # столько слов отдаём модели за раз: дальше хвост из единичных
+
+
+async def stopwords_scan(ctx, task_id, phrase, params):
+    """Разбор слов ветки на стоп-слова, бренды и нежелательное (design §4.7).
+
+    Результат — ПРЕДЛОЖЕНИЕ, а не фильтр: в БД попадает только то, что пользователь принял
+    руками. Уже сохранённые слова на вход не идут — их классифицировали один раз; а слово,
+    которое пользователь отклонил, модель предложит снова, потому что «отклонённого» мы не
+    храним: список исключений — это то, что человек подтвердил, и ничего больше."""
+    root = wscore.normalize(phrase)
+    saved = [w["word"] for w in wscore.stopwords(ctx.con)]
+    words, total = wscore.word_stats(ctx.con, root, exclude=saved, cap=STOP_WORDS_CAP)
+    if not words:
+        raise RuntimeError(f"в поддереве {root!r} не осталось неразобранных слов")
+    _save_params(ctx, task_id, {"root": root, "words": len(words), "words_total": total,
+                                "saved": len(saved)})
+    if total > len(words):
+        ctx.log("WARN", "stopwords", root,
+                f"слов в ветке {total}, отдаём {len(words)} самых частых — остальные "
+                f"встречаются реже всего")
+
+    jparams = {"root": root, "root_freq": wscore.get_node(ctx.con, root)["freq"],
+               "already_saved": saved, "words": words}
+    res = (await _run_llm(ctx, "stopwords", root,
+                          [_job(task_id, 0, "stopwords", jparams)]))[0]
+    if not isinstance(res, dict):
+        raise ValueError("stopwords вернул не объект")
+    if not any(k in res for k in wscore.STOP_KINDS):
+        # пустая категория — нормально, ответ без единой категории — уже не разбор
+        raise ValueError("stopwords не вернул ни одной категории")
+
+    known = {w["word"] for w in words}
+    out, dropped = {}, 0
+    for kind in wscore.STOP_KINDS:
+        picked = []
+        for it in res.get(kind) or []:
+            w = wscore.normalize(it.get("word") if isinstance(it, dict) else it)
+            if w not in known:          # выдуманное слово в список не пускаем
+                dropped += 1
+                continue
+            picked.append({"word": w, "why": _str(it.get("why")) if isinstance(it, dict) else ""})
+        out[kind] = picked
+    if dropped:
+        ctx.log("WARN", "stopwords", root, f"пропущено {dropped} слов: их не было во входе")
+    ctx.log("INFO", "stopwords", root,
+            "предложено: " + ", ".join(f"{k} {len(v)}" for k, v in out.items()))
+    return {"root": root, "words_seen": len(words), "words_total": total, **out}
+
+
+OPS = {"load": load, "full_load": full_load, "stopwords_scan": stopwords_scan,
+       "needs_dump": needs_dump,
        "needs_build": needs_build, "needs_analyze": needs_analyze,
-       "needs_season": needs_season, "needs_adjacent": needs_adjacent,
-       "classify": classify, "score": score, "analyze": analyze, "drill": drill}
+       "needs_analyze_adv": needs_analyze_adv,
+       "needs_season": needs_season, "needs_adjacent": needs_adjacent}
 
 
 # ---------- тестовая постановка джоба (testing-plan §1.1) ----------

@@ -323,20 +323,23 @@ def test_14_task_tab(page, server, worker):
 # ---------- 15. Вкладка Отчёты ----------
 
 def test_15_reports_tab_sorted(page, server):
-    """§8.15 — отчёты РАБОТ, по убыванию verdict_score; ссылка открывает готовый файл."""
+    """§8.15 — отчёты РАБОТ, НОВЫЕ СВЕРХУ; ссылка открывает готовый файл.
+
+    Порядок по дате, а не по оценке: свежий прогон должен быть виден сразу, иначе он тонет
+    в хвосте таблицы и выглядит как «отчёт не появился»."""
     open_app(page, server)
     tab(page, "reports")
 
     rows = page.get_by_test_id("report-row")
     expect(rows).to_have_count(2)
-    expect(rows.nth(0)).to_contain_text(seed.NEEDS_WORK)        # 91 выше
-    expect(rows.nth(0)).to_contain_text(str(seed.REP_HI_SCORE))
-    expect(rows.nth(1)).to_contain_text(seed.NEEDS_GAP_WORK)    # 42 ниже
+    expect(rows.nth(0)).to_contain_text(seed.NEEDS_GAP_WORK)    # засеян позже
+    expect(rows.nth(1)).to_contain_text(seed.NEEDS_WORK)
+    expect(rows.nth(1)).to_contain_text(str(seed.REP_HI_SCORE))
     # у каждой строки видно, по какой ветке собрана работа
-    expect(rows.nth(0)).to_contain_text(seed.ROOT_A)
+    expect(rows.nth(1)).to_contain_text(seed.ROOT_A)
 
     with page.expect_popup() as popup:
-        rows.nth(0).locator("[data-testid=report-link]").click()
+        rows.nth(1).locator("[data-testid=report-link]").click()
     assert popup.value.url.endswith(f"/reports/{seed.REP_HI_ID}.html")
 
 

@@ -34,11 +34,8 @@ def test_subscribe_sends_roots_log_tail_tasks_and_llm_status(client, log_file):
     rows = task_rows if isinstance(task_rows, list) else [task_rows]
     assert {"id", "type", "node", "status", "created_at", "started_at", "finished_at",
             "error"} <= set(rows[0])
-    assert {r["status"] for r in rows} <= {"QUEUED", "RUNNING", "DONE", "FAILED"}
-
-    reports = only(events, "report")[0]
-    rows = reports if isinstance(reports, list) else [reports]
-    assert {"id", "node", "title", "verdict", "verdict_score", "link", "created_at"} <= set(rows[0])
+    assert {r["status"] for r in rows} <= {"QUEUED", "WAITING", "RUNNING", "DONE", "FAILED"}
+    assert not any(k == "report" for k, _ in events), "события report больше нет: отчёт у работы"
 
     status = only(events, "llm_status")[0]
     assert set(status) == {"online", "last_seen_at"} and status["online"] is False
@@ -133,24 +130,6 @@ def test_broken_message_does_not_kill_the_socket(client):
 
 # ---------------------------------------------------------------- дельты и события
 
-def test_kind_change_arrives_as_node_delta(client):
-    """Любая смена статуса наблюдаема: изменение в базе и событие не расходятся (tech §5)."""
-    with client.websocket_connect("/ws") as ws:
-        ws.send_json({"action": "subscribe"})
-        drain(ws)
-        r = client.post("/api/node/kind", json={"phrase": SNAP["NAVIGATIONAL"],
-                                                "kind": "transactional"})
-        assert r.status_code == 200
-        events = drain(ws)
-
-    deltas = only(events, "node")
-    assert deltas, "смена kind обязана прийти событием node"
-    delta = check_node(deltas[-1])
-    assert (delta["phrase"], delta["status"], delta["kind"]) == (
-        SNAP["NAVIGATIONAL"], "TRANSACTIONAL", "transactional")
-    assert any(k == "log" for k, _ in events)
-
-
 def test_log_cleared_event(client):
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"action": "subscribe"})
@@ -201,9 +180,10 @@ def test_crawl_progress_flows_and_total_may_grow(crawl_client):
     assert dones == sorted(dones)
     assert totals[-1] >= 2 and totals[-1] > totals[0], "total растёт по ходу краула"
     assert dones[-1] == totals[-1], "к концу краула сделано столько, сколько и планировалось"
-    # фетчей может выйти БОЛЬШЕ, чем видно на старте: частота узла ползёт, и по ходу краула
-    # часть узлов пересекает FLOOR — их краул догружает перепроверкой фронтира
-    assert dones[-1] >= need, f"сделано {dones[-1]}, на старте было видно {need}"
+    # Со стартовой оценкой не сверяем: частота у Вордстата ползёт в обе стороны, а решение
+    # «идти вглубь» принимается по самому свежему значению — узел, ушедший ниже FLOOR,
+    # законно не фетчится. Проверяемый инвариант один: после краула фронтир пуст.
+    assert dones[-1] > 0 and wscore.unqueried_frontier(probe, root) == []
     assert wscore.unqueried_frontier(probe, root) == [], "поддерево осталось недогруженным"
 
     assert wscore.net_calls() == 0

@@ -217,9 +217,9 @@ describe('меню действий', () => {
     return work
   }
 
-  it('три действия с подсказками', async () => {
+  it('пять действий с подсказками', async () => {
     const work = await opened()
-    for (const a of ['analyze', 'season', 'adjacent']) {
+    for (const a of ['analyze', 'analyze_adv', 'season', 'adjacent', 'dump']) {
       const b = within(work).getByTestId('needs-run-' + a)
       expect(b).toBeEnabled()
       expect(b.getAttribute('title')!.length).toBeGreaterThan(40)
@@ -281,6 +281,35 @@ describe('меню действий', () => {
     expect(again).toHaveTextContent('(1)')
     await userEvent.click(again)
     expect(await screen.findByTestId('needs-confirm')).toHaveTextContent('уже делали')
+  })
+
+  it('на работе видны вердикты обоих разборов сразу', async () => {
+    // они отвечают на разные вопросы: обычный про перехват трафика, Adv про одну функцию,
+    // за которую платят. Расхождение — сигнал, поэтому показываем оба, а не последний
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/tree/')
+        ? res(200, {
+            ...TREE,
+            works: [
+              {
+                ...TREE.works[0],
+                artifacts: [
+                  { kind: 'analyze_adv', created_at: 2, report_link: 'reports/adv.html', task_id: 'adv', verdict: 'MAYBE', verdict_score: 58, summary: null },
+                  { kind: 'analyze', created_at: 1, report_link: 'reports/a1.html', task_id: 'a1', verdict: 'SKIP', verdict_score: 27, summary: null },
+                ],
+                analysis: { verdict: 'SKIP', verdict_score: 27, report_link: 'reports/a1.html', created_at: 1, searched: [], confidence: 0.5 },
+              },
+              TREE.works[1],
+            ],
+          })
+        : res(200, { trees: [row()] }),
+    )
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const work = (await screen.findAllByTestId('needs-work'))[0]
+
+    expect(within(work).getByTestId('needs-verdict')).toHaveTextContent('SKIP 27')
+    expect(within(work).getByTestId('needs-verdict-adv')).toHaveTextContent('Adv MAYBE 58')
   })
 
   it('все отчёты остаются ссылками, а не заменяют друг друга', async () => {

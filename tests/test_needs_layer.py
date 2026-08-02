@@ -10,6 +10,7 @@ import time
 import pytest
 
 import needs_layer
+import tasks
 import wscore
 from conftest import SNAP, TOKEN, node_row, task_done, task_row, wait_for
 from fake_worker import FakeWorker
@@ -155,6 +156,115 @@ def test_analyze_reuses_paid_serp_without_network(client, seeded, snap_con):
                               json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
             assert task_done(snap_con, tid)["status"] == "DONE"
     assert wscore.net_calls() == 0
+
+
+def test_analyze_adv_is_a_second_opinion_on_the_same_paid_serp(client, seeded, snap_con,
+                                                               reports_dir):
+    """`Analyze Adv` — второй разбор той же работы другим вопросом.
+
+    Он живёт рядом с обычным, а не вместо него: свой тип джоба, свой артефакт, та же выдача из
+    оплаченного кэша (значит по разобранной работе он бесплатен). Единица его ответа — функция,
+    поэтому пустой список функций не принимается."""
+    with FakeWorker(client, TOKEN) as fake:
+        tid = client.post("/api/needs/analyze_adv",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        row = task_done(snap_con, tid)
+
+    assert row["status"] == "DONE", row["error"]
+    assert [s["type"] for s in fake.seen] == ["analyze_adv"], "свой тип джоба, не analyze_work"
+    assert wscore.net_calls() == 0, "выдача взята из кэша — второй разбор бесплатен"
+
+    res = json.loads(row["result"])
+    assert res["functions"] >= 1 and res["best"], "единица ответа — функция"
+    arts = needs_layer.work_artifacts(TREE_ID)[needs_layer._norm(WORK)]
+    adv = next(a for a in arts if a["kind"] == "analyze_adv")
+    assert adv["functions"][0]["entry_query"], "у функции есть входная фраза из поиска"
+    assert adv["report_link"] != next(
+        (a["report_link"] for a in arts if a["kind"] == "analyze"), None), \
+        "у двух разборов разные отчёты"
+
+
+def test_reports_show_both_kinds_newest_first(client, seeded, snap_con):
+    """Вкладка «Отчёты»: оба вида разбора отдельными строками, новые сверху.
+
+    Раньше список фильтровался по виду `analyze`, и Adv-разборы в раздел не попадали вовсе;
+    сортировка по оценке топила свежий прогон в хвосте таблицы."""
+    with FakeWorker(client, TOKEN):
+        for i, action in enumerate(("analyze", "analyze_adv")):
+            if i:
+                time.sleep(1.1)   # дата артефакта в секундах: иначе прогоны неразличимы
+            tid = client.post(f"/api/needs/{action}",
+                              json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+            assert task_done(snap_con, tid)["status"] == "DONE"
+
+    rows = client.get("/api/needs/reports").json()["reports"]
+    mine = [r for r in rows if r["work"] == WORK]
+    assert {r["kind"] for r in mine} == {"analyze", "analyze_adv"}, "оба разбора видны"
+    assert mine[0]["kind"] == "analyze_adv", "последний прогон — первой строкой"
+    dates = [r["created_at"] or 0 for r in rows]
+    assert dates == sorted(dates, reverse=True), "весь список отсортирован по дате"
+
+
+def test_report_is_a_page_even_if_the_model_returns_a_fragment(client, seeded, snap_con,
+                                                              reports_dir):
+    """Оболочку отчёта делает система, а не модель.
+
+    Модель регулярно возвращает голое тело без `<html>` и `<style>` — в браузере это нечитаемо,
+    и полагаться на её вёрстку нельзя: шаблон лежит в репозитории, а агент туда не ходит."""
+    body = "<h2>Коротко</h2><p>" + "текст " * 40 + "</p>"
+    with FakeWorker(client, TOKEN, answer=lambda job: {
+            "functions": [{"name": "делает X", "entry_query": "x", "score": 50}],
+            "recommendation": "MAYBE", "verdict_score": 50, "confidence": 0.5,
+            "report_html": body}):
+        tid = client.post("/api/needs/analyze_adv",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        assert task_done(snap_con, tid)["status"] == "DONE"
+
+    page = (reports_dir / f"{tid}.html").read_text(encoding="utf-8")
+    assert page.lstrip().lower().startswith("<!doctype html>")
+    assert "<style>" in page and "<h1>" in page, "есть стили и заголовок"
+    assert '<span class="verdict MAYBE">MAYBE</span>' in page, "шапка с вердиктом"
+    assert '<span class="bigscore">50</span>' in page, "и с крупной оценкой"
+    assert body in page, "тело модели не потеряно"
+    assert "Входные данные" in page, "блок входных данных на месте"
+
+
+def test_dump_saves_pages_by_engine_and_query(client, seeded, snap_con, monkeypatch,
+                                              reports_dir):
+    """Выгрузка топ-10: страницы целиком, разложены по движку и запросу, LLM не нужна.
+
+    Загрузчик подменён — сеть в тестах не трогаем; проверяем раскладку, индекс и то, что
+    операция не-LLM (без воркера доходит до DONE)."""
+    monkeypatch.setattr(tasks, "_fetch_page", lambda url: {
+        "html": f"<html><body>{'текст ' * 300}{url}</body></html>",
+        "status": 200, "text_len": 2000, "method": "http"})
+
+    tid = client.post("/api/needs/dump",
+                      json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+    row = task_done(snap_con, tid)
+    assert row["status"] == "DONE", row["error"]
+
+    res = json.loads(row["result"])
+    assert res["pages"] > 0 and res["ok"] == res["pages"]
+    root = reports_dir / needs_layer.slug(WORK)
+    assert (root / "index.html").is_file() and (root / "index.json").is_file()
+    saved = list(root.rglob("*.html"))
+    assert any(p.parent.parent.name == "yandex" for p in saved), "папка движка"
+    assert any(p.parent.parent.name == "google" for p in saved)
+    idx = json.loads((root / "index.json").read_text(encoding="utf-8"))
+    assert idx["queries"] and all(q["why"] for q in idx["queries"]), "у каждого угла есть причина"
+    assert len({q["query"] for q in idx["queries"]}) == len(idx["queries"]), "углы не дублируются"
+
+
+def test_analyze_adv_rejects_an_answer_without_functions(client, seeded, snap_con):
+    """Вердикт без функций — не ответ: разбор обязан назвать, что именно строить."""
+    with FakeWorker(client, TOKEN, answer=lambda job: {
+            "recommendation": "SKIP", "verdict_score": 10, "confidence": 0.5,
+            "report_html": "<html><body>" + "нет функций " * 20 + "</body></html>"}):
+        tid = client.post("/api/needs/analyze_adv",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        row = task_done(snap_con, tid)
+    assert row["status"] == "FAILED" and "функц" in row["error"]
 
 
 def test_analyze_without_serp_fails_with_clear_reason(client, seeded, snap_con):

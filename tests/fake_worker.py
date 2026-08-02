@@ -49,23 +49,25 @@ def report_html(phrase, verdict="BUILD", verdict_score=82):
 def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, confidence=0.9):
     """Заготовка ответа по типу джоба: форма — как в design §6, выравнивание по `phrase`."""
     params = job.get("params") or {}
-    if job["type"] == "classify":
-        return {"results": [
-            {"phrase": n["phrase"], "kind": (kinds or {}).get(n["phrase"], "transactional"),
-             "confidence": confidence, "reason": "фальшивый воркер: заготовка"}
-            for n in params.get("nodes", [])]}
-    if job["type"] == "score":
-        return {"results": [
-            {"phrase": it["phrase"], "score": (scores or {}).get(it["phrase"], 75),
-             "competition_yandex": 30, "competition_google": 40,
-             "weights": {"yandex": 0.6, "google": 0.4},
-             "description": "заготовка: спрос есть, выдача его не закрывает",
-             "signals": [{"code": "NO_DEDICATED_TOOL", "weight": 40, "evidence": "в топе статьи"}]}
-            for it in params.get("items", [])]}
-    if job["type"] == "analyze":
-        phrase = params.get("phrase", "")
-        return {"recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.7,
-                "report_html": report_html(phrase, verdict, verdict_score)}
+    if job["type"] == "stopwords":
+        # первое слово входа кладём в stop, остальное не трогаем: тестам важен транспорт,
+        # а не качество разметки
+        words = [w["word"] for w in params.get("words", [])]
+        return {"stop": [{"word": w, "why": "заготовка"} for w in words[:1]],
+                "brand": [], "unwanted": []}
+    if job["type"] == "analyze_adv":
+        # второй разбор возвращает функции, а не только вердикт по работе
+        name = (params.get("work") or {}).get("name", "")
+        return {"functions": [
+                    {"name": f"делает {name}", "io": "вход -> выход",
+                     "entry_query": (params.get("phrases") or [{}])[0].get("phrase", ""),
+                     "entry_freq": (params.get("phrases") or [{}])[0].get("freq", 0),
+                     "paid_proof": "заготовка: платный аналог есть",
+                     "edge": "без регистрации", "channel": "магазин расширений",
+                     "effort_weeks": 3, "score": verdict_score, "why": "заготовка",
+                     "kill_test": "если платных аналогов нет — гипотеза мертва"}],
+                "recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.6,
+                "report_html": report_html(name, verdict, verdict_score)}
     if job["type"] == "analyze_work":
         # единица разбора — работа: в отчёт идёт её имя, а не фраза
         name = (params.get("work") or {}).get("name", "")

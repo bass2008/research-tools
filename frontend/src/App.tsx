@@ -4,11 +4,12 @@ import * as api from './api'
 import { fmt, fmtTime, fmtWhen, reportHref } from './api'
 import type { ReportRow, TaskRow } from './api'
 import { NeedsPane } from './NeedsPane'
+import { StopPane } from './StopPane'
 import { TreeNode } from './TreeNode'
 import { TreeCtx, applyEvent, initialState } from './store'
 import type { Cmd, LogRow, TreeApi } from './store'
 
-type Tab = 'main' | 'needs' | 'log' | 'tasks' | 'reports'
+type Tab = 'main' | 'needs' | 'stop' | 'log' | 'tasks' | 'reports'
 
 const TABS: [Tab, string, string][] = [
   ['main', 'Главная', 'tab-main'],
@@ -16,6 +17,7 @@ const TABS: [Tab, string, string][] = [
   ['log', 'Лог', 'tab-log'],
   ['tasks', 'Task', 'tab-tasks'],
   ['reports', 'Отчёты', 'tab-reports'],
+  ['stop', 'Стоп-слова', 'tab-stop'],      // служебное: справа, чтобы не мешало основному ходу
 ]
 
 function errText(e: unknown): string {
@@ -25,12 +27,13 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
-const DEFAULT_ROOT = 'нейросеть'   // как в этапе 1-2: дерево видно сразу при открытии
+// Корней в дереве столько, сколько завели, и они независимы: при открытии показываем
+// их все, а не один заранее выбранный.
 
 export default function App() {
   const [st, dispatch] = useReducer(applyEvent, initialState)
   const [tab, setTab] = useState<Tab>('main')
-  const [phrase, setPhrase] = useState(DEFAULT_ROOT)
+  const [phrase, setPhrase] = useState('')
   const [conn, setConn] = useState<api.ConnState>('connecting')
   const [err, setErr] = useState('')
   const [ask, setAsk] = useState<{ phrase: string; cmd: Cmd; text: string } | null>(null)
@@ -40,9 +43,9 @@ export default function App() {
   useEffect(() => {
     const c = api.connect(dispatch, setConn, () => {
       c.send({ action: 'subscribe' })
-      // дерево на экране сразу: корень по умолчанию раскрывается сам, как было в этапе 1-2.
-      // Это чистое чтение (проекция уже загруженного) — CQRS не нарушает.
-      c.send({ action: 'root', phrase: rootRef.current ?? DEFAULT_ROOT })
+      // подписка сама приносит список корней; ветку перезапрашиваем, только если её выбирали
+      // до обрыва. Это чистое чтение (проекция уже загруженного) — CQRS не нарушает.
+      if (rootRef.current) c.send({ action: 'root', phrase: rootRef.current })
     })
     sock.current = c
     return () => c.close()
@@ -71,6 +74,17 @@ export default function App() {
     setAsk({ phrase: p, cmd, text })
   }
 
+  /** Завести фразу корнем: узел + загрузка пула, потом переключить дерево на него. */
+  async function addRoot(p: string) {
+    try {
+      await api.addRoot(p)
+      setErr('')
+      loadRoot(p)
+    } catch (e) {
+      setErr(errText(e))
+    }
+  }
+
   function loadRoot(p: string) {
     const q = p.trim()
     if (!q) return
@@ -95,22 +109,53 @@ export default function App() {
     [st.nodes, st.kids],
   )
 
+  /** Назад ко всем корням: дерево запросов — лес, а не одна ветка. */
+  function showForest() {
+    rootRef.current = null
+    setPhrase('')
+    dispatch({ type: 'forest' })
+  }
+
+  // ветка не выбрана и ничего не искали -> показываем все корни
+  const forest = st.root === null && st.missing === null
+
   const tree = useMemo(
     () =>
-      st.root ? (
+      forest ? (
+        st.roots.length ? (
+          <div data-testid="tree-forest">
+            {st.roots.map((p) => (
+              <TreeNode key={p} phrase={p} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty">
+            Дерево пусто. Впишите фразу и заведите её корнем.
+          </div>
+        )
+      ) : st.root ? (
         <TreeNode key={st.root} phrase={st.root} isRoot />
       ) : st.missing !== null ? (
         // Узел не сочиняем: иначе на опечатке появляется фальшивый узел с платными кнопками
         <div className="empty" data-testid="tree-missing">
           Фразы «{st.missing}» в дереве нет — проверьте написание. Дерево строится только по
           фразам, которые уже в нём есть.
+          <div className="empty-act">
+            <button className="go" data-testid="tree-add-root" onClick={() => void addRoot(st.missing!)}>
+              Добавить корнем и загрузить
+            </button>
+            <span className="mut">
+              новый корень живёт отдельно от остальных: своё дерево, свои операции
+            </span>
+          </div>
         </div>
       ) : (
         <div className="empty">
           Дерево пусто. Впишите фразу, которая уже есть в дереве, и нажмите Enter.
         </div>
       ),
-    [st.root, st.missing],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [forest, st.roots, st.root, st.missing],
   )
 
   const pr = st.progress
@@ -143,8 +188,13 @@ export default function App() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') loadRoot(phrase)
               }}
-              placeholder="корневой запрос — Enter, чтобы построить дерево…"
+              placeholder="фраза-корень или узел — Enter, чтобы открыть ветку…"
             />
+          )}
+          {tab === 'main' && !forest && (
+            <button className="act" data-testid="show-roots" onClick={showForest}>
+              ← все корни
+            </button>
           )}
           <span
             className={'llm ' + (st.llm.online ? 'on' : 'off')}
@@ -213,6 +263,10 @@ export default function App() {
           </div>
 
           {tree}
+        </section>
+
+        <section className="pane" style={{ display: tab === 'stop' ? '' : 'none' }}>
+          <StopPane active={tab === 'stop'} tasks={st.tasks} />
         </section>
 
         <section className="pane" style={{ display: tab === 'needs' ? '' : 'none' }}>
@@ -347,7 +401,8 @@ function TaskPane({ rows }: { rows: TaskRow[] }) {
 
 function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
   const [rows, setRows] = useState<ReportRow[] | null>(null)
-  const done = tasks.filter((t) => t.type === 'needs_analyze' && t.status === 'DONE').length
+  // любая законченная операция второго слоя может добавить отчёт, не только обычный разбор
+  const done = tasks.filter((t) => t.type.startsWith('needs_') && t.status === 'DONE').length
 
   useEffect(() => {
     if (!active) return
@@ -363,6 +418,7 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
       <thead>
         <tr>
           <th>работа</th>
+          <th>разбор</th>
           <th>ветка</th>
           <th className="num">частота</th>
           <th className="num">фраз</th>
@@ -376,17 +432,18 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
       <tbody>
         {rows.length === 0 && (
           <tr>
-            <td colSpan={9} className="mut">
+            <td colSpan={10} className="mut">
               отчётов пока нет — разбор запускается кнопкой Analyze на работе
             </td>
           </tr>
         )}
         {rows.map((r) => (
-          <tr key={r.tree_id + '/' + r.work} data-testid="report-row">
+          <tr key={r.tree_id + '/' + r.work + '/' + r.kind} data-testid="report-row">
             <td className="ph">
               <div>{r.work}</div>
               {r.gap_candidate && <span className="gap">ЩЕЛЬ</span>}
             </td>
+            <td className="mut">{r.kind === 'analyze_adv' ? 'Adv' : 'обычный'}</td>
             <td className="ph">{r.root ?? '—'}</td>
             <td className="num">{fmt(r.top_freq)}</td>
             <td className="num">{r.phrases ?? '—'}</td>

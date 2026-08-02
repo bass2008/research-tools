@@ -57,7 +57,7 @@
    ```bash
    cd /home/sergey/Personal/research-tools/worker
    claude --model opus
-   /effort xhigh          # нужен для качества analyze: агенты analyze наследуют режим сессии
+   # модель и effort исполнителей заданы в ~/.claude/agents/pipeline-*.md и от сессии не зависят
    ```
    Дальше говорить ничего не нужно — Claude прочитает этот файл и уйдёт в петлю. Если не ушёл,
    скажи «прочитай README».

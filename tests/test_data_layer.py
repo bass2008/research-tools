@@ -7,6 +7,7 @@
 import json
 import pytest
 
+import needs_layer
 import tasks
 import wscore
 from conftest import (SNAP, StubCtx, counts, node_row, seed_cache, table_rows, wipe_model)
@@ -61,10 +62,8 @@ def test_build_forest_nests_by_words():
 
 def test_thresholds_are_the_agreed_ones():
     assert wscore.FLOOR == 50                 # граница рекурсии краула (design §4)
-    assert wscore.SCORE_THRESHOLD == 60       # > 60 -> SCORED, <= 60 -> LOW_SCORED
-    assert tasks.HEAD_FREQ == 30000           # freq > 30000 -> CATEGORY (design §2)
-    assert len(wscore.STATUSES) == 11
-    assert set(wscore.TERMINALS) < set(wscore.STATUSES)
+    assert needs_layer.HEAD_FREQ == 30000     # выше — голова, в сборку не идёт (design §3)
+    assert wscore.LIMIT == 2000               # потолок самого источника, не тюнинг
 
 
 # ---------------------------------------------------------------- §4 границы порогов
@@ -84,66 +83,6 @@ async def test_floor_boundary_49_not_drilled_50_drilled(empty_db, fetch_spy):
     # лист ниже FLOOR — тоже FULLY_LOADED, иначе classify его не обработает (tech §5)
     assert node_row(con, "тест фон мало")["status"] == "FULLY_LOADED"
     assert wscore.net_calls() == 0
-    con.close()
-
-
-async def test_score_threshold_60_low_61_scored(snapshot_db):
-    """Порог score: 60 -> LOW_SCORED, 61 -> SCORED (граница в LOW_SCORED, tech §4)."""
-    con = wscore.connect(snapshot_db)
-    low, high = SNAP["LOW_SCORED"], SNAP["SEARCHED"]
-    con.execute("UPDATE node SET status = 'SEARCHED', score = NULL WHERE phrase IN (?, ?)",
-                (low, high))
-    con.commit()
-    scores = {high: 61, low: 60}
-    ctx = StubCtx(con, answer=lambda job: {"results": [
-        {"phrase": it["phrase"], "score": scores[it["phrase"]], "competition_yandex": 30,
-         "competition_google": 40, "weights": {"yandex": 0.6, "google": 0.4},
-         "description": "проверка границы"} for it in job["params"]["items"]]})
-    task_id = tasks.create_task(ctx, "score", high, {"phrases": [high, low]})
-
-    assert await tasks.execute(ctx, task_id) is True
-    assert node_row(con, high)["status"] == "SCORED"
-    assert node_row(con, low)["status"] == "LOW_SCORED"
-    assert node_row(con, high)["score"] == 61
-    assert node_row(con, low)["score"] == 60
-    # сырые входы и веса сохранены — формулу можно перекалибровать без прогона LLM
-    assert node_row(con, high)["competition_yandex"] == 30
-    assert node_row(con, high)["competition_google"] == 40
-    assert "yandex" in node_row(con, high)["score_weights"]
-    con.close()
-
-
-async def test_score_null_keeps_node_searched(snapshot_db):
-    """score=null: узел остаётся SEARCHED, ошибка в лог, отдельного терминала нет (design §2)."""
-    con = wscore.connect(snapshot_db)
-    phrase = SNAP["SEARCHED"]
-    ctx = StubCtx(con, answer=lambda job: {"results": [
-        {"phrase": phrase, "score": None, "competition_yandex": None, "competition_google": None}]})
-    task_id = tasks.create_task(ctx, "score", phrase, None)
-
-    assert await tasks.execute(ctx, task_id) is True
-    assert node_row(con, phrase)["status"] == "SEARCHED"
-    assert node_row(con, phrase)["error_stage"] == "score"
-    assert any(r["level"] == "ERROR" and "score=null" in r["msg"] for r in ctx.logs)
-    con.close()
-
-
-async def test_head_freq_over_30000_becomes_category(snapshot_db):
-    """freq > 30000 -> classify всегда CATEGORY, что бы ни ответила LLM (design §2)."""
-    con = wscore.connect(snapshot_db)
-    head, border = SNAP["HEAD"], SNAP["FULLY_LOADED"]
-    con.execute("UPDATE node SET freq = 30000 WHERE phrase = ?", (border,))
-    con.commit()
-    ctx = StubCtx(con, answer=lambda job: {"results": [
-        {"phrase": n["phrase"], "kind": "transactional", "confidence": 0.9, "reason": "-"}
-        for n in job["params"]["nodes"]]})
-
-    assert await tasks.execute(ctx, tasks.create_task(ctx, "classify", head, None)) is True
-    assert node_row(con, head)["status"] == "CATEGORY"
-    assert node_row(con, head)["kind"] == "category"
-
-    assert await tasks.execute(ctx, tasks.create_task(ctx, "classify", border, None)) is True
-    assert node_row(con, border)["status"] == "TRANSACTIONAL", "ровно 30000 — ещё не голова"
     con.close()
 
 
@@ -336,17 +275,6 @@ def test_save_serp_is_all_or_nothing(empty_db):
 
     wscore.save_serp(con, "фон", {"yandex": {"found": 1, "docs": []}, "google": {"docs": []}})
     assert set(wscore.load_serp(con, "фон")) == {"yandex", "google"}
-    con.close()
-
-
-def test_node_object_shape_and_report_link(snapshot_db):
-    """Объект узла — ровно поля контракта tech §6.2; report_link только при наличии отчёта."""
-    con = wscore.connect(snapshot_db)
-    obj = wscore.node_object(con, SNAP["ANALYZED"])
-    assert set(obj) == {"phrase", "freq", "status", "kind", "score", "verdict", "verdict_score",
-                        "task_id", "error", "cached", "childCount", "report_link"}
-    assert obj["status"] == "ANALYZED" and obj["report_link"].startswith("reports/")
-    assert "report_link" not in wscore.node_object(con, SNAP["NEW"])
     con.close()
 
 

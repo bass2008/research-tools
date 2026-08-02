@@ -87,6 +87,11 @@ _SQL_CACHE = """CREATE TABLE IF NOT EXISTS cache (
 _SQL_PROBE = """CREATE TABLE IF NOT EXISTS probe (
     query TEXT PRIMARY KEY, kind TEXT, created_at INTEGER NOT NULL)"""
 
+# Стоп-слова: что мы сознательно НЕ покупаем. Хранится слово, сравнение идёт по основе —
+# «проститутка» и «проститутки» это одно слово, а падежей у Вордстата полный набор.
+_SQL_STOPWORD = """CREATE TABLE IF NOT EXISTS stopword (
+    word TEXT PRIMARY KEY, kind TEXT NOT NULL, added_at INTEGER NOT NULL)"""
+
 # node: базовые колонки (этап 1-2) + поля конвейера (design §3)
 _SQL_HISTORY = """CREATE TABLE IF NOT EXISTS history (
     phrase TEXT PRIMARY KEY,
@@ -188,7 +193,7 @@ def connect(db_path=None, backfill=True):
         con.execute("DROP TABLE IF EXISTS edge")   # схема этапа 1-2: пересобираем из cache
         con.execute("DROP TABLE IF EXISTS node")
     for sql in (_SQL_NODE, _SQL_EDGE, _SQL_SERP, _SQL_TASK, _SQL_REPORT, _SQL_HISTORY,
-                _SQL_PROBE, *_SQL_INDEXES):
+                _SQL_PROBE, _SQL_STOPWORD, *_SQL_INDEXES):
         con.execute(sql)
     _add_missing_cols(con)
     con.commit()
@@ -598,13 +603,86 @@ def unqueried_frontier(con, root, floor=FLOOR):
     """Узлы поддерева, которые ОБЯЗАНЫ быть запрошены, но не запрошены: freq >= floor.
 
     Это же условие проверяет `repair_fully_loaded` — там оно ловит следствие, здесь служит
-    условием остановки краула. -> список фраз по убыванию частоты."""
+    условием остановки краула. Фразы под стоп-словами фронтиром не считаются: мы их
+    сознательно не покупаем, и без этого краул гонялся бы за ними по кругу.
+    -> список фраз по убыванию частоты."""
+    stems = stop_stems(con)
     return [r[0] for r in con.execute(f"""
         WITH RECURSIVE sub(ph) AS (
           SELECT ? UNION SELECT e.child FROM sub JOIN edge e ON e.parent = sub.ph)
         SELECT n.phrase FROM sub JOIN node n ON n.phrase = sub.ph
         WHERE n.queried = 0 AND COALESCE(n.freq, 0) >= ?
-        ORDER BY COALESCE(n.freq, 0) DESC""", (normalize(root), floor))]
+        ORDER BY COALESCE(n.freq, 0) DESC""", (normalize(root), floor))
+            if not is_stopped(r[0], stems)]
+
+
+# ---------- стоп-слова ----------
+
+STOP_KINDS = ("stop", "brand", "unwanted")
+
+
+def stopwords(con):
+    """Сохранённые исключения, новые сверху. -> [{word, kind, added_at}]"""
+    return [{"word": r[0], "kind": r[1], "added_at": r[2]}
+            for r in con.execute("SELECT word, kind, added_at FROM stopword "
+                                 "ORDER BY added_at DESC, word")]
+
+
+def stop_stems(con):
+    """Основы сохранённых слов — по ним и идёт сравнение с фразами."""
+    return frozenset(stem(w) for (w,) in con.execute("SELECT word FROM stopword"))
+
+
+def add_stopwords(con, items):
+    """items: [(слово, категория)]. Уже сохранённое слово не дублируется. -> сколько добавлено."""
+    now = int(time.time())
+    rows = [(normalize(w), k, now) for w, k in items
+            if normalize(w) and k in STOP_KINDS]
+    cur = con.executemany("INSERT OR IGNORE INTO stopword(word, kind, added_at) VALUES (?, ?, ?)",
+                          rows)
+    con.commit()
+    return cur.rowcount
+
+
+def remove_stopwords(con, words):
+    ws = [(normalize(w),) for w in words if normalize(w)]
+    cur = con.executemany("DELETE FROM stopword WHERE word = ?", ws)
+    con.commit()
+    return cur.rowcount
+
+
+def is_stopped(phrase, stems):
+    """Фраза попадает под исключение, если хоть одно её слово — стоп-слово."""
+    return bool(stems) and bool(words_of(phrase) & stems)
+
+
+def word_stats(con, root, exclude=(), floor=FLOOR, cap=400):
+    """Слова поддерева для разбора стоп-слов: {word, phrases, top_freq, examples}.
+
+    Частоты НЕ складываем (широкое соответствие уже включает уточнения) — берём самую
+    частотную фразу со словом и число фраз. Слова самого корня и уже сохранённые
+    исключения не возвращаем: их классифицировать повторно незачем."""
+    root = normalize(root)
+    skip = set(words_of(root)) | {stem(w) for w in exclude}
+    stats = {}
+    for p, f in con.execute("""
+            WITH RECURSIVE sub(ph) AS (
+              SELECT ? UNION SELECT e.child FROM sub JOIN edge e ON e.parent = sub.ph)
+            SELECT n.phrase, COALESCE(n.freq, 0) FROM sub JOIN node n ON n.phrase = sub.ph
+            WHERE COALESCE(n.freq, 0) >= ?""", (root, floor)):
+        for w in p.split():
+            if stem(w) in skip:
+                continue
+            it = stats.setdefault(stem(w), {"word": w, "phrases": 0, "top_freq": 0,
+                                            "examples": []})
+            it["phrases"] += 1
+            if f > it["top_freq"]:
+                it["top_freq"] = f
+                it["word"] = w        # представителем берём форму из самой частотной фразы
+            if len(it["examples"]) < 3:
+                it["examples"].append(p)
+    out = sorted(stats.values(), key=lambda x: (-x["phrases"], -x["top_freq"]))
+    return out[:cap], len(out)
 
 
 # ---------- краул поддерева (full_load) ----------
@@ -625,6 +703,21 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
     db = db_path_of(con)
     root = normalize(phrase)
     sem = asyncio.Semaphore(max(1, workers))
+    stops = stop_stems(con)          # что не покупаем: снимок на весь прогон
+    skipped = 0
+    if is_stopped(root, stops):
+        # Сам корень под стоп-словом: не покупаем НИЧЕГО, включая его пул. Все уточнения такой
+        # фразы содержат её слова, то есть тоже под запретом — покупать нечего и незачем.
+        # Статус всё равно ставим: вопрос по ветке закрыт, и висеть в NEW ей ни к чему. Если
+        # слово убрать из списка, ветка сама вернётся в LOADED — она незапрошена и выше FLOOR,
+        # а это ровно то, что ловит repair_fully_loaded().
+        phrases = subtree_phrases(con, root)
+        con.executemany("UPDATE node SET status = 'FULLY_LOADED' "
+                        "WHERE phrase = ? AND status IN ('NEW', 'LOADED')",
+                        [(p,) for p in phrases])
+        con.commit()
+        return {"fetched": 0, "nodes": len(phrases), "errors": [], "rechecked": 0,
+                "skipped": 1, "left": 0}
     upsert_node(con, root)
     con.commit()
 
@@ -660,6 +753,9 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
                 continue
             if p != root and (row[1] if row else 0) < floor:
                 continue                          # лист: ниже FLOOR вглубь не бурим
+            if p != root and is_stopped(p, stops):
+                skipped += 1                      # стоп-слово: узел есть, пул не покупаем
+                continue
             total += 1
             running[asyncio.ensure_future(fetch(p))] = p
         if not running:
@@ -711,34 +807,82 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
     # `rechecked` — сколько кругов перепроверки понадобилось, `left` — что осталось
     # незапрошенным (не ноль = либо фетчи падали, либо кончились круги)
     return {"fetched": done, "nodes": len(phrases), "errors": errors, "rechecked": rounds,
+            "skipped": skipped,
             "left": len(unqueried_frontier(con, root, floor))}
 
 
 # ---------- данные для classify ----------
 
-def subtree_for_classify(con, phrase, chunk=None, floor=FLOOR):
-    """Данные для classify (design §6.1): плоский дедуплицированный список узлов
-    поддерева [{phrase, freq, children:[фраза,…]}], дети ниже floor отфильтрованы,
-    нарезанный на чанки по chunk узлов. -> [[узел,…], …]."""
-    chunk = chunk or CLASSIFY_CHUNK
-    root = normalize(phrase)
-    seen = {root}
-    queue = deque([root])
-    nodes = []
-    while queue:
-        p = queue.popleft()
-        row = con.execute("SELECT COALESCE(freq, 0) FROM node WHERE phrase = ?", (p,)).fetchone()
-        kids = con.execute(
-            "SELECT n.phrase, COALESCE(n.freq, 0) FROM edge e JOIN node n ON n.phrase = e.child "
-            "WHERE e.parent = ? ORDER BY 2 DESC", (p,)).fetchall()
-        nodes.append({"phrase": p, "freq": row[0] if row else 0,
-                      "children": [k[0] for k in kids if k[1] >= floor]})
-        for k in kids:
-            if k[0] not in seen:
-                seen.add(k[0])
-                queue.append(k[0])
-    return [nodes[i:i + chunk] for i in range(0, len(nodes), chunk)]
+def repair_fully_loaded(con):
+    """Инвариант: узел НЕ может быть FULLY_LOADED, если в его поддереве есть незагруженный
+    узел с freq >= FLOOR. Нарушители сбрасываются в LOADED. -> сколько исправлено.
 
+    Зачем: статус FULLY_LOADED ставит краул на всё поддерево, но узлы могут стать
+    незагруженными ПОЗЖЕ — например при выбрасывании отравленной записи кэша. Тогда предки
+    продолжают утверждать «загружено полностью», хотя это уже ложь, и full_load по ним
+    даже не запустить (операция разрешена только из NEW/LOADED).
+    Прецедент: чистка 97 сохранённых отказов XMLRiver оставила 72 таких предка.
+
+    Фразы под стоп-словами дырой не считаются: их не покупают намеренно, иначе каждый старт
+    сервера снимал бы FULLY_LOADED со всей отфильтрованной ветки."""
+    stems = stop_stems(con)
+    con.execute("CREATE TEMP TABLE IF NOT EXISTS _stopped(phrase TEXT PRIMARY KEY)")
+    con.execute("DELETE FROM _stopped")
+    if stems:
+        holes = [(p,) for (p,) in con.execute(
+            "SELECT phrase FROM node WHERE queried = 0 AND COALESCE(freq, 0) >= ?", (FLOOR,))
+            if is_stopped(p, stems)]
+        con.executemany("INSERT INTO _stopped(phrase) VALUES (?)", holes)
+    cur = con.execute(f"""
+        UPDATE node SET status = 'LOADED'
+        WHERE status = 'FULLY_LOADED' AND EXISTS (
+          WITH RECURSIVE sub(p) AS (
+            SELECT node.phrase UNION SELECT e.child FROM edge e JOIN sub ON e.parent = sub.p)
+          SELECT 1 FROM node n JOIN sub ON n.phrase = sub.p
+          WHERE n.queried = 0 AND COALESCE(n.freq, 0) >= {FLOOR}
+            AND n.phrase NOT IN (SELECT phrase FROM _stopped))""")
+    con.commit()
+    return cur.rowcount
+
+
+# ---------- выдача (serp) ----------
+
+def save_serp(con, phrase, serps):
+    """Записать выдачу узла: serps = {engine: {"found": int|None, "docs": [{rank,url,title,
+    snippet}]}} (или просто {engine: [docs]}). Инвариант no-partial: нет какой-то из
+    выдач -> ValueError и в БД не попадает ничего. Одна транзакция, без await внутри."""
+    p = normalize(phrase)
+    now = int(time.time())
+    rows = []
+    for engine in SERP_ENGINES:
+        part = serps.get(engine)
+        if part is None:
+            raise ValueError(f"нет выдачи движка {engine} — частичная запись запрещена")
+        docs = part if isinstance(part, list) else part.get("docs")
+        if not isinstance(docs, list):
+            raise ValueError(f"выдача движка {engine} без списка docs")
+        found = None if isinstance(part, list) else part.get("found")
+        rows.append((p, engine, found, json.dumps(docs, ensure_ascii=False), now))
+    try:
+        con.executemany("INSERT OR REPLACE INTO serp(phrase, engine, found, docs_json, fetched_at) "
+                        "VALUES (?, ?, ?, ?, ?)", rows)
+        con.commit()
+    except Exception:
+        con.rollback()
+        raise
+    return len(rows)
+
+
+def load_serp(con, phrase):
+    """Сохранённая выдача узла: {engine: {found, docs, fetched_at}}; ничего нет -> {}."""
+    out = {}
+    for r in con.execute("SELECT engine, found, docs_json, fetched_at FROM serp WHERE phrase = ?",
+                         (normalize(phrase),)):
+        out[r[0]] = {"found": r[1], "docs": json.loads(r[2]), "fetched_at": r[3]}
+    return out
+
+
+# ---------- отчёты ----------
 
 # ---------- объект узла и запись статуса ----------
 
@@ -819,96 +963,6 @@ def clear_stale_locks(con):
     cur = con.execute("UPDATE node SET task_id = NULL WHERE task_id IS NOT NULL")
     con.commit()
     return cur.rowcount
-
-
-def repair_fully_loaded(con):
-    """Инвариант: узел НЕ может быть FULLY_LOADED, если в его поддереве есть незагруженный
-    узел с freq >= FLOOR. Нарушители сбрасываются в LOADED. -> сколько исправлено.
-
-    Зачем: статус FULLY_LOADED ставит краул на всё поддерево, но узлы могут стать
-    незагруженными ПОЗЖЕ — например при выбрасывании отравленной записи кэша. Тогда предки
-    продолжают утверждать «загружено полностью», хотя это уже ложь, и full_load по ним
-    даже не запустить (операция разрешена только из NEW/LOADED).
-    Прецедент: чистка 97 сохранённых отказов XMLRiver оставила 72 таких предка."""
-    cur = con.execute(f"""
-        UPDATE node SET status = 'LOADED'
-        WHERE status = 'FULLY_LOADED' AND EXISTS (
-          WITH RECURSIVE sub(p) AS (
-            SELECT node.phrase UNION SELECT e.child FROM edge e JOIN sub ON e.parent = sub.p)
-          SELECT 1 FROM node n JOIN sub ON n.phrase = sub.p
-          WHERE n.queried = 0 AND COALESCE(n.freq, 0) >= {FLOOR})""")
-    con.commit()
-    return cur.rowcount
-
-
-# ---------- выдача (serp) ----------
-
-def save_serp(con, phrase, serps):
-    """Записать выдачу узла: serps = {engine: {"found": int|None, "docs": [{rank,url,title,
-    snippet}]}} (или просто {engine: [docs]}). Инвариант no-partial: нет какой-то из
-    выдач -> ValueError и в БД не попадает ничего. Одна транзакция, без await внутри."""
-    p = normalize(phrase)
-    now = int(time.time())
-    rows = []
-    for engine in SERP_ENGINES:
-        part = serps.get(engine)
-        if part is None:
-            raise ValueError(f"нет выдачи движка {engine} — частичная запись запрещена")
-        docs = part if isinstance(part, list) else part.get("docs")
-        if not isinstance(docs, list):
-            raise ValueError(f"выдача движка {engine} без списка docs")
-        found = None if isinstance(part, list) else part.get("found")
-        rows.append((p, engine, found, json.dumps(docs, ensure_ascii=False), now))
-    try:
-        con.executemany("INSERT OR REPLACE INTO serp(phrase, engine, found, docs_json, fetched_at) "
-                        "VALUES (?, ?, ?, ?, ?)", rows)
-        con.commit()
-    except Exception:
-        con.rollback()
-        raise
-    return len(rows)
-
-
-def load_serp(con, phrase):
-    """Сохранённая выдача узла: {engine: {found, docs, fetched_at}}; ничего нет -> {}."""
-    out = {}
-    for r in con.execute("SELECT engine, found, docs_json, fetched_at FROM serp WHERE phrase = ?",
-                         (normalize(phrase),)):
-        out[r[0]] = {"found": r[1], "docs": json.loads(r[2]), "fetched_at": r[3]}
-    return out
-
-
-# ---------- отчёты ----------
-
-def save_report(con, report_id, node, link, created_at=None):
-    """Строка отчёта (сам HTML лежит файлом на диске). -> данные события report."""
-    con.execute("INSERT OR REPLACE INTO report(id, node, link, created_at) VALUES (?, ?, ?, ?)",
-                (report_id, normalize(node), link, created_at or int(time.time())))
-    con.commit()
-    return report_row(con, report_id)
-
-
-def report_row(con, report_id):
-    """Отчёт + поля узла (report JOIN node) в форме события report (tech §6.2)."""
-    r = con.execute(
-        "SELECT r.id, r.node, r.link, r.created_at, n.verdict, n.verdict_score "
-        "FROM report r LEFT JOIN node n ON n.phrase = r.node WHERE r.id = ?", (report_id,)).fetchone()
-    if not r:
-        return None
-    return {"id": r[0], "node": r[1], "title": r[1], "verdict": r[4],
-            "verdict_score": r[5], "link": r[2], "created_at": r[3]}
-
-
-def list_reports(con, limit=500):
-    """Вкладка «Отчёты»: report JOIN node, по убыванию verdict_score."""
-    rows = con.execute(
-        "SELECT r.id, r.node, r.link, r.created_at, n.verdict, n.verdict_score "
-        "FROM report r LEFT JOIN node n ON n.phrase = r.node "
-        "ORDER BY COALESCE(n.verdict_score, -1) DESC, r.created_at DESC LIMIT ?", (limit,)).fetchall()
-    return [{"id": r[0], "node": r[1], "title": r[1], "verdict": r[4],
-             "verdict_score": r[5], "link": r[2], "created_at": r[3]} for r in rows]
-
-
 # ---------- корни и проекция детей ----------
 
 def root_candidates(con, limit=50):
@@ -950,8 +1004,8 @@ def project(con, phrase):
 def rebuild_model_from_cache(con, limit=LIMIT):
     """Пересбор модели (node/edge) из уже накопленного кэша ответов. Идемпотентен."""
     probes = {r[0] for r in con.execute("SELECT query FROM probe")}
-    for row in con.execute("SELECT query, response FROM cache").fetchall():
-        q, resp = row[0], row[1]
+    for row in con.execute("SELECT query, response, ts FROM cache").fetchall():
+        q, resp, ts = row[0], row[1], row[2]
         try:
             data = json.loads(resp)
         except (ValueError, TypeError):
@@ -960,9 +1014,12 @@ def rebuild_model_from_cache(con, limit=LIMIT):
         if qn in probes:
             continue
         own_freq, refs = _parse_pool(qn, data, limit)
-        upsert_node(con, qn, freq=own_freq, queried=True, total=len(refs))
+        # возраст пула передаём так же, как при живом фетче: одна и та же фраза приходит из
+        # разных пулов с разными числами (у Вордстата частота ползёт), и побеждать должен
+        # свежий, а не тот, что обработали последним. Без этого пересборка даёт другое дерево.
+        upsert_node(con, qn, freq=own_freq, queried=True, total=len(refs), freq_at=ts)
         for p, f in refs:
-            upsert_node(con, p, freq=f)
+            upsert_node(con, p, freq=f, freq_at=ts)
             con.execute("INSERT OR IGNORE INTO edge(parent, child) VALUES (?, ?)", (qn, p))
     con.commit()
 

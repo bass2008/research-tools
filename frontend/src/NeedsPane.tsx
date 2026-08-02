@@ -9,23 +9,31 @@ import type { NeedsAction, NeedsPhrase, NeedsRow, NeedsTree, NeedsWork, TaskRow 
 
 const LABEL: Record<NeedsAction, string> = {
   analyze: 'Analyze',
+  analyze_adv: 'Analyze Adv',
   season: 'Посчитать сезонность',
   adjacent: 'Собрать смежные ключи',
+  dump: 'Полная выгрузка TOP 10',
 }
 
 const ACTION_HINT: Record<NeedsAction, string> = {
+  analyze_adv:
+    'Второй разбор той же работы с другим вопросом: какую ОДНУ функцию тут можно сделать, найдут ли её из поиска и платит ли за неё кто-то уже сегодня. Занятость ниши тут не минус, а доказательство спроса; статьи в топе считаются уликой, что инструмента нет. Выдачу берёт из кэша — по разобранной работе бесплатно.',
   analyze:
     'Купить выдачу по частотным фразам работы и отдать всё Opus: вердикт, оценка и полный отчёт по нише. ~7 минут, 2 платных запроса. Повторный запуск идёт по накопленным данным — сезонности и смежным ключам.',
   season:
     'История частоты по самой частотной фразе работы за два года: есть ли сезон, во сколько раз расходятся пик и дно, где мы сейчас. Один платный запрос.',
   adjacent:
     'Как ту же работу ищут БЕЗ слова «нейросеть». Наше дерево выросло из одной ветки и видит только тех, кто уже думает про технологию, — это домер настоящего размера ниши. 6–12 платных запросов.',
+  dump:
+    'Скачать топ-10 обоих движков страницами целиком в reports/<работа>/yandex и /google — чтобы прочитать, что там на самом деле, а не сниппеты. Берёт пять РАЗНЫХ углов (головная фраза, фраза кандидата из Adv, «как это делают руками», «бесплатно», коммерческая): топы по близким фразам совпадают на 70–80%. Страницы, которые рисует скрипт, догружает браузером. LLM не нужна, до 10 платных запросов за выдачу.',
 }
 
 const KIND_LABEL: Record<string, string> = {
   analyze: 'Разбор',
+  analyze_adv: 'Разбор Adv',
   season: 'Сезонность',
   adjacent: 'Смежные ключи',
+  dump: 'Выгрузка',
 }
 
 const WHY: Record<string, string> = {
@@ -322,6 +330,9 @@ function Work({
   const [open, setOpen] = useState(false)
   const segs = w.segments ?? []
   const a = w.analysis
+  // два разбора отвечают на разные вопросы, поэтому показываем оба вердикта рядом:
+  // расхождение между ними — сигнал, а не ошибка
+  const adv = (w.artifacts ?? []).find((x) => x.kind === 'analyze_adv')
   const seen: Record<string, number> = {}
   const links = [...(w.artifacts ?? [])]
     .filter((x) => x.report_link)
@@ -387,9 +398,17 @@ function Work({
           </span>
         )}
         {a?.verdict && (
-          <span className={'vd vd-' + a.verdict} data-testid="needs-verdict" title="вердикт разбора">
+          <span className={'vd vd-' + a.verdict} data-testid="needs-verdict"
+                title="обычный разбор: можно ли перехватить поисковый трафик">
             {a.verdict}
             {a.verdict_score != null ? ' ' + a.verdict_score : ''}
+          </span>
+        )}
+        {adv?.verdict && (
+          <span className={'vd vd-' + adv.verdict} data-testid="needs-verdict-adv"
+                title="Analyze Adv: есть ли одна функция, за которую платят">
+            Adv {adv.verdict}
+            {adv.verdict_score != null ? ' ' + adv.verdict_score : ''}
           </span>
         )}
         <span className="acts">
@@ -398,7 +417,7 @@ function Work({
           <details className="menu" data-testid="needs-menu">
             <summary className="act">Действие ▾</summary>
             <div className="menu-body" onClick={closeMenu}>
-              {(['analyze', 'season', 'adjacent'] as NeedsAction[]).map((act) => {
+              {(['analyze', 'analyze_adv', 'season', 'adjacent', 'dump'] as NeedsAction[]).map((act) => {
                 const done = (w.artifacts ?? []).filter((x) => x.kind === act).length
                 const wait = busy.has((w.name ?? '') + '|' + act)
                 return (

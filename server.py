@@ -55,13 +55,7 @@ ROOTS_LIMIT = 50
 ALLOWED = {
     "load": ("NEW",),
     "full_load": ("NEW", "LOADED"),
-    "classify": ("FULLY_LOADED",),
-    "search": ("TRANSACTIONAL",),
-    "score": ("SEARCHED",),
-    "analyze": ("SCORED",),
-    "drill": tuple(s for s in wscore.STATUSES if s not in wscore.TERMINALS),
 }
-OPS_HTTP = ("classify", "search", "score", "analyze")   # значения поля op в /api/node/op
 ERRORS = {401: "unauthorized", 404: "not_found", 409: "conflict", 422: "invalid"}
 
 CTX = None   # рантайм процесса, создаётся в lifespan
@@ -397,26 +391,21 @@ class PhraseIn(BaseModel):
     phrase: str
 
 
-class OpIn(BaseModel):
-    phrase: str
-    op: str
-
-
-class KindIn(BaseModel):
-    phrase: str
-    kind: str
-
-
-# Fix kind разрешён только там, где интент уже определён (design §2):
-# intent-терминалы и TRANSACTIONAL. Из NEW/LOADED/FULLY_LOADED/SEARCHED/... — 422.
-FIX_KIND_FROM = frozenset({"TRANSACTIONAL", "CATEGORY", "INFORMATIONAL", "NAVIGATIONAL"})
-
-
 def _node_or_404(phrase):
     row = wscore.get_node(CTX.con, phrase)
     if row is None:
         raise HTTPException(404, f"фраза неизвестна: {phrase!r}")
     return row
+
+
+def _not_stopped_or_422(phrase):
+    """Фраза под стоп-словом — покупать нечего: и она сама, и все её уточнения в запрете."""
+    hit = wscore.words_of(phrase) & wscore.stop_stems(CTX.con)
+    if hit:
+        word = next(w["word"] for w in wscore.stopwords(CTX.con)
+                    if wscore.stem(w["word"]) in hit)
+        raise HTTPException(422, f"фраза под стоп-словом {word!r}: загрузка не имеет смысла — "
+                                 f"её уточнения тоже под запретом")
 
 
 def _free_or_409(phrase):
@@ -435,6 +424,26 @@ def _command(op, phrase, params=None):
     return {"task_id": tasks.enqueue(CTX, op, p, params)}
 
 
+@app.post("/api/node/root")
+async def cmd_add_root(body: PhraseIn, caller: str = Header(None, alias="X-Caller")):
+    """Завести новый корень дерева запросов и сразу загрузить его пул.
+
+    Единственный законный вход для фразы, которой в дереве нет: остальные команды работают
+    по уже существующему узлу (иначе на опечатке появлялся бы узел с платными кнопками).
+    Корни независимы — общего «главного» корня у дерева нет, их столько, сколько завели."""
+    p = wscore.normalize(body.phrase)
+    if not p:
+        raise HTTPException(422, "пустая фраза")
+    if wscore.get_node(CTX.con, p) is not None:
+        raise HTTPException(409, f"фраза уже есть в дереве: {p!r}")
+    _not_stopped_or_422(p)
+    wscore.upsert_node(CTX.con, p)          # частоты нет: её принесёт пул
+    CTX.con.commit()
+    CTX.publish("node", wscore.node_object(CTX.con, p))
+    CTX.log("INFO", "root", p, f"новый корень завёл {_caller(caller, 'ui')}")
+    return {"task_id": tasks.enqueue(CTX, "load", p)}
+
+
 @app.post("/api/node/load")
 async def cmd_load(body: PhraseIn):
     return _command("load", body.phrase)
@@ -443,39 +452,6 @@ async def cmd_load(body: PhraseIn):
 @app.post("/api/node/full-load")
 async def cmd_full_load(body: PhraseIn):
     return _command("full_load", body.phrase)
-
-
-@app.post("/api/node/op")
-async def cmd_op(body: OpIn):
-    if body.op not in OPS_HTTP:
-        raise HTTPException(422, f"неизвестный op: {body.op!r}")
-    return _command(body.op, body.phrase)
-
-
-@app.post("/api/node/drill")
-async def cmd_drill(body: PhraseIn):
-    return _command("drill", body.phrase)
-
-
-@app.post("/api/node/kind")
-async def cmd_kind(body: KindIn):
-    """Fix kind — синхронно, без задачи: kind и status меняются вместе (design §2)."""
-    p = wscore.normalize(body.phrase)
-    row = _node_or_404(p)
-    _free_or_409(p)
-    kind = wscore.normalize(body.kind)
-    if kind not in wscore.KIND_STATUS:
-        raise HTTPException(422, f"неизвестный kind: {body.kind!r}")
-    # Fix kind правит ошибочную метку, а не служит способом перескочить пайплайн (design §2):
-    # интент должен быть уже определён, иначе узел прыгнул бы в TRANSACTIONAL минуя classify.
-    cur = row["status"]
-    if cur not in FIX_KIND_FROM:
-        raise HTTPException(422, f"Fix kind недопустим из статуса {cur}: метка правится "
-                                 f"только у {', '.join(sorted(FIX_KIND_FROM))}")
-    delta = wscore.override_kind(CTX.con, p, kind)
-    CTX.publish("node", delta)
-    CTX.log("INFO", "kind", p, f"Fix kind: kind={kind}, status={delta['status']}")
-    return {"phrase": p, "kind": delta["kind"], "status": delta["status"]}
 
 
 @app.post("/api/logs/clear")
@@ -531,6 +507,73 @@ async def cmd_needs_build(body: PhraseIn2, caller: str = Header(None, alias="X-C
     return {"task_id": task_id}
 
 
+# ---------- стоп-слова (design §4.7) ----------
+
+
+class StopWordsIn(BaseModel):
+    words: list[dict]
+
+
+class StopRemoveIn(BaseModel):
+    words: list[str]
+
+
+def _last_scan():
+    """Последнее УДАВШЕЕСЯ предложение: оно живёт в результате задачи, отдельного файла
+    у него нет — предложение одноразовое, ценность только у принятого списка."""
+    row = CTX.con.execute("SELECT id, node, result, finished_at FROM task "
+                          "WHERE type = 'stopwords_scan' AND status = 'DONE' "
+                          "ORDER BY finished_at DESC LIMIT 1").fetchone()
+    if row is None or not row["result"]:
+        return None
+    try:
+        data = json.loads(row["result"])
+    except (ValueError, TypeError):
+        return None
+    return {"task_id": row["id"], "root": row["node"], "created_at": row["finished_at"],
+            "words_seen": data.get("words_seen"), "words_total": data.get("words_total"),
+            **{k: data.get(k) or [] for k in wscore.STOP_KINDS}}
+
+
+@app.get("/api/stopwords")
+async def api_stopwords():
+    """Сохранённые исключения и последнее предложение модели."""
+    return {"saved": wscore.stopwords(CTX.con), "suggestion": _last_scan(),
+            "kinds": list(wscore.STOP_KINDS)}
+
+
+@app.post("/api/stopwords/scan")
+async def cmd_stopwords_scan(body: PhraseIn, caller: str = Header(None, alias="X-Caller")):
+    """Разобрать слова ветки на стоп-слова, бренды и нежелательное (предложение)."""
+    p = wscore.normalize(body.phrase)
+    _node_or_404(p)
+    _free_or_409(p)
+    CTX.log("INFO", "stopwords", p, f"разбор слов заказал {_caller(caller, 'ui')}")
+    return {"task_id": tasks.enqueue(CTX, "stopwords_scan", p)}
+
+
+@app.post("/api/stopwords")
+async def cmd_stopwords_add(body: StopWordsIn):
+    """Принять слова в список исключений. Принимает человек, а не модель."""
+    items = []
+    for it in body.words:
+        w, k = wscore.normalize(str(it.get("word", ""))), str(it.get("kind", ""))
+        if not w:
+            raise HTTPException(422, "пустое слово")
+        if k not in wscore.STOP_KINDS:
+            raise HTTPException(422, f"неизвестная категория: {k!r}")
+        items.append((w, k))
+    return {"added": wscore.add_stopwords(CTX.con, items),
+            "saved": wscore.stopwords(CTX.con)}
+
+
+@app.delete("/api/stopwords")
+async def cmd_stopwords_remove(body: StopRemoveIn):
+    """Убрать слова из списка. Модель предложит их снова — отклонённого мы не помним."""
+    return {"removed": wscore.remove_stopwords(CTX.con, body.words),
+            "saved": wscore.stopwords(CTX.con)}
+
+
 @app.get("/api/needs/reports")
 async def api_needs_reports():
     """Разборы работ по всем деревьям — вкладка «Отчёты». Отчёт принадлежит работе."""
@@ -558,12 +601,14 @@ async def api_needs_tree(tree_id: str):
 @app.post("/api/needs/{action}")
 async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
                          caller: str = Header(None, alias="X-Caller")):
-    """Действие над работой: `analyze` (выдача -> Opus -> отчёт), `season` (история частоты),
-    `adjacent` (смежные ключи без слова-технологии).
+    """Действие над работой: `analyze` (выдача -> Opus -> отчёт), `analyze_adv` (второй разбор
+    другим вопросом: одна функция, вход из поиска, платят ли), `season` (история частоты),
+    `adjacent` (смежные ключи без слова-технологии), `dump` (полная выгрузка топ-10 страницами).
 
     Повторный запуск разрешён: каждый прогон копит свой артефакт, и смысл повтора в том, что
     данных стало больше. Запрещён только ПАРАЛЛЕЛЬНЫЙ прогон той же операции по той же работе."""
-    ops = {"analyze": "needs_analyze", "season": "needs_season", "adjacent": "needs_adjacent"}
+    ops = {"analyze": "needs_analyze", "analyze_adv": "needs_analyze_adv",
+           "season": "needs_season", "adjacent": "needs_adjacent", "dump": "needs_dump"}
     if action not in ops:
         raise HTTPException(404, f"нет такого действия: {action}")
     tree_id, work = body.tree_id.strip(), body.work.strip()
@@ -624,9 +669,6 @@ async def _ws_action(q, req):
         rows = recent_tasks()
         if rows:
             q.put_nowait({"type": "task", "data": rows})
-        reports = wscore.list_reports(CTX.con)
-        if reports:
-            q.put_nowait({"type": "report", "data": reports})
         q.put_nowait({"type": "llm_status",
                       "data": {"online": CTX.llm_online(), "last_seen_at": int(CTX.last_watch) or None}})
     elif action == "root":

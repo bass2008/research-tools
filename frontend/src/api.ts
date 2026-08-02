@@ -43,6 +43,7 @@ export interface TaskRow {
 // Отчёт принадлежит РАБОТЕ второго слоя, а не узлу дерева запросов.
 export interface ReportRow {
   tree_id: string
+  kind: string
   work: string
   root: string | null
   condition: string | null
@@ -194,6 +195,17 @@ const post = (path: string, body: unknown = {}) =>
     body: JSON.stringify(body),
   })
 
+const del = (path: string, body: unknown = {}) =>
+  req(path, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+/** Новый корень дерева запросов: заводит узел и грузит его пул. Корни независимы. */
+export const addRoot = (phrase: string): Promise<{ task_id: string }> =>
+  post('/api/node/root', { phrase })
+
 export const loadNode = (phrase: string): Promise<{ task_id: string }> =>
   post('/api/node/load', { phrase })
 
@@ -205,6 +217,45 @@ export const needsBuild = (phrase: string): Promise<{ task_id: string }> =>
   post('/api/needs/build', { phrase })
 
 export const clearLogs = (): Promise<{ ok: boolean }> => post('/api/logs/clear')
+
+// ---------- стоп-слова ----------
+
+export type StopKind = 'stop' | 'brand' | 'unwanted'
+
+export interface StopWord {
+  word: string
+  kind: StopKind
+  added_at: number
+}
+
+/** Предложение модели: слова с обоснованием, по категориям. Ничего не фильтрует само. */
+export interface StopSuggestion {
+  task_id: string
+  root: string | null
+  created_at: number | null
+  words_seen: number | null
+  words_total: number | null
+  stop: { word: string; why: string }[]
+  brand: { word: string; why: string }[]
+  unwanted: { word: string; why: string }[]
+}
+
+export interface StopState {
+  saved: StopWord[]
+  suggestion: StopSuggestion | null
+  kinds: StopKind[]
+}
+
+export const stopwords = (): Promise<StopState> => req('/api/stopwords')
+
+export const stopScan = (phrase: string): Promise<{ task_id: string }> =>
+  post('/api/stopwords/scan', { phrase })
+
+export const stopAdd = (words: { word: string; kind: StopKind }[]): Promise<{ saved: StopWord[] }> =>
+  post('/api/stopwords', { words })
+
+export const stopRemove = (words: string[]): Promise<{ saved: StopWord[] }> =>
+  del('/api/stopwords', { words })
 
 export const estimate = (phrase: string): Promise<Estimate> =>
   req(`/api/estimate?phrase=${encodeURIComponent(phrase)}`)
@@ -254,7 +305,7 @@ export interface NeedsAnalysis {
   searched: string[] | null
 }
 
-export type NeedsAction = 'analyze' | 'season' | 'adjacent'
+export type NeedsAction = 'analyze' | 'analyze_adv' | 'season' | 'adjacent' | 'dump'
 
 /** Прогон над работой: разбор, сезонность или смежные ключи. Копятся, не перезаписываются. */
 export interface NeedsArtifact {

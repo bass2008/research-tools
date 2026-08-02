@@ -95,6 +95,44 @@ describe('подписка и выбор корня', () => {
   })
 })
 
+describe('лес корней', () => {
+  it('при открытии показываются ВСЕ корни, а не одна заранее выбранная ветка', () => {
+    const { emit, ws } = mount()
+    expect(ws.sent).not.toContainEqual(expect.objectContaining({ action: 'root' }))
+
+    emit({ type: 'roots', data: { roots: [n('нейросеть', { freq: 4986011 }), n('телеграм', { freq: 5475727 })] } })
+    const forest = screen.getByTestId('tree-forest')
+    expect(within(forest).getByTestId('node-нейросеть')).toBeInTheDocument()
+    expect(within(forest).getByTestId('node-телеграм')).toBeInTheDocument()
+  })
+
+  it('после выбора ветки есть возврат ко всем корням', async () => {
+    const { emit } = mount()
+    emit({ type: 'roots', data: { roots: [n('нейросеть'), n('телеграм')] } })
+    emit({ type: 'snapshot', data: { root: n('телеграм'), children: [n('телеграм каналы')] } })
+    expect(screen.queryByTestId('tree-forest')).toBeNull()
+
+    await userEvent.click(screen.getByTestId('show-roots'))
+    expect(screen.getByTestId('tree-forest')).toBeInTheDocument()
+    expect(screen.getByTestId('node-нейросеть')).toBeInTheDocument()
+  })
+})
+
+describe('новый корень', () => {
+  it('фраза вне дерева предлагает завести корень, а не рисует фальшивый узел', async () => {
+    const { emit, ws } = mount()
+    emit({ type: 'snapshot', data: { root: null, missing: 'телеграм', children: [] } })
+    expect(screen.getByTestId('tree-missing')).toHaveTextContent('телеграм')
+    expect(screen.queryByTestId('node-телеграм')).toBeNull()
+
+    await userEvent.click(screen.getByTestId('tree-add-root'))
+    await waitFor(() => expect(lastUrl()).toBe('/api/node/root'))
+    expect(lastBody()).toEqual({ phrase: 'телеграм' })
+    // после заведения дерево переключается на новый корень — он независим от прежнего
+    await waitFor(() => expect(ws.sent).toContainEqual({ action: 'root', phrase: 'телеграм' }))
+  })
+})
+
 describe('дерево: snapshot / children / node', () => {
   it('snapshot рисует дерево и ЗАМЕНЯЕТ его следующим снимком', () => {
     const { emit } = mount()
@@ -421,6 +459,7 @@ describe('обрыв и переподключение канала', () => {
       act(() => first.accept())
       expect(screen.getByTestId('ws-status')).toHaveTextContent('WS ✓')
 
+      fireEvent.change(screen.getByTestId('root-input'), { target: { value: 'нейросеть' } })
       fireEvent.keyDown(screen.getByTestId('root-input'), { key: 'Enter' })
       expect(first.sent).toContainEqual({ action: 'root', phrase: 'нейросеть' })
 

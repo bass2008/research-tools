@@ -4,7 +4,6 @@
 таблицы §5, плюс здесь же: дробление операции на джобы, время жизни джоба и «в логе виден
 вызывающий» (требование §1.2).
 """
-import functools
 import json
 
 import pytest
@@ -24,8 +23,13 @@ def worker(client):
     return _make
 
 
-def start_op(client, phrase, op="classify"):
-    r = client.post("/api/node/op", json={"phrase": phrase, "op": op})
+def start_op(client, phrase):
+    """Операция-носитель для проверок транспорта: один джоб, узел не меняет.
+
+    Раньше здесь стоял узловой `classify`; после его удаления роль носителя играет разбор
+    слов — он тоже одноджобовый, но при этом ничего не пишет в дерево, поэтому проверки
+    «узел остался как был» стали строже."""
+    r = client.post("/api/stopwords/scan", json={"phrase": phrase})
     assert r.status_code == 200, r.text
     return r.json()["task_id"]
 
@@ -42,13 +46,12 @@ def test_correct_answer_moves_status_and_finishes_task(client, snap_con, worker,
     signals = fake.run_once(timeout=10)
     row = task_done(snap_con, task_id)
 
-    assert [s["type"] for s in signals] == ["classify"]
+    assert [s["type"] for s in signals] == ["stopwords"]
     assert row["status"] == "DONE", row["error"]
-    node = node_row(snap_con, phrase)
-    assert node["status"] == "TRANSACTIONAL" and node["kind"] == "transactional"
-    assert node["classify_conf"] == 0.9 and node["classify_reason"]
-    assert node["classified_at"] and node["task_id"] is None
-    assert json.loads(row["result"])["marked"] == 1
+    assert node_row(snap_con, phrase)["task_id"] is None, "блокировка снята"
+    result = json.loads(row["result"])
+    assert result["root"] == phrase and result["stop"], "предложение сохранено в задаче"
+    assert client.get("/api/stopwords").json()["saved"] == [], "но в список ничего не ушло"
 
 
 def test_agent_error_fails_task_and_leaves_node_intact(client, snap_con, worker, llm_timeout,
@@ -158,7 +161,7 @@ def test_empty_answer_is_not_a_silent_success(client, snap_con, worker, llm_time
     phrase = SNAP["FULLY_LOADED"]
     task_id = start_op(client, phrase)
 
-    worker("ok", answer=lambda job: {"results": []}).run_once(timeout=10)
+    worker("ok", answer=lambda job: {"результата нет": []}).run_once(timeout=10)
     row = task_done(snap_con, task_id)
 
     assert node_row(snap_con, phrase)["status"] == "FULLY_LOADED", "узел действительно не тронут"
@@ -177,55 +180,6 @@ def test_caller_is_visible_for_each_internal_call(client, worker, llm_timeout, l
 
 
 # ---------------------------------------------------------------- дробление операции
-
-def test_operation_is_split_into_jobs_and_waits_for_all(client, snap_con, worker, llm_timeout,
-                                                        monkeypatch):
-    """Дробление (tech §3): большое поддерево режется на джобы, но операция — одна строка
-    task и завершается только когда вернулись ВСЕ части."""
-    llm_timeout(30)
-    # размер чанка зашит в значение по умолчанию, поэтому подменяем саму функцию
-    monkeypatch.setattr(wscore, "subtree_for_classify",
-                        functools.partial(wscore.subtree_for_classify, chunk=2))
-    phrase = SNAP["FULLY_LOADED"]
-    task_id = start_op(client, phrase)
-    fake = worker("ok")
-
-    signals = fake.watch(max_jobs=20, timeout=10)
-    assert len(signals) >= 3, "поддерево из 10 узлов чанками по 2 — это несколько джобов"
-    assert {s["job_id"] for s in signals} == {f"{task_id}:{i}" for i in range(len(signals))}
-
-    for signal in signals[:-1]:
-        fake.handle(signal)
-    assert task_row(snap_con, task_id)["status"] == "RUNNING", "часть частей — операция не готова"
-    assert node_row(snap_con, phrase)["status"] == "FULLY_LOADED", "и модель ещё не тронута"
-
-    fake.handle(signals[-1])
-    row = task_done(snap_con, task_id)
-
-    assert row["status"] == "DONE"
-    assert json.loads(row["result"])["jobs"] == len(signals)
-    assert snap_con.execute("SELECT COUNT(*) FROM task WHERE type = 'classify'").fetchone()[0] == 1
-    assert node_row(snap_con, phrase)["status"] == "TRANSACTIONAL"
-
-
-async def test_score_is_split_into_batches(snapshot_db, monkeypatch):
-    """`score` режется батчами (tech §3), одна операция — одна строка task."""
-    monkeypatch.setattr(tasks, "SCORE_BATCH", 1)
-    con = wscore.connect(snapshot_db)
-    phrases = [SNAP["SEARCHED"], SNAP["SCORED"], SNAP["LOW_SCORED"]]
-    con.execute("UPDATE node SET status = 'SEARCHED' WHERE phrase IN (?, ?, ?)", phrases)
-    con.commit()
-    ctx = StubCtx(con, answer=lambda job: {"results": [
-        {"phrase": it["phrase"], "score": 70} for it in job["params"]["items"]]})
-    task_id = tasks.create_task(ctx, "score", phrases[0], {"phrases": phrases})
-
-    assert await tasks.execute(ctx, task_id) is True
-
-    assert [len(j["params"]["items"]) for j in ctx.jobs] == [1, 1, 1]
-    assert {j["job_id"] for j in ctx.jobs} == {f"{task_id}:{i}" for i in range(3)}
-    assert con.execute("SELECT COUNT(*) FROM task").fetchone()[0] == 3, "3 строки снимка + эта"
-    con.close()
-
 
 # ---------------------------------------------------------------- граница §6.3
 
@@ -253,9 +207,9 @@ def test_job_data_lives_until_the_operation_ends(client, snap_con, worker, llm_t
 
     job = fake.get_job(signal["job_id"])
     assert set(job) == {"job_id", "type", "params", "prompt"}
-    assert job["type"] == "classify" and job["job_id"] == f"{task_id}:0"
-    assert job["params"]["root"] == SNAP["FULLY_LOADED"] and job["params"]["nodes"]
-    assert "classify" in job["prompt"].lower() or job["prompt"].strip(), "промпт инлайнится сервером"
+    assert job["type"] == "stopwords" and job["job_id"] == f"{task_id}:0"
+    assert job["params"]["root"] == SNAP["FULLY_LOADED"] and job["params"]["words"]
+    assert job["prompt"].strip(), "промпт инлайнится сервером"
 
     assert fake.submit(signal["job_id"], result=fake.result_for(job)) is True
     task_done(snap_con, task_id)
@@ -268,7 +222,7 @@ def test_job_data_lives_until_the_operation_ends(client, snap_con, worker, llm_t
     ("get", "/internal/llm/watch", None),
     ("get", "/internal/llm/job/x:0", None),
     ("post", "/internal/llm/result", {"job_id": "x:0", "ok": True}),
-    ("post", "/internal/test/enqueue-job", {"type": "classify", "params": {}}),
+    ("post", "/internal/test/enqueue-job", {"type": "stopwords", "params": {}}),
 ])
 def test_internal_endpoints_are_closed_by_token(client, method, path, body):
     call = getattr(client, method)
@@ -280,10 +234,10 @@ def test_internal_endpoints_are_closed_by_token(client, method, path, body):
 def test_enqueue_bare_job_needs_no_crawl(client, snap_con, worker, llm_timeout):
     """Требование §1.1: джоб с готовыми params можно поставить без краула и без LLM."""
     llm_timeout(20)
-    params = {"root": "тестовый корень", "nodes": [{"phrase": "тестовый корень", "freq": 100,
-                                                    "children": []}]}
+    params = {"root": "тестовый корень",
+              "words": [{"word": "корень", "phrases": 3, "top_freq": 100, "examples": []}]}
     r = client.post("/internal/test/enqueue-job", headers=HDR,
-                    json={"type": "classify", "params": params})
+                    json={"type": "stopwords", "params": params})
     assert r.status_code == 200
     body = r.json()
     assert set(body) == {"task_id", "job_id"} and body["job_id"] == f"{body['task_id']}:0"
@@ -327,48 +281,3 @@ def test_offline_loop_is_warned_before_the_operation(client, snap_con, worker, l
 
 
 # ---------------------------------------------------------------- отчёт
-
-def test_analyze_writes_report_file_row_and_event(client, snap_con, worker, llm_timeout,
-                                                  reports_dir):
-    """Отчёт: файл на диске, строка в `report`, раздача статикой, ссылка приходит в событии."""
-    llm_timeout(30)
-    phrase = SNAP["SCORED"]
-    with client.websocket_connect("/ws") as ws:
-        ws.send_json({"action": "subscribe"})
-        drain(ws)
-        task_id = start_op(client, phrase, op="analyze")
-        worker("ok", verdict="BUILD", verdict_score=91).run_once(timeout=20)
-        row = task_done(snap_con, task_id)
-        events = drain(ws)
-
-    assert row["status"] == "DONE", row["error"]
-    node = node_row(snap_con, phrase)
-    assert (node["status"], node["verdict"], node["verdict_score"]) == ("ANALYZED", "BUILD", 91)
-
-    report = snap_con.execute("SELECT * FROM report WHERE id = ?", (task_id,)).fetchone()
-    assert report["node"] == phrase and report["link"] == f"reports/{task_id}.html"
-    path = reports_dir / f"{task_id}.html"
-    html = path.read_text(encoding="utf-8")
-    assert all(section in html for section in REPORT_SECTIONS)
-    assert client.get(f"/reports/{task_id}.html").status_code == 200
-
-    event = [d for k, d in events if k == "report"][-1]
-    assert {"id", "node", "title", "verdict", "verdict_score", "link", "created_at"} <= set(event)
-    assert event["link"] == f"reports/{task_id}.html"
-    assert wscore.node_object(snap_con, phrase)["report_link"] == event["link"]
-
-
-def test_search_and_score_chain_over_transport(client, snap_con, worker, llm_timeout):
-    """Цепочка через настоящий транспорт: SEARCHED -> score -> SCORED, порог 60 работает."""
-    llm_timeout(20)
-    phrase = SNAP["SEARCHED"]
-    task_id = start_op(client, phrase, op="score")
-
-    worker("ok", scores={phrase: 61}).run_once(timeout=10)
-    row = task_done(snap_con, task_id)
-
-    assert row["status"] == "DONE"
-    node = node_row(snap_con, phrase)
-    assert node["status"] == "SCORED" and node["score"] == 61
-    assert node["description"] and node["signals_json"] and node["scored_at"]
-    assert wait_for(lambda: node_row(snap_con, phrase)["task_id"] is None, what="снятие блокировки")

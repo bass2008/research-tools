@@ -109,8 +109,6 @@ def seed_snapshot(con):
     for key in ("SEARCHED", "SCORED", "LOW_SCORED"):
         wscore.save_serp(con, SNAP[key], {"yandex": {"found": 1200, "docs": _docs("yandex")},
                                           "google": {"found": 3400, "docs": _docs("google")}})
-    # узел с отчётом
-    wscore.save_report(con, SNAP_REPORT_ID, SNAP["ANALYZED"], f"reports/{SNAP_REPORT_ID}.html")
     # журнал задач: одна успешная и одна упавшая — вкладка Task при subscribe
     now = int(time.time())
     con.executemany(

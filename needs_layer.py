@@ -139,7 +139,7 @@ def counts(tree, analyzed=()):
 
 # ---------- разборы работ ----------
 
-ARTIFACT_KINDS = ("analyze", "season", "adjacent")
+ARTIFACT_KINDS = ("analyze", "analyze_adv", "season", "adjacent", "dump")
 
 
 def save_artifact(tree_id, work_name, kind, data):
@@ -174,9 +174,17 @@ def work_artifacts(tree_id):
     return out
 
 
-def all_analyses():
-    """Все разборы работ по всем деревьям, лучшие сверху — вкладка «Отчёты».
+ANALYSIS_KINDS = ("analyze", "analyze_adv")
 
+
+def all_analyses():
+    """Разборы работ по всем деревьям, НОВЫЕ СВЕРХУ — вкладка «Отчёты».
+
+    Порядок по дате, а не по оценке: свежий прогон должен быть виден сразу, иначе он тонет
+    в хвосте длинной таблицы и выглядит как «отчёт не появился».
+
+    Разборов два вида (`analyze` и `analyze_adv`) — они отвечают на разные вопросы, поэтому
+    показываются отдельными строками; от каждого вида берём последний прогон по работе.
     Единица отчёта — работа, поэтому таблица `report` (она про узлы) здесь не участвует."""
     out = []
     for tid, (tree_file, params_file) in trees().items():
@@ -187,17 +195,18 @@ def all_analyses():
         _, meta = _input(params_file)
         by_name = {_norm(w.get("name")): w for w in works(tree)}
         for name, arts in work_artifacts(tid).items():
-            a = next((x for x in arts if x.get("kind") == "analyze"), None)
+          for kind in ANALYSIS_KINDS:
+            a = next((x for x in arts if x.get("kind") == kind), None)
             if a is None:
                 continue
             w = by_name.get(name) or {}
-            out.append({"tree_id": tid, "work": a.get("work"), "root": meta.get("root"),
-                        "condition": tree.get("condition"),
+            out.append({"tree_id": tid, "work": a.get("work"), "kind": kind,
+                        "root": meta.get("root"), "condition": tree.get("condition"),
                         "top_freq": w.get("top_freq"), "phrases": a.get("phrases"),
                         "gap_candidate": w.get("gap_candidate"),
                         **{k: a.get(k) for k in ("verdict", "verdict_score", "confidence",
                                                  "report_link", "created_at")}})
-    out.sort(key=lambda r: (-(r["verdict_score"] or 0), r["work"] or ""))
+    out.sort(key=lambda r: (-(r["created_at"] or 0), r["work"] or ""))
     return out
 
 
