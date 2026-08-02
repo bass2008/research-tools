@@ -32,8 +32,7 @@
 ## Запуск
 
 ```bash
-conda activate research3.12
-uvicorn server:app --port 8000            # сервер + фронт на http://127.0.0.1:8000
+./run.sh                                  # сервер + фронт на http://127.0.0.1:8000
 cd frontend && npm run build              # пересобрать фронт (dist раздаёт сервер)
 ```
 

@@ -9,3 +9,4 @@ frontend/dist/
 logs/
 *.db-wal
 *.db-shm
+reports/
