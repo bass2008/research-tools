@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import './App.css'
 import * as api from './api'
-import { fmt, fmtTime, fmtWhen, reportHref } from './api'
+import { fmt, fmtDuration, fmtTime, fmtWhen, reportHref } from './api'
 import type { ReportRow, TaskRow } from './api'
 import { NeedsPane } from './NeedsPane'
 import { StopPane } from './StopPane'
@@ -357,8 +357,8 @@ function TaskPane({ rows }: { rows: TaskRow[] }) {
           <th>узел</th>
           <th>статус</th>
           <th>создана</th>
-          <th>старт</th>
           <th>финиш</th>
+          <th>время</th>
           <th>ошибка</th>
         </tr>
       </thead>
@@ -389,14 +389,20 @@ function TaskPane({ rows }: { rows: TaskRow[] }) {
               </span>
             </td>
             <td>{fmtWhen(t.created_at)}</td>
-            <td>{fmtWhen(t.started_at)}</td>
             <td>{fmtWhen(t.finished_at)}</td>
+            <td>{fmtDuration(t.started_at, t.finished_at)}</td>
             <td className="err">{t.error ?? ''}</td>
           </tr>
         ))}
       </tbody>
     </table>
   )
+}
+
+const REPORT_KIND: Record<string, string> = {
+  analyze: '1 · Ниша',
+  analyze_adv: '2 · Функции',
+  analyze_product: '3 · Продукт',
 }
 
 function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
@@ -433,7 +439,7 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
         {rows.length === 0 && (
           <tr>
             <td colSpan={10} className="mut">
-              отчётов пока нет — разбор запускается кнопкой Analyze на работе
+              отчётов пока нет — разбор запускается на работе в дереве потребностей
             </td>
           </tr>
         )}
@@ -443,7 +449,7 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
               <div>{r.work}</div>
               {r.gap_candidate && <span className="gap">ЩЕЛЬ</span>}
             </td>
-            <td className="mut">{r.kind === 'analyze_adv' ? 'Adv' : 'обычный'}</td>
+            <td className="mut">{REPORT_KIND[r.kind] ?? r.kind}</td>
             <td className="ph">{r.root ?? '—'}</td>
             <td className="num">{fmt(r.top_freq)}</td>
             <td className="num">{r.phrases ?? '—'}</td>

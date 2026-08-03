@@ -19,11 +19,11 @@ import json
 import os
 import time
 from collections import deque
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -224,6 +224,21 @@ class LlmBroker:
             except asyncio.TimeoutError:
                 return []
 
+    def requeue_signals(self, signals):
+        """Вернуть не доставленные HTTP-клиенту сигналы в начало очереди."""
+        queued = set(self.pending)
+        added = 0
+        for signal in reversed(signals):
+            jid = signal.get("job_id") if isinstance(signal, dict) else None
+            job = self.jobs.get(jid)
+            if jid and jid not in queued and job and not job["future"].done():
+                self.pending.appendleft(jid)
+                queued.add(jid)
+                added += 1
+        if added:
+            self.arrival.set()
+        return added
+
     def data(self, job_id):
         """Полные данные джоба или None (неизвестен/просрочен).
 
@@ -285,6 +300,31 @@ class LlmBroker:
             return [j["future"].result() for j in jobs]
         finally:
             self._drop([j["job_id"] for j in jobs])
+
+
+async def _watch_connected(broker, request, max_jobs, timeout, poll=0.25):
+    """Ждать сигнал, не позволяя отключившемуся long-poll навсегда снять его с очереди."""
+    watching = asyncio.create_task(broker.watch(max_jobs, timeout))
+    try:
+        while not watching.done():
+            if await request.is_disconnected():
+                watching.cancel()
+                with suppress(asyncio.CancelledError):
+                    await watching
+                return [], True
+            done, _ = await asyncio.wait({watching}, timeout=poll)
+            if done:
+                break
+        jobs = watching.result()
+        if jobs and await request.is_disconnected():
+            broker.requeue_signals(jobs)
+            return [], True
+        return jobs, False
+    finally:
+        if not watching.done():
+            watching.cancel()
+            with suppress(asyncio.CancelledError):
+                await watching
 
 
 # ---------- фоновые петли процесса ----------
@@ -507,7 +547,7 @@ async def cmd_needs_build(body: PhraseIn2, caller: str = Header(None, alias="X-C
     return {"task_id": task_id}
 
 
-# ---------- стоп-слова (design §4.7) ----------
+# ---------- стоп-слова (design §4.10) ----------
 
 
 class StopWordsIn(BaseModel):
@@ -601,14 +641,17 @@ async def api_needs_tree(tree_id: str):
 @app.post("/api/needs/{action}")
 async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
                          caller: str = Header(None, alias="X-Caller")):
-    """Действие над работой: `analyze` (выдача -> Opus -> отчёт), `analyze_adv` (второй разбор
-    другим вопросом: одна функция, вход из поиска, платят ли), `season` (история частоты),
+    """Действие над работой. Три разбора, воронка от рынка к продукту: `analyze` — «Ниша»
+    (можно ли перехватить поисковый трафик), `analyze_adv` — «Функции» (какие функции внутри
+    работы и за что платят), `product` — «Продукт» (одна функция -> спецификация: кому, почём,
+    почему купят). Плюс `season` (история частоты),
     `adjacent` (смежные ключи без слова-технологии), `dump` (полная выгрузка топ-10 страницами).
 
     Повторный запуск разрешён: каждый прогон копит свой артефакт, и смысл повтора в том, что
     данных стало больше. Запрещён только ПАРАЛЛЕЛЬНЫЙ прогон той же операции по той же работе."""
     ops = {"analyze": "needs_analyze", "analyze_adv": "needs_analyze_adv",
-           "season": "needs_season", "adjacent": "needs_adjacent", "dump": "needs_dump"}
+           "product": "needs_analyze_product", "season": "needs_season",
+           "adjacent": "needs_adjacent", "dump": "needs_dump"}
     if action not in ops:
         raise HTTPException(404, f"нет такого действия: {action}")
     tree_id, work = body.tree_id.strip(), body.work.strip()
@@ -742,7 +785,8 @@ def _caller(x_caller, default):
 
 
 @app.get("/internal/llm/watch")
-async def llm_watch(max_jobs: int = Query(8, ge=1, le=100),
+async def llm_watch(request: Request,
+                    max_jobs: int = Query(8, ge=1, le=100),
                     timeout: float = Query(300.0, ge=0, le=3600),
                     x_internal_token: str | None = Header(default=None),
                     x_caller: str | None = Header(default=None)):
@@ -756,10 +800,12 @@ async def llm_watch(max_jobs: int = Query(8, ge=1, le=100),
             f"timeout={timeout:.0f} c, в очереди {CTX.llm.waiting()}")
     CTX.watchers += 1
     try:
-        jobs = await CTX.llm.watch(max_jobs, timeout)
+        jobs, disconnected = await _watch_connected(CTX.llm, request, max_jobs, timeout)
     finally:
         CTX.watchers -= 1
         CTX.last_watch = time.time()
+    if disconnected:
+        CTX.log("INFO", "llm", None, "watch-клиент отключился; сигнал оставлен в очереди")
     if jobs:
         CTX.log("INFO", "llm", None, "сигнал диспетчеру: "
                 + ", ".join(f"{j['job_id']}({j['type']})" for j in jobs))

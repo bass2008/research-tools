@@ -1,7 +1,8 @@
 """Точка входа CLI.
 
-    taskworker mcp           # stdio MCP-сервер (его поднимает Claude Code; регистрация user-scope)
+    taskworker mcp           # stdio MCP-сервер (его поднимает MCP-клиент; регистрация user-scope)
     taskworker wait-jobs     # висит, пока джобов нет; появились — печатает [{job_id, type}] и выходит
+    taskworker codex-dispatch start --fast  # автономно исполнять джобы моделями Codex
 
 Лаборатория типа `needs` (пока без конвейера, см. needs.py):
 
@@ -155,6 +156,12 @@ def build_parser() -> argparse.ArgumentParser:
                       help="максимум секунд ожидания (0 = бесконечно)")
     wait.set_defaults(func=_cmd_wait_jobs)
 
+    dispatch = sub.add_parser(
+        "codex-dispatch",
+        help="автономный Codex-dispatcher: start/status/stop/run",
+    )
+    dispatch.set_defaults(func=lambda _args: 0)
+
     job = sub.add_parser("needs-job", help="собрать ветку из БД и завести локальный джоб needs")
     job.add_argument("phrase", help="фраза-корень ветки")
     job.add_argument("--min-freq", dest="min_freq", type=int, default=50,
@@ -178,6 +185,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    # У Codex-dispatcher свой вложенный parser (start/status/stop/run). Передаём ему argv до
+    # разбора верхнего уровня, чтобы одинаково работали `codex-dispatch --help` и help действий.
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "codex-dispatch":
+        from . import codex_dispatch
+
+        raise SystemExit(codex_dispatch.main(sys.argv[2:]))
     parser = build_parser()
     args = parser.parse_args()
     raise SystemExit(args.func(args))

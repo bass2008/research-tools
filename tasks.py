@@ -22,6 +22,7 @@ import re
 import time
 import uuid
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import httpx
 
@@ -32,7 +33,8 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("needs", "analyze_work", "analyze_adv", "season", "adjacent", "stopwords")
+LLM_TYPES = ("needs", "analyze_work", "analyze_adv", "analyze_product", "season", "adjacent",
+             "stopwords")
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
 PROGRESS_EVERY = 0.5        # progress краула — не чаще, чем раз в N секунд
 LOG_EVERY = 50              # строка в лог на каждые N фетчей краула
@@ -48,12 +50,15 @@ DUMP_ANGLES = 5             # запросов на выгрузку: топы �
 DUMP_MAX_PAGES = 40         # страниц за одну выгрузку
 DUMP_THIN = 1500            # текста меньше — считаем, что страницу рисует скрипт, и рендерим
 DUMP_WORKERS = 8
+REPORT_TEXT_CAP = 60_000    # столько текста чужого отчёта отдаём следующему разбору
+FORECAST_MONTHS = (1, 2, 3, 6)   # разгон, закрепление, тренд и полугодовой итог
 
 # Ожидание LLM: (база на операцию, добавка на каждую следующую часть), секунды.
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
 # (tech §3): минуты на толкование готовых чисел, десятки минут на сборку и разбор.
 LLM_TIMEOUT = {"needs": (2400, 0), "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
-               "season": (600, 0), "adjacent": (900, 300), "stopwords": (900, 0)}
+               "analyze_product": (2400, 0), "season": (600, 0), "adjacent": (900, 300),
+               "stopwords": (900, 0)}
 
 _serp_client = httpx.Client(timeout=60)
 _prompts = {}
@@ -172,8 +177,8 @@ async def execute(ctx, task_id, lock=None):
         # занятость работы во втором слое снимаем здесь же: иначе новая операция легко
         # забудет это сделать и работа останется навсегда «занятой»
         act = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
-               "needs_season": "season", "needs_adjacent": "adjacent",
-               "needs_dump": "dump"}.get(op)
+               "needs_analyze_product": "product", "needs_season": "season",
+               "needs_adjacent": "adjacent", "needs_dump": "dump"}.get(op)
         if act and isinstance(params, dict) and params.get("tree_id"):
             ctx.needs_busy.discard((params["tree_id"],
                                     needs_layer._norm(params.get("work")), act))
@@ -579,8 +584,135 @@ def _verdict_of(res, op):
     return verdict, vscore, html
 
 
+def _report_text(artifact, cap=REPORT_TEXT_CAP):
+    """Текст чужого отчёта для следующего разбора: он читает выводы предшественника целиком,
+    а не только его оценку."""
+    link = (artifact or {}).get("report_link") or ""
+    if not link:
+        return None
+    f = REPORTS / Path(link).name
+    try:
+        return _clean_text(f.read_text(encoding="utf-8"))[:cap]
+    except OSError:
+        return None
+
+
+def _forecast_of(res):
+    """Прогноз продаж: месяцы 1/2/3/6, допущения с источниками, потолок, бюджет, окупаемость.
+
+    Без него спецификация не отвечает, за что мы боремся и сколько ресурсов сюда можно вложить,
+    поэтому прогноз обязателен. Таблица из нулей — тоже отказ: «продукт не взлетает» пишется
+    вердиктом `SKIP`, а не пустыми числами, по которым не видно, считал ли кто-нибудь вообще."""
+    f = res.get("forecast")
+    if not isinstance(f, dict):
+        raise ValueError("analyze_product не вернул forecast: прогноз обязателен")
+    rows = {}
+    for m in f.get("months") or []:
+        n = _num(m.get("month"), 1, 60) if isinstance(m, dict) else None
+        if n is None:
+            continue
+        rows[int(n)] = {"month": int(n),
+                        **{k: _num(m.get(k), 0, 10 ** 9) or 0
+                           for k in ("visits", "trials", "new_paying", "paying", "mrr",
+                                     "revenue_cum")}}
+    missing = [m for m in FORECAST_MONTHS if m not in rows]
+    if missing:
+        raise ValueError(f"в forecast нет месяцев: {', '.join(map(str, missing))}")
+    months = [rows[m] for m in FORECAST_MONTHS]
+    if not any(m["mrr"] or m["paying"] for m in months):
+        raise ValueError("прогноз из одних нулей: это вердикт SKIP, а не таблица")
+    assumptions = [{"name": _str(a.get("name")), "value": _str(a.get("value")),
+                    "source": _str(a.get("source"))}
+                   for a in (f.get("assumptions") or []) if isinstance(a, dict)]
+    if not assumptions:
+        raise ValueError("в forecast нет допущений: прогноз без источников не проверить")
+    invest = (_str(f.get("invest_case")) or "").strip()
+    if not invest:
+        raise ValueError("в forecast нет invest_case: отчёт должен отвечать, зачем вкладываться")
+    num_or_none = lambda v: _num(v, 0, 10 ** 12)
+    ceiling, budget = f.get("ceiling") or {}, f.get("budget") or {}
+    return {"months": months, "assumptions": assumptions,
+            "ceiling": {"paying": num_or_none(ceiling.get("paying")),
+                        "mrr": num_or_none(ceiling.get("mrr")), "why": _str(ceiling.get("why"))},
+            "budget": {"hours": num_or_none(budget.get("hours")),
+                       "money": num_or_none(budget.get("money")),
+                       "monthly": num_or_none(budget.get("monthly")),
+                       "why": _str(budget.get("why"))},
+            "payback": _str(f.get("payback")), "scenario_low": _str(f.get("scenario_low")),
+            "invest_case": invest}
+
+
+async def needs_analyze_product(ctx, task_id, phrase, params):
+    """`Продукт`: одна функция -> спецификация микро-продукта (design §4.6).
+
+    Третий разбор отвечает на вопрос исполнителя: что открыть в понедельник, кому продать, по
+    какой цене и почему заплатят. Решение принимается по трём источникам сразу — выдача плюс
+    последние отчёты «Ниша» и «Функции» целиком текстом."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    if not tree_id or not work_name:
+        raise RuntimeError("нужны tree_id и work")
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name, "needs_analyze_product")
+
+    prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
+    niche = next((a for a in prev if a.get("kind") == "analyze"), None)
+    feats = next((a for a in prev if a.get("kind") == "analyze_adv"), None)
+    if not (niche or feats):
+        raise RuntimeError("нужен хотя бы один предыдущий разбор: «Ниша» или «Функции»")
+    jparams["context"] = {
+        **jparams["context"],
+        "niche": {**{k: niche.get(k) for k in ("verdict", "verdict_score", "created_at")},
+                  "report": _report_text(niche)} if niche else None,
+        "features": {**{k: feats.get(k) for k in ("verdict", "verdict_score", "created_at",
+                                                  "functions")},
+                     "report": _report_text(feats)} if feats else None,
+    }
+
+    res = (await _run_llm(ctx, "analyze_product", work_name,
+                          [_job(task_id, 0, "analyze_product", jparams)]))[0]
+    verdict, vscore, html = _verdict_of(res, "analyze_product")
+    spec = res.get("spec")
+    if not isinstance(spec, dict):
+        raise ValueError("analyze_product не вернул spec")
+    keep = ("chosen_function", "chosen_why", "product", "user", "promise", "price", "free_part",
+            "paid_part", "why_pay", "find", "find_freq", "channel", "first_paying",
+            "scope_in", "scope_out", "weeks", "unit_cost", "kill_test")
+    spec = {k: spec.get(k) for k in keep}
+    # спецификация без продукта, цены и причины платить — это не спецификация
+    missing = [k for k in ("product", "price", "why_pay") if not (_str(spec.get(k)) or "").strip()]
+    if missing:
+        raise ValueError(f"в spec не заполнено: {', '.join(missing)}")
+
+    forecast = _forecast_of(res)
+    m6 = next(m for m in forecast["months"] if m["month"] == FORECAST_MONTHS[-1])
+
+    scores = {"niche": niche.get("verdict_score") if niche else None,
+              "features": feats.get("verdict_score") if feats else None,
+              "product": vscore}
+    trail = " → ".join(f"{k} {v:g}" for k, v in scores.items() if v is not None)
+    money = f"{m6['paying']:g} платящих · {m6['mrr']:g} ₽/мес к 6-му месяцу"
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    page = _report_page(f"Продукт: {work_name}",
+                        f"{spec['product']} · {spec['price']} · {money} · оценки: {trail}",
+                        html, verdict, vscore)
+    (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
+    link = f"reports/{task_id}.html"
+    needs_layer.save_artifact(tree_id, work_name, "analyze_product", {
+        "verdict": verdict, "verdict_score": vscore,
+        "confidence": _num(res.get("confidence"), 0, 1), "why": _str(res.get("why")),
+        "report_link": link, "task_id": task_id, "created_at": _now(),
+        "searched": data["search"], "spec": spec, "scores": scores, "forecast": forecast,
+        "summary": f"{spec['product']} · {spec['price']} · {money}"})
+    ctx.log("INFO", "needs_analyze_product", work_name,
+            f"{verdict} {vscore:g} · «{spec['product']}» по цене {spec['price']} · {money} · "
+            f"окупаемость: {forecast['payback']} · оценки {trail}")
+    return {"verdict": verdict, "verdict_score": vscore, "product": spec["product"],
+            "price": spec["price"], "scores": scores, "forecast": forecast, "link": link,
+            "tree_id": tree_id, "work": work_name}
+
+
 async def needs_analyze_adv(ctx, task_id, phrase, params):
-    """`Analyze Adv`: второй разбор той же работы с другим вопросом (design §4.5).
+    """«Функции»: второй разбор той же работы с другим вопросом (design §4.5).
 
     Обычный разбор спрашивает «можно ли перехватить поисковый трафик» и делит спрос на
     конкуренцию. Этот спрашивает «какую ОДНУ функцию тут можно сделать, найдут ли её из поиска
@@ -598,12 +730,17 @@ async def needs_analyze_adv(ctx, task_id, phrase, params):
     funcs = res.get("functions")
     if not isinstance(funcs, list) or not funcs:
         raise ValueError("analyze_adv не вернул ни одной функции")
-    keep = ("name", "io", "entry_query", "entry_freq", "paid_proof", "edge", "channel",
-            "effort_weeks", "score", "why", "kill_test")
+    keep = ("name", "io", "entry_query", "entry_freq", "paid_proof", "edge", "money", "cost",
+            "channel", "parity", "effort_weeks", "score", "why", "kill_test")
     funcs = [{k: f.get(k) for k in keep} for f in funcs if isinstance(f, dict) and f.get("name")]
     if not funcs:
         raise ValueError("в functions нет ни одной записи с именем")
     funcs.sort(key=lambda f: -(_num(f.get("score"), 0, 100) or 0))
+    # вердикт без модели денег и без себестоимости — не ответ: именно так разбор скатывается
+    # в «отдадим бесплатно то, за что конкурент берёт деньги»
+    missing = [k for k in ("money", "cost") if not (_str(funcs[0].get(k)) or "").strip()]
+    if missing:
+        raise ValueError(f"у лучшей функции не заполнено: {', '.join(missing)}")
 
     best = funcs[0]
     REPORTS.mkdir(parents=True, exist_ok=True)
@@ -1047,7 +1184,7 @@ STOP_WORDS_CAP = 400        # столько слов отдаём модели 
 
 
 async def stopwords_scan(ctx, task_id, phrase, params):
-    """Разбор слов ветки на стоп-слова, бренды и нежелательное (design §4.7).
+    """Разбор слов ветки на стоп-слова, бренды и нежелательное (design §4.10).
 
     Результат — ПРЕДЛОЖЕНИЕ, а не фильтр: в БД попадает только то, что пользователь принял
     руками. Уже сохранённые слова на вход не идут — их классифицировали один раз; а слово,
@@ -1097,6 +1234,7 @@ OPS = {"load": load, "full_load": full_load, "stopwords_scan": stopwords_scan,
        "needs_dump": needs_dump,
        "needs_build": needs_build, "needs_analyze": needs_analyze,
        "needs_analyze_adv": needs_analyze_adv,
+       "needs_analyze_product": needs_analyze_product,
        "needs_season": needs_season, "needs_adjacent": needs_adjacent}
 
 

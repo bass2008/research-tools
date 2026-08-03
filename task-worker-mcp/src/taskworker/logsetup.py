@@ -21,7 +21,7 @@ def setup_logging(component: str, stderr: bool = False) -> logging.Logger:
     """Настроить лог (один раз на процесс) и вернуть логгер компонента.
 
     `stderr=True` — дополнительно сыпать в stderr, но только WARNING и выше: вывод команды читает
-    Claude, и лишние INFO-строки ему только мешают."""
+    LLM-клиент, и лишние INFO-строки ему только мешают."""
     root = logging.getLogger("taskworker")
     root.setLevel(logging.INFO)
     root.propagate = False

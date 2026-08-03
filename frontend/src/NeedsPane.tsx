@@ -2,35 +2,51 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import * as api from './api'
 import { fmt, fmtWhen, reportHref } from './api'
-import type { NeedsAction, NeedsPhrase, NeedsRow, NeedsTree, NeedsWork, TaskRow } from './api'
+import type { ArtifactKind, NeedsAction, NeedsPhrase, NeedsRow, NeedsTree, NeedsWork, TaskRow } from './api'
 
 // Второй слой — толкование: работы и сегменты, а не фразы. Дерево здесь только смотрят:
 // оно собрано вне приложения и лежит файлом в папке, поэтому ни команд, ни статусов тут нет.
 
+// Три разбора — воронка от рынка к продукту, поэтому и названы по тому, что ищут.
 const LABEL: Record<NeedsAction, string> = {
-  analyze: 'Analyze',
-  analyze_adv: 'Analyze Adv',
-  season: 'Посчитать сезонность',
-  adjacent: 'Собрать смежные ключи',
-  dump: 'Полная выгрузка TOP 10',
+  analyze: '1 · Ниша',
+  analyze_adv: '2 · Функции',
+  product: '3 · Продукт',
+  season: 'Сезонность',
+  adjacent: 'Смежные ключи',
+  dump: 'Выгрузка TOP 10',
 }
 
 const ACTION_HINT: Record<NeedsAction, string> = {
-  analyze_adv:
-    'Второй разбор той же работы с другим вопросом: какую ОДНУ функцию тут можно сделать, найдут ли её из поиска и платит ли за неё кто-то уже сегодня. Занятость ниши тут не минус, а доказательство спроса; статьи в топе считаются уликой, что инструмента нет. Выдачу берёт из кэша — по разобранной работе бесплатно.',
   analyze:
-    'Купить выдачу по частотным фразам работы и отдать всё Opus: вердикт, оценка и полный отчёт по нише. ~7 минут, 2 платных запроса. Повторный запуск идёт по накопленным данным — сезонности и смежным ключам.',
+    'РЫНОК И ТРАФИК. Отвечает: можно ли перехватить поисковый трафик и кто его уже держит. Единица ответа — работа целиком, оценка считается как спрос ÷ конкуренция, поэтому заполненная выдача тянет вердикт вниз. ~7 минут, 2 платных запроса (повтор по купленной выдаче бесплатен).',
+  analyze_adv:
+    'ЧТО МОЖНО СДЕЛАТЬ. Отвечает: какие функции есть внутри работы, у какой есть вход из поиска и кто за неё платит. Единица ответа — функция «вход → выход». Занятость ниши тут не минус, а доказательство спроса; статьи в топе — улика, что инструмента нет. Требует назвать, на чём зарабатываем мы и во сколько обходится один пользователь. Выдача из кэша — бесплатно.',
+  product:
+    'ЧТО СТРОИМ. Берёт ОДНУ функцию и превращает её в спецификацию микро-продукта: кто пользователь, что получает за минуту, цена и модель оплаты, почему заплатят, а не уйдут к бесплатному, откуда первые сто пользователей, что НЕ входит в первую версию, срок до первого платящего и недельная проверка без кода. Плюс ПРОГНОЗ ПРОДАЖ: воронкой от частоты — платящие и ₽/мес на 1-й, 2-й, 3-й и 6-й месяц, потолок ниши, бюджет разработки, окупаемость и ответ, почему в это стоит вложить деньги и месяцы. На вход берёт выдачу и последние отчёты «Ниша» и «Функции» целиком. Бесплатно.',
   season:
     'История частоты по самой частотной фразе работы за два года: есть ли сезон, во сколько раз расходятся пик и дно, где мы сейчас. Один платный запрос.',
   adjacent:
-    'Как ту же работу ищут БЕЗ слова «нейросеть». Наше дерево выросло из одной ветки и видит только тех, кто уже думает про технологию, — это домер настоящего размера ниши. 6–12 платных запросов.',
+    'Как ту же работу ищут БЕЗ слова-технологии. Наше дерево выросло из одной ветки и видит только тех, кто уже думает про технологию, — это домер настоящего размера ниши. 6–12 платных запросов.',
   dump:
     'Скачать топ-10 обоих движков страницами целиком в reports/<работа>/yandex и /google — чтобы прочитать, что там на самом деле, а не сниппеты. Берёт пять РАЗНЫХ углов (головная фраза, фраза кандидата из Adv, «как это делают руками», «бесплатно», коммерческая): топы по близким фразам совпадают на 70–80%. Страницы, которые рисует скрипт, догружает браузером. LLM не нужна, до 10 платных запросов за выдачу.',
 }
 
+// имя действия и вид артефакта совпадают не всегда: «Продукт» запускается как `product`,
+// а прогоны его копятся под `analyze_product` — без этой карты счётчик прогонов не находился
+const ARTIFACT_OF: Record<NeedsAction, ArtifactKind> = {
+  analyze: 'analyze',
+  analyze_adv: 'analyze_adv',
+  product: 'analyze_product',
+  season: 'season',
+  adjacent: 'adjacent',
+  dump: 'dump',
+}
+
 const KIND_LABEL: Record<string, string> = {
-  analyze: 'Разбор',
-  analyze_adv: 'Разбор Adv',
+  analyze: 'Ниша',
+  analyze_adv: 'Функции',
+  analyze_product: 'Продукт',
   season: 'Сезонность',
   adjacent: 'Смежные ключи',
   dump: 'Выгрузка',
@@ -333,6 +349,7 @@ function Work({
   // два разбора отвечают на разные вопросы, поэтому показываем оба вердикта рядом:
   // расхождение между ними — сигнал, а не ошибка
   const adv = (w.artifacts ?? []).find((x) => x.kind === 'analyze_adv')
+  const prod = (w.artifacts ?? []).find((x) => x.kind === 'analyze_product')
   const seen: Record<string, number> = {}
   const links = [...(w.artifacts ?? [])]
     .filter((x) => x.report_link)
@@ -406,9 +423,23 @@ function Work({
         )}
         {adv?.verdict && (
           <span className={'vd vd-' + adv.verdict} data-testid="needs-verdict-adv"
-                title="Analyze Adv: есть ли одна функция, за которую платят">
-            Adv {adv.verdict}
+                title="2 · Функции: есть ли функция, за которую платят">
+            Функц {adv.verdict}
             {adv.verdict_score != null ? ' ' + adv.verdict_score : ''}
+          </span>
+        )}
+        {prod?.verdict && (
+          <span className={'vd vd-' + prod.verdict} data-testid="needs-verdict-product"
+                title={'3 · Продукт: ' + (prod.summary ?? 'спецификация микро-продукта')}>
+            Прод {prod.verdict}
+            {prod.verdict_score != null ? ' ' + prod.verdict_score : ''}
+          </span>
+        )}
+        {/* деньги шестого месяца прямо в строке: по ним видно, за что боремся, ещё до отчёта */}
+        {prod?.mrr6 != null && (
+          <span className="vd vd-money" data-testid="needs-mrr6"
+                title="прогноз «Продукта»: ₽/мес на шестом месяце">
+            {fmt(prod.mrr6)} ₽/мес
           </span>
         )}
         <span className="acts">
@@ -417,8 +448,8 @@ function Work({
           <details className="menu" data-testid="needs-menu">
             <summary className="act">Действие ▾</summary>
             <div className="menu-body" onClick={closeMenu}>
-              {(['analyze', 'analyze_adv', 'season', 'adjacent', 'dump'] as NeedsAction[]).map((act) => {
-                const done = (w.artifacts ?? []).filter((x) => x.kind === act).length
+              {(['analyze', 'analyze_adv', 'product', 'season', 'adjacent', 'dump'] as NeedsAction[]).map((act) => {
+                const done = (w.artifacts ?? []).filter((x) => x.kind === ARTIFACT_OF[act]).length
                 const wait = busy.has((w.name ?? '') + '|' + act)
                 return (
                   <button

@@ -139,7 +139,7 @@ def counts(tree, analyzed=()):
 
 # ---------- разборы работ ----------
 
-ARTIFACT_KINDS = ("analyze", "analyze_adv", "season", "adjacent", "dump")
+ARTIFACT_KINDS = ("analyze", "analyze_adv", "analyze_product", "season", "adjacent", "dump")
 
 
 def save_artifact(tree_id, work_name, kind, data):
@@ -154,6 +154,13 @@ def save_artifact(tree_id, work_name, kind, data):
     f.write_text(json.dumps({"work": work_name, "kind": kind, **data}, ensure_ascii=False, indent=1),
                  encoding="utf-8")
     return f
+
+
+def _mrr6(artifact):
+    """₽/мес на шестом месяце прогноза — «за что боремся» видно в строке работы, без отчёта."""
+    months = ((artifact.get("forecast") or {}).get("months") or [])
+    m = next((x for x in months if isinstance(x, dict) and x.get("month") == 6), None)
+    return (m or {}).get("mrr")
 
 
 def work_artifacts(tree_id):
@@ -174,7 +181,7 @@ def work_artifacts(tree_id):
     return out
 
 
-ANALYSIS_KINDS = ("analyze", "analyze_adv")
+ANALYSIS_KINDS = ("analyze", "analyze_adv", "analyze_product")
 
 
 def all_analyses():
@@ -257,10 +264,11 @@ def detail(tree_id):
                                         "phrases": with_freq(s.get("phrases"))}
                                        for s in (w.get("segments") or [])
                                        if isinstance(s, dict)],
-                          "artifacts": [{k: x.get(k) for k in
-                                         ("kind", "created_at", "report_link", "task_id",
-                                          "verdict", "verdict_score", "summary")}
-                                        for x in mine],
+                          "artifacts": [{**{k: x.get(k) for k in
+                                            ("kind", "created_at", "report_link", "task_id",
+                                             "verdict", "verdict_score", "summary")},
+                                          "mrr6": _mrr6(x)}
+                                         for x in mine],
                           "analysis": {k: a.get(k) for k in
                                        ("verdict", "verdict_score", "report_link",
                                         "created_at", "searched", "confidence")} if a else None})

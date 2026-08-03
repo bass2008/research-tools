@@ -64,10 +64,43 @@ def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, conf
                      "entry_freq": (params.get("phrases") or [{}])[0].get("freq", 0),
                      "paid_proof": "заготовка: платный аналог есть",
                      "edge": "без регистрации", "channel": "магазин расширений",
+                     "money": "заготовка: платный тариф 300 ₽/мес за пакетную обработку",
+                     "cost": "заготовка: 2 ₽ за вызов модели",
+                     "parity": "заготовка: выгрузка обратно на площадку",
                      "effort_weeks": 3, "score": verdict_score, "why": "заготовка",
                      "kill_test": "если платных аналогов нет — гипотеза мертва"}],
                 "recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.6,
                 "report_html": report_html(name, verdict, verdict_score)}
+    if job["type"] == "analyze_product":
+        # третий разбор возвращает спецификацию продукта; product/price/why_pay приёмник
+        # проверяет на непустоту
+        name = (params.get("work") or {}).get("name", "")
+        phr = (params.get("phrases") or [{}])[0]
+        return {"spec": {"chosen_function": f"делает {name}", "chosen_why": "заготовка",
+                         "product": f"делает {name} за минуту", "user": "заготовка: кто и когда",
+                         "promise": "результат за минуту без регистрации",
+                         "price": "199 ₽/мес", "free_part": "три штуки в день",
+                         "paid_part": "пакет и экспорт без водяного знака",
+                         "why_pay": "у соседа водяной знак снимается только за $9/мес",
+                         "find": phr.get("phrase", ""), "find_freq": phr.get("freq", 0),
+                         "channel": "магазин расширений", "first_paying": "пост в профильном чате",
+                         "scope_in": ["одна функция"], "scope_out": ["редактор", "командный режим"],
+                         "weeks": 4, "unit_cost": "2 ₽ за вызов модели",
+                         "kill_test": "лендинг с кнопкой оплаты за неделю"},
+                "forecast": {
+                    "assumptions": [{"name": "визит -> попробовал", "value": "20%",
+                                     "source": "ориентир промпта"}],
+                    "months": [{"month": m, "visits": 100 * m, "trials": 20 * m,
+                                "new_paying": m, "paying": m, "mrr": 199 * m,
+                                "revenue_cum": 199 * m * m} for m in (1, 2, 3, 6)],
+                    "ceiling": {"paying": 200, "mrr": 39800, "why": "заготовка"},
+                    "budget": {"hours": 120, "money": 240000, "monthly": 3000,
+                               "why": "заготовка"},
+                    "payback": "не окупается за шесть месяцев",
+                    "scenario_low": "заготовка: 400 ₽/мес на шестом месяце",
+                    "invest_case": "заготовка: зачем вкладываться"},
+                "recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.6,
+                "why": "заготовка", "report_html": report_html(name, verdict, verdict_score)}
     if job["type"] == "analyze_work":
         # единица разбора — работа: в отчёт идёт её имя, а не фраза
         name = (params.get("work") or {}).get("name", "")

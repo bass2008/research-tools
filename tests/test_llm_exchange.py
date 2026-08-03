@@ -10,6 +10,7 @@ import pytest
 
 import tasks
 import wscore
+from server import LlmBroker, _watch_connected
 from conftest import (SNAP, HDR, StubCtx, TOKEN, drain, log_lines, node_row, only, task_done,
                       task_row, wait_for)
 from fake_worker import REPORT_SECTIONS, FakeWorker
@@ -195,6 +196,27 @@ def test_watch_returns_signal_only(client, worker, llm_timeout):
 
 def test_watch_returns_empty_list_on_timeout(client, worker):
     assert worker("ok").watch(timeout=0.2) == []
+
+
+class _DisconnectAfter:
+    def __init__(self, *answers):
+        self.answers = iter(answers)
+
+    async def is_disconnected(self):
+        return next(self.answers, True)
+
+
+@pytest.mark.asyncio
+async def test_disconnected_watch_requeues_signal():
+    broker = LlmBroker(None)
+    broker._add({"job_id": "lost:0", "type": "stopwords"})
+
+    jobs, disconnected = await _watch_connected(
+        broker, _DisconnectAfter(False, True), max_jobs=1, timeout=1, poll=0
+    )
+
+    assert jobs == [] and disconnected is True
+    assert await broker.watch(1, 0) == [{"job_id": "lost:0", "type": "stopwords"}]
 
 
 def test_job_data_lives_until_the_operation_ends(client, snap_con, worker, llm_timeout):

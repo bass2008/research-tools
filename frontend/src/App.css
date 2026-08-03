@@ -223,6 +223,10 @@
 .vd-SKIP {
   color: var(--mut);
 }
+.vd-money {
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+}
 
 .acts {
   display: flex;

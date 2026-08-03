@@ -13,6 +13,7 @@ import needs_layer
 import tasks
 import wscore
 from conftest import SNAP, TOKEN, node_row, task_done, task_row, wait_for
+import fake_worker
 from fake_worker import FakeWorker
 
 TREE_ID = "t-001"
@@ -184,6 +185,92 @@ def test_analyze_adv_is_a_second_opinion_on_the_same_paid_serp(client, seeded, s
         "у двух разборов разные отчёты"
 
 
+def test_analyze_product_reads_both_previous_reports_and_keeps_the_score_trail(
+        client, seeded, snap_con, reports_dir):
+    """`Продукт` — третий разбор: решение по выдаче ПЛЮС двум предыдущим отчётам целиком.
+
+    Ему на вход кладут последние прогоны «Ниши» и «Функций» текстом, а не только их оценки:
+    цены конкурентов и барьеры там уже собраны, переоткрывать их незачем. В артефакте остаются
+    все три оценки — по ним видно, как менялось мнение."""
+    seen_params = {}
+    with FakeWorker(client, TOKEN,
+                    answer=lambda job: (seen_params.setdefault(job["type"], job["params"]),
+                                        fake_worker.canned(job))[1]):
+        for i, action in enumerate(("analyze", "analyze_adv", "product")):
+            if i:
+                time.sleep(1.1)   # дата артефакта в секундах: иначе прогоны неразличимы
+            tid = client.post(f"/api/needs/{action}",
+                              json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+            row = task_done(snap_con, tid)
+            assert row["status"] == "DONE", row["error"]
+
+    ctx = seen_params["analyze_product"]["context"]
+    assert ctx["niche"]["report"] and ctx["features"]["report"], "оба отчёта пришли текстом"
+    assert "Скоркарта" in ctx["niche"]["report"], "текст отчёта, а не ссылка на него"
+    assert seen_params["analyze_product"]["serps"], "выдача тоже на входе: она первоисточник"
+
+    arts = needs_layer.work_artifacts(TREE_ID)[needs_layer._norm(WORK)]
+    prod = next(a for a in arts if a["kind"] == "analyze_product")
+    assert prod["spec"]["product"] and prod["spec"]["price"], "ответ — спецификация"
+    assert [m["month"] for m in prod["forecast"]["months"]] == [1, 2, 3, 6], "прогноз по месяцам"
+    assert prod["forecast"]["assumptions"][0]["source"], "у допущения есть источник"
+    assert prod["forecast"]["invest_case"], "отчёт отвечает, зачем вкладываться"
+    assert "₽/мес" in prod["summary"], "в строке работы видно, за что боремся"
+    assert set(prod["scores"]) == {"niche", "features", "product"}, "видно, как менялось мнение"
+    assert prod["report_link"] not in [a["report_link"] for a in arts
+                                       if a["kind"] != "analyze_product"], "свой отчёт"
+
+
+def test_analyze_product_needs_a_previous_analysis(client, seeded, snap_con):
+    """Без «Ниши» и «Функций» третий разбор не запускается: ему нечего сводить."""
+    with FakeWorker(client, TOKEN):
+        tid = client.post("/api/needs/product",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        row = task_done(snap_con, tid)
+    assert row["status"] == "FAILED" and "разбор" in (row["error"] or "")
+
+
+def test_analyze_product_rejects_a_forecast_of_zeros(client, seeded, snap_con, reports_dir):
+    """Прогноз обязателен, и таблица нулей за него не считается.
+
+    Спецификация без чисел не говорит, за что боремся и сколько сюда можно вложить. «Продукт не
+    взлетает» — это вердикт `SKIP` с объяснением, а не пустые числа, по которым не видно, считал
+    ли кто-нибудь вообще."""
+    def zeros(job):
+        res = fake_worker.canned(job)
+        if job["type"] == "analyze_product":
+            for m in res["forecast"]["months"]:
+                m.update({k: 0 for k in m if k != "month"})
+        return res
+
+    with FakeWorker(client, TOKEN, answer=zeros):
+        tid = client.post("/api/needs/analyze",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        assert task_done(snap_con, tid)["status"] == "DONE"
+        tid = client.post("/api/needs/product",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        row = task_done(snap_con, tid)
+    assert row["status"] == "FAILED" and "нулей" in (row["error"] or "")
+
+
+def test_analyze_product_rejects_a_spec_without_price(client, seeded, snap_con, reports_dir):
+    """Спецификация без цены и причины платить — не спецификация, а рассуждение."""
+    def answer(job):
+        res = fake_worker.canned(job)
+        if job["type"] == "analyze_product":
+            res["spec"]["price"] = res["spec"]["why_pay"] = ""
+        return res
+
+    with FakeWorker(client, TOKEN, answer=answer):
+        tid = client.post("/api/needs/analyze",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        assert task_done(snap_con, tid)["status"] == "DONE"
+        tid = client.post("/api/needs/product",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        row = task_done(snap_con, tid)
+    assert row["status"] == "FAILED" and "price" in (row["error"] or "")
+
+
 def test_reports_show_both_kinds_newest_first(client, seeded, snap_con):
     """Вкладка «Отчёты»: оба вида разбора отдельными строками, новые сверху.
 
@@ -213,7 +300,8 @@ def test_report_is_a_page_even_if_the_model_returns_a_fragment(client, seeded, s
     и полагаться на её вёрстку нельзя: шаблон лежит в репозитории, а агент туда не ходит."""
     body = "<h2>Коротко</h2><p>" + "текст " * 40 + "</p>"
     with FakeWorker(client, TOKEN, answer=lambda job: {
-            "functions": [{"name": "делает X", "entry_query": "x", "score": 50}],
+            "functions": [{"name": "делает X", "entry_query": "x", "score": 50,
+                           "money": "тариф 300 ₽/мес", "cost": "2 ₽ за вызов"}],
             "recommendation": "MAYBE", "verdict_score": 50, "confidence": 0.5,
             "report_html": body}):
         tid = client.post("/api/needs/analyze_adv",
@@ -254,6 +342,23 @@ def test_dump_saves_pages_by_engine_and_query(client, seeded, snap_con, monkeypa
     idx = json.loads((root / "index.json").read_text(encoding="utf-8"))
     assert idx["queries"] and all(q["why"] for q in idx["queries"]), "у каждого угла есть причина"
     assert len({q["query"] for q in idx["queries"]}) == len(idx["queries"]), "углы не дублируются"
+
+
+def test_analyze_adv_rejects_a_function_without_a_money_model(client, seeded, snap_con):
+    """Функция без модели денег и себестоимости — не ответ.
+
+    Именно так разбор скатывается в «раздадим бесплатно то, за что конкурент берёт деньги»:
+    отличие названо, а на чём зарабатываем мы и во сколько нам обходится каждый гость — нет."""
+    with FakeWorker(client, TOKEN, answer=lambda job: {
+            "functions": [{"name": "делает схему", "entry_query": "схема", "score": 74,
+                           "edge": "без регистрации"}],
+            "recommendation": "BUILD", "verdict_score": 74, "confidence": 0.6,
+            "report_html": "<h2>Коротко</h2><p>" + "текст " * 40 + "</p>"}):
+        tid = client.post("/api/needs/analyze_adv",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        row = task_done(snap_con, tid)
+    assert row["status"] == "FAILED"
+    assert "money" in row["error"] and "cost" in row["error"]
 
 
 def test_analyze_adv_rejects_an_answer_without_functions(client, seeded, snap_con):

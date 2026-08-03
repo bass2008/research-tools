@@ -1,4 +1,4 @@
-"""MCP-сервер `taskworker` (stdio): мост между Claude Code и FastAPI конвейера.
+"""MCP-сервер `taskworker` (stdio): мост между LLM-клиентом и FastAPI конвейера.
 
 Роли разведены (tech-design §6.3, `prompts/orchestrator.md`):
 
@@ -11,16 +11,22 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
 from . import app_client
-from .config import app_url, env_file, internal_token
+from .config import app_url, env_file, internal_token, log_dir
 from .logsetup import setup_logging
 
 STATUS_PEEK_MAX = 10     # сколько джобов status готов принять, если они уже стоят в очереди
 STATUS_PEEK_WAIT = 1     # проверка связи не должна висеть: ждём секунду и отвечаем
+INLINE_JOB_MAX_BYTES = 48 * 1024
 
 log = setup_logging("mcp")
 
@@ -35,6 +41,67 @@ _INSTRUCTIONS = """Транспорт LLM-задач конвейера ниш (
 блокируется, пока джобов нет, и завершается ровно в момент их появления."""
 
 mcp = FastMCP("taskworker", instructions=_INSTRUCTIONS)
+
+
+def _server_job_dir(job_id: str) -> Path:
+    safe = re.sub(r"[^A-Za-z0-9._-]", "_", job_id)
+    return log_dir() / "codex-dispatcher" / "job-files" / safe
+
+
+def _atomic_bytes(path: Path, payload: bytes) -> None:
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    tmp.write_bytes(payload)
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+
+def _job_for_agent(job: dict, max_inline_bytes: int = INLINE_JOB_MAX_BYTES) -> dict:
+    """Большой server payload передать файлом, не через обрезаемый MCP tool result."""
+    payload = json.dumps(job, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    if len(payload) <= max_inline_bytes:
+        return job
+    directory = _server_job_dir(str(job["job_id"]))
+    input_file = directory / "input.json"
+    result_file = directory / "result.json"
+    _atomic_bytes(input_file, payload)
+    result_file.unlink(missing_ok=True)
+    digest = hashlib.sha256(payload).hexdigest()
+    return {
+        "job_id": job["job_id"],
+        "type": job["type"],
+        "params": {
+            "input_file": str(input_file),
+            "input_sha256": digest,
+            "input_bytes": len(payload),
+        },
+        "prompt": "Полный неизменённый server payload находится в params.input_file. "
+                  "Прочитай весь JSON, проверь job_id/type и SHA-256, затем выполни его поле "
+                  "prompt над его params. Не подменяй файл другими данными.",
+        "result_file": str(result_file),
+        "как отдать ответ": "запиши полный JSON в result_file и вызови submit_result(job_id) "
+                            "без параметра result",
+    }
+
+
+def _result_from_server_file(job_id: str) -> tuple[Any, str | None]:
+    directory = _server_job_dir(job_id)
+    input_file, result_file = directory / "input.json", directory / "result.json"
+    if not input_file.is_file():
+        return None, "для этого джоба result_file не объявлен"
+    try:
+        source = json.loads(input_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"не удалось проверить объявленный input_file: {exc}"
+    if source.get("job_id") != job_id:
+        return None, "job_id в объявленном input_file не совпадает"
+    if not result_file.is_file():
+        return None, f"файла ответа нет: {result_file}"
+    try:
+        return json.loads(result_file.read_text(encoding="utf-8")), None
+    except json.JSONDecodeError as exc:
+        return None, f"в {result_file.name} невалидный JSON: {exc}"
 
 
 @mcp.tool()
@@ -94,10 +161,16 @@ def get_job(job_id: str) -> dict:
     except app_client.AppError as exc:
         log.error("tool get_job(%s) -> ошибка: %s", job_id, exc)
         return {"job_id": job_id, "error": f"нет связи с сервером: {exc}"}
-    log.info("tool get_job(%s) -> type=%s, params=%d симв., prompt=%d симв.",
-             job_id, job.get("type"), len(str(job.get("params", ""))),
-             len(str(job.get("prompt", ""))))
-    return job
+    compact = _job_for_agent(job)
+    if compact is job:
+        log.info("tool get_job(%s) -> type=%s, params=%d симв., prompt=%d симв.",
+                 job_id, job.get("type"), len(str(job.get("params", ""))),
+                 len(str(job.get("prompt", ""))))
+    else:
+        log.info("tool get_job(%s) -> type=%s, большой вход %d байт файлом: %s",
+                 job_id, job.get("type"), compact["params"]["input_bytes"],
+                 compact["params"]["input_file"])
+    return compact
 
 
 @mcp.tool()
@@ -128,8 +201,10 @@ def submit_result(job_id: str, result: Any = None, error: str | None = None) -> 
                  "" if answer.get("accepted") else f", проблем: {len(answer.get('problems', []))}")
         return answer
     if result is None and error is None:
-        log.warning("tool submit_result(%s) -> ни result, ни error", job_id)
-        return {"accepted": False, "error": "передай либо result, либо error"}
+        result, problem = _result_from_server_file(job_id)
+        if problem:
+            log.warning("tool submit_result(%s) -> %s", job_id, problem)
+            return {"accepted": False, "error": problem}
     if result is not None and error is not None:
         log.warning("tool submit_result(%s) -> переданы и result, и error: отправляю как ошибку",
                     job_id)

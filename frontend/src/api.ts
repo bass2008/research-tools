@@ -305,17 +305,29 @@ export interface NeedsAnalysis {
   searched: string[] | null
 }
 
-export type NeedsAction = 'analyze' | 'analyze_adv' | 'season' | 'adjacent' | 'dump'
+export type NeedsAction = 'analyze' | 'analyze_adv' | 'product' | 'season' | 'adjacent' | 'dump'
+
+// Вид артефакта — не то же, что имя действия: «Продукт» запускается как `product`, а хранится
+// как `analyze_product` (третий разбор, а не отдельная сущность).
+export type ArtifactKind =
+  | 'analyze'
+  | 'analyze_adv'
+  | 'analyze_product'
+  | 'season'
+  | 'adjacent'
+  | 'dump'
 
 /** Прогон над работой: разбор, сезонность или смежные ключи. Копятся, не перезаписываются. */
 export interface NeedsArtifact {
-  kind: NeedsAction
+  kind: ArtifactKind
   created_at: number | null
   report_link: string | null
   task_id: string | null
   verdict: string | null
   verdict_score: number | null
   summary: string | null
+  /** ₽/мес на шестом месяце прогноза — только у «Продукта»: за что боремся. */
+  mrr6?: number | null
 }
 
 export interface NeedsWork {
@@ -396,6 +408,22 @@ export function fmtTime(ts: number | string | null | undefined): string {
 export function fmtWhen(ts: number | string | null | undefined): string {
   const d = toDate(ts)
   return d ? fmtTime(ts) : '—'
+}
+
+/** ЧЧ:ММ:СС — фактическое время выполнения между стартом и финишем. */
+export function fmtDuration(
+  startedAt: number | string | null | undefined,
+  finishedAt: number | string | null | undefined,
+): string {
+  const started = toDate(startedAt)
+  const finished = toDate(finishedAt)
+  if (!started || !finished || finished < started) return '—'
+
+  const totalSeconds = Math.floor((finished.getTime() - started.getTime()) / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  return `${String(hours).padStart(2, '0')}:${pad(minutes)}:${pad(seconds)}`
 }
 
 /** Ссылка на отчёт: в БД лежит относительный путь вида reports/{id}.html. */

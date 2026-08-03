@@ -388,17 +388,28 @@ describe('вкладки Task и Отчёты', () => {
         id: 't1',
         type: 'needs_build',
         node: 'a',
-        status: 'RUNNING',
+        status: 'DONE',
         created_at: 1_700_000_000,
         started_at: 1_700_000_001,
-        finished_at: null,
+        finished_at: 1_700_000_126,
         error: null,
       },
     })
     await user.click(screen.getByTestId('tab-tasks'))
     const task = screen.getByTestId('task-row')
     expect(task).toHaveTextContent('needs_build')
-    expect(task).toHaveTextContent('RUNNING')
+    expect(task).toHaveTextContent('DONE')
+    const table = task.closest('table')!
+    expect(within(table).getAllByRole('columnheader').map((h) => h.textContent)).toEqual([
+      'тип',
+      'узел',
+      'статус',
+      'создана',
+      'финиш',
+      'время',
+      'ошибка',
+    ])
+    expect(within(task).getAllByRole('cell')[5]).toHaveTextContent('00:02:05')
   })
 
   it('вкладка «Отчёты» показывает разборы РАБОТ, а не узлов', async () => {

@@ -52,6 +52,7 @@ MCP-сервер **`taskworker`**:
 | `needs` | `pipeline-needs` | opus / xhigh | сборка дерева: сотни фраз одной пачкой, суждение |
 | `analyze_work` | `pipeline-analyze` | opus / xhigh | вердикт, по которому человек решает строить или нет |
 | `analyze_adv` | `pipeline-analyze-adv` | opus / xhigh | второй разбор той же работы: одна функция, вход из поиска, платят ли |
+| `analyze_product` | `pipeline-analyze-product` | opus / xhigh | третий разбор: одна функция → спецификация микро-продукта (кому, почём, почему купят) |
 | `season` | `pipeline-season` | sonnet / low | толкование готового ряда из 24 чисел: сводку считает система |
 | `adjacent` | `pipeline-adjacent` | sonnet / medium | подобрать корни-синонимы без слова-технологии |
 | `stopwords` | `pipeline-stopwords` | sonnet / low | разметка сотен слов по трём корзинам |

@@ -283,9 +283,9 @@ describe('меню действий', () => {
     expect(await screen.findByTestId('needs-confirm')).toHaveTextContent('уже делали')
   })
 
-  it('на работе видны вердикты обоих разборов сразу', async () => {
-    // они отвечают на разные вопросы: обычный про перехват трафика, Adv про одну функцию,
-    // за которую платят. Расхождение — сигнал, поэтому показываем оба, а не последний
+  it('на работе видны вердикты всех трёх разборов сразу', async () => {
+    // они отвечают на разные вопросы: «Ниша» про перехват трафика, «Функции» про то, за что
+    // платят, «Продукт» про спецификацию. Расхождение — сигнал, поэтому показываем все три
     fetchMock.mockImplementation(async (url: string) =>
       url.includes('/api/needs/tree/')
         ? res(200, {
@@ -294,6 +294,7 @@ describe('меню действий', () => {
               {
                 ...TREE.works[0],
                 artifacts: [
+                  { kind: 'analyze_product', created_at: 3, report_link: 'reports/p.html', task_id: 'p', verdict: 'BUILD', verdict_score: 72, summary: 'бот-расшифровщик, 199 ₽/мес', mrr6: 39800 },
                   { kind: 'analyze_adv', created_at: 2, report_link: 'reports/adv.html', task_id: 'adv', verdict: 'MAYBE', verdict_score: 58, summary: null },
                   { kind: 'analyze', created_at: 1, report_link: 'reports/a1.html', task_id: 'a1', verdict: 'SKIP', verdict_score: 27, summary: null },
                 ],
@@ -309,7 +310,16 @@ describe('меню действий', () => {
     const work = (await screen.findAllByTestId('needs-work'))[0]
 
     expect(within(work).getByTestId('needs-verdict')).toHaveTextContent('SKIP 27')
-    expect(within(work).getByTestId('needs-verdict-adv')).toHaveTextContent('Adv MAYBE 58')
+    expect(within(work).getByTestId('needs-verdict-adv')).toHaveTextContent('Функц MAYBE 58')
+    expect(within(work).getByTestId('needs-verdict-product')).toHaveTextContent('Прод BUILD 72')
+    // за что боремся видно в строке, а не только в отчёте
+    expect(within(work).getByTestId('needs-mrr6')).toHaveTextContent('39 800 ₽/мес')
+
+    // счётчик прогонов на кнопке ищет СВОЙ вид артефакта: «Продукт» запускается как `product`,
+    // а копится как `analyze_product` — раньше на этой паре счётчик молчал
+    await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
+    expect(within(work).getByTestId('needs-run-product')).toHaveTextContent('(1)')
+    expect(within(work).getByTestId('needs-run-analyze_adv')).toHaveTextContent('(1)')
   })
 
   it('все отчёты остаются ссылками, а не заменяют друг друга', async () => {
@@ -340,8 +350,8 @@ describe('меню действий', () => {
 
     const analyze = within(work).getAllByTestId('needs-report-analyze')
     expect(analyze).toHaveLength(2)
-    expect(analyze[0]).toHaveTextContent('Разбор 1')
-    expect(analyze[1]).toHaveTextContent('Разбор 2')
+    expect(analyze[0]).toHaveTextContent('Ниша 1')
+    expect(analyze[1]).toHaveTextContent('Ниша 2')
     const season = within(work).getByTestId('needs-report-season')
     expect(season).toHaveAttribute('href', '/reports/s1.html')
     expect(season.getAttribute('title')).toContain('размах')
