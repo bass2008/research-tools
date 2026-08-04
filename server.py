@@ -21,7 +21,7 @@ import time
 from collections import deque
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import RequestValidationError
@@ -50,6 +50,7 @@ XMLRIVER_LIMIT = 4        # одновременных обращений к XML
 CRAWL_LIMIT = 1           # одновременных краулов (внутри каждого — wscore.WORKERS фетчей)
 CLIENT_QUEUE = 5000       # события на клиента; переполнилось — клиент слишком медленный
 ROOTS_LIMIT = 50
+MODEL_FAMILIES = ("claude", "codex")
 
 # кто может дёрнуть операцию из текущего статуса (design §2, «Кнопки по статусу»)
 ALLOWED = {
@@ -75,12 +76,12 @@ class Ctx:
         self.net = asyncio.Semaphore(XMLRIVER_LIMIT)
         self.crawl = asyncio.Semaphore(CRAWL_LIMIT)
         self.llm = LlmBroker(self)
-        self.last_watch = 0.0                      # когда петля последний раз приходила
-        self.watchers = 0                          # висящих сейчас watch-ожиданий
+        self.last_watch = {f: 0.0 for f in MODEL_FAMILIES}  # последний watch каждого семейства
+        self.watchers = {f: 0 for f in MODEL_FAMILIES}      # висящие watch каждого семейства
         self.running = set()                       # живые корутины задач (иначе их съест GC)
         self._locks = {}                           # phrase -> стек task_id (drill + его шаги)
         self.needs_busy = set()                    # (дерево, работа) — разбор уже идёт
-        self._online = None
+        self._online = {f: None for f in MODEL_FAMILIES}
 
     # --- шина событий ---
 
@@ -154,24 +155,43 @@ class Ctx:
 
     # --- состояние LLM-петли ---
 
-    def llm_online(self):
-        return self.watchers > 0 or (time.time() - self.last_watch) <= LLM_OFFLINE_AFTER
+    def llm_online(self, family=None):
+        """Онлайн конкретного семейства; Basic достаточно любого живого диспетчера."""
+        if family is None:
+            return any(self.llm_online(f) for f in MODEL_FAMILIES)
+        if family not in MODEL_FAMILIES:
+            return False
+        return self.watchers[family] > 0 or \
+            (time.time() - self.last_watch[family]) <= LLM_OFFLINE_AFTER
+
+    def llm_status(self):
+        families = {
+            family: {"online": self.llm_online(family),
+                     "last_seen_at": int(self.last_watch[family]) or None}
+            for family in MODEL_FAMILIES
+        }
+        last = max(self.last_watch.values())
+        return {"online": any(v["online"] for v in families.values()),
+                "last_seen_at": int(last) or None, "families": families}
 
     def check_llm(self, force=False):
         """Публикует llm_status при смене состояния (и предупреждение в лог, если offline)."""
-        online = self.llm_online()
-        if not force and online == self._online:
-            return online
-        self._online = online
-        self.publish("llm_status", {"online": online,
-                                    "last_seen_at": int(self.last_watch) or None})
-        if online:
-            self.log("INFO", "llm", None, "LLM-петля на связи")
-        else:
-            self.log("WARN", "llm", None,
-                     "LLM-петля не приходила за джобами больше минуты — "
-                     "операции classify/score/analyze провалятся по таймауту")
-        return online
+        states = {family: self.llm_online(family) for family in MODEL_FAMILIES}
+        changed = [f for f in MODEL_FAMILIES if states[f] != self._online[f]]
+        if not force and not changed:
+            return any(states.values())
+        previous = dict(self._online)
+        self._online.update(states)
+        self.publish("llm_status", self.llm_status())
+        for family in changed:
+            label = "Claude" if family == "claude" else "Codex"
+            if states[family]:
+                self.log("INFO", "llm", None, f"{label}-петля на связи")
+            elif previous[family] is not None:
+                self.log("WARN", "llm", None,
+                         f"{label}-петля не приходила за джобами больше "
+                         f"{LLM_OFFLINE_AFTER} секунд")
+        return any(states.values())
 
 
 class LlmBroker:
@@ -202,17 +222,30 @@ class LlmBroker:
         self.pending.clear()
         self.pending.extend(left)
 
-    async def watch(self, max_jobs, timeout):
-        """Блокируется, пока джобов нет. -> [{job_id, type}] (только сигнал, без данных)."""
+    async def watch(self, max_jobs, timeout, model_family=None):
+        """Блокируется, пока подходящих джобов нет. Сигнал не содержит полного payload."""
         loop = asyncio.get_running_loop()
         deadline = loop.time() + max(0.0, timeout)
         while True:
             out = []
-            while self.pending and len(out) < max_jobs:
+            skipped = deque()
+            # Просматриваем текущую очередь один раз: чужое семейство не снимаем и не даём
+            # ему блокировать подходящие джобы, лежащие дальше.
+            for _ in range(len(self.pending)):
                 jid = self.pending.popleft()
                 job = self.jobs.get(jid)
-                if job and not job["future"].done():
-                    out.append({"job_id": jid, "type": job["type"]})
+                if not job or job["future"].done():
+                    continue
+                family = job.get("model_family")
+                # Basic-джоб не принадлежит семейству и может быть взят любым диспетчером;
+                # модельные анализы получает только диспетчер своего семейства.
+                matches = model_family is None or family is None or family == model_family
+                if len(out) < max_jobs and matches:
+                    out.append({"job_id": jid, "type": job["type"],
+                                "model_family": family})
+                else:
+                    skipped.append(jid)
+            self.pending.extendleft(reversed(skipped))
             if out:
                 return out
             rest = deadline - loop.time()
@@ -254,7 +287,7 @@ class LlmBroker:
             self.ctx.log("INFO", "llm", None,
                          f"джоб {job_id} взят исполнителем — задача перешла в RUNNING")
         return {"job_id": job_id, "type": job["type"], "params": job["params"],
-                "prompt": job["prompt"]}
+                "model_family": job.get("model_family"), "prompt": job["prompt"]}
 
     def submit(self, job_id, ok, result=None, error=None):
         """Результат от агента. -> accepted: False, если джоб просрочен или неизвестен."""
@@ -273,6 +306,19 @@ class LlmBroker:
                 return True
         fut.set_result(result)
         return True
+
+    def submit_delay(self, job_id):
+        """Сколько ещё держать тестовый submit, чтобы исполнитель реально жил минуту."""
+        job = self.jobs.get(job_id)
+        if not job or job.get("type") != "model_test":
+            return 0.0
+        minimum = (job.get("params") or {}).get("minimum_runtime_seconds", 0)
+        try:
+            minimum = min(300.0, max(0.0, float(minimum)))
+        except (TypeError, ValueError):
+            return 0.0
+        started = job.get("taken_at") or time.time()
+        return max(0.0, minimum - (time.time() - started))
 
     async def run(self, jobs, timeout, on_done=None):
         """Отправить джобы и дождаться ВСЕХ частей. Любой отказ или таймаут -> исключение.
@@ -302,9 +348,9 @@ class LlmBroker:
             self._drop([j["job_id"] for j in jobs])
 
 
-async def _watch_connected(broker, request, max_jobs, timeout, poll=0.25):
+async def _watch_connected(broker, request, max_jobs, timeout, model_family=None, poll=0.25):
     """Ждать сигнал, не позволяя отключившемуся long-poll навсегда снять его с очереди."""
-    watching = asyncio.create_task(broker.watch(max_jobs, timeout))
+    watching = asyncio.create_task(broker.watch(max_jobs, timeout, model_family))
     try:
         while not watching.done():
             if await request.is_disconnected():
@@ -388,6 +434,7 @@ async def lifespan(app):
     REPORTS.mkdir(parents=True, exist_ok=True)
     wscore.load_env()
     con = wscore.connect()
+    migrated_reports = needs_layer.migrate_analysis_families()
     freed = wscore.clear_stale_locks(con)   # рестарт не оставляет залипших блокировок
     # инвариант: FULLY_LOADED только если всё поддерево загружено (узлы могли стать
     # незагруженными позже — например при выбрасывании отравленной записи кэша)
@@ -396,7 +443,9 @@ async def lifespan(app):
     app.state.ctx = CTX
     loops = [CTX.spawn(log_writer(CTX)), CTX.spawn(dispatcher(CTX)), CTX.spawn(llm_monitor(CTX))]
     CTX.log("INFO", "server", None,
-            f"сервер запущен, снято зависших блокировок: {freed}, исправлено ложных FULLY_LOADED: {repaired}")
+            f"сервер запущен, снято зависших блокировок: {freed}, "
+            f"исправлено ложных FULLY_LOADED: {repaired}, "
+            f"старых отчётов помечено Claude: {migrated_reports}")
     try:
         yield
     finally:
@@ -526,6 +575,7 @@ async def api_estimate(phrase: str = Query(...)):
 class NeedsAnalyzeIn(BaseModel):
     tree_id: str
     work: str
+    model_family: Literal["claude", "codex"] = "claude"
 
 
 class PhraseIn2(BaseModel):
@@ -650,7 +700,8 @@ async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
     Повторный запуск разрешён: каждый прогон копит свой артефакт, и смысл повтора в том, что
     данных стало больше. Запрещён только ПАРАЛЛЕЛЬНЫЙ прогон той же операции по той же работе."""
     ops = {"analyze": "needs_analyze", "analyze_adv": "needs_analyze_adv",
-           "product": "needs_analyze_product", "season": "needs_season",
+           "product": "needs_analyze_product", "test": "needs_model_test",
+           "season": "needs_season",
            "adjacent": "needs_adjacent", "dump": "needs_dump"}
     if action not in ops:
         raise HTTPException(404, f"нет такого действия: {action}")
@@ -660,18 +711,24 @@ async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
         w = needs_layer.find_work(tree, work)
     except needs_layer.NeedsError as e:
         raise HTTPException(404, str(e))
-    key = (tree_id, needs_layer._norm(work), action)
+    model_action = action in {"analyze", "analyze_adv", "product", "test"}
+    family = body.model_family if model_action else "basic"
+    key = (tree_id, needs_layer._norm(work), action, family)
     if key in CTX.needs_busy:
-        raise HTTPException(409, f"«{action}» по работе {work!r} уже идёт")
+        suffix = f" ({family})" if model_action else ""
+        raise HTTPException(409, f"«{action}»{suffix} по работе {work!r} уже идёт")
     phrases = needs_layer.work_phrases(w)
     if not phrases:
         raise HTTPException(422, f"в работе {work!r} нет фраз")
     CTX.needs_busy.add(key)
-    task_id = tasks.create_task(CTX, ops[action], work, {"tree_id": tree_id, "work": work})
+    params = {"tree_id": tree_id, "work": work}
+    if model_action:
+        params["model_family"] = family
+    task_id = tasks.create_task(CTX, ops[action], work, params)
     CTX.queue.put_nowait(task_id)
     CTX.log("INFO", ops[action], work,
             f"задача {task_id[:8]} поставлена в очередь ({_caller(caller, 'ui')}), "
-            f"дерево {tree_id}, фраз {len(phrases)}")
+            f"дерево {tree_id}, фраз {len(phrases)}, семейство {family}")
     return {"task_id": task_id}
 
 
@@ -693,7 +750,7 @@ def _snapshot(phrase):
 def recent_tasks(limit=200):
     """Последние строки журнала задач — вкладка Task при подписке."""
     rows = CTX.con.execute(
-        "SELECT id, type, node, status, created_at, started_at, finished_at, error "
+        "SELECT id, type, node, status, model_family, created_at, started_at, finished_at, error "
         "FROM task ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
     return [dict(r) for r in rows]
 
@@ -712,8 +769,7 @@ async def _ws_action(q, req):
         rows = recent_tasks()
         if rows:
             q.put_nowait({"type": "task", "data": rows})
-        q.put_nowait({"type": "llm_status",
-                      "data": {"online": CTX.llm_online(), "last_seen_at": int(CTX.last_watch) or None}})
+        q.put_nowait({"type": "llm_status", "data": CTX.llm_status()})
     elif action == "root":
         q.put_nowait({"type": "snapshot", "data": _snapshot(phrase)})
     elif action == "expand":
@@ -765,6 +821,7 @@ class ResultIn(BaseModel):
 class TestJobIn(BaseModel):
     type: str
     params: Any = None
+    model_family: Literal["claude", "codex"] | None = None
 
 
 def _auth(token):
@@ -788,27 +845,35 @@ def _caller(x_caller, default):
 async def llm_watch(request: Request,
                     max_jobs: int = Query(8, ge=1, le=100),
                     timeout: float = Query(300.0, ge=0, le=3600),
+                    model_family: Literal["claude", "codex"] | None = Query(default=None),
                     x_internal_token: str | None = Header(default=None),
                     x_caller: str | None = Header(default=None)):
     """Ожидание работы: блокируется, пока джобов нет; отдаёт ТОЛЬКО сигнал без данных.
     Зовёт диспетчер — по этому и различаем вызывающего в логе (testing-plan §1.2)."""
     _auth(x_internal_token)
-    CTX.last_watch = time.time()
+    # Старый wait-jobs не передавал семейство и исторически был Claude. Такой default даёт
+    # мягкое обновление; Codex-dispatcher всегда передаёт `codex` явно.
+    family = model_family or "claude"
+    CTX.last_watch[family] = time.time()
     CTX.check_llm()
     CTX.log("INFO", "llm", None,
             f"внутренний вызов watch (вызвал: {_caller(x_caller, 'диспетчер')}): max_jobs={max_jobs}, "
-            f"timeout={timeout:.0f} c, в очереди {CTX.llm.waiting()}")
-    CTX.watchers += 1
+            f"timeout={timeout:.0f} c, семейство={family}, "
+            f"в очереди {CTX.llm.waiting()}")
+    CTX.watchers[family] += 1
     try:
-        jobs, disconnected = await _watch_connected(CTX.llm, request, max_jobs, timeout)
+        jobs, disconnected = await _watch_connected(CTX.llm, request, max_jobs, timeout,
+                                                     family)
     finally:
-        CTX.watchers -= 1
-        CTX.last_watch = time.time()
+        CTX.watchers[family] -= 1
+        CTX.last_watch[family] = time.time()
+        CTX.check_llm()
     if disconnected:
         CTX.log("INFO", "llm", None, "watch-клиент отключился; сигнал оставлен в очереди")
     if jobs:
         CTX.log("INFO", "llm", None, "сигнал диспетчеру: "
-                + ", ".join(f"{j['job_id']}({j['type']})" for j in jobs))
+                + ", ".join(f"{j['job_id']}({j['type']}/{j.get('model_family') or 'basic'})"
+                            for j in jobs))
     return jobs
 
 
@@ -832,6 +897,11 @@ async def llm_result(body: ResultIn, x_internal_token: str | None = Header(defau
     """Результат джоба. Зовёт агент-исполнитель. Опоздавший или неизвестный job_id —
     accepted:false и предупреждение в лог; сервер при этом жив."""
     _auth(x_internal_token)
+    delay = CTX.llm.submit_delay(body.job_id) if body.ok else 0.0
+    if delay > 0:
+        CTX.log("INFO", "llm", None,
+                f"тестовый джоб {body.job_id}: submit принят к ожиданию ещё {delay:.1f} c")
+        await asyncio.sleep(delay)
     accepted = CTX.llm.submit(body.job_id, body.ok, body.result, body.error)
     kind = "результат" if body.ok else f"ошибка ({body.error})"
     who = _caller(x_caller, "агент")
@@ -850,7 +920,7 @@ async def test_enqueue_job(body: TestJobIn, x_internal_token: str | None = Heade
     """Тестовая постановка джоба с готовыми params — без краула и без LLM (testing-plan §1.1)."""
     _auth(x_internal_token)
     try:
-        task_id, job_id = tasks.enqueue_bare_job(CTX, body.type, body.params)
+        task_id, job_id = tasks.enqueue_bare_job(CTX, body.type, body.params, body.model_family)
     except ValueError as e:
         raise HTTPException(422, str(e))
     CTX.log("INFO", "llm", None, f"тестовый джоб {job_id} ({body.type}) поставлен в очередь")

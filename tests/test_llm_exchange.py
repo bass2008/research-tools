@@ -191,7 +191,8 @@ def test_watch_returns_signal_only(client, worker, llm_timeout):
 
     signals = worker("silent").watch(timeout=10)
 
-    assert signals and all(set(s) == {"job_id", "type"} for s in signals)
+    assert signals and all(set(s) == {"job_id", "type", "model_family"} for s in signals)
+    assert signals[0]["model_family"] is None
 
 
 def test_watch_returns_empty_list_on_timeout(client, worker):
@@ -216,7 +217,28 @@ async def test_disconnected_watch_requeues_signal():
     )
 
     assert jobs == [] and disconnected is True
-    assert await broker.watch(1, 0) == [{"job_id": "lost:0", "type": "stopwords"}]
+    assert await broker.watch(1, 0) == [
+        {"job_id": "lost:0", "type": "stopwords", "model_family": None}
+    ]
+
+
+@pytest.mark.asyncio
+async def test_family_watch_takes_own_analysis_and_shared_basic_only():
+    """Два диспетчера не крадут анализы друг друга; Basic может выполнить любой."""
+    broker = LlmBroker(None)
+    for job_id, family in (("basic:0", None), ("claude:0", "claude"),
+                           ("codex:0", "codex")):
+        broker._add({"job_id": job_id, "task_id": job_id.split(":")[0],
+                     "type": "season" if family is None else "analyze_work",
+                     "model_family": family, "params": {}, "prompt": "test"})
+
+    codex = await broker.watch(8, 0, "codex")
+    assert [(j["job_id"], j["model_family"]) for j in codex] == [
+        ("basic:0", None), ("codex:0", "codex")
+    ]
+    assert await broker.watch(8, 0, "claude") == [
+        {"job_id": "claude:0", "type": "analyze_work", "model_family": "claude"}
+    ]
 
 
 def test_job_data_lives_until_the_operation_ends(client, snap_con, worker, llm_timeout):
@@ -228,7 +250,8 @@ def test_job_data_lives_until_the_operation_ends(client, snap_con, worker, llm_t
     signal = fake.watch(timeout=10)[0]
 
     job = fake.get_job(signal["job_id"])
-    assert set(job) == {"job_id", "type", "params", "prompt"}
+    assert set(job) == {"job_id", "type", "params", "model_family", "prompt"}
+    assert job["model_family"] is None
     assert job["type"] == "stopwords" and job["job_id"] == f"{task_id}:0"
     assert job["params"]["root"] == SNAP["FULLY_LOADED"] and job["params"]["words"]
     assert job["prompt"].strip(), "промпт инлайнится сервером"
@@ -281,15 +304,25 @@ def test_enqueue_bare_job_rejects_unknown_type(client):
 # ---------------------------------------------------------------- индикатор петли
 
 def test_llm_status_goes_online_after_watch(client, worker):
-    """Сервер помнит, когда петля последний раз приходила за джобами (tech §6 «Правила»)."""
+    """Сервер помнит здоровье Claude/Codex независимо."""
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"action": "subscribe"})
-        assert only(drain(ws), "llm_status")[-1]["online"] is False
+        first = only(drain(ws), "llm_status")[-1]
+        assert first["families"]["claude"]["online"] is False
+        assert first["families"]["codex"]["online"] is False
 
         worker("ok").watch(timeout=0.2)
 
         ws.send_json({"action": "subscribe"})
-        assert only(drain(ws), "llm_status")[-1]["online"] is True
+        status = only(drain(ws), "llm_status")[-1]
+        assert status["families"]["claude"]["online"] is True
+        assert status["families"]["codex"]["online"] is False
+
+        worker("ok").watch(timeout=0.2, model_family="codex")
+        ws.send_json({"action": "subscribe"})
+        status = only(drain(ws), "llm_status")[-1]
+        assert status["families"]["claude"]["online"] is True
+        assert status["families"]["codex"]["online"] is True
 
 
 def test_offline_loop_is_warned_before_the_operation(client, snap_con, worker, llm_timeout,

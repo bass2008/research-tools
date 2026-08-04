@@ -35,7 +35,14 @@ export const initialState: State = {
   logSeq: 0,
   tasks: [],
   progress: null,
-  llm: { online: false, last_seen_at: null },
+  llm: {
+    online: false,
+    last_seen_at: null,
+    families: {
+      claude: { online: false, last_seen_at: null },
+      codex: { online: false, last_seen_at: null },
+    },
+  },
 }
 
 const LOG_CAP = 3000 // держим хвост, чтобы вкладка Лог не съела память на длинном крауле

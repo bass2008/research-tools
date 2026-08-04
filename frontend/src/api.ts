@@ -7,6 +7,7 @@ export type Status = 'NEW' | 'LOADED' | 'FULLY_LOADED'
 // WAITING — джоб отдан в очередь LLM, но исполнитель его ещё не взял: сервер свою
 // часть сделал, работы никто не делает. RUNNING = работа реально идёт.
 export type TaskStatus = 'QUEUED' | 'WAITING' | 'RUNNING' | 'DONE' | 'FAILED'
+export type ModelFamily = 'claude' | 'codex'
 
 // Объект узла (tech §6.2). children — ЛОКАЛЬНЫЕ дети из пула родителя (вложенность
 // по словам), приходят вместе с родителем; реальные дети — событием children.
@@ -38,6 +39,7 @@ export interface TaskRow {
   started_at: number | null
   finished_at: number | null
   error: string | null
+  model_family?: ModelFamily | null
 }
 
 // Отчёт принадлежит РАБОТЕ второго слоя, а не узлу дерева запросов.
@@ -55,6 +57,7 @@ export interface ReportRow {
   confidence: number | null
   report_link: string | null
   created_at: number | null
+  model_family?: ModelFamily | null
 }
 
 export const needsReports = (): Promise<{ reports: ReportRow[] }> => req('/api/needs/reports')
@@ -66,9 +69,13 @@ export interface Progress {
   total: number
 }
 
-export interface LlmStatus {
+export interface LlmFamilyStatus {
   online: boolean
   last_seen_at: number | null
+}
+
+export interface LlmStatus extends LlmFamilyStatus {
+  families?: Record<ModelFamily, LlmFamilyStatus>
 }
 
 export interface Estimate {
@@ -303,9 +310,17 @@ export interface NeedsAnalysis {
   report_link: string | null
   created_at: number | null
   searched: string[] | null
+  model_family?: ModelFamily | null
 }
 
-export type NeedsAction = 'analyze' | 'analyze_adv' | 'product' | 'season' | 'adjacent' | 'dump'
+export type NeedsAction =
+  | 'analyze'
+  | 'analyze_adv'
+  | 'product'
+  | 'test'
+  | 'season'
+  | 'adjacent'
+  | 'dump'
 
 // Вид артефакта — не то же, что имя действия: «Продукт» запускается как `product`, а хранится
 // как `analyze_product` (третий разбор, а не отдельная сущность).
@@ -313,6 +328,7 @@ export type ArtifactKind =
   | 'analyze'
   | 'analyze_adv'
   | 'analyze_product'
+  | 'model_test'
   | 'season'
   | 'adjacent'
   | 'dump'
@@ -326,6 +342,7 @@ export interface NeedsArtifact {
   verdict: string | null
   verdict_score: number | null
   summary: string | null
+  model_family?: ModelFamily | null
   /** ₽/мес на шестом месяце прогноза — только у «Продукта»: за что боремся. */
   mrr6?: number | null
 }
@@ -375,7 +392,9 @@ export const needsRun = (
   action: NeedsAction,
   tree_id: string,
   work: string,
-): Promise<{ task_id: string }> => post('/api/needs/' + action, { tree_id, work })
+  model_family?: ModelFamily,
+): Promise<{ task_id: string }> =>
+  post('/api/needs/' + action, { tree_id, work, ...(model_family ? { model_family } : {}) })
 
 // ---------- форматирование ----------
 

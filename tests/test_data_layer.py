@@ -5,6 +5,7 @@
 `tasks.*` на заглушке рантайма (`StubCtx`).
 """
 import json
+import sqlite3
 import pytest
 
 import needs_layer
@@ -96,6 +97,27 @@ def test_schema_is_idempotent(empty_db):
     con.close()
     con = wscore.connect(empty_db)
     assert counts(con)["node"] == 0
+    con.close()
+
+
+def test_task_schema_migrates_old_analysis_rows_to_claude(tmp_path):
+    """До появления model_family все анализы выполнял Claude; Basic остаётся без семьи."""
+    db = tmp_path / "old-task.db"
+    con = sqlite3.connect(db)
+    con.execute("CREATE TABLE task (id TEXT PRIMARY KEY, type TEXT NOT NULL, "
+                "status TEXT NOT NULL, node TEXT, params TEXT, result TEXT, created_at INTEGER, "
+                "started_at INTEGER, finished_at INTEGER, error TEXT)")
+    con.executemany("INSERT INTO task(id, type, status) VALUES (?, ?, 'DONE')", [
+        ("n", "needs_analyze"), ("f", "needs_analyze_adv"),
+        ("p", "needs_analyze_product"), ("s", "needs_season"),
+    ])
+    con.commit()
+    con.close()
+
+    con = wscore.connect(db, backfill=False)
+    rows = dict(con.execute("SELECT id, model_family FROM task"))
+    assert rows == {"n": "claude", "f": "claude", "p": "claude", "s": None}
+    assert "model_family" in {c[1] for c in con.execute("PRAGMA table_info(task)")}
     con.close()
 
 

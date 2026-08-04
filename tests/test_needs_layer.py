@@ -142,6 +142,7 @@ def test_analyze_work_buys_serp_then_calls_llm(client, seeded, snap_con, reports
     d = client.get(f"/api/needs/tree/{TREE_ID}").json()
     work = next(w for w in d["works"] if w["name"] == WORK)
     assert work["analysis"]["verdict"] == "BUILD"
+    assert work["analysis"]["model_family"] == "claude", "старый/default запуск — Claude"
     assert (reports_dir / f"{task_id}.html").is_file()
     assert work["analysis"]["report_link"] == f"reports/{task_id}.html"
     # статус узла первого слоя не изменился: второй слой в модель не пишет
@@ -230,6 +231,40 @@ def test_analyze_product_needs_a_previous_analysis(client, seeded, snap_con):
     assert row["status"] == "FAILED" and "разбор" in (row["error"] or "")
 
 
+def test_product_uses_previous_reports_of_its_own_family_only(
+        client, seeded, snap_con, reports_dir):
+    """Codex Product продолжает цепочку Codex, даже если свежий отчёт вообще — Claude."""
+    seen = {}
+    for i, family in enumerate(("codex", "claude"), 1):
+        for kind in ("analyze", "analyze_adv"):
+            report = reports_dir / f"{family}-{kind}.html"
+            report.write_text(f"<html><body>{family} {kind} " + "данные " * 40 +
+                              "</body></html>", encoding="utf-8")
+            data = {"task_id": f"{family}-{kind}", "created_at": i,
+                    "model_family": family, "verdict": "MAYBE", "verdict_score": 50 + i,
+                    "report_link": f"reports/{report.name}"}
+            if kind == "analyze_adv":
+                data["functions"] = [{"name": f"{family}-функция", "score": 50 + i}]
+            needs_layer.save_artifact(TREE_ID, WORK, kind, data)
+
+    def answer(job):
+        if job["type"] == "analyze_product":
+            seen.update(job["params"]["context"])
+        return fake_worker.canned(job)
+
+    with FakeWorker(client, TOKEN, answer=answer, model_family="codex"):
+        tid = client.post("/api/needs/product", json={
+            "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
+        }).json()["task_id"]
+        row = task_done(snap_con, tid)
+
+    assert row["status"] == "DONE", row["error"]
+    assert row["model_family"] == "codex"
+    assert seen["features"]["functions"][0]["name"] == "codex-функция"
+    assert "codex analyze" in seen["niche"]["report"]
+    assert "claude" not in seen["niche"]["report"]
+
+
 def test_analyze_product_rejects_a_forecast_of_zeros(client, seeded, snap_con, reports_dir):
     """Прогноз обязателен, и таблица нулей за него не считается.
 
@@ -290,6 +325,22 @@ def test_reports_show_both_kinds_newest_first(client, seeded, snap_con):
     assert mine[0]["kind"] == "analyze_adv", "последний прогон — первой строкой"
     dates = [r["created_at"] or 0 for r in rows]
     assert dates == sorted(dates, reverse=True), "весь список отсортирован по дате"
+
+
+def test_old_analysis_artifacts_are_migrated_to_claude(needs_dir):
+    """Файловая миграция явная, атомарная и идемпотентная."""
+    root = put_tree(needs_dir, TREE_ID, tree_doc([SNAP["NEW"]], []),
+                    {"root": SNAP["HEAD"], "nodes": []})
+    artifact_dir = root / "artifacts" / needs_layer.slug(WORK)
+    artifact_dir.mkdir(parents=True)
+    old = artifact_dir / "analyze-old.json"
+    old.write_text(json.dumps({"work": WORK, "kind": "analyze", "task_id": "old",
+                               "created_at": 1, "verdict": "SKIP", "verdict_score": 20},
+                              ensure_ascii=False), encoding="utf-8")
+
+    assert needs_layer.migrate_analysis_families() == 1
+    assert json.loads(old.read_text(encoding="utf-8"))["model_family"] == "claude"
+    assert needs_layer.migrate_analysis_families() == 0
 
 
 def test_report_is_a_page_even_if_the_model_returns_a_fragment(client, seeded, snap_con,
@@ -389,6 +440,9 @@ def test_analyze_unknown_tree_or_work_is_404(client, seeded):
                        json={"tree_id": "нет", "work": WORK}).status_code == 404
     assert client.post("/api/needs/analyze",
                        json={"tree_id": TREE_ID, "work": "нет такой работы"}).status_code == 404
+    assert client.post("/api/needs/analyze", json={
+        "tree_id": TREE_ID, "work": WORK, "model_family": "llama",
+    }).status_code == 422
 
 
 def test_analyze_is_not_started_twice(client, seeded, llm_timeout):
@@ -399,6 +453,57 @@ def test_analyze_is_not_started_twice(client, seeded, llm_timeout):
                            json={"tree_id": TREE_ID, "work": WORK}).status_code == 200
         r = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "work": WORK})
     assert r.status_code == 409 and "уже идёт" in r.json()["detail"]
+
+
+def test_same_analysis_can_run_for_claude_and_codex_in_parallel(
+        client, seeded, snap_con, llm_timeout):
+    llm_timeout(0.3)
+    body = {"tree_id": TREE_ID, "work": WORK}
+    claude = client.post("/api/needs/analyze",
+                         json={**body, "model_family": "claude"})
+    codex = client.post("/api/needs/analyze",
+                        json={**body, "model_family": "codex"})
+    repeated = client.post("/api/needs/analyze",
+                           json={**body, "model_family": "claude"})
+
+    assert claude.status_code == codex.status_code == 200
+    assert repeated.status_code == 409
+    assert task_done(snap_con, claude.json()["task_id"])["model_family"] == "claude"
+    assert task_done(snap_con, codex.json()["task_id"])["model_family"] == "codex"
+
+
+def test_model_test_routes_two_families_in_parallel_and_writes_reports(
+        client, seeded, snap_con, reports_dir, monkeypatch):
+    """Две семейные петли одновременно получают только свой минутный smoke-test."""
+    monkeypatch.setattr(tasks, "MODEL_TEST_SECONDS", 0.2)
+    claude_worker = FakeWorker(client, TOKEN, model_family="claude")
+    codex_worker = FakeWorker(client, TOKEN, model_family="codex")
+    body = {"tree_id": TREE_ID, "work": WORK}
+    started = time.monotonic()
+    with claude_worker, codex_worker:
+        claude = client.post("/api/needs/test",
+                             json={**body, "model_family": "claude"}).json()["task_id"]
+        codex = client.post("/api/needs/test",
+                            json={**body, "model_family": "codex"}).json()["task_id"]
+        claude_row = task_done(snap_con, claude)
+        codex_row = task_done(snap_con, codex)
+    elapsed = time.monotonic() - started
+
+    assert claude_row["status"] == codex_row["status"] == "DONE"
+    assert elapsed >= 0.18, "submit не должен приниматься раньше минимального времени"
+    assert {s["model_family"] for s in claude_worker.seen} == {"claude"}
+    assert {s["model_family"] for s in codex_worker.seen} == {"codex"}
+    claude_result, codex_result = json.loads(claude_row["result"]), json.loads(codex_row["result"])
+    assert claude_result["requested_model"] == "haiku"
+    assert codex_result["requested_model"] == "gpt-5.6-luna"
+    assert claude_result["duration_seconds"] >= 0.18
+    assert codex_result["duration_seconds"] >= 0.18
+    assert (reports_dir / f"{claude}.html").is_file()
+    assert (reports_dir / f"{codex}.html").is_file()
+
+    artifacts = needs_layer.work_artifacts(TREE_ID)[needs_layer._norm(WORK)]
+    tests = [a for a in artifacts if a["kind"] == "model_test"]
+    assert {a["model_family"] for a in tests} == {"claude", "codex"}
 
 
 def test_waiting_until_the_agent_actually_takes_the_job(client, seeded, snap_con, llm_timeout):

@@ -25,12 +25,23 @@ def test_parse_signals_accepts_only_short_safe_envelopes():
         with pytest.raises(ValueError):
             codex_dispatch.parse_signals(bad)
 
+    assert codex_dispatch.parse_signals(
+        '[{"job_id":"c:0","type":"model_test","model_family":"codex"}]',
+        model_family="codex",
+    ) == [("c:0", "model_test")]
+    with pytest.raises(ValueError, match="чужое семейство"):
+        codex_dispatch.parse_signals(
+            '[{"job_id":"x:0","type":"model_test","model_family":"claude"}]',
+            model_family="codex",
+        )
+
 
 @pytest.mark.parametrize(
     ("job_type", "model", "effort"),
     [
         ("needs", "gpt-5.6-sol", "xhigh"),
         ("analyze_product", "gpt-5.6-sol", "xhigh"),
+        ("model_test", "gpt-5.6-luna", "low"),
         ("season", "gpt-5.6-terra", "low"),
         ("adjacent", "gpt-5.6-terra", "medium"),
         ("stopwords", "gpt-5.6-terra", "low"),
@@ -132,6 +143,8 @@ def test_background_start_status_stop_without_generated_script(tmp_path):
         f"""#!{sys.executable}
 import os, pathlib, sys, time
 args = sys.argv[1:]
+if args[args.index('--model-family') + 1] != 'codex':
+    raise SystemExit(9)
 timeout = float(args[args.index('--timeout') + 1])
 counter = pathlib.Path(os.environ['FAKE_WATCH_COUNTER'])
 seen = int(counter.read_text() or '0') if counter.exists() else 0
@@ -208,6 +221,7 @@ else:
     assert payload["alive"] is True
     assert payload["status"] == "running"
     assert payload["fast_mode"] is True
+    assert payload["model_family"] == "codex"
     assert payload["counts"]["finished"] == 1
 
     stopped = subprocess.run(

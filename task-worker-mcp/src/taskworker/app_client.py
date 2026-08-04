@@ -1,6 +1,7 @@
 """HTTP-клиент к внутренним эндпоинтам FastAPI (tech-design §6.3).
 
-    GET  /internal/llm/watch?max_jobs=&timeout=   -> [{job_id, type}]   (висит, пока джобов нет)
+    GET  /internal/llm/watch?max_jobs=&timeout=&model_family=
+                                                -> [{job_id, type, model_family}]
     GET  /internal/llm/job/{job_id}               -> {job_id, type, params, prompt}
     POST /internal/llm/result {job_id, ok, ...}   -> {accepted}
 
@@ -55,15 +56,19 @@ def _request(method: str, path: str, *, caller: str, read_timeout: float,
         raise AppError(f"{method} {path}: ответ не JSON ({response.text[:200]})") from exc
 
 
-def watch(max_jobs: int = 10, timeout: float = 200.0, caller: str = "dispatcher") -> list[dict]:
-    """Ожидание джобов: сервер держит запрос, пока их нет. Возвращает `[{job_id, type}]`.
+def watch(max_jobs: int = 10, timeout: float = 200.0, caller: str = "dispatcher",
+          model_family: str = "claude") -> list[dict]:
+    """Ожидание джобов своего семейства. Basic может получить любой диспетчер.
 
     Серверный `timeout` никогда не отдаём нулём (у нуля легко получить смысл «ждать вечно»),
     а HTTP-таймаут держим заведомо больше него."""
+    if model_family not in {"claude", "codex"}:
+        raise AppError(f"неизвестное семейство модели: {model_family!r}")
     wait = max(1, int(timeout))
     data = _request("GET", "/internal/llm/watch", caller=caller,
                     read_timeout=wait + WATCH_MARGIN,
-                    params={"max_jobs": int(max_jobs), "timeout": wait})
+                    params={"max_jobs": int(max_jobs), "timeout": wait,
+                            "model_family": model_family})
     if data is None:
         return []
     if not isinstance(data, list):
@@ -71,7 +76,8 @@ def watch(max_jobs: int = 10, timeout: float = 200.0, caller: str = "dispatcher"
     jobs = []
     for item in data:
         if isinstance(item, dict) and item.get("job_id"):
-            jobs.append({"job_id": str(item["job_id"]), "type": str(item.get("type") or "")})
+            jobs.append({"job_id": str(item["job_id"]), "type": str(item.get("type") or ""),
+                         "model_family": item.get("model_family")})
     return jobs
 
 

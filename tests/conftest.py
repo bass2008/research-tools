@@ -475,7 +475,7 @@ class StubCtx:
 
     # --- обмен с LLM ---
 
-    def llm_online(self):
+    def llm_online(self, family=None):
         return True
 
     async def run(self, jobs, timeout, on_done=None):

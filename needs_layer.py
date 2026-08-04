@@ -139,7 +139,27 @@ def counts(tree, analyzed=()):
 
 # ---------- разборы работ ----------
 
-ARTIFACT_KINDS = ("analyze", "analyze_adv", "analyze_product", "season", "adjacent", "dump")
+ARTIFACT_KINDS = ("analyze", "analyze_adv", "analyze_product", "model_test",
+                  "season", "adjacent", "dump")
+ANALYSIS_KINDS = ("analyze", "analyze_adv", "analyze_product")
+MODEL_ARTIFACT_KINDS = (*ANALYSIS_KINDS, "model_test")
+MODEL_FAMILIES = ("claude", "codex")
+
+
+def model_family(value, default=None):
+    """Нормализованное семейство модели или ошибка на неизвестном значении."""
+    family = str(value or default or "").strip().lower()
+    if family not in MODEL_FAMILIES:
+        raise NeedsError(f"неизвестное семейство модели: {value!r}")
+    return family
+
+
+def artifact_family(artifact):
+    """Семейство артефакта. Старые анализы до миграции принадлежат Claude."""
+    if (artifact or {}).get("kind") not in MODEL_ARTIFACT_KINDS:
+        return None
+    family = str((artifact or {}).get("model_family") or "claude").strip().lower()
+    return family if family in MODEL_FAMILIES else "claude"
 
 
 def save_artifact(tree_id, work_name, kind, data):
@@ -150,10 +170,40 @@ def save_artifact(tree_id, work_name, kind, data):
     ключи), и сравнить прогоны важнее, чем хранить последний."""
     d = NEEDS_DIR / tree_id / "artifacts" / slug(work_name)
     d.mkdir(parents=True, exist_ok=True)
+    if kind in MODEL_ARTIFACT_KINDS:
+        data = {**data, "model_family": model_family(data.get("model_family"), "claude")}
     f = d / f"{kind}-{data.get('task_id', 'x')}.json"
     f.write_text(json.dumps({"work": work_name, "kind": kind, **data}, ensure_ascii=False, indent=1),
                  encoding="utf-8")
     return f
+
+
+def migrate_analysis_families():
+    """Разовая идемпотентная миграция: все старые анализы считаются запусками Claude."""
+    changed = 0
+    seen = set()
+    for tree_file, _ in trees().values():
+        root = tree_file.parent
+        files = list((root / "artifacts").glob("*/*.json")) + list((root / "analysis").glob("*.json"))
+        for f in files:
+            if f in seen:
+                continue
+            seen.add(f)
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(data, dict):
+                continue
+            kind = data.get("kind") or "analyze"
+            if kind not in ANALYSIS_KINDS or data.get("model_family") in MODEL_FAMILIES:
+                continue
+            data["model_family"] = "claude"
+            tmp = f.with_suffix(f.suffix + ".tmp")
+            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+            tmp.replace(f)
+            changed += 1
+    return changed
 
 
 def _mrr6(artifact):
@@ -175,13 +225,12 @@ def work_artifacts(tree_id):
         if not isinstance(data, dict) or not data.get("work"):
             continue
         data.setdefault("kind", "analyze")
+        if data["kind"] in MODEL_ARTIFACT_KINDS:
+            data["model_family"] = artifact_family(data)
         out.setdefault(_norm(data["work"]), []).append(data)
     for lst in out.values():
         lst.sort(key=lambda a: -(a.get("created_at") or 0))
     return out
-
-
-ANALYSIS_KINDS = ("analyze", "analyze_adv", "analyze_product")
 
 
 def all_analyses():
@@ -190,8 +239,9 @@ def all_analyses():
     Порядок по дате, а не по оценке: свежий прогон должен быть виден сразу, иначе он тонет
     в хвосте длинной таблицы и выглядит как «отчёт не появился».
 
-    Разборов два вида (`analyze` и `analyze_adv`) — они отвечают на разные вопросы, поэтому
-    показываются отдельными строками; от каждого вида берём последний прогон по работе.
+    Разборов три вида (`analyze`, `analyze_adv`, `analyze_product`) и два семейства модели.
+    Они отвечают на разные вопросы, поэтому показываются отдельными строками; от каждого
+    сочетания вида и семейства берём последний прогон по работе.
     Единица отчёта — работа, поэтому таблица `report` (она про узлы) здесь не участвует."""
     out = []
     for tid, (tree_file, params_file) in trees().items():
@@ -202,17 +252,21 @@ def all_analyses():
         _, meta = _input(params_file)
         by_name = {_norm(w.get("name")): w for w in works(tree)}
         for name, arts in work_artifacts(tid).items():
-          for kind in ANALYSIS_KINDS:
-            a = next((x for x in arts if x.get("kind") == kind), None)
-            if a is None:
-                continue
-            w = by_name.get(name) or {}
-            out.append({"tree_id": tid, "work": a.get("work"), "kind": kind,
-                        "root": meta.get("root"), "condition": tree.get("condition"),
-                        "top_freq": w.get("top_freq"), "phrases": a.get("phrases"),
-                        "gap_candidate": w.get("gap_candidate"),
-                        **{k: a.get(k) for k in ("verdict", "verdict_score", "confidence",
-                                                 "report_link", "created_at")}})
+            for family in MODEL_FAMILIES:
+                for kind in ANALYSIS_KINDS:
+                    a = next((x for x in arts
+                              if x.get("kind") == kind and artifact_family(x) == family), None)
+                    if a is None:
+                        continue
+                    w = by_name.get(name) or {}
+                    out.append({"tree_id": tid, "work": a.get("work"), "kind": kind,
+                                "model_family": family,
+                                "root": meta.get("root"), "condition": tree.get("condition"),
+                                "top_freq": w.get("top_freq"), "phrases": a.get("phrases"),
+                                "gap_candidate": w.get("gap_candidate"),
+                                **{k: a.get(k) for k in
+                                   ("verdict", "verdict_score", "confidence",
+                                    "report_link", "created_at")}})
     out.sort(key=lambda r: (-(r["created_at"] or 0), r["work"] or ""))
     return out
 
@@ -257,7 +311,10 @@ def detail(tree_id):
     out_works = []
     for w in works(tree):
         mine = arts.get(_norm(w.get("name")), [])
-        a = next((x for x in mine if x.get("kind") == "analyze"), None)
+        # legacy-поле analysis остаётся Claude-проекцией; новый UI читает оба семейства из
+        # artifacts. Так старые клиенты не начнут случайно показывать Codex как «основной».
+        a = next((x for x in mine
+                  if x.get("kind") == "analyze" and artifact_family(x) == "claude"), None)
         out_works.append({**{k: w.get(k) for k in WORK_KEYS},
                           "phrases": with_freq(w.get("phrases")),
                           "segments": [{**{k: s.get(k) for k in SEGMENT_KEYS},
@@ -266,12 +323,14 @@ def detail(tree_id):
                                        if isinstance(s, dict)],
                           "artifacts": [{**{k: x.get(k) for k in
                                             ("kind", "created_at", "report_link", "task_id",
-                                             "verdict", "verdict_score", "summary")},
+                                             "verdict", "verdict_score", "summary",
+                                             "model_family")},
                                           "mrr6": _mrr6(x)}
                                          for x in mine],
                           "analysis": {k: a.get(k) for k in
                                        ("verdict", "verdict_score", "report_link",
-                                        "created_at", "searched", "confidence")} if a else None})
+                                        "created_at", "searched", "confidence",
+                                        "model_family")} if a else None})
     # самое потенциально интересное сверху — по оценке сборки
     out_works.sort(key=lambda w: (-(w.get("score") or 0), -(w.get("top_freq") or 0)))
     excluded = [{"phrase": e.get("phrase"), "why": e.get("why"), "note": e.get("note"),

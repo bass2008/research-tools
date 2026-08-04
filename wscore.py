@@ -139,6 +139,7 @@ _SQL_TASK = """CREATE TABLE IF NOT EXISTS task (
     id TEXT PRIMARY KEY, type TEXT NOT NULL,         -- load|full_load|classify|search|score|analyze|drill
     status TEXT NOT NULL,                            -- QUEUED|RUNNING|DONE|FAILED
     node TEXT, params TEXT, result TEXT,
+    model_family TEXT,                               -- claude|codex для модельных разборов
     created_at INTEGER, started_at INTEGER, finished_at INTEGER, error TEXT)"""
 
 _SQL_REPORT = """CREATE TABLE IF NOT EXISTS report (
@@ -171,6 +172,7 @@ _PRE_PIPELINE_MARKER = "status"
 # Колонки, добавленные ПОСЛЕ первого прогона пайплайна: только через ALTER TABLE.
 # Новую колонку дописывать СЮДА, а не в признак схемы выше.
 _NODE_LATE_COLS = (("freq_at", "INTEGER"),)
+_TASK_LATE_COLS = (("model_family", "TEXT"),)
 
 # статус -> колонка таймстемпа операции (ставится автоматически)
 _STATUS_TS = {"TRANSACTIONAL": "classified_at", "CATEGORY": "classified_at",
@@ -228,12 +230,17 @@ def _mark_orphan_probes(con):
 
 
 def _add_missing_cols(con):
-    """Догнать схему node аддитивно: чего нет — добавить ALTER TABLE, ничего не теряя.
-    Так новая колонка не приводит к пересозданию таблицы и потере данных (tech §5)."""
-    have = {r[1] for r in con.execute("PRAGMA table_info(node)")}
-    for name, decl in _NODE_LATE_COLS:
-        if name not in have:
-            con.execute(f"ALTER TABLE node ADD COLUMN {name} {decl}")
+    """Догнать схемы аддитивно: новые колонки не должны стирать оплаченные данные."""
+    for table, columns in (("node", _NODE_LATE_COLS), ("task", _TASK_LATE_COLS)):
+        have = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
+        for name, decl in columns:
+            if name not in have:
+                con.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+    # До появления семейств все три этапа анализа запускались Claude. Basic-задачи и
+    # операции первого слоя семейства не имеют и остаются NULL.
+    con.execute("UPDATE task SET model_family = 'claude' "
+                "WHERE model_family IS NULL AND type IN "
+                "('needs_analyze', 'needs_analyze_adv', 'needs_analyze_product')")
 
 
 def db_path_of(con):

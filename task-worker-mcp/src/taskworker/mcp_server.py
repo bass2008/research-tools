@@ -105,7 +105,7 @@ def _result_from_server_file(job_id: str) -> tuple[Any, str | None]:
 
 
 @mcp.tool()
-def status() -> str:
+def status(model_family: str = "claude") -> str:
     """Проверка связи с сервером конвейера. Вызывает ДИСПЕТЧЕР (шаг 1 петли).
 
     Отдаёт: доступен ли сервер, куда стучимся (`APP_URL`), задан ли секрет, сколько джобов ждёт.
@@ -113,20 +113,23 @@ def status() -> str:
     ВНИМАНИЕ: если джобы уже стоят в очереди, этот вызов снимает их сигнал с очереди (сигнал
     выдаётся один раз) — их `job_id` перечислены в ответе. Раздай их агентам сразу же: повторного
     сигнала по этим джобам не будет, ни здесь, ни в `wait-jobs`."""
+    if model_family not in {"claude", "codex"}:
+        return f"сервер: НЕ ПРОВЕРЕН\nпричина: неизвестное семейство {model_family!r}"
     url = app_url()
     token = "задан" if internal_token() else "НЕ ЗАДАН — пропиши INTERNAL_TOKEN в .env"
     env = env_file()
     head = [f"APP_URL: {url}", f"секрет: {token}", f".env: {env or 'не найден'}"]
     try:
         jobs = app_client.watch(max_jobs=STATUS_PEEK_MAX, timeout=STATUS_PEEK_WAIT,
-                                caller="dispatcher")
+                                caller="dispatcher", model_family=model_family)
     except app_client.AppError as exc:
         log.warning("tool status -> сервер недоступен: %s", exc)
         return "\n".join(["сервер: НЕДОСТУПЕН", f"причина: {exc}", *head,
                           "починить: подними приложение (uvicorn server:app --port 8000), "
                           "проверь APP_URL и INTERNAL_TOKEN в .env"])
     log.info("tool status -> сервер доступен, джобов ждёт: %d", len(jobs))
-    lines = ["сервер: доступен", *head, f"джобов ждёт: {len(jobs)}"]
+    lines = ["сервер: доступен", f"семейство: {model_family}", *head,
+             f"джобов ждёт: {len(jobs)}"]
     if jobs:
         lines.append("эти джобы выданы этим вызовом — раздай их агентам сейчас же:")
         lines += [f"  {job['job_id']} ({job['type']})" for job in jobs]

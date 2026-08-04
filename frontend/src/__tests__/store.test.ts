@@ -271,8 +271,16 @@ describe('task', () => {
   })
 
   it('обновляет индикатор петли', () => {
-    const s = run([{ type: 'llm_status', data: { online: true, last_seen_at: 1_700_000_000 } }])
-    expect(s.llm).toEqual({ online: true, last_seen_at: 1_700_000_000 })
+    const data = {
+      online: true,
+      last_seen_at: 1_700_000_000,
+      families: {
+        claude: { online: false, last_seen_at: null },
+        codex: { online: true, last_seen_at: 1_700_000_000 },
+      },
+    }
+    const s = run([{ type: 'llm_status', data }])
+    expect(s.llm).toEqual(data)
   })
 })
 

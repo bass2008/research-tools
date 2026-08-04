@@ -43,8 +43,8 @@ def _cmd_wait_jobs(args: argparse.Namespace) -> int:
 
     log = setup_logging("wait", stderr=True)
     deadline = time.monotonic() + args.timeout if args.timeout else None
-    log.info("wait-jobs: ждём джобы (max_jobs=%d, timeout=%s)",
-             args.max_jobs, args.timeout or "бесконечно")
+    log.info("wait-jobs: ждём джобы (family=%s, max_jobs=%d, timeout=%s)",
+             args.model_family, args.max_jobs, args.timeout or "бесконечно")
     failing_since: float | None = None
     try:
         while True:
@@ -52,7 +52,8 @@ def _cmd_wait_jobs(args: argparse.Namespace) -> int:
             if left <= 0:
                 break
             try:
-                jobs = app_client.watch(max_jobs=args.max_jobs, timeout=left)
+                jobs = app_client.watch(max_jobs=args.max_jobs, timeout=left,
+                                        model_family=args.model_family)
                 failing_since = None
             except app_client.AppError as exc:
                 now = time.monotonic()
@@ -154,6 +155,8 @@ def build_parser() -> argparse.ArgumentParser:
                       help="сколько джобов забрать за раз (по умолчанию 10)")
     wait.add_argument("--timeout", type=float, default=0,
                       help="максимум секунд ожидания (0 = бесконечно)")
+    wait.add_argument("--model-family", choices=("claude", "codex"), default="claude",
+                      help="какое семейство джобов забирать (по умолчанию claude)")
     wait.set_defaults(func=_cmd_wait_jobs)
 
     dispatch = sub.add_parser(

@@ -196,16 +196,26 @@ export default function App() {
               ← все корни
             </button>
           )}
-          <span
-            className={'llm ' + (st.llm.online ? 'on' : 'off')}
-            data-testid="llm-status"
-            title={
-              st.llm.last_seen_at
-                ? 'петля приходила: ' + fmtWhen(st.llm.last_seen_at)
-                : 'петля ещё не приходила за задачами'
-            }
-          >
-            LLM: {st.llm.online ? 'онлайн' : 'офлайн'}
+          <span className="llm-pair" data-testid="llm-status">
+            {(['claude', 'codex'] as const).map((family) => {
+              const status = st.llm.families?.[family] ?? {
+                online: family === 'claude' ? st.llm.online : false,
+                last_seen_at: family === 'claude' ? st.llm.last_seen_at : null,
+              }
+              const label = family === 'claude' ? 'Claude' : 'Codex'
+              return (
+                <span
+                  key={family}
+                  className={'llm ' + (status.online ? 'on' : 'off')}
+                  data-testid={`llm-${family}-status`}
+                  title={status.last_seen_at
+                    ? `${label}-петля приходила: ${fmtWhen(status.last_seen_at)}`
+                    : `${label}-петля ещё не приходила за задачами`}
+                >
+                  {label}: {status.online ? 'онлайн' : 'офлайн'}
+                </span>
+              )
+            })}
           </span>
           <span className={'ws ws-' + conn} data-testid="ws-status" title="состояние WebSocket">
             {conn === 'open' ? 'WS ✓' : conn === 'connecting' ? 'WS …' : 'WS ✕'}
@@ -372,7 +382,15 @@ function TaskPane({ rows }: { rows: TaskRow[] }) {
         )}
         {rows.map((t) => (
           <tr key={t.id} data-testid="task-row">
-            <td>{t.type}</td>
+            <td>
+              {t.type}{' '}
+              {t.model_family && (
+                <span
+                  className={`model-dot model-${t.model_family}`}
+                  title={t.model_family === 'claude' ? 'Claude' : 'Codex'}
+                />
+              )}
+            </td>
             <td className="ph">{t.node ?? '—'}</td>
             <td>
               <span
@@ -420,61 +438,82 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
 
   if (rows === null) return <div className="mut">загружаем…</div>
   return (
-    <table className="tbl">
-      <thead>
-        <tr>
-          <th>работа</th>
-          <th>разбор</th>
-          <th>ветка</th>
-          <th className="num">частота</th>
-          <th className="num">фраз</th>
-          <th>вердикт</th>
-          <th className="num">score</th>
-          <th className="num">увер.</th>
-          <th>дата</th>
-          <th>отчёт</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.length === 0 && (
+    <>
+      <div className="report-legend" data-testid="report-legend">
+        <span><span className="model-dot model-claude" /> Claude</span>
+        <span><span className="model-dot model-codex" /> Codex</span>
+        <table className="verdict-table">
+          <tbody>
+            <tr><td><span className="vscore vscore-SKIP">30</span></td><th>SKIP</th><td>не строить</td></tr>
+            <tr><td><span className="vscore vscore-MAYBE">58</span></td><th>MAYBE</th><td>сначала проверить</td></tr>
+            <tr><td><span className="vscore vscore-BUILD">77</span></td><th>BUILD</th><td>можно строить</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <table className="tbl">
+        <thead>
           <tr>
-            <td colSpan={10} className="mut">
-              отчётов пока нет — разбор запускается на работе в дереве потребностей
-            </td>
+            <th>работа</th>
+            <th>модель</th>
+            <th>разбор</th>
+            <th>ветка</th>
+            <th className="num">частота</th>
+            <th className="num">фраз</th>
+            <th className="num">score</th>
+            <th className="num">увер.</th>
+            <th>дата</th>
+            <th>отчёт</th>
           </tr>
-        )}
-        {rows.map((r) => (
-          <tr key={r.tree_id + '/' + r.work + '/' + r.kind} data-testid="report-row">
-            <td className="ph">
-              <div>{r.work}</div>
-              {r.gap_candidate && <span className="gap">ЩЕЛЬ</span>}
-            </td>
-            <td className="mut">{REPORT_KIND[r.kind] ?? r.kind}</td>
-            <td className="ph">{r.root ?? '—'}</td>
-            <td className="num">{fmt(r.top_freq)}</td>
-            <td className="num">{r.phrases ?? '—'}</td>
-            <td>
-              <span className={'vd vd-' + r.verdict}>{r.verdict ?? '—'}</span>
-            </td>
-            <td className="num">{r.verdict_score ?? '—'}</td>
-            <td className="num">{r.confidence ?? '—'}</td>
-            <td>{fmtWhen(r.created_at)}</td>
-            <td>
-              {r.report_link && (
-                <a
-                  className="act act-link"
-                  data-testid="report-link"
-                  href={reportHref(r.report_link)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Link
-                </a>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={10} className="mut">
+                отчётов пока нет — разбор запускается на работе в дереве потребностей
+              </td>
+            </tr>
+          )}
+          {rows.map((r) => {
+            const family = r.model_family ?? 'claude'
+            return (
+              <tr key={r.tree_id + '/' + r.work + '/' + family + '/' + r.kind} data-testid="report-row">
+                <td className="ph">
+                  <div>{r.work}</div>
+                  {r.gap_candidate && <span className="gap">ЩЕЛЬ</span>}
+                </td>
+                <td>
+                  <span className={`model-dot model-${family}`}
+                        title={family === 'claude' ? 'Claude' : 'Codex'} />
+                </td>
+                <td className="mut">{REPORT_KIND[r.kind] ?? r.kind}</td>
+                <td className="ph">{r.root ?? '—'}</td>
+                <td className="num">{fmt(r.top_freq)}</td>
+                <td className="num">{r.phrases ?? '—'}</td>
+                <td className="num" title={r.verdict ?? undefined}>
+                  <span className={`vscore vscore-${r.verdict ?? 'unknown'}`}>
+                    {r.verdict_score ?? '—'}
+                  </span>
+                </td>
+                <td className="num">{r.confidence ?? '—'}</td>
+                <td>{fmtWhen(r.created_at)}</td>
+                <td>
+                  {r.report_link && (
+                    <a
+                      className="act act-link"
+                      data-testid="report-link"
+                      href={reportHref(r.report_link)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link
+                    </a>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </>
   )
 }

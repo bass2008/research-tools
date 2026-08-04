@@ -217,13 +217,20 @@ describe('меню действий', () => {
     return work
   }
 
-  it('пять действий с подсказками', async () => {
+  it('три Basic-действия и по три анализа каждого семейства с подсказками', async () => {
     const work = await opened()
-    for (const a of ['analyze', 'analyze_adv', 'season', 'adjacent', 'dump']) {
-      const b = within(work).getByTestId('needs-run-' + a)
+    for (const id of [
+      'season', 'adjacent', 'dump',
+      'claude-analyze', 'claude-analyze_adv', 'claude-product', 'claude-test',
+      'codex-analyze', 'codex-analyze_adv', 'codex-product', 'codex-test',
+    ]) {
+      const b = within(work).getByTestId('needs-run-' + id)
       expect(b).toBeEnabled()
       expect(b.getAttribute('title')!.length).toBeGreaterThan(40)
     }
+    expect(within(work).getByText('Basic')).toBeTruthy()
+    expect(within(work).getByText('Claude')).toBeTruthy()
+    expect(within(work).getByText('Codex')).toBeTruthy()
   })
 
   it('после выбора действия меню закрывается', async () => {
@@ -240,6 +247,24 @@ describe('меню действий', () => {
 
     await userEvent.click(within(work).getByTestId('needs-run-season'))
     expect(menu).not.toHaveAttribute('open')
+  })
+
+  it('команда анализа передаёт slug семейства модели', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/analyze')
+        ? res(200, { task_id: 'c1' })
+        : url.includes('/api/needs/tree/')
+          ? res(200, TREE)
+          : res(200, { trees: [row()] }),
+    )
+    const work = await opened()
+    await userEvent.click(within(work).getByTestId('needs-run-codex-analyze'))
+    const call = fetchMock.mock.calls.find((c) => String(c[0]).includes('/api/needs/analyze'))!
+    expect(JSON.parse(String(call[1]?.body))).toEqual({
+      tree_id: TREE.id,
+      work: 'оживить фото',
+      model_family: 'codex',
+    })
   })
 
   it('первый запуск идёт сразу, повторный — через подтверждение', async () => {
@@ -277,13 +302,13 @@ describe('меню действий', () => {
 
     // разбор уже был: счётчик на кнопке и подтверждение вместо запуска
     await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
-    const again = within(work).getByTestId('needs-run-analyze')
+    const again = within(work).getByTestId('needs-run-claude-analyze')
     expect(again).toHaveTextContent('(1)')
     await userEvent.click(again)
     expect(await screen.findByTestId('needs-confirm')).toHaveTextContent('уже делали')
   })
 
-  it('на работе видны вердикты всех трёх разборов сразу', async () => {
+  it('на работе три оценки и MRR схлопнуты в один кружок семейства', async () => {
     // они отвечают на разные вопросы: «Ниша» про перехват трафика, «Функции» про то, за что
     // платят, «Продукт» про спецификацию. Расхождение — сигнал, поэтому показываем все три
     fetchMock.mockImplementation(async (url: string) =>
@@ -294,6 +319,7 @@ describe('меню действий', () => {
               {
                 ...TREE.works[0],
                 artifacts: [
+                  { kind: 'analyze', model_family: 'codex', created_at: 4, report_link: 'reports/c.html', task_id: 'c', verdict: 'MAYBE', verdict_score: 44, summary: null },
                   { kind: 'analyze_product', created_at: 3, report_link: 'reports/p.html', task_id: 'p', verdict: 'BUILD', verdict_score: 72, summary: 'бот-расшифровщик, 199 ₽/мес', mrr6: 39800 },
                   { kind: 'analyze_adv', created_at: 2, report_link: 'reports/adv.html', task_id: 'adv', verdict: 'MAYBE', verdict_score: 58, summary: null },
                   { kind: 'analyze', created_at: 1, report_link: 'reports/a1.html', task_id: 'a1', verdict: 'SKIP', verdict_score: 27, summary: null },
@@ -309,17 +335,20 @@ describe('меню действий', () => {
     await userEvent.click(await screen.findByTestId('needs-row'))
     const work = (await screen.findAllByTestId('needs-work'))[0]
 
-    expect(within(work).getByTestId('needs-verdict')).toHaveTextContent('SKIP 27')
-    expect(within(work).getByTestId('needs-verdict-adv')).toHaveTextContent('Функц MAYBE 58')
-    expect(within(work).getByTestId('needs-verdict-product')).toHaveTextContent('Прод BUILD 72')
-    // за что боремся видно в строке, а не только в отчёте
-    expect(within(work).getByTestId('needs-mrr6')).toHaveTextContent('39 800 ₽/мес')
+    const score = within(work).getByTestId('needs-score-claude')
+    expect(score).toHaveTextContent('(27,58,72)')
+    expect(within(work).getByTestId('needs-mrr-claude')).toHaveTextContent('39 800 ₽/мес')
+    expect(score).toHaveAttribute('title', expect.stringContaining('1: SKIP 27'))
+    expect(score).toHaveAttribute('title', expect.stringContaining('2: MAYBE 58'))
+    expect(score).toHaveAttribute('title', expect.stringContaining('3: BUILD 72'))
+    expect(within(work).getByTestId('needs-score-codex')).toHaveTextContent('(44)')
+    expect(within(work).queryByTestId('needs-mrr-codex')).toBeNull()
 
     // счётчик прогонов на кнопке ищет СВОЙ вид артефакта: «Продукт» запускается как `product`,
     // а копится как `analyze_product` — раньше на этой паре счётчик молчал
     await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
-    expect(within(work).getByTestId('needs-run-product')).toHaveTextContent('(1)')
-    expect(within(work).getByTestId('needs-run-analyze_adv')).toHaveTextContent('(1)')
+    expect(within(work).getByTestId('needs-run-claude-product')).toHaveTextContent('(1)')
+    expect(within(work).getByTestId('needs-run-claude-analyze_adv')).toHaveTextContent('(1)')
   })
 
   it('все отчёты остаются ссылками, а не заменяют друг друга', async () => {
@@ -348,7 +377,7 @@ describe('меню действий', () => {
     await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
     expect(within(work).getByTestId('needs-report-season').closest('.menu-body')).not.toBeNull()
 
-    const analyze = within(work).getAllByTestId('needs-report-analyze')
+    const analyze = within(work).getAllByTestId('needs-report-claude-analyze')
     expect(analyze).toHaveLength(2)
     expect(analyze[0]).toHaveTextContent('Ниша 1')
     expect(analyze[1]).toHaveTextContent('Ниша 2')

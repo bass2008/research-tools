@@ -33,8 +33,8 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("needs", "analyze_work", "analyze_adv", "analyze_product", "season", "adjacent",
-             "stopwords")
+LLM_TYPES = ("needs", "analyze_work", "analyze_adv", "analyze_product", "model_test",
+             "season", "adjacent", "stopwords")
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
 PROGRESS_EVERY = 0.5        # progress краула — не чаще, чем раз в N секунд
 LOG_EVERY = 50              # строка в лог на каждые N фетчей краула
@@ -52,13 +52,14 @@ DUMP_THIN = 1500            # текста меньше — считаем, чт
 DUMP_WORKERS = 8
 REPORT_TEXT_CAP = 60_000    # столько текста чужого отчёта отдаём следующему разбору
 FORECAST_MONTHS = (1, 2, 3, 6)   # разгон, закрепление, тренд и полугодовой итог
+MODEL_TEST_SECONDS = 60           # smoke-test обязан удерживать реального исполнителя минуту
 
 # Ожидание LLM: (база на операцию, добавка на каждую следующую часть), секунды.
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
 # (tech §3): минуты на толкование готовых чисел, десятки минут на сборку и разбор.
 LLM_TIMEOUT = {"needs": (2400, 0), "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
-               "analyze_product": (2400, 0), "season": (600, 0), "adjacent": (900, 300),
-               "stopwords": (900, 0)}
+               "analyze_product": (2400, 0), "model_test": (180, 0),
+               "season": (600, 0), "adjacent": (900, 300), "stopwords": (900, 0)}
 
 _serp_client = httpx.Client(timeout=60)
 _prompts = {}
@@ -77,7 +78,8 @@ def _chunks(seq, size):
 
 def _task_row(ctx, task_id):
     r = ctx.con.execute(
-        "SELECT id, type, status, node, params, created_at, started_at, finished_at, error "
+        "SELECT id, type, status, node, params, model_family, created_at, started_at, "
+        "finished_at, error "
         "FROM task WHERE id = ?", (task_id,)).fetchone()
     return dict(r) if r else None
 
@@ -93,9 +95,11 @@ def _task_event(ctx, task_id):
 def create_task(ctx, op, node, params=None):
     """Новая строка task в статусе QUEUED. -> task_id (uuid4-hex)."""
     task_id = uuid.uuid4().hex
+    family = (params or {}).get("model_family") if isinstance(params, dict) else None
     ctx.con.execute(
-        "INSERT INTO task(id, type, status, node, params, created_at) VALUES (?, ?, 'QUEUED', ?, ?, ?)",
-        (task_id, op, node, _dump(params), _now()))
+        "INSERT INTO task(id, type, status, node, params, model_family, created_at) "
+        "VALUES (?, ?, 'QUEUED', ?, ?, ?, ?)",
+        (task_id, op, node, _dump(params), family, _now()))
     ctx.con.commit()
     _task_event(ctx, task_id)
     return task_id
@@ -177,11 +181,15 @@ async def execute(ctx, task_id, lock=None):
         # занятость работы во втором слое снимаем здесь же: иначе новая операция легко
         # забудет это сделать и работа останется навсегда «занятой»
         act = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
-               "needs_analyze_product": "product", "needs_season": "season",
+               "needs_analyze_product": "product", "needs_model_test": "test",
+               "needs_season": "season",
                "needs_adjacent": "adjacent", "needs_dump": "dump"}.get(op)
         if act and isinstance(params, dict) and params.get("tree_id"):
+            family = params.get("model_family") \
+                if act in {"analyze", "analyze_adv", "product", "test"} \
+                else "basic"
             ctx.needs_busy.discard((params["tree_id"],
-                                    needs_layer._norm(params.get("work")), act))
+                                    needs_layer._norm(params.get("work")), act, family))
 
 
 def _brief(result):
@@ -204,8 +212,9 @@ def _prompt(op):
 
 def _job(task_id, n, op, params):
     """Часть операции = джоб; job_id = "{task_id}:{n}", n с нуля."""
+    family = params.get("model_family") if isinstance(params, dict) else None
     return {"job_id": f"{task_id}:{n}", "task_id": task_id, "type": op,
-            "params": params, "prompt": _prompt(op)}
+            "model_family": family, "params": params, "prompt": _prompt(op)}
 
 
 async def _run_llm(ctx, op, node, jobs):
@@ -217,9 +226,12 @@ async def _run_llm(ctx, op, node, jobs):
     иначе «висит без исполнителя» неотличимо от честной работы."""
     base, extra = LLM_TIMEOUT[op]
     timeout = base + extra * (len(jobs) - 1)
-    if not ctx.llm_online():
+    family = jobs[0].get("model_family") if jobs else None
+    if not ctx.llm_online(family):
+        owner = f" ({family})" if family else ""
         ctx.log("WARN", op, node,
-                "LLM-петля не на связи — задача, скорее всего, провалится по таймауту")
+                f"LLM-петля{owner} не на связи — "
+                "задача, скорее всего, провалится по таймауту")
     ctx.log("INFO", op, node, f"в очередь LLM: {len(jobs)} джоб(ов), таймаут {timeout:.0f} c")
     ctx.publish("progress", {"stage": op, "node": node, "done": 0, "total": len(jobs)})
 
@@ -527,12 +539,13 @@ async def needs_analyze(ctx, task_id, phrase, params):
     толкование, его пересобирают, а модель первого слоя от этого не должна зависеть."""
     tree_id = str((params or {}).get("tree_id") or "").strip()
     work_name = str((params or {}).get("work") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
     if not tree_id or not work_name:
         raise RuntimeError("нужны tree_id и work")
-    return await _needs_analyze(ctx, task_id, tree_id, work_name)
+    return await _needs_analyze(ctx, task_id, tree_id, work_name, family)
 
 
-async def _analyze_input(ctx, task_id, tree_id, work_name, stage):
+async def _analyze_input(ctx, task_id, tree_id, work_name, stage, family):
     """Общий вход обоих разборов: работа, её фразы, выдача и накопленное по работе.
 
     Выдача берётся из общего оплаченного кэша, поэтому второй разбор по уже разобранной
@@ -542,6 +555,7 @@ async def _analyze_input(ctx, task_id, tree_id, work_name, stage):
         raise RuntimeError(f"в работе {work_name!r} нет фраз")
 
     _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name,
+                                "model_family": family,
                                 "phrases": len(data["phrases"]), "search": data["search"]})
     serps = {}
     for qn in data["search"]:
@@ -561,10 +575,11 @@ async def _analyze_input(ctx, task_id, tree_id, work_name, stage):
                      ("keys", "total_freq", "ours", "covered", "comment")} if adjacent else None,
         "previous_verdicts": [{"verdict": a.get("verdict"), "verdict_score": a.get("verdict_score"),
                                "created_at": a.get("created_at")}
-                              for a in prev if a.get("kind") in ("analyze", "analyze_adv")],
+                              for a in prev if a.get("kind") in ("analyze", "analyze_adv")
+                              and needs_layer.artifact_family(a) == family],
     }
     jparams = {**{k: data[k] for k in ("condition", "root", "work", "segments", "phrases")},
-               "serps": serps, "context": context}
+               "model_family": family, "serps": serps, "context": context}
     return data, jparams
 
 
@@ -650,15 +665,19 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
     последние отчёты «Ниша» и «Функции» целиком текстом."""
     tree_id = str((params or {}).get("tree_id") or "").strip()
     work_name = str((params or {}).get("work") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
     if not tree_id or not work_name:
         raise RuntimeError("нужны tree_id и work")
-    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name, "needs_analyze_product")
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name,
+                                         "needs_analyze_product", family)
 
     prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
-    niche = next((a for a in prev if a.get("kind") == "analyze"), None)
-    feats = next((a for a in prev if a.get("kind") == "analyze_adv"), None)
+    niche = next((a for a in prev if a.get("kind") == "analyze"
+                  and needs_layer.artifact_family(a) == family), None)
+    feats = next((a for a in prev if a.get("kind") == "analyze_adv"
+                  and needs_layer.artifact_family(a) == family), None)
     if not (niche or feats):
-        raise RuntimeError("нужен хотя бы один предыдущий разбор: «Ниша» или «Функции»")
+        raise RuntimeError(f"для {family} нужен хотя бы один предыдущий разбор: «Ниша» или «Функции»")
     jparams["context"] = {
         **jparams["context"],
         "niche": {**{k: niche.get(k) for k in ("verdict", "verdict_score", "created_at")},
@@ -698,17 +717,18 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
     needs_layer.save_artifact(tree_id, work_name, "analyze_product", {
+        "model_family": family,
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1), "why": _str(res.get("why")),
         "report_link": link, "task_id": task_id, "created_at": _now(),
         "searched": data["search"], "spec": spec, "scores": scores, "forecast": forecast,
         "summary": f"{spec['product']} · {spec['price']} · {money}"})
     ctx.log("INFO", "needs_analyze_product", work_name,
-            f"{verdict} {vscore:g} · «{spec['product']}» по цене {spec['price']} · {money} · "
+            f"[{family}] {verdict} {vscore:g} · «{spec['product']}» по цене {spec['price']} · {money} · "
             f"окупаемость: {forecast['payback']} · оценки {trail}")
     return {"verdict": verdict, "verdict_score": vscore, "product": spec["product"],
             "price": spec["price"], "scores": scores, "forecast": forecast, "link": link,
-            "tree_id": tree_id, "work": work_name}
+            "tree_id": tree_id, "work": work_name, "model_family": family}
 
 
 async def needs_analyze_adv(ctx, task_id, phrase, params):
@@ -720,9 +740,11 @@ async def needs_analyze_adv(ctx, task_id, phrase, params):
     подтверждение спроса. Выдача берётся из кэша, поэтому по разобранной работе он бесплатен."""
     tree_id = str((params or {}).get("tree_id") or "").strip()
     work_name = str((params or {}).get("work") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
     if not tree_id or not work_name:
         raise RuntimeError("нужны tree_id и work")
-    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name, "needs_analyze_adv")
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name,
+                                         "needs_analyze_adv", family)
 
     res = (await _run_llm(ctx, "analyze_adv", work_name,
                           [_job(task_id, 0, "analyze_adv", jparams)]))[0]
@@ -751,20 +773,23 @@ async def needs_analyze_adv(ctx, task_id, phrase, params):
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
     needs_layer.save_artifact(tree_id, work_name, "analyze_adv", {
+        "model_family": family,
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1),
         "report_link": link, "task_id": task_id, "created_at": _now(),
         "searched": data["search"], "functions": funcs,
         "summary": f"{len(funcs)} функц.: «{best.get('name')}» — {best.get('score')}"})
     ctx.log("INFO", "needs_analyze_adv", work_name,
-            f"функций {len(funcs)}, лучшая «{best.get('name')}» ({best.get('score')}), "
+            f"[{family}] функций {len(funcs)}, лучшая «{best.get('name')}» ({best.get('score')}), "
             f"вердикт {verdict} {vscore:g}, отчёт {link}")
     return {"verdict": verdict, "verdict_score": vscore, "functions": len(funcs),
-            "best": best.get("name"), "link": link, "tree_id": tree_id, "work": work_name}
+            "best": best.get("name"), "link": link, "tree_id": tree_id, "work": work_name,
+            "model_family": family}
 
 
-async def _needs_analyze(ctx, task_id, tree_id, work_name):
-    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name, "needs_analyze")
+async def _needs_analyze(ctx, task_id, tree_id, work_name, family):
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name,
+                                         "needs_analyze", family)
     res = (await _run_llm(ctx, "analyze_work", work_name,
                           [_job(task_id, 0, "analyze_work", jparams)]))[0]
     verdict, vscore, html = _verdict_of(res, "analyze_work")
@@ -777,15 +802,64 @@ async def _needs_analyze(ctx, task_id, tree_id, work_name):
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
     needs_layer.save_artifact(tree_id, work_name, "analyze", {
+        "model_family": family,
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1),
         "report_link": link, "task_id": task_id, "created_at": _now(),
         "searched": data["search"], "phrases": len(data["phrases"])})
     ctx.log("INFO", "needs_analyze", work_name,
-            f"вердикт {verdict}, verdict_score={vscore:g}, отчёт {link} ({len(html)} симв.), "
+            f"[{family}] вердикт {verdict}, verdict_score={vscore:g}, отчёт {link} ({len(html)} симв.), "
             f"выдача по {len(data['search'])} фраз(ам)")
     return {"verdict": verdict, "verdict_score": vscore, "link": link,
-            "tree_id": tree_id, "work": work_name}
+            "tree_id": tree_id, "work": work_name, "model_family": family}
+
+
+async def needs_model_test(ctx, task_id, phrase, params):
+    """Минутный smoke-test семейного диспетчера с простым HTML-отчётом-пустышкой."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
+    if not tree_id or not work_name:
+        raise RuntimeError("нужны tree_id и work")
+    # Повторно проверяем файловый вход уже внутри задачи: дерево могли удалить после POST.
+    tree, _, _ = needs_layer.load_tree(tree_id)
+    needs_layer.find_work(tree, work_name)
+    minimum = max(0.0, float(MODEL_TEST_SECONDS))
+    requested_model = "haiku" if family == "claude" else "gpt-5.6-luna"
+    _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name,
+                                "model_family": family,
+                                "minimum_runtime_seconds": minimum,
+                                "requested_model": requested_model})
+    jparams = {"tree_id": tree_id, "work": work_name, "model_family": family,
+               "minimum_runtime_seconds": minimum, "requested_model": requested_model}
+    started = time.time()
+    res = (await _run_llm(ctx, "model_test", work_name,
+                          [_job(task_id, 0, "model_test", jparams)]))[0]
+    if not isinstance(res, dict):
+        raise ValueError("model_test вернул не объект")
+    returned_family = str(res.get("model_family") or "").strip().lower()
+    if returned_family != family:
+        raise ValueError(f"model_test вернул семейство {returned_family!r}, ожидалось {family!r}")
+    html = res.get("report_html")
+    if not isinstance(html, str) or len(html.strip()) < 100:
+        raise ValueError("model_test не вернул простой report_html")
+    message = (_str(res.get("message"), 500) or "Тестовый отчёт сформирован").strip()
+    duration = round(time.time() - started, 1)
+    page = _report_page(f"Test {family}: {work_name}",
+                        f"{requested_model} · {duration:.1f} c", html)
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    (REPORTS / f"{task_id}.html").write_text(page, encoding="utf-8")
+    link = f"reports/{task_id}.html"
+    needs_layer.save_artifact(tree_id, work_name, "model_test", {
+        "model_family": family, "report_link": link, "task_id": task_id,
+        "created_at": _now(), "summary": f"{message} · {duration:.1f} c",
+        "duration_seconds": duration, "requested_model": requested_model,
+    })
+    ctx.log("INFO", "needs_model_test", work_name,
+            f"[{family}] минутный тест готов за {duration:.1f} c, отчёт {link}")
+    return {"link": link, "tree_id": tree_id, "work": work_name,
+            "model_family": family, "requested_model": requested_model,
+            "duration_seconds": duration}
 
 
 # ---------- сезонность и смежные ключи ----------
@@ -1235,21 +1309,26 @@ OPS = {"load": load, "full_load": full_load, "stopwords_scan": stopwords_scan,
        "needs_build": needs_build, "needs_analyze": needs_analyze,
        "needs_analyze_adv": needs_analyze_adv,
        "needs_analyze_product": needs_analyze_product,
+       "needs_model_test": needs_model_test,
        "needs_season": needs_season, "needs_adjacent": needs_adjacent}
 
 
 # ---------- тестовая постановка джоба (testing-plan §1.1) ----------
 
-def enqueue_bare_job(ctx, op, params):
+def enqueue_bare_job(ctx, op, params, model_family=None):
     """Положить один LLM-джоб с готовыми params — без краула и без записи в модель.
     Нужно, чтобы обмен джобами проверялся фальшивым воркером. -> (task_id, job_id)."""
     if op not in LLM_TYPES:
         raise ValueError(f"неизвестный тип джоба: {op}")
-    task_id = create_task(ctx, op, None, {"test": True})
+    job_params = params
+    if model_family:
+        job_params = {**(params if isinstance(params, dict) else {"value": params}),
+                      "model_family": model_family}
+    task_id = create_task(ctx, op, None, {"test": True, "model_family": model_family})
     ctx.con.execute("UPDATE task SET status = 'RUNNING', started_at = ? WHERE id = ?", (_now(), task_id))
     ctx.con.commit()
     _task_event(ctx, task_id)
-    job = _job(task_id, 0, op, params)
+    job = _job(task_id, 0, op, job_params)
 
     async def wait():
         try:

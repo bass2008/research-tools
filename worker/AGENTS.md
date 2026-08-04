@@ -129,6 +129,7 @@ Durable ledger записывается до запуска модели. Пос
 | `analyze_work` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_adv` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_product` | `gpt-5.6-sol` | `xhigh` |
+| `model_test` | `gpt-5.6-luna` | `low` |
 | `season` | `gpt-5.6-terra` | `low` |
 | `adjacent` | `gpt-5.6-terra` | `medium` |
 | `stopwords` | `gpt-5.6-terra` | `low` |

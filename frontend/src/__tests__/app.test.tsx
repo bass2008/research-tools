@@ -438,8 +438,10 @@ describe('вкладки Task и Отчёты', () => {
     await user.click(screen.getByTestId('tab-reports'))
     const row = await screen.findByTestId('report-row')
     expect(row).toHaveTextContent('создать песню или музыку')
-    expect(row).toHaveTextContent('SKIP')
     expect(row).toHaveTextContent('30')
+    expect(within(row).getByTitle('Claude')).toBeTruthy()
+    expect(within(row).getByTitle('SKIP')).toBeTruthy()
+    expect(screen.getByTestId('report-legend')).toHaveTextContent('SKIP')
     const link = within(row).getByTestId('report-link')
     expect(link).toHaveAttribute('href', '/reports/r1.html')
     expect(link).toHaveAttribute('target', '_blank')
@@ -495,10 +497,19 @@ describe('обрыв и переподключение канала', () => {
 })
 
 describe('индикатор LLM-петли', () => {
-  it('офлайн по умолчанию, переключается событием', () => {
+  it('показывает Claude и Codex независимо', () => {
     const { emit } = mount()
-    expect(screen.getByTestId('llm-status')).toHaveTextContent('офлайн')
-    emit({ type: 'llm_status', data: { online: true, last_seen_at: 1_700_000_000 } })
-    expect(screen.getByTestId('llm-status')).toHaveTextContent('онлайн')
+    expect(screen.getByTestId('llm-claude-status')).toHaveTextContent('Claude: офлайн')
+    expect(screen.getByTestId('llm-codex-status')).toHaveTextContent('Codex: офлайн')
+    emit({ type: 'llm_status', data: {
+      online: true,
+      last_seen_at: 1_700_000_000,
+      families: {
+        claude: { online: false, last_seen_at: null },
+        codex: { online: true, last_seen_at: 1_700_000_000 },
+      },
+    } })
+    expect(screen.getByTestId('llm-claude-status')).toHaveTextContent('Claude: офлайн')
+    expect(screen.getByTestId('llm-codex-status')).toHaveTextContent('Codex: онлайн')
   })
 })

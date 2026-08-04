@@ -5,8 +5,8 @@
 эндпоинтам, что и `task-worker-mcp` (tech §6.3), с теми же заголовками
 `X-Internal-Token` / `X-Caller`:
 
-    GET  /internal/llm/watch?max_jobs=&timeout=   -> [{job_id, type}]     (диспетчер)
-    GET  /internal/llm/job/{job_id}               -> {job_id,type,params,prompt}  (агент)
+    GET  /internal/llm/watch?max_jobs=&timeout=   -> [{job_id, type, model_family}] (диспетчер)
+    GET  /internal/llm/job/{job_id}               -> {job_id,type,params,model_family,prompt} (агент)
     POST /internal/llm/result {job_id, ok, …}     -> {accepted}           (агент)
 
 Транспорт — любой объект с методами `get`/`post` в стиле httpx: `TestClient` в тестах или
@@ -101,6 +101,19 @@ def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, conf
                     "invest_case": "заготовка: зачем вкладываться"},
                 "recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.6,
                 "why": "заготовка", "report_html": report_html(name, verdict, verdict_score)}
+    if job["type"] == "model_test":
+        family = str(params.get("model_family") or "claude")
+        model = str(params.get("requested_model") or "test-model")
+        name = str(params.get("work") or "тестовая работа")
+        return {
+            "model_family": family,
+            "message": "Тестовый отчёт сформирован",
+            "report_html": (
+                f"<h2>Минутный тест пройден</h2><p>Работа: {name}. Семейство: {family}. "
+                f"Модель: {model}.</p><p>Это отчёт-пустышка без бизнес-выводов, score, "
+                "конкурентов и прогноза денег.</p>"
+            ),
+        }
     if job["type"] == "analyze_work":
         # единица разбора — работа: в отчёт идёт её имя, а не фраза
         name = (params.get("work") or {}).get("name", "")
@@ -113,7 +126,7 @@ class FakeWorker:
     """Петля-заготовка. Один экземпляр = один режим поведения."""
 
     def __init__(self, http, token, mode="ok", answer=None, kinds=None, scores=None,
-                 verdict="BUILD", verdict_score=82, late_after=None):
+                 verdict="BUILD", verdict_score=82, late_after=None, model_family=None):
         assert mode in MODES, f"неизвестный режим: {mode!r}"
         self.http = http
         self.token = token
@@ -124,6 +137,7 @@ class FakeWorker:
         self.verdict = verdict
         self.verdict_score = verdict_score
         self.late_after = late_after        # сколько ждать перед опоздавшим ответом
+        self.model_family = model_family    # семейный dispatcher; None = старый/default Claude
         self.seen = []                      # сигналы, которые пришли из watch
         self.taken = []                     # job_id, по которым забирали данные
         self.done = []                      # [{job_id, accepted, mode}]
@@ -136,8 +150,11 @@ class FakeWorker:
     def _hdr(self, caller):
         return {"X-Internal-Token": self.token, "X-Caller": caller}
 
-    def watch(self, max_jobs=8, timeout=5.0, caller="dispatcher"):
-        r = self.http.get("/internal/llm/watch", params={"max_jobs": max_jobs, "timeout": timeout},
+    def watch(self, max_jobs=8, timeout=5.0, caller="dispatcher", model_family=None):
+        params = {"max_jobs": max_jobs, "timeout": timeout}
+        if model_family:
+            params["model_family"] = model_family
+        r = self.http.get("/internal/llm/watch", params=params,
                           headers=self._hdr(caller))
         assert r.status_code == 200, f"watch -> {r.status_code}: {r.text[:200]}"
         jobs = r.json()
@@ -197,7 +214,7 @@ class FakeWorker:
 
     def run_once(self, max_jobs=8, timeout=5.0):
         """Один оборот петли: дождаться пачку и обработать её. -> список сигналов."""
-        jobs = self.watch(max_jobs=max_jobs, timeout=timeout)
+        jobs = self.watch(max_jobs=max_jobs, timeout=timeout, model_family=self.model_family)
         for signal in jobs:
             self.handle(signal)
         return jobs
@@ -207,7 +224,8 @@ class FakeWorker:
     def _loop(self, max_jobs, timeout):
         while not self._stop.is_set():
             try:
-                jobs = self.watch(max_jobs=max_jobs, timeout=timeout)
+                jobs = self.watch(max_jobs=max_jobs, timeout=timeout,
+                                  model_family=self.model_family)
             except Exception as e:                      # сервер погас — петля тихо выходит
                 self.errors.append(f"watch: {type(e).__name__}: {e}")
                 return

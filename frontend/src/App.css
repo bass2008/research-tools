@@ -6,6 +6,10 @@
   --bad: #d33;
   --warn: #b45309;
   --card: #f7f8fa;
+  --claude: #c2410c;
+  --claude-bg: #fff2e8;
+  --codex: #2563eb;
+  --codex-bg: #eaf2ff;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -13,6 +17,10 @@
     --bad: #f87171;
     --warn: #fbbf24;
     --card: #1b1e22;
+    --claude: #fb923c;
+    --claude-bg: #3b2418;
+    --codex: #60a5fa;
+    --codex-bg: #172b4d;
   }
 }
 
@@ -55,6 +63,10 @@
   border-radius: 10px;
   border: 1px solid var(--line);
   white-space: nowrap;
+}
+.llm-pair {
+  display: inline-flex;
+  gap: 5px;
 }
 .llm.on {
   color: var(--ok);
@@ -226,6 +238,92 @@
 .vd-money {
   color: var(--ok);
   font-variant-numeric: tabular-nums;
+}
+
+/* Компактный след 1→2→3→MRR. Семейство кодируется рамкой/фоном, вердикт каждого числа —
+   цветом самого числа; слова BUILD/MAYBE/SKIP живут только в легенде. */
+.model-score {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  min-height: 24px;
+  padding: 1px 8px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.model-claude {
+  border-color: var(--claude);
+  background: var(--claude-bg);
+}
+.model-codex {
+  border-color: var(--codex);
+  background: var(--codex-bg);
+}
+.vscore {
+  font-weight: 700;
+}
+.vscore-BUILD {
+  color: var(--ok);
+}
+.vscore-MAYBE {
+  color: var(--warn);
+}
+.vscore-SKIP,
+.vscore-unknown {
+  color: var(--mut);
+}
+.model-mrr {
+  flex: none;
+  min-width: 82px;
+  color: var(--ok);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.model-dot {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid;
+  border-radius: 50%;
+  vertical-align: -2px;
+}
+.model-dot.model-claude {
+  border-color: var(--claude);
+}
+.model-dot.model-codex {
+  border-color: var(--codex);
+}
+.report-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  margin: 0 0 9px;
+  color: var(--mut);
+  font-size: 12px;
+}
+.report-legend > span {
+  white-space: nowrap;
+}
+.verdict-table {
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.verdict-table th,
+.verdict-table td {
+  border: 0;
+  padding: 0 5px;
+  text-align: left;
+}
+.verdict-table th {
+  color: var(--fg);
 }
 
 .acts {
@@ -624,6 +722,19 @@
 .nlegend > div {
   gap: 5px;
 }
+.verdict-key table {
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.verdict-key th,
+.verdict-key td {
+  border: 0;
+  padding: 0 5px;
+  text-align: left;
+}
+.verdict-key th {
+  color: var(--fg);
+}
 
 /* меню действий у работы */
 .menu {
@@ -656,6 +767,38 @@
 }
 .menu-body .act {
   text-align: left;
+}
+
+.menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-title {
+  margin-top: 3px;
+  padding: 5px 5px 1px;
+  border-top: 1px solid var(--line);
+  color: var(--fg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.menu-body > .menu-title:first-child {
+  margin-top: 0;
+  padding-top: 1px;
+  border-top: 0;
+}
+.model-title.model-claude,
+.model-title.model-codex {
+  background: transparent;
+}
+.model-title.model-claude {
+  color: var(--claude);
+}
+.model-title.model-codex {
+  color: var(--codex);
 }
 
 .menu-sep {

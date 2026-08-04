@@ -38,7 +38,12 @@ def test_subscribe_sends_roots_log_tail_tasks_and_llm_status(client, log_file):
     assert not any(k == "report" for k, _ in events), "события report больше нет: отчёт у работы"
 
     status = only(events, "llm_status")[0]
-    assert set(status) == {"online", "last_seen_at"} and status["online"] is False
+    assert set(status) == {"online", "last_seen_at", "families"}
+    assert status["online"] is False
+    assert status["families"] == {
+        "claude": {"online": False, "last_seen_at": None},
+        "codex": {"online": False, "last_seen_at": None},
+    }
 
 
 # ---------------------------------------------------------------- root / expand

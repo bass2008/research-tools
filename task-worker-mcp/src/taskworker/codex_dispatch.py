@@ -36,6 +36,7 @@ MODELS: dict[str, tuple[str, str]] = {
     "analyze_work": ("gpt-5.6-sol", "xhigh"),
     "analyze_adv": ("gpt-5.6-sol", "xhigh"),
     "analyze_product": ("gpt-5.6-sol", "xhigh"),
+    "model_test": ("gpt-5.6-luna", "low"),
     "season": ("gpt-5.6-terra", "low"),
     "adjacent": ("gpt-5.6-terra", "medium"),
     "stopwords": ("gpt-5.6-terra", "low"),
@@ -126,7 +127,7 @@ def _counts(ledger: dict[str, Any]) -> dict[str, int]:
     return result
 
 
-def parse_signals(stdout: str) -> list[tuple[str, str]]:
+def parse_signals(stdout: str, model_family: str | None = None) -> list[tuple[str, str]]:
     """Проверить stdout wait-jobs и вернуть пары ``(job_id, type)``."""
     try:
         batch = json.loads(stdout)
@@ -143,6 +144,11 @@ def parse_signals(stdout: str) -> list[tuple[str, str]]:
             raise ValueError("wait-jobs вернул небезопасный или пустой job_id")
         if not isinstance(job_type, str) or not job_type:
             raise ValueError(f"wait-jobs вернул пустой type для {job_id}")
+        family = item.get("model_family")
+        if model_family and family not in (None, model_family):
+            raise ValueError(
+                f"wait-jobs вернул чужое семейство {family!r} для {job_id}; ожидалось {model_family}"
+            )
         signals.append((job_id, job_type))
     return signals
 
@@ -304,6 +310,7 @@ class Supervisor:
             "started_at": self.started_at,
             "updated_at": iso_now(),
             "working_directory": str(self.worker_dir),
+            "model_family": "codex",
             "tier": "fast" if self.fast else "configured-default",
             "fast_mode": self.fast,
             "parallel_limit": self.max_workers,
@@ -474,7 +481,8 @@ class Supervisor:
         ledger: dict[str, Any] | None = None,
     ) -> tuple[int, str]:
         self.wait_process = subprocess.Popen(
-            [self.taskworker, "wait-jobs", "--max-jobs", "10", "--timeout", str(timeout)],
+            [self.taskworker, "wait-jobs", "--model-family", "codex",
+             "--max-jobs", "10", "--timeout", str(timeout)],
             cwd=self.worker_dir,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
@@ -540,7 +548,7 @@ class Supervisor:
                 self.write_state(ledger, "failed", output)
                 self.log(f"startup watch failed: {output}")
                 return 1
-            signals = parse_signals(output)
+            signals = parse_signals(output, model_family="codex")
             added = self.ingest(ledger, signals)
             self.last_watch_at = iso_now()
             self.launch_pending(ledger)
@@ -562,7 +570,7 @@ class Supervisor:
                         time.sleep(0.25)
                     continue
                 try:
-                    signals = parse_signals(output)
+                    signals = parse_signals(output, model_family="codex")
                 except ValueError as exc:
                     self.unavailable_since = self.unavailable_since or iso_now()
                     self.write_state(ledger, "degraded", str(exc))

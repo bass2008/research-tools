@@ -2,7 +2,17 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import * as api from './api'
 import { fmt, fmtWhen, reportHref } from './api'
-import type { ArtifactKind, NeedsAction, NeedsPhrase, NeedsRow, NeedsTree, NeedsWork, TaskRow } from './api'
+import type {
+  ArtifactKind,
+  ModelFamily,
+  NeedsAction,
+  NeedsArtifact,
+  NeedsPhrase,
+  NeedsRow,
+  NeedsTree,
+  NeedsWork,
+  TaskRow,
+} from './api'
 
 // Второй слой — толкование: работы и сегменты, а не фразы. Дерево здесь только смотрят:
 // оно собрано вне приложения и лежит файлом в папке, поэтому ни команд, ни статусов тут нет.
@@ -12,6 +22,7 @@ const LABEL: Record<NeedsAction, string> = {
   analyze: '1 · Ниша',
   analyze_adv: '2 · Функции',
   product: '3 · Продукт',
+  test: 'Test · 1 мин',
   season: 'Сезонность',
   adjacent: 'Смежные ключи',
   dump: 'Выгрузка TOP 10',
@@ -24,6 +35,8 @@ const ACTION_HINT: Record<NeedsAction, string> = {
     'ЧТО МОЖНО СДЕЛАТЬ. Отвечает: какие функции есть внутри работы, у какой есть вход из поиска и кто за неё платит. Единица ответа — функция «вход → выход». Занятость ниши тут не минус, а доказательство спроса; статьи в топе — улика, что инструмента нет. Требует назвать, на чём зарабатываем мы и во сколько обходится один пользователь. Выдача из кэша — бесплатно.',
   product:
     'ЧТО СТРОИМ. Берёт ОДНУ функцию и превращает её в спецификацию микро-продукта: кто пользователь, что получает за минуту, цена и модель оплаты, почему заплатят, а не уйдут к бесплатному, откуда первые сто пользователей, что НЕ входит в первую версию, срок до первого платящего и недельная проверка без кода. Плюс ПРОГНОЗ ПРОДАЖ: воронкой от частоты — платящие и ₽/мес на 1-й, 2-й, 3-й и 6-й месяц, потолок ниши, бюджет разработки, окупаемость и ответ, почему в это стоит вложить деньги и месяцы. На вход берёт выдачу и последние отчёты «Ниша» и «Функции» целиком. Бесплатно.',
+  test:
+    'МИНУТНЫЙ SMOKE-TEST. Запускает дешёвого исполнителя своего семейства (Haiku для Claude, Luna для Codex), удерживает его не меньше минуты и сохраняет простой HTML-отчёт-пустышку. Нужен для проверки независимого dispatcher/MCP, бизнес-анализа не делает.',
   season:
     'История частоты по самой частотной фразе работы за два года: есть ли сезон, во сколько раз расходятся пик и дно, где мы сейчас. Один платный запрос.',
   adjacent:
@@ -38,15 +51,22 @@ const ARTIFACT_OF: Record<NeedsAction, ArtifactKind> = {
   analyze: 'analyze',
   analyze_adv: 'analyze_adv',
   product: 'analyze_product',
+  test: 'model_test',
   season: 'season',
   adjacent: 'adjacent',
   dump: 'dump',
 }
 
+const BASIC_ACTIONS: NeedsAction[] = ['season', 'adjacent', 'dump']
+const ANALYSIS_ACTIONS: NeedsAction[] = ['analyze', 'analyze_adv', 'product', 'test']
+const MODEL_FAMILIES: ModelFamily[] = ['claude', 'codex']
+const FAMILY_LABEL: Record<ModelFamily, string> = { claude: 'Claude', codex: 'Codex' }
+
 const KIND_LABEL: Record<string, string> = {
   analyze: 'Ниша',
   analyze_adv: 'Функции',
   analyze_product: 'Продукт',
+  model_test: 'Test',
   season: 'Сезонность',
   adjacent: 'Смежные ключи',
   dump: 'Выгрузка',
@@ -72,13 +92,26 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
+const artifactFamily = (a: NeedsArtifact): ModelFamily | null =>
+  ['analyze', 'analyze_adv', 'analyze_product', 'model_test'].includes(a.kind)
+    ? (a.model_family ?? 'claude')
+    : null
+
+const busyKey = (work: string, action: NeedsAction, family?: ModelFamily) =>
+  `${work}|${action}|${family ?? 'basic'}`
+
 export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: TaskRow[] }) {
   const [rows, setRows] = useState<NeedsRow[] | null>(null)
   const [open, setOpen] = useState<string | null>(null)
   const [tree, setTree] = useState<NeedsTree | null>(null)
   const [err, setErr] = useState('')
-  const [busy, setBusy] = useState<Record<string, string>>({}) // "работа|действие" -> task_id
-  const [ask, setAsk] = useState<{ work: string; action: NeedsAction; text: string } | null>(null)
+  const [busy, setBusy] = useState<Record<string, string>>({}) // "работа|действие|семейство" -> task_id
+  const [ask, setAsk] = useState<{
+    work: string
+    action: NeedsAction
+    family?: ModelFamily
+    text: string
+  } | null>(null)
   const statuses = useRef(new Map<string, string>())
 
   useEffect(() => {
@@ -130,14 +163,18 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
     ...Object.keys(busy),
     ...tasks
       .filter((t) => t.type.startsWith('needs_') && ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status))
-      .map((t) => (t.node ?? '') + '|' + t.type.replace('needs_', '')),
+      .map((t) => {
+        const action = t.type.replace('needs_', '')
+          .replace('analyze_product', 'product').replace('model_test', 'test') as NeedsAction
+        return busyKey(t.node ?? '', action, t.model_family ?? undefined)
+      }),
   ])
 
-  async function run(action: NeedsAction, work: string) {
+  async function run(action: NeedsAction, work: string, family?: ModelFamily) {
     if (!open) return
     try {
-      const { task_id } = await api.needsRun(action, open, work)
-      setBusy((b) => ({ ...b, [work + '|' + action]: task_id }))
+      const { task_id } = await api.needsRun(action, open, work, family)
+      setBusy((b) => ({ ...b, [busyKey(work, action, family)]: task_id }))
       setErr('')
     } catch (e) {
       setErr(errText(e))
@@ -145,15 +182,17 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
   }
 
   /** Повтор — не ошибка, а смысл: данных могло прибавиться. Но спрашиваем. */
-  function start(action: NeedsAction, work: string, done: number) {
-    if (!done) return void run(action, work)
+  function start(action: NeedsAction, work: string, done: number, family?: ModelFamily) {
+    if (!done) return void run(action, work, family)
+    const owner = family ? `${FAMILY_LABEL[family]} · ` : ''
     setAsk({
       work,
       action,
+      family,
       text:
         action === 'analyze'
-          ? `Разбор этой работы уже делали ${done} раз(а). Запустить ещё раз? Смысл есть, если с прошлого раза добавились данные — сезонность или смежные ключи. Старые отчёты останутся.`
-          : `«${LABEL[action]}» уже считали ${done} раз(а). Посчитать заново? Прошлый отчёт останется.`,
+          ? `${owner}разбор этой работы уже делали ${done} раз(а). Запустить ещё раз? Смысл есть, если с прошлого раза добавились данные — сезонность или смежные ключи. Старые отчёты останутся.`
+          : `${owner}«${LABEL[action]}» уже считали ${done} раз(а). Посчитать заново? Прошлый отчёт останется.`,
     })
   }
 
@@ -197,7 +236,7 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
           <div className="modal">
             <div className="dlg" data-testid="needs-confirm">
               <b>
-                {LABEL[ask.action]}: {ask.work}
+                {ask.family ? FAMILY_LABEL[ask.family] + ' · ' : ''}{LABEL[ask.action]}: {ask.work}
               </b>
               <p>{ask.text}</p>
               <div className="dlg-btns">
@@ -207,7 +246,7 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
                   onClick={() => {
                     const a = ask
                     setAsk(null)
-                    void run(a.action, a.work)
+                    void run(a.action, a.work, a.family)
                   }}
                 >
                   Да, запустить
@@ -334,6 +373,60 @@ function Phrases({ items }: { items: NeedsPhrase[] }) {
   )
 }
 
+function ModelScore({ family, artifacts }: { family: ModelFamily; artifacts: NeedsArtifact[] }) {
+  const latest = (kind: ArtifactKind) =>
+    artifacts
+      .filter((a) => a.kind === kind && artifactFamily(a) === family)
+      .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))[0]
+  const stageSlots = [
+    { n: 1, artifact: latest('analyze') },
+    { n: 2, artifact: latest('analyze_adv') },
+    { n: 3, artifact: latest('analyze_product') },
+  ]
+  let last = stageSlots.length - 1
+  while (last >= 0 && stageSlots[last].artifact?.verdict_score == null) last -= 1
+  if (last < 0) return null
+  // Не сдвигаем этапы влево: если есть только «Функции», `(—,58)` честнее, чем `(58)`,
+  // которое выглядело бы как score «Ниши».
+  const stages = stageSlots.slice(0, last + 1)
+  const product = latest('analyze_product')
+  const title = stages
+    .filter((x) => x.artifact?.verdict_score != null)
+    .map(({ n, artifact }) =>
+      `${n}: ${artifact?.verdict ?? '—'} ${artifact?.verdict_score ?? '—'}`,
+    )
+    .join(' · ')
+  return (
+    <>
+      <span
+        className={`model-score model-${family}`}
+        data-testid={`needs-score-${family}`}
+        title={`${FAMILY_LABEL[family]} · ${title}`}
+      >
+        (
+        {stages.map(({ n, artifact }, i) => (
+          <span key={n}>
+            {i > 0 && ','}
+            <span className={`vscore vscore-${artifact?.verdict ?? 'unknown'}`}>
+              {artifact?.verdict_score ?? '—'}
+            </span>
+          </span>
+        ))}
+        )
+      </span>
+      {product?.mrr6 != null && (
+        <span
+          className="model-mrr"
+          data-testid={`needs-mrr-${family}`}
+          title={`${FAMILY_LABEL[family]} · MRR на шестом месяце`}
+        >
+          {fmt(product.mrr6)} ₽/мес
+        </span>
+      )}
+    </>
+  )
+}
+
 function Work({
   w,
   busy,
@@ -341,29 +434,29 @@ function Work({
 }: {
   w: NeedsWork
   busy: Set<string>
-  onRun: (action: NeedsAction, work: string, done: number) => void
+  onRun: (action: NeedsAction, work: string, done: number, family?: ModelFamily) => void
 }) {
   const [open, setOpen] = useState(false)
   const segs = w.segments ?? []
-  const a = w.analysis
-  // два разбора отвечают на разные вопросы, поэтому показываем оба вердикта рядом:
-  // расхождение между ними — сигнал, а не ошибка
-  const adv = (w.artifacts ?? []).find((x) => x.kind === 'analyze_adv')
-  const prod = (w.artifacts ?? []).find((x) => x.kind === 'analyze_product')
-  const seen: Record<string, number> = {}
-  const links = [...(w.artifacts ?? [])]
-    .filter((x) => x.report_link)
-    .sort((x, y) => (x.created_at ?? 0) - (y.created_at ?? 0))
-    .map((x) => {
-      seen[x.kind] = (seen[x.kind] ?? 0) + 1
-      return { ...x, n: seen[x.kind] }
-    })
-    .map((x, _i, all) => ({
+  const artifacts = w.artifacts ?? []
+  const hasNiche = artifacts.some((x) => x.kind === 'analyze')
+  const linksFor = (family: ModelFamily | null) => {
+    const seen: Record<string, number> = {}
+    const selected = artifacts
+      .filter((x) => x.report_link && artifactFamily(x) === family)
+      .sort((x, y) => (x.created_at ?? 0) - (y.created_at ?? 0))
+      .map((x) => {
+        seen[x.kind] = (seen[x.kind] ?? 0) + 1
+        return { ...x, n: seen[x.kind] }
+      })
+    return selected.map((x) => ({
       ...x,
       label:
         (KIND_LABEL[x.kind] ?? x.kind) +
-        (all.filter((y) => y.kind === x.kind).length > 1 ? ' ' + x.n : ''),
+        (selected.filter((y) => y.kind === x.kind).length > 1 ? ' ' + x.n : ''),
     }))
+  }
+  const basicLinks = linksFor(null)
   return (
     <div className="nwork" data-testid="needs-work">
       <div className="row">
@@ -409,48 +502,26 @@ function Work({
             занято: {w.occupied_by}
           </span>
         )}
-        {w.needs_serp && !a && (
+        {w.needs_serp && !hasNiche && (
           <span className="serp" title={w.serp_question ?? 'нужна проверка выдачей'}>
             ?выдача
           </span>
         )}
-        {a?.verdict && (
-          <span className={'vd vd-' + a.verdict} data-testid="needs-verdict"
-                title="обычный разбор: можно ли перехватить поисковый трафик">
-            {a.verdict}
-            {a.verdict_score != null ? ' ' + a.verdict_score : ''}
-          </span>
-        )}
-        {adv?.verdict && (
-          <span className={'vd vd-' + adv.verdict} data-testid="needs-verdict-adv"
-                title="2 · Функции: есть ли функция, за которую платят">
-            Функц {adv.verdict}
-            {adv.verdict_score != null ? ' ' + adv.verdict_score : ''}
-          </span>
-        )}
-        {prod?.verdict && (
-          <span className={'vd vd-' + prod.verdict} data-testid="needs-verdict-product"
-                title={'3 · Продукт: ' + (prod.summary ?? 'спецификация микро-продукта')}>
-            Прод {prod.verdict}
-            {prod.verdict_score != null ? ' ' + prod.verdict_score : ''}
-          </span>
-        )}
-        {/* деньги шестого месяца прямо в строке: по ним видно, за что боремся, ещё до отчёта */}
-        {prod?.mrr6 != null && (
-          <span className="vd vd-money" data-testid="needs-mrr6"
-                title="прогноз «Продукта»: ₽/мес на шестом месяце">
-            {fmt(prod.mrr6)} ₽/мес
-          </span>
-        )}
+        {/* По одному компактному кружку score на семейство: 1 · Ниша, 2 · Функции,
+            3 · Продукт. MRR шестого месяца — отдельной зелёной колонкой рядом. */}
+        {MODEL_FAMILIES.map((family) => (
+          <ModelScore key={family} family={family} artifacts={artifacts} />
+        ))}
         <span className="acts">
           {/* всё в одном меню: действий три, а отчётов копится сколько угодно */}
           {/* меню закрывается по любому выбору: иначе оно перекрывает соседние работы */}
           <details className="menu" data-testid="needs-menu">
             <summary className="act">Действие ▾</summary>
             <div className="menu-body" onClick={closeMenu}>
-              {(['analyze', 'analyze_adv', 'product', 'season', 'adjacent', 'dump'] as NeedsAction[]).map((act) => {
-                const done = (w.artifacts ?? []).filter((x) => x.kind === ARTIFACT_OF[act]).length
-                const wait = busy.has((w.name ?? '') + '|' + act)
+              <div className="menu-title">Basic</div>
+              {BASIC_ACTIONS.map((act) => {
+                const done = artifacts.filter((x) => x.kind === ARTIFACT_OF[act]).length
+                const wait = busy.has(busyKey(w.name ?? '', act))
                 return (
                   <button
                     key={act}
@@ -465,8 +536,8 @@ function Work({
                   </button>
                 )
               })}
-              {links.length > 0 && <div className="menu-sep">отчёты</div>}
-              {links.map((x) => (
+              {basicLinks.length > 0 && <div className="menu-sep">отчёты</div>}
+              {basicLinks.map((x) => (
                 <a
                   key={x.task_id ?? x.created_at}
                   className="act act-link"
@@ -479,6 +550,49 @@ function Work({
                   {x.label}
                 </a>
               ))}
+              {MODEL_FAMILIES.map((family) => {
+                const links = linksFor(family)
+                return (
+                  <div className="menu-group" key={family}>
+                    <div className={`menu-title model-title model-${family}`}>
+                      {FAMILY_LABEL[family]}
+                    </div>
+                    {ANALYSIS_ACTIONS.map((act) => {
+                      const done = artifacts.filter(
+                        (x) => x.kind === ARTIFACT_OF[act] && artifactFamily(x) === family,
+                      ).length
+                      const wait = busy.has(busyKey(w.name ?? '', act, family))
+                      return (
+                        <button
+                          key={act}
+                          className="act"
+                          data-testid={`needs-run-${family}-${act}`}
+                          disabled={wait}
+                          title={ACTION_HINT[act]}
+                          onClick={() => w.name && onRun(act, w.name, done, family)}
+                        >
+                          {wait ? 'идёт…' : LABEL[act]}
+                          {done ? ` (${done})` : ''}
+                        </button>
+                      )
+                    })}
+                    {links.length > 0 && <div className="menu-sep">отчёты</div>}
+                    {links.map((x) => (
+                      <a
+                        key={x.task_id ?? x.created_at}
+                        className="act act-link"
+                        data-testid={`needs-report-${family}-${x.kind}`}
+                        href={reportHref(x.report_link!)}
+                        target="_blank"
+                        rel="noreferrer"
+                        title={[x.summary, fmtWhen(x.created_at)].filter(Boolean).join(' · ')}
+                      >
+                        {x.label}
+                      </a>
+                    ))}
+                  </div>
+                )
+              })}
             </div>
           </details>
           {[...busy].some((k) => k.startsWith((w.name ?? '') + '|')) && (
@@ -523,7 +637,7 @@ function TreeView({
 }: {
   tree: NeedsTree
   busy: Set<string>
-  onRun: (action: NeedsAction, work: string, done: number) => void
+  onRun: (action: NeedsAction, work: string, done: number, family?: ModelFamily) => void
 }) {
   const [showEx, setShowEx] = useState(false)
   const byWhy = new Map<string, typeof tree.excluded>()
@@ -566,8 +680,24 @@ function TreeView({
               hint="Сборка нашла в ветке брендовые запросы продукта, который эту работу уже делает. Такие работы проверяют в последнюю очередь." />
         <Mark sample={<span className="serp">?выдача</span>} label="нужна проверка"
               hint="Сборка сама говорит: по словам не решается, занято или нет. Это список покупок — выдача платная, и покупается она по этим отметкам." />
-        <Mark sample={<span className="act act-analyze">Analyze</span>} label="разбор"
-              hint="Купит выдачу по самым частотным формулировкам работы и отдаст всё Opus: он вернёт вердикт, оценку и полный отчёт по нише. Занимает около 7 минут и два платных запроса; повторный разбор выдачу уже не перекупает." />
+        <Mark sample={<span className="model-score model-claude">(30,58,27)</span>}
+              label="Claude · числа: Ниша, Функции, Продукт"
+              hint="Один компактный кружок хранит до трёх score по этапам 1–2–3. Старые отчёты мигрированы в Claude." />
+        <Mark sample={<span className="model-score model-codex">(42,61)</span>}
+              label="Codex · тот же порядок этапов"
+              hint="Цвет рамки показывает семейство модели. Claude и Codex могут считать один этап одной работы параллельно и не смешивают входы Product." />
+        <Mark sample={<span className="model-mrr">4 233 ₽/мес</span>}
+              label="MRR на шестом месяце"
+              hint="Прогноз месячной выручки из отчёта «Продукт». Деньги вынесены из кружка score в отдельную зелёную колонку." />
+        <div className="verdict-key" data-testid="needs-verdict-legend">
+          <table>
+            <tbody>
+              <tr><td><span className="vscore vscore-SKIP">30</span></td><th>SKIP</th><td>не строить</td></tr>
+              <tr><td><span className="vscore vscore-MAYBE">58</span></td><th>MAYBE</th><td>сначала проверить</td></tr>
+              <tr><td><span className="vscore vscore-BUILD">77</span></td><th>BUILD</th><td>можно строить</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       {tree.works.map((w) => (
         <Work
