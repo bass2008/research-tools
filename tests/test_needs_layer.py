@@ -86,7 +86,9 @@ def seeded(needs_dir, snap_con):
 
 def test_rows_and_detail_join_freqs(client, seeded):
     row = client.get("/api/needs/trees").json()["trees"][0]
-    assert row["id"] == TREE_ID and row["works"] == 2 and row["gaps"] == 1
+    assert row["id"] == TREE_ID and row["works"] == 2
+    assert row["ranked"] == 0 and row["best_score"] is None, \
+        "классификация сама продуктовый шанс не назначает"
     assert row["root"] == SNAP["FULLY_LOADED"] and row["analyzed"] == 0
 
     d = client.get(f"/api/needs/tree/{TREE_ID}").json()
@@ -96,8 +98,46 @@ def test_rows_and_detail_join_freqs(client, seeded):
     assert [p["freq"] for p in work["phrases"]] == [900, 500]
     assert work["sum_freq"] == 1400
     assert work["top_freq"] == 900
+    assert work["score"] is None
+    assert work["favorite"] is False
     assert work["analysis"] is None
     assert d["excluded"][0]["freq"] == 90000
+
+
+def test_favorite_is_persistent_sidecar_and_does_not_change_classification(
+        client, seeded, needs_dir):
+    accepted = needs_dir / TREE_ID / "accepted.json"
+    before = accepted.read_bytes()
+
+    marked = client.post("/api/needs/favorite", json={
+        "tree_id": TREE_ID, "work": WORK, "favorite": True,
+    })
+    assert marked.status_code == 200
+    assert marked.json() == {"work": WORK, "favorite": True, "favorites": [WORK]}
+    assert accepted.read_bytes() == before
+    assert json.loads((needs_dir / TREE_ID / "favorites.json").read_text(encoding="utf-8"))[
+        "works"
+    ] == [WORK]
+
+    detail = client.get(f"/api/needs/tree/{TREE_ID}").json()
+    assert next(w for w in detail["works"] if w["name"] == WORK)["favorite"] is True
+    assert next(w for w in detail["works"] if w["name"] == GAP_WORK)["favorite"] is False
+
+    unmarked = client.post("/api/needs/favorite", json={
+        "tree_id": TREE_ID, "work": WORK, "favorite": False,
+    })
+    assert unmarked.status_code == 200
+    assert unmarked.json()["favorites"] == []
+    assert next(w for w in client.get(f"/api/needs/tree/{TREE_ID}").json()["works"]
+                if w["name"] == WORK)["favorite"] is False
+
+
+def test_favorite_rejects_unknown_work(client, seeded):
+    response = client.post("/api/needs/favorite", json={
+        "tree_id": TREE_ID, "work": "нет такой работы", "favorite": True,
+    })
+    assert response.status_code == 422
+    assert "работы нет" in response.json()["detail"]
 
 
 def test_unknown_tree_is_404(client, needs_dir):
@@ -132,20 +172,17 @@ def refined_tree():
     return {
         "condition": "онлайн · бесплатно",
         "works": [
-            {"name": WORK, "score": 40, "score_why": "занято",
-             "phrases": [SNAP["TRANSACTIONAL"]], "top_freq": 900, "phrase_count": 1,
-             "occupied_by": "remove.bg", "unclear": False, "gap_candidate": False,
-             "needs_serp": True, "serp_question": "кто в топе", "why": "один результат",
+            {"name": WORK, "phrases": [SNAP["TRANSACTIONAL"]],
+             "top_freq": 900, "phrase_count": 1,
+             "unclear": False, "why": "один результат",
              "segments": []},
-            {"name": GAP_WORK, "score": 85, "score_why": "узко",
-             "phrases": [SNAP["NEW"]], "top_freq": 40, "phrase_count": 1,
-             "occupied_by": None, "unclear": False, "gap_candidate": True,
-             "needs_serp": False, "serp_question": None, "why": "другой продукт",
+            {"name": GAP_WORK, "phrases": [SNAP["NEW"]],
+             "top_freq": 40, "phrase_count": 1,
+             "unclear": False, "why": "другой продукт",
              "segments": []},
-            {"name": "что-то сделать — результат из фразы не ясен", "score": 5,
-             "score_why": "намерение не названо", "phrases": [SNAP["LOADED"]],
-             "top_freq": 500, "phrase_count": 1, "occupied_by": None, "unclear": True,
-             "gap_candidate": False, "needs_serp": False, "serp_question": None,
+            {"name": "что-то сделать — результат из фразы не ясен",
+             "phrases": [SNAP["LOADED"]], "top_freq": 500, "phrase_count": 1,
+             "unclear": True,
              "why": "результат нельзя выбрать без догадки", "segments": []},
         ],
         "excluded": [{"phrase": SNAP["HEAD"], "why": "condition", "note": None}],
@@ -155,15 +192,23 @@ def refined_tree():
 def test_strict_validation_enforces_unclear_and_exact_counts(seeded):
     source = needs_layer.load_source(TREE_ID)
     bad = refined_tree()
-    bad["works"][2].update({"score": 50, "gap_candidate": True,
-                             "needs_serp": True, "phrase_count": 99, "top_freq": 1})
+    bad["works"][2].update({"unclear": "да", "phrase_count": 99, "top_freq": 1})
     problems = needs_layer.validate_tree(source, bad, strict=True)
 
     assert any("phrase_count" in p for p in problems)
     assert any("top_freq" in p for p in problems)
-    assert any("unclear score" in p for p in problems)
-    assert any("gap_candidate" in p for p in problems)
-    assert any("needs_serp" in p for p in problems)
+    assert any("unclear должен" in p for p in problems)
+
+
+def test_classification_rejects_old_chance_fields(seeded):
+    source = needs_layer.load_source(TREE_ID)
+    answer = refined_tree()
+    answer["works"][0]["score"] = 82
+    answer["works"][0]["gap_candidate"] = True
+
+    problems = needs_layer.validate_tree(source, answer, strict=True)
+
+    assert any("классификация не должна содержать продуктовый анализ" in p for p in problems)
 
 
 def test_refine_routes_family_replaces_tree_and_keeps_revision(
@@ -185,6 +230,8 @@ def test_refine_routes_family_replaces_tree_and_keeps_revision(
     ]
     tree, _, _ = needs_layer.load_tree(TREE_ID)
     assert tree["_revision"] == 1 and tree["_refined_by"] == "codex"
+    assert all("score" not in w and "occupied_by" not in w for w in tree["works"]), \
+        "в канонической классификации нет продуктовых гипотез"
     assert next(w for w in tree["works"] if w["unclear"])["phrases"] == [SNAP["LOADED"]]
     detail = client.get(f"/api/needs/tree/{TREE_ID}").json()
     assert detail["revision"] == 1 and detail["refined_by"] == "codex"
@@ -225,7 +272,111 @@ def test_refine_is_exclusive_for_both_families_and_work_actions(
     assert client.post("/api/needs/analyze", json={
         "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
     }).status_code == 409
+    assert client.post("/api/needs/rank", json={
+        "tree_id": TREE_ID, "model_family": "codex",
+    }).status_code == 409
     assert task_done(snap_con, first.json()["task_id"])["status"] == "FAILED"
+
+
+# ---------- анализ физической возможности продукта ----------
+
+def rank_answer(job, wrong_score=False):
+    classification = job["params"]["classification"]
+    out = []
+    for work in classification["works"]:
+        product = work["name"] == GAP_WORK
+        item = {
+            "name": work["name"],
+            "intent": "product" if product else "support",
+            "factors": {k: 80 if product else 90 for k in needs_layer.RANK_FACTORS},
+            "score_why": "самостоятельный инструмент возможен" if product
+                         else "это починка чужого продукта",
+            "product": "видео → фон удалён" if product else None,
+            "blocker": None if product else "результат контролирует чужой продукт",
+            "evidence": [needs_layer.work_phrases(work)[0]],
+        }
+        item["score"] = needs_layer.rank_score(item) + (1 if wrong_score else 0)
+        out.append(item)
+    return {"works": out}
+
+
+def test_rank_uses_accepted_classification_and_stores_separate_artifact(
+        client, seeded, snap_con):
+    before, _, _ = needs_layer.load_tree(TREE_ID)
+    with FakeWorker(client, TOKEN, model_family="codex",
+                    answer=lambda job: rank_answer(job)) as worker:
+        response = client.post("/api/needs/rank", json={
+            "tree_id": TREE_ID, "model_family": "codex",
+        })
+        assert response.status_code == 200
+        row = task_done(snap_con, response.json()["task_id"])
+
+    assert row["status"] == "DONE", row["error"]
+    assert [(j["type"], j["model_family"]) for j in worker.seen] == [
+        ("needs_rank", "codex")
+    ]
+    assert needs_layer.load_tree(TREE_ID)[0] == before, "анализ не меняет классификацию"
+    ranking = needs_layer.latest_ranking(TREE_ID)
+    assert ranking["model_family"] == "codex" and ranking["tree_revision"] == 0
+    assert {w["name"]: w["score"] for w in ranking["works"]} == {WORK: 20, GAP_WORK: 80}
+
+    detail = client.get(f"/api/needs/tree/{TREE_ID}").json()
+    assert detail["ranked_by"] == "codex" and detail["counts"]["best_score"] == 80
+    assert [w["name"] for w in detail["works"]] == [GAP_WORK, WORK], \
+        "после анализа работы ранжируются по продуктовому score"
+
+
+def test_rank_rejects_unverifiable_score(client, seeded, snap_con):
+    with FakeWorker(client, TOKEN, model_family="claude",
+                    answer=lambda job: rank_answer(job, wrong_score=True)):
+        tid = client.post("/api/needs/rank", json={
+            "tree_id": TREE_ID, "model_family": "claude",
+        }).json()["task_id"]
+        row = task_done(snap_con, tid)
+
+    assert row["status"] == "FAILED" and "по факторам" in (row["error"] or "")
+    assert needs_layer.latest_ranking(TREE_ID) is None
+
+
+def test_rank_is_exclusive_with_refine_and_work_actions(
+        client, seeded, snap_con, llm_timeout):
+    llm_timeout(0.2)
+    first = client.post("/api/needs/rank", json={
+        "tree_id": TREE_ID, "model_family": "claude",
+    })
+    assert first.status_code == 200
+    assert client.post("/api/needs/rank", json={
+        "tree_id": TREE_ID, "model_family": "codex",
+    }).status_code == 409
+    assert client.post("/api/needs/refine", json={
+        "tree_id": TREE_ID, "model_family": "codex",
+    }).status_code == 409
+    assert client.post("/api/needs/analyze", json={
+        "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
+    }).status_code == 409
+    assert task_done(snap_con, first.json()["task_id"])["status"] == "FAILED"
+
+
+def test_second_pass_invalidates_ranking_of_previous_classification(
+        client, seeded, snap_con):
+    original = needs_layer.classification_only(needs_layer.load_tree(TREE_ID)[0])
+    needs_layer.save_ranking(
+        TREE_ID, rank_answer({"params": {"classification": original}}),
+        "rank-old", "claude", expected_revision=0,
+    )
+    assert client.get(f"/api/needs/tree/{TREE_ID}").json()["ranked_at"] is not None
+
+    with FakeWorker(client, TOKEN, model_family="codex", answer=lambda job: refined_tree()):
+        tid = client.post("/api/needs/refine", json={
+            "tree_id": TREE_ID, "model_family": "codex",
+        }).json()["task_id"]
+        row = task_done(snap_con, tid)
+
+    assert row["status"] == "DONE", row["error"]
+    detail = client.get(f"/api/needs/tree/{TREE_ID}").json()
+    assert detail["revision"] == 1 and detail["ranked_at"] is None
+    assert detail["counts"]["ranked"] == 0 and detail["counts"]["best_score"] is None
+    assert all(work["score"] is None for work in detail["works"])
 
 
 # ---------- разбор работы ----------
@@ -291,6 +442,43 @@ def test_analyze_adv_is_a_second_opinion_on_the_same_paid_serp(client, seeded, s
         "у двух разборов разные отчёты"
 
 
+def test_next_analysis_reads_the_latest_report_of_any_family(
+        client, seeded, snap_con, reports_dir):
+    """Разбор берёт ПОСЛЕДНИЙ отчёт, чьё бы семейство он ни был.
+
+    Раньше «Продукт» на Claude не видел разбор codex и падал с «нужен предыдущий разбор», хотя
+    отчёт лежал рядом. Разбор — это довод, а не собственность модели: автор указан в поле `by`,
+    чтобы расхождение читалось как расхождение, а не как своя же ошибка."""
+    seen = {}
+
+    def spy(job):
+        seen[(job["type"], job.get("model_family"))] = job["params"]
+        return fake_worker.canned(job)
+
+    with FakeWorker(client, TOKEN, model_family="codex", answer=spy):
+        tid = client.post("/api/needs/analyze", json={
+            "tree_id": TREE_ID, "work": WORK, "model_family": "codex"}).json()["task_id"]
+        assert task_done(snap_con, tid)["status"] == "DONE"
+    time.sleep(1.1)     # дата артефакта в секундах: иначе прогоны неразличимы
+
+    with FakeWorker(client, TOKEN, model_family="claude", answer=spy):
+        for action in ("analyze_adv", "product"):
+            tid = client.post(f"/api/needs/{action}", json={
+                "tree_id": TREE_ID, "work": WORK, "model_family": "claude"}).json()["task_id"]
+            row = task_done(snap_con, tid)
+            assert row["status"] == "DONE", row["error"]
+            time.sleep(1.1)
+
+    adv_ctx = seen[("analyze_adv", "claude")]["context"]
+    assert [v["by"] for v in adv_ctx["previous_verdicts"]] == ["codex"], \
+        "Claude видит вердикт codex и знает, кто автор"
+
+    prod_ctx = seen[("analyze_product", "claude")]["context"]
+    assert prod_ctx["niche"]["by"] == "codex" and prod_ctx["niche"]["report"], \
+        "отчёт «Ниша» от codex пришёл целиком текстом"
+    assert prod_ctx["features"]["by"] == "claude", "«Функции» — свой, более свежий"
+
+
 def test_analyze_product_reads_both_previous_reports_and_keeps_the_score_trail(
         client, seeded, snap_con, reports_dir):
     """`Продукт` — третий разбор: решение по выдаче ПЛЮС двум предыдущим отчётам целиком.
@@ -336,9 +524,12 @@ def test_analyze_product_needs_a_previous_analysis(client, seeded, snap_con):
     assert row["status"] == "FAILED" and "разбор" in (row["error"] or "")
 
 
-def test_product_uses_previous_reports_of_its_own_family_only(
+def test_product_takes_the_freshest_report_even_from_another_family(
         client, seeded, snap_con, reports_dir):
-    """Codex Product продолжает цепочку Codex, даже если свежий отчёт вообще — Claude."""
+    """Codex Product берёт свежий отчёт Claude, а не свой прошлый: свежесть важнее авторства.
+
+    Автор приезжает в поле `by` — модель должна знать, чей это довод, чтобы расхождение
+    читалось как расхождение двух моделей, а не как её собственная ошибка."""
     seen = {}
     for i, family in enumerate(("codex", "claude"), 1):
         for kind in ("analyze", "analyze_adv"):
@@ -364,10 +555,10 @@ def test_product_uses_previous_reports_of_its_own_family_only(
         row = task_done(snap_con, tid)
 
     assert row["status"] == "DONE", row["error"]
-    assert row["model_family"] == "codex"
-    assert seen["features"]["functions"][0]["name"] == "codex-функция"
-    assert "codex analyze" in seen["niche"]["report"]
-    assert "claude" not in seen["niche"]["report"]
+    assert row["model_family"] == "codex", "сам разбор всё равно идёт своим семейством"
+    assert seen["niche"]["by"] == "claude" and "claude analyze" in seen["niche"]["report"]
+    assert seen["features"]["by"] == "claude"
+    assert seen["features"]["functions"][0]["name"] == "claude-функция"
 
 
 def test_analyze_product_rejects_a_forecast_of_zeros(client, seeded, snap_con, reports_dir):
@@ -636,6 +827,29 @@ def test_waiting_until_the_agent_actually_takes_the_job(client, seeded, snap_con
 
     worker.submit(jobs[0]["job_id"], ok=False, error="намеренная ошибка")
     assert task_done(snap_con, tid)["status"] == "FAILED"
+
+
+def test_cancel_frees_the_work_for_a_new_run(client, seeded, snap_con, llm_timeout):
+    """Отмена `WAITING` снимает и джоб, и занятость работы.
+
+    Иначе после отмены работа осталась бы «занятой» навсегда и повторный запуск отвечал 409 —
+    а отменяют как раз для того, чтобы запустить заново, обычно другим семейством модели."""
+    llm_timeout(30.0)
+    with FakeWorker(client, TOKEN, mode="silent"):
+        tid = client.post("/api/needs/analyze",
+                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+        wait_for(lambda: task_row(snap_con, tid)["status"] == "WAITING",
+                 what="задача ждёт исполнителя")
+        assert client.post(f"/api/needs/analyze",
+                           json={"tree_id": TREE_ID, "work": WORK}).status_code == 409
+
+        assert client.post(f"/api/task/{tid}/cancel").status_code == 200
+        row = wait_for(lambda: (lambda r: r if r["status"] == "FAILED" else None)(
+            task_row(snap_con, tid)), what="задача закрылась после отмены")
+        assert "отменена" in (row["error"] or "")
+
+        again = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "work": WORK})
+        assert again.status_code == 200, "после отмены работа свободна"
 
 
 def test_non_llm_operation_is_running_right_away(client, seeded, snap_con):

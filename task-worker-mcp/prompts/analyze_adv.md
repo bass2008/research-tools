@@ -29,7 +29,7 @@
 ```
 { "condition": "рамка ветки" | null,
   "root": "узел дерева запросов",
-  "work": { "name", "score", "top_freq", "phrase_count", "occupied_by", "gap_candidate",
+  "work": { "name", "score", "intent", "product", "blocker", "top_freq", "phrase_count",
             "unclear", "why" },
   "segments": [ { "name", "phrases": [...], "why" } ],
   "phrases": [ { "phrase", "freq" } ],          // все формулировки работы
@@ -37,8 +37,9 @@
   "context": { "season", "adjacent", "previous_verdicts" } }   // что уже посчитали по работе
 ```
 
-`previous_verdicts` — вердикты обычного разбора. Ты не обязан с ними соглашаться; если
-расходишься, скажи в чём и почему.
+`previous_verdicts` — вердикты предыдущих разборов этой работы: у каждого указан `kind`
+(«Ниша» или «Функции») и `by` — модель-автор, которая может быть не той, что ты. Соглашаться не
+обязан ни со своими прошлыми, ни с чужими: расходишься — скажи, в чём и почему.
 
 ## Что сделать
 

@@ -53,6 +53,28 @@ def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, conf
         # По умолчанию второй проход принимает исходный draft без смысловых изменений;
         # отдельные тесты передают answer и проверяют реальные переносы между работами.
         return params.get("draft")
+    if job["type"] == "needs_rank":
+        ranked = []
+        for work in (params.get("classification") or {}).get("works") or []:
+            unclear = work.get("unclear") is True
+            value = 5 if unclear else 80
+            phrases = list(work.get("phrases") or []) + [
+                p for segment in (work.get("segments") or []) for p in segment.get("phrases") or []
+            ]
+            ranked.append({
+                "name": work.get("name"),
+                "intent": "unclear" if unclear else "product",
+                "factors": {k: value for k in (
+                    "external_control", "tool_intent", "outcome_clarity", "product_shape",
+                    "repeatability", "user_value",
+                )},
+                "score": value,
+                "score_why": "заготовка продуктового анализа",
+                "product": None if unclear else "вход → самостоятельный результат",
+                "blocker": "результат не ясен" if unclear else None,
+                "evidence": phrases[0:1],
+            })
+        return {"works": ranked}
     if job["type"] == "stopwords":
         # первое слово входа кладём в stop, остальное не трогаем: тестам важен транспорт,
         # а не качество разметки

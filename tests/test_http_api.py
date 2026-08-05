@@ -226,6 +226,85 @@ def test_logs_clear_truncates_file(client, log_file):
     assert log_file.read_text(encoding="utf-8") == ""
 
 
+def test_tasks_clear_deletes_entire_journal(client, snap_con):
+    snap_con.execute(
+        "INSERT INTO task(id, type, status, node, created_at) "
+        "VALUES ('task-running', 'full_load', 'RUNNING', ?, 0)",
+        (SNAP["LOADED"],),
+    )
+    snap_con.commit()
+
+    r = client.post("/api/tasks/clear")
+
+    assert r.status_code == 200
+    assert r.json() == {"ok": True, "deleted": 3}
+    assert snap_con.execute("SELECT COUNT(*) FROM task").fetchone()[0] == 0
+
+
+def test_cancel_removes_a_task_nobody_took(client, snap_con):
+    """`WAITING` — джоб лежит в очереди, работы не идёт: снять его безопасно.
+
+    Так снимают задачу, поставленную не на то семейство модели: нужной петли нет на связи,
+    и без отмены задача просто досидит до таймаута операции."""
+    snap_con.execute(
+        "INSERT INTO task(id, type, status, node, created_at, params) "
+        "VALUES ('task-waiting', 'needs_analyze_adv', 'WAITING', 'работа', 0, "
+        "'{\"tree_id\": \"t\", \"work\": \"работа\", \"model_family\": \"codex\"}')")
+    snap_con.commit()
+
+    r = client.post("/api/task/task-waiting/cancel")
+
+    assert r.status_code == 200, r.text
+    row = snap_con.execute("SELECT status, error FROM task WHERE id = 'task-waiting'").fetchone()
+    assert row["status"] == "FAILED" and "отменена" in row["error"]
+
+
+def test_cancel_refuses_a_task_that_is_already_working(client, snap_con):
+    """`RUNNING` не отменяем: агент уже работает и вернёт результат, которому некуда лечь."""
+    snap_con.execute(
+        "INSERT INTO task(id, type, status, node, created_at) "
+        "VALUES ('task-run', 'needs_analyze', 'RUNNING', 'работа', 0)")
+    snap_con.commit()
+
+    assert client.post("/api/task/task-run/cancel").status_code == 409
+    assert client.post("/api/task/нет-такой/cancel").status_code == 404
+
+
+def test_retry_reruns_a_failed_task_through_the_same_command(client, snap_con):
+    """Повтор упавшей задачи идёт через ту же ручку, что и первый запуск.
+
+    Иначе повтор обошёл бы проверку статуса узла и занятости: смысл кнопки — «сделай то же
+    самое ещё раз», а не «поставь задачу в обход правил». Старая строка остаётся: у повтора
+    свой task_id, история падений не переписывается."""
+    snap_con.execute(
+        "INSERT INTO task(id, type, status, node, created_at, error) "
+        "VALUES ('task-failed', 'full_load', 'FAILED', ?, 0, 'таймаут')",
+        (SNAP["LOADED"],),
+    )
+    snap_con.commit()
+
+    r = client.post("/api/task/task-failed/retry")
+
+    assert r.status_code == 200, r.text
+    new_id = r.json()["task_id"]
+    assert new_id != "task-failed"
+    row = snap_con.execute("SELECT type, node, status FROM task WHERE id = ?", (new_id,)).fetchone()
+    assert (row["type"], row["node"]) == ("full_load", SNAP["LOADED"])
+    assert snap_con.execute("SELECT status FROM task WHERE id = 'task-failed'").fetchone()[0] \
+        == "FAILED", "старая задача остаётся упавшей"
+
+
+def test_retry_refuses_a_task_that_did_not_fail(client, snap_con):
+    """Повторяем только упавшую: у DONE повтор — это новый запуск руками, а не «ещё раз»."""
+    snap_con.execute(
+        "INSERT INTO task(id, type, status, node, created_at) "
+        "VALUES ('task-ok', 'full_load', 'DONE', ?, 0)", (SNAP["LOADED"],))
+    snap_con.commit()
+
+    assert client.post("/api/task/task-ok/retry").status_code == 409
+    assert client.post("/api/task/нет-такой/retry").status_code == 404
+
+
 def test_report_is_served_as_static(client, reports_dir):
     """Отчёт — файл на диске, раздаётся статикой (tech §6 «Правила»)."""
     (reports_dir / f"{SNAP_REPORT_ID}.html").write_text("<h1>отчёт</h1>", encoding="utf-8")

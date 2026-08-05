@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 import time
@@ -29,12 +30,29 @@ NEEDS_DIR = ROOT / "logs" / "needs-lab"
 FLOOR = wscore.FLOOR        # ниже в сборку не берём: вглубь мы там и не бурим
 HEAD_FREQ = 30000           # выше — голова, интент размыт по определению
 
-# `score` ставит САМА сборка (0-100: шанс, что разбор найдёт незакрытую потребность) — это
-# суждение, а не формула по признакам: занятость рынка и кустарность обслуживания из четырёх
-# флагов не выводятся. Порядок работ на экране — по этому числу.
-WORK_KEYS = ("name", "score", "score_why", "top_freq", "phrase_count", "occupied_by",
-             "unclear", "gap_candidate", "needs_serp", "serp_question", "why")
-SEGMENT_KEYS = ("name", "gap_candidate", "why")
+# Классификация отвечает только за структуру: работа, сегменты и назначенные им фразы.
+# Продуктовый рейтинг строится отдельной дорогой командой и хранится отдельным артефактом,
+# чтобы пересборка классов не притворялась анализом рынка или возможности продукта.
+CLASS_WORK_KEYS = ("name", "top_freq", "phrase_count", "unclear", "why")
+SEGMENT_KEYS = ("name", "why")
+RANK_KEYS = ("score", "score_why", "intent", "product", "blocker", "evidence", "factors")
+RANK_RESULT_KEYS = ("name", "intent", "factors", "score", "score_why", "product",
+                    "blocker", "evidence")
+CLASS_FORBIDDEN_KEYS = (*RANK_KEYS, "occupied_by", "gap_candidate", "needs_serp",
+                        "serp_question")
+WORK_KEYS = (*CLASS_WORK_KEYS, *RANK_KEYS)
+RANK_INTENTS = ("product", "mixed", "information", "platform_action", "support",
+                "navigation", "unclear")
+RANK_FACTORS = {
+    "external_control": 25,
+    "tool_intent": 20,
+    "outcome_clarity": 15,
+    "product_shape": 15,
+    "repeatability": 10,
+    "user_value": 15,
+}
+RANK_CAPS = {"product": 100, "mixed": 60, "information": 30,
+             "platform_action": 15, "support": 20, "navigation": 5, "unclear": 10}
 
 
 class NeedsError(Exception):
@@ -130,12 +148,32 @@ def works(tree):
     return [w for w in (tree.get("works") or []) if isinstance(w, dict)]
 
 
+def classification_only(tree):
+    """Каноническая классификация без старых гипотез `score/occupied/gap/needs_serp`."""
+    return {
+        "condition": tree.get("condition"),
+        "works": [
+            {**{k: w.get(k) for k in CLASS_WORK_KEYS},
+             "phrases": list(w.get("phrases") or []),
+             "segments": [
+                 {**{k: s.get(k) for k in SEGMENT_KEYS},
+                  "phrases": list(s.get("phrases") or [])}
+                 for s in (w.get("segments") or []) if isinstance(s, dict)
+             ]}
+            for w in works(tree)
+        ],
+        "excluded": [dict(e) for e in (tree.get("excluded") or []) if isinstance(e, dict)],
+    }
+
+
 def work_phrases(work):
     """Все фразы работы, включая сегменты."""
-    out = list(work.get("phrases") or [])
-    for s in work.get("segments") or []:
-        if isinstance(s, dict):
-            out += list(s.get("phrases") or [])
+    direct = work.get("phrases")
+    out = list(direct) if isinstance(direct, list) else []
+    segments = work.get("segments")
+    for s in segments if isinstance(segments, list) else []:
+        if isinstance(s, dict) and isinstance(s.get("phrases"), list):
+            out += list(s["phrases"])
     return out
 
 
@@ -147,18 +185,66 @@ def find_work(tree, name):
     raise NeedsError(f"работы нет в дереве: {name}")
 
 
-def counts(tree, analyzed=()):
+# ---------- ручное избранное ----------
+
+def _favorites_path(tree_id, tree_file=None):
+    """Отдельный sidecar: лайки не являются ни классификацией, ни рейтингом модели."""
+    if tree_file is None:
+        _, tree_file, _ = load_tree(tree_id)
+    if tree_file.name == "accepted.json":
+        return tree_file.parent / "favorites.json"
+    # Для одиночных `<id>.json` нельзя класть sidecar рядом: он сам стал бы ещё одним
+    # деревом. Хеш одновременно не даёт превратить tree_id в произвольный путь.
+    digest = hashlib.sha256(tree_id.encode("utf-8")).hexdigest()
+    return NEEDS_DIR / ".favorites" / f"{digest}.json"
+
+
+def favorite_names(tree_id):
+    """Избранные работы текущей классификации, в её каноническом порядке."""
+    tree, tree_file, _ = load_tree(tree_id)
+    path = _favorites_path(tree_id, tree_file)
+    if not path.is_file():
+        return []
+    data = _read(path)
+    raw = data.get("works")
+    if not isinstance(raw, list) or any(not isinstance(name, str) for name in raw):
+        raise NeedsError(f"избранное {path.name}: works должен быть массивом строк")
+    selected = {_norm(name) for name in raw}
+    return [w.get("name") for w in works(tree)
+            if isinstance(w.get("name"), str) and _norm(w.get("name")) in selected]
+
+
+def set_favorite(tree_id, work_name, favorite):
+    """Поставить или снять ручной лайк, не меняя accepted.json и ranking-артефакты."""
+    tree, tree_file, _ = load_tree(tree_id)
+    work = find_work(tree, work_name)
+    canonical = work.get("name")
+    selected = {_norm(name) for name in favorite_names(tree_id)}
+    if favorite:
+        selected.add(_norm(canonical))
+    else:
+        selected.discard(_norm(canonical))
+    ordered = [w.get("name") for w in works(tree)
+               if isinstance(w.get("name"), str) and _norm(w.get("name")) in selected]
+    path = _favorites_path(tree_id, tree_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _write_json_atomic(path, {"works": ordered, "updated_at": int(time.time())})
+    return canonical, ordered
+
+
+def counts(tree, analyzed=(), ranking=None):
     ws = works(tree)
     done = {_norm(n) for n in analyzed}
-    fresh = [w.get("score") or 0 for w in ws if _norm(w.get("name")) not in done]
+    ranked = {_norm(w.get("name")): w for w in (ranking or {}).get("works") or []
+              if isinstance(w, dict)}
+    fresh = [ranked[_norm(w.get("name"))]["score"] for w in ws
+             if _norm(w.get("name")) not in done and _norm(w.get("name")) in ranked]
     return {"works": len(ws),
-            "best_score": max(fresh) if fresh else 0,
+            "best_score": max(fresh) if fresh else None,
+            "ranked": len(ranked),
             "segments": sum(len(w.get("segments") or []) for w in ws),
             "phrases": sum(len(work_phrases(w)) for w in ws),
-            "excluded": len(tree.get("excluded") or []),
-            "gaps": sum(1 for w in ws if w.get("gap_candidate")),
-            "occupied": sum(1 for w in ws if w.get("occupied_by")),
-            "needs_serp": sum(1 for w in ws if w.get("needs_serp"))}
+            "excluded": len(tree.get("excluded") or [])}
 
 
 # ---------- разборы работ ----------
@@ -176,6 +262,124 @@ def model_family(value, default=None):
     if family not in MODEL_FAMILIES:
         raise NeedsError(f"неизвестное семейство модели: {value!r}")
     return family
+
+
+def rank_score(item):
+    """Детерминированный итог из оценённых моделью факторов и жёсткого cap по интенту."""
+    factors = item.get("factors") or {}
+    weighted = sum(factors.get(k, 0) * weight for k, weight in RANK_FACTORS.items())
+    score = int(weighted / 100 + 0.5)
+    cap = RANK_CAPS.get(item.get("intent"), 0)
+    if not str(item.get("product") or "").strip():
+        cap = min(cap, 25)
+    return min(score, cap)
+
+
+def validate_ranking(tree, result):
+    """Проверить полноту и аудируемость продуктового рейтинга."""
+    if not isinstance(result, dict) or not isinstance(result.get("works"), list):
+        return ["ответ анализа должен быть объектом с массивом works"]
+    if set(result) != {"works"}:
+        result_shape_problem = ["ответ анализа должен содержать только поле works"]
+    else:
+        result_shape_problem = []
+    expected = {_norm(w.get("name")): w for w in works(tree)}
+    seen = set()
+    problems = result_shape_problem
+    for i, item in enumerate(result["works"]):
+        if not isinstance(item, dict):
+            problems.append(f"works[{i}] не объект")
+            continue
+        raw_name = item.get("name")
+        if not isinstance(raw_name, str):
+            problems.append(f"works[{i}]: name должен быть строкой")
+            continue
+        name = _norm(raw_name)
+        if name not in expected:
+            problems.append(f"works[{i}]: неизвестная работа {item.get('name')!r}")
+            continue
+        if name in seen:
+            problems.append(f"работа {item.get('name')!r} оценена дважды")
+        seen.add(name)
+        if item.get("name") != expected[name].get("name"):
+            problems.append(f"works[{i}]: имя работы должно быть сохранено точно: "
+                            f"{expected[name].get('name')!r}")
+        if set(item) != set(RANK_RESULT_KEYS):
+            problems.append(f"{item.get('name')}: поля оценки должны быть ровно: "
+                            + ", ".join(RANK_RESULT_KEYS))
+        intent = item.get("intent")
+        if intent not in RANK_INTENTS:
+            problems.append(f"{item.get('name')}: неизвестный intent {intent!r}")
+        factors = item.get("factors")
+        if not isinstance(factors, dict) or set(factors) != set(RANK_FACTORS):
+            problems.append(f"{item.get('name')}: factors должны содержать "
+                            + ", ".join(RANK_FACTORS))
+        else:
+            for key, value in factors.items():
+                if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 100:
+                    problems.append(f"{item.get('name')}: factors.{key} должен быть целым 0-100")
+        score = item.get("score")
+        if not isinstance(score, int) or isinstance(score, bool) or not 0 <= score <= 100:
+            problems.append(f"{item.get('name')}: score должен быть целым 0-100")
+        if not isinstance(item.get("score_why"), str) or not item["score_why"].strip():
+            problems.append(f"{item.get('name')}: нужен score_why")
+        for key in ("product", "blocker"):
+            value = item.get(key)
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                problems.append(f"{item.get('name')}: {key} должен быть непустой строкой или null")
+        evidence = item.get("evidence")
+        allowed = {_norm(p) for p in work_phrases(expected[name])}
+        if not isinstance(evidence, list) or not 1 <= len(evidence) <= 5:
+            problems.append(f"{item.get('name')}: evidence должен содержать 1-5 фраз")
+        elif any(not isinstance(p, str) or _norm(p) not in allowed for p in evidence):
+            problems.append(f"{item.get('name')}: evidence содержит нестроку или фразу не из работы")
+        factors_valid = isinstance(factors, dict) and set(factors) == set(RANK_FACTORS) \
+            and all(isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= 100
+                    for value in factors.values())
+        if factors_valid and intent in RANK_INTENTS:
+            expected_score = rank_score(item)
+            if score != expected_score:
+                problems.append(f"{item.get('name')}: score={score!r}, по факторам и cap "
+                                f"должен быть {expected_score}")
+        if expected[name].get("unclear") is True and intent != "unclear":
+            problems.append(f"{item.get('name')}: unclear-работа должна иметь intent=unclear")
+    missing = sorted(set(expected) - seen)
+    if missing:
+        problems.append(f"не оценено работ: {missing[:5]}")
+    return problems
+
+
+def save_ranking(tree_id, result, task_id, family, expected_revision):
+    """Сохранить отдельный рейтинг; каноническую классификацию не менять."""
+    tree, tree_file, params_file = load_tree(tree_id)
+    if tree_file.name != "accepted.json" or params_file is None:
+        raise NeedsError(f"дерево {tree_id} не поддерживает анализ")
+    revision = tree_revision(tree)
+    if revision != expected_revision:
+        raise NeedsError(f"классификация изменилась во время анализа: была {expected_revision}, "
+                         f"стала {revision}")
+    data = {"task_id": task_id, "model_family": model_family(family),
+            "created_at": int(time.time()), "tree_revision": revision,
+            "works": result["works"]}
+    d = tree_file.parent / "rankings"
+    d.mkdir(parents=True, exist_ok=True)
+    _write_json_atomic(d / f"ranking-{task_id}.json", data)
+    return data
+
+
+def latest_ranking(tree_id, revision=None):
+    """Последний рейтинг текущей ревизии классификации; старые остаются историей."""
+    tree, tree_file, _ = load_tree(tree_id)
+    want = tree_revision(tree) if revision is None else revision
+    found = []
+    for f in (tree_file.parent / "rankings").glob("ranking-*.json"):
+        try:
+            data = _read(f)
+        except NeedsError:
+            continue
+        if data.get("tree_revision") == want and isinstance(data.get("works"), list):
+            found.append((data.get("created_at") or 0, f.name, data))
+    return max(found, default=(0, "", None))[2]
 
 
 def artifact_family(artifact):
@@ -299,7 +503,6 @@ def all_analyses():
                                 "model_family": family,
                                 "root": meta.get("root"), "condition": tree.get("condition"),
                                 "top_freq": w.get("top_freq"), "phrases": a.get("phrases"),
-                                "gap_candidate": w.get("gap_candidate"),
                                 **{k: a.get(k) for k in
                                    ("verdict", "verdict_score", "confidence",
                                     "report_link", "created_at")}})
@@ -318,18 +521,22 @@ def rows():
         except NeedsError as e:
             out.append({"id": tid, "error": str(e), "condition": None, "root": None,
                         "root_freq": None, "created_at": None, "analyzed": 0,
-                        **{k: 0 for k in ("works", "segments", "phrases", "excluded",
-                                          "gaps", "occupied", "needs_serp")}})
+                        "ranked_at": None, "ranked_by": None,
+                        "works": 0, "best_score": None, "ranked": 0,
+                        "segments": 0, "phrases": 0, "excluded": 0})
             continue
         _, meta = _input(params_file)
         arts = work_artifacts(tid)
+        ranking = latest_ranking(tid)
         out.append({"id": tid, "error": None, "condition": tree.get("condition"),
                     "root": meta.get("root"), "root_freq": meta.get("root_freq"),
                     "created_at": int(tree_file.stat().st_mtime),
+                    "ranked_at": (ranking or {}).get("created_at"),
+                    "ranked_by": (ranking or {}).get("model_family"),
                     "analyzed": sum(1 for v in arts.values()
                                      if any(x.get("kind") == "analyze" for x in v)),
                     **counts(tree, [k for k, v in arts.items()
-                                    if any(x.get("kind") == "analyze" for x in v)])})
+                                    if any(x.get("kind") == "analyze" for x in v)], ranking)})
     out.sort(key=lambda r: (r["created_at"] or 0), reverse=True)
     return out
 
@@ -339,6 +546,10 @@ def detail(tree_id):
     tree, tree_file, params_file = load_tree(tree_id)
     freqs, meta = _input(params_file)
     arts = work_artifacts(tree_id)
+    ranking = latest_ranking(tree_id)
+    favorites = {_norm(name) for name in favorite_names(tree_id)}
+    ranked = {_norm(w.get("name")): w for w in (ranking or {}).get("works") or []
+              if isinstance(w, dict)}
 
     def with_freq(items):
         return sorted(({"phrase": p, "freq": freqs.get(p)} for p in (items or [])),
@@ -347,6 +558,7 @@ def detail(tree_id):
     out_works = []
     for w in works(tree):
         mine = arts.get(_norm(w.get("name")), [])
+        rank = ranked.get(_norm(w.get("name")), {})
         # Производная витринная метрика: намеренно сырая сумма частот всех формулировок
         # работы, включая сегменты. `top_freq` остаётся прежним максимумом и продолжает
         # использоваться в LLM-контрактах; сумму показываем отдельно, не выдавая её за
@@ -356,7 +568,9 @@ def detail(tree_id):
         # artifacts. Так старые клиенты не начнут случайно показывать Codex как «основной».
         a = next((x for x in mine
                   if x.get("kind") == "analyze" and artifact_family(x) == "claude"), None)
-        out_works.append({**{k: w.get(k) for k in WORK_KEYS},
+        out_works.append({**{k: w.get(k) for k in CLASS_WORK_KEYS},
+                          **{k: rank.get(k) for k in RANK_KEYS},
+                          "favorite": _norm(w.get("name")) in favorites,
                           "sum_freq": sum_freq,
                           "phrases": with_freq(w.get("phrases")),
                           "segments": [{**{k: s.get(k) for k in SEGMENT_KEYS},
@@ -373,8 +587,9 @@ def detail(tree_id):
                                        ("verdict", "verdict_score", "report_link",
                                         "created_at", "searched", "confidence",
                                         "model_family")} if a else None})
-    # самое потенциально интересное сверху — по оценке сборки
-    out_works.sort(key=lambda w: (-(w.get("score") or 0), -(w.get("top_freq") or 0)))
+    # До отдельного анализа сохраняем порядок классификации. После — продуктовые кандидаты сверху.
+    if ranking:
+        out_works.sort(key=lambda w: (-(w.get("score") or 0), -(w.get("top_freq") or 0)))
     excluded = [{"phrase": e.get("phrase"), "why": e.get("why"), "note": e.get("note"),
                  "freq": freqs.get(e.get("phrase"))}
                 for e in (tree.get("excluded") or []) if isinstance(e, dict)]
@@ -386,9 +601,13 @@ def detail(tree_id):
             "revision": tree_revision(tree),
             "refined_at": tree.get("_refined_at"),
             "refined_by": tree.get("_refined_by"),
+            "ranked_at": (ranking or {}).get("created_at"),
+            "ranked_by": (ranking or {}).get("model_family"),
+            "rank_task_id": (ranking or {}).get("task_id"),
             "refinements": history,
             "counts": counts(tree, [k for k, v in arts.items()
-                                    if any(x.get("kind") == "analyze" for x in v)]), "works": out_works, "excluded": excluded}
+                                    if any(x.get("kind") == "analyze" for x in v)], ranking),
+            "works": out_works, "excluded": excluded}
 
 
 def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
@@ -446,12 +665,28 @@ def validate_tree(payload, tree, strict=False):
         if not isinstance(w, dict):
             out.append(f"works[{i}] не объект")
             continue
-        if not (w.get("name") or "").strip():
+        if not isinstance(w.get("name"), str) or not w["name"].strip():
             out.append(f"works[{i}]: пустое name")
-        sc = w.get("score")
-        if not isinstance(sc, (int, float)) or not 0 <= sc <= 100:
-            out.append(f"works[{i}] ({w.get('name')}): score должен быть числом 0-100, "
-                       f"получено {sc!r}")
+        forbidden = sorted(set(w) & set(CLASS_FORBIDDEN_KEYS))
+        if forbidden:
+            out.append(f"works[{i}] ({w.get('name')}): классификация не должна содержать "
+                       f"продуктовый анализ: {forbidden}")
+        segments = w.get("segments")
+        if strict and not isinstance(segments, list):
+            out.append(f"works[{i}] ({w.get('name')}): segments должен быть массивом")
+        if strict and not isinstance(w.get("phrases"), list):
+            out.append(f"works[{i}] ({w.get('name')}): phrases должен быть массивом")
+        for j, segment in enumerate(segments or []):
+            if not isinstance(segment, dict):
+                if strict:
+                    out.append(f"works[{i}].segments[{j}] не объект")
+                continue
+            forbidden = sorted(set(segment) & set(CLASS_FORBIDDEN_KEYS))
+            if forbidden:
+                out.append(f"works[{i}].segments[{j}]: классификация не должна содержать "
+                           f"продуктовый анализ: {forbidden}")
+            if strict and not isinstance(segment.get("phrases"), list):
+                out.append(f"works[{i}].segments[{j}]: phrases должен быть массивом")
         phrases = work_phrases(w)
         for ph in phrases:
             n = _norm(ph)
@@ -471,17 +706,6 @@ def validate_tree(payload, tree, strict=False):
             if w.get("top_freq") != expected_top:
                 out.append(f"works[{i}] ({name}): top_freq={w.get('top_freq')!r}, "
                            f"по входу {expected_top}")
-            if w.get("unclear") is True:
-                if not isinstance(sc, (int, float)) or sc > 10:
-                    out.append(f"works[{i}] ({name}): у unclear score должен быть 0-10")
-                if w.get("gap_candidate") is not False:
-                    out.append(f"works[{i}] ({name}): у unclear gap_candidate должен быть false")
-                if w.get("occupied_by") not in (None, ""):
-                    out.append(f"works[{i}] ({name}): у unclear occupied_by должен быть null")
-                if w.get("needs_serp") is not False:
-                    out.append(f"works[{i}] ({name}): у unclear needs_serp должен быть false")
-                if w.get("serp_question") not in (None, ""):
-                    out.append(f"works[{i}] ({name}): у unclear serp_question должен быть null")
     for e in tree.get("excluded") or []:
         ph = e.get("phrase") if isinstance(e, dict) else e
         if not isinstance(e, dict) or not ph or not (e.get("why") or "").strip():
@@ -505,7 +729,7 @@ def save_tree(tree_id, payload, tree):
     """Сборку — каталогом, как её кладёт лаборатория: вход рядом с деревом."""
     d = NEEDS_DIR / tree_id
     d.mkdir(parents=True, exist_ok=True)
-    initial = {**tree, "_revision": tree_revision(tree)}
+    initial = {**classification_only(tree), "_revision": 0}
     _write_json_atomic(d / "params.json", payload)
     _write_json_atomic(d / "accepted.json", initial)
     return d
@@ -528,7 +752,7 @@ def save_refined_tree(tree_id, tree, task_id, family, expected_revision):
         )
     now = int(time.time())
     revision = before_revision + 1
-    accepted = {**tree, "_revision": revision, "_refined_at": now,
+    accepted = {**classification_only(tree), "_revision": revision, "_refined_at": now,
                 "_refined_by": model_family(family), "_refine_task_id": task_id}
     revisions = tree_file.parent / "revisions"
     revisions.mkdir(parents=True, exist_ok=True)
@@ -571,12 +795,16 @@ def work_input(tree_id, work_name, top):
     покупать под выдачу (самые частотные — они и представляют работу)."""
     tree, _, params_file = load_tree(tree_id)
     work = find_work(tree, work_name)
+    ranking = latest_ranking(tree_id)
+    rank = next((r for r in (ranking or {}).get("works") or []
+                 if _norm(r.get("name")) == _norm(work_name)), {})
     freqs, meta = _input(params_file)
     phrases = sorted(({"phrase": p, "freq": freqs.get(p) or 0} for p in work_phrases(work)),
                      key=lambda x: (-x["freq"], x["phrase"]))
     return {"tree_id": tree_id, "condition": tree.get("condition"),
             "root": meta.get("root"),
-            "work": {k: work.get(k) for k in WORK_KEYS},
+            "work": {**{k: work.get(k) for k in CLASS_WORK_KEYS},
+                     **{k: rank.get(k) for k in RANK_KEYS}},
             "segments": [{**{k: s.get(k) for k in SEGMENT_KEYS},
                           "phrases": sorted(s.get("phrases") or [],
                                             key=lambda p: -(freqs.get(p) or 0))}

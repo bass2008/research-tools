@@ -51,7 +51,6 @@ export interface ReportRow {
   condition: string | null
   top_freq: number | null
   phrases: number | null
-  gap_candidate: boolean | null
   verdict: string | null
   verdict_score: number | null
   confidence: number | null
@@ -95,6 +94,7 @@ export type WsEvent =
   | { type: 'log'; data: LogLine | LogLine[] }
   | { type: 'task'; data: TaskRow | TaskRow[] }
   | { type: 'log_cleared'; data: Record<string, never> }
+  | { type: 'tasks_cleared'; data: Record<string, never> }
   | { type: 'llm_status'; data: LlmStatus }
 
 // Клиент -> сервер.
@@ -225,6 +225,16 @@ export const needsBuild = (phrase: string): Promise<{ task_id: string }> =>
 
 export const clearLogs = (): Promise<{ ok: boolean }> => post('/api/logs/clear')
 
+export const clearTasks = (): Promise<{ ok: boolean; deleted: number }> => post('/api/tasks/clear')
+
+/** Повторить упавшую задачу: тот же вызов, что и в первый раз, новый task_id. */
+export const retryTask = (id: string): Promise<{ task_id: string }> =>
+  post(`/api/task/${encodeURIComponent(id)}/retry`)
+
+/** Снять задачу, которую исполнитель не взял (только WAITING). */
+export const cancelTask = (id: string): Promise<{ ok: boolean; task_id: string }> =>
+  post(`/api/task/${encodeURIComponent(id)}/cancel`)
+
 // ---------- стоп-слова ----------
 
 export type StopKind = 'stop' | 'brand' | 'unwanted'
@@ -267,17 +277,15 @@ export const stopRemove = (words: string[]): Promise<{ saved: StopWord[] }> =>
 export const estimate = (phrase: string): Promise<Estimate> =>
   req(`/api/estimate?phrase=${encodeURIComponent(phrase)}`)
 
-// ---------- деревья потребностей (второй слой; пока читаются из папки) ----------
+// ---------- деревья потребностей (второй слой; классификация и рейтинги лежат файлами) ----------
 
 export interface NeedsCounts {
   works: number
-  best_score: number
+  best_score: number | null
+  ranked: number
   segments: number
   phrases: number
   excluded: number
-  gaps: number
-  occupied: number
-  needs_serp: number
 }
 
 // строка таблицы: счётчики плоско, чтобы таблица читалась без вложенности
@@ -288,6 +296,8 @@ export interface NeedsRow extends NeedsCounts {
   root: string | null
   root_freq: number | null
   created_at: number | null
+  ranked_at?: number | null
+  ranked_by?: ModelFamily | null
   error: string | null
 }
 
@@ -298,7 +308,6 @@ export interface NeedsPhrase {
 
 export interface NeedsSegment {
   name: string | null
-  gap_candidate: boolean | null
   why: string | null
   phrases: NeedsPhrase[]
 }
@@ -349,18 +358,21 @@ export interface NeedsArtifact {
 
 export interface NeedsWork {
   name: string | null
-  // 0-100: шанс, что разбор найдёт незакрытую потребность. Ставит сборка (LLM), не формула.
+  /** Ручной лайк пользователя; хранится отдельно от классификации и рейтинга. */
+  favorite?: boolean
+  // 0-100: возможность самостоятельного продукта; появляется только после общей команды «Анализ».
   score: number | null
   score_why: string | null
+  intent: 'product' | 'mixed' | 'information' | 'platform_action' | 'support' | 'navigation' | 'unclear' | null
+  product: string | null
+  blocker: string | null
+  evidence: string[] | null
+  factors: Record<string, number> | null
   /** Сырая сумма частот всех формулировок работы, включая сегменты. Старый backend не отдаёт. */
   sum_freq?: number
   top_freq: number | null
   phrase_count: number | null
-  occupied_by: string | null
   unclear: boolean | null
-  gap_candidate: boolean | null
-  needs_serp: boolean | null
-  serp_question: string | null
   why: string | null
   phrases: NeedsPhrase[]
   segments: NeedsSegment[]
@@ -383,6 +395,9 @@ export interface NeedsTree {
   revision?: number
   refined_at?: number | null
   refined_by?: ModelFamily | null
+  ranked_at?: number | null
+  ranked_by?: ModelFamily | null
+  rank_task_id?: string | null
   refinements?: Array<{
     task_id: string
     model_family: ModelFamily
@@ -400,11 +415,25 @@ export const needsTrees = (): Promise<{ trees: NeedsRow[] }> => req('/api/needs/
 export const needsTree = (id: string): Promise<NeedsTree> =>
   req(`/api/needs/tree/${encodeURIComponent(id)}`)
 
+/** Поставить или снять ручной лайк у работы. */
+export const needsFavorite = (
+  tree_id: string,
+  work: string,
+  favorite: boolean,
+): Promise<{ work: string; favorite: boolean; favorites: string[] }> =>
+  post('/api/needs/favorite', { tree_id, work, favorite })
+
 /** Второй проход классификации всего дерева. Результат заменяет каноническую ревизию. */
 export const needsRefine = (
   tree_id: string,
   model_family: ModelFamily,
 ): Promise<{ task_id: string }> => post('/api/needs/refine', { tree_id, model_family })
+
+/** Продуктовый рейтинг всей принятой классификации, без выдачи и анализа конкурентов. */
+export const needsRank = (
+  tree_id: string,
+  model_family: ModelFamily,
+): Promise<{ task_id: string }> => post('/api/needs/rank', { tree_id, model_family })
 
 /** Действие над работой. Повторный запуск разрешён: каждый прогон копит свой артефакт. */
 export const needsRun = (

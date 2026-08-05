@@ -127,6 +127,7 @@ Durable ledger записывается до запуска модели. Пос
 |---|---|---|
 | `needs` | `gpt-5.6-sol` | `xhigh` |
 | `needs_refine` | `gpt-5.6-sol` | `xhigh` |
+| `needs_rank` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_work` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_adv` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_product` | `gpt-5.6-sol` | `xhigh` |

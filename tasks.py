@@ -33,7 +33,7 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("needs", "needs_refine", "analyze_work", "analyze_adv", "analyze_product", "model_test",
+LLM_TYPES = ("needs", "needs_refine", "needs_rank", "analyze_work", "analyze_adv", "analyze_product", "model_test",
              "season", "adjacent", "stopwords")
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
 PROGRESS_EVERY = 0.5        # progress краула — не чаще, чем раз в N секунд
@@ -57,7 +57,7 @@ MODEL_TEST_SECONDS = 60           # smoke-test обязан удерживать
 # Ожидание LLM: (база на операцию, добавка на каждую следующую часть), секунды.
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
 # (tech §3): минуты на толкование готовых чисел, десятки минут на сборку и разбор.
-LLM_TIMEOUT = {"needs": (2400, 0), "needs_refine": (2400, 0),
+LLM_TIMEOUT = {"needs": (2400, 0), "needs_refine": (2400, 0), "needs_rank": (2400, 0),
                "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
                "analyze_product": (2400, 0), "model_test": (180, 0),
                "season": (600, 0), "adjacent": (900, 300), "stopwords": (900, 0)}
@@ -170,8 +170,12 @@ async def execute(ctx, task_id, lock=None):
         ctx.log("INFO", op, node, f"готово за {time.time() - t0:.1f} c: {_brief(result)}")
         return True
     except asyncio.CancelledError:
-        _finish(ctx, task_id, "FAILED", error="операция прервана (остановка сервера)")
-        ctx.log("ERROR", op, node, "операция прервана")
+        manual = task_id in getattr(ctx, "cancelled", ())
+        if manual:
+            ctx.cancelled.discard(task_id)
+        why = "отменена вручную" if manual else "операция прервана (остановка сервера)"
+        _finish(ctx, task_id, "FAILED", error=why)
+        ctx.log("INFO" if manual else "ERROR", op, node, why)
         raise
     except Exception as e:
         _finish(ctx, task_id, "FAILED", error=f"{type(e).__name__}: {e}")
@@ -191,8 +195,10 @@ async def execute(ctx, task_id, lock=None):
                 else "basic"
             ctx.needs_busy.discard((params["tree_id"],
                                     needs_layer._norm(params.get("work")), act, family))
-        if op == "needs_refine" and isinstance(params, dict) and params.get("tree_id"):
-            ctx.needs_busy.discard((params["tree_id"], "", "refine", "shared"))
+        if op in {"needs_refine", "needs_rank"} and isinstance(params, dict) \
+                and params.get("tree_id"):
+            action = "refine" if op == "needs_refine" else "rank"
+            ctx.needs_busy.discard((params["tree_id"], "", action, "shared"))
 
 
 def _brief(result):
@@ -457,7 +463,7 @@ async def needs_build(ctx, task_id, phrase, params):
     _save_params(ctx, task_id, {"root": root, "phrases": len(payload["nodes"]),
                                 "subtree": payload["subtree_total"]})
     res = (await _run_llm(ctx, "needs", root, [_job(task_id, 0, "needs", payload)]))[0]
-    problems = needs_layer.validate_tree(payload, res)
+    problems = needs_layer.validate_tree(payload, res, strict=True)
     if problems:
         raise ValueError("сборка не прошла проверку: " + "; ".join(problems[:3]))
     tree_id = f"{needs_layer.slug(root, 40)}-{task_id[:8]}"
@@ -465,7 +471,7 @@ async def needs_build(ctx, task_id, phrase, params):
     counts = needs_layer.counts(res)
     ctx.log("INFO", "needs_build", root,
             f"дерево потребностей собрано: {tree_id} — работ {counts['works']}, "
-            f"сегментов {counts['segments']}, щелей {counts['gaps']}, "
+            f"сегментов {counts['segments']}, "
             f"исключено {counts['excluded']} из {len(payload['nodes'])} фраз")
     return {"tree_id": tree_id, **counts}
 
@@ -505,6 +511,46 @@ async def needs_refine(ctx, task_id, phrase, params):
             f"семейство {family}")
     return {"tree_id": tree_id, "revision": meta["revision"],
             "model_family": family, **result_counts}
+
+
+async def needs_rank(ctx, task_id, phrase, params):
+    """Глубоко оценить возможность отдельного продукта по уже принятой классификации.
+
+    Выдача и конкуренты намеренно не участвуют. Модель размечает несколько проверяемых
+    факторов, итог вычисляется по фиксированным весам и caps, а результат хранится отдельно
+    от accepted.json и привязан к ревизии классификации.
+    """
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
+    if not tree_id:
+        raise RuntimeError("нужен tree_id")
+    draft, _, _ = needs_layer.load_tree(tree_id)
+    source = needs_layer.load_source(tree_id)
+    revision = needs_layer.tree_revision(draft)
+    classification = needs_layer.classification_only(draft)
+    _save_params(ctx, task_id, {"tree_id": tree_id, "model_family": family,
+                                "revision": revision,
+                                "phrases": len(source.get("nodes") or []),
+                                "works": len(needs_layer.works(classification))})
+    result = (await _run_llm(
+        ctx, "needs_rank", tree_id,
+        [_job(task_id, 0, "needs_rank", {
+            "model_family": family, "source": source, "classification": classification,
+        })],
+    ))[0]
+    problems = needs_layer.validate_ranking(classification, result)
+    if problems:
+        raise ValueError("анализ возможности продукта не прошёл проверку: "
+                         + "; ".join(problems[:5]))
+    saved = needs_layer.save_ranking(
+        tree_id, result, task_id, family, expected_revision=revision,
+    )
+    scores = [w["score"] for w in saved["works"]]
+    ctx.log("INFO", "needs_rank", tree_id,
+            f"продуктовый рейтинг готов: работ {len(scores)}, лучший шанс {max(scores)}, "
+            f"семейство {family}")
+    return {"tree_id": tree_id, "revision": revision, "model_family": family,
+            "works": len(scores), "best_score": max(scores)}
 
 
 # ---------- разбор работы (второй слой) ----------
@@ -551,9 +597,9 @@ def _with_inputs(html, jp):
 <p>Что было у модели в момент разбора — на этом и только на этом стоят выводы выше.</p>
 <p><b>Работа:</b> {w.get('name')} · формулировок {len(ph)} ·
 условие ветки: {jp.get('condition') or '—'} · ветка: {jp.get('root') or '—'}</p>
-<p><b>Гипотезы сборки:</b> оценка {w.get('score')} ·
-щель: {'да' if w.get('gap_candidate') else 'нет'} ·
-занято: {w.get('occupied_by') or 'не названо'}</p>
+<p><b>Продуктовая гипотеза:</b> шанс {w.get('score') if w.get('score') is not None else 'не считался'} ·
+интент: {w.get('intent') or 'не определён'} ·
+форма продукта: {w.get('product') or 'не предложена'}</p>
 <p><b>Выдача:</b><br>{serp}</p>
 <p><b>Сезонность:</b> {season}</p>
 <p><b>Смежные ключи:</b> {adj}</p>
@@ -613,10 +659,12 @@ async def _analyze_input(ctx, task_id, tree_id, work_name, stage, family):
         if season else None,
         "adjacent": {k: adjacent.get(k) for k in
                      ("keys", "total_freq", "ours", "covered", "comment")} if adjacent else None,
+        # чужое семейство не скрываем: разбор — это довод, а не собственность модели.
+        # Автор указан, чтобы расхождение читалось как расхождение, а не как своя же ошибка.
         "previous_verdicts": [{"verdict": a.get("verdict"), "verdict_score": a.get("verdict_score"),
-                               "created_at": a.get("created_at")}
-                              for a in prev if a.get("kind") in ("analyze", "analyze_adv")
-                              and needs_layer.artifact_family(a) == family],
+                               "created_at": a.get("created_at"), "kind": a.get("kind"),
+                               "by": needs_layer.artifact_family(a)}
+                              for a in prev if a.get("kind") in ("analyze", "analyze_adv")],
     }
     jparams = {**{k: data[k] for k in ("condition", "root", "work", "segments", "phrases")},
                "model_family": family, "serps": serps, "context": context}
@@ -712,18 +760,20 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
                                          "needs_analyze_product", family)
 
     prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
-    niche = next((a for a in prev if a.get("kind") == "analyze"
-                  and needs_layer.artifact_family(a) == family), None)
-    feats = next((a for a in prev if a.get("kind") == "analyze_adv"
-                  and needs_layer.artifact_family(a) == family), None)
+    # берём ПОСЛЕДНИЙ разбор каждого вида, чьё бы семейство он ни был: свежие данные важнее
+    # авторства, а кто автор — сказано в поле `by`
+    niche = next((a for a in prev if a.get("kind") == "analyze"), None)
+    feats = next((a for a in prev if a.get("kind") == "analyze_adv"), None)
     if not (niche or feats):
-        raise RuntimeError(f"для {family} нужен хотя бы один предыдущий разбор: «Ниша» или «Функции»")
+        raise RuntimeError("нужен хотя бы один предыдущий разбор: «Ниша» или «Функции»")
     jparams["context"] = {
         **jparams["context"],
         "niche": {**{k: niche.get(k) for k in ("verdict", "verdict_score", "created_at")},
+                  "by": needs_layer.artifact_family(niche),
                   "report": _report_text(niche)} if niche else None,
         "features": {**{k: feats.get(k) for k in ("verdict", "verdict_score", "created_at",
                                                   "functions")},
+                     "by": needs_layer.artifact_family(feats),
                      "report": _report_text(feats)} if feats else None,
     }
 
@@ -1346,7 +1396,7 @@ async def stopwords_scan(ctx, task_id, phrase, params):
 
 OPS = {"load": load, "full_load": full_load, "stopwords_scan": stopwords_scan,
        "needs_dump": needs_dump,
-       "needs_build": needs_build, "needs_refine": needs_refine,
+       "needs_build": needs_build, "needs_refine": needs_refine, "needs_rank": needs_rank,
        "needs_analyze": needs_analyze,
        "needs_analyze_adv": needs_analyze_adv,
        "needs_analyze_product": needs_analyze_product,

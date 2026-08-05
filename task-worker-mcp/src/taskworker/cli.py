@@ -115,10 +115,8 @@ def _cmd_needs_show(args: argparse.Namespace) -> int:
         if cov[key]:
             print(f"    {key}: {cov[key]}")
     for w in job["result"].get("works") or []:
-        mark = " ЩЕЛЬ" if w.get("gap_candidate") else ""
-        occ = f" занято: {w['occupied_by']}" if w.get("occupied_by") else ""
         print(f"    {w.get('top_freq', 0):>7} / {w.get('phrase_count', 0):>3}  "
-              f"{w.get('name')}{mark}{occ}")
+              f"{w.get('name')}")
     return 0
 
 

@@ -41,6 +41,7 @@ def test_parse_signals_accepts_only_short_safe_envelopes():
     [
         ("needs", "gpt-5.6-sol", "xhigh"),
         ("needs_refine", "gpt-5.6-sol", "xhigh"),
+        ("needs_rank", "gpt-5.6-sol", "xhigh"),
         ("analyze_product", "gpt-5.6-sol", "xhigh"),
         ("model_test", "gpt-5.6-luna", "low"),
         ("season", "gpt-5.6-terra", "low"),

@@ -402,14 +402,94 @@ describe('вкладки Task и Отчёты', () => {
     const table = task.closest('table')!
     expect(within(table).getAllByRole('columnheader').map((h) => h.textContent)).toEqual([
       'тип',
+      'исполнитель',
       'узел',
       'статус',
       'создана',
       'финиш',
       'время',
       'ошибка',
+      'действие',
     ])
-    expect(within(task).getAllByRole('cell')[5]).toHaveTextContent('00:02:05')
+    expect(within(task).getAllByRole('cell')[6]).toHaveTextContent('00:02:05')
+  })
+
+  it('у упавшей задачи есть «Повторить», у остальных нет', async () => {
+    // повтор — это тот же вызов ещё раз; у DONE и RUNNING кнопки быть не должно, иначе она
+    // читается как «запустить заново» там, где запускать нечего
+    const user = userEvent.setup()
+    const { emit } = mount()
+    const task = (id: string, status: string) => ({
+      type: 'task',
+      data: {
+        id,
+        type: 'needs_analyze',
+        node: 'работа',
+        status,
+        created_at: 1_700_000_000,
+        started_at: 1_700_000_001,
+        finished_at: 1_700_000_010,
+        error: status === 'FAILED' ? 'таймаут LLM' : null,
+      },
+    })
+    emit(task('ok-1', 'DONE'))
+    emit(task('bad-1', 'FAILED'))
+    await user.click(screen.getByTestId('tab-tasks'))
+
+    expect(screen.getAllByTestId('task-retry')).toHaveLength(1)
+    await user.click(screen.getByTestId('task-retry'))
+    expect(lastUrl()).toBe('/api/task/bad-1/retry')
+  })
+
+  it('у ожидающей задачи есть «Отменить»: её никто не взял', async () => {
+    // WAITING значит джоб лежит в очереди LLM; если нужного семейства нет на связи, задача
+    // досидит до таймаута — снимаем её вручную
+    const user = userEvent.setup()
+    const { emit } = mount()
+    emit({
+      type: 'task',
+      data: {
+        id: 'wait-1',
+        type: 'needs_analyze_adv',
+        node: 'купить Telegram Stars',
+        status: 'WAITING',
+        model_family: 'codex',
+        created_at: 1_700_000_000,
+        started_at: null,
+        finished_at: null,
+        error: null,
+      },
+    })
+    await user.click(screen.getByTestId('tab-tasks'))
+    const row = screen.getByTestId('task-row')
+    expect(row).toHaveTextContent('Codex')
+    expect(screen.queryByTestId('task-retry')).toBeNull()
+
+    await user.click(within(row).getByTestId('task-cancel'))
+    expect(lastUrl()).toBe('/api/task/wait-1/cancel')
+  })
+
+  it('«Удалить всё» очищает журнал задач через сервер', async () => {
+    const user = userEvent.setup()
+    const { emit } = mount()
+    emit({
+      type: 'task',
+      data: {
+        id: 'running-1',
+        type: 'needs_build',
+        node: 'a',
+        status: 'RUNNING',
+        created_at: 1_700_000_000,
+        started_at: 1_700_000_001,
+        finished_at: null,
+        error: null,
+      },
+    })
+    await user.click(screen.getByTestId('tab-tasks'))
+    await user.click(screen.getByTestId('tasks-clear'))
+    expect(lastUrl()).toBe('/api/tasks/clear')
+    await waitFor(() => expect(screen.queryByTestId('task-row')).toBeNull())
+    expect(screen.getByText('задач пока нет')).toBeInTheDocument()
   })
 
   it('вкладка «Отчёты» показывает разборы РАБОТ, а не узлов', async () => {
@@ -425,7 +505,6 @@ describe('вкладки Task и Отчёты', () => {
             condition: 'бесплатно',
             top_freq: 7106,
             phrases: 31,
-            gap_candidate: true,
             verdict: 'SKIP',
             verdict_score: 30,
             confidence: 0.6,

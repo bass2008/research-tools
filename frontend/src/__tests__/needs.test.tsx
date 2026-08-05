@@ -16,10 +16,10 @@ const row = (over: Partial<NeedsRow> = {}): NeedsRow => ({
   segments: 18,
   phrases: 247,
   excluded: 82,
-  gaps: 8,
-  occupied: 4,
-  needs_serp: 11,
+  ranked: 16,
   best_score: 88,
+  ranked_at: 1_785_091_140,
+  ranked_by: 'codex',
   analyzed: 0,
   error: null,
   ...over,
@@ -31,19 +31,22 @@ const TREE: NeedsTree = {
   root: 'нейросеть бесплатно без регистрации',
   root_freq: 86201,
   created_at: 1785091133,
-  counts: { works: 2, best_score: 88, segments: 1, phrases: 4, excluded: 2, gaps: 1, occupied: 1, needs_serp: 1 },
+  ranked_at: 1_785_091_140,
+  ranked_by: 'codex',
+  counts: { works: 2, best_score: 88, ranked: 2, segments: 1, phrases: 4, excluded: 2 },
   works: [
     {
       name: 'оживить фото',
       score: 35,
-      score_why: 'спрос большой, но работу держит Алиса',
+      score_why: 'интент смешанный: часть запросов ищет инструкцию, но редактор возможен',
+      intent: 'mixed',
+      product: 'фото → короткое анимированное видео',
+      blocker: 'много информационных запросов',
+      evidence: ['оживить фото нейросеть бесплатно без регистрации'],
+      factors: { external_control: 80, tool_intent: 30, outcome_clarity: 70, product_shape: 60, repeatability: 40, user_value: 55 },
       top_freq: 11081,
       phrase_count: 3,
-      occupied_by: 'Яндекс Алиса',
       unclear: false,
-      gap_candidate: false,
-      needs_serp: true,
-      serp_question: 'кто в топе по «оживить фото»',
       why: 'одна работа: анимировать статичный снимок',
       phrases: [
         { phrase: 'оживить фото нейросеть бесплатно без регистрации', freq: 11081 },
@@ -54,7 +57,6 @@ const TREE: NeedsTree = {
       segments: [
         {
           name: 'через Алису',
-          gap_candidate: false,
           why: 'работу уже закрывает голосовой помощник',
           phrases: [{ phrase: 'алиса нейросеть оживить фото бесплатно без регистрации', freq: 573 }],
         },
@@ -63,15 +65,16 @@ const TREE: NeedsTree = {
     {
       name: 'написать фанфик',
       score: 88,
-      score_why: 'узкая аудитория, профильных продуктов нет',
+      score_why: 'ясный результат можно выдать отдельным генератором',
+      intent: 'product',
+      product: 'описание → законченный фанфик',
+      blocker: null,
+      evidence: ['генератор фанфиков нейросеть бесплатно без регистрации'],
+      factors: { external_control: 95, tool_intent: 90, outcome_clarity: 85, product_shape: 90, repeatability: 75, user_value: 85 },
       sum_freq: 589,
       top_freq: 589,
       phrase_count: 1,
-      occupied_by: null,
       unclear: false,
-      gap_candidate: true,
-      needs_serp: false,
-      serp_question: null,
       why: 'узкая аудитория, мейнстрим не обслуживает',
       phrases: [{ phrase: 'генератор фанфиков нейросеть бесплатно без регистрации', freq: 589 }],
       artifacts: [],
@@ -157,7 +160,72 @@ describe('вкладка «Дерево потребностей»', () => {
     const works = await screen.findAllByTestId('needs-work')
     const score = within(works[0]).getByTestId('needs-score')
     expect(score).toHaveTextContent('35')
-    expect(score).toHaveAttribute('title', 'спрос большой, но работу держит Алиса')
+    expect(score).toHaveAttribute('title', expect.stringContaining('интент смешанный'))
+  })
+
+  it('ставит сердечко и показывает только избранные работы', async () => {
+    let favorites: string[] = []
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.includes('/api/needs/favorite')) {
+        const body = JSON.parse(String(init?.body)) as {
+          work: string
+          favorite: boolean
+        }
+        favorites = body.favorite
+          ? [...new Set([...favorites, body.work])]
+          : favorites.filter((work) => work !== body.work)
+        return res(200, { work: body.work, favorite: body.favorite, favorites })
+      }
+      return url.includes('/api/needs/tree/')
+        ? res(200, TREE)
+        : res(200, { trees: [row()] })
+    })
+
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const hearts = await screen.findAllByTestId('needs-favorite')
+    expect(hearts[0]).toHaveAttribute('aria-pressed', 'false')
+
+    await userEvent.click(hearts[0])
+    await waitFor(() => expect(hearts[0]).toHaveAttribute('aria-pressed', 'true'))
+    expect(screen.getByTestId('needs-favorites-only')).toHaveTextContent('(1)')
+
+    await userEvent.click(screen.getByTestId('needs-favorites-only'))
+    const shown = screen.getAllByTestId('needs-work')
+    expect(shown).toHaveLength(1)
+    expect(shown[0]).toHaveTextContent('оживить фото')
+    expect(screen.queryByText('написать фанфик')).toBeNull()
+
+    await userEvent.click(screen.getByTestId('needs-favorite'))
+    expect(await screen.findByTestId('needs-favorites-empty')).toBeTruthy()
+    expect(screen.queryAllByTestId('needs-work')).toHaveLength(0)
+
+    await userEvent.click(screen.getByTestId('needs-favorites-only'))
+    expect(screen.getAllByTestId('needs-work')).toHaveLength(2)
+  })
+
+  it('до отдельного анализа классификация не показывает и не выдумывает шанс', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/tree/')
+        ? res(200, {
+            ...TREE,
+            ranked_at: null,
+            ranked_by: null,
+            counts: { ...TREE.counts, ranked: 0, best_score: null },
+            works: TREE.works.map((w) => ({
+              ...w, score: null, score_why: null, intent: null, product: null,
+              blocker: null, evidence: null, factors: null,
+            })),
+          })
+        : res(200, { trees: [row()] }),
+    )
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const tree = await screen.findByTestId('needs-tree')
+
+    expect(within(tree).queryByTestId('needs-score')).toBeNull()
+    expect(tree).toHaveTextContent('продуктовый анализ не запускался')
+    expect(tree).not.toHaveTextContent('82')
   })
 
   it('показывает сумму частот и отдельно прежний максимум', async () => {
@@ -169,13 +237,16 @@ describe('вкладка «Дерево потребностей»', () => {
     expect(within(work).getByTestId('needs-top-freq')).toHaveTextContent('max 11 081')
   })
 
-  it('щель и занятость видны на строке работы', async () => {
+  it('форма продукта скрыта в подсказке рядом с типом интента', async () => {
     render(<NeedsPane active />)
     await userEvent.click(await screen.findByTestId('needs-row'))
     const works = await screen.findAllByTestId('needs-work')
-    expect(within(works[0]).getByTestId('needs-occupied')).toHaveTextContent('Яндекс Алиса')
-    expect(within(works[0]).queryByTestId('needs-gap')).toBeNull()
-    expect(within(works[1]).getByTestId('needs-gap')).toHaveTextContent('ЩЕЛЬ')
+    expect(within(works[0]).getByTestId('needs-intent')).toHaveTextContent('смешанный интент')
+    const product = within(works[0]).getByTestId('needs-product')
+    expect(product).toHaveTextContent('?')
+    expect(product).toHaveAttribute('title', expect.stringContaining('анимированное видео'))
+    expect(works[0]).not.toHaveTextContent('статичный снимок → анимированное видео')
+    expect(within(works[1]).getByTestId('needs-intent')).toHaveTextContent('продукт')
   })
 
   it('исключённые фразы скрыты и раскрываются по причинам', async () => {
@@ -261,6 +332,29 @@ describe('меню действий', () => {
     await userEvent.click(screen.getByTestId('needs-refine-confirm-yes'))
 
     const call = fetchMock.mock.calls.find((c) => String(c[0]).includes('/api/needs/refine'))!
+    expect(JSON.parse(String(call[1]?.body))).toEqual({
+      tree_id: TREE.id,
+      model_family: 'codex',
+    })
+  })
+
+  it('общий «Анализ» запускает Opus/Sol по принятой классификации', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/rank')
+        ? res(200, { task_id: 'rank-1' })
+        : url.includes('/api/needs/tree/')
+          ? res(200, TREE)
+          : res(200, { trees: [row()] }),
+    )
+    await opened()
+    expect(screen.getByTestId('needs-rank-claude')).toBeEnabled()
+    await userEvent.click(screen.getByTestId('needs-rank-codex'))
+    expect(await screen.findByTestId('needs-rank-confirm')).toHaveTextContent(
+      'контроль результата сторонним продуктом',
+    )
+    await userEvent.click(screen.getByTestId('needs-rank-confirm-yes'))
+
+    const call = fetchMock.mock.calls.find((c) => String(c[0]).includes('/api/needs/rank'))!
     expect(JSON.parse(String(call[1]?.body))).toEqual({
       tree_id: TREE.id,
       model_family: 'codex',

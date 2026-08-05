@@ -62,6 +62,17 @@ export default function App() {
     }
   }
 
+  async function clearTasks() {
+    try {
+      await api.clearTasks()
+      // Событие WS очистит все клиенты; локально чистим и сами на случай разрыва канала.
+      dispatch({ type: 'tasks_cleared', data: {} })
+      setErr('')
+    } catch (e) {
+      setErr(errText(e))
+    }
+  }
+
   // Full load — только через подтверждение с оценкой объёма (design §8)
   async function confirmVolume(p: string, cmd: Cmd) {
     let text: string
@@ -288,7 +299,12 @@ export default function App() {
         </section>
 
         <section className="pane" style={{ display: tab === 'tasks' ? '' : 'none' }}>
-          <TaskPane rows={st.tasks} />
+          <TaskPane
+            rows={st.tasks}
+            onClear={() => void clearTasks()}
+            onRetry={(id) => void api.retryTask(id).catch((e) => setErr(errText(e)))}
+            onCancel={(id) => void api.cancelTask(id).catch((e) => setErr(errText(e)))}
+          />
         </section>
 
         <section className="pane" style={{ display: tab === 'reports' ? '' : 'none' }}>
@@ -358,62 +374,109 @@ function LogPane({ lines, onClear }: { lines: LogRow[]; onClear: () => void }) {
   )
 }
 
-function TaskPane({ rows }: { rows: TaskRow[] }) {
+function TaskPane({
+  rows,
+  onClear,
+  onRetry,
+  onCancel,
+}: {
+  rows: TaskRow[]
+  onClear: () => void
+  onRetry: (id: string) => void
+  onCancel: (id: string) => void
+}) {
   return (
-    <table className="tbl">
-      <thead>
-        <tr>
-          <th>тип</th>
-          <th>узел</th>
-          <th>статус</th>
-          <th>создана</th>
-          <th>финиш</th>
-          <th>время</th>
-          <th>ошибка</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.length === 0 && (
+    <>
+      <div className="bar-row">
+        <button className="act act-danger" data-testid="tasks-clear" onClick={onClear}>
+          Удалить всё
+        </button>
+        <span className="mut">задач: {rows.length}</span>
+      </div>
+      <table className="tbl">
+        <thead>
           <tr>
-            <td colSpan={7} className="mut">
-              задач пока нет
-            </td>
+            <th>тип</th>
+            <th>исполнитель</th>
+            <th>узел</th>
+            <th>статус</th>
+            <th>создана</th>
+            <th>финиш</th>
+            <th>время</th>
+            <th>ошибка</th>
+            <th>действие</th>
           </tr>
-        )}
-        {rows.map((t) => (
-          <tr key={t.id} data-testid="task-row">
-            <td>
-              {t.type}{' '}
-              {t.model_family && (
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={9} className="mut">
+                задач пока нет
+              </td>
+            </tr>
+          )}
+          {rows.map((t) => (
+            <tr key={t.id} data-testid="task-row">
+              <td>{t.type}</td>
+              {/* исполнитель жёстко привязан только у разборов; у остальных операций его нет */}
+              <td>
+                {t.model_family ? (
+                  <span className={`model-tag model-${t.model_family}`} title="джоб уходит только этой петле">
+                    <span className={`model-dot model-${t.model_family}`} />
+                    {t.model_family === 'claude' ? 'Claude' : 'Codex'}
+                  </span>
+                ) : (
+                  <span className="mut">—</span>
+                )}
+              </td>
+              <td className="ph">{t.node ?? '—'}</td>
+              <td>
                 <span
-                  className={`model-dot model-${t.model_family}`}
-                  title={t.model_family === 'claude' ? 'Claude' : 'Codex'}
-                />
-              )}
-            </td>
-            <td className="ph">{t.node ?? '—'}</td>
-            <td>
-              <span
-                className={'ts ts-' + t.status}
-                title={
-                  t.status === 'WAITING'
-                    ? 'джоб отдан в очередь LLM, исполнитель его пока не взял'
-                    : t.status === 'RUNNING'
-                      ? 'работа реально идёт'
-                      : ''
-                }
-              >
-                {t.status}
-              </span>
-            </td>
-            <td>{fmtWhen(t.created_at)}</td>
-            <td>{fmtWhen(t.finished_at)}</td>
-            <td>{fmtDuration(t.started_at, t.finished_at)}</td>
-            <td className="err">{t.error ?? ''}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+                  className={'ts ts-' + t.status}
+                  title={
+                    t.status === 'WAITING'
+                      ? 'джоб отдан в очередь LLM, исполнитель его пока не взял'
+                      : t.status === 'RUNNING'
+                        ? 'работа реально идёт'
+                        : ''
+                  }
+                >
+                  {t.status}
+                </span>
+              </td>
+              <td>{fmtWhen(t.created_at)}</td>
+              <td>{fmtWhen(t.finished_at)}</td>
+              <td>{fmtDuration(t.started_at, t.finished_at)}</td>
+              <td className="err">{t.error ?? ''}</td>
+              <td>
+                {/* повтор только у упавшей: тот же вызов и те же проверки, что в первый раз */}
+                {t.status === 'FAILED' && (
+                  <button
+                    className="act"
+                    data-testid="task-retry"
+                    title="Запустить эту операцию заново с теми же параметрами"
+                    onClick={() => onRetry(t.id)}
+                  >
+                    Повторить
+                  </button>
+                )}
+                {/* WAITING — джоб лежит в очереди, никто не взял: снять его безопасно */}
+                {t.status === 'WAITING' && (
+                  <button
+                    className="act act-danger"
+                    data-testid="task-cancel"
+                    title="Снять задачу: исполнитель её ещё не взял"
+                    onClick={() => onCancel(t.id)}
+                  >
+                    Отменить
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   )
 }
 
@@ -479,7 +542,6 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
               <tr key={r.tree_id + '/' + r.work + '/' + family + '/' + r.kind} data-testid="report-row">
                 <td className="ph">
                   <div>{r.work}</div>
-                  {r.gap_candidate && <span className="gap">ЩЕЛЬ</span>}
                 </td>
                 <td>
                   <span className={`model-dot model-${family}`}

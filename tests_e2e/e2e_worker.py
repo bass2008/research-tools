@@ -158,16 +158,31 @@ class FakeWorker:
             phrases = [n["phrase"] for n in params.get("nodes", [])]
             root = params.get("root")
             body = [p for p in phrases if p != root]
+            freqs = {n["phrase"]: n.get("freq") or 0 for n in params.get("nodes", [])}
             return {"condition": "онлайн · бесплатно",
-                    "works": [{"name": seed.NEEDS_WORK, "score": 77,
-                               "score_why": "заготовка", "phrases": body,
-                               "top_freq": params.get("root_freq") or 0,
-                               "phrase_count": len(body), "occupied_by": None,
-                               "unclear": False, "gap_candidate": True, "needs_serp": True,
-                               "serp_question": "кто в топе", "why": "заготовка",
+                    "works": [{"name": seed.NEEDS_WORK, "phrases": body,
+                               "top_freq": max((freqs[p] for p in body), default=0),
+                               "phrase_count": len(body), "unclear": False,
+                               "why": "заготовка",
                                "segments": []}],
                     "excluded": [{"phrase": root, "why": "condition",
                                   "note": "корень ветки работы не называет"}]}
+        if job["type"] == "needs_rank":
+            ranked = []
+            for work in (params.get("classification") or {}).get("works") or []:
+                evidence = list(work.get("phrases") or [])
+                for segment in work.get("segments") or []:
+                    evidence.extend(segment.get("phrases") or [])
+                ranked.append({
+                    "name": work["name"], "intent": "product",
+                    "factors": {"external_control": 80, "tool_intent": 80,
+                                "outcome_clarity": 80, "product_shape": 80,
+                                "repeatability": 80, "user_value": 80},
+                    "score": 80, "score_why": "самостоятельный инструмент возможен",
+                    "product": "изображение → изображение без фона", "blocker": None,
+                    "evidence": evidence[:1],
+                })
+            return {"works": ranked}
         if job["type"] == "analyze_work":
             name = (params.get("work") or {}).get("name", "")
             return {"recommendation": self.verdict, "verdict_score": self.verdict_score,

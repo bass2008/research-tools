@@ -270,6 +270,12 @@ describe('task', () => {
     expect(s.tasks.map((t) => t.id)).toEqual(['t2', 't3', 't1'])
   })
 
+  it('tasks_cleared удаляет все задачи', () => {
+    const withTask = applyEvent(initialState, { type: 'task', data: task({ id: 't1' }) })
+    const cleared = applyEvent(withTask, { type: 'tasks_cleared', data: {} })
+    expect(cleared.tasks).toEqual([])
+  })
+
   it('обновляет индикатор петли', () => {
     const data = {
       online: true,

@@ -91,7 +91,8 @@ def test_01_open_app(page, server, worker):
     expect(page.get_by_test_id("load-root")).to_have_count(0)
 
     # индикатор петли: воркер ходит за джобами -> онлайн
-    expect(page.get_by_test_id("llm-status")).to_have_text("LLM: онлайн")
+    expect(page.get_by_test_id("llm-claude-status")).to_have_text("Claude: онлайн")
+    expect(page.get_by_test_id("llm-codex-status")).to_have_text("Codex: офлайн")
 
 
 # ---------- 2. Загрузить корень ----------
@@ -263,11 +264,11 @@ def test_12_link_opens_report(page, server):
     tab(page, "needs")
     page.get_by_test_id("needs-row").first.click()
     work = page.get_by_test_id("needs-work").filter(has_text=seed.NEEDS_WORK).first
-    expect(work.locator("[data-testid=needs-verdict]")).to_contain_text("BUILD")
+    expect(work.locator("[data-testid=needs-score-claude]")).to_contain_text("91")
 
     work.locator("[data-testid=needs-menu] summary").click()   # отчёты живут в меню действий
     with page.expect_popup() as popup:
-        work.locator("[data-testid=needs-report-analyze]").click()
+        work.locator("[data-testid=needs-report-claude-analyze]").click()
     report = popup.value
     report.wait_for_load_state()
 
@@ -393,9 +394,11 @@ def test_17_reconnect_after_restart(page, server, worker):
 def test_18_llm_offline(page, server):
     """§8.18 — индикатор «офлайн»; LLM-операция падает по таймауту с внятным логом."""
     open_app(page, server, seed.ROOT_A)                     # фальшивый воркер НЕ запущен
-    llm = page.get_by_test_id("llm-status")
-    expect(llm).to_have_text("LLM: офлайн")
-    expect(llm).to_have_attribute("title", "петля ещё не приходила за задачами")
+    expect(page.get_by_test_id("llm-claude-status")).to_have_text("Claude: офлайн")
+    expect(page.get_by_test_id("llm-codex-status")).to_have_text("Codex: офлайн")
+    expect(page.get_by_test_id("llm-claude-status")).to_have_attribute(
+        "title", "Claude-петля ещё не приходила за задачами"
+    )
 
     btn(page, seed.ROOT_A, "btn-needs-build").click()
 
@@ -415,8 +418,8 @@ def test_18_llm_offline(page, server):
 def test_19_needs_tree_tab(page, server):
     """§8.19 — таблица деревьев из папки; клик открывает дерево, «Назад» возвращает.
 
-    Второй слой конвейером не производится: дерево лежит файлом, поэтому проверяем показ —
-    работы с частотами, щель, занятость, раскрытие фраз и сегмента."""
+    Дерево лежит файлом, поэтому проверяем чистую классификацию без выдуманного рейтинга,
+    работы с частотами, раскрытие фраз и сегмента."""
     open_app(page, server)
     tab(page, "needs")
 
@@ -436,9 +439,8 @@ def test_19_needs_tree_tab(page, server):
     works = page.get_by_test_id("needs-work")
     expect(works).to_have_count(2)
     first = works.filter(has_text=seed.NEEDS_WORK).first
-    expect(first.locator("[data-testid=needs-occupied]")).to_contain_text(seed.NEEDS_OCCUPIED)
-    gap = works.filter(has_text=seed.NEEDS_GAP_WORK).first
-    expect(gap.locator("[data-testid=needs-gap]")).to_have_text("ЩЕЛЬ")
+    expect(page.get_by_test_id("needs-score")).to_have_count(0)
+    expect(tree).to_contain_text("продуктовый анализ не запускался")
 
     # фразы появляются только по клику, вместе с сегментом
     expect(page.get_by_test_id("needs-phrase")).to_have_count(0)
@@ -454,3 +456,29 @@ def test_19_needs_tree_tab(page, server):
     page.get_by_test_id("needs-back").click()
     expect(rows).to_have_count(1)
     expect(page.get_by_test_id("needs-tree")).to_have_count(0)
+
+
+def test_20_needs_rank_is_separate_from_classification(page, server, worker):
+    """Общий «Анализ» получает принятую классификацию и только после него показывает Шанс."""
+    worker.start()
+    open_app(page, server)
+    tab(page, "needs")
+    page.get_by_test_id("needs-row").first.click()
+
+    tree = page.get_by_test_id("needs-tree")
+    expect(tree).to_be_visible()
+    expect(page.get_by_test_id("needs-score")).to_have_count(0)
+
+    # E2E fake_worker имитирует Claude-петлю; маршрут Codex/Sol проверяется отдельно unit-тестом.
+    page.get_by_test_id("needs-rank-claude").click()
+    expect(page.get_by_test_id("needs-rank-confirm")).to_contain_text(
+        "Выдача и конкуренты не используются"
+    )
+    page.get_by_test_id("needs-rank-confirm-yes").click()
+
+    tab(page, "tasks")
+    expect(task_rows(page, "needs_rank").locator(".ts")).to_have_text("DONE", timeout=SLOW)
+    tab(page, "needs")
+    expect(page.get_by_test_id("needs-score")).to_have_count(2)
+    expect(page.get_by_test_id("needs-score").first).to_have_text("80")
+    expect(tree).to_contain_text("продукт")

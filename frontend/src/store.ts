@@ -162,6 +162,8 @@ export function applyEvent(s: State, ev: WsEvent | LocalEvent): State {
       }
     case 'log_cleared':
       return { ...s, logs: [] }
+    case 'tasks_cleared':
+      return { ...s, tasks: [] }
     case 'llm_status':
       return { ...s, llm: ev.data }
     default:

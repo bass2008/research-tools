@@ -20,7 +20,8 @@
 semcore.db          оплаченные данные (cache, serp, history) + производное дерево (node/edge)
                     + probe (что куплено под замер) + task
 wscore.py           слой данных: схема, нормализация, фетч Вордстата, краул, проекции, инварианты
-tasks.py            операции: load, full_load, stopwords_scan, needs_build, три разбора
+tasks.py            операции: load, full_load, stopwords_scan, needs_build, needs_refine,
+                    needs_rank, три разбора
                     (needs_analyze / needs_analyze_adv / needs_analyze_product),
                     needs_season, needs_adjacent, needs_dump (+ наследие, §8)
 needs_layer.py      второй слой: чтение и запись файлов дерева потребностей, проекции для API
@@ -151,10 +152,20 @@ localhost. Брокер добавил бы инфраструктуру и то
 `task.result` как предложение, пока человек не перенесёт слова в список. Отдельного хранилища у
 предложения нет намеренно — ценность только у принятого.
 
-**`needs_build`** — единица работы **ветка**; ответ принимается только целиком прошедшим проверку
-полноты (каждая входная фраза ровно один раз); результат сохраняется файлами; **модель первого слоя
-не меняется**. Диапазон входа — `FLOOR … 30000`: голова выше порога в сборку не идёт, но сам корень
-ветки включается всегда, иначе непонятно, по чему собрано.
+**`needs_build`** — единица работы **ветка**; ответ принимается только целиком прошедшим строгую
+проверку полноты и счётчиков (каждая входная фраза ровно один раз); результат сохраняется файлами;
+**модель первого слоя не меняется**. `score`, `occupied_by`, щели и любые продуктовые поля в
+классификации запрещены. Диапазон входа — `FLOOR … 30000`: голова выше порога в сборку не идёт,
+но сам корень ветки включается всегда, иначе непонятно, по чему собрано.
+
+**`needs_refine`** — второй проход всей классификации на Opus/Sol `xhigh`. Ответ проходит ту же
+строгую проверку, заменяет `accepted.json` атомарно и увеличивает `_revision`; прежняя версия и
+метаданные прохода остаются в `revisions/`.
+
+**`needs_rank`** — один Opus/Sol `xhigh`-джоб по принятой классификации. Модель возвращает тип
+намерения, шесть факторов, конкретную форму продукта, ограничение и точные опорные фразы. Сервер
+проверяет полный набор работ, диапазоны и схему, сам пересчитывает score по весам и intent-cap.
+Рейтинг сохраняется отдельно в `rankings/` с `tree_revision`; выдача и конкуренты не участвуют.
 
 **`needs_analyze`** — сначала гарантирует выдачу по самым частотным формулировкам работы (из кэша
 либо покупкой), затем один джоб Opus; принимает ответ только с валидным вердиктом, `verdict_score`
@@ -209,6 +220,8 @@ localhost. Брокер добавил бы инфраструктуру и то
 | `POST /api/stopwords` | `{words: [{word, kind}]}` | принять слова в исключения | 422 пустое слово или неизвестная категория |
 | `DELETE /api/stopwords` | `{words: [слово, …]}` | убрать слова из исключений | — |
 | `POST /api/needs/build` | `{phrase}` | собрать дерево потребностей по ветке | 404 · 409 · 422 (не `FULLY_LOADED`) |
+| `POST /api/needs/refine` | `{tree_id, model_family}` | второй проход принятой классификации всего дерева | 404 · 409 дерево занято · 422 нет исходного `params.json` |
+| `POST /api/needs/rank` | `{tree_id, model_family}` | продуктовый шанс по всем работам без выдачи и конкурентов | 404 · 409 дерево занято · 422 нет исходника/работ |
 | `POST /api/needs/{action}` | `{tree_id, work}` | действие по работе. Три разбора воронкой: `analyze` — «Ниша» (перехват трафика, выдача + Opus), `analyze_adv` — «Функции» (за что платят), `product` — «Продукт» (спецификация по выдаче и двум отчётам). Плюс `season` (история частоты), `adjacent` (смежные ключи), `dump` (выгрузка топ-10 страницами) | 404 нет дерева, работы или неизвестное действие · 409 это действие по работе уже идёт · 422 в работе нет фраз |
 | `POST /api/logs/clear` | `{}` | очистить представление и файл лога | 422 файл не очищается |
 
@@ -260,15 +273,18 @@ localhost. Брокер добавил бы инфраструктуру и то
 | `GET /api/stopwords` | `{saved: [{word, kind, added_at}], suggestion, kinds}` — принятые исключения и последнее предложение модели |
 
 **Строка таблицы деревьев:** `{id, root, root_freq, condition, works, segments, phrases, excluded,
-gaps, occupied, needs_serp, analyzed, best_score, created_at, error}`. `best_score` — лучшая оценка
-**среди ещё не разобранных** работ: разобранное уже не «что посмотреть дальше». `error ≠ null` — файл дерева не читается;
+ranked, analyzed, best_score, ranked_at, ranked_by, created_at, error}`. До отдельного анализа
+`best_score = null` и `ranked = 0`; затем `best_score` — лучшая оценка **среди ещё не разобранных**
+работ. `error ≠ null` — файл дерева не читается;
 строка всё равно отдаётся, чтобы битая сборка не роняла список.
 
-**Дерево:** `{id, root, root_freq, condition, created_at, counts, works, excluded}`.
+**Дерево:** `{id, root, root_freq, condition, created_at, revision, refined_*, ranked_*, counts,
+works, excluded}`.
 
-**Работа:** `{name, score, score_why, top_freq, phrase_count, occupied_by, unclear, gap_candidate,
-needs_serp, serp_question, why, phrases: [{phrase, freq}], segments: [{name, gap_candidate, why,
-phrases}], artifacts, analysis}`. `score` 0-100 ставит сборка; порядок работ — по нему.
+**Работа:** классификация `{name, top_freq, phrase_count, unclear, why, phrases, segments}` плюс
+nullable-проекция отдельного рейтинга `{score, score_why, intent, product, blocker, evidence,
+factors}` и `artifacts`, `analysis`. До рейтинга `score = null` и порядок классификации сохранён;
+после рейтинга работы сортируются по `score`.
 
 **Артефакт:** `{kind, created_at, report_link, task_id, verdict, verdict_score, summary}`, новые
 сверху. `kind` — `analyze` | `analyze_adv` | `analyze_product` | `season` | `adjacent` | `dump`;
@@ -308,6 +324,9 @@ report_link, created_at, searched}` либо `null`, если работу ещ�
 logs/needs-lab/<tree_id>/params.json          {root, root_freq, min_freq, max_freq,
                                                subtree_total, nodes: [{phrase, freq, children}]}
 logs/needs-lab/<tree_id>/accepted.json        {condition, works: [...], excluded: [...]}
+logs/needs-lab/<tree_id>/revisions/*.json     прежние классификации и события второго прохода
+logs/needs-lab/<tree_id>/rankings/ranking-<task_id>.json
+                                              {tree_revision, model_family, works: [оценка, …]}
 logs/needs-lab/<tree_id>/artifacts/<slug>/<kind>-<task_id>.json
                                               {work, kind, task_id, created_at, report_link, …}
                                               analyze: verdict, verdict_score, confidence, searched
@@ -368,7 +387,8 @@ reports/<id>.html                             отчёт по работе
 списка колонок приводит к пересозданию `node`/`edge` из кэша. Это уже стирало результаты работы
 LLM, поэтому схема развивается только аддитивно.
 
-Действующие промпты: **`needs.md`** (сборка ветки), три разбора — **`analyze_work.md`**
+Действующие промпты: **`needs.md`** (чистая классификация), **`needs_refine.md`** (второй проход),
+**`needs_rank.md`** (физическая возможность продукта без конкурентов), три разбора — **`analyze_work.md`**
 («Ниша»), **`analyze_adv.md`** («Функции»), **`analyze_product.md`** («Продукт»), — плюс
 **`season.md`**, **`adjacent.md`**, **`stopwords.md`** и `orchestrator.md` (инструкция петле
 исполнения).

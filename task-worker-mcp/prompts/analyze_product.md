@@ -33,15 +33,20 @@
 { "condition", "root", "work", "segments", "phrases",
   "serps": { "фраза": { "yandex": [ {rank,url,title,snippet} ], "google": [...] } },
   "context": {
-     "niche":    { "verdict", "verdict_score", "created_at",
+     "niche":    { "verdict", "verdict_score", "created_at", "by": "claude" | "codex",
                    "report": "полный текст последнего отчёта «Ниша»" } | null,
-     "features": { "verdict", "verdict_score", "created_at",
+     "features": { "verdict", "verdict_score", "created_at", "by": "claude" | "codex",
                    "report": "полный текст последнего отчёта «Функции»",
                    "functions": [ { "name", "io", "entry_query", "entry_freq", "paid_proof",
                                     "edge", "money", "cost", "channel", "parity",
                                     "effort_weeks", "score", "why", "kill_test" } ] } | null,
      "season", "adjacent" } }
 ```
+
+Поле **`by`** говорит, какая модель писала отчёт, и оно может не совпадать с тобой: берётся
+**последний** прогон каждого вида, чей бы он ни был. Чужой разбор читается на тех же правах, что и
+свой — по доводам и числам, а не по авторству. Не сошлось с твоими выводами — скажи, в чём именно,
+и назови автора: расхождение двух моделей полезнее согласия.
 
 **Выдача — первоисточник, отчёты — чужие выводы.** В отчётах уже собраны цены конкурентов,
 барьеры и проверенные страницы: пользуйся этим, не переоткрывай заново. Но если выдача им

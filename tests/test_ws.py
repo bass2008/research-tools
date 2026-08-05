@@ -145,6 +145,16 @@ def test_log_cleared_event(client):
     assert only(events, "log_cleared") == [{}]
 
 
+def test_tasks_cleared_event(client):
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"action": "subscribe"})
+        drain(ws)
+        client.post("/api/tasks/clear")
+        events = drain(ws)
+
+    assert only(events, "tasks_cleared") == [{}]
+
+
 # ---------------------------------------------------------------- прогресс краула
 
 @pytest.fixture

@@ -286,6 +286,12 @@
   text-align: right;
   white-space: nowrap;
 }
+.model-tag {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  white-space: nowrap;
+}
 .model-dot {
   display: inline-block;
   width: 13px;
@@ -562,9 +568,20 @@
 }
 .nwork > .row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   flex-wrap: wrap;
+}
+.nwork > .row > .ph {
+  /* `.ph` is globally `flex: 1 1 0`, which lets a long work name collapse to
+     a one-character column when the ranked row also contains product metadata. */
+  flex: 1 1 320px;
+  min-width: 240px;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+.nwork > .row > .acts {
+  margin-left: auto;
 }
 .freq-sum,
 .freq-max {
@@ -633,6 +650,15 @@
   border: 1px solid var(--line);
   white-space: nowrap;
 }
+.intent-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+.product-help {
+  flex: none;
+}
 .nhead {
   padding: 7px 0 12px;
   border-bottom: 1px solid var(--line);
@@ -657,7 +683,7 @@
   border-color: var(--warn);
 }
 
-/* шанс: оценка сборки, что разбор найдёт незакрытую потребность */
+/* шанс: отдельный анализ физической возможности самостоятельного продукта */
 .chance {
   display: inline-block;
   min-width: 31px;
@@ -679,6 +705,40 @@
 }
 .ch-low {
   color: var(--mut);
+}
+
+/* ручное избранное: не влияет на классификацию и продуктовый рейтинг */
+.favorite {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--mut);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+.favorite:hover:not(:disabled),
+.favorite.on {
+  color: #e11d48;
+}
+.favorite:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.favorite-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: 8px 0;
+}
+.favorite-filter.on {
+  color: #e11d48;
+  border-color: #e11d48;
+}
+.favorite-empty {
+  text-align: center;
 }
 
 /* легенда дерева: образцы кнопок и значков рядом с объяснением */

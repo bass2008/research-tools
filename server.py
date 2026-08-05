@@ -79,6 +79,8 @@ class Ctx:
         self.last_watch = {f: 0.0 for f in MODEL_FAMILIES}  # последний watch каждого семейства
         self.watchers = {f: 0 for f in MODEL_FAMILIES}      # висящие watch каждого семейства
         self.running = set()                       # живые корутины задач (иначе их съест GC)
+        self.task_runs = {}                        # task_id -> корутина: нужна для отмены
+        self.cancelled = set()                     # отменённые вручную: отличить от рестарта
         self._locks = {}                           # phrase -> стек task_id (drill + его шаги)
         self.needs_busy = set()                    # (дерево, работа) — разбор уже идёт
         self._online = {f: None for f in MODEL_FAMILIES}
@@ -380,7 +382,9 @@ async def dispatcher(ctx):
     не мешает разбирать очередь (tech §2)."""
     while True:
         task_id = await ctx.queue.get()
-        ctx.spawn(tasks.execute(ctx, task_id))
+        run = ctx.spawn(tasks.execute(ctx, task_id))
+        ctx.task_runs[task_id] = run
+        run.add_done_callback(lambda _, tid=task_id: ctx.task_runs.pop(tid, None))
 
 
 def log_line(row):
@@ -558,6 +562,15 @@ async def cmd_logs_clear():
     return {"ok": True}
 
 
+@app.post("/api/tasks/clear")
+async def cmd_tasks_clear():
+    """Удалить журнал задач целиком и очистить вкладку у всех клиентов."""
+    cur = CTX.con.execute("DELETE FROM task")
+    CTX.con.commit()
+    CTX.publish("tasks_cleared", {})
+    return {"ok": True, "deleted": cur.rowcount}
+
+
 @app.get("/api/estimate")
 async def api_estimate(phrase: str = Query(...)):
     """Нижняя оценка объёма full_load/drill по уже известному поддереву."""
@@ -567,9 +580,9 @@ async def api_estimate(phrase: str = Query(...)):
 
 # ---------- деревья потребностей: второй слой (needs_layer) ----------
 #
-# Слой файловый: сборку делает LLM вне конвейера, разбор работы — операция needs_analyze.
-# Чтение идёт по HTTP, а не по WS: второй слой ещё не часть конвейера, тянуть его в протокол
-# подписки рано (прецедент — GET /api/estimate).
+# Слой файловый: каноническая классификация, её ревизии, отдельный продуктовый рейтинг и
+# артефакты разборов работ. Чтение идёт по HTTP, а завершение фоновых операций — через общий
+# журнал задач в WS (прецедент — GET /api/estimate).
 
 
 class NeedsAnalyzeIn(BaseModel):
@@ -581,6 +594,12 @@ class NeedsAnalyzeIn(BaseModel):
 class NeedsRefineIn(BaseModel):
     tree_id: str
     model_family: Literal["claude", "codex"] = "claude"
+
+
+class NeedsFavoriteIn(BaseModel):
+    tree_id: str
+    work: str
+    favorite: bool
 
 
 class PhraseIn2(BaseModel):
@@ -693,6 +712,19 @@ async def api_needs_tree(tree_id: str):
         raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
 
 
+@app.post("/api/needs/favorite")
+async def cmd_needs_favorite(body: NeedsFavoriteIn):
+    """Ручное избранное работы. Хранится отдельно от классификации и рейтинга."""
+    tree_id = body.tree_id.strip()
+    try:
+        work, favorites = needs_layer.set_favorite(
+            tree_id, body.work, body.favorite,
+        )
+    except needs_layer.NeedsError as e:
+        raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
+    return {"work": work, "favorite": body.favorite, "favorites": favorites}
+
+
 @app.post("/api/needs/refine")
 async def cmd_needs_refine(body: NeedsRefineIn,
                            caller: str = Header(None, alias="X-Caller")):
@@ -722,6 +754,33 @@ async def cmd_needs_refine(body: NeedsRefineIn,
     return {"task_id": task_id}
 
 
+@app.post("/api/needs/rank")
+async def cmd_needs_rank(body: NeedsRefineIn,
+                         caller: str = Header(None, alias="X-Caller")):
+    """Оценить физическую возможность продукта по принятой классификации, без выдачи."""
+    tree_id = body.tree_id.strip()
+    try:
+        tree, _, _ = needs_layer.load_tree(tree_id)
+        source = needs_layer.load_source(tree_id)
+    except needs_layer.NeedsError as e:
+        raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
+    running = [key for key in CTX.needs_busy if key[0] == tree_id]
+    if running:
+        raise HTTPException(409, "по этому дереву уже идёт анализ, второй проход или работа с отчётом")
+    if not needs_layer.works(tree):
+        raise HTTPException(422, "в классификации нет работ для анализа")
+    key = (tree_id, "", "rank", "shared")
+    CTX.needs_busy.add(key)
+    params = {"tree_id": tree_id, "model_family": body.model_family}
+    task_id = tasks.create_task(CTX, "needs_rank", tree_id, params)
+    CTX.queue.put_nowait(task_id)
+    CTX.log("INFO", "needs_rank", tree_id,
+            f"анализ продукта {task_id[:8]} поставлен в очередь "
+            f"({_caller(caller, 'ui')}), работ {len(needs_layer.works(tree))}, "
+            f"фраз {len(source.get('nodes') or [])}, семейство {body.model_family}")
+    return {"task_id": task_id}
+
+
 @app.post("/api/needs/{action}")
 async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
                          caller: str = Header(None, alias="X-Caller")):
@@ -747,8 +806,8 @@ async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
         raise HTTPException(404, str(e))
     model_action = action in {"analyze", "analyze_adv", "product", "test"}
     family = body.model_family if model_action else "basic"
-    if (tree_id, "", "refine", "shared") in CTX.needs_busy:
-        raise HTTPException(409, "по дереву идёт второй проход классификации")
+    if any(k[0] == tree_id and k[1] == "" and k[3] == "shared" for k in CTX.needs_busy):
+        raise HTTPException(409, "по дереву идёт анализ или второй проход классификации")
     key = (tree_id, needs_layer._norm(work), action, family)
     if key in CTX.needs_busy:
         suffix = f" ({family})" if model_action else ""
@@ -821,6 +880,82 @@ async def _ws_sender(websocket, q):
     while True:
         env = await q.get()
         await websocket.send_text(json.dumps(env, ensure_ascii=False))
+
+
+
+NEEDS_WORK_OPS = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
+                  "needs_analyze_product": "product", "needs_model_test": "test",
+                  "needs_season": "season", "needs_adjacent": "adjacent",
+                  "needs_dump": "dump"}
+
+
+@app.post("/api/task/{task_id}/cancel")
+async def cmd_task_cancel(task_id: str, caller: str = Header(None, alias="X-Caller")):
+    """Снять задачу, которую никто не взял (`WAITING`).
+
+    Отменяем только `WAITING`: джоб лежит в очереди LLM, работы не идёт, и если нужного
+    семейства нет на связи, задача просто досидит до таймаута. `RUNNING` не отменяем — агент
+    уже работает и вернёт результат, которому некуда лечь."""
+    row = CTX.con.execute("SELECT type, node, status FROM task WHERE id = ?",
+                          (task_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, f"задачи нет: {task_id}")
+    if row["status"] != "WAITING":
+        raise HTTPException(409, f"отменяем только WAITING, а эта задача в {row['status']}")
+    CTX.cancelled.add(task_id)
+    run = CTX.task_runs.get(task_id)
+    if run is not None:
+        run.cancel()      # джобы снимет `LlmBroker.run` в finally, блокировки — `execute`
+    else:
+        # корутины нет: сервер перезапускали, ждать уже некому — закрываем строку сами
+        CTX.cancelled.discard(task_id)
+        tasks._finish(CTX, task_id, "FAILED", error="отменена вручную")
+    CTX.log("INFO", row["type"], row["node"],
+            f"задачу {task_id[:8]} отменил {_caller(caller, 'ui')} — исполнитель её не взял")
+    return {"ok": True, "task_id": task_id}
+
+
+@app.post("/api/task/{task_id}/retry")
+async def cmd_task_retry(task_id: str, caller: str = Header(None, alias="X-Caller")):
+    """Повторить УПАВШУЮ задачу тем же вызовом, что и в первый раз.
+
+    Перезапуск идёт через ту же ручку, а не мимо неё: иначе повтор обойдёт проверки статуса
+    узла и занятости работы и два прогона пойдут параллельно. Старая строка задачи остаётся —
+    у повтора свой task_id, история падений не переписывается."""
+    row = CTX.con.execute("SELECT type, node, params, status FROM task WHERE id = ?",
+                          (task_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, f"задачи нет: {task_id}")
+    if row["status"] != "FAILED":
+        raise HTTPException(409, f"повторяем только упавшую задачу, а эта в {row['status']}")
+    op = row["type"]
+    try:
+        params = json.loads(row["params"]) if row["params"] else {}
+    except (ValueError, TypeError):
+        params = {}
+    if not isinstance(params, dict):
+        params = {}
+    family = params.get("model_family")
+    family = family if family in {"claude", "codex"} else "claude"
+    tree_id, work, node = params.get("tree_id"), params.get("work"), row["node"]
+    if op in NEEDS_WORK_OPS:
+        if not (tree_id and work):
+            raise HTTPException(422, "в параметрах задачи нет дерева или работы")
+        return await cmd_needs_work(
+            NEEDS_WORK_OPS[op],
+            NeedsAnalyzeIn(tree_id=tree_id, work=work, model_family=family), caller)
+    if op in {"needs_refine", "needs_rank"}:
+        if not tree_id:
+            raise HTTPException(422, "в параметрах задачи нет дерева")
+        body = NeedsRefineIn(tree_id=tree_id, model_family=family)
+        return await (cmd_needs_refine if op == "needs_refine" else cmd_needs_rank)(body, caller)
+    if op == "needs_build":
+        return await cmd_needs_build(PhraseIn2(phrase=node or ""), caller)
+    if op == "stopwords_scan":
+        return await cmd_stopwords_scan(PhraseIn(phrase=node or ""), caller)
+    if op in {"load", "full_load"}:
+        return _command(op, node or "")
+    raise HTTPException(422, f"повтор не поддержан для операции {op}")
 
 
 @app.websocket("/ws")
