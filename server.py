@@ -578,6 +578,11 @@ class NeedsAnalyzeIn(BaseModel):
     model_family: Literal["claude", "codex"] = "claude"
 
 
+class NeedsRefineIn(BaseModel):
+    tree_id: str
+    model_family: Literal["claude", "codex"] = "claude"
+
+
 class PhraseIn2(BaseModel):
     phrase: str
 
@@ -688,6 +693,35 @@ async def api_needs_tree(tree_id: str):
         raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
 
 
+@app.post("/api/needs/refine")
+async def cmd_needs_refine(body: NeedsRefineIn,
+                           caller: str = Header(None, alias="X-Caller")):
+    """Второй проход классификации всего дерева выбранным семейством модели.
+
+    Дерево каноническое и общее для Claude/Codex, поэтому два refine одного дерева и любые
+    разборы его работ с refine не идут параллельно. Предыдущая ревизия сохраняется на диске.
+    """
+    tree_id = body.tree_id.strip()
+    try:
+        needs_layer.load_tree(tree_id)
+        source = needs_layer.load_source(tree_id)
+    except needs_layer.NeedsError as e:
+        raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
+    running = [key for key in CTX.needs_busy if key[0] == tree_id]
+    if running:
+        raise HTTPException(409, "по этому дереву уже идёт второй проход или работа с отчётом")
+    key = (tree_id, "", "refine", "shared")
+    CTX.needs_busy.add(key)
+    params = {"tree_id": tree_id, "model_family": body.model_family}
+    task_id = tasks.create_task(CTX, "needs_refine", tree_id, params)
+    CTX.queue.put_nowait(task_id)
+    CTX.log("INFO", "needs_refine", tree_id,
+            f"второй проход {task_id[:8]} поставлен в очередь "
+            f"({_caller(caller, 'ui')}), фраз {len(source.get('nodes') or [])}, "
+            f"семейство {body.model_family}")
+    return {"task_id": task_id}
+
+
 @app.post("/api/needs/{action}")
 async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
                          caller: str = Header(None, alias="X-Caller")):
@@ -713,6 +747,8 @@ async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
         raise HTTPException(404, str(e))
     model_action = action in {"analyze", "analyze_adv", "product", "test"}
     family = body.model_family if model_action else "basic"
+    if (tree_id, "", "refine", "shared") in CTX.needs_busy:
+        raise HTTPException(409, "по дереву идёт второй проход классификации")
     key = (tree_id, needs_layer._norm(work), action, family)
     if key in CTX.needs_busy:
         suffix = f" ({family})" if model_action else ""
@@ -856,10 +892,6 @@ async def llm_watch(request: Request,
     family = model_family or "claude"
     CTX.last_watch[family] = time.time()
     CTX.check_llm()
-    CTX.log("INFO", "llm", None,
-            f"внутренний вызов watch (вызвал: {_caller(x_caller, 'диспетчер')}): max_jobs={max_jobs}, "
-            f"timeout={timeout:.0f} c, семейство={family}, "
-            f"в очереди {CTX.llm.waiting()}")
     CTX.watchers[family] += 1
     try:
         jobs, disconnected = await _watch_connected(CTX.llm, request, max_jobs, timeout,
@@ -871,7 +903,8 @@ async def llm_watch(request: Request,
     if disconnected:
         CTX.log("INFO", "llm", None, "watch-клиент отключился; сигнал оставлен в очереди")
     if jobs:
-        CTX.log("INFO", "llm", None, "сигнал диспетчеру: "
+        CTX.log("INFO", "llm", None,
+                f"сигнал диспетчеру (watch вызвал: {_caller(x_caller, 'диспетчер')}): "
                 + ", ".join(f"{j['job_id']}({j['type']}/{j.get('model_family') or 'basic'})"
                             for j in jobs))
     return jobs

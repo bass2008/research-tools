@@ -566,6 +566,19 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+.freq-sum,
+.freq-max {
+  flex: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.freq-sum {
+  font-weight: 700;
+}
+.freq-max {
+  color: var(--mut);
+  font-size: 13px;
+}
 .nbody {
   padding: 5px 0 10px 31px;
 }

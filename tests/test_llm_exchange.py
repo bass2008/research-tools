@@ -175,7 +175,8 @@ def test_caller_is_visible_for_each_internal_call(client, worker, llm_timeout, l
     start_op(client, SNAP["FULLY_LOADED"])
     worker("ok").run_once(timeout=10)
 
-    assert log_lines(log_file, contains="вызов watch (вызвал: диспетчер)")
+    watch_lines = log_lines(log_file, contains="сигнал диспетчеру")
+    assert any("watch вызвал: диспетчер" in line for line in watch_lines)
     assert log_lines(log_file, contains="вызов get_job")
     assert log_lines(log_file, contains="вызов result")
 
@@ -197,6 +198,12 @@ def test_watch_returns_signal_only(client, worker, llm_timeout):
 
 def test_watch_returns_empty_list_on_timeout(client, worker):
     assert worker("ok").watch(timeout=0.2) == []
+
+
+def test_empty_watch_does_not_pollute_application_log(client, worker, log_file):
+    assert worker("ok").watch(timeout=0.05) == []
+    lines = log_file.read_text(encoding="utf-8").splitlines() if log_file.exists() else []
+    assert not any("внутренний вызов watch" in line for line in lines)
 
 
 class _DisconnectAfter:

@@ -33,6 +33,7 @@ JOB_ID_RE = re.compile(r"^[A-Za-z0-9._:-]+$")
 
 MODELS: dict[str, tuple[str, str]] = {
     "needs": ("gpt-5.6-sol", "xhigh"),
+    "needs_refine": ("gpt-5.6-sol", "xhigh"),
     "analyze_work": ("gpt-5.6-sol", "xhigh"),
     "analyze_adv": ("gpt-5.6-sol", "xhigh"),
     "analyze_product": ("gpt-5.6-sol", "xhigh"),

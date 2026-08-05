@@ -352,6 +352,8 @@ export interface NeedsWork {
   // 0-100: шанс, что разбор найдёт незакрытую потребность. Ставит сборка (LLM), не формула.
   score: number | null
   score_why: string | null
+  /** Сырая сумма частот всех формулировок работы, включая сегменты. Старый backend не отдаёт. */
+  sum_freq?: number
   top_freq: number | null
   phrase_count: number | null
   occupied_by: string | null
@@ -377,6 +379,17 @@ export interface NeedsTree {
   root: string | null
   root_freq: number | null
   created_at: number | null
+  /** Версия классификации: 0 — исходная сборка, +1 за каждый успешный второй проход. */
+  revision?: number
+  refined_at?: number | null
+  refined_by?: ModelFamily | null
+  refinements?: Array<{
+    task_id: string
+    model_family: ModelFamily
+    created_at: number
+    from_revision: number
+    revision: number
+  }>
   counts: NeedsCounts
   works: NeedsWork[]
   excluded: NeedsExcluded[]
@@ -386,6 +399,12 @@ export const needsTrees = (): Promise<{ trees: NeedsRow[] }> => req('/api/needs/
 
 export const needsTree = (id: string): Promise<NeedsTree> =>
   req(`/api/needs/tree/${encodeURIComponent(id)}`)
+
+/** Второй проход классификации всего дерева. Результат заменяет каноническую ревизию. */
+export const needsRefine = (
+  tree_id: string,
+  model_family: ModelFamily,
+): Promise<{ task_id: string }> => post('/api/needs/refine', { tree_id, model_family })
 
 /** Действие над работой. Повторный запуск разрешён: каждый прогон копит свой артефакт. */
 export const needsRun = (

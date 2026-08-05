@@ -33,7 +33,7 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("needs", "analyze_work", "analyze_adv", "analyze_product", "model_test",
+LLM_TYPES = ("needs", "needs_refine", "analyze_work", "analyze_adv", "analyze_product", "model_test",
              "season", "adjacent", "stopwords")
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
 PROGRESS_EVERY = 0.5        # progress краула — не чаще, чем раз в N секунд
@@ -57,7 +57,8 @@ MODEL_TEST_SECONDS = 60           # smoke-test обязан удерживать
 # Ожидание LLM: (база на операцию, добавка на каждую следующую часть), секунды.
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
 # (tech §3): минуты на толкование готовых чисел, десятки минут на сборку и разбор.
-LLM_TIMEOUT = {"needs": (2400, 0), "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
+LLM_TIMEOUT = {"needs": (2400, 0), "needs_refine": (2400, 0),
+               "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
                "analyze_product": (2400, 0), "model_test": (180, 0),
                "season": (600, 0), "adjacent": (900, 300), "stopwords": (900, 0)}
 
@@ -190,6 +191,8 @@ async def execute(ctx, task_id, lock=None):
                 else "basic"
             ctx.needs_busy.discard((params["tree_id"],
                                     needs_layer._norm(params.get("work")), act, family))
+        if op == "needs_refine" and isinstance(params, dict) and params.get("tree_id"):
+            ctx.needs_busy.discard((params["tree_id"], "", "refine", "shared"))
 
 
 def _brief(result):
@@ -465,6 +468,43 @@ async def needs_build(ctx, task_id, phrase, params):
             f"сегментов {counts['segments']}, щелей {counts['gaps']}, "
             f"исключено {counts['excluded']} из {len(payload['nodes'])} фраз")
     return {"tree_id": tree_id, **counts}
+
+
+async def needs_refine(ctx, task_id, phrase, params):
+    """Второй проход: перепроверить готовую классификацию и заменить её целиком.
+
+    Исходные фразы остаются источником истины. До успешной строгой валидации текущий файл не
+    меняется; при принятии предыдущая ревизия сохраняется рядом.
+    """
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
+    if not tree_id:
+        raise RuntimeError("нужен tree_id")
+    draft, _, _ = needs_layer.load_tree(tree_id)
+    source = needs_layer.load_source(tree_id)
+    revision = needs_layer.tree_revision(draft)
+    _save_params(ctx, task_id, {"tree_id": tree_id, "model_family": family,
+                                "revision": revision,
+                                "phrases": len(source.get("nodes") or []),
+                                "works": len(needs_layer.works(draft))})
+    job_params = {"model_family": family, "source": source, "draft": draft}
+    refined = (await _run_llm(
+        ctx, "needs_refine", tree_id,
+        [_job(task_id, 0, "needs_refine", job_params)],
+    ))[0]
+    problems = needs_layer.validate_tree(source, refined, strict=True)
+    if problems:
+        raise ValueError("второй проход не прошёл проверку: " + "; ".join(problems[:5]))
+    meta = needs_layer.save_refined_tree(
+        tree_id, refined, task_id, family, expected_revision=revision,
+    )
+    result_counts = needs_layer.counts(refined)
+    ctx.log("INFO", "needs_refine", tree_id,
+            f"классификация обновлена: ревизия {revision} -> {meta['revision']}, "
+            f"работ {meta['before']['works']} -> {result_counts['works']}, "
+            f"семейство {family}")
+    return {"tree_id": tree_id, "revision": meta["revision"],
+            "model_family": family, **result_counts}
 
 
 # ---------- разбор работы (второй слой) ----------
@@ -1306,7 +1346,8 @@ async def stopwords_scan(ctx, task_id, phrase, params):
 
 OPS = {"load": load, "full_load": full_load, "stopwords_scan": stopwords_scan,
        "needs_dump": needs_dump,
-       "needs_build": needs_build, "needs_analyze": needs_analyze,
+       "needs_build": needs_build, "needs_refine": needs_refine,
+       "needs_analyze": needs_analyze,
        "needs_analyze_adv": needs_analyze_adv,
        "needs_analyze_product": needs_analyze_product,
        "needs_model_test": needs_model_test,

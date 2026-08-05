@@ -64,6 +64,7 @@ const TREE: NeedsTree = {
       name: 'написать фанфик',
       score: 88,
       score_why: 'узкая аудитория, профильных продуктов нет',
+      sum_freq: 589,
       top_freq: 589,
       phrase_count: 1,
       occupied_by: null,
@@ -159,6 +160,15 @@ describe('вкладка «Дерево потребностей»', () => {
     expect(score).toHaveAttribute('title', 'спрос большой, но работу держит Алиса')
   })
 
+  it('показывает сумму частот и отдельно прежний максимум', async () => {
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    const work = (await screen.findAllByTestId('needs-work'))[0]
+
+    expect(within(work).getByTestId('needs-sum-freq')).toHaveTextContent('Σ 12 388')
+    expect(within(work).getByTestId('needs-top-freq')).toHaveTextContent('max 11 081')
+  })
+
   it('щель и занятость видны на строке работы', async () => {
     render(<NeedsPane active />)
     await userEvent.click(await screen.findByTestId('needs-row'))
@@ -231,6 +241,30 @@ describe('меню действий', () => {
     expect(within(work).getByText('Basic')).toBeTruthy()
     expect(within(work).getByText('Claude')).toBeTruthy()
     expect(within(work).getByText('Codex')).toBeTruthy()
+  })
+
+  it('второй проход есть у Claude и Codex и требует подтверждения', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/refine')
+        ? res(200, { task_id: 'refine-1' })
+        : url.includes('/api/needs/tree/')
+          ? res(200, { ...TREE, revision: 2 })
+          : res(200, { trees: [row()] }),
+    )
+    await opened()
+    expect(screen.getByTestId('needs-refine-bar')).toHaveTextContent('Классификация v2')
+    expect(screen.getByTestId('needs-refine-claude')).toBeEnabled()
+    await userEvent.click(screen.getByTestId('needs-refine-codex'))
+    expect(await screen.findByTestId('needs-refine-confirm')).toHaveTextContent(
+      'разделит работы, которым нужны разные микро-продукты',
+    )
+    await userEvent.click(screen.getByTestId('needs-refine-confirm-yes'))
+
+    const call = fetchMock.mock.calls.find((c) => String(c[0]).includes('/api/needs/refine'))!
+    expect(JSON.parse(String(call[1]?.body))).toEqual({
+      tree_id: TREE.id,
+      model_family: 'codex',
+    })
   })
 
   it('после выбора действия меню закрывается', async () => {

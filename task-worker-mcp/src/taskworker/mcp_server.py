@@ -26,7 +26,10 @@ from .logsetup import setup_logging
 
 STATUS_PEEK_MAX = 10     # сколько джобов status готов принять, если они уже стоят в очереди
 STATUS_PEEK_WAIT = 1     # проверка связи не должна висеть: ждём секунду и отвечаем
-INLINE_JOB_MAX_BYTES = 48 * 1024
+# Codex может обрезать MCP tool result раньше общего лимита контекста. Наблюдавшийся ответ
+# размером менее 48 KiB уже потерял хвост (303 фразы + prompt), поэтому inline оставляем только
+# для действительно маленьких envelope. Тяжёлый payload надёжнее передать локальным файлом.
+INLINE_JOB_MAX_BYTES = 12 * 1024
 
 log = setup_logging("mcp")
 

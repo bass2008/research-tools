@@ -25,7 +25,7 @@ def tree_doc(phrases, gap_phrases):
     return {"condition": "онлайн · бесплатно",
             "works": [
                 {"name": WORK, "score": 40, "score_why": "занято, но выдачу стоит глянуть",
-                 "phrases": phrases, "top_freq": 1000, "phrase_count": len(phrases),
+                 "phrases": phrases, "top_freq": 900, "phrase_count": len(phrases),
                  "occupied_by": "remove.bg", "unclear": False, "gap_candidate": False,
                  "needs_serp": True, "serp_question": "кто в топе", "why": "одна работа",
                  "segments": []},
@@ -94,6 +94,8 @@ def test_rows_and_detail_join_freqs(client, seeded):
     work = next(w for w in d["works"] if w["name"] == WORK)
     # частоты в дереве не хранятся — они подставляются из входа сборки
     assert [p["freq"] for p in work["phrases"]] == [900, 500]
+    assert work["sum_freq"] == 1400
+    assert work["top_freq"] == 900
     assert work["analysis"] is None
     assert d["excluded"][0]["freq"] == 90000
 
@@ -121,6 +123,109 @@ def test_loose_json_file_is_a_tree_too(client, needs_dir, seeded):
                                                     ensure_ascii=False), encoding="utf-8")
     ids = {r["id"] for r in client.get("/api/needs/trees").json()["trees"]}
     assert "hand" in ids
+
+
+# ---------- второй проход классификации ----------
+
+def refined_tree():
+    """Корректный второй проход: неоднозначная фраза уходит из конкретной работы."""
+    return {
+        "condition": "онлайн · бесплатно",
+        "works": [
+            {"name": WORK, "score": 40, "score_why": "занято",
+             "phrases": [SNAP["TRANSACTIONAL"]], "top_freq": 900, "phrase_count": 1,
+             "occupied_by": "remove.bg", "unclear": False, "gap_candidate": False,
+             "needs_serp": True, "serp_question": "кто в топе", "why": "один результат",
+             "segments": []},
+            {"name": GAP_WORK, "score": 85, "score_why": "узко",
+             "phrases": [SNAP["NEW"]], "top_freq": 40, "phrase_count": 1,
+             "occupied_by": None, "unclear": False, "gap_candidate": True,
+             "needs_serp": False, "serp_question": None, "why": "другой продукт",
+             "segments": []},
+            {"name": "что-то сделать — результат из фразы не ясен", "score": 5,
+             "score_why": "намерение не названо", "phrases": [SNAP["LOADED"]],
+             "top_freq": 500, "phrase_count": 1, "occupied_by": None, "unclear": True,
+             "gap_candidate": False, "needs_serp": False, "serp_question": None,
+             "why": "результат нельзя выбрать без догадки", "segments": []},
+        ],
+        "excluded": [{"phrase": SNAP["HEAD"], "why": "condition", "note": None}],
+    }
+
+
+def test_strict_validation_enforces_unclear_and_exact_counts(seeded):
+    source = needs_layer.load_source(TREE_ID)
+    bad = refined_tree()
+    bad["works"][2].update({"score": 50, "gap_candidate": True,
+                             "needs_serp": True, "phrase_count": 99, "top_freq": 1})
+    problems = needs_layer.validate_tree(source, bad, strict=True)
+
+    assert any("phrase_count" in p for p in problems)
+    assert any("top_freq" in p for p in problems)
+    assert any("unclear score" in p for p in problems)
+    assert any("gap_candidate" in p for p in problems)
+    assert any("needs_serp" in p for p in problems)
+
+
+def test_refine_routes_family_replaces_tree_and_keeps_revision(
+        client, seeded, snap_con, needs_dir):
+    needs_layer.save_artifact(TREE_ID, WORK, "analyze", {
+        "task_id": "old-report", "created_at": 1, "model_family": "claude",
+        "verdict": "BUILD", "verdict_score": 80,
+    })
+    with FakeWorker(client, TOKEN, model_family="codex", answer=lambda job: refined_tree()) as worker:
+        response = client.post("/api/needs/refine", json={
+            "tree_id": TREE_ID, "model_family": "codex",
+        })
+        assert response.status_code == 200
+        row = task_done(snap_con, response.json()["task_id"])
+
+    assert row["status"] == "DONE", row["error"]
+    assert [(j["type"], j["model_family"]) for j in worker.seen] == [
+        ("needs_refine", "codex")
+    ]
+    tree, _, _ = needs_layer.load_tree(TREE_ID)
+    assert tree["_revision"] == 1 and tree["_refined_by"] == "codex"
+    assert next(w for w in tree["works"] if w["unclear"])["phrases"] == [SNAP["LOADED"]]
+    detail = client.get(f"/api/needs/tree/{TREE_ID}").json()
+    assert detail["revision"] == 1 and detail["refined_by"] == "codex"
+    assert detail["refinements"][0]["from_revision"] == 0
+    assert list((needs_dir / TREE_ID / "revisions").glob("revision-0-before-*.json"))
+    assert needs_layer.work_artifacts(TREE_ID) == {}, "отчёт старой классификации не текущий"
+    stale = needs_layer.work_artifacts(TREE_ID, include_stale=True)
+    assert stale[needs_layer._norm(WORK)][0]["task_id"] == "old-report"
+
+
+def test_invalid_refine_fails_without_changing_tree(client, seeded, snap_con):
+    before, _, _ = needs_layer.load_tree(TREE_ID)
+    invalid = refined_tree()
+    invalid["works"][0]["phrases"] = []  # одна исходная фраза потеряна
+    invalid["works"][0]["phrase_count"] = 0
+    invalid["works"][0]["top_freq"] = 0
+    with FakeWorker(client, TOKEN, model_family="claude", answer=lambda job: invalid):
+        tid = client.post("/api/needs/refine", json={
+            "tree_id": TREE_ID, "model_family": "claude",
+        }).json()["task_id"]
+        row = task_done(snap_con, tid)
+
+    assert row["status"] == "FAILED" and "потеряно" in row["error"]
+    after, _, _ = needs_layer.load_tree(TREE_ID)
+    assert after == before
+
+
+def test_refine_is_exclusive_for_both_families_and_work_actions(
+        client, seeded, snap_con, llm_timeout):
+    llm_timeout(0.2)
+    first = client.post("/api/needs/refine", json={
+        "tree_id": TREE_ID, "model_family": "claude",
+    })
+    assert first.status_code == 200
+    assert client.post("/api/needs/refine", json={
+        "tree_id": TREE_ID, "model_family": "codex",
+    }).status_code == 409
+    assert client.post("/api/needs/analyze", json={
+        "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
+    }).status_code == 409
+    assert task_done(snap_con, first.json()["task_id"])["status"] == "FAILED"
 
 
 # ---------- разбор работы ----------

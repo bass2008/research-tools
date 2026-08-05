@@ -40,6 +40,7 @@ def test_parse_signals_accepts_only_short_safe_envelopes():
     ("job_type", "model", "effort"),
     [
         ("needs", "gpt-5.6-sol", "xhigh"),
+        ("needs_refine", "gpt-5.6-sol", "xhigh"),
         ("analyze_product", "gpt-5.6-sol", "xhigh"),
         ("model_test", "gpt-5.6-luna", "low"),
         ("season", "gpt-5.6-terra", "low"),
@@ -87,7 +88,7 @@ def test_large_server_job_uses_declared_input_and_result_files(tmp_path, monkeyp
     job = {"job_id": "large:0", "type": "analyze_product",
            "params": {"blob": "я" * 60000}, "prompt": "строгий prompt"}
 
-    compact = mcp_server._job_for_agent(job, max_inline_bytes=1024)
+    compact = mcp_server._job_for_agent(job)
     input_file = Path(compact["params"]["input_file"])
     result_file = Path(compact["result_file"])
 
@@ -96,6 +97,13 @@ def test_large_server_job_uses_declared_input_and_result_files(tmp_path, monkeyp
     assert input_file.stat().st_mode & 0o777 == 0o600
     result_file.write_text('{"ok":true}', encoding="utf-8")
     assert mcp_server._result_from_server_file("large:0") == ({"ok": True}, None)
+
+
+def test_small_server_job_stays_inline():
+    job = {"job_id": "small:0", "type": "season",
+           "params": {"phrase": "телеграм"}, "prompt": "короткий prompt"}
+
+    assert mcp_server._job_for_agent(job) is job
 
 
 def test_standard_worker_does_not_force_fast(tmp_path, monkeypatch):

@@ -49,6 +49,10 @@ def report_html(phrase, verdict="BUILD", verdict_score=82):
 def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, confidence=0.9):
     """Заготовка ответа по типу джоба: форма — как в design §6, выравнивание по `phrase`."""
     params = job.get("params") or {}
+    if job["type"] == "needs_refine":
+        # По умолчанию второй проход принимает исходный draft без смысловых изменений;
+        # отдельные тесты передают answer и проверяют реальные переносы между работами.
+        return params.get("draft")
     if job["type"] == "stopwords":
         # первое слово входа кладём в stop, остальное не трогаем: тестам важен транспорт,
         # а не качество разметки

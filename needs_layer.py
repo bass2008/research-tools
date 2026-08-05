@@ -6,6 +6,7 @@
 
     <id>/accepted.json      дерево (ответ сборки)
     <id>/params.json        вход сборки: фразы с частотами
+    <id>/revisions/         прежние классификации и журнал вторых проходов
     <id>/artifacts/<slug>/<kind>-<task>.json   что сделали по работе: разбор, сезонность,
                                                смежные ключи — каждый прогон отдельным файлом
 
@@ -15,7 +16,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import time
 import unicodedata
 from pathlib import Path
 
@@ -79,12 +82,33 @@ def _read(path):
     return data
 
 
+def _write_json_atomic(path, data):
+    """Записать JSON через replace: читатель не увидит половину нового дерева."""
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.replace(path)
+
+
+def tree_revision(tree):
+    """Ревизия классификации. У старых деревьев и артефактов она равна нулю."""
+    value = tree.get("_revision", 0) if isinstance(tree, dict) else 0
+    return value if isinstance(value, int) and value >= 0 else 0
+
+
 def load_tree(tree_id):
     files = trees()
     if tree_id not in files:
         raise NeedsError(f"дерева нет: {tree_id}")
     tree_file, params_file = files[tree_id]
     return _read(tree_file), tree_file, params_file
+
+
+def load_source(tree_id):
+    """Исходные фразы дерева; нужны повторной классификации как источник истины."""
+    _, _, params_file = load_tree(tree_id)
+    if params_file is None:
+        raise NeedsError(f"у дерева {tree_id} нет params.json с исходными фразами")
+    return _read(params_file)
 
 
 def _input(params_file):
@@ -168,6 +192,8 @@ def save_artifact(tree_id, work_name, kind, data):
     Каждый прогон — отдельный файл: старые не перезаписываются. Смысл в том, что повторный
     разбор идёт по данным, которых раньше не было (появилась сезонность, добрали смежные
     ключи), и сравнить прогоны важнее, чем хранить последний."""
+    tree, _, _ = load_tree(tree_id)
+    data = {**data, "tree_revision": tree_revision(tree)}
     d = NEEDS_DIR / tree_id / "artifacts" / slug(work_name)
     d.mkdir(parents=True, exist_ok=True)
     if kind in MODEL_ARTIFACT_KINDS:
@@ -213,10 +239,17 @@ def _mrr6(artifact):
     return (m or {}).get("mrr")
 
 
-def work_artifacts(tree_id):
-    """{работа: [артефакт, ...]} — новые сверху. Читает и старую раскладку `analysis/`."""
+def work_artifacts(tree_id, include_stale=False):
+    """{работа: [артефакт, ...]} текущей классификации — новые сверху.
+
+    После второго прохода старые файлы сохраняются, но не приклеиваются по совпавшему имени
+    к уже иначе классифицированной работе. Для диагностики их можно получить с
+    ``include_stale=True``.
+    """
     out = {}
     root = NEEDS_DIR / tree_id
+    tree, _, _ = load_tree(tree_id)
+    current_revision = tree_revision(tree)
     for f in sorted((root / "artifacts").glob("*/*.json")) + sorted((root / "analysis").glob("*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
@@ -225,6 +258,9 @@ def work_artifacts(tree_id):
         if not isinstance(data, dict) or not data.get("work"):
             continue
         data.setdefault("kind", "analyze")
+        data.setdefault("tree_revision", 0)
+        if not include_stale and data["tree_revision"] != current_revision:
+            continue
         if data["kind"] in MODEL_ARTIFACT_KINDS:
             data["model_family"] = artifact_family(data)
         out.setdefault(_norm(data["work"]), []).append(data)
@@ -311,11 +347,17 @@ def detail(tree_id):
     out_works = []
     for w in works(tree):
         mine = arts.get(_norm(w.get("name")), [])
+        # Производная витринная метрика: намеренно сырая сумма частот всех формулировок
+        # работы, включая сегменты. `top_freq` остаётся прежним максимумом и продолжает
+        # использоваться в LLM-контрактах; сумму показываем отдельно, не выдавая её за
+        # дедуплицированный уникальный спрос.
+        sum_freq = sum((freqs.get(p) or 0) for p in work_phrases(w))
         # legacy-поле analysis остаётся Claude-проекцией; новый UI читает оба семейства из
         # artifacts. Так старые клиенты не начнут случайно показывать Codex как «основной».
         a = next((x for x in mine
                   if x.get("kind") == "analyze" and artifact_family(x) == "claude"), None)
         out_works.append({**{k: w.get(k) for k in WORK_KEYS},
+                          "sum_freq": sum_freq,
                           "phrases": with_freq(w.get("phrases")),
                           "segments": [{**{k: s.get(k) for k in SEGMENT_KEYS},
                                         "phrases": with_freq(s.get("phrases"))}
@@ -337,9 +379,14 @@ def detail(tree_id):
                  "freq": freqs.get(e.get("phrase"))}
                 for e in (tree.get("excluded") or []) if isinstance(e, dict)]
     excluded.sort(key=lambda e: (str(e["why"]), -(e["freq"] or 0)))
+    history = refinement_history(tree_id)
     return {"id": tree_id, "condition": tree.get("condition"),
             "root": meta.get("root"), "root_freq": meta.get("root_freq"),
             "created_at": int(tree_file.stat().st_mtime),
+            "revision": tree_revision(tree),
+            "refined_at": tree.get("_refined_at"),
+            "refined_by": tree.get("_refined_by"),
+            "refinements": history,
             "counts": counts(tree, [k for k, v in arts.items()
                                     if any(x.get("kind") == "analyze" for x in v)]), "works": out_works, "excluded": excluded}
 
@@ -379,7 +426,7 @@ def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
             "subtree_total": len(subtree), "nodes": nodes}
 
 
-def validate_tree(payload, tree):
+def validate_tree(payload, tree, strict=False):
     """Что не так со сборкой. Пусто = принимаем.
 
     Синтаксис JSON проверит транспорт; здесь то, что остаётся валидным JSON и всё равно
@@ -392,6 +439,8 @@ def validate_tree(payload, tree):
     if not isinstance(ws, list) or not ws:
         out.append("нет непустого списка works")
         ws = ws if isinstance(ws, list) else []
+    freq = {_norm(n.get("phrase")): n.get("freq")
+            for n in payload.get("nodes", []) if isinstance(n, dict) and n.get("phrase")}
     seen, dup = set(), []
     for i, w in enumerate(ws):
         if not isinstance(w, dict):
@@ -403,9 +452,36 @@ def validate_tree(payload, tree):
         if not isinstance(sc, (int, float)) or not 0 <= sc <= 100:
             out.append(f"works[{i}] ({w.get('name')}): score должен быть числом 0-100, "
                        f"получено {sc!r}")
-        for ph in work_phrases(w):
+        phrases = work_phrases(w)
+        for ph in phrases:
             n = _norm(ph)
             dup.append(ph) if n in seen else seen.add(n)
+        if strict:
+            name = w.get("name")
+            if not phrases:
+                out.append(f"works[{i}] ({name}): работа не содержит фраз")
+            if not isinstance(w.get("unclear"), bool):
+                out.append(f"works[{i}] ({name}): unclear должен быть true или false")
+            phrase_count = w.get("phrase_count")
+            if (not isinstance(phrase_count, int) or isinstance(phrase_count, bool)
+                    or phrase_count != len(phrases)):
+                out.append(f"works[{i}] ({name}): phrase_count={w.get('phrase_count')!r}, "
+                           f"фактически {len(phrases)}")
+            expected_top = max((freq.get(_norm(ph)) or 0 for ph in phrases), default=0)
+            if w.get("top_freq") != expected_top:
+                out.append(f"works[{i}] ({name}): top_freq={w.get('top_freq')!r}, "
+                           f"по входу {expected_top}")
+            if w.get("unclear") is True:
+                if not isinstance(sc, (int, float)) or sc > 10:
+                    out.append(f"works[{i}] ({name}): у unclear score должен быть 0-10")
+                if w.get("gap_candidate") is not False:
+                    out.append(f"works[{i}] ({name}): у unclear gap_candidate должен быть false")
+                if w.get("occupied_by") not in (None, ""):
+                    out.append(f"works[{i}] ({name}): у unclear occupied_by должен быть null")
+                if w.get("needs_serp") is not False:
+                    out.append(f"works[{i}] ({name}): у unclear needs_serp должен быть false")
+                if w.get("serp_question") not in (None, ""):
+                    out.append(f"works[{i}] ({name}): у unclear serp_question должен быть null")
     for e in tree.get("excluded") or []:
         ph = e.get("phrase") if isinstance(e, dict) else e
         if not isinstance(e, dict) or not ph or not (e.get("why") or "").strip():
@@ -413,7 +489,8 @@ def validate_tree(payload, tree):
             continue
         n = _norm(ph)
         dup.append(ph) if n in seen else seen.add(n)
-    given = {n["phrase"] for n in payload.get("nodes", [])}
+    given = {_norm(n["phrase"]) for n in payload.get("nodes", [])
+             if isinstance(n, dict) and n.get("phrase")}
     lost, invented = sorted(given - seen), sorted(seen - given)
     if lost:
         out.append(f"потеряно {len(lost)} входных фраз, например: {lost[:5]}")
@@ -428,11 +505,65 @@ def save_tree(tree_id, payload, tree):
     """Сборку — каталогом, как её кладёт лаборатория: вход рядом с деревом."""
     d = NEEDS_DIR / tree_id
     d.mkdir(parents=True, exist_ok=True)
-    (d / "params.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1),
-                                   encoding="utf-8")
-    (d / "accepted.json").write_text(json.dumps(tree, ensure_ascii=False, indent=1),
-                                     encoding="utf-8")
+    initial = {**tree, "_revision": tree_revision(tree)}
+    _write_json_atomic(d / "params.json", payload)
+    _write_json_atomic(d / "accepted.json", initial)
     return d
+
+
+def save_refined_tree(tree_id, tree, task_id, family, expected_revision):
+    """Сохранить полный результат второго прохода и предыдущую ревизию.
+
+    Проверка ревизии защищает от применения устаревшего ответа, если файл успели изменить
+    вручную, пока модель работала.
+    """
+    current, tree_file, params_file = load_tree(tree_id)
+    if tree_file.name != "accepted.json" or params_file is None:
+        raise NeedsError(f"дерево {tree_id} не поддерживает повторную классификацию")
+    before_revision = tree_revision(current)
+    if before_revision != expected_revision:
+        raise NeedsError(
+            f"дерево изменилось во время второго прохода: было {expected_revision}, "
+            f"стало {before_revision}"
+        )
+    now = int(time.time())
+    revision = before_revision + 1
+    accepted = {**tree, "_revision": revision, "_refined_at": now,
+                "_refined_by": model_family(family), "_refine_task_id": task_id}
+    revisions = tree_file.parent / "revisions"
+    revisions.mkdir(parents=True, exist_ok=True)
+    backup = revisions / f"revision-{before_revision}-before-{task_id}.json"
+    event = revisions / f"refinement-{task_id}.json"
+    _write_json_atomic(backup, current)
+    before_counts, after_counts = counts(current), counts(accepted)
+    meta = {"task_id": task_id, "model_family": model_family(family),
+            "created_at": now, "from_revision": before_revision, "revision": revision,
+            "backup": backup.name, "before": before_counts, "after": after_counts}
+    _write_json_atomic(event, meta)
+    _write_json_atomic(tree_file, accepted)
+    return meta
+
+
+def refinement_history(tree_id):
+    """Метаданные вторых проходов, новые сверху; сами старые деревья остаются на диске."""
+    root = NEEDS_DIR / tree_id / "revisions"
+    try:
+        current_revision = tree_revision(load_tree(tree_id)[0])
+    except NeedsError:
+        return []
+    out = []
+    for f in root.glob("refinement-*.json"):
+        try:
+            data = _read(f)
+        except NeedsError:
+            continue
+        # Событие пишется до атомарной замены accepted.json. Если финальный replace не удался,
+        # подготовленная запись не должна выглядеть как завершённый второй проход.
+        if data.get("revision", current_revision + 1) > current_revision:
+            continue
+        out.append(data)
+    out.sort(key=lambda x: -(x.get("created_at") or 0))
+    return out
 
 
 def work_input(tree_id, work_name, top):

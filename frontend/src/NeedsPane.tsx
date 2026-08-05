@@ -14,8 +14,8 @@ import type {
   TaskRow,
 } from './api'
 
-// Второй слой — толкование: работы и сегменты, а не фразы. Дерево здесь только смотрят:
-// оно собрано вне приложения и лежит файлом в папке, поэтому ни команд, ни статусов тут нет.
+// Второй слой — толкование: работы и сегменты, а не фразы. Разборы работают над одной работой,
+// а второй проход перепроверяет и заменяет классификацию всего дерева.
 
 // Три разбора — воронка от рынка к продукту, поэтому и названы по тому, что ищут.
 const LABEL: Record<NeedsAction, string> = {
@@ -100,6 +100,16 @@ const artifactFamily = (a: NeedsArtifact): ModelFamily | null =>
 const busyKey = (work: string, action: NeedsAction, family?: ModelFamily) =>
   `${work}|${action}|${family ?? 'basic'}`
 
+const WORK_TASK_ACTION: Record<string, NeedsAction> = {
+  needs_analyze: 'analyze',
+  needs_analyze_adv: 'analyze_adv',
+  needs_analyze_product: 'product',
+  needs_model_test: 'test',
+  needs_season: 'season',
+  needs_adjacent: 'adjacent',
+  needs_dump: 'dump',
+}
+
 export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: TaskRow[] }) {
   const [rows, setRows] = useState<NeedsRow[] | null>(null)
   const [open, setOpen] = useState<string | null>(null)
@@ -112,6 +122,8 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
     family?: ModelFamily
     text: string
   } | null>(null)
+  const [refineAsk, setRefineAsk] = useState<ModelFamily | null>(null)
+  const [refineTask, setRefineTask] = useState<string | null>(null)
   const statuses = useRef(new Map<string, string>())
 
   useEffect(() => {
@@ -154,7 +166,10 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
     )
     if (open) api.needsTree(open).then(setTree).catch((e) => setErr(errText(e)))
     setRows(null)
-  }, [tasks, open])
+    if (refineTask && ['DONE', 'FAILED'].includes(seen.get(refineTask) ?? '')) {
+      setRefineTask(null)
+    }
+  }, [tasks, open, refineTask])
 
   // Работы, по которым разбор уже идёт. Считаем по журналу задач (он приходит с сервера),
   // иначе после перезагрузки страницы кнопка снова становится нажимаемой и ловит 409.
@@ -162,19 +177,33 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
   const busyWorks = new Set([
     ...Object.keys(busy),
     ...tasks
-      .filter((t) => t.type.startsWith('needs_') && ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status))
+      .filter((t) => WORK_TASK_ACTION[t.type] && ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status))
       .map((t) => {
-        const action = t.type.replace('needs_', '')
-          .replace('analyze_product', 'product').replace('model_test', 'test') as NeedsAction
+        const action = WORK_TASK_ACTION[t.type]
         return busyKey(t.node ?? '', action, t.model_family ?? undefined)
       }),
   ])
+  const refineBusy = Boolean(refineTask) || tasks.some(
+    (t) => t.type === 'needs_refine' && t.node === open &&
+      ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status),
+  )
 
   async function run(action: NeedsAction, work: string, family?: ModelFamily) {
     if (!open) return
     try {
       const { task_id } = await api.needsRun(action, open, work, family)
       setBusy((b) => ({ ...b, [busyKey(work, action, family)]: task_id }))
+      setErr('')
+    } catch (e) {
+      setErr(errText(e))
+    }
+  }
+
+  async function runRefine(family: ModelFamily) {
+    if (!open) return
+    try {
+      const { task_id } = await api.needsRefine(open, family)
+      setRefineTask(task_id)
       setErr('')
     } catch (e) {
       setErr(errText(e))
@@ -227,8 +256,30 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
           </span>
           <span className="mut">{open}</span>
         </div>
+        <div className="bar-row needs-refine-bar" data-testid="needs-refine-bar">
+          <span className="mut">
+            Классификация v{tree?.revision ?? 0} · второй проход проверяет границы работ и unclear
+          </span>
+          {MODEL_FAMILIES.map((family) => (
+            <button
+              key={family}
+              className={`act model-${family}`}
+              data-testid={`needs-refine-${family}`}
+              disabled={refineBusy || !tree}
+              title="Перепроверить все фразы, разделить работы с разными MVP и убрать неоднозначные фразы в «не ясно»"
+              onClick={() => setRefineAsk(family)}
+            >
+              {refineBusy ? '2-й проход идёт…' : `${FAMILY_LABEL[family]} · 2-й проход`}
+            </button>
+          ))}
+          {tree?.refined_by && (
+            <span className="mut" data-testid="needs-refined-by">
+              последний: {FAMILY_LABEL[tree.refined_by]} · {fmtWhen(tree.refined_at)}
+            </span>
+          )}
+        </div>
         {tree ? (
-          <TreeView tree={tree} busy={busyWorks} onRun={start} />
+          <TreeView tree={tree} busy={busyWorks} locked={refineBusy} onRun={start} />
         ) : (
           <div className="mut">загружаем дерево…</div>
         )}
@@ -254,6 +305,32 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
                 <button className="act" data-testid="needs-confirm-no" onClick={() => setAsk(null)}>
                   Нет
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {refineAsk && (
+          <div className="modal">
+            <div className="dlg" data-testid="needs-refine-confirm">
+              <b>{FAMILY_LABEL[refineAsk]} · второй проход всего дерева</b>
+              <p>
+                Модель заново проверит каждую фразу, разделит работы, которым нужны разные
+                микро-продукты, и перенесёт неоднозначное в «не ясно». Исправленное дерево станет
+                новой канонической версией; прежняя версия и её отчёты останутся на диске.
+              </p>
+              <div className="dlg-btns">
+                <button
+                  className="go"
+                  data-testid="needs-refine-confirm-yes"
+                  onClick={() => {
+                    const family = refineAsk
+                    setRefineAsk(null)
+                    void runRefine(family)
+                  }}
+                >
+                  Да, перепроверить
+                </button>
+                <button className="act" onClick={() => setRefineAsk(null)}>Нет</button>
               </div>
             </div>
           </div>
@@ -430,15 +507,24 @@ function ModelScore({ family, artifacts }: { family: ModelFamily; artifacts: Nee
 function Work({
   w,
   busy,
+  locked,
   onRun,
 }: {
   w: NeedsWork
   busy: Set<string>
+  locked: boolean
   onRun: (action: NeedsAction, work: string, done: number, family?: ModelFamily) => void
 }) {
   const [open, setOpen] = useState(false)
   const segs = w.segments ?? []
   const artifacts = w.artifacts ?? []
+  // Backward-compatible с уже запущенным backend без sum_freq: все частоты фраз в ответе есть.
+  const sumFreq =
+    w.sum_freq ??
+    [...w.phrases, ...segs.flatMap((s) => s.phrases)].reduce(
+      (total, phrase) => total + (phrase.freq ?? 0),
+      0,
+    )
   const hasNiche = artifacts.some((x) => x.kind === 'analyze')
   const linksFor = (family: ModelFamily | null) => {
     const seen: Record<string, number> = {}
@@ -477,8 +563,19 @@ function Work({
           {w.score ?? '—'}
         </span>
         <span className="ph">{w.name ?? '—'}</span>
-        <span className="fr" title="наибольшая частота в работе">
-          {fmt(w.top_freq)}
+        <span
+          className="fr freq-sum"
+          data-testid="needs-sum-freq"
+          title="сырая сумма частот всех формулировок работы, включая сегменты"
+        >
+          Σ {fmt(sumFreq)}
+        </span>
+        <span
+          className="fr freq-max"
+          data-testid="needs-top-freq"
+          title="наибольшая частота одной формулировки в работе"
+        >
+          max {fmt(w.top_freq)}
         </span>
         <span className="ct" title="фраз в работе">
           {w.phrase_count ?? w.phrases.length} фраз
@@ -527,7 +624,7 @@ function Work({
                     key={act}
                     className="act"
                     data-testid={'needs-run-' + act}
-                    disabled={wait}
+                    disabled={locked || wait}
                     title={ACTION_HINT[act]}
                     onClick={() => w.name && onRun(act, w.name, done)}
                   >
@@ -567,7 +664,7 @@ function Work({
                           key={act}
                           className="act"
                           data-testid={`needs-run-${family}-${act}`}
-                          disabled={wait}
+                          disabled={locked || wait}
                           title={ACTION_HINT[act]}
                           onClick={() => w.name && onRun(act, w.name, done, family)}
                         >
@@ -633,10 +730,12 @@ function Work({
 function TreeView({
   tree,
   busy,
+  locked,
   onRun,
 }: {
   tree: NeedsTree
   busy: Set<string>
+  locked: boolean
   onRun: (action: NeedsAction, work: string, done: number, family?: ModelFamily) => void
 }) {
   const [showEx, setShowEx] = useState(false)
@@ -668,8 +767,10 @@ function TreeView({
       <div className="legend nlegend">
         <Mark sample={<span className="chance ch-high">82</span>} label="шанс"
               hint="Оценка сборки: насколько вероятно, что разбор с выдачей найдёт здесь незакрытую потребность. Ставит модель, а не формула по признакам, и именно по этому числу отсортированы работы. Выдачей оценка не проверена — разбор её либо подтвердит, либо снимет." />
-        <Mark sample={<span className="fr">11 081</span>} label="частота"
-              hint="Наибольшая частота среди формулировок работы. Не сумма: частоты Вордстата вложены друг в друга, и сложение завысило бы спрос в разы." />
+        <Mark sample={<span className="fr freq-sum">Σ 18 431</span>} label="сумма частот"
+              hint="Сырая сумма частот всех формулировок работы, включая сегменты. Запросы могут пересекаться, поэтому это не число уникальных пользователей." />
+        <Mark sample={<span className="fr freq-max">max 11 081</span>} label="максимум"
+              hint="Прежний показатель: наибольшая частота одной формулировки работы. Не содержит повторного сложения пересекающихся запросов." />
         <Mark sample={<span className="ct">15 фраз</span>} label="формулировок"
               hint="Сколько фраз ветки собрано в эту работу, включая её сегменты. Это и есть ядро ключей ниши — оно попадает в отчёт." />
         <Mark sample={<span className="gap">ЩЕЛЬ</span>} label="незакрытая потребность"
@@ -704,6 +805,7 @@ function TreeView({
           key={w.name ?? Math.random()}
           w={w}
           busy={busy}
+          locked={locked}
           onRun={onRun}
         />
       ))}

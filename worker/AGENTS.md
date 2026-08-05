@@ -126,6 +126,7 @@ Durable ledger записывается до запуска модели. Пос
 | `type` | Codex-модель | effort |
 |---|---|---|
 | `needs` | `gpt-5.6-sol` | `xhigh` |
+| `needs_refine` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_work` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_adv` | `gpt-5.6-sol` | `xhigh` |
 | `analyze_product` | `gpt-5.6-sol` | `xhigh` |
