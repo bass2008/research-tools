@@ -793,16 +793,14 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
         raise ValueError(f"в spec не заполнено: {', '.join(missing)}")
 
     forecast = _forecast_of(res)
-    m6 = next(m for m in forecast["months"] if m["month"] == FORECAST_MONTHS[-1])
 
     scores = {"niche": niche.get("verdict_score") if niche else None,
               "features": feats.get("verdict_score") if feats else None,
               "product": vscore}
     trail = " → ".join(f"{k} {v:g}" for k, v in scores.items() if v is not None)
-    money = f"{m6['paying']:g} платящих · {m6['mrr']:g} ₽/мес к 6-му месяцу"
     REPORTS.mkdir(parents=True, exist_ok=True)
     page = _report_page(f"Продукт: {work_name}",
-                        f"{spec['product']} · {spec['price']} · {money} · оценки: {trail}",
+                        f"{spec['product']} · {spec['price']} · оценки: {trail}",
                         html, verdict, vscore)
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
@@ -812,9 +810,9 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
         "confidence": _num(res.get("confidence"), 0, 1), "why": _str(res.get("why")),
         "report_link": link, "task_id": task_id, "created_at": _now(),
         "searched": data["search"], "spec": spec, "scores": scores, "forecast": forecast,
-        "summary": f"{spec['product']} · {spec['price']} · {money}"})
+        "summary": f"{spec['product']} · {spec['price']}"})
     ctx.log("INFO", "needs_analyze_product", work_name,
-            f"[{family}] {verdict} {vscore:g} · «{spec['product']}» по цене {spec['price']} · {money} · "
+            f"[{family}] {verdict} {vscore:g} · «{spec['product']}» по цене {spec['price']} · "
             f"окупаемость: {forecast['payback']} · оценки {trail}")
     return {"verdict": verdict, "verdict_score": vscore, "product": spec["product"],
             "price": spec["price"], "scores": scores, "forecast": forecast, "link": link,

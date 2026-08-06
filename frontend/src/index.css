@@ -8,8 +8,8 @@
   --local: #0d9488;
   --localbg: #d3f3ee;
   color-scheme: light dark;
-  /* поля страницы: по 20% слева и справа, но не меньше 16px на узких окнах */
-  --pad-x: max(16px, 20%);
+  /* поля страницы: по 15% слева и справа, но не меньше 16px на узких окнах */
+  --pad-x: max(16px, 15%);
 }
 @media (prefers-color-scheme: dark) {
   :root {

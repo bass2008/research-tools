@@ -352,8 +352,6 @@ export interface NeedsArtifact {
   verdict_score: number | null
   summary: string | null
   model_family?: ModelFamily | null
-  /** ₽/мес на шестом месяце прогноза — только у «Продукта»: за что боремся. */
-  mrr6?: number | null
 }
 
 export interface NeedsWork {

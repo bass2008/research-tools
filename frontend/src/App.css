@@ -276,16 +276,6 @@
 .vscore-unknown {
   color: var(--mut);
 }
-.model-mrr {
-  flex: none;
-  min-width: 82px;
-  color: var(--ok);
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
-}
 .model-tag {
   display: inline-flex;
   gap: 5px;

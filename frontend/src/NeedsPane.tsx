@@ -571,7 +571,6 @@ function ModelScore({ family, artifacts }: { family: ModelFamily; artifacts: Nee
   // Не сдвигаем этапы влево: если есть только «Функции», `(—,58)` честнее, чем `(58)`,
   // которое выглядело бы как score «Ниши».
   const stages = stageSlots.slice(0, last + 1)
-  const product = latest('analyze_product')
   const title = stages
     .filter((x) => x.artifact?.verdict_score != null)
     .map(({ n, artifact }) =>
@@ -579,33 +578,22 @@ function ModelScore({ family, artifacts }: { family: ModelFamily; artifacts: Nee
     )
     .join(' · ')
   return (
-    <>
-      <span
-        className={`model-score model-${family}`}
-        data-testid={`needs-score-${family}`}
-        title={`${FAMILY_LABEL[family]} · ${title}`}
-      >
-        (
-        {stages.map(({ n, artifact }, i) => (
-          <span key={n}>
-            {i > 0 && ','}
-            <span className={`vscore vscore-${artifact?.verdict ?? 'unknown'}`}>
-              {artifact?.verdict_score ?? '—'}
-            </span>
+    <span
+      className={`model-score model-${family}`}
+      data-testid={`needs-score-${family}`}
+      title={`${FAMILY_LABEL[family]} · ${title}`}
+    >
+      (
+      {stages.map(({ n, artifact }, i) => (
+        <span key={n}>
+          {i > 0 && ','}
+          <span className={`vscore vscore-${artifact?.verdict ?? 'unknown'}`}>
+            {artifact?.verdict_score ?? '—'}
           </span>
-        ))}
-        )
-      </span>
-      {product?.mrr6 != null && (
-        <span
-          className="model-mrr"
-          data-testid={`needs-mrr-${family}`}
-          title={`${FAMILY_LABEL[family]} · MRR на шестом месяце`}
-        >
-          {fmt(product.mrr6)} ₽/мес
         </span>
-      )}
-    </>
+      ))}
+      )
+    </span>
   )
 }
 
@@ -913,9 +901,6 @@ function TreeView({
         <Mark sample={<span className="model-score model-codex">(42,61)</span>}
               label="Codex · тот же порядок этапов"
               hint="Цвет рамки показывает семейство модели. Claude и Codex могут считать один этап одной работы параллельно и не смешивают входы Product." />
-        <Mark sample={<span className="model-mrr">4 233 ₽/мес</span>}
-              label="MRR на шестом месяце"
-              hint="Прогноз месячной выручки из отчёта «Продукт». Деньги вынесены из кружка score в отдельную зелёную колонку." />
         <div className="verdict-key" data-testid="needs-verdict-legend">
           <table>
             <tbody>

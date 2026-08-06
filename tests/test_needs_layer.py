@@ -509,7 +509,8 @@ def test_analyze_product_reads_both_previous_reports_and_keeps_the_score_trail(
     assert [m["month"] for m in prod["forecast"]["months"]] == [1, 2, 3, 6], "прогноз по месяцам"
     assert prod["forecast"]["assumptions"][0]["source"], "у допущения есть источник"
     assert prod["forecast"]["invest_case"], "отчёт отвечает, зачем вкладываться"
-    assert "₽/мес" in prod["summary"], "в строке работы видно, за что боремся"
+    assert prod["spec"]["price"] in prod["summary"], "в строке работы видно, что строим и почём"
+    assert "платящих" not in prod["summary"], "разовая покупка не описывается метриками подписки"
     assert set(prod["scores"]) == {"niche", "features", "product"}, "видно, как менялось мнение"
     assert prod["report_link"] not in [a["report_link"] for a in arts
                                        if a["kind"] != "analyze_product"], "свой отчёт"

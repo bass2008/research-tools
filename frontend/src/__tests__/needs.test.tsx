@@ -448,7 +448,7 @@ describe('меню действий', () => {
                 ...TREE.works[0],
                 artifacts: [
                   { kind: 'analyze', model_family: 'codex', created_at: 4, report_link: 'reports/c.html', task_id: 'c', verdict: 'MAYBE', verdict_score: 44, summary: null },
-                  { kind: 'analyze_product', created_at: 3, report_link: 'reports/p.html', task_id: 'p', verdict: 'BUILD', verdict_score: 72, summary: 'бот-расшифровщик, 199 ₽/мес', mrr6: 39800 },
+                  { kind: 'analyze_product', created_at: 3, report_link: 'reports/p.html', task_id: 'p', verdict: 'BUILD', verdict_score: 72, summary: 'бот-расшифровщик, 199 ₽/мес' },
                   { kind: 'analyze_adv', created_at: 2, report_link: 'reports/adv.html', task_id: 'adv', verdict: 'MAYBE', verdict_score: 58, summary: null },
                   { kind: 'analyze', created_at: 1, report_link: 'reports/a1.html', task_id: 'a1', verdict: 'SKIP', verdict_score: 27, summary: null },
                 ],
@@ -465,7 +465,6 @@ describe('меню действий', () => {
 
     const score = within(work).getByTestId('needs-score-claude')
     expect(score).toHaveTextContent('(27,58,72)')
-    expect(within(work).getByTestId('needs-mrr-claude')).toHaveTextContent('39 800 ₽/мес')
     expect(score).toHaveAttribute('title', expect.stringContaining('1: SKIP 27'))
     expect(score).toHaveAttribute('title', expect.stringContaining('2: MAYBE 58'))
     expect(score).toHaveAttribute('title', expect.stringContaining('3: BUILD 72'))
