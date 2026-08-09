@@ -10,3 +10,18 @@ logs/
 *.db-wal
 *.db-shm
 reports/
+
+# Terraform runtime files and local secrets. Provider lock files are committed.
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+*.tfplan
+crash.log
+crash.*.log
+.terraform.tfstate.lock.info
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

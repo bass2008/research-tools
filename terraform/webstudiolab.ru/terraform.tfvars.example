@@ -1,0 +1,6 @@
+domain           = "webstudiolab.ru"
+site_bucket_name = "webstudiolab.ru"
+
+# First apply: false. After REG.RU delegates the domain to Yandex Cloud DNS and
+# Certificate Manager reports ISSUED, change to true and apply again.
+enable_https = false
