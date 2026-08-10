@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import * as api from './api'
 import { fmt, fmtWhen, reportHref } from './api'
@@ -6,13 +5,28 @@ import type {
   ArtifactKind,
   ModelFamily,
   NeedsAction,
-  NeedsArtifact,
-  NeedsPhrase,
   NeedsRow,
   NeedsTree,
   NeedsWork,
   TaskRow,
 } from './api'
+import {
+  FAMILY_LABEL,
+  TreeActions,
+  TreeHead,
+  TreeTable as SharedTreeTable,
+  INTENT_LABEL,
+  KIND_LABEL,
+  Legend,
+  MODEL_FAMILIES,
+  ModelScore,
+  Phrases,
+  Segments,
+  artifactFamily,
+  band,
+  closeMenu,
+  errText,
+} from './needsUi'
 
 // Второй слой — толкование: классификация отделена от продуктового рейтинга. Разборы работают
 // над одной работой, второй проход меняет классы, а общая команда «Анализ» только ранжирует их.
@@ -58,28 +72,8 @@ const ARTIFACT_OF: Record<NeedsAction, ArtifactKind> = {
 }
 
 const BASIC_ACTIONS: NeedsAction[] = ['season', 'adjacent', 'dump']
-const ANALYSIS_ACTIONS: NeedsAction[] = ['analyze', 'analyze_adv', 'product', 'test']
-const MODEL_FAMILIES: ModelFamily[] = ['claude', 'codex']
-const FAMILY_LABEL: Record<ModelFamily, string> = { claude: 'Claude', codex: 'Codex' }
-const INTENT_LABEL: Record<NonNullable<NeedsWork['intent']>, string> = {
-  product: 'продукт',
-  mixed: 'смешанный интент',
-  information: 'инфо',
-  platform_action: 'действие платформы',
-  support: 'поддержка',
-  navigation: 'кнопка/навигация',
-  unclear: 'не ясно',
-}
-
-const KIND_LABEL: Record<string, string> = {
-  analyze: 'Ниша',
-  analyze_adv: 'Функции',
-  analyze_product: 'Продукт',
-  model_test: 'Test',
-  season: 'Сезонность',
-  adjacent: 'Смежные ключи',
-  dump: 'Выгрузка',
-}
+// три разбора переехали на группу дерева продуктов; здесь остался только smoke-test
+const ANALYSIS_ACTIONS: NeedsAction[] = ['test']
 
 const WHY: Record<string, string> = {
   brand: 'бренд — ищут вход в конкретный продукт',
@@ -91,20 +85,6 @@ const WHY: Record<string, string> = {
   other: 'прочее',
 }
 
-/** Закрыть выпадающее меню после выбора пункта. */
-function closeMenu(e: { currentTarget: HTMLElement }) {
-  e.currentTarget.closest('details')?.removeAttribute('open')
-}
-
-function errText(e: unknown): string {
-  if (e instanceof api.ApiError) return `${e.status} · ${e.message}${e.detail ? ' — ' + e.detail : ''}`
-  return e instanceof Error ? e.message : String(e)
-}
-
-const artifactFamily = (a: NeedsArtifact): ModelFamily | null =>
-  ['analyze', 'analyze_adv', 'analyze_product', 'model_test'].includes(a.kind)
-    ? (a.model_family ?? 'claude')
-    : null
 
 const busyKey = (work: string, action: NeedsAction, family?: ModelFamily) =>
   `${work}|${action}|${family ?? 'basic'}`
@@ -119,7 +99,11 @@ const WORK_TASK_ACTION: Record<string, NeedsAction> = {
   needs_dump: 'dump',
 }
 
-export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: TaskRow[] }) {
+export function NeedsPane({ active, tasks = [], onOpenTree }: {
+  active: boolean
+  tasks?: TaskRow[]
+  onOpenTree?: (treeId: string | null) => void
+}) {
   const [rows, setRows] = useState<NeedsRow[] | null>(null)
   const [open, setOpen] = useState<string | null>(null)
   const [tree, setTree] = useState<NeedsTree | null>(null)
@@ -135,6 +119,8 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
   const [refineTask, setRefineTask] = useState<string | null>(null)
   const [rankAsk, setRankAsk] = useState<ModelFamily | null>(null)
   const [rankTask, setRankTask] = useState<string | null>(null)
+  const [branchAsk, setBranchAsk] = useState<ModelFamily | null>(null)
+  const [branchTask, setBranchTask] = useState<string | null>(null)
   const [favoriteBusy, setFavoriteBusy] = useState<Record<string, boolean>>({})
   const statuses = useRef(new Map<string, string>())
 
@@ -147,6 +133,7 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
   }, [active, rows])
 
   useEffect(() => {
+    onOpenTree?.(open)
     if (!open) return
     setTree(null)
     api
@@ -184,7 +171,10 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
     if (rankTask && ['DONE', 'FAILED'].includes(seen.get(rankTask) ?? '')) {
       setRankTask(null)
     }
-  }, [tasks, open, refineTask, rankTask])
+    if (branchTask && ['DONE', 'FAILED'].includes(seen.get(branchTask) ?? '')) {
+      setBranchTask(null)
+    }
+  }, [tasks, open, refineTask, rankTask, branchTask])
 
   // Работы, по которым разбор уже идёт. Считаем по журналу задач (он приходит с сервера),
   // иначе после перезагрузки страницы кнопка снова становится нажимаемой и ловит 409.
@@ -206,7 +196,11 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
     (t) => t.type === 'needs_rank' && t.node === open &&
       ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status),
   )
-  const treeBusy = refineBusy || rankBusy
+  const branchBusy = Boolean(branchTask) || tasks.some(
+    (t) => t.type === 'needs_products' && t.node === open &&
+      ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status),
+  )
+  const treeBusy = refineBusy || rankBusy || branchBusy
 
   async function run(action: NeedsAction, work: string, family?: ModelFamily) {
     if (!open) return
@@ -235,6 +229,17 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
     try {
       const { task_id } = await api.needsRank(open, family)
       setRankTask(task_id)
+      setErr('')
+    } catch (e) {
+      setErr(errText(e))
+    }
+  }
+
+  async function runProducts(family: ModelFamily) {
+    if (!open) return
+    try {
+      const { task_id } = await api.needsProducts(open, family)
+      setBranchTask(task_id)
       setErr('')
     } catch (e) {
       setErr(errText(e))
@@ -300,55 +305,57 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
   if (open) {
     return (
       <>
-        <div className="bar-row">
-          <button className="act" data-testid="needs-back" onClick={() => setOpen(null)}>
-            ← Назад к списку
-          </button>
-          {/* по какому узлу дерева запросов собрано — иначе по одному id не понять */}
-          <span className="ph" data-testid="needs-branch">
-            {tree?.root ?? '…'}
-          </span>
-          <span className="mut">{open}</span>
-        </div>
-        <div className="bar-row needs-refine-bar" data-testid="needs-refine-bar">
-          <span className="mut">
-            Классификация v{tree?.revision ?? 0}
-          </span>
-          {MODEL_FAMILIES.map((family) => (
-            <button
-              key={family}
-              className={`act model-${family}`}
-              data-testid={`needs-refine-${family}`}
-              disabled={treeBusy || !tree}
-              title="Перепроверить все фразы, разделить работы с разными MVP и убрать неоднозначные фразы в «не ясно»"
-              onClick={() => setRefineAsk(family)}
-            >
-              {refineBusy ? '2-й проход идёт…' : `${FAMILY_LABEL[family]} · 2-й проход`}
-            </button>
-          ))}
-          {MODEL_FAMILIES.map((family) => (
-            <button
-              key={'rank-' + family}
-              className={`act model-${family}`}
-              data-testid={`needs-rank-${family}`}
-              disabled={treeBusy || !tree}
-              title="Оценить физическую возможность самостоятельного продукта по шести факторам, без выдачи и конкурентов"
-              onClick={() => setRankAsk(family)}
-            >
-              {rankBusy ? 'Анализ идёт…' : `${FAMILY_LABEL[family]} · Анализ`}
-            </button>
-          ))}
-          {tree?.refined_by && (
-            <span className="mut" data-testid="needs-refined-by">
-              2-й проход: {FAMILY_LABEL[tree.refined_by]} · {fmtWhen(tree.refined_at)}
-            </span>
-          )}
-          {tree?.ranked_by && (
-            <span className="mut" data-testid="needs-ranked-by">
-              анализ: {FAMILY_LABEL[tree.ranked_by]} · {fmtWhen(tree.ranked_at)}
-            </span>
-          )}
-        </div>
+        <TreeHead
+          onBack={() => setOpen(null)}
+          backLabel="← Назад"
+          backTestId="needs-back"
+          root={tree?.root ?? null}
+          condition={tree?.condition}
+          rootTestId="needs-branch"
+          meta={[
+            `сборка ${open}`,
+            `классификация v${tree?.revision ?? 0}`,
+            tree?.refined_by && `уточнено: ${FAMILY_LABEL[tree.refined_by]} · ${fmtWhen(tree.refined_at)}`,
+            tree?.ranked_by && `ранги: ${FAMILY_LABEL[tree.ranked_by]} · ${fmtWhen(tree.ranked_at)}`,
+          ].filter(Boolean).join('\n')}
+          actions={
+          <TreeActions
+            disabled={treeBusy || !tree}
+            items={MODEL_FAMILIES.flatMap((family) => [
+              {
+                key: `refine-${family}`,
+                family,
+                testId: `needs-refine-${family}`,
+                label: 'Уточнить дерево потребностей',
+                busy: refineBusy,
+                busyLabel: 'Уточняю…',
+                hint: 'Перепроверить все фразы, склеить лишне разрезанные работы, разделить склеенные и убрать неоднозначные фразы в «не ясно». Меняет ревизию классификации: дерево продуктов и разборы под ним обесценятся.',
+                onClick: () => setRefineAsk(family),
+              },
+              {
+                key: `rank-${family}`,
+                family,
+                testId: `needs-rank-${family}`,
+                label: 'Анализ рангов',
+                busy: rankBusy,
+                busyLabel: 'Ранжирую…',
+                hint: 'Оценить физическую возможность самостоятельного продукта по шести факторам и разметить интент. Выдача и конкуренты не используются; ранг виден кружком на строке работы.',
+                onClick: () => setRankAsk(family),
+              },
+              {
+                key: `products-${family}`,
+                family,
+                testId: `needs-products-${family}`,
+                label: 'Собрать дерево продуктов',
+                busy: branchBusy,
+                busyLabel: 'Собираю продукты…',
+                hint: 'Разложить работы ветки в продукты на трёх вложенных масштабах: микро ⊂ средний ⊂ комплексный. Результат — во вкладке «Дерево продуктов».',
+                onClick: () => setBranchAsk(family),
+              },
+            ])}
+          />
+          }
+        />
         {tree ? (
           <TreeView
             tree={tree}
@@ -440,6 +447,42 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
             </div>
           </div>
         )}
+        {branchAsk && (
+          <div className="modal">
+            <div className="dlg" data-testid="needs-products-confirm">
+              <b>{FAMILY_LABEL[branchAsk]} · собрать дерево продуктов</b>
+              <p>
+                Разложит работы ветки в продукты на трёх масштабах — микро ⊂ средний ⊂
+                комплексный. У каждой группы: один вход, один движок, рынок по головным
+                контейнерам и модель денег. Покрытие полное: работа, которая ни с чем не
+                склеивается, станет отдельным микропродуктом. Выдача не покупается,
+                классификацию не меняет. Результат — во вкладке «Дерево продуктов».
+              </p>
+              {tree?.products?.groups?.length ? (
+                <p className="warn" data-testid="needs-products-warn">
+                  Дерево продуктов уже собрано: {tree.products.groups.length} групп. Новая
+                  раскладка заменит текущую, а <b>разборы групп, которых в ней не окажется, будут
+                  удалены вместе с отчётами</b> — id групп придумывает модель и между прогонами
+                  они не стабильны. Прежний файл группировки останется на диске.
+                </p>
+              ) : null}
+              <div className="dlg-btns">
+                <button
+                  className="go"
+                  data-testid="needs-products-confirm-yes"
+                  onClick={() => {
+                    const family = branchAsk
+                    setBranchAsk(null)
+                    void runProducts(family)
+                  }}
+                >
+                  Да, собрать продукты
+                </button>
+                <button className="act" onClick={() => setBranchAsk(null)}>Нет</button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     )
   }
@@ -448,152 +491,19 @@ export function NeedsPane({ active, tasks = [] }: { active: boolean; tasks?: Tas
 }
 
 function TreeTable({ rows, onOpen }: { rows: NeedsRow[] | null; onOpen: (id: string) => void }) {
-  if (rows === null) return <div className="mut">загружаем список…</div>
   return (
-    <>
-      <div className="hint">
-        Второй слой — <b>толкование</b>: работы, которые люди хотят сделать, собранные из фраз
-        первого дерева. Классификация и отдельный продуктовый анализ складываются файлами в{' '}
-        <code>logs/needs-lab</code>. Клик по строке открывает дерево.
-      </div>
-      <table className="tbl">
-        <thead>
-          <tr>
-            <Th label="узел дерева запросов" hint="Ветка первого дерева, по фразам которой собрано это толкование. Мелким снизу — id сборки: по одной ветке их может быть несколько, они не мешают друг другу." />
-            <Th num label="лучший шанс" hint="Самая высокая оценка физической возможности продукта среди ещё не разобранных работ. До отдельной команды «Анализ» оценки нет." />
-            <Th num label="частота" hint="Частота корневой фразы ветки по Вордстату. Это широкое соответствие: число уже включает все уточнения, поэтому складывать частоты внутри ветки нельзя." />
-            <Th num label="работ" hint="Сколько работ собрала модель. Работа — это результат, которого человек хочет добиться («оживить фото»); одну работу выражают десятки формулировок." />
-            <Th num label="сегм." hint="Сегменты внутри работ — более узкие потребности: другой вход, другая аудитория, другое ограничение. Именно там обычно и живёт микро-продукт." />
-            <Th num label="фраз" hint="Сколько фраз ветки попало в работы и их сегменты. Остальные ушли в исключённые: вместе эти два числа дают все фразы ветки, каждую ровно один раз." />
-            <Th num label="исключ." hint="Фразы, которые работой не являются: бренды (ищут конкретный продукт), каталоги («лучшие нейросети»), потребление («слушать» вместо «сделать»), сломанные запросы и фразы-условия." />
-            <Th num label="оценено" hint="Сколько работ прошло отдельный продуктовый анализ. Классификация сама шанс не выставляет." />
-            <Th num label="разобрано" hint="По скольким работам уже прошёл разбор: куплена выдача, Opus дал вердикт и написал отчёт." />
-            <Th label="собрано" hint="Когда собрано это дерево. Толкование одноразовое: ветка растёт, и старая сборка постепенно перестаёт её описывать." />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 && (
-            <tr>
-              <td colSpan={10} className="mut">
-                деревьев пока нет — положите json в logs/needs-lab
-              </td>
-            </tr>
-          )}
-          {rows.map((r) => (
-            <tr
-              key={r.id}
-              className={'clickable' + (r.error ? ' bad' : '')}
-              data-testid="needs-row"
-              onClick={() => onOpen(r.id)}
-            >
-              {/* название — сам узел; id сборки мелким под ним, иначе по нему ничего не понять */}
-              <td>
-                <div className="ph">{r.root ?? r.condition ?? '—'}</div>
-                <div className="mut small">{r.id}</div>
-              </td>
-              <td className="num">
-                {r.best_score == null ? '—' : (
-                  <span className={'chance ' + band(r.best_score)}>{r.best_score}</span>
-                )}
-              </td>
-              <td className="num">{fmt(r.root_freq)}</td>
-              <td className="num">{r.works}</td>
-              <td className="num">{r.segments}</td>
-              <td className="num">{r.phrases}</td>
-              <td className="num">{r.excluded}</td>
-              <td className="num">{r.ranked || '—'}</td>
-              <td className="num">{r.analyzed || '—'}</td>
-              <td>{r.error ? <span className="err">{r.error}</span> : fmtWhen(r.created_at)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
-  )
-}
-
-// полоса шанса: 70+ стоит смотреть, 40-69 неочевидно, ниже — вряд ли
-function band(score: number | null): string {
-  if (score == null) return 'ch-low'
-  return score >= 70 ? 'ch-high' : score >= 40 ? 'ch-mid' : 'ch-low'
-}
-
-function Mark({ sample, label, hint }: { sample: ReactNode; label: string; hint: string }) {
-  return (
-    <div>
-      {sample}
-      <span className="mut">{label}</span>
-      <span className="q" title={hint} data-testid="col-hint">
-        ?
-      </span>
-    </div>
-  )
-}
-
-function Th({ label, hint, num }: { label: string; hint: string; num?: boolean }) {
-  return (
-    <th className={num ? 'num' : undefined}>
-      {label}{' '}
-      <span className="q" title={hint} data-testid="col-hint">
-        ?
-      </span>
-    </th>
-  )
-}
-
-function Phrases({ items }: { items: NeedsPhrase[] }) {
-  if (!items.length) return null
-  return (
-    <div className="nphrases">
-      {items.map((p) => (
-        <div className="nphrase" data-testid="needs-phrase" key={p.phrase}>
-          <span className="ph">{p.phrase}</span>
-          <span className="fr">{fmt(p.freq)}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function ModelScore({ family, artifacts }: { family: ModelFamily; artifacts: NeedsArtifact[] }) {
-  const latest = (kind: ArtifactKind) =>
-    artifacts
-      .filter((a) => a.kind === kind && artifactFamily(a) === family)
-      .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))[0]
-  const stageSlots = [
-    { n: 1, artifact: latest('analyze') },
-    { n: 2, artifact: latest('analyze_adv') },
-    { n: 3, artifact: latest('analyze_product') },
-  ]
-  let last = stageSlots.length - 1
-  while (last >= 0 && stageSlots[last].artifact?.verdict_score == null) last -= 1
-  if (last < 0) return null
-  // Не сдвигаем этапы влево: если есть только «Функции», `(—,58)` честнее, чем `(58)`,
-  // которое выглядело бы как score «Ниши».
-  const stages = stageSlots.slice(0, last + 1)
-  const title = stages
-    .filter((x) => x.artifact?.verdict_score != null)
-    .map(({ n, artifact }) =>
-      `${n}: ${artifact?.verdict ?? '—'} ${artifact?.verdict_score ?? '—'}`,
-    )
-    .join(' · ')
-  return (
-    <span
-      className={`model-score model-${family}`}
-      data-testid={`needs-score-${family}`}
-      title={`${FAMILY_LABEL[family]} · ${title}`}
-    >
-      (
-      {stages.map(({ n, artifact }, i) => (
-        <span key={n}>
-          {i > 0 && ','}
-          <span className={`vscore vscore-${artifact?.verdict ?? 'unknown'}`}>
-            {artifact?.verdict_score ?? '—'}
-          </span>
-        </span>
-      ))}
-      )
-    </span>
+    <SharedTreeTable
+      rows={rows}
+      onOpen={onOpen}
+      rowTestId="needs-row"
+      hint={
+        <>
+          Второй слой — <b>толкование</b>: работы, которые люди хотят сделать, собранные из фраз
+          первого дерева. Классификация и отдельный продуктовый анализ складываются файлами в{' '}
+          <code>logs/needs-lab</code>. Клик по строке открывает дерево.
+        </>
+      }
+    />
   )
 }
 
@@ -615,13 +525,7 @@ function Work({
   const [open, setOpen] = useState(false)
   const segs = w.segments ?? []
   const artifacts = w.artifacts ?? []
-  // Backward-compatible с уже запущенным backend без sum_freq: все частоты фраз в ответе есть.
-  const sumFreq =
-    w.sum_freq ??
-    [...w.phrases, ...segs.flatMap((s) => s.phrases)].reduce(
-      (total, phrase) => total + (phrase.freq ?? 0),
-      0,
-    )
+  const sumFreq = w.sum_freq
   const linksFor = (family: ModelFamily | null) => {
     const seen: Record<string, number> = {}
     const selected = artifacts
@@ -819,16 +723,7 @@ function Work({
             <div className="nwhy"><b>опорные фразы:</b> {w.evidence.join(' · ')}</div>
           ) : null}
           <Phrases items={w.phrases} />
-          {segs.map((s) => (
-            <div className="nseg" data-testid="needs-segment" key={s.name ?? Math.random()}>
-              <div className="row">
-                <span className="ph">└ {s.name ?? '—'}</span>
-                <span className="ct">{s.phrases.length} фраз</span>
-              </div>
-              {s.why && <div className="nwhy">{s.why}</div>}
-              <Phrases items={s.phrases} />
-            </div>
-          ))}
+          <Segments items={segs} />
         </div>
       )}
     </div>
@@ -882,35 +777,7 @@ function TreeView({
         </div>
       </div>
       {/* то же, что заголовки колонок в таблице: у работы не колонки, а метки — поясняем их */}
-      <div className="legend nlegend">
-        {tree.ranked_at && (
-          <Mark sample={<span className="chance ch-high">0–100</span>} label="шанс продукта"
-                hint="Отдельный анализ Opus/Sol: физически ли возможен самостоятельный продукт. Итог считается из шести факторов с жёсткими ограничителями для статей, поддержки, кнопок и действий самой платформы. Конкуренты и выдача не учитываются; по этому числу отсортированы работы." />
-        )}
-        <Mark sample={<span className="fr freq-sum">Σ 18 431</span>} label="сумма частот"
-              hint="Сырая сумма частот всех формулировок работы, включая сегменты. Запросы могут пересекаться, поэтому это не число уникальных пользователей." />
-        <Mark sample={<span className="fr freq-max">max 11 081</span>} label="максимум"
-              hint="Прежний показатель: наибольшая частота одной формулировки работы. Не содержит повторного сложения пересекающихся запросов." />
-        <Mark sample={<span className="ct">15 фраз</span>} label="формулировок"
-              hint="Сколько фраз ветки собрано в эту работу, включая её сегменты. Это и есть ядро ключей ниши — оно попадает в отчёт." />
-        <Mark sample={<span className="occ">НЕ ЯСНО</span>} label="работа не названа"
-              hint="Объект понятен, а результат из фраз не виден: «нейросеть фото» — сгенерировать? улучшить? оживить? Это реальный спрос, который не удалось отнести к работе; разбирать там нечего." />
-        <Mark sample={<span className="model-score model-claude">(30,58,27)</span>}
-              label="Claude · числа: Ниша, Функции, Продукт"
-              hint="Один компактный кружок хранит до трёх score по этапам 1–2–3. Старые отчёты мигрированы в Claude." />
-        <Mark sample={<span className="model-score model-codex">(42,61)</span>}
-              label="Codex · тот же порядок этапов"
-              hint="Цвет рамки показывает семейство модели. Claude и Codex могут считать один этап одной работы параллельно и не смешивают входы Product." />
-        <div className="verdict-key" data-testid="needs-verdict-legend">
-          <table>
-            <tbody>
-              <tr><td><span className="vscore vscore-SKIP">30</span></td><th>SKIP</th><td>не строить</td></tr>
-              <tr><td><span className="vscore vscore-MAYBE">58</span></td><th>MAYBE</th><td>сначала проверить</td></tr>
-              <tr><td><span className="vscore vscore-BUILD">77</span></td><th>BUILD</th><td>можно строить</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Legend ranked={Boolean(tree.ranked_at)} unit="работы" />
       <div className="favorite-tools">
         <button
           type="button"

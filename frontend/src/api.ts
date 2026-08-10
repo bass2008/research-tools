@@ -46,10 +46,13 @@ export interface TaskRow {
 export interface ReportRow {
   tree_id: string
   kind: string
-  work: string
+  /** Единица отчёта — группа дерева продуктов. */
+  group: string
+  name: string
+  level: ProductLevel | null
   root: string | null
   condition: string | null
-  top_freq: number | null
+  pool: number | null
   phrases: number | null
   verdict: string | null
   verdict_score: number | null
@@ -291,6 +294,8 @@ export interface NeedsCounts {
 // строка таблицы: счётчики плоско, чтобы таблица читалась без вложенности
 export interface NeedsRow extends NeedsCounts {
   analyzed: number
+  /** Сколько групп в дереве продуктов текущей ревизии. */
+  products?: number
   id: string
   condition: string | null
   root: string | null
@@ -306,21 +311,69 @@ export interface NeedsPhrase {
   freq: number | null
 }
 
+export type ProductLevel = 'micro' | 'medium' | 'macro'
+
+/** Группа дерева продуктов: один вход, один движок, несколько работ. */
+export interface ProductGroup {
+  id: string
+  level: ProductLevel
+  name: string | null
+  works: string[]
+  parent: string | null
+  input: string | null
+  engine: string | null
+  output: string | null
+  money: string | null
+  pool: number | null
+  pool_why: string | null
+  core: string | null
+  order: string[] | null
+  why: string | null
+  /** Агрегаты по работам группы — считает backend, не модель. */
+  work_items: Array<{
+    name: string
+    top_freq: number | null
+    /** Сырая сумма частот всех фраз потребности, включая её подгруппы. */
+    sum_freq: number
+    phrase_count: number | null
+    unclear: boolean | null
+    why: string | null
+    score: number | null
+    intent: string | null
+    blocker: string | null
+    /** Ключи потребности: продукт → потребность → фразы. */
+    phrases: NeedsPhrase[]
+    sections: Array<{ name: string | null; kind?: string | null; why: string | null; phrase_count: number }>
+  }>
+  sum_freq: number
+  top_freq: number
+  phrase_count: number
+  section_count: number
+  best_score: number | null
+  /** Ручной лайк человека — стоит на продукте, а не на потребности. */
+  favorite?: boolean
+  artifacts: NeedsArtifact[]
+}
+
+export interface NeedsProducts {
+  task_id: string | null
+  model_family: ModelFamily | null
+  created_at: number | null
+  tree_revision: number | null
+  why: string | null
+  /** HTML-отчёт самой группировки: как ветка раскладывается на продукты. */
+  report_link: string | null
+  groups: ProductGroup[]
+}
+
 export interface NeedsSegment {
   name: string | null
+  /** section — тот же вход и продукт, другой раздел ответа; segment — другой вход или аудитория. */
+  kind?: 'segment' | 'section' | null
   why: string | null
   phrases: NeedsPhrase[]
 }
 
-export interface NeedsAnalysis {
-  verdict: string | null
-  verdict_score: number | null
-  confidence: number | null
-  report_link: string | null
-  created_at: number | null
-  searched: string[] | null
-  model_family?: ModelFamily | null
-}
 
 export type NeedsAction =
   | 'analyze'
@@ -366,8 +419,8 @@ export interface NeedsWork {
   blocker: string | null
   evidence: string[] | null
   factors: Record<string, number> | null
-  /** Сырая сумма частот всех формулировок работы, включая сегменты. Старый backend не отдаёт. */
-  sum_freq?: number
+  /** Сырая сумма частот всех формулировок работы, включая сегменты. */
+  sum_freq: number
   top_freq: number | null
   phrase_count: number | null
   unclear: boolean | null
@@ -375,7 +428,6 @@ export interface NeedsWork {
   phrases: NeedsPhrase[]
   segments: NeedsSegment[]
   artifacts: NeedsArtifact[]
-  analysis: NeedsAnalysis | null
 }
 
 export interface NeedsExcluded extends NeedsPhrase {
@@ -404,6 +456,8 @@ export interface NeedsTree {
     revision: number
   }>
   counts: NeedsCounts
+  /** Дерево продуктов текущей ревизии; null — группировка ещё не запускалась. */
+  products: NeedsProducts | null
   works: NeedsWork[]
   excluded: NeedsExcluded[]
 }
@@ -433,7 +487,29 @@ export const needsRank = (
   model_family: ModelFamily,
 ): Promise<{ task_id: string }> => post('/api/needs/rank', { tree_id, model_family })
 
-/** Действие над работой. Повторный запуск разрешён: каждый прогон копит свой артефакт. */
+/** «Продукты»: разложить работы ветки в дерево продуктов на трёх масштабах. */
+export const needsProducts = (
+  tree_id: string,
+  model_family: ModelFamily,
+): Promise<{ task_id: string; replacing: ProductsPlan }> =>
+  post('/api/needs/products', { tree_id, model_family })
+
+/** Что потеряет пересборка: сколько групп сейчас и сколько по ним готовых отчётов. */
+export interface ProductsPlan {
+  groups: number
+  with_reports: number
+  reports: number
+}
+
+/** Лайк продукта: та же ручка, что у работы, но единица — группа. */
+export const needsFavoriteGroup = (
+  tree_id: string,
+  group: string,
+  favorite: boolean,
+): Promise<{ group: string; favorite: boolean; favorites: string[] }> =>
+  post('/api/needs/favorite', { tree_id, group, favorite })
+
+/** Действие по работе: сезонность, смежные ключи, выгрузка, smoke-test. */
 export const needsRun = (
   action: NeedsAction,
   tree_id: string,
@@ -441,6 +517,15 @@ export const needsRun = (
   model_family?: ModelFamily,
 ): Promise<{ task_id: string }> =>
   post('/api/needs/' + action, { tree_id, work, ...(model_family ? { model_family } : {}) })
+
+/** Разбор по ГРУППЕ дерева продуктов: «Ниша», «Функции», «Спецификация». */
+export const needsRunGroup = (
+  action: NeedsAction,
+  tree_id: string,
+  group: string,
+  model_family?: ModelFamily,
+): Promise<{ task_id: string }> =>
+  post('/api/needs/' + action, { tree_id, group, ...(model_family ? { model_family } : {}) })
 
 // ---------- форматирование ----------
 

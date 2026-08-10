@@ -34,6 +34,7 @@ const TREE: NeedsTree = {
   ranked_at: 1_785_091_140,
   ranked_by: 'codex',
   counts: { works: 2, best_score: 88, ranked: 2, segments: 1, phrases: 4, excluded: 2 },
+  products: null,      // группировка живёт в своей вкладке; здесь её нет
   works: [
     {
       name: 'оживить фото',
@@ -44,6 +45,7 @@ const TREE: NeedsTree = {
       blocker: 'много информационных запросов',
       evidence: ['оживить фото нейросеть бесплатно без регистрации'],
       factors: { external_control: 80, tool_intent: 30, outcome_clarity: 70, product_shape: 60, repeatability: 40, user_value: 55 },
+      sum_freq: 12388,
       top_freq: 11081,
       phrase_count: 3,
       unclear: false,
@@ -53,7 +55,6 @@ const TREE: NeedsTree = {
         { phrase: 'оживление фото нейросеть бесплатно без регистрации', freq: 734 },
       ],
       artifacts: [],
-      analysis: null,
       segments: [
         {
           name: 'через Алису',
@@ -78,7 +79,6 @@ const TREE: NeedsTree = {
       why: 'узкая аудитория, мейнстрим не обслуживает',
       phrases: [{ phrase: 'генератор фанфиков нейросеть бесплатно без регистрации', freq: 589 }],
       artifacts: [],
-      analysis: null,
       segments: [],
     },
   ],
@@ -298,20 +298,42 @@ describe('меню действий', () => {
     return work
   }
 
-  it('три Basic-действия и по три анализа каждого семейства с подсказками', async () => {
+  it('на работе остались домеры спроса и smoke-test — разборы уехали на продукт', async () => {
     const work = await opened()
     for (const id of [
-      'season', 'adjacent', 'dump',
-      'claude-analyze', 'claude-analyze_adv', 'claude-product', 'claude-test',
-      'codex-analyze', 'codex-analyze_adv', 'codex-product', 'codex-test',
+      'season', 'adjacent', 'dump', 'claude-test', 'codex-test',
     ]) {
       const b = within(work).getByTestId('needs-run-' + id)
       expect(b).toBeEnabled()
       expect(b.getAttribute('title')!.length).toBeGreaterThan(40)
     }
     expect(within(work).getByText('Basic')).toBeTruthy()
-    expect(within(work).getByText('Claude')).toBeTruthy()
-    expect(within(work).getByText('Codex')).toBeTruthy()
+    // три разбора запускаются по группе во вкладке «Дерево продуктов», а не по работе
+    expect(within(work).queryByTestId('needs-run-claude-analyze')).toBeNull()
+    expect(within(work).queryByTestId('needs-run-claude-product')).toBeNull()
+  })
+
+  it('сборка дерева продуктов предупреждает, что снесёт разборы прошлой раскладки', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/tree/')
+        ? res(200, {
+            ...TREE,
+            products: {
+              task_id: 'p1', model_family: 'claude', created_at: 1, tree_revision: 0,
+              why: null, report_link: null,
+              groups: [{ id: 'macro-1' }, { id: 'micro-1' }],
+            },
+          })
+        : res(200, { trees: [row()] }),
+    )
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+    await userEvent.click((await screen.findByTestId('tree-actions')).querySelector('summary')!)
+    await userEvent.click(screen.getByTestId('needs-products-claude'))
+
+    const warn = await screen.findByTestId('needs-products-warn')
+    expect(warn).toHaveTextContent('2 групп')
+    expect(warn).toHaveTextContent('будут удалены вместе с отчётами')
   })
 
   it('второй проход есть у Claude и Codex и требует подтверждения', async () => {
@@ -323,8 +345,11 @@ describe('меню действий', () => {
           : res(200, { trees: [row()] }),
     )
     await opened()
-    expect(screen.getByTestId('needs-refine-bar')).toHaveTextContent('Классификация v2')
+    // ревизия ушла из строки в подсказку на корне: решение по ней не принимают
+    expect(screen.getByTestId('needs-branch')).toHaveAttribute(
+      'title', expect.stringContaining('классификация v2'))
     expect(screen.getByTestId('needs-refine-claude')).toBeEnabled()
+    await userEvent.click(screen.getByTestId('tree-actions').querySelector('summary')!)
     await userEvent.click(screen.getByTestId('needs-refine-codex'))
     expect(await screen.findByTestId('needs-refine-confirm')).toHaveTextContent(
       'разделит работы, которым нужны разные микро-продукты',
@@ -348,6 +373,7 @@ describe('меню действий', () => {
     )
     await opened()
     expect(screen.getByTestId('needs-rank-claude')).toBeEnabled()
+    await userEvent.click(screen.getByTestId('tree-actions').querySelector('summary')!)
     await userEvent.click(screen.getByTestId('needs-rank-codex'))
     expect(await screen.findByTestId('needs-rank-confirm')).toHaveTextContent(
       'контроль результата сторонним продуктом',
@@ -377,27 +403,9 @@ describe('меню действий', () => {
     expect(menu).not.toHaveAttribute('open')
   })
 
-  it('команда анализа передаёт slug семейства модели', async () => {
-    fetchMock.mockImplementation(async (url: string) =>
-      url.includes('/api/needs/analyze')
-        ? res(200, { task_id: 'c1' })
-        : url.includes('/api/needs/tree/')
-          ? res(200, TREE)
-          : res(200, { trees: [row()] }),
-    )
-    const work = await opened()
-    await userEvent.click(within(work).getByTestId('needs-run-codex-analyze'))
-    const call = fetchMock.mock.calls.find((c) => String(c[0]).includes('/api/needs/analyze'))!
-    expect(JSON.parse(String(call[1]?.body))).toEqual({
-      tree_id: TREE.id,
-      work: 'оживить фото',
-      model_family: 'codex',
-    })
-  })
-
   it('первый запуск идёт сразу, повторный — через подтверждение', async () => {
     fetchMock.mockImplementation(async (url: string) => {
-      if (url.includes('/api/needs/season')) return res(200, { task_id: 't9' })
+      if (url.includes('/api/needs/dump')) return res(200, { task_id: 't9' })
       if (url.includes('/api/needs/tree/')) {
         return res(200, {
           ...TREE,
@@ -406,12 +414,12 @@ describe('меню действий', () => {
               ...TREE.works[0],
               artifacts: [
                 {
-                  kind: 'analyze',
+                  kind: 'season',
                   created_at: 1,
                   report_link: 'reports/r1.html',
                   task_id: 'r1',
-                  verdict: 'SKIP',
-                  verdict_score: 30,
+                  verdict: null,
+                  verdict_score: null,
                   summary: null,
                 },
               ],
@@ -424,58 +432,16 @@ describe('меню действий', () => {
     })
     const work = await opened()
 
-    // сезонности ещё не было — запускается без вопросов
-    await userEvent.click(within(work).getByTestId('needs-run-season'))
+    // выгрузки ещё не было — запускается без вопросов
+    await userEvent.click(within(work).getByTestId('needs-run-dump'))
     expect(screen.queryByTestId('needs-confirm')).toBeNull()
 
-    // разбор уже был: счётчик на кнопке и подтверждение вместо запуска
+    // сезонность уже снимали: счётчик на кнопке и подтверждение вместо запуска
     await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
-    const again = within(work).getByTestId('needs-run-claude-analyze')
+    const again = within(work).getByTestId('needs-run-season')
     expect(again).toHaveTextContent('(1)')
     await userEvent.click(again)
-    expect(await screen.findByTestId('needs-confirm')).toHaveTextContent('уже делали')
-  })
-
-  it('на работе три оценки и MRR схлопнуты в один кружок семейства', async () => {
-    // они отвечают на разные вопросы: «Ниша» про перехват трафика, «Функции» про то, за что
-    // платят, «Продукт» про спецификацию. Расхождение — сигнал, поэтому показываем все три
-    fetchMock.mockImplementation(async (url: string) =>
-      url.includes('/api/needs/tree/')
-        ? res(200, {
-            ...TREE,
-            works: [
-              {
-                ...TREE.works[0],
-                artifacts: [
-                  { kind: 'analyze', model_family: 'codex', created_at: 4, report_link: 'reports/c.html', task_id: 'c', verdict: 'MAYBE', verdict_score: 44, summary: null },
-                  { kind: 'analyze_product', created_at: 3, report_link: 'reports/p.html', task_id: 'p', verdict: 'BUILD', verdict_score: 72, summary: 'бот-расшифровщик, 199 ₽/мес' },
-                  { kind: 'analyze_adv', created_at: 2, report_link: 'reports/adv.html', task_id: 'adv', verdict: 'MAYBE', verdict_score: 58, summary: null },
-                  { kind: 'analyze', created_at: 1, report_link: 'reports/a1.html', task_id: 'a1', verdict: 'SKIP', verdict_score: 27, summary: null },
-                ],
-                analysis: { verdict: 'SKIP', verdict_score: 27, report_link: 'reports/a1.html', created_at: 1, searched: [], confidence: 0.5 },
-              },
-              TREE.works[1],
-            ],
-          })
-        : res(200, { trees: [row()] }),
-    )
-    render(<NeedsPane active />)
-    await userEvent.click(await screen.findByTestId('needs-row'))
-    const work = (await screen.findAllByTestId('needs-work'))[0]
-
-    const score = within(work).getByTestId('needs-score-claude')
-    expect(score).toHaveTextContent('(27,58,72)')
-    expect(score).toHaveAttribute('title', expect.stringContaining('1: SKIP 27'))
-    expect(score).toHaveAttribute('title', expect.stringContaining('2: MAYBE 58'))
-    expect(score).toHaveAttribute('title', expect.stringContaining('3: BUILD 72'))
-    expect(within(work).getByTestId('needs-score-codex')).toHaveTextContent('(44)')
-    expect(within(work).queryByTestId('needs-mrr-codex')).toBeNull()
-
-    // счётчик прогонов на кнопке ищет СВОЙ вид артефакта: «Продукт» запускается как `product`,
-    // а копится как `analyze_product` — раньше на этой паре счётчик молчал
-    await userEvent.click(within(work).getByTestId('needs-menu').querySelector('summary')!)
-    expect(within(work).getByTestId('needs-run-claude-product')).toHaveTextContent('(1)')
-    expect(within(work).getByTestId('needs-run-claude-analyze_adv')).toHaveTextContent('(1)')
+    expect(await screen.findByTestId('needs-confirm')).toHaveTextContent('уже считали')
   })
 
   it('все отчёты остаются ссылками, а не заменяют друг друга', async () => {

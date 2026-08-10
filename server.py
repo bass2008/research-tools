@@ -438,7 +438,7 @@ async def lifespan(app):
     REPORTS.mkdir(parents=True, exist_ok=True)
     wscore.load_env()
     con = wscore.connect()
-    migrated_reports = needs_layer.migrate_analysis_families()
+    heads_added = needs_layer.backfill_head_nodes(con)
     freed = wscore.clear_stale_locks(con)   # рестарт не оставляет залипших блокировок
     # инвариант: FULLY_LOADED только если всё поддерево загружено (узлы могли стать
     # незагруженными позже — например при выбрасывании отравленной записи кэша)
@@ -449,7 +449,7 @@ async def lifespan(app):
     CTX.log("INFO", "server", None,
             f"сервер запущен, снято зависших блокировок: {freed}, "
             f"исправлено ложных FULLY_LOADED: {repaired}, "
-            f"старых отчётов помечено Claude: {migrated_reports}")
+            f"входов дополнено головой ветки: {heads_added}")
     try:
         yield
     finally:
@@ -586,8 +586,10 @@ async def api_estimate(phrase: str = Query(...)):
 
 
 class NeedsAnalyzeIn(BaseModel):
+    """Единица действия: `group` у трёх разборов, `work` у сезонности, смежных, выгрузки и теста."""
     tree_id: str
-    work: str
+    work: str = ""
+    group: str = ""
     model_family: Literal["claude", "codex"] = "claude"
 
 
@@ -597,8 +599,10 @@ class NeedsRefineIn(BaseModel):
 
 
 class NeedsFavoriteIn(BaseModel):
+    """Лайк ставится либо на работу, либо на группу дерева продуктов."""
     tree_id: str
-    work: str
+    work: str = ""
+    group: str = ""
     favorite: bool
 
 
@@ -714,15 +718,20 @@ async def api_needs_tree(tree_id: str):
 
 @app.post("/api/needs/favorite")
 async def cmd_needs_favorite(body: NeedsFavoriteIn):
-    """Ручное избранное работы. Хранится отдельно от классификации и рейтинга."""
+    """Ручное избранное работы или продукта. Хранится отдельно от классификации и рейтинга."""
     tree_id = body.tree_id.strip()
+    group_id = (body.group or "").strip()
+    if not group_id and not (body.work or "").strip():
+        raise HTTPException(422, "нужна работа или группа")
     try:
-        work, favorites = needs_layer.set_favorite(
-            tree_id, body.work, body.favorite,
+        name, favorites = needs_layer.set_favorite(
+            tree_id, work_name=body.work or None, favorite=body.favorite,
+            group_id=group_id or None,
         )
     except needs_layer.NeedsError as e:
         raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
-    return {"work": work, "favorite": body.favorite, "favorites": favorites}
+    key = "group" if group_id else "work"
+    return {key: name, "favorite": body.favorite, "favorites": favorites}
 
 
 @app.post("/api/needs/refine")
@@ -781,49 +790,91 @@ async def cmd_needs_rank(body: NeedsRefineIn,
     return {"task_id": task_id}
 
 
+@app.post("/api/needs/products")
+async def cmd_needs_products(body: NeedsRefineIn,
+                             caller: str = Header(None, alias="X-Caller")):
+    """«Продукты»: разложить работы ветки в дерево продуктов на трёх масштабах.
+
+    Единица здесь — ВЕТКА, а не работа. Объявлено до `/api/needs/{action}` — иначе `products`
+    поймает маршрут действия над группой."""
+    tree_id = body.tree_id.strip()
+    try:
+        tree, _, _ = needs_layer.load_tree(tree_id)
+    except needs_layer.NeedsError as e:
+        raise HTTPException(404 if "дерева нет" in str(e) else 422, str(e))
+    if [key for key in CTX.needs_busy if key[0] == tree_id]:
+        raise HTTPException(409, "по этому дереву уже идёт операция")
+    if not needs_layer.works(tree):
+        raise HTTPException(422, "в классификации нет работ для группировки")
+    plan = needs_layer.products_plan(tree_id)
+    CTX.needs_busy.add((tree_id, "", "products", "shared"))
+    params = {"tree_id": tree_id, "model_family": body.model_family}
+    task_id = tasks.create_task(CTX, "needs_products", tree_id, params)
+    CTX.queue.put_nowait(task_id)
+    CTX.log("INFO", "needs_products", tree_id,
+            f"группировка в продукты {task_id[:8]} поставлена в очередь "
+            f"({_caller(caller, 'ui')}), работ {len(needs_layer.works(tree))}, "
+            f"семейство {body.model_family}; прежних групп {plan['groups']}, "
+            f"из них с разборами {plan['with_reports']} ({plan['reports']} отчётов)")
+    return {"task_id": task_id, "replacing": plan}
+
+
 @app.post("/api/needs/{action}")
 async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
                          caller: str = Header(None, alias="X-Caller")):
-    """Действие над работой. Три разбора, воронка от рынка к продукту: `analyze` — «Ниша»
-    (можно ли перехватить поисковый трафик), `analyze_adv` — «Функции» (какие функции внутри
-    работы и за что платят), `product` — «Продукт» (одна функция -> спецификация: кому, почём,
-    почему купят). Плюс `season` (история частоты),
-    `adjacent` (смежные ключи без слова-технологии), `dump` (полная выгрузка топ-10 страницами).
+    """Действие второго и третьего слоёв.
+
+    Три разбора идут по ГРУППЕ дерева продуктов, воронкой от рынка к продукту: `analyze` —
+    «Ниша» (можно ли перехватить поисковый трафик), `analyze_adv` — «Функции» (какие функции
+    внутри и за что платят), `product` — «Спецификация» (кому, почём, почему купят и сколько).
+    По РАБОТЕ остаются `season` (история частоты), `adjacent` (смежные ключи без
+    слова-технологии), `dump` (выгрузка топ-10 страницами) и `test` — это факты о спросе и
+    служебная проверка, а не суждения о продукте.
 
     Повторный запуск разрешён: каждый прогон копит свой артефакт, и смысл повтора в том, что
-    данных стало больше. Запрещён только ПАРАЛЛЕЛЬНЫЙ прогон той же операции по той же работе."""
+    данных стало больше. Запрещён только ПАРАЛЛЕЛЬНЫЙ прогон той же операции по той же единице."""
     ops = {"analyze": "needs_analyze", "analyze_adv": "needs_analyze_adv",
            "product": "needs_analyze_product", "test": "needs_model_test",
            "season": "needs_season",
            "adjacent": "needs_adjacent", "dump": "needs_dump"}
     if action not in ops:
         raise HTTPException(404, f"нет такого действия: {action}")
-    tree_id, work = body.tree_id.strip(), body.work.strip()
+    # выгрузка работает по обеим единицам: по группе, если она передана, иначе по работе
+    by_group = action in {"analyze", "analyze_adv", "product"} or (
+        action == "dump" and bool((body.group or "").strip()))
+    tree_id = body.tree_id.strip()
+    unit = (body.group or "").strip() if by_group else (body.work or "").strip()
+    if not unit:
+        raise HTTPException(422, "нужна группа" if by_group else "нужна работа")
     try:
         tree, _, _ = needs_layer.load_tree(tree_id)
-        w = needs_layer.find_work(tree, work)
+        if by_group:
+            group = needs_layer.find_group(tree_id, unit)
+            count = len(needs_layer.group_input(tree_id, unit, 1)["phrases"])
+        else:
+            count = len(needs_layer.work_phrases(needs_layer.find_work(tree, unit)))
     except needs_layer.NeedsError as e:
         raise HTTPException(404, str(e))
     model_action = action in {"analyze", "analyze_adv", "product", "test"}
     family = body.model_family if model_action else "basic"
     if any(k[0] == tree_id and k[1] == "" and k[3] == "shared" for k in CTX.needs_busy):
-        raise HTTPException(409, "по дереву идёт анализ или второй проход классификации")
-    key = (tree_id, needs_layer._norm(work), action, family)
+        raise HTTPException(409, "по дереву идёт группировка, анализ или второй проход")
+    key = (tree_id, unit if by_group else needs_layer._norm(unit), action, family)
     if key in CTX.needs_busy:
         suffix = f" ({family})" if model_action else ""
-        raise HTTPException(409, f"«{action}»{suffix} по работе {work!r} уже идёт")
-    phrases = needs_layer.work_phrases(w)
-    if not phrases:
-        raise HTTPException(422, f"в работе {work!r} нет фраз")
+        raise HTTPException(409, f"«{action}»{suffix} по {unit!r} уже идёт")
+    if not count:
+        raise HTTPException(422, f"в {unit!r} нет фраз")
     CTX.needs_busy.add(key)
-    params = {"tree_id": tree_id, "work": work}
+    label = group.get("name") or unit if by_group else unit
+    params = {"tree_id": tree_id, ("group" if by_group else "work"): unit}
     if model_action:
         params["model_family"] = family
-    task_id = tasks.create_task(CTX, ops[action], work, params)
+    task_id = tasks.create_task(CTX, ops[action], label, params)
     CTX.queue.put_nowait(task_id)
-    CTX.log("INFO", ops[action], work,
+    CTX.log("INFO", ops[action], label,
             f"задача {task_id[:8]} поставлена в очередь ({_caller(caller, 'ui')}), "
-            f"дерево {tree_id}, фраз {len(phrases)}, семейство {family}")
+            f"дерево {tree_id}, фраз {count}, семейство {family}")
     return {"task_id": task_id}
 
 
@@ -938,17 +989,20 @@ async def cmd_task_retry(task_id: str, caller: str = Header(None, alias="X-Calle
     family = params.get("model_family")
     family = family if family in {"claude", "codex"} else "claude"
     tree_id, work, node = params.get("tree_id"), params.get("work"), row["node"]
+    group = params.get("group")
     if op in NEEDS_WORK_OPS:
-        if not (tree_id and work):
-            raise HTTPException(422, "в параметрах задачи нет дерева или работы")
+        if not (tree_id and (work or group)):
+            raise HTTPException(422, "в параметрах задачи нет дерева, работы или группы")
         return await cmd_needs_work(
             NEEDS_WORK_OPS[op],
-            NeedsAnalyzeIn(tree_id=tree_id, work=work, model_family=family), caller)
-    if op in {"needs_refine", "needs_rank"}:
+            NeedsAnalyzeIn(tree_id=tree_id, work=work or "", group=group or "",
+                           model_family=family), caller)
+    if op in {"needs_refine", "needs_rank", "needs_products"}:
         if not tree_id:
             raise HTTPException(422, "в параметрах задачи нет дерева")
         body = NeedsRefineIn(tree_id=tree_id, model_family=family)
-        return await (cmd_needs_refine if op == "needs_refine" else cmd_needs_rank)(body, caller)
+        return await {"needs_refine": cmd_needs_refine, "needs_rank": cmd_needs_rank,
+                      "needs_products": cmd_needs_products}[op](body, caller)
     if op == "needs_build":
         return await cmd_needs_build(PhraseIn2(phrase=node or ""), caller)
     if op == "stopwords_scan":

@@ -34,7 +34,11 @@ HEAD_FREQ = 30000           # выше — голова, интент размы
 # Продуктовый рейтинг строится отдельной дорогой командой и хранится отдельным артефактом,
 # чтобы пересборка классов не притворялась анализом рынка или возможности продукта.
 CLASS_WORK_KEYS = ("name", "top_freq", "phrase_count", "unclear", "why")
-SEGMENT_KEYS = ("name", "why")
+SEGMENT_KEYS = ("name", "kind", "why")
+# `section` — тот же вход и тот же продукт, другой раздел ответа (позиция карты, тема разбора);
+# `segment` — другой вход, аудитория или ограничение. Разница в том, нужна ли вторая разработка:
+# разделы, поднятые до работ, дают N бюджетов на один движок и N долей одного пула.
+SEGMENT_KINDS = ("segment", "section")
 RANK_KEYS = ("score", "score_why", "intent", "product", "blocker", "evidence", "factors")
 RANK_RESULT_KEYS = ("name", "intent", "factors", "score", "score_why", "product",
                     "blocker", "evidence")
@@ -177,6 +181,43 @@ def work_phrases(work):
     return out
 
 
+def head_cover(source, phrases):
+    """Головные контейнеры, под которыми лежат фразы работы.
+
+    Частота по широкому соответствию уже включает уточнения, поэтому пул работы ограничен
+    сверху контейнером, а не суммой её фраз. Голова в классификацию не входит, и без этой
+    сводки разбор её не видит вовсе: он складывает детей руками и получает кратно заниженный
+    рынок. `covers` — сколько фраз работы лежит под контейнером по рёбрам ветки; ноль значит,
+    что рёбрами связь не установлена, а не что контейнер к работе не относится (перестановки
+    слов и тупиковые узлы рёбер не дают). -> [{phrase, freq, covers, covers_top_freq}],
+    накрывающие первыми."""
+    heads = [h for h in (source.get("head_nodes") or [])
+             if isinstance(h, dict) and h.get("phrase")]
+    if not heads:
+        return []
+    want = {_norm(p) for p in phrases}
+    kids, freq = {}, {}
+    for n in list(source.get("nodes") or []) + heads:
+        if isinstance(n, dict) and n.get("phrase"):
+            key = _norm(n["phrase"])
+            kids[key] = [_norm(c) for c in (n.get("children") or [])]
+            freq[key] = n.get("freq") or 0
+    out = []
+    for h in heads:
+        seen, stack, hit = set(), list(kids.get(_norm(h["phrase"]), [])), []
+        while stack:
+            p = stack.pop()
+            if p in seen:
+                continue
+            seen.add(p)
+            if p in want:
+                hit.append(p)
+            stack += kids.get(p, [])
+        out.append({"phrase": h["phrase"], "freq": h.get("freq") or 0, "covers": len(hit),
+                    "covers_top_freq": max((freq.get(p, 0) for p in hit), default=0)})
+    return sorted(out, key=lambda x: (x["covers"] == 0, -x["freq"], x["phrase"]))
+
+
 def find_work(tree, name):
     want = _norm(name)
     for w in works(tree):
@@ -199,36 +240,62 @@ def _favorites_path(tree_id, tree_file=None):
     return NEEDS_DIR / ".favorites" / f"{digest}.json"
 
 
+def _favorites_read(tree_id, tree_file=None):
+    path = _favorites_path(tree_id, tree_file)
+    if not path.is_file():
+        return {}
+    data = _read(path)
+    for key in ("works", "groups"):
+        raw = data.get(key)
+        if raw is not None and (not isinstance(raw, list)
+                                or any(not isinstance(x, str) for x in raw)):
+            raise NeedsError(f"избранное {path.name}: {key} должен быть массивом строк")
+    return data
+
+
 def favorite_names(tree_id):
     """Избранные работы текущей классификации, в её каноническом порядке."""
     tree, tree_file, _ = load_tree(tree_id)
-    path = _favorites_path(tree_id, tree_file)
-    if not path.is_file():
-        return []
-    data = _read(path)
-    raw = data.get("works")
-    if not isinstance(raw, list) or any(not isinstance(name, str) for name in raw):
-        raise NeedsError(f"избранное {path.name}: works должен быть массивом строк")
-    selected = {_norm(name) for name in raw}
+    selected = {_norm(name) for name in (_favorites_read(tree_id, tree_file).get("works") or [])}
     return [w.get("name") for w in works(tree)
             if isinstance(w.get("name"), str) and _norm(w.get("name")) in selected]
 
 
-def set_favorite(tree_id, work_name, favorite):
-    """Поставить или снять ручной лайк, не меняя accepted.json и ranking-артефакты."""
+def favorite_groups(tree_id):
+    """Избранные продукты текущей группировки, в её порядке.
+
+    Лайк на группе, а не на работе: строить решают продукт, и отметка человека нужна там же,
+    где кнопки разборов."""
+    known = [str(g.get("id")) for g in (latest_products(tree_id) or {}).get("groups") or []]
+    selected = set(_favorites_read(tree_id).get("groups") or [])
+    return [gid for gid in known if gid in selected]
+
+
+def set_favorite(tree_id, work_name=None, favorite=True, group_id=None):
+    """Поставить или снять ручной лайк на работе или на группе.
+
+    Не меняет ни accepted.json, ни ranking, ни группировку: лайк — отметка человека, она живёт
+    отдельным sidecar. -> (каноническое имя, полный список избранных этого вида)."""
     tree, tree_file, _ = load_tree(tree_id)
-    work = find_work(tree, work_name)
-    canonical = work.get("name")
-    selected = {_norm(name) for name in favorite_names(tree_id)}
-    if favorite:
-        selected.add(_norm(canonical))
+    data = _favorites_read(tree_id, tree_file)
+    if group_id is not None:
+        find_group(tree_id, group_id)            # нет группы — 404, а не тихая запись
+        selected = set(data.get("groups") or [])
+        selected.add(str(group_id)) if favorite else selected.discard(str(group_id))
+        known = [str(g.get("id")) for g in (latest_products(tree_id) or {}).get("groups") or []]
+        ordered = [gid for gid in known if gid in selected]
+        canonical, key = str(group_id), "groups"
     else:
-        selected.discard(_norm(canonical))
-    ordered = [w.get("name") for w in works(tree)
-               if isinstance(w.get("name"), str) and _norm(w.get("name")) in selected]
+        canonical = find_work(tree, work_name).get("name")
+        selected = {_norm(n) for n in (data.get("works") or [])}
+        selected.add(_norm(canonical)) if favorite else selected.discard(_norm(canonical))
+        ordered = [w.get("name") for w in works(tree)
+                   if isinstance(w.get("name"), str) and _norm(w.get("name")) in selected]
+        key = "works"
     path = _favorites_path(tree_id, tree_file)
     path.parent.mkdir(parents=True, exist_ok=True)
-    _write_json_atomic(path, {"works": ordered, "updated_at": int(time.time())})
+    _write_json_atomic(path, {**{k: data.get(k) for k in ("works", "groups") if data.get(k)},
+                              key: ordered, "updated_at": int(time.time())})
     return canonical, ordered
 
 
@@ -254,6 +321,23 @@ ARTIFACT_KINDS = ("analyze", "analyze_adv", "analyze_product", "model_test",
 ANALYSIS_KINDS = ("analyze", "analyze_adv", "analyze_product")
 MODEL_ARTIFACT_KINDS = (*ANALYSIS_KINDS, "model_test")
 MODEL_FAMILIES = ("claude", "codex")
+
+# ---------- третий слой: продукты ----------
+#
+# Работа отвечает на вопрос «что человек хочет сделать», продукт — «что мы строим», и связь между
+# ними многие-ко-многим: один продукт закрывает несколько работ (одна дата рождения -> карта ->
+# двадцать разделов), одна работа обслуживает несколько продуктов. Пока единицей разбора была
+# работа, движок ветки считался заново в каждом отчёте: семь отчётов по одной ветке насчитали
+# 1,8 млн ₽ разработки одного калькулятора.
+#
+# Уровни — три раскладки ОДНИХ И ТЕХ ЖЕ работ, вложенные друг в друга: micro ⊂ medium ⊂ macro.
+# Покрытие полное на каждом: работа, которая ни с чем не склеивается, на micro становится группой
+# из одной работы. Остатка («не вошло никуда») не существует.
+PRODUCT_LEVELS = ("micro", "medium", "macro")
+# `cost` тут намеренно нет: группировка не видит выдачи и не знает ни про готовые плагины, ни
+# про то, генерируются тексты на лету или заранее. Стоимость считает «Спецификация».
+GROUP_KEYS = ("id", "level", "name", "works", "input", "engine", "output", "money",
+              "pool", "pool_why", "core", "order", "parent", "why")
 
 
 def model_family(value, default=None):
@@ -382,6 +466,148 @@ def latest_ranking(tree_id, revision=None):
     return max(found, default=(0, "", None))[2]
 
 
+def validate_products(tree, result):
+    """Что не так с группировкой в продукты. Пусто = принимаем.
+
+    Три вещи, которые проверить может только приёмник, а не промпт: покрытие полное на каждом
+    уровне (остатка не существует), уровни вложены друг в друга, идентификаторы уникальны.
+    Работа может входить в несколько групп одного уровня — тогда у вхождения обязана быть
+    причина, иначе модель начнёт дублировать работы ради красивых пулов."""
+    problems = []
+    if not isinstance(result, dict):
+        return ["ответ должен быть объектом"]
+    groups = result.get("groups")
+    if not isinstance(groups, list) or not groups:
+        return ["нет непустого списка groups"]
+    known = {_norm(w.get("name")) for w in works(tree)}
+    by_level, ids = {level: [] for level in PRODUCT_LEVELS}, {}
+    for i, g in enumerate(groups):
+        if not isinstance(g, dict):
+            problems.append(f"groups[{i}] не объект")
+            continue
+        gid, level = str(g.get("id") or "").strip(), g.get("level")
+        if not gid:
+            problems.append(f"groups[{i}]: пустой id")
+        elif gid in ids:
+            problems.append(f"groups[{i}]: id {gid!r} уже занят")
+        else:
+            ids[gid] = g
+        if level not in PRODUCT_LEVELS:
+            problems.append(f"groups[{i}] ({gid}): level={level!r}, "
+                            f"допустимо {' / '.join(PRODUCT_LEVELS)}")
+            continue
+        names = g.get("works")
+        if not isinstance(names, list) or not names:
+            problems.append(f"{gid}: непустой список works обязателен")
+            continue
+        unknown = [n for n in names if _norm(n) not in known]
+        if unknown:
+            problems.append(f"{gid}: работ нет в классификации: {unknown[:3]}")
+        for key in ("input", "engine", "money"):
+            if not str(g.get(key) or "").strip():
+                problems.append(f"{gid}: пустое поле {key}")
+        if len(names) > len({_norm(n) for n in names}):
+            problems.append(f"{gid}: работа указана в группе дважды")
+        by_level[level].append(g)
+    for level in PRODUCT_LEVELS:
+        if not by_level[level]:
+            problems.append(f"уровень {level} пуст: покрытие обязано быть полным на каждом")
+            continue
+        covered = {_norm(n) for g in by_level[level] for n in (g.get("works") or [])}
+        missing = sorted(known - covered)
+        if missing:
+            problems.append(f"уровень {level}: работы не вошли ни в одну группу — {missing[:5]}")
+    # вложенность: состав каждой группы обязан целиком лежать в её родителе уровнем выше
+    for level, upper in (("micro", "medium"), ("medium", "macro")):
+        for g in by_level[level]:
+            parent = ids.get(str(g.get("parent") or "").strip())
+            if parent is None:
+                problems.append(f"{g.get('id')}: parent обязан ссылаться на группу уровня {upper}")
+                continue
+            if parent.get("level") != upper:
+                problems.append(f"{g.get('id')}: parent {parent.get('id')} уровня "
+                                f"{parent.get('level')}, ожидался {upper}")
+                continue
+            outside = sorted({_norm(n) for n in (g.get("works") or [])}
+                             - {_norm(n) for n in (parent.get("works") or [])})
+            if outside:
+                problems.append(f"{g.get('id')}: работы вне родителя {parent.get('id')}: "
+                                f"{outside[:3]}")
+    return problems
+
+
+def save_products(tree_id, result, task_id, family, expected_revision):
+    """Сохранить группировку отдельным артефактом; классификацию не менять."""
+    tree, tree_file, params_file = load_tree(tree_id)
+    if tree_file.name != "accepted.json" or params_file is None:
+        raise NeedsError(f"дерево {tree_id} не поддерживает группировку")
+    revision = tree_revision(tree)
+    if revision != expected_revision:
+        raise NeedsError(f"классификация изменилась во время группировки: была "
+                         f"{expected_revision}, стала {revision}")
+    groups = [{k: g.get(k) for k in GROUP_KEYS} for g in result["groups"]]
+    data = {"task_id": task_id, "model_family": model_family(family),
+            "created_at": int(time.time()), "tree_revision": revision,
+            "why": result.get("why"), "report_link": result.get("report_link"),
+            "groups": groups}
+    d = tree_file.parent / "products"
+    d.mkdir(parents=True, exist_ok=True)
+    _write_json_atomic(d / f"products-{task_id}.json", data)
+    data["dropped"] = _drop_orphan_groups(tree_id, {str(g.get("id")) for g in groups})
+    return data
+
+
+def _drop_orphan_groups(tree_id, known):
+    """Снести разборы групп, которых в новой раскладке нет.
+
+    `id` групп придумывает модель, между прогонами они не стабильны, поэтому после пересборки
+    часть разборов осталась бы висеть без своей группы: в интерфейсе они выглядят мусором, а
+    решение по ним всё равно устарело — пул и состав работ другие. -> сколько удалено."""
+    root = NEEDS_DIR / tree_id / "products"
+    dropped = 0
+    for d in sorted(p for p in root.glob("*") if p.is_dir()):
+        if d.name in {slug(str(k)) for k in known} | set(known):
+            continue
+        for f in sorted(d.glob("*.json")):
+            try:
+                link = (_read(f).get("report_link") or "").strip()
+            except NeedsError:
+                link = ""
+            if link:
+                page = ROOT / "reports" / Path(link).name
+                page.unlink(missing_ok=True)
+            f.unlink(missing_ok=True)
+            dropped += 1
+        try:
+            d.rmdir()
+        except OSError:
+            pass
+    return dropped
+
+
+def latest_products(tree_id, revision=None):
+    """Последняя группировка текущей ревизии классификации; старые остаются историей."""
+    tree, tree_file, _ = load_tree(tree_id)
+    want = tree_revision(tree) if revision is None else revision
+    found = []
+    for f in (tree_file.parent / "products").glob("products-*.json"):
+        try:
+            data = _read(f)
+        except NeedsError:
+            continue
+        if data.get("tree_revision") == want and isinstance(data.get("groups"), list):
+            found.append((data.get("created_at") or 0, f.name, data))
+    return max(found, default=(0, "", None))[2]
+
+
+def find_group(tree_id, group_id):
+    products = latest_products(tree_id)
+    for g in (products or {}).get("groups") or []:
+        if str(g.get("id")) == str(group_id):
+            return g
+    raise NeedsError(f"группы нет в дереве {tree_id}: {group_id}")
+
+
 def artifact_family(artifact):
     """Семейство артефакта. Старые анализы до миграции принадлежат Claude."""
     if (artifact or {}).get("kind") not in MODEL_ARTIFACT_KINDS:
@@ -408,32 +634,243 @@ def save_artifact(tree_id, work_name, kind, data):
     return f
 
 
-def migrate_analysis_families():
-    """Разовая идемпотентная миграция: все старые анализы считаются запусками Claude."""
-    changed = 0
-    seen = set()
-    for tree_file, _ in trees().values():
-        root = tree_file.parent
-        files = list((root / "artifacts").glob("*/*.json")) + list((root / "analysis").glob("*.json"))
-        for f in files:
-            if f in seen:
+def save_group_artifact(tree_id, group_id, kind, data):
+    """Артефакт разбора ГРУППЫ. Каждый прогон — отдельный файл, как у работ.
+
+    Лежит в `products/<group_id>/`, рядом с самой группировкой (`products/products-*.json`):
+    подкаталоги и файлы не пересекаются по glob."""
+    tree, _, _ = load_tree(tree_id)
+    d = NEEDS_DIR / tree_id / "products" / slug(str(group_id))
+    d.mkdir(parents=True, exist_ok=True)
+    data = {"group": str(group_id), "kind": kind, **data,
+            "tree_revision": tree_revision(tree)}
+    if kind in MODEL_ARTIFACT_KINDS:
+        data["model_family"] = model_family(data.get("model_family"), "claude")
+    _write_json_atomic(d / f"{kind}-{data.get('task_id', 'x')}.json", data)
+    return d / f"{kind}-{data.get('task_id', 'x')}.json"
+
+
+def group_artifacts(tree_id, include_stale=False):
+    """{группа: [артефакт, ...]} текущей ревизии — новые сверху."""
+    out = {}
+    tree, _, _ = load_tree(tree_id)
+    current = tree_revision(tree)
+    for f in sorted((NEEDS_DIR / tree_id / "products").glob("*/*.json")):
+        try:
+            data = _read(f)
+        except NeedsError:
+            continue
+        if not data.get("group"):
+            continue
+        data.setdefault("tree_revision", 0)
+        if not include_stale and data["tree_revision"] != current:
+            continue
+        if data.get("kind") in MODEL_ARTIFACT_KINDS:
+            data["model_family"] = artifact_family(data)
+        out.setdefault(str(data["group"]), []).append(data)
+    for lst in out.values():
+        lst.sort(key=lambda a: -(a.get("created_at") or 0))
+    return out
+
+
+def _group_works(tree, group):
+    want = {_norm(n) for n in (group.get("works") or [])}
+    return [w for w in works(tree) if _norm(w.get("name")) in want]
+
+
+def group_input(tree_id, group_id, top):
+    """Данные для разбора ГРУППЫ: фразы всех её работ разом, голова над ними и что уже собрано.
+
+    Разбор по одной работе видел только её фразы и потому не мог знать, что рядом лежат работы
+    на том же движке. Здесь единица — продукт: фразы объединены, `head` посчитан по объединению,
+    сезонность и смежные ключи собраны со всех работ группы."""
+    tree, _, params_file = load_tree(tree_id)
+    group = find_group(tree_id, group_id)
+    freqs, meta = _input(params_file)
+    source = _read(params_file) if params_file is not None else {}
+    ranking = latest_ranking(tree_id) or {}
+    ranks = {_norm(r.get("name")): r for r in (ranking.get("works") or [])}
+    arts = work_artifacts(tree_id)
+    mine = _group_works(tree, group)
+    # своя выгрузка группы идёт первой: она снята по дверям продукта, а не одной его работы
+    own = [{"work": None, "group": str(group_id), "dir": f"reports/{slug(str(group_id))}",
+            **{k: a.get(k) for k in ("queries", "pages", "ok", "report_link", "created_at")}}
+           for a in group_artifacts(tree_id).get(str(group_id), []) if a.get("kind") == "dump"]
+    seen, phrases = set(), []
+    for w in mine:
+        for p in work_phrases(w):
+            if _norm(p) in seen:
                 continue
-            seen.add(f)
-            try:
-                data = json.loads(f.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if not isinstance(data, dict):
-                continue
-            kind = data.get("kind") or "analyze"
-            if kind not in ANALYSIS_KINDS or data.get("model_family") in MODEL_FAMILIES:
-                continue
-            data["model_family"] = "claude"
-            tmp = f.with_suffix(f.suffix + ".tmp")
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-            tmp.replace(f)
-            changed += 1
-    return changed
+            seen.add(_norm(p))
+            phrases.append({"phrase": p, "freq": freqs.get(p) or 0})
+    phrases.sort(key=lambda x: (-x["freq"], x["phrase"]))
+    season = adjacent = None
+    dumps = list(own)
+    for w in mine:
+        for a in arts.get(_norm(w.get("name")), []):
+            if a.get("kind") == "season" and season is None:
+                season = a
+            if a.get("kind") == "adjacent" and adjacent is None:
+                adjacent = a
+            # выгрузка — это скачанные страницы топа: сниппет обещает «бесплатно», а на
+            # странице стоит пейволл, и проверить это можно только по самой странице
+            if a.get("kind") == "dump":
+                dumps.append({"work": w.get("name"), "dir": f"reports/{slug(w.get('name'))}",
+                              **{k: a.get(k) for k in ("queries", "pages", "ok", "report_link",
+                                                       "created_at")}})
+    return {
+        "tree_id": tree_id, "condition": tree.get("condition"),
+        "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+        "group": {k: group.get(k) for k in GROUP_KEYS},
+        "works": [{**{k: w.get(k) for k in CLASS_WORK_KEYS},
+                   **{k: ranks.get(_norm(w.get("name")), {}).get(k) for k in RANK_KEYS},
+                   "sections": [{**{k: s.get(k) for k in SEGMENT_KEYS},
+                                 "phrase_count": len(s.get("phrases") or [])}
+                                for s in (w.get("segments") or []) if isinstance(s, dict)]}
+                  for w in mine],
+        "head": head_cover(source, [p["phrase"] for p in phrases]),
+        "phrases": phrases,
+        "season": season, "adjacent": adjacent, "dumps": dumps,
+        "search": [p["phrase"] for p in phrases[:max(1, top)]],
+    }
+
+
+def products_plan(tree_id):
+    """Что потеряет пересборка группировки: группы с разборами и число их отчётов.
+
+    `id` групп придумывает модель, между прогонами они не стабильны, поэтому пересборка почти
+    наверняка осиротит часть разборов — и они удаляются вместе с отчётами. Человек должен видеть
+    цену до нажатия, а не узнавать её постфактум."""
+    products = latest_products(tree_id)
+    if not products:
+        return {"groups": 0, "with_reports": 0, "reports": 0}
+    known = {str(g.get("id")) for g in products.get("groups") or []}
+    arts = {gid: a for gid, a in group_artifacts(tree_id).items() if gid in known}
+    return {"groups": len(known), "with_reports": len(arts),
+            "reports": sum(len(a) for a in arts.values())}
+
+
+def products_view(tree_id):
+    """Группировка для UI: группы с агрегатами своих работ. None, если ещё не собрана.
+
+    Агрегаты считаются здесь, а не моделью: сумма частот, максимум, число фраз и рангов — это
+    арифметика по классификации, и просить её у LLM значит получить приблизительные числа."""
+    products = latest_products(tree_id)
+    if not products:
+        return None
+    tree, _, params_file = load_tree(tree_id)
+    freqs, _meta = _input(params_file)
+    ranking = latest_ranking(tree_id) or {}
+    ranks = {_norm(r.get("name")): r for r in (ranking.get("works") or [])}
+    arts = group_artifacts(tree_id)
+    liked = set(favorite_groups(tree_id))
+    out = []
+    for g in products.get("groups") or []:
+        mine = _group_works(tree, g)
+        seen, sum_freq, top_freq, sections = set(), 0, 0, 0
+        for w in mine:
+            sections += len([s for s in (w.get("segments") or []) if isinstance(s, dict)])
+            for p in work_phrases(w):
+                if _norm(p) in seen:
+                    continue
+                seen.add(_norm(p))
+                f = freqs.get(p) or 0
+                sum_freq += f
+                top_freq = max(top_freq, f)
+        scores = [ranks.get(_norm(w.get("name")), {}).get("score") for w in mine]
+        scores = [s for s in scores if isinstance(s, (int, float))]
+        out.append({**{k: g.get(k) for k in GROUP_KEYS},
+                    "favorite": str(g.get("id")) in liked,
+                    # ключи работы едут вместе с ней: в дереве продуктов человек читает
+                    # продукт -> потребность -> фразы, не переключаясь на другую вкладку
+                    "work_items": [{"name": w.get("name"), "top_freq": w.get("top_freq"),
+                                    "phrase_count": w.get("phrase_count"),
+                                    "sum_freq": sum((freqs.get(p) or 0)
+                                                    for p in work_phrases(w)),
+                                    "unclear": w.get("unclear"), "why": w.get("why"),
+                                    "phrases": sorted(
+                                        ({"phrase": p, "freq": freqs.get(p) or 0}
+                                         for p in work_phrases(w)),
+                                        key=lambda x: (-x["freq"], x["phrase"])),
+                                    "sections": [{**{k: s.get(k) for k in SEGMENT_KEYS},
+                                                  "phrase_count": len(s.get("phrases") or [])}
+                                                 for s in (w.get("segments") or [])
+                                                 if isinstance(s, dict)],
+                                    **{k: ranks.get(_norm(w.get("name")), {}).get(k)
+                                       for k in ("score", "intent", "blocker")}}
+                                   for w in mine],
+                    "sum_freq": sum_freq, "top_freq": top_freq,
+                    "phrase_count": len(seen), "section_count": sections,
+                    "best_score": max(scores) if scores else None,
+                    "artifacts": [{k: x.get(k) for k in
+                                   ("kind", "created_at", "report_link", "task_id", "verdict",
+                                    "verdict_score", "summary", "model_family")}
+                                  for x in arts.get(str(g.get("id")), [])]})
+    order = {level: i for i, level in enumerate(PRODUCT_LEVELS)}
+    out.sort(key=lambda g: (order.get(g.get("level"), 9), -(g.get("pool") or 0),
+                            -(g.get("sum_freq") or 0)))
+    return {k: products.get(k) for k in ("task_id", "model_family", "created_at",
+                                         "tree_revision", "why", "report_link")} | {"groups": out}
+
+
+def products_input(tree_id):
+    """Вход группировки: корень с частотой, голова, условие и все работы ветки разом.
+
+    Разбор работы видит только свои фразы и потому не может знать, что рядом лежат работы на том
+    же движке. Здесь модель видит ветку целиком: `head` даёт потолок рынка по контейнерам,
+    `works` — из чего складываются продукты и что прирастает к ним разделами."""
+    tree, _, params_file = load_tree(tree_id)
+    source = _read(params_file) if params_file is not None else {}
+    freqs, meta = _input(params_file)
+    ranking = latest_ranking(tree_id) or {}
+    ranks = {_norm(r.get("name")): r for r in (ranking.get("works") or [])}
+    out = []
+    for w in works(tree):
+        phrases = work_phrases(w)
+        rank = ranks.get(_norm(w.get("name")), {})
+        out.append({
+            **{k: w.get(k) for k in CLASS_WORK_KEYS},
+            **{k: rank.get(k) for k in RANK_KEYS},
+            "top_phrases": sorted(({"phrase": p, "freq": freqs.get(p) or 0} for p in phrases),
+                                  key=lambda x: (-x["freq"], x["phrase"]))[:12],
+            "sections": [{**{k: s.get(k) for k in SEGMENT_KEYS},
+                          "phrase_count": len(s.get("phrases") or [])}
+                         for s in (w.get("segments") or []) if isinstance(s, dict)],
+            "head": head_cover(source, phrases),
+        })
+    out.sort(key=lambda w: -(w.get("score") or 0))
+    return {"tree_id": tree_id, "condition": tree.get("condition"),
+            "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+            "head_nodes": source.get("head_nodes") or [],
+            "works": out}
+
+
+def backfill_head_nodes(con, max_freq=HEAD_FREQ):
+    """Дописать голову ветки во входы деревьев, собранных до её появления.
+
+    Раньше голова просто выбрасывалась, и разбор считал пул сложением её детей — рынок выходил
+    кратно занижённым. Досыпаем из первого слоя: `nodes` при этом не трогаются, поэтому уже
+    принятая классификация и правило полноты остаются в силе, а пересобирать дерево не нужно.
+    Идемпотентно. -> сколько входов дополнено."""
+    done = 0
+    for tree_id, (_, params_file) in trees().items():
+        if params_file is None:
+            continue
+        try:
+            source = _read(params_file)
+        except NeedsError:
+            continue
+        root = source.get("root")
+        if not root or source.get("head_nodes") is not None:
+            continue
+        try:
+            fresh = build_payload(con, root, min_freq=source.get("min_freq") or FLOOR,
+                                  max_freq=source.get("max_freq") or max_freq)
+        except NeedsError:      # ветку могли удалить из первого слоя — дерево живёт дальше
+            continue
+        _write_json_atomic(params_file, {**source, "head_nodes": fresh["head_nodes"]})
+        done += 1
+    return done
 
 
 def work_artifacts(tree_id, include_stale=False):
@@ -447,7 +884,7 @@ def work_artifacts(tree_id, include_stale=False):
     root = NEEDS_DIR / tree_id
     tree, _, _ = load_tree(tree_id)
     current_revision = tree_revision(tree)
-    for f in sorted((root / "artifacts").glob("*/*.json")) + sorted((root / "analysis").glob("*.json")):
+    for f in sorted((root / "artifacts").glob("*/*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -467,15 +904,16 @@ def work_artifacts(tree_id, include_stale=False):
 
 
 def all_analyses():
-    """Разборы работ по всем деревьям, НОВЫЕ СВЕРХУ — вкладка «Отчёты».
+    """Разборы продуктов по всем деревьям, НОВЫЕ СВЕРХУ — вкладка «Отчёты».
 
     Порядок по дате, а не по оценке: свежий прогон должен быть виден сразу, иначе он тонет
     в хвосте длинной таблицы и выглядит как «отчёт не появился».
 
     Разборов три вида (`analyze`, `analyze_adv`, `analyze_product`) и два семейства модели.
     Они отвечают на разные вопросы, поэтому показываются отдельными строками; от каждого
-    сочетания вида и семейства берём последний прогон по работе.
-    Единица отчёта — работа, поэтому таблица `report` (она про узлы) здесь не участвует."""
+    сочетания вида и семейства берём последний прогон по группе.
+    Единица отчёта — группа дерева продуктов, поэтому таблица `report` (она про узлы) здесь
+    не участвует."""
     out = []
     for tid, (tree_file, params_file) in trees().items():
         try:
@@ -483,23 +921,51 @@ def all_analyses():
         except NeedsError:
             continue
         _, meta = _input(params_file)
-        by_name = {_norm(w.get("name")): w for w in works(tree)}
-        for name, arts in work_artifacts(tid).items():
+        products = latest_products(tid) or {}
+        groups = {str(g.get("id")): g for g in products.get("groups") or []}
+        # сама группировка — тоже отчёт, и единственный на всю ветку: без строки в гриде
+        # её HTML недостижим из интерфейса
+        if products.get("report_link"):
+            out.append({"tree_id": tid, "group": "",
+                        "name": f"дерево продуктов: {meta.get('root')}",
+                        "level": None, "kind": "products",
+                        "model_family": products.get("model_family"),
+                        "root": meta.get("root"), "condition": tree.get("condition"),
+                        "pool": None, "phrases": len(groups),
+                        "verdict": None, "verdict_score": None, "confidence": None,
+                        "report_link": products.get("report_link"),
+                        "created_at": products.get("created_at")})
+        for gid, arts in group_artifacts(tid).items():
+            g = groups.get(gid) or {}
+            # выгрузка топа модели не требует, поэтому идёт одной строкой без семейства
+            for a in [x for x in arts if x.get("kind") == "dump" and x.get("report_link")]:
+                out.append({"tree_id": tid, "group": gid,
+                            "name": g.get("name") or gid,
+                            "level": g.get("level"), "kind": "dump", "model_family": None,
+                            "root": meta.get("root"), "condition": tree.get("condition"),
+                            "pool": g.get("pool"), "phrases": a.get("pages"),
+                            "verdict": None, "verdict_score": None, "confidence": None,
+                            "report_link": a.get("report_link"),
+                            "created_at": a.get("created_at")})
             for family in MODEL_FAMILIES:
                 for kind in ANALYSIS_KINDS:
                     a = next((x for x in arts
                               if x.get("kind") == kind and artifact_family(x) == family), None)
                     if a is None:
                         continue
-                    w = by_name.get(name) or {}
-                    out.append({"tree_id": tid, "work": a.get("work"), "kind": kind,
-                                "model_family": family,
+                    # id групп придумывает модель, между прогонами они не стабильны:
+                    # после пересборки разбор может остаться без своей группы. Такие отчёты
+                    # не прячем — иначе сделанная работа молча исчезает из интерфейса
+                    out.append({"tree_id": tid, "group": gid,
+                                "name": g.get("name") or gid,
+                                "level": g.get("level"),
+                                "kind": kind, "model_family": family,
                                 "root": meta.get("root"), "condition": tree.get("condition"),
-                                "top_freq": w.get("top_freq"), "phrases": a.get("phrases"),
+                                "pool": g.get("pool"), "phrases": a.get("phrases"),
                                 **{k: a.get(k) for k in
                                    ("verdict", "verdict_score", "confidence",
                                     "report_link", "created_at")}})
-    out.sort(key=lambda r: (-(r["created_at"] or 0), r["work"] or ""))
+    out.sort(key=lambda r: (-(r["created_at"] or 0), r["name"] or ""))
     return out
 
 
@@ -514,22 +980,24 @@ def rows():
         except NeedsError as e:
             out.append({"id": tid, "error": str(e), "condition": None, "root": None,
                         "root_freq": None, "created_at": None, "analyzed": 0,
-                        "ranked_at": None, "ranked_by": None,
+                        "ranked_at": None, "ranked_by": None, "products": 0,
                         "works": 0, "best_score": None, "ranked": 0,
                         "segments": 0, "phrases": 0, "excluded": 0})
             continue
         _, meta = _input(params_file)
-        arts = work_artifacts(tid)
+        arts = group_artifacts(tid)
         ranking = latest_ranking(tid)
+        products = latest_products(tid)
         out.append({"id": tid, "error": None, "condition": tree.get("condition"),
                     "root": meta.get("root"), "root_freq": meta.get("root_freq"),
                     "created_at": int(tree_file.stat().st_mtime),
                     "ranked_at": (ranking or {}).get("created_at"),
                     "ranked_by": (ranking or {}).get("model_family"),
+                    "products": len((products or {}).get("groups") or []),
+                    # разобранных ПРОДУКТОВ, а не работ: единица разбора теперь группа
                     "analyzed": sum(1 for v in arts.values()
-                                     if any(x.get("kind") == "analyze" for x in v)),
-                    **counts(tree, [k for k, v in arts.items()
-                                    if any(x.get("kind") == "analyze" for x in v)], ranking)})
+                                    if any(x.get("kind") == "analyze" for x in v)),
+                    **counts(tree, ranking=ranking)})
     out.sort(key=lambda r: (r["created_at"] or 0), reverse=True)
     return out
 
@@ -557,10 +1025,6 @@ def detail(tree_id):
         # использоваться в LLM-контрактах; сумму показываем отдельно, не выдавая её за
         # дедуплицированный уникальный спрос.
         sum_freq = sum((freqs.get(p) or 0) for p in work_phrases(w))
-        # legacy-поле analysis остаётся Claude-проекцией; новый UI читает оба семейства из
-        # artifacts. Так старые клиенты не начнут случайно показывать Codex как «основной».
-        a = next((x for x in mine
-                  if x.get("kind") == "analyze" and artifact_family(x) == "claude"), None)
         out_works.append({**{k: w.get(k) for k in CLASS_WORK_KEYS},
                           **{k: rank.get(k) for k in RANK_KEYS},
                           "favorite": _norm(w.get("name")) in favorites,
@@ -574,11 +1038,7 @@ def detail(tree_id):
                                          ("kind", "created_at", "report_link", "task_id",
                                           "verdict", "verdict_score", "summary",
                                           "model_family")}
-                                        for x in mine],
-                          "analysis": {k: a.get(k) for k in
-                                       ("verdict", "verdict_score", "report_link",
-                                        "created_at", "searched", "confidence",
-                                        "model_family")} if a else None})
+                                        for x in mine]})
     # До отдельного анализа сохраняем порядок классификации. После — продуктовые кандидаты сверху.
     if ranking:
         out_works.sort(key=lambda w: (-(w.get("score") or 0), -(w.get("top_freq") or 0)))
@@ -587,6 +1047,7 @@ def detail(tree_id):
                 for e in (tree.get("excluded") or []) if isinstance(e, dict)]
     excluded.sort(key=lambda e: (str(e["why"]), -(e["freq"] or 0)))
     history = refinement_history(tree_id)
+    products = products_view(tree_id)
     return {"id": tree_id, "condition": tree.get("condition"),
             "root": meta.get("root"), "root_freq": meta.get("root_freq"),
             "created_at": int(tree_file.stat().st_mtime),
@@ -597,17 +1058,20 @@ def detail(tree_id):
             "ranked_by": (ranking or {}).get("model_family"),
             "rank_task_id": (ranking or {}).get("task_id"),
             "refinements": history,
-            "counts": counts(tree, [k for k, v in arts.items()
-                                    if any(x.get("kind") == "analyze" for x in v)], ranking),
+            "counts": counts(tree, [], ranking),
+            "products": products,
             "works": out_works, "excluded": excluded}
 
 
 def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
-    """Ветка дерева запросов как вход сборки: {root, root_freq, nodes:[{phrase, freq, children}]}.
+    """Ветка дерева запросов как вход сборки: {root, root_freq, nodes, head_nodes}.
 
     `children` — только те дети, что сами попали в payload: иначе сборка увидит ссылки на
-    фразы, которых у неё нет. Голову (> `max_freq`) не берём — интент там размыт по
-    определению, но сам корень оставляем всегда, иначе непонятно, по чему собирали."""
+    фразы, которых у неё нет. Голову (> `max_freq`) классификация не разбирает — интент там
+    размыт по определению, — но и не теряет: она уходит отдельным списком `head_nodes`.
+    Разбору она нужна как контейнер пула: частота родителя уже включает уточнения, и без него
+    рынок считается по обрезкам («матрица судьбы рассчитать» 204 741 против собранных руками
+    71 717 по её же детям)."""
     root = _norm(root)
     row = con.execute("SELECT phrase, COALESCE(freq, 0) f, status FROM node WHERE phrase = ?",
                       (root,)).fetchone()
@@ -622,19 +1086,25 @@ def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
     kept = {p for p, f in freq.items()
             if f >= min_freq and (max_freq is None or f <= max_freq)}
     kept.add(root)
-    edges = {}
+    head = {p for p, f in freq.items() if p not in kept and f > (max_freq or 0)}
+    edges, head_edges = {}, {}
     for chunk in [subtree[i:i + 400] for i in range(0, len(subtree), 400)]:
         qs = ",".join("?" * len(chunk))
         for parent, child in con.execute(
                 f"SELECT parent, child FROM edge WHERE parent IN ({qs})", chunk):
             if parent in kept and child in kept:
                 edges.setdefault(parent, []).append(child)
+            elif parent in head and (child in kept or child in head):
+                head_edges.setdefault(parent, []).append(child)
     nodes = [{"phrase": p, "freq": freq[p],
               "children": sorted(edges.get(p, []), key=lambda c: (-freq[c], c))}
              for p in sorted(kept, key=lambda p: (-freq[p], p))]
+    head_nodes = [{"phrase": p, "freq": freq[p],
+                   "children": sorted(head_edges.get(p, []), key=lambda c: (-freq[c], c))}
+                  for p in sorted(head, key=lambda p: (-freq[p], p))]
     return {"root": root, "root_freq": freq[root], "status": row[2],
             "min_freq": min_freq, "max_freq": max_freq,
-            "subtree_total": len(subtree), "nodes": nodes}
+            "subtree_total": len(subtree), "nodes": nodes, "head_nodes": head_nodes}
 
 
 def validate_tree(payload, tree, strict=False):
@@ -679,6 +1149,10 @@ def validate_tree(payload, tree, strict=False):
                            f"продуктовый анализ: {forbidden}")
             if strict and not isinstance(segment.get("phrases"), list):
                 out.append(f"works[{i}].segments[{j}]: phrases должен быть массивом")
+            kind = segment.get("kind")
+            if kind is not None and kind not in SEGMENT_KINDS:
+                out.append(f"works[{i}].segments[{j}]: kind={kind!r}, "
+                           f"допустимо {' или '.join(SEGMENT_KINDS)}")
         phrases = work_phrases(w)
         for ph in phrases:
             n = _norm(ph)
@@ -784,17 +1258,22 @@ def refinement_history(tree_id):
 
 def work_input(tree_id, work_name, top):
     """Данные для разбора работы: сама работа, её фразы с частотами и какие фразы
-    покупать под выдачу (самые частотные — они и представляют работу)."""
+    покупать под выдачу (самые частотные — они и представляют работу).
+
+    `root_freq` и `head` дают разбору верхнюю границу рынка: без них он видит только фразы
+    работы, максимум по ветке — ниже порога головы, и считает пул сложением обрезков."""
     tree, _, params_file = load_tree(tree_id)
     work = find_work(tree, work_name)
     ranking = latest_ranking(tree_id)
     rank = next((r for r in (ranking or {}).get("works") or []
                  if _norm(r.get("name")) == _norm(work_name)), {})
     freqs, meta = _input(params_file)
+    source = _read(params_file) if params_file is not None else {}
     phrases = sorted(({"phrase": p, "freq": freqs.get(p) or 0} for p in work_phrases(work)),
                      key=lambda x: (-x["freq"], x["phrase"]))
     return {"tree_id": tree_id, "condition": tree.get("condition"),
-            "root": meta.get("root"),
+            "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+            "head": head_cover(source, [p["phrase"] for p in phrases]),
             "work": {**{k: work.get(k) for k in CLASS_WORK_KEYS},
                      **{k: rank.get(k) for k in RANK_KEYS}},
             "segments": [{**{k: s.get(k) for k in SEGMENT_KEYS},

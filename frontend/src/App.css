@@ -917,3 +917,55 @@
 .stop-btns button {
   min-width: 44px;
 }
+
+/* ---- дерево продуктов: уровни группировки и запуск разборов по группе ---- */
+.lvl {
+  margin: 14px 0 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.act.on {
+  border-color: var(--fg);
+  font-weight: 600;
+}
+
+/* потребность внутри продукта — та же строка, только с отступом и без своей рамки */
+.nwork-nested {
+  margin-left: 18px;
+  border-bottom: 1px dashed var(--line);
+}
+
+/* предупреждение в диалоге: операция удаляет уже сделанную работу */
+.dlg .warn {
+  border-left: 3px solid var(--bad);
+  padding-left: 8px;
+  color: var(--fg);
+}
+
+/* шапка дерева: «назад» слева, «Действия» прижаты вправо, всё одной строкой */
+.tree-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.tree-head > .ph {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-head > .cond {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-head > .head-actions {
+  margin-left: auto;
+  flex: none;
+}

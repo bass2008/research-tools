@@ -415,15 +415,6 @@ def refinements(qn, data):
     return [(p, f) for p, f in parse_popular(data) if words_of(p) > qw]
 
 
-def cached_child_count(phrase, con):
-    """Сколько уточнений у фразы, ЕСЛИ она уже в кэше. None — если не кэширована."""
-    qn = normalize(phrase)
-    row = con.execute("SELECT response FROM cache WHERE query = ?", (qn,)).fetchone()
-    if not row:
-        return None
-    return len(refinements(qn, json.loads(row[0])))
-
-
 # ---------- модель (nodes + edges) ----------
 
 def upsert_node(con, phrase, freq=None, queried=False, total=None, freq_at=None):
@@ -559,15 +550,6 @@ def save_phrase(con, phrase, own_freq, refs, pool_ts=None):
         con.execute("INSERT OR IGNORE INTO edge(parent, child) VALUES (?, ?)", (qn, p))
     con.commit()
     return own_freq, len(refs)
-
-
-def load_phrase(con, phrase, limit=LIMIT):
-    """Запросить пул фразы (кэш) и записать в модель: узел queried=1 + рёбра к
-    уточнениям (весь пул, до limit). Возвращает (own_freq, total)."""
-    qn = normalize(phrase)
-    own_freq, refs = _parse_pool(qn, fetch_wordstat(qn, con), limit)
-    row = con.execute("SELECT ts FROM cache WHERE query = ?", (qn,)).fetchone()
-    return save_phrase(con, qn, own_freq, refs, pool_ts=row[0] if row else None)
 
 
 def _child_phrases(con, parent):

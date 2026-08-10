@@ -141,9 +141,12 @@ def canned(job, kinds=None, scores=None, verdict="BUILD", verdict_score=82, conf
             ),
         }
     if job["type"] == "analyze_work":
-        # единица разбора — работа: в отчёт идёт её имя, а не фраза
-        name = (params.get("work") or {}).get("name", "")
+        # единица разбора — группа дерева продуктов: в отчёт идёт её имя, а не фраза
+        name = (params.get("group") or {}).get("name", "")
         return {"recommendation": verdict, "verdict_score": verdict_score, "confidence": 0.7,
+                "money": "PDF-разбор 490 ₽ разово",
+                "who_pays": "женщина 25-50, сразу после расчёта; сегодня платит конкуренту",
+                "why_pay": "у конкурента полный текст только после регистрации",
                 "report_html": report_html(name, verdict, verdict_score)}
     raise AssertionError(f"фальшивый воркер не знает тип джоба: {job['type']!r}")
 

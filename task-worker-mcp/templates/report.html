@@ -17,6 +17,13 @@
   body { max-width: 900px; margin: 2rem auto; padding: 0 1rem;
          font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; }
   h1 { margin: 0 0 .3em; font-size: 1.7rem; }
+  /* длинные перечни фраз держим свёрнутыми: ядро ключей нужно целиком, но читать отчёт
+     мешает — на живой ветке оно занимало две трети страницы */
+  details.keys { margin: .8em 0; border: 1px solid var(--br); border-radius: .4em;
+                 padding: .4em .7em; background: var(--bg2); }
+  details.keys > summary { cursor: pointer; font-weight: 600; }
+  details.keys[open] > summary { margin-bottom: .5em; }
+  details.keys table { margin: 0; }
   h2 { margin: 2rem 0 .5em; padding-top: .8rem; border-top: 2px solid var(--br); font-size: 1.25rem; }
   h3 { margin: 1.2rem 0 .3em; font-size: 1.02rem; }
   p, li { margin: .3em 0; } .muted { color: var(--muted); }

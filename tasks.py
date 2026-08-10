@@ -16,6 +16,7 @@ needs_adjacent).
 объектом `ctx` из server.py — здесь его не создают, чтобы не было кольца импортов.
 """
 import asyncio
+import collections
 import json
 import os
 import re
@@ -33,7 +34,8 @@ ROOT = wscore.ROOT
 REPORTS = ROOT / "reports"
 PROMPTS = ROOT / "task-worker-mcp" / "prompts"
 
-LLM_TYPES = ("needs", "needs_refine", "needs_rank", "analyze_work", "analyze_adv", "analyze_product", "model_test",
+LLM_TYPES = ("needs", "needs_refine", "needs_rank", "products", "analyze_work",
+             "analyze_adv", "analyze_product", "model_test",
              "season", "adjacent", "stopwords")
 MAX_NODE_DELTAS = 300       # больше node-дельт за одну операцию не шлём: только progress
 PROGRESS_EVERY = 0.5        # progress краула — не чаще, чем раз в N секунд
@@ -58,6 +60,7 @@ MODEL_TEST_SECONDS = 60           # smoke-test обязан удерживать
 # Масштабируется от числа частей, чтобы крупная операция не падала при нормальной работе
 # (tech §3): минуты на толкование готовых чисел, десятки минут на сборку и разбор.
 LLM_TIMEOUT = {"needs": (2400, 0), "needs_refine": (2400, 0), "needs_rank": (2400, 0),
+               "products": (2400, 0),
                "analyze_work": (2400, 0), "analyze_adv": (2400, 0),
                "analyze_product": (2400, 0), "model_test": (180, 0),
                "season": (600, 0), "adjacent": (900, 300), "stopwords": (900, 0)}
@@ -183,8 +186,9 @@ async def execute(ctx, task_id, lock=None):
         return False
     finally:
         ctx.release(nodes, task_id)
-        # занятость работы во втором слое снимаем здесь же: иначе новая операция легко
-        # забудет это сделать и работа останется навсегда «занятой»
+        # занятость снимаем здесь же: иначе новая операция легко забудет это сделать и
+        # единица останется навсегда «занятой». Ключ — по группе у разборов и по работе у
+        # операций, которые остались на потребностях (сезонность, смежные, выгрузка, тест)
         act = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
                "needs_analyze_product": "product", "needs_model_test": "test",
                "needs_season": "season",
@@ -193,12 +197,12 @@ async def execute(ctx, task_id, lock=None):
             family = params.get("model_family") \
                 if act in {"analyze", "analyze_adv", "product", "test"} \
                 else "basic"
-            ctx.needs_busy.discard((params["tree_id"],
-                                    needs_layer._norm(params.get("work")), act, family))
-        if op in {"needs_refine", "needs_rank"} and isinstance(params, dict) \
-                and params.get("tree_id"):
-            action = "refine" if op == "needs_refine" else "rank"
-            ctx.needs_busy.discard((params["tree_id"], "", action, "shared"))
+            unit = params.get("group") or needs_layer._norm(params.get("work"))
+            ctx.needs_busy.discard((params["tree_id"], unit, act, family))
+        tree_action = {"needs_refine": "refine", "needs_rank": "rank",
+                       "needs_products": "products"}.get(op)
+        if tree_action and isinstance(params, dict) and params.get("tree_id"):
+            ctx.needs_busy.discard((params["tree_id"], "", tree_action, "shared"))
 
 
 def _brief(result):
@@ -210,13 +214,30 @@ def _brief(result):
 # ---------- обмен с LLM ----------
 
 def _prompt(op):
-    """Текст prompts/{op}.md: сервер инлайнит его в поле prompt джоба (tech §7)."""
+    """Текст prompts/{op}.md: сервер инлайнит его в поле prompt джоба (tech §7).
+
+    Строка `{{include _файл.md}}` заменяется содержимым соседнего файла: правила классификации
+    нужны и сборке, и второму проходу дословно, а два экземпляра одного текста расходятся."""
     if op not in _prompts:
         path = PROMPTS / f"{op}.md"
         if not path.exists():
             raise RuntimeError(f"нет файла промпта: {path}")
-        _prompts[op] = path.read_text(encoding="utf-8")
+        _prompts[op] = _expand_includes(path)
     return _prompts[op]
+
+
+def _expand_includes(path):
+    out = []
+    for line in path.read_text(encoding="utf-8").splitlines(keepends=True):
+        name = re.fullmatch(r"\{\{include ([\w.\-]+)}}\s*", line)
+        if not name:
+            out.append(line)
+            continue
+        included = path.parent / name.group(1)
+        if not included.exists():
+            raise RuntimeError(f"{path.name}: нет включаемого файла {included}")
+        out.append(included.read_text(encoding="utf-8"))
+    return "".join(out)
 
 
 def _job(task_id, n, op, params):
@@ -257,15 +278,6 @@ async def _run_llm(ctx, op, node, jobs):
         row = _task_row(ctx, task_id)
         if row and row["status"] == "WAITING":
             set_task_status(ctx, task_id, "RUNNING")
-
-
-def _results(res, key="results"):
-    """Ответ агента -> список результатов; форма не та -> ValueError (task FAILED)."""
-    if isinstance(res, dict):
-        res = res.get(key, res.get("items"))
-    if not isinstance(res, list):
-        raise ValueError(f"в ответе LLM нет массива {key}")
-    return [it for it in res if isinstance(it, dict)]
 
 
 def _str(v, cap=4000):
@@ -553,6 +565,53 @@ async def needs_rank(ctx, task_id, phrase, params):
             "works": len(scores), "best_score": max(scores)}
 
 
+async def needs_products(ctx, task_id, phrase, params):
+    """`Продукты`: разложить работы ветки в дерево продуктов на трёх масштабах.
+
+    Слой между потребностями и разборами. Пока его не было, каждый разбор считал общий движок
+    заново и делил рынок ветки на свою долю. Выдача сюда не идёт намеренно — она покупается под
+    разбор конкретного продукта, а вопрос здесь про устройство ветки."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    family = needs_layer.model_family((params or {}).get("model_family"), "claude")
+    if not tree_id:
+        raise RuntimeError("нужен tree_id")
+    tree, _, _ = needs_layer.load_tree(tree_id)
+    revision = needs_layer.tree_revision(tree)
+    data = needs_layer.products_input(tree_id)
+    if not data["works"]:
+        raise RuntimeError(f"в дереве {tree_id!r} нет работ")
+    _save_params(ctx, task_id, {"tree_id": tree_id, "model_family": family,
+                                "root": data["root"], "revision": revision,
+                                "works": len(data["works"])})
+    jparams = {**data, "model_family": family}
+    res = (await _run_llm(ctx, "products", tree_id,
+                          [_job(task_id, 0, "products", jparams)]))[0]
+    problems = needs_layer.validate_products(tree, res)
+    if problems:
+        raise ValueError("группировка не прошла проверку: " + "; ".join(problems[:5]))
+    html = res.get("report_html")
+    if not isinstance(html, str) or len(html.strip()) < 100:
+        raise ValueError("products не вернул report_html")
+    link = f"reports/{task_id}.html"
+    saved = needs_layer.save_products(tree_id, {**res, "report_link": link}, task_id, family,
+                                      expected_revision=revision)
+    by_level = collections.Counter(g.get("level") for g in saved["groups"])
+    levels = " · ".join(f"{lvl} {by_level.get(lvl, 0)}"
+                        for lvl in needs_layer.PRODUCT_LEVELS)
+
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    page = _report_page(f"Продукты: {data['root']}",
+                        f"работ {len(data['works'])} → групп {len(saved['groups'])} · {levels}",
+                        html)
+    (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
+    ctx.log("INFO", "needs_products", data["root"],
+            f"[{family}] дерево продуктов собрано: работ {len(data['works'])} → "
+            f"групп {len(saved['groups'])} ({levels}), ревизия {revision}")
+    return {"tree_id": tree_id, "revision": revision, "model_family": family,
+            "groups": len(saved["groups"]), "link": link,
+            **{lvl: by_level.get(lvl, 0) for lvl in needs_layer.PRODUCT_LEVELS}}
+
+
 # ---------- разбор работы (второй слой) ----------
 
 def _with_inputs(html, jp):
@@ -614,34 +673,34 @@ def _with_inputs(html, jp):
 
 
 async def needs_analyze(ctx, task_id, phrase, params):
-    """`Analyze` на работе дерева потребностей: выдача -> Opus -> отчёт по нише.
+    """`Analyze` на продукте дерева продуктов: выдача -> Opus -> отчёт по нише.
 
-    Единица разбора — **работа**, а не фраза: одну нишу выражают десятки формулировок, и
-    отчёт по каждой из них был бы одним и тем же текстом. Выдачу покупаем по самым частотным
-    фразам работы (`NEEDS_SERP_TOP`) — они её и представляют; остальные формулировки уходят в
-    промпт списком с частотами, как ядро ключей ниши.
+    Единица разбора — **группа**, а не работа и не фраза: строится продукт, а не потребность, и
+    отчёт по каждой работе внутри одного продукта был бы одним и тем же текстом с разной долей
+    рынка. Выдачу покупаем по самым частотным фразам группы (`NEEDS_SERP_TOP`); остальные
+    формулировки уходят в промпт списком с частотами, как ядро ключей ниши.
 
     Результат живёт файлами рядом с деревом, в `node` ничего не пишем: второй слой —
     толкование, его пересобирают, а модель первого слоя от этого не должна зависеть."""
     tree_id = str((params or {}).get("tree_id") or "").strip()
-    work_name = str((params or {}).get("work") or "").strip()
+    group_id = str((params or {}).get("group") or "").strip()
     family = needs_layer.model_family((params or {}).get("model_family"), "claude")
-    if not tree_id or not work_name:
-        raise RuntimeError("нужны tree_id и work")
-    return await _needs_analyze(ctx, task_id, tree_id, work_name, family)
+    if not tree_id or not group_id:
+        raise RuntimeError("нужны tree_id и group")
+    return await _needs_analyze(ctx, task_id, tree_id, group_id, family)
 
 
-async def _analyze_input(ctx, task_id, tree_id, work_name, stage, family):
-    """Общий вход обоих разборов: работа, её фразы, выдача и накопленное по работе.
+async def _analyze_input(ctx, task_id, tree_id, group_id, stage, family):
+    """Общий вход всех трёх разборов: группа, её фразы, выдача и накопленное по ней.
 
-    Выдача берётся из общего оплаченного кэша, поэтому второй разбор по уже разобранной
-    работе не стоит ни одного запроса. -> (data, jparams)."""
-    data = needs_layer.work_input(tree_id, work_name, NEEDS_SERP_TOP)
+    Выдача берётся из общего оплаченного кэша, поэтому второй разбор по уже разобранному
+    продукту не стоит ни одного запроса. -> (data, jparams)."""
+    data = needs_layer.group_input(tree_id, group_id, NEEDS_SERP_TOP)
     if not data["phrases"]:
-        raise RuntimeError(f"в работе {work_name!r} нет фраз")
+        raise RuntimeError(f"в группе {group_id!r} нет фраз")
 
-    _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name,
-                                "model_family": family,
+    _save_params(ctx, task_id, {"tree_id": tree_id, "group": group_id,
+                                "model_family": family, "works": len(data["works"]),
                                 "phrases": len(data["phrases"]), "search": data["search"]})
     serps = {}
     for qn in data["search"]:
@@ -649,16 +708,19 @@ async def _analyze_input(ctx, task_id, tree_id, work_name, stage, family):
         s = wscore.load_serp(ctx.con, qn)
         serps[qn] = {e: s.get(e, {}).get("docs", []) for e in wscore.SERP_ENGINES}
 
-    # накопленное по работе: разбор идёт по ВСЕМ данным, что появились к этому моменту —
-    # в этом и смысл повторного запуска
-    prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
-    season = next((a for a in prev if a.get("kind") == "season"), None)
-    adjacent = next((a for a in prev if a.get("kind") == "adjacent"), None)
+    # накопленное по продукту: разбор идёт по ВСЕМ данным, что появились к этому моменту —
+    # в этом и смысл повторного запуска. Сезонность и смежные ключи снимаются по работам, а
+    # сюда приходят собранными со всех работ группы
+    prev = needs_layer.group_artifacts(tree_id).get(str(group_id), [])
+    season, adjacent = data.get("season"), data.get("adjacent")
     context = {
         "season": {k: season.get(k) for k in ("stats", "seasonal", "phase", "comment", "phrase")}
         if season else None,
         "adjacent": {k: adjacent.get(k) for k in
                      ("keys", "total_freq", "ours", "covered", "comment")} if adjacent else None,
+        # выгрузки топа: сами скачанные страницы лежат каталогами, и разбор их читает с диска —
+        # в промпт они не влезают, а по сниппетам цену и пейволл проверить нельзя
+        "dumps": data.get("dumps") or [],
         # чужое семейство не скрываем: разбор — это довод, а не собственность модели.
         # Автор указан, чтобы расхождение читалось как расхождение, а не как своя же ошибка.
         "previous_verdicts": [{"verdict": a.get("verdict"), "verdict_score": a.get("verdict_score"),
@@ -666,7 +728,8 @@ async def _analyze_input(ctx, task_id, tree_id, work_name, stage, family):
                                "by": needs_layer.artifact_family(a)}
                               for a in prev if a.get("kind") in ("analyze", "analyze_adv")],
     }
-    jparams = {**{k: data[k] for k in ("condition", "root", "work", "segments", "phrases")},
+    jparams = {**{k: data[k] for k in ("condition", "root", "root_freq", "head",
+                                       "group", "works", "phrases")},
                "model_family": family, "serps": serps, "context": context}
     return data, jparams
 
@@ -737,29 +800,33 @@ def _forecast_of(res):
     return {"months": months, "assumptions": assumptions,
             "ceiling": {"paying": num_or_none(ceiling.get("paying")),
                         "mrr": num_or_none(ceiling.get("mrr")), "why": _str(ceiling.get("why"))},
+            # shared/incremental: движок ветки пишется один раз, работа сверх него стоит
+            # только контента. Без этого деления каждый отчёт по ветке считает движок заново
             "budget": {"hours": num_or_none(budget.get("hours")),
                        "money": num_or_none(budget.get("money")),
                        "monthly": num_or_none(budget.get("monthly")),
+                       "shared": num_or_none(budget.get("shared")),
+                       "incremental": num_or_none(budget.get("incremental")),
                        "why": _str(budget.get("why"))},
             "payback": _str(f.get("payback")), "scenario_low": _str(f.get("scenario_low")),
             "invest_case": invest}
 
 
 async def needs_analyze_product(ctx, task_id, phrase, params):
-    """`Продукт`: одна функция -> спецификация микро-продукта (design §4.6).
+    """`Спецификация`: продукт группы -> спека и прогноз продаж (design §4.6).
 
     Третий разбор отвечает на вопрос исполнителя: что открыть в понедельник, кому продать, по
     какой цене и почему заплатят. Решение принимается по трём источникам сразу — выдача плюс
     последние отчёты «Ниша» и «Функции» целиком текстом."""
     tree_id = str((params or {}).get("tree_id") or "").strip()
-    work_name = str((params or {}).get("work") or "").strip()
+    group_id = str((params or {}).get("group") or "").strip()
     family = needs_layer.model_family((params or {}).get("model_family"), "claude")
-    if not tree_id or not work_name:
-        raise RuntimeError("нужны tree_id и work")
-    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name,
+    if not tree_id or not group_id:
+        raise RuntimeError("нужны tree_id и group")
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, group_id,
                                          "needs_analyze_product", family)
 
-    prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
+    prev = needs_layer.group_artifacts(tree_id).get(str(group_id), [])
     # берём ПОСЛЕДНИЙ разбор каждого вида, чьё бы семейство он ни был: свежие данные важнее
     # авторства, а кто автор — сказано в поле `by`
     niche = next((a for a in prev if a.get("kind") == "analyze"), None)
@@ -777,15 +844,15 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
                      "report": _report_text(feats)} if feats else None,
     }
 
-    res = (await _run_llm(ctx, "analyze_product", work_name,
+    res = (await _run_llm(ctx, "analyze_product", group_id,
                           [_job(task_id, 0, "analyze_product", jparams)]))[0]
     verdict, vscore, html = _verdict_of(res, "analyze_product")
     spec = res.get("spec")
     if not isinstance(spec, dict):
         raise ValueError("analyze_product не вернул spec")
     keep = ("chosen_function", "chosen_why", "product", "user", "promise", "price", "free_part",
-            "paid_part", "why_pay", "find", "find_freq", "channel", "first_paying",
-            "scope_in", "scope_out", "weeks", "unit_cost", "kill_test")
+            "paid_part", "why_pay", "find", "find_freq", "also_covers", "channel",
+            "first_paying", "scope_in", "scope_out", "weeks", "unit_cost", "kill_test")
     spec = {k: spec.get(k) for k in keep}
     # спецификация без продукта, цены и причины платить — это не спецификация
     missing = [k for k in ("product", "price", "why_pay") if not (_str(spec.get(k)) or "").strip()]
@@ -799,42 +866,43 @@ async def needs_analyze_product(ctx, task_id, phrase, params):
               "product": vscore}
     trail = " → ".join(f"{k} {v:g}" for k, v in scores.items() if v is not None)
     REPORTS.mkdir(parents=True, exist_ok=True)
-    page = _report_page(f"Продукт: {work_name}",
+    title = data["group"].get("name") or group_id
+    page = _report_page(f"Спецификация: {title}",
                         f"{spec['product']} · {spec['price']} · оценки: {trail}",
                         html, verdict, vscore)
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
-    needs_layer.save_artifact(tree_id, work_name, "analyze_product", {
+    needs_layer.save_group_artifact(tree_id, group_id, "analyze_product", {
         "model_family": family,
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1), "why": _str(res.get("why")),
         "report_link": link, "task_id": task_id, "created_at": _now(),
         "searched": data["search"], "spec": spec, "scores": scores, "forecast": forecast,
         "summary": f"{spec['product']} · {spec['price']}"})
-    ctx.log("INFO", "needs_analyze_product", work_name,
+    ctx.log("INFO", "needs_analyze_product", title,
             f"[{family}] {verdict} {vscore:g} · «{spec['product']}» по цене {spec['price']} · "
             f"окупаемость: {forecast['payback']} · оценки {trail}")
     return {"verdict": verdict, "verdict_score": vscore, "product": spec["product"],
             "price": spec["price"], "scores": scores, "forecast": forecast, "link": link,
-            "tree_id": tree_id, "work": work_name, "model_family": family}
+            "tree_id": tree_id, "group": group_id, "model_family": family}
 
 
 async def needs_analyze_adv(ctx, task_id, phrase, params):
-    """«Функции»: второй разбор той же работы с другим вопросом (design §4.5).
+    """«Функции»: второй разбор того же продукта с другим вопросом (design §4.5).
 
     Обычный разбор спрашивает «можно ли перехватить поисковый трафик» и делит спрос на
     конкуренцию. Этот спрашивает «какую ОДНУ функцию тут можно сделать, найдут ли её из поиска
     и платит ли за неё кто-то уже сегодня» — занятость ниши в нём не знаменатель, а
-    подтверждение спроса. Выдача берётся из кэша, поэтому по разобранной работе он бесплатен."""
+    подтверждение спроса. Выдача берётся из кэша, поэтому по разобранной группе он бесплатен."""
     tree_id = str((params or {}).get("tree_id") or "").strip()
-    work_name = str((params or {}).get("work") or "").strip()
+    group_id = str((params or {}).get("group") or "").strip()
     family = needs_layer.model_family((params or {}).get("model_family"), "claude")
-    if not tree_id or not work_name:
-        raise RuntimeError("нужны tree_id и work")
-    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name,
+    if not tree_id or not group_id:
+        raise RuntimeError("нужны tree_id и group")
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, group_id,
                                          "needs_analyze_adv", family)
 
-    res = (await _run_llm(ctx, "analyze_adv", work_name,
+    res = (await _run_llm(ctx, "analyze_adv", group_id,
                           [_job(task_id, 0, "analyze_adv", jparams)]))[0]
     verdict, vscore, html = _verdict_of(res, "analyze_adv")
     funcs = res.get("functions")
@@ -852,54 +920,63 @@ async def needs_analyze_adv(ctx, task_id, phrase, params):
     if missing:
         raise ValueError(f"у лучшей функции не заполнено: {', '.join(missing)}")
 
-    best = funcs[0]
+    best, title = funcs[0], data["group"].get("name") or group_id
     REPORTS.mkdir(parents=True, exist_ok=True)
-    page = _report_page(f"Разбор Adv: {work_name}",
+    page = _report_page(f"Функции: {title}",
                         f"функций {len(funcs)} · лучшая «{best.get('name')}» "
                         f"· уверенность {_num(res.get('confidence'), 0, 1)}",
                         html, verdict, vscore)
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
-    needs_layer.save_artifact(tree_id, work_name, "analyze_adv", {
+    needs_layer.save_group_artifact(tree_id, group_id, "analyze_adv", {
         "model_family": family,
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1),
         "report_link": link, "task_id": task_id, "created_at": _now(),
         "searched": data["search"], "functions": funcs,
         "summary": f"{len(funcs)} функц.: «{best.get('name')}» — {best.get('score')}"})
-    ctx.log("INFO", "needs_analyze_adv", work_name,
+    ctx.log("INFO", "needs_analyze_adv", title,
             f"[{family}] функций {len(funcs)}, лучшая «{best.get('name')}» ({best.get('score')}), "
             f"вердикт {verdict} {vscore:g}, отчёт {link}")
     return {"verdict": verdict, "verdict_score": vscore, "functions": len(funcs),
-            "best": best.get("name"), "link": link, "tree_id": tree_id, "work": work_name,
+            "best": best.get("name"), "link": link, "tree_id": tree_id, "group": group_id,
             "model_family": family}
 
 
-async def _needs_analyze(ctx, task_id, tree_id, work_name, family):
-    data, jparams = await _analyze_input(ctx, task_id, tree_id, work_name,
+async def _needs_analyze(ctx, task_id, tree_id, group_id, family):
+    data, jparams = await _analyze_input(ctx, task_id, tree_id, group_id,
                                          "needs_analyze", family)
-    res = (await _run_llm(ctx, "analyze_work", work_name,
+    res = (await _run_llm(ctx, "analyze_work", group_id,
                           [_job(task_id, 0, "analyze_work", jparams)]))[0]
     verdict, vscore, html = _verdict_of(res, "analyze_work")
+    # без ответа про деньги отчёт по нише бесполезен: «монетизация слабая» — это оценка, а не
+    # ответ на «что продаём, кому и почему купят у нас». Раньше поле было строкой в списке
+    # «Реализация», и разбор проходил приёмку, вовсе про них не сказав
+    money = {k: _str(res.get(k)) for k in ("money", "who_pays", "why_pay")}
+    empty = [k for k, v in money.items() if not (v or "").strip()]
+    if empty:
+        raise ValueError(f"analyze_work не ответил про деньги: {', '.join(empty)}")
 
+    title = data["group"].get("name") or group_id
     REPORTS.mkdir(parents=True, exist_ok=True)
-    page = _report_page(f"Ниша: {work_name}",
+    page = _report_page(f"Ниша: {title}",
                         f"уверенность {_num(res.get('confidence'), 0, 1)} · "
-                        f"top-freq {data['work'].get('top_freq')} · "
+                        f"пул {data['group'].get('pool')} · "
                         f"{len(data['phrases'])} формулировок", html, verdict, vscore)
     (REPORTS / f"{task_id}.html").write_text(_with_inputs(page, jparams), encoding="utf-8")
     link = f"reports/{task_id}.html"
-    needs_layer.save_artifact(tree_id, work_name, "analyze", {
+    needs_layer.save_group_artifact(tree_id, group_id, "analyze", {
         "model_family": family,
         "verdict": verdict, "verdict_score": vscore,
         "confidence": _num(res.get("confidence"), 0, 1),
         "report_link": link, "task_id": task_id, "created_at": _now(),
-        "searched": data["search"], "phrases": len(data["phrases"])})
-    ctx.log("INFO", "needs_analyze", work_name,
+        "searched": data["search"], "phrases": len(data["phrases"]),
+        **money, "summary": money["money"]})
+    ctx.log("INFO", "needs_analyze", title,
             f"[{family}] вердикт {verdict}, verdict_score={vscore:g}, отчёт {link} ({len(html)} симв.), "
             f"выдача по {len(data['search'])} фраз(ам)")
     return {"verdict": verdict, "verdict_score": vscore, "link": link,
-            "tree_id": tree_id, "work": work_name, "model_family": family}
+            "tree_id": tree_id, "group": group_id, "model_family": family}
 
 
 async def needs_model_test(ctx, task_id, phrase, params):
@@ -1208,8 +1285,8 @@ _MARKERS = (("как", ("как", "инструкц", "пошагов", "сам�
             ("деньги", ("цена", "стоимость", "купить", "сервис", "подписк", "тариф")))
 
 
-def _dump_queries(ctx, tree_id, work_name, data):
-    """Углы выгрузки: не все формулировки работы, а разные ИНТЕНТЫ.
+def _dump_queries(ctx, tree_id, unit, data, by_group=False):
+    """Углы выгрузки: не все формулировки, а разные ИНТЕНТЫ.
 
     Топ-10 по шести близким фразам пересекается на 70-80% — платить шесть раз за одни и те же
     домены незачем. Ценность даёт разный интент: головная фраза, фраза кандидата из Adv-разбора,
@@ -1223,9 +1300,10 @@ def _dump_queries(ctx, tree_id, work_name, data):
             picked.append({"query": ph, "why": why})
 
     phrases = data["phrases"]
-    add(phrases[0]["phrase"], "головная фраза работы")
+    add(phrases[0]["phrase"], "головная фраза продукта" if by_group else "головная фраза работы")
 
-    prev = needs_layer.work_artifacts(tree_id).get(needs_layer._norm(work_name), [])
+    prev = (needs_layer.group_artifacts(tree_id).get(str(unit), []) if by_group
+            else needs_layer.work_artifacts(tree_id).get(needs_layer._norm(unit), []))
     adv = next((a for a in prev if a.get("kind") == "analyze_adv"), None)
     if adv and (adv.get("functions") or []):
         add((adv["functions"][0] or {}).get("entry_query"), "входная фраза кандидата (Adv)")
@@ -1271,19 +1349,29 @@ async def needs_dump(ctx, task_id, phrase, params):
     """Полная выгрузка топ-10: страницы целиком, чтобы их читал человек или модель.
 
     Операция без LLM: выбрать углы, докупить выдачу, скачать страницы, разложить по папкам
-    `reports/<работа>/<движок>/<запрос>/`. Скачивание бесплатно — платит только выдача."""
-    tree_id = str((params or {}).get("tree_id") or "").strip()
-    work_name = str((params or {}).get("work") or "").strip()
-    if not tree_id or not work_name:
-        raise RuntimeError("нужны tree_id и work")
-    data = needs_layer.work_input(tree_id, work_name, NEEDS_SERP_TOP)
-    if not data["phrases"]:
-        raise RuntimeError(f"в работе {work_name!r} нет фраз")
+    `reports/<единица>/<движок>/<запрос>/`. Скачивание бесплатно — платит только выдача.
 
-    queries = _dump_queries(ctx, tree_id, work_name, data)
-    _save_params(ctx, task_id, {"tree_id": tree_id, "work": work_name,
+    Единица — **группа**, если она передана: разборы идут по продукту, и проверять цены с
+    пейволлами надо по его дверям, а не по одной работе из двадцати. По работе выгрузка тоже
+    остаётся: она полезна сама по себе, когда группировки ещё нет."""
+    tree_id = str((params or {}).get("tree_id") or "").strip()
+    group_id = str((params or {}).get("group") or "").strip()
+    work_name = str((params or {}).get("work") or "").strip()
+    if not tree_id or not (group_id or work_name):
+        raise RuntimeError("нужны tree_id и group или work")
+    by_group = bool(group_id)
+    unit = group_id or work_name
+    data = (needs_layer.group_input(tree_id, group_id, NEEDS_SERP_TOP) if by_group
+            else needs_layer.work_input(tree_id, work_name, NEEDS_SERP_TOP))
+    if not data["phrases"]:
+        raise RuntimeError(f"в {unit!r} нет фраз")
+    label = (data["group"].get("name") or group_id) if by_group else work_name
+
+    queries = _dump_queries(ctx, tree_id, unit, data, by_group=by_group)
+    _save_params(ctx, task_id, {"tree_id": tree_id,
+                                **({"group": group_id} if by_group else {"work": work_name}),
                                 "queries": [q["query"] for q in queries]})
-    ctx.log("INFO", "needs_dump", work_name,
+    ctx.log("INFO", "needs_dump", label,
             "углы: " + "; ".join(f"{q['query']} — {q['why']}" for q in queries))
 
     targets = {}
@@ -1294,7 +1382,7 @@ async def needs_dump(ctx, task_id, phrase, params):
             await _ensure_serp(ctx, q["query"], stage="needs_dump")
         except Exception as e:
             q["error"] = f"{type(e).__name__}: {e}"
-            ctx.log("WARN", "needs_dump", work_name, f"угол «{q['query']}» пропущен: {e}")
+            ctx.log("WARN", "needs_dump", label, f"угол «{q['query']}» пропущен: {e}")
             continue
         serp = wscore.load_serp(ctx.con, q["query"])
         for engine in wscore.SERP_ENGINES:
@@ -1306,7 +1394,7 @@ async def needs_dump(ctx, task_id, phrase, params):
 
     if not targets:
         raise RuntimeError("ни по одному углу не удалось получить выдачу")
-    root = REPORTS / needs_layer.slug(work_name)
+    root = REPORTS / needs_layer.slug(unit)
     loop = asyncio.get_running_loop()
     got = await asyncio.gather(*[loop.run_in_executor(None, _fetch_page, u) for u in targets])
 
@@ -1322,19 +1410,22 @@ async def needs_dump(ctx, task_id, phrase, params):
                       "file": f"{meta['engine']}/{needs_layer.slug(meta['query'])}/{name}"})
     saved.sort(key=lambda i: (i["engine"], i["query"], i["rank"] or 0))
     (root / "index.json").write_text(json.dumps(
-        {"work": work_name, "tree_id": tree_id, "created_at": _now(),
+        {"unit": unit, "by_group": by_group, "tree_id": tree_id, "created_at": _now(),
          "queries": queries, "pages": saved}, ensure_ascii=False, indent=1), encoding="utf-8")
-    _dump_index(root, work_name, queries, saved)
+    _dump_index(root, label, queries, saved)
 
     ok = sum(1 for i in saved if i["method"] != "failed")
     rendered = sum(1 for i in saved if i["method"] == "render")
-    link = f"reports/{needs_layer.slug(work_name)}/index.html"
-    needs_layer.save_artifact(tree_id, work_name, "dump", {
-        "task_id": task_id, "created_at": _now(), "report_link": link,
-        "queries": [q["query"] for q in queries], "pages": len(saved), "ok": ok,
-        "summary": f"{ok} из {len(saved)} страниц, {rendered} через браузер, "
-                   f"{len(queries)} запросов"})
-    ctx.log("INFO", "needs_dump", work_name,
+    link = f"reports/{needs_layer.slug(unit)}/index.html"
+    payload = {"task_id": task_id, "created_at": _now(), "report_link": link,
+               "queries": [q["query"] for q in queries], "pages": len(saved), "ok": ok,
+               "summary": f"{ok} из {len(saved)} страниц, {rendered} через браузер, "
+                          f"{len(queries)} запросов"}
+    if by_group:
+        needs_layer.save_group_artifact(tree_id, group_id, "dump", payload)
+    else:
+        needs_layer.save_artifact(tree_id, work_name, "dump", payload)
+    ctx.log("INFO", "needs_dump", label,
             f"выгружено {ok}/{len(saved)} страниц ({rendered} рендером) в {root.name}/")
     return {"pages": len(saved), "ok": ok, "rendered": rendered, "queries": len(queries),
             "link": link, "dir": str(root)}
@@ -1395,6 +1486,7 @@ async def stopwords_scan(ctx, task_id, phrase, params):
 OPS = {"load": load, "full_load": full_load, "stopwords_scan": stopwords_scan,
        "needs_dump": needs_dump,
        "needs_build": needs_build, "needs_refine": needs_refine, "needs_rank": needs_rank,
+       "needs_products": needs_products,
        "needs_analyze": needs_analyze,
        "needs_analyze_adv": needs_analyze_adv,
        "needs_analyze_product": needs_analyze_product,

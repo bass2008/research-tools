@@ -52,6 +52,7 @@ MCP-сервер **`taskworker`**:
 | `needs` | `pipeline-needs` | opus / xhigh | сборка дерева: сотни фраз одной пачкой, суждение |
 | `needs_refine` | `pipeline-needs` | opus / xhigh | второй проход классификации всего дерева |
 | `needs_rank` | `pipeline-needs-rank` | opus / xhigh | глубокая оценка физической возможности продукта по всем работам |
+| `products` | `pipeline-products` | opus / xhigh | группировка работ ветки в дерево продуктов на трёх масштабах: micro / medium / macro |
 | `analyze_work` | `pipeline-analyze` | opus / xhigh | вердикт, по которому человек решает строить или нет |
 | `analyze_adv` | `pipeline-analyze-adv` | opus / xhigh | второй разбор той же работы: одна функция, вход из поиска, платят ли |
 | `analyze_product` | `pipeline-analyze-product` | opus / xhigh | третий разбор: одна функция → спецификация микро-продукта (кому, почём, почему купят) |

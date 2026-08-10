@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import time
 import unicodedata
@@ -27,6 +28,19 @@ LOCAL_PREFIX = "local-"
 
 PROMPT_FILE = Path(__file__).resolve().parents[2] / "prompts" / "needs.md"
 REFERENCE_DIR = Path(__file__).resolve().parents[2] / "reference"
+
+
+def _expand_includes(path: Path) -> str:
+    """`{{include _файл.md}}` -> содержимое соседнего файла.
+
+    Общие правила классификации лежат отдельным файлом: их дословно читают и сборка, и второй
+    проход, а две копии одного текста расходятся. Лаборатория обязана собирать промпт так же,
+    как сервер, иначе прогон проверяет не то, что поедет в бой."""
+    out = []
+    for line in path.read_text(encoding="utf-8").splitlines(keepends=True):
+        name = re.fullmatch(r"\{\{include ([\w.\-]+)}}\s*", line)
+        out.append((path.parent / name.group(1)).read_text(encoding="utf-8") if name else line)
+    return "".join(out)
 
 
 def lab_dir() -> Path:
@@ -52,10 +66,11 @@ def _norm(s: str) -> str:
 # ---------- payload ----------
 
 def build_payload(root: str, min_freq: int = FLOOR, max_freq: int | None = None) -> dict:
-    """Ветка как JSON: {root, root_freq, nodes:[{phrase, freq, children}]}.
+    """Ветка как JSON: {root, root_freq, nodes, head_nodes}.
 
     `children` — только те дети, что сами попали в payload, иначе агент увидит ссылки на
-    фразы, которых у него нет."""
+    фразы, которых у него нет. Голова (> `max_freq`) в классификацию не идёт, но остаётся
+    в `head_nodes`: она контейнер пула, а не мусор."""
     root = _norm(root)
     con = _connect_ro()
     try:
@@ -73,21 +88,28 @@ def build_payload(root: str, min_freq: int = FLOOR, max_freq: int | None = None)
         kept = {p for p, f in freq.items()
                 if f >= min_freq and (max_freq is None or f <= max_freq)}
         kept.add(root)
+        head = {p for p, f in freq.items() if p not in kept and f > (max_freq or 0)}
         edges: dict[str, list[str]] = {}
+        head_edges: dict[str, list[str]] = {}
         for r in con.execute(
                 f"SELECT parent, child FROM edge WHERE parent IN ({qs})", subtree):
             if r["parent"] in kept and r["child"] in kept:
                 edges.setdefault(r["parent"], []).append(r["child"])
+            elif r["parent"] in head and (r["child"] in kept or r["child"] in head):
+                head_edges.setdefault(r["parent"], []).append(r["child"])
     finally:
         con.close()
 
     nodes = [{"phrase": p, "freq": freq[p],
               "children": sorted(edges.get(p, []), key=lambda c: (-freq[c], c))}
              for p in sorted(kept, key=lambda p: (-freq[p], p))]
+    head_nodes = [{"phrase": p, "freq": freq[p],
+                   "children": sorted(head_edges.get(p, []), key=lambda c: (-freq[c], c))}
+                  for p in sorted(head, key=lambda p: (-freq[p], p))]
     return {"root": root, "root_freq": freq[root], "status": row["status"],
             "min_freq": min_freq, "max_freq": max_freq,
             "floor": FLOOR, "head_freq": HEAD_FREQ,
-            "subtree_total": len(subtree), "nodes": nodes}
+            "subtree_total": len(subtree), "nodes": nodes, "head_nodes": head_nodes}
 
 
 # ---------- локальные джобы ----------
@@ -123,7 +145,7 @@ def create_job(payload: dict, tag: str = "") -> str:
     d.mkdir(parents=True, exist_ok=True)
     (d / "params.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1),
                                    encoding="utf-8")
-    (d / "prompt.md").write_text(PROMPT_FILE.read_text(encoding="utf-8"), encoding="utf-8")
+    (d / "prompt.md").write_text(_expand_includes(PROMPT_FILE), encoding="utf-8")
     job = {"job_id": job_id, "type": JOB_TYPE,
            "input_file": str(d / "params.json"), "input_sha256": _sha(d / "params.json"),
            "result_file": str(d / "result.json"),

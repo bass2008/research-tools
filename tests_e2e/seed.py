@@ -193,24 +193,57 @@ NEEDS_PARAMS = {
 }
 
 
-# засеянные разборы работ: вкладка «Отчёты» показывает их, а не узлы
+# ---------- дерево продуктов (третий слой) ----------
+# Единица разбора — группа: один вход, один движок, несколько работ. Уровни вложены,
+# покрытие полное — ровно то, что проверяет приёмник группировки.
+
+NEEDS_GROUP = "micro-1"
+NEEDS_GAP_GROUP = "micro-2"
+
+
+def _group(gid, level, works, parent):
+    return {"id": gid, "level": level, "name": f"продукт: {works[0]}", "works": works,
+            "parent": parent, "input": "картинка", "engine": "сегментация",
+            "output": "картинка без фона", "money": "разово 199 ₽",
+            "pool": 1000, "pool_why": "контейнер ветки 1000",
+            "cost": {"engine": 240000, "content": 40000, "monthly": 1500, "weeks": 6},
+            "core": "загрузил — получил", "order": [], "why": "один вход и один движок"}
+
+
+NEEDS_PRODUCTS = {
+    "task_id": "e2e-products-1", "model_family": "claude", "created_at": TS,
+    "tree_revision": 0, "why": "ветка распадается на два микропродукта",
+    "groups": [
+        _group("macro-1", "macro", [NEEDS_WORK, NEEDS_GAP_WORK], None),
+        _group("medium-1", "medium", [NEEDS_WORK, NEEDS_GAP_WORK], "macro-1"),
+        _group(NEEDS_GROUP, "micro", [NEEDS_WORK], "medium-1"),
+        _group(NEEDS_GAP_GROUP, "micro", [NEEDS_GAP_WORK], "medium-1"),
+    ],
+}
+
+# засеянные разборы ПРОДУКТОВ: вкладка «Отчёты» показывает их, а не узлы и не работы
 NEEDS_ANALYSES = [
-    {"work": NEEDS_WORK, "verdict": "BUILD", "verdict_score": 91.0, "confidence": 0.8,
+    {"group": NEEDS_GROUP, "kind": "analyze", "model_family": "claude",
+     "verdict": "BUILD", "verdict_score": 91.0, "confidence": 0.8,
      "report_link": f"reports/{REP_HI_ID}.html", "task_id": REP_HI_ID,
-     "created_at": TS, "searched": [ROOT_A], "phrases": 4},
-    {"work": NEEDS_GAP_WORK, "verdict": "MAYBE", "verdict_score": 42.0, "confidence": 0.5,
+     "created_at": TS, "searched": [ROOT_A], "phrases": 4, "tree_revision": 0},
+    {"group": NEEDS_GAP_GROUP, "kind": "analyze", "model_family": "claude",
+     "verdict": "MAYBE", "verdict_score": 42.0, "confidence": 0.5,
      "report_link": f"reports/{REP_LO_ID}.html", "task_id": REP_LO_ID,
-     "created_at": TS + 1, "searched": [A_VIDEO], "phrases": 2},
+     "created_at": TS + 1, "searched": [A_VIDEO], "phrases": 2, "tree_revision": 0},
 ]
 
 
 def needs_files(with_analyses=True):
     """{относительный путь: содержимое} — раскладка каталога сборки, как её читает сервер."""
     out = {f"{NEEDS_ID}/accepted.json": json.dumps(NEEDS_TREE, ensure_ascii=False),
-           f"{NEEDS_ID}/params.json": json.dumps(NEEDS_PARAMS, ensure_ascii=False)}
+           f"{NEEDS_ID}/params.json": json.dumps(NEEDS_PARAMS, ensure_ascii=False),
+           f"{NEEDS_ID}/products/products-{NEEDS_PRODUCTS['task_id']}.json":
+               json.dumps(NEEDS_PRODUCTS, ensure_ascii=False)}
     if with_analyses:
         for a in NEEDS_ANALYSES:
-            out[f"{NEEDS_ID}/analysis/{a['task_id']}.json"] = json.dumps(a, ensure_ascii=False)
+            out[f"{NEEDS_ID}/products/{a['group']}/analyze-{a['task_id']}.json"] = \
+                json.dumps(a, ensure_ascii=False)
     return out
 
 

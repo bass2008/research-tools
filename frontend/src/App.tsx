@@ -4,16 +4,18 @@ import * as api from './api'
 import { fmt, fmtDuration, fmtTime, fmtWhen, reportHref } from './api'
 import type { ReportRow, TaskRow } from './api'
 import { NeedsPane } from './NeedsPane'
+import { ProductsPane } from './ProductsPane'
 import { StopPane } from './StopPane'
 import { TreeNode } from './TreeNode'
 import { TreeCtx, applyEvent, initialState } from './store'
 import type { Cmd, LogRow, TreeApi } from './store'
 
-type Tab = 'main' | 'needs' | 'stop' | 'log' | 'tasks' | 'reports'
+type Tab = 'main' | 'needs' | 'products' | 'stop' | 'log' | 'tasks' | 'reports'
 
 const TABS: [Tab, string, string][] = [
   ['main', 'Главная', 'tab-main'],
   ['needs', 'Дерево потребностей', 'tab-needs'],
+  ['products', 'Дерево продуктов', 'tab-products'],
   ['log', 'Лог', 'tab-log'],
   ['tasks', 'Task', 'tab-tasks'],
   ['reports', 'Отчёты', 'tab-reports'],
@@ -33,6 +35,8 @@ function errText(e: unknown): string {
 export default function App() {
   const [st, dispatch] = useReducer(applyEvent, initialState)
   const [tab, setTab] = useState<Tab>('main')
+  // какое дерево открыто в «Потребностях» — его же показывает вкладка продуктов
+  const [openTree, setOpenTree] = useState<string | null>(null)
   const [phrase, setPhrase] = useState('')
   const [conn, setConn] = useState<api.ConnState>('connecting')
   const [err, setErr] = useState('')
@@ -291,7 +295,7 @@ export default function App() {
         </section>
 
         <section className="pane" style={{ display: tab === 'needs' ? '' : 'none' }}>
-          <NeedsPane active={tab === 'needs'} tasks={st.tasks} />
+          <NeedsPane active={tab === 'needs'} tasks={st.tasks} onOpenTree={setOpenTree} />
         </section>
 
         <section className="pane" style={{ display: tab === 'log' ? '' : 'none' }}>
@@ -307,6 +311,9 @@ export default function App() {
           />
         </section>
 
+        <section className="pane" style={{ display: tab === 'products' ? '' : 'none' }}>
+          <ProductsPane active={tab === 'products'} treeId={openTree} tasks={st.tasks} />
+        </section>
         <section className="pane" style={{ display: tab === 'reports' ? '' : 'none' }}>
           <ReportPane active={tab === 'reports'} tasks={st.tasks} />
         </section>
@@ -483,8 +490,12 @@ function TaskPane({
 const REPORT_KIND: Record<string, string> = {
   analyze: '1 · Ниша',
   analyze_adv: '2 · Функции',
-  analyze_product: '3 · Продукт',
+  analyze_product: '3 · Спецификация',
+  products: '0 · Продукты',
+  dump: 'Выгрузка TOP 10',
 }
+
+const LEVEL_SHORT: Record<string, string> = { micro: 'микро', medium: 'средний', macro: 'комплексный' }
 
 function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
   const [rows, setRows] = useState<ReportRow[] | null>(null)
@@ -516,11 +527,11 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
       <table className="tbl">
         <thead>
           <tr>
-            <th>работа</th>
+            <th>продукт</th>
             <th>модель</th>
             <th>разбор</th>
             <th>ветка</th>
-            <th className="num">частота</th>
+            <th className="num">пул</th>
             <th className="num">фраз</th>
             <th className="num">score</th>
             <th className="num">увер.</th>
@@ -532,16 +543,17 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
           {rows.length === 0 && (
             <tr>
               <td colSpan={10} className="mut">
-                отчётов пока нет — разбор запускается на работе в дереве потребностей
+                отчётов пока нет — разбор запускается на группе во вкладке «Дерево продуктов»
               </td>
             </tr>
           )}
           {rows.map((r) => {
             const family = r.model_family ?? 'claude'
             return (
-              <tr key={r.tree_id + '/' + r.work + '/' + family + '/' + r.kind} data-testid="report-row">
+              <tr key={r.tree_id + '/' + r.group + '/' + family + '/' + r.kind} data-testid="report-row">
                 <td className="ph">
-                  <div>{r.work}</div>
+                  <div>{r.name}</div>
+                  <div className="mut sm">{LEVEL_SHORT[r.level ?? ''] ?? ''}</div>
                 </td>
                 <td>
                   <span className={`model-dot model-${family}`}
@@ -549,7 +561,7 @@ function ReportPane({ active, tasks }: { active: boolean; tasks: TaskRow[] }) {
                 </td>
                 <td className="mut">{REPORT_KIND[r.kind] ?? r.kind}</td>
                 <td className="ph">{r.root ?? '—'}</td>
-                <td className="num">{fmt(r.top_freq)}</td>
+                <td className="num">{fmt(r.pool)}</td>
                 <td className="num">{r.phrases ?? '—'}</td>
                 <td className="num" title={r.verdict ?? undefined}>
                   <span className={`vscore vscore-${r.verdict ?? 'unknown'}`}>

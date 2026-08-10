@@ -19,6 +19,33 @@ from fake_worker import FakeWorker
 TREE_ID = "t-001"
 WORK = "убрать фон с картинки"
 GAP_WORK = "убрать фон на видео"
+GROUP = "micro-1"
+GAP_GROUP = "micro-2"
+
+
+def products_doc():
+    """Группировка из двух микропродуктов и накрывающих их medium/macro.
+
+    Разборы идут по ГРУППЕ, поэтому без неё их вызвать нечем. Уровни вложены, покрытие полное —
+    ровно то, что требует приёмник."""
+    def g(gid, level, works, parent):
+        return {"id": gid, "level": level, "name": f"продукт {gid}", "works": works,
+                "parent": parent, "input": "картинка", "engine": "сегментация",
+                "output": "картинка без фона", "money": "разово 199 ₽",
+                "pool": 900, "pool_why": "одна дверь 900",
+                "core": "загрузил — получил", "order": [], "why": "один вход и один движок"}
+    return {"groups": [g("macro-1", "macro", [WORK, GAP_WORK], None),
+                       g("medium-1", "medium", [WORK, GAP_WORK], "macro-1"),
+                       g(GROUP, "micro", [WORK], "medium-1"),
+                       g(GAP_GROUP, "micro", [GAP_WORK], "medium-1")]}
+
+
+def put_products(needs_dir, tree_id, task_id="p-001", revision=0):
+    d = needs_dir / tree_id / "products"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"products-{task_id}.json").write_text(json.dumps(
+        {"task_id": task_id, "model_family": "claude", "created_at": 1, "why": "тест",
+         "tree_revision": revision, **products_doc()}, ensure_ascii=False), encoding="utf-8")
 
 
 def tree_doc(phrases, gap_phrases):
@@ -75,6 +102,7 @@ def seeded(needs_dir, snap_con):
                         ((SNAP["TRANSACTIONAL"], 900), (SNAP["LOADED"], 500),
                          (SNAP["NEW"], 40), (SNAP["HEAD"], 90000))]}
     put_tree(needs_dir, TREE_ID, tree_doc(phrases, gap), params)
+    put_products(needs_dir, TREE_ID)
     wscore.save_serp(snap_con, SNAP["TRANSACTIONAL"],
                      {e: {"found": 1000, "docs": docs(SNAP["TRANSACTIONAL"], e)}
                       for e in wscore.SERP_ENGINES})
@@ -100,7 +128,7 @@ def test_rows_and_detail_join_freqs(client, seeded):
     assert work["top_freq"] == 900
     assert work["score"] is None
     assert work["favorite"] is False
-    assert work["analysis"] is None
+    assert work["artifacts"] == []
     assert d["excluded"][0]["freq"] == 90000
 
 
@@ -270,7 +298,7 @@ def test_refine_is_exclusive_for_both_families_and_work_actions(
         "tree_id": TREE_ID, "model_family": "codex",
     }).status_code == 409
     assert client.post("/api/needs/analyze", json={
-        "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
+        "tree_id": TREE_ID, "group": GROUP, "model_family": "codex",
     }).status_code == 409
     assert client.post("/api/needs/rank", json={
         "tree_id": TREE_ID, "model_family": "codex",
@@ -352,7 +380,7 @@ def test_rank_is_exclusive_with_refine_and_work_actions(
         "tree_id": TREE_ID, "model_family": "codex",
     }).status_code == 409
     assert client.post("/api/needs/analyze", json={
-        "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
+        "tree_id": TREE_ID, "group": GROUP, "model_family": "codex",
     }).status_code == 409
     assert task_done(snap_con, first.json()["task_id"])["status"] == "FAILED"
 
@@ -384,7 +412,7 @@ def test_second_pass_invalidates_ranking_of_previous_classification(
 def test_analyze_work_buys_serp_then_calls_llm(client, seeded, snap_con, reports_dir):
     """Цепочка: выдача -> Opus -> отчёт файлом рядом с деревом; `node` не тронут."""
     with FakeWorker(client, TOKEN, verdict="BUILD", verdict_score=88):
-        r = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "work": WORK})
+        r = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "group": GROUP})
         assert r.status_code == 200
         task_id = r.json()["task_id"]
         row = task_done(snap_con, task_id)
@@ -396,11 +424,12 @@ def test_analyze_work_buys_serp_then_calls_llm(client, seeded, snap_con, reports
     assert wscore.load_serp(snap_con, SNAP["TRANSACTIONAL"])
     # разбор лежит файлом рядом с деревом
     d = client.get(f"/api/needs/tree/{TREE_ID}").json()
-    work = next(w for w in d["works"] if w["name"] == WORK)
-    assert work["analysis"]["verdict"] == "BUILD"
-    assert work["analysis"]["model_family"] == "claude", "старый/default запуск — Claude"
+    group = next(g for g in d["products"]["groups"] if g["id"] == GROUP)
+    art = next(a for a in group["artifacts"] if a["kind"] == "analyze")
+    assert art["verdict"] == "BUILD"
+    assert art["model_family"] == "claude", "старый/default запуск — Claude"
     assert (reports_dir / f"{task_id}.html").is_file()
-    assert work["analysis"]["report_link"] == f"reports/{task_id}.html"
+    assert art["report_link"] == f"reports/{task_id}.html"
     # статус узла первого слоя не изменился: второй слой в модель не пишет
     assert node_row(snap_con, SNAP["TRANSACTIONAL"])["status"] == "TRANSACTIONAL"
 
@@ -411,7 +440,7 @@ def test_analyze_reuses_paid_serp_without_network(client, seeded, snap_con):
     with FakeWorker(client, TOKEN):
         for _ in range(2):
             tid = client.post("/api/needs/analyze",
-                              json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                              json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
             assert task_done(snap_con, tid)["status"] == "DONE"
     assert wscore.net_calls() == 0
 
@@ -425,7 +454,7 @@ def test_analyze_adv_is_a_second_opinion_on_the_same_paid_serp(client, seeded, s
     поэтому пустой список функций не принимается."""
     with FakeWorker(client, TOKEN) as fake:
         tid = client.post("/api/needs/analyze_adv",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
 
     assert row["status"] == "DONE", row["error"]
@@ -434,7 +463,7 @@ def test_analyze_adv_is_a_second_opinion_on_the_same_paid_serp(client, seeded, s
 
     res = json.loads(row["result"])
     assert res["functions"] >= 1 and res["best"], "единица ответа — функция"
-    arts = needs_layer.work_artifacts(TREE_ID)[needs_layer._norm(WORK)]
+    arts = needs_layer.group_artifacts(TREE_ID)[GROUP]
     adv = next(a for a in arts if a["kind"] == "analyze_adv")
     assert adv["functions"][0]["entry_query"], "у функции есть входная фраза из поиска"
     assert adv["report_link"] != next(
@@ -457,14 +486,15 @@ def test_next_analysis_reads_the_latest_report_of_any_family(
 
     with FakeWorker(client, TOKEN, model_family="codex", answer=spy):
         tid = client.post("/api/needs/analyze", json={
-            "tree_id": TREE_ID, "work": WORK, "model_family": "codex"}).json()["task_id"]
+            "tree_id": TREE_ID, "group": GROUP, "model_family": "codex"}).json()["task_id"]
         assert task_done(snap_con, tid)["status"] == "DONE"
     time.sleep(1.1)     # дата артефакта в секундах: иначе прогоны неразличимы
 
     with FakeWorker(client, TOKEN, model_family="claude", answer=spy):
         for action in ("analyze_adv", "product"):
             tid = client.post(f"/api/needs/{action}", json={
-                "tree_id": TREE_ID, "work": WORK, "model_family": "claude"}).json()["task_id"]
+                "tree_id": TREE_ID, "group": GROUP,
+                "model_family": "claude"}).json()["task_id"]
             row = task_done(snap_con, tid)
             assert row["status"] == "DONE", row["error"]
             time.sleep(1.1)
@@ -494,7 +524,7 @@ def test_analyze_product_reads_both_previous_reports_and_keeps_the_score_trail(
             if i:
                 time.sleep(1.1)   # дата артефакта в секундах: иначе прогоны неразличимы
             tid = client.post(f"/api/needs/{action}",
-                              json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                              json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
             row = task_done(snap_con, tid)
             assert row["status"] == "DONE", row["error"]
 
@@ -503,7 +533,7 @@ def test_analyze_product_reads_both_previous_reports_and_keeps_the_score_trail(
     assert "Скоркарта" in ctx["niche"]["report"], "текст отчёта, а не ссылка на него"
     assert seen_params["analyze_product"]["serps"], "выдача тоже на входе: она первоисточник"
 
-    arts = needs_layer.work_artifacts(TREE_ID)[needs_layer._norm(WORK)]
+    arts = needs_layer.group_artifacts(TREE_ID)[GROUP]
     prod = next(a for a in arts if a["kind"] == "analyze_product")
     assert prod["spec"]["product"] and prod["spec"]["price"], "ответ — спецификация"
     assert [m["month"] for m in prod["forecast"]["months"]] == [1, 2, 3, 6], "прогноз по месяцам"
@@ -520,7 +550,7 @@ def test_analyze_product_needs_a_previous_analysis(client, seeded, snap_con):
     """Без «Ниши» и «Функций» третий разбор не запускается: ему нечего сводить."""
     with FakeWorker(client, TOKEN):
         tid = client.post("/api/needs/product",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
     assert row["status"] == "FAILED" and "разбор" in (row["error"] or "")
 
@@ -542,7 +572,7 @@ def test_product_takes_the_freshest_report_even_from_another_family(
                     "report_link": f"reports/{report.name}"}
             if kind == "analyze_adv":
                 data["functions"] = [{"name": f"{family}-функция", "score": 50 + i}]
-            needs_layer.save_artifact(TREE_ID, WORK, kind, data)
+            needs_layer.save_group_artifact(TREE_ID, GROUP, kind, data)
 
     def answer(job):
         if job["type"] == "analyze_product":
@@ -551,7 +581,7 @@ def test_product_takes_the_freshest_report_even_from_another_family(
 
     with FakeWorker(client, TOKEN, answer=answer, model_family="codex"):
         tid = client.post("/api/needs/product", json={
-            "tree_id": TREE_ID, "work": WORK, "model_family": "codex",
+            "tree_id": TREE_ID, "group": GROUP, "model_family": "codex",
         }).json()["task_id"]
         row = task_done(snap_con, tid)
 
@@ -577,10 +607,10 @@ def test_analyze_product_rejects_a_forecast_of_zeros(client, seeded, snap_con, r
 
     with FakeWorker(client, TOKEN, answer=zeros):
         tid = client.post("/api/needs/analyze",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         assert task_done(snap_con, tid)["status"] == "DONE"
         tid = client.post("/api/needs/product",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
     assert row["status"] == "FAILED" and "нулей" in (row["error"] or "")
 
@@ -595,10 +625,10 @@ def test_analyze_product_rejects_a_spec_without_price(client, seeded, snap_con, 
 
     with FakeWorker(client, TOKEN, answer=answer):
         tid = client.post("/api/needs/analyze",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         assert task_done(snap_con, tid)["status"] == "DONE"
         tid = client.post("/api/needs/product",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
     assert row["status"] == "FAILED" and "price" in (row["error"] or "")
 
@@ -613,31 +643,31 @@ def test_reports_show_both_kinds_newest_first(client, seeded, snap_con):
             if i:
                 time.sleep(1.1)   # дата артефакта в секундах: иначе прогоны неразличимы
             tid = client.post(f"/api/needs/{action}",
-                              json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                              json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
             assert task_done(snap_con, tid)["status"] == "DONE"
 
     rows = client.get("/api/needs/reports").json()["reports"]
-    mine = [r for r in rows if r["work"] == WORK]
+    mine = [r for r in rows if r["group"] == GROUP]
     assert {r["kind"] for r in mine} == {"analyze", "analyze_adv"}, "оба разбора видны"
     assert mine[0]["kind"] == "analyze_adv", "последний прогон — первой строкой"
     dates = [r["created_at"] or 0 for r in rows]
     assert dates == sorted(dates, reverse=True), "весь список отсортирован по дате"
 
 
-def test_old_analysis_artifacts_are_migrated_to_claude(needs_dir):
-    """Файловая миграция явная, атомарная и идемпотентная."""
+def test_artifact_without_family_reads_as_claude(needs_dir):
+    """Артефакт без явного семейства читается как запуск Claude, файл при этом не переписывается."""
     root = put_tree(needs_dir, TREE_ID, tree_doc([SNAP["NEW"]], []),
                     {"root": SNAP["HEAD"], "nodes": []})
     artifact_dir = root / "artifacts" / needs_layer.slug(WORK)
     artifact_dir.mkdir(parents=True)
     old = artifact_dir / "analyze-old.json"
     old.write_text(json.dumps({"work": WORK, "kind": "analyze", "task_id": "old",
-                               "created_at": 1, "verdict": "SKIP", "verdict_score": 20},
-                              ensure_ascii=False), encoding="utf-8")
+                               "created_at": 1, "verdict": "SKIP", "verdict_score": 20,
+                               "tree_revision": 0}, ensure_ascii=False), encoding="utf-8")
 
-    assert needs_layer.migrate_analysis_families() == 1
-    assert json.loads(old.read_text(encoding="utf-8"))["model_family"] == "claude"
-    assert needs_layer.migrate_analysis_families() == 0
+    got = needs_layer.work_artifacts(TREE_ID)[needs_layer._norm(WORK)][0]
+    assert got["model_family"] == "claude"
+    assert "model_family" not in json.loads(old.read_text(encoding="utf-8"))
 
 
 def test_report_is_a_page_even_if_the_model_returns_a_fragment(client, seeded, snap_con,
@@ -653,7 +683,7 @@ def test_report_is_a_page_even_if_the_model_returns_a_fragment(client, seeded, s
             "recommendation": "MAYBE", "verdict_score": 50, "confidence": 0.5,
             "report_html": body}):
         tid = client.post("/api/needs/analyze_adv",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         assert task_done(snap_con, tid)["status"] == "DONE"
 
     page = (reports_dir / f"{tid}.html").read_text(encoding="utf-8")
@@ -703,7 +733,7 @@ def test_analyze_adv_rejects_a_function_without_a_money_model(client, seeded, sn
             "recommendation": "BUILD", "verdict_score": 74, "confidence": 0.6,
             "report_html": "<h2>Коротко</h2><p>" + "текст " * 40 + "</p>"}):
         tid = client.post("/api/needs/analyze_adv",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
     assert row["status"] == "FAILED"
     assert "money" in row["error"] and "cost" in row["error"]
@@ -715,7 +745,7 @@ def test_analyze_adv_rejects_an_answer_without_functions(client, seeded, snap_co
             "recommendation": "SKIP", "verdict_score": 10, "confidence": 0.5,
             "report_html": "<html><body>" + "нет функций " * 20 + "</body></html>"}):
         tid = client.post("/api/needs/analyze_adv",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
     assert row["status"] == "FAILED" and "функц" in row["error"]
 
@@ -725,20 +755,21 @@ def test_analyze_without_serp_fails_with_clear_reason(client, seeded, snap_con):
     ничего не выдумывая и не помечая работу разобранной."""
     with FakeWorker(client, TOKEN):
         tid = client.post("/api/needs/analyze",
-                          json={"tree_id": TREE_ID, "work": GAP_WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GAP_GROUP}).json()["task_id"]
         row = task_done(snap_con, tid)
     assert row["status"] == "FAILED" and "только кэш" in row["error"]
     d = client.get(f"/api/needs/tree/{TREE_ID}").json()
-    assert next(w for w in d["works"] if w["name"] == GAP_WORK)["analysis"] is None
+    assert next(g for g in d["products"]["groups"]
+                if g["id"] == GAP_GROUP)["artifacts"] == []
 
 
-def test_analyze_unknown_tree_or_work_is_404(client, seeded):
+def test_analyze_unknown_tree_or_group_is_404(client, seeded):
     assert client.post("/api/needs/analyze",
-                       json={"tree_id": "нет", "work": WORK}).status_code == 404
+                       json={"tree_id": "нет", "group": GROUP}).status_code == 404
     assert client.post("/api/needs/analyze",
-                       json={"tree_id": TREE_ID, "work": "нет такой работы"}).status_code == 404
+                       json={"tree_id": TREE_ID, "group": "нет такой группы"}).status_code == 404
     assert client.post("/api/needs/analyze", json={
-        "tree_id": TREE_ID, "work": WORK, "model_family": "llama",
+        "tree_id": TREE_ID, "group": GROUP, "model_family": "llama",
     }).status_code == 422
 
 
@@ -747,15 +778,15 @@ def test_analyze_is_not_started_twice(client, seeded, llm_timeout):
     llm_timeout(3.0)
     with FakeWorker(client, TOKEN, mode="silent"):
         assert client.post("/api/needs/analyze",
-                           json={"tree_id": TREE_ID, "work": WORK}).status_code == 200
-        r = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "work": WORK})
+                           json={"tree_id": TREE_ID, "group": GROUP}).status_code == 200
+        r = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "group": GROUP})
     assert r.status_code == 409 and "уже идёт" in r.json()["detail"]
 
 
 def test_same_analysis_can_run_for_claude_and_codex_in_parallel(
         client, seeded, snap_con, llm_timeout):
     llm_timeout(0.3)
-    body = {"tree_id": TREE_ID, "work": WORK}
+    body = {"tree_id": TREE_ID, "group": GROUP}
     claude = client.post("/api/needs/analyze",
                          json={**body, "model_family": "claude"})
     codex = client.post("/api/needs/analyze",
@@ -775,7 +806,7 @@ def test_model_test_routes_two_families_in_parallel_and_writes_reports(
     monkeypatch.setattr(tasks, "MODEL_TEST_SECONDS", 0.2)
     claude_worker = FakeWorker(client, TOKEN, model_family="claude")
     codex_worker = FakeWorker(client, TOKEN, model_family="codex")
-    body = {"tree_id": TREE_ID, "work": WORK}
+    body = {"tree_id": TREE_ID, "work": WORK}      # smoke-test остался операцией по работе
     started = time.monotonic()
     with claude_worker, codex_worker:
         claude = client.post("/api/needs/test",
@@ -812,7 +843,7 @@ def test_waiting_until_the_agent_actually_takes_the_job(client, seeded, snap_con
     llm_timeout(6.0)
     worker = FakeWorker(client, TOKEN, mode="silent")     # сигнал возьмёт, данные не заберёт
     tid = client.post("/api/needs/analyze",
-                      json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                      json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
     # выдача уже засеяна, поэтому системная часть проходит мгновенно и мы сразу ждём агента
     wait_for(lambda: task_row(snap_con, tid)["status"] == "WAITING",
              what="задача перешла в ожидание исполнителя")
@@ -838,18 +869,18 @@ def test_cancel_frees_the_work_for_a_new_run(client, seeded, snap_con, llm_timeo
     llm_timeout(30.0)
     with FakeWorker(client, TOKEN, mode="silent"):
         tid = client.post("/api/needs/analyze",
-                          json={"tree_id": TREE_ID, "work": WORK}).json()["task_id"]
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
         wait_for(lambda: task_row(snap_con, tid)["status"] == "WAITING",
                  what="задача ждёт исполнителя")
         assert client.post(f"/api/needs/analyze",
-                           json={"tree_id": TREE_ID, "work": WORK}).status_code == 409
+                           json={"tree_id": TREE_ID, "group": GROUP}).status_code == 409
 
         assert client.post(f"/api/task/{tid}/cancel").status_code == 200
         row = wait_for(lambda: (lambda r: r if r["status"] == "FAILED" else None)(
             task_row(snap_con, tid)), what="задача закрылась после отмены")
         assert "отменена" in (row["error"] or "")
 
-        again = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "work": WORK})
+        again = client.post("/api/needs/analyze", json={"tree_id": TREE_ID, "group": GROUP})
         assert again.status_code == 200, "после отмены работа свободна"
 
 
@@ -865,3 +896,36 @@ def test_non_llm_operation_is_running_right_away(client, seeded, snap_con):
         time.sleep(0.01)
     assert "WAITING" not in seen, f"не-LLM операция побывала в WAITING: {seen}"
     assert seen[-1] == "DONE", seen
+
+
+def test_niche_without_money_answer_is_rejected(client, seeded, snap_con, reports_dir):
+    """«Ниша» без ответа про деньги не принимается.
+
+    Раньше монетизация была строкой в списке «Реализация», и разбор проходил приёмку, ни разу
+    не сказав, что продаём, кому и почему купят у нас. На живой ветке так и вышло: отчёт
+    порекомендовал контентный актив и не назвал ни модели, ни цены."""
+    def answer(job):
+        res = fake_worker.canned(job)
+        if job["type"] == "analyze_work":
+            res.pop("who_pays")          # остальные два поля на месте
+        return res
+
+    with FakeWorker(client, TOKEN, answer=answer):
+        tid = client.post("/api/needs/analyze",
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
+        row = task_done(snap_con, tid)
+
+    assert row["status"] == "FAILED"
+    assert "не ответил про деньги" in row["error"] and "who_pays" in row["error"]
+
+
+def test_niche_keeps_the_money_answer_next_to_the_verdict(client, seeded, snap_con, reports_dir):
+    """Ответ про деньги ложится в артефакт: его читают следующие разборы и вкладка «Отчёты»."""
+    with FakeWorker(client, TOKEN):
+        tid = client.post("/api/needs/analyze",
+                          json={"tree_id": TREE_ID, "group": GROUP}).json()["task_id"]
+        assert task_done(snap_con, tid)["status"] == "DONE"
+
+    art = next(a for a in needs_layer.group_artifacts(TREE_ID)[GROUP] if a["kind"] == "analyze")
+    assert art["money"] and art["who_pays"] and art["why_pay"]
+    assert art["summary"] == art["money"]

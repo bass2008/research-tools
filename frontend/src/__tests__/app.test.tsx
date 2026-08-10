@@ -492,7 +492,7 @@ describe('вкладки Task и Отчёты', () => {
     expect(screen.getByText('задач пока нет')).toBeInTheDocument()
   })
 
-  it('вкладка «Отчёты» показывает разборы РАБОТ, а не узлов', async () => {
+  it('вкладка «Отчёты» показывает разборы ПРОДУКТОВ, а не узлов', async () => {
     const user = userEvent.setup()
     mount()
     fetchMock.mockResolvedValueOnce(
@@ -500,10 +500,13 @@ describe('вкладки Task и Отчёты', () => {
         reports: [
           {
             tree_id: 'tree-1',
-            work: 'создать песню или музыку',
+            group: 'micro-2',
+            name: 'создать песню или музыку',
+            level: 'micro',
+            kind: 'analyze',
             root: 'нейросеть бесплатно без регистрации',
             condition: 'бесплатно',
-            top_freq: 7106,
+            pool: 7106,
             phrases: 31,
             verdict: 'SKIP',
             verdict_score: 30,
@@ -517,6 +520,7 @@ describe('вкладки Task и Отчёты', () => {
     await user.click(screen.getByTestId('tab-reports'))
     const row = await screen.findByTestId('report-row')
     expect(row).toHaveTextContent('создать песню или музыку')
+    expect(row).toHaveTextContent('микро')
     expect(row).toHaveTextContent('30')
     expect(within(row).getByTitle('Claude')).toBeTruthy()
     expect(within(row).getByTitle('SKIP')).toBeTruthy()

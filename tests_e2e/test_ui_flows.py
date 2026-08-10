@@ -257,18 +257,22 @@ def test_09_needs_build_from_loaded_branch(page, server, worker):
 # ---------- 12. Link открывает отчёт в новой вкладке ----------
 
 def test_12_link_opens_report(page, server):
-    """§8.12 — `Link` у РАБОТЫ открывает новую вкладку с готовым HTML; разделы на месте.
+    """§8.12 — ссылка на отчёт у ПРОДУКТА открывает новую вкладку с готовым HTML.
 
-    Отчёт принадлежит работе второго слоя, а не узлу дерева запросов."""
+    Отчёт принадлежит группе дерева продуктов, а не работе и не узлу дерева запросов."""
     open_app(page, server)
     tab(page, "needs")
-    page.get_by_test_id("needs-row").first.click()
-    work = page.get_by_test_id("needs-work").filter(has_text=seed.NEEDS_WORK).first
-    expect(work.locator("[data-testid=needs-score-claude]")).to_contain_text("91")
+    page.get_by_test_id("needs-row").first.click()       # вкладка продуктов берёт открытое дерево
+    tab(page, "products")
+    # вкладка открывается на комплексных, а разбор засеян микропродукту
+    page.get_by_test_id("products-level-btn-micro").click()
+    group = (page.get_by_test_id("products-level-micro")
+             .get_by_test_id("product-group").first)
+    expect(group).to_contain_text("пул")
 
-    work.locator("[data-testid=needs-menu] summary").click()   # отчёты живут в меню действий
+    group.locator("[data-testid=product-menu] summary").click()   # отчёты живут в меню действий
     with page.expect_popup() as popup:
-        work.locator("[data-testid=needs-report-claude-analyze]").click()
+        group.locator("[data-testid=product-report-claude-analyze]").click()
     report = popup.value
     report.wait_for_load_state()
 
@@ -324,7 +328,7 @@ def test_14_task_tab(page, server, worker):
 # ---------- 15. Вкладка Отчёты ----------
 
 def test_15_reports_tab_sorted(page, server):
-    """§8.15 — отчёты РАБОТ, НОВЫЕ СВЕРХУ; ссылка открывает готовый файл.
+    """§8.15 — отчёты ПРОДУКТОВ, НОВЫЕ СВЕРХУ; ссылка открывает готовый файл.
 
     Порядок по дате, а не по оценке: свежий прогон должен быть виден сразу, иначе он тонет
     в хвосте таблицы и выглядит как «отчёт не появился»."""
@@ -470,6 +474,8 @@ def test_20_needs_rank_is_separate_from_classification(page, server, worker):
     expect(page.get_by_test_id("needs-score")).to_have_count(0)
 
     # E2E fake_worker имитирует Claude-петлю; маршрут Codex/Sol проверяется отдельно unit-тестом.
+    # операции уровня дерева спрятаны за «Действия»: в строку шесть кнопок не влезали
+    page.get_by_test_id("tree-actions").locator("summary").click()
     page.get_by_test_id("needs-rank-claude").click()
     expect(page.get_by_test_id("needs-rank-confirm")).to_contain_text(
         "Выдача и конкуренты не используются"
