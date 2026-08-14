@@ -1,0 +1,67 @@
+"use client";
+
+// Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { useSession } from "./useSession";
+
+const ROW: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  font: "600 13px var(--sans)",
+  color: "var(--dim)",
+  whiteSpace: "nowrap",
+};
+
+const BTN: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: 0,
+  font: "inherit",
+  color: "inherit",
+  cursor: "pointer",
+  width: "auto",
+};
+
+export default function SessionBadge() {
+  const session = useSession();
+  const router = useRouter();
+
+  if (session.status === "loading") {
+    return <span style={{ ...ROW, color: "var(--dim2)" }}>проверяем доступ…</span>;
+  }
+
+  if (session.status !== "user") {
+    return (
+      <span style={ROW}>
+        <Link data-testid="nav-login" href="/login">
+          Войти
+        </Link>
+        <Link data-testid="nav-register" href="/register">
+          Регистрация
+        </Link>
+      </span>
+    );
+  }
+
+  return (
+    <span style={ROW}>
+      <Link data-testid="account-email" className="user-email" href="/account">
+        {session.email}
+      </Link>
+      <button
+        type="button"
+        data-testid="logout"
+        style={BTN}
+        onClick={async () => {
+          await session.signOut();
+          router.push("/");
+        }}
+      >
+        Выйти
+      </button>
+    </span>
+  );
+}

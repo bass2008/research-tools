@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="g1" cx="18%" cy="0%" r="80%">
+      <stop offset="0" stop-color="#dff0ef"/><stop offset="1" stop-color="#eef2f4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="92%" cy="0%" r="70%">
+      <stop offset="0" stop-color="#e8eef7"/><stop offset="1" stop-color="#eef2f4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#eef2f4"/>
+  <rect width="1200" height="630" fill="url(#g1)"/>
+  <rect width="1200" height="630" fill="url(#g2)"/>
+  <g transform="translate(880,315)">
+    <circle r="196" fill="none" stroke="#cfdde2" stroke-width="2"/>
+    <circle r="178" fill="none" stroke="#dde7ea" stroke-width="2"/>
+    <polygon points="178.0,0.0 125.9,125.9 0.0,178.0 -125.9,125.9 -178.0,0.0 -125.9,-125.9 -0.0,-178.0 125.9,-125.9" fill="none" stroke="#8399a8" stroke-width="3"/>
+    <polygon points="102.0,0.0 0.0,102.0 -102.0,0.0 -0.0,-102.0" fill="none" stroke="#b3c2cc" stroke-width="2"/>
+    <polygon points="72.1,72.1 -72.1,72.1 -72.1,-72.1 72.1,-72.1" fill="none" stroke="#b3c2cc" stroke-width="2"/>
+    <circle cx="178.0" cy="0.0" r="26" fill="#1f9ed6"/><text x="178.0" y="8.0" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">14</text><circle cx="125.9" cy="125.9" r="26" fill="#159c69"/><text x="125.9" y="133.9" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">9</text><circle cx="0.0" cy="178.0" r="26" fill="#c9453a"/><text x="0.0" y="186.0" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">20</text><circle cx="-125.9" cy="125.9" r="26" fill="#dd7b2a"/><text x="-125.9" y="133.9" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">13</text><circle cx="-178.0" cy="0.0" r="26" fill="#d9ac1e"/><text x="-178.0" y="8.0" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">6</text><circle cx="-125.9" cy="-125.9" r="26" fill="#3f5ec9"/><text x="-125.9" y="-117.9" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">17</text><circle cx="-0.0" cy="-178.0" r="26" fill="#8e5bc4"/><text x="-0.0" y="-170.0" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">3</text><circle cx="125.9" cy="-125.9" r="26" fill="#3f5ec9"/><text x="125.9" y="-117.9" font-family="DejaVu Sans" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle">11</text>
+    <circle r="36" fill="#0e8f88"/>
+    <text y="10" font-family="DejaVu Sans" font-size="28" font-weight="bold" fill="#fff" text-anchor="middle">22</text>
+  </g>
+  <text x="80" y="180" font-family="DejaVu Serif" font-size="66" font-weight="bold" fill="#16283c">Матрица судьбы</text>
+  <text x="80" y="250" font-family="DejaVu Sans" font-size="30" fill="#5a6d7d">Разбор по дате рождения: октаграмма,</text>
+  <text x="80" y="294" font-family="DejaVu Sans" font-size="30" fill="#5a6d7d">карта энергий и 20 разделов</text>
+  <rect x="80" y="348" width="480" height="84" rx="16" fill="#ffffff" stroke="#0e8f88" stroke-width="2"/>
+  <text x="104" y="402" font-family="DejaVu Sans" font-size="38" font-weight="bold" fill="#16283c">1 990 ₽</text>
+  <text x="330" y="382" font-family="DejaVu Sans" font-size="19" fill="#5a6d7d">полный разбор</text>
+  <text x="330" y="412" font-family="DejaVu Sans" font-size="19" fill="#0b7a74">6 разделов бесплатно</text>
+  <text x="80" y="500" font-family="DejaVu Sans" font-size="22" fill="#8395a3">Дата рождения не покидает браузер</text>
+</svg>

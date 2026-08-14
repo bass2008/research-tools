@@ -25,3 +25,21 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Веса моделей: 22 ГБ, качаются заново по fetch-скриптам, в истории им не место
+project/destiny-matrix/generators/models/
+
+# Сборка и кеши Next.js
+project/destiny-matrix/web/.next/
+project/destiny-matrix/web/out/
+# Локальная БД API
+project/destiny-matrix/api/var/
+
+# Черновики генерации: 590 МБ вариантов на выбор сида. В продукт идут 22 webp в
+# web/public/img/arcana, выбор сидов лежит в generators/seeds.json, промпты — в arcana.py,
+# поэтому колода воспроизводима без этих файлов.
+project/destiny-matrix/generators/out/
+project/destiny-matrix/legacy/gen/
+# Страницы предпросмотра колоды — их пишет generators/pages.py при каждом прогоне
+project/destiny-matrix/legacy/g100-*.html
+project/destiny-matrix/legacy/card-100-*.html

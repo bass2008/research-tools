@@ -1,0 +1,30 @@
+site_domain   = "matritsa.webstudiolab.ru"
+dns_zone_name = "webstudiolab-ru"
+
+admin_email = "hello@webstudiolab.ru"
+
+# Публичный ключ, а не путь к нему:
+#   ssh_public_key = file("~/.ssh/id_ed25519.pub")
+ssh_public_key = "ssh-ed25519 AAAA... user@host"
+
+# Сузить до своего адреса после первого входа. Совсем закрыть нельзя: деплой идёт по ssh.
+#   ssh_allowed_cidrs = ["203.0.113.7/32"]
+ssh_allowed_cidrs = ["0.0.0.0/0"]
+
+# 1 297 ₽/мес. Замеры и развилки — ../README.md §4.
+# Если в journalctl появится OOM или swap станет использоваться постоянно — memory = 4 (+537 ₽).
+platform_id   = "standard-v2"
+core_fraction = 5
+cores         = 2
+memory        = 2
+
+# SSD, а не HDD: 5 544 предрендеренные страницы читаются вхолодную краулерами, а HDD такого
+# размера получает долю от 300 IOPS на юнит 256 ГБ.
+disk_type = "network-ssd"
+disk_size = 20
+
+# node 24 — активный LTS. Артефакт standalone должен собираться на совместимой мажорной версии.
+node_major = 24
+
+# Сколько релизов держать для откатов. Каждый ~1,2 ГБ, но неизменные файлы — жёсткие ссылки.
+releases_keep = 3

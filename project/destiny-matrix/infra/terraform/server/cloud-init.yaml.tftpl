@@ -1,0 +1,311 @@
+#cloud-config
+package_update: true
+
+packages:
+  - postgresql
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - python3-venv
+  - rsync
+  - curl
+  - ca-certificates
+  - gnupg
+
+write_files:
+  - path: /etc/nginx/conf.d/matritsa-tuning.conf
+    permissions: '0644'
+    content: |
+      server_tokens off;
+      client_max_body_size 2m;
+
+      gzip on;
+      gzip_vary on;
+      gzip_proxied any;
+      gzip_min_length 1024;
+      gzip_types text/plain text/css application/javascript application/json image/svg+xml application/xml;
+
+  - path: /etc/nginx/sites-available/matritsa.conf
+    permissions: '0644'
+    content: |
+      # Единая точка входа. И страницы, и /api/ уходят на node: BFF внутри Next сам ходит в
+      # FastAPI на 127.0.0.1:${api_port} и сам ставит httpOnly-куку. Прямого пути от браузера к
+      # FastAPI нет — иначе токен приходит телом ответа, а его читает JavaScript.
+      server {
+          listen 80;
+          listen [::]:80;
+          server_name ${site_fqdn};
+
+          # Чанки с хешем в имени отдаёт nginx с диска, node на них не тратит цикл событий.
+          # Каталог общий для релизов и накапливается: браузер с открытой вкладкой продолжает
+          # просить чанки прошлой сборки.
+          # try_files здесь нет намеренно: вместе с alias он известен тем, что склеивает путь
+          # дважды. Отсутствующий чанк nginx и так отдаёт как 404.
+          location /_next/static/ {
+              alias ${app_dir}/web/static/;
+              access_log off;
+              add_header Cache-Control "public, max-age=31536000, immutable" always;
+          }
+
+          location /api/ {
+              proxy_pass http://127.0.0.1:${web_port};
+              proxy_http_version 1.1;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_read_timeout 30s;
+          }
+
+          location / {
+              proxy_pass http://127.0.0.1:${web_port};
+              proxy_http_version 1.1;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_read_timeout 30s;
+          }
+      }
+
+  - path: /etc/nginx/sites-available/matritsa-api.conf
+    permissions: '0644'
+    content: |
+      # Имя api. оставлено (A-запись и сертификат), но наружу FastAPI не смотрит: единственный
+      # путь к API — BFF на самом сайте. Выставить его наружу — это правка этого файла руками
+      # и осознанный отказ от модели «токен только в httpOnly-куке».
+      server {
+          listen 80;
+          listen [::]:80;
+          server_name ${api_fqdn};
+
+          location / {
+              return 301 https://${site_fqdn}$request_uri;
+          }
+      }
+
+  - path: /etc/matritsa/postgresql-small-vm.conf
+    permissions: '0644'
+    content: |
+      # Машина делится памятью с node (замер: 244 МБ RSS) и uvicorn (84 МБ), поэтому доля
+      # Postgres меньше обычной четверти RAM.
+      shared_buffers = ${floor(memory_gb * 1024 * 0.12)}MB
+      effective_cache_size = ${floor(memory_gb * 1024 * 0.4)}MB
+      work_mem = 8MB
+      maintenance_work_mem = 64MB
+      max_connections = 30
+
+  - path: /etc/systemd/system/matritsa-web.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=matritsa web (Next.js standalone)
+      After=network-online.target matritsa-api.service
+      Wants=network-online.target
+      # До первого деплоя каталога релиза нет: без условия служба била бы в StartLimit и падала.
+      ConditionPathExists=${app_dir}/web/current/server.js
+
+      [Service]
+      User=${app_user}
+      Group=${app_user}
+      WorkingDirectory=${app_dir}/web/current
+      Environment=NODE_ENV=production
+      Environment=PORT=${web_port}
+      # server.js слушает process.env.HOSTNAME; без этого он встанет на 0.0.0.0 и обойдёт nginx
+      Environment=HOSTNAME=127.0.0.1
+      Environment=API_INTERNAL_URL=http://127.0.0.1:${api_port}
+      Environment=NEXT_TELEMETRY_DISABLED=1
+      Environment=NODE_OPTIONS=--max-old-space-size=512
+      EnvironmentFile=-${app_dir}/web.env
+      ExecStart=/usr/bin/node server.js
+      Restart=always
+      RestartSec=2
+      NoNewPrivileges=yes
+      PrivateTmp=yes
+      ProtectSystem=full
+      ProtectHome=yes
+      LimitNOFILE=8192
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/matritsa-api.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=matritsa API (FastAPI)
+      After=network-online.target postgresql.service
+      Wants=network-online.target postgresql.service
+      ConditionPathExists=${app_dir}/api/current/api/app/main.py
+
+      [Service]
+      User=${app_user}
+      Group=${app_user}
+      # приложение живёт в api релиза, а engine — в его корне, отсюда PYTHONPATH
+      WorkingDirectory=${app_dir}/api/current/api
+      Environment=APP_ENV=prod
+      Environment=PYTHONPATH=${app_dir}/api/current
+      Environment=PYTHONUNBUFFERED=1
+      # драйвер тот же, что в api/requirements.txt — psycopg2; вход по unix-сокету, пароля нет
+      Environment=DATABASE_URL=postgresql+psycopg2://${app_user}@/${app_user}?host=/var/run/postgresql
+      # в проде публичная мок-оплата недопустима
+      Environment=MOCK_PAYMENTS=0
+      # кросс-доменных запросов нет: браузер говорит только со своим origin, дальше идёт BFF
+      Environment=CORS_ORIGINS=
+      Environment=ENCYCLOPEDIA_DIR=${app_dir}/api/current/web/content
+      # JWT_SECRET; файл создаётся при первой загрузке машины, см. matritsa-bootstrap.sh
+      EnvironmentFile=${app_dir}/api.env
+      # схема догоняется до кода перед каждым запуском, иначе новый код падает на старой БД
+      ExecStartPre=${app_dir}/venv/bin/python -m alembic upgrade head
+      ExecStart=${app_dir}/venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port ${api_port}
+      Restart=always
+      RestartSec=2
+      NoNewPrivileges=yes
+      PrivateTmp=yes
+      ProtectSystem=full
+      ProtectHome=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: ${app_dir}/DEPLOY.md
+    permissions: '0644'
+    content: |
+      # Машина готова, кода на ней ещё нет
+
+      Terraform выдал VM, DNS, порты, обе службы и nginx. Код и артефакт фронта приносит
+      `infra/deploy.sh` с рабочей машины: репозиторий сюда не клонируется и ключей от него
+      здесь нет.
+
+      1. TLS, после того как A-записи ${site_fqdn} и ${api_fqdn} разошлись:
+
+             sudo certbot --nginx -d ${site_fqdn} -d ${api_fqdn} \
+               -m ${admin_email} --agree-tos -n --redirect
+
+      2. Первый релиз — с рабочей машины, не отсюда:
+
+             cd infra && ./deploy.sh
+
+      3. Что проверить руками:
+
+             systemctl status matritsa-api matritsa-web
+             curl -s http://127.0.0.1:${api_port}/api/health
+             curl -s -o /dev/null -w '%%{http_code}\n' http://127.0.0.1:${web_port}/
+
+      ## Что уже сделано за вас
+
+      - роль и база `${app_user}`, вход по unix-сокету через peer, пароля нет;
+      - `${app_dir}/api.env` с `JWT_SECRET` (0600). Пересоздание VM = новый ключ = все сессии
+        недействительны; это осознанный обмен: секрет не лежит ни в state, ни в метаданных;
+      - node ${node_major} из NodeSource, `/usr/bin/node`;
+      - swap ${swap_size_mb} МБ — страховка от OOM-killer на маленькой машине;
+      - обе службы `enable`, но до первого деплоя они не стартуют: `ConditionPathExists` на
+        каталог релиза.
+
+      ## Раскладка каталогов
+
+          ${app_dir}/web/releases/<ts>/   артефакт standalone (server.js, .next, node_modules)
+          ${app_dir}/web/current          симлинк на текущий релиз, его видит служба
+          ${app_dir}/web/static/          пул чанков _next/static, его отдаёт nginx
+          ${app_dir}/api/releases/<ts>/   api + engine + web/content
+          ${app_dir}/api/current          симлинк на текущий релиз
+          ${app_dir}/venv/                python-окружение API
+          ${app_dir}/api.env              JWT_SECRET
+
+  - path: /usr/local/sbin/matritsa-bootstrap.sh
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      retry() {
+        local n=0
+        until "$@"; do
+          n=$((n + 1))
+          [ $n -ge 5 ] && return 1
+          sleep $((n * 5))
+        done
+      }
+
+      if [ ${swap_size_mb} -gt 0 ] && [ ! -e /swapfile ]; then
+        fallocate -l ${swap_size_mb}M /swapfile ||
+          dd if=/dev/zero of=/swapfile bs=1M count=${swap_size_mb}
+        chmod 600 /swapfile
+        mkswap /swapfile
+        swapon /swapfile
+        grep -q '^/swapfile' /etc/fstab || printf '/swapfile none swap sw 0 0\n' >>/etc/fstab
+        printf 'vm.swappiness=10\n' >/etc/sysctl.d/99-matritsa.conf
+        sysctl -w vm.swappiness=10
+      fi
+
+      id -u ${app_user} >/dev/null 2>&1 ||
+        useradd --system --create-home --home-dir ${app_dir} --shell /bin/bash ${app_user}
+
+      # 0755, а не HOME_MODE Ubuntu (0750): nginx под www-data обязан пройти вглубь до
+      # ${app_dir}/web/static, иначе каждый чанк отвечает 403.
+      install -d -m 0755 -o ${app_user} -g ${app_user} ${app_dir}
+      chmod 0755 ${app_dir}
+
+      # setgid на каталогах релизов: rsync приходит от ubuntu, а файлы читает служба под
+      # ${app_user}, поэтому группа обязана наследоваться.
+      usermod -aG ${app_user} ubuntu
+      for d in web web/releases web/static api api/releases venv; do
+        install -d -m 2775 -o ubuntu -g ${app_user} ${app_dir}/$d
+      done
+      chown ${app_user}:${app_user} ${app_dir}/DEPLOY.md
+
+      # Node из NodeSource: в Ubuntu 24.04 из репозитория идёт 18.x, а он уже без поддержки.
+      # `nodistro` — единый канал NodeSource, привязки к кодовому имени релиза у него нет.
+      if ! command -v node >/dev/null; then
+        install -d -m 0755 /usr/share/keyrings
+        retry curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key -o /tmp/nodesource.key
+        gpg --dearmor --yes -o /usr/share/keyrings/nodesource.gpg /tmp/nodesource.key
+        printf 'deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_%s.x nodistro main\n' \
+          '${node_major}' >/etc/apt/sources.list.d/nodesource.list
+        retry apt-get update
+        retry apt-get install -y nodejs
+      fi
+      node --version
+
+      systemctl enable --now postgresql
+
+      # Peer auth over the unix socket: the role name equals the OS user, so there is no
+      # database password to store in metadata, in Terraform state or in a unit file.
+      if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${app_user}'" | grep -q 1; then
+        runuser -u postgres -- createuser ${app_user}
+      fi
+      if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_database WHERE datname='${app_user}'" | grep -q 1; then
+        runuser -u postgres -- createdb -O ${app_user} ${app_user}
+      fi
+
+      # The major version is in the path, so find it instead of hardcoding 16.
+      for conf_dir in /etc/postgresql/*/main/conf.d; do
+        [ -d "$conf_dir" ] || continue
+        install -m 0644 /etc/matritsa/postgresql-small-vm.conf "$conf_dir/10-small-vm.conf"
+      done
+      systemctl restart postgresql
+
+      # Ключ подписи токенов рождается здесь и никуда не уезжает: ни в state, ни в метаданные.
+      if [ ! -s ${app_dir}/api.env ]; then
+        printf 'JWT_SECRET=%s\n' "$(openssl rand -base64 48)" >${app_dir}/api.env
+        chown ${app_user}:${app_user} ${app_dir}/api.env
+        chmod 600 ${app_dir}/api.env
+      fi
+
+      rm -f /etc/nginx/sites-enabled/default
+      ln -sfn /etc/nginx/sites-available/matritsa.conf /etc/nginx/sites-enabled/matritsa.conf
+      ln -sfn /etc/nginx/sites-available/matritsa-api.conf /etc/nginx/sites-enabled/matritsa-api.conf
+      nginx -t
+      systemctl enable --now nginx
+      systemctl reload nginx
+
+      # Обе службы включены сразу. Кода ещё нет, поэтому ConditionPathExists держит их в
+      # inactive без падений; первый деплой поднимает их без правки systemd.
+      systemctl daemon-reload
+      systemctl enable --now matritsa-api.service
+      systemctl enable --now matritsa-web.service
+
+      printf 'matritsa bootstrap finished\n'
+
+runcmd:
+  - [/usr/local/sbin/matritsa-bootstrap.sh]

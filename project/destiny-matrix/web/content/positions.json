@@ -1,0 +1,5608 @@
+{
+ "count": 37,
+ "items": [
+  {
+   "key": "character",
+   "kind": "section",
+   "title": "Характер и личные качества",
+   "lead": "Как вы устроены и что в вас видят люди с первого взгляда.",
+   "access": "free",
+   "meaning": [
+    "Три верхние точки карты складываются в то, что люди видят в человеке сразу: манеру держаться, скорость реакции, привычный тон. Это не «весь характер», а первый слой — но именно по нему решают, доверять или нет.",
+    "Читать раздел лучше не по одному аркану, а по связке. Аркан дня даёт ядро, аркан месяца — то, что досталось без усилий, аркан года — родовую опору. Когда все три об одном, характер получается цельным и упрямым; когда спорят, человек сам себе кажется противоречивым, и это нормальное устройство, а не поломка."
+   ],
+   "reading": "Сначала аркан дня — ядро; затем месяц и год как поправки к нему. Совпадающие энергии усиливают друг друга, спорящие дают внутренний торг.",
+   "points": [
+    {
+     "key": "day",
+     "title": "Аркан дня рождения — визитка",
+     "href": "/encyclopedia/position/day"
+    },
+    {
+     "key": "month",
+     "title": "Аркан месяца рождения",
+     "href": "/encyclopedia/position/month"
+    },
+    {
+     "key": "year",
+     "title": "Аркан года рождения — опора рода",
+     "href": "/encyclopedia/position/year"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Характер по матрице судьбы — три аркана личности",
+    "description": "Раздел про характер в матрице судьбы: аркан дня, месяца и года рождения. Что видно в человеке сразу и как читать три точки вместе, а не по отдельности.",
+    "queries": [
+     "характер человека по матрице",
+     "матрица судьбы характер",
+     "личные качества по дате рождения",
+     "аркан характера",
+     "характер и личные качества в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "comfort",
+   "kind": "section",
+   "title": "Что даёт вам внутренний комфорт",
+   "lead": "Состояние, в котором вы восстанавливаетесь, а не тратитесь.",
+   "access": "free",
+   "meaning": [
+    "Зона комфорта в матрице — не про лежание на диване, а про состояние, в котором человек восстанавливается, а не догорает. У одного это тишина и книга, у другого — шумная компания и общее дело, и подменять одно другим бессмысленно.",
+    "Центр карты показывает, как человек устроен внутри, а точки вокруг него уточняют: в чём комфорт в деле и в чём — в отношениях. Расхождение между ними объясняет частую жалобу: на работе всё правильно, а дома нет сил, или наоборот."
+   ],
+   "reading": "Центр даёт основное состояние покоя, южная точка — комфорт в деле, северная — в отношениях. Проверяйте по фактам: после чего сил больше.",
+   "points": [
+    {
+     "key": "center",
+     "title": "Центр матрицы",
+     "href": "/encyclopedia/position/center"
+    },
+    {
+     "key": "comfort_north",
+     "title": "Зона комфорта: север",
+     "href": "/encyclopedia/position/comfort_north"
+    },
+    {
+     "key": "comfort_south",
+     "title": "Зона комфорта: юг — аркан под сердцем",
+     "href": "/encyclopedia/position/comfort_south"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Зона комфорта в матрице судьбы — центр и точки вокруг него",
+    "description": "Что такое зона комфорта в матрице судьбы: аркан центра, комфорт в деле и в отношениях. Как понять, от чего вы наполняетесь, а что только кажется отдыхом.",
+    "queries": [
+     "матрица судьбы комфорт",
+     "зона комфорта в матрице судьбы",
+     "аркан зоны комфорта",
+     "что дает внутренний комфорт",
+     "что даёт вам внутренний комфорт в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "profession",
+   "kind": "section",
+   "title": "Профессия и дело по душе",
+   "lead": "Через какое дело ваша энергия превращается в результат.",
+   "access": "free",
+   "meaning": [
+    "Линия таланта отвечает на скучный, но денежный вопрос: через какое действие энергия человека превращается в результат, за который платят. Дар без такого перевода остаётся хобби, и это самая частая история раздела.",
+    "Здесь три шага: что дано, как это раскрывается и во что складывается на выходе. Средний аркан важнее остальных — он показывает форму работы. Один и тот же талант объяснять может стать преподаванием, продажами или текстами, и выбирать надо по нему, а не по названию профессии."
+   ],
+   "reading": "Первый аркан — сырьё, второй — способ, третий — результат. Если работа не совпадает со вторым, устаёте вы не от нагрузки, а от формы.",
+   "points": [
+    {
+     "key": "month",
+     "title": "Аркан месяца рождения",
+     "href": "/encyclopedia/position/month"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Вишудха",
+     "href": "/encyclopedia/chakra/vishuddha"
+    }
+   ],
+   "seo": {
+    "title": "Таланты и профессия в матрице судьбы — линия таланта",
+    "description": "Таланты в матрице судьбы: как читать линию таланта из трёх арканов и подобрать форму работы, в которой дар превращается в деньги, а не в хобби.",
+    "queries": [
+     "таланты в матрице судьбы",
+     "профессия по матрице судьбы",
+     "дело по душе по дате рождения",
+     "линия таланта матрица судьбы",
+     "профессия и дело по душе в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "realisation",
+   "kind": "section",
+   "title": "Путь самореализации",
+   "lead": "Куда ведёт ваша линия, если не сопротивляться.",
+   "access": "free",
+   "meaning": [
+    "Путь самореализации собирается из миссии и двух предназначений — личного и социального. Это направление, а не должность: одна и та же миссия у разных людей выглядит как школа, армия, монастырь или бизнес.",
+    "Полезнее всего смотреть, где человек сопротивляется. Обычно он знает своё направление лет с двадцати, но идёт мимо: там платят, там спокойнее, там родители одобрили. Раздел показывает, сколько лет уходит на этот объезд."
+   ],
+   "reading": "Миссия — общий вектор, личное предназначение — то, что нужно сделать для себя, социальное — то, за что вас видят люди. Читайте их как один путь.",
+   "points": [
+    {
+     "key": "mission",
+     "title": "Миссия",
+     "href": "/encyclopedia/position/mission"
+    },
+    {
+     "key": "purpose_personal",
+     "title": "Личное предназначение",
+     "href": "/encyclopedia/position/purpose_personal"
+    },
+    {
+     "key": "purpose_social",
+     "title": "Социальное предназначение",
+     "href": "/encyclopedia/position/purpose_social"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Аджна",
+     "href": "/encyclopedia/chakra/ajna"
+    },
+    {
+     "label": "Вишудха",
+     "href": "/encyclopedia/chakra/vishuddha"
+    }
+   ],
+   "seo": {
+    "title": "Путь самореализации в матрице судьбы — миссия и предназначение",
+    "description": "Самореализация в матрице судьбы: аркан миссии, личное и социальное предназначение. Куда ведёт линия, если перестать объезжать её стороной.",
+    "queries": [
+     "путь самореализации матрица судьбы",
+     "самореализация по дате рождения",
+     "предназначение по дате рождения",
+     "аркан самореализации",
+     "путь самореализации в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "karma40",
+   "kind": "section",
+   "title": "Кармическая задача до 40 лет",
+   "lead": "Что нужно пройти в первой половине пути.",
+   "access": "free",
+   "meaning": [
+    "До сорока лет человек в основном разбирается с тем, что получил на входе: родовые сценарии, чужие ожидания, привычки, взятые из детства. Аркан наследия показывает содержание этой работы, а западная точка — через что она делается.",
+    "Задача не в том, чтобы «отработать карму» и получить награду. Смысл проще: к сорока перестать повторять то, что тебе не принадлежит. Кто закрыл этот круг, вторую половину живёт заметно свободнее — и это видно по деньгам тоже."
+   ],
+   "reading": "Первый аркан — что именно проходится, второй — способ. Если сюжет повторяется третий раз, смотрите на способ: он не сработал.",
+   "points": [
+    {
+     "key": "inheritance",
+     "title": "Наследие рода",
+     "href": "/encyclopedia/position/inheritance"
+    },
+    {
+     "key": "comfort_west",
+     "title": "Зона комфорта: запад",
+     "href": "/encyclopedia/position/comfort_west"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Кармическая задача до 40 лет в матрице судьбы",
+    "description": "Кармическая задача до 40 лет по матрице судьбы: что человек проходит в первой половине пути, через что она решается и что меняется после закрытия круга.",
+    "queries": [
+     "кармическая задача до 40 лет",
+     "задачи до 40 лет матрица судьбы",
+     "карма до 40 лет по дате рождения",
+     "аркан кармической задачи",
+     "кармическая задача до 40 лет в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "resources",
+   "kind": "section",
+   "title": "Что открывает вам блага и ресурс",
+   "lead": "Канал, по которому в жизнь приходит достаток.",
+   "access": "free",
+   "meaning": [
+    "Ресурсный вход — это ответ на вопрос, откуда в жизнь приходят блага, и он у всех разный: у одного через людей и связи, у другого через мастерство, у третьего через риск и скорость. Стучаться не в свою дверь можно годами.",
+    "Второй аркан раздела ставит условие. Ресурс идёт не всегда, а при выполнении чего-то конкретного: пока человек молчит о своей цене, пока не доводит начатое, пока держится за старое — канал закрыт, и никакие ритуалы его не откроют."
+   ],
+   "reading": "Первый аркан — вход, второй — условие потока. Проверьте по прошлым удачным годам: условие в них обычно выполнялось само.",
+   "points": [
+    {
+     "key": "descendants",
+     "title": "Дети и продолжение рода",
+     "href": "/encyclopedia/position/descendants"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Манипура",
+     "href": "/encyclopedia/chakra/manipura"
+    }
+   ],
+   "seo": {
+    "title": "Что открывает блага и ресурс — матрица судьбы",
+    "description": "Ресурсный канал в матрице судьбы: через что в жизнь приходят блага и какое условие держит поток открытым. Разбор двух арканов раздела.",
+    "queries": [
+     "что открывает блага матрица судьбы",
+     "канал ресурса матрица судьбы",
+     "ресурс по дате рождения",
+     "аркан благ",
+     "что открывает вам блага и ресурс в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "family_gifts",
+   "kind": "section",
+   "title": "Поддержка и дары вашего рода",
+   "lead": "Что род передал вам как силу.",
+   "access": "paid",
+   "meaning": [
+    "Род передаёт не только сценарии, но и силу: умение работать, выживать, держать дом, ладить с людьми. Мужская и женская линии показывают, что именно пришло с каждой стороны, а итоги ветвей — во что это сложилось к вашему поколению.",
+    "Раздел полезно читать вместе с историей семьи. Там, где аркан совпадает с реальной судьбой деда или бабки, дар обычно уже проверен, и им можно пользоваться сразу. Там, где не совпадает, дар лежит нераспакованным — и достаётся первому, кто возьмётся."
+   ],
+   "reading": "Мужская и женская линии — что дано с двух сторон, итоги ветвей — результат к вашему поколению. Сверяйте с фактами о родных.",
+   "points": [
+    {
+     "key": "father_line",
+     "title": "Мужская линия рода",
+     "href": "/encyclopedia/position/father_line"
+    },
+    {
+     "key": "mother_line",
+     "title": "Женская линия рода",
+     "href": "/encyclopedia/position/mother_line"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Дары и поддержка рода в матрице судьбы",
+    "description": "Поддержка рода в матрице судьбы: мужская и женская линии, итоги обеих ветвей и то, какие дары семьи уже проверены, а какие лежат нераспакованными.",
+    "queries": [
+     "дары рода матрица судьбы",
+     "поддержка рода по дате рождения",
+     "матрица судьбы род",
+     "родовые дары аркан",
+     "поддержка и дары вашего рода в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "soul_tasks",
+   "kind": "section",
+   "title": "Духовные задачи и уроки души",
+   "lead": "Работа, которую видно только изнутри.",
+   "access": "paid",
+   "meaning": [
+    "Небесная линия карты говорит о работе, которую не видно снаружи: как человек обходится со своей совестью, чего боится признать, что тянет годами. Результата в деньгах и должностях здесь нет — есть внутренняя тишина или её отсутствие.",
+    "Две задачи раздела почти всегда неудобные: первая ближе к характеру, вторая — к отношениям с другими. Смысл не в том, чтобы их «закрыть», а в том, чтобы перестать делать вид, что их нет. С этого места обычно и начинается спокойствие."
+   ],
+   "reading": "Итог неба — общая тема, две задачи — конкретные шаги. Читайте как вопросы к себе, а не как приговор.",
+   "points": [],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Сахасрара",
+     "href": "/encyclopedia/chakra/sahasrara"
+    },
+    {
+     "label": "Аджна",
+     "href": "/encyclopedia/chakra/ajna"
+    }
+   ],
+   "seo": {
+    "title": "Духовные задачи и уроки души в матрице судьбы",
+    "description": "Духовные задачи в матрице судьбы: линия неба, две задачи души и то, что человек обычно предпочитает не замечать. Разбор без мистики и запугивания.",
+    "queries": [
+     "духовные задачи матрица судьбы",
+     "небо в матрице судьбы",
+     "уроки души по дате рождения",
+     "аркан духовной задачи",
+     "духовные задачи и уроки души в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "past_lives",
+   "kind": "section",
+   "title": "Задачи прошлых воплощений",
+   "lead": "Кармический хвост: то, что пришло с вами.",
+   "access": "paid",
+   "meaning": [
+    "Кармический хвост — самая популярная тройка карты, и спрашивают о ней чаще всего. Читается она так: аркан рода, аркан полученного наследия и их сумма — то, что человек принёс с собой и повторяет автоматически.",
+    "Отношение к теме может быть любым: буквально про прошлые воплощения или как к описанию врождённых привычек. Практический смысл одинаковый — в хвосте лежит сценарий, который включается сам, без решения. Пока он не назван, человек считает его своим характером."
+   ],
+   "reading": "Первый аркан — корень, второй — как проявляется, третий — итог, который тянется. Ищите свой сюжет в третьем.",
+   "points": [
+    {
+     "key": "year",
+     "title": "Аркан года рождения — опора рода",
+     "href": "/encyclopedia/position/year"
+    },
+    {
+     "key": "inheritance",
+     "title": "Наследие рода",
+     "href": "/encyclopedia/position/inheritance"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Кармический хвост в матрице судьбы — задачи прошлых воплощений",
+    "description": "Кармический хвост в матрице судьбы: три аркана, из которых он складывается, и сценарий, который включается без вашего решения. Как читать хвост по шагам.",
+    "queries": [
+     "кармический хвост в матрице судьбы",
+     "кармический хвост 9",
+     "задачи прошлых воплощений матрица судьбы",
+     "хвост в матрице судьбы",
+     "задачи прошлых воплощений в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "purpose",
+   "kind": "section",
+   "title": "Ваше предназначение",
+   "lead": "Четыре уровня: личный, социальный, духовный и планетарный.",
+   "access": "paid",
+   "meaning": [
+    "Предназначение в матрице разложено на четыре уровня, и путать их — главная ошибка новичка. Личное касается только вас, социальное — того, за что вас знают люди, духовная гармония — внутреннего согласия, планетарная задача — того, что через вас идёт дальше вашей жизни.",
+    "Уровни включаются по очереди, а не сразу. Пока не сделано личное, социальное выглядит натужно: человек берётся спасать мир, а дома при этом пусто. Обратный порядок работает лучше и быстрее, хотя выглядит скромнее."
+   ],
+   "reading": "Идите снизу вверх: личное, социальное, гармония, планетарная задача. Перескок через уровень даёт красивые слова без результата.",
+   "points": [
+    {
+     "key": "harmony",
+     "title": "Духовная гармония",
+     "href": "/encyclopedia/position/harmony"
+    },
+    {
+     "key": "planetary",
+     "title": "Планетарная задача",
+     "href": "/encyclopedia/position/planetary"
+    },
+    {
+     "key": "purpose_personal",
+     "title": "Личное предназначение",
+     "href": "/encyclopedia/position/purpose_personal"
+    },
+    {
+     "key": "purpose_social",
+     "title": "Социальное предназначение",
+     "href": "/encyclopedia/position/purpose_social"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Сахасрара",
+     "href": "/encyclopedia/chakra/sahasrara"
+    }
+   ],
+   "seo": {
+    "title": "Предназначение в матрице судьбы — четыре уровня",
+    "description": "Предназначение по матрице судьбы: личный, социальный, духовный и планетарный уровни. Почему они включаются по очереди и что бывает при перескоке.",
+    "queries": [
+     "предназначение в матрице судьбы",
+     "личное и социальное предназначение",
+     "четыре уровня предназначения",
+     "аркан предназначения",
+     "ваше предназначение в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "money",
+   "kind": "section",
+   "title": "Деньги в матрице судьбы",
+   "lead": "Где деньги приходят легко, а где перекрыт канал.",
+   "access": "paid",
+   "meaning": [
+    "Денежная линия показывает не сумму, а способ: каким действием человек зарабатывает легче всего. Один продаёт голосом, другой — руками, третий — тем, что удерживает людей вокруг себя. Работать против своего способа можно, но дороже.",
+    "Второй аркан — условие потока, третий — итог, а земная линия добавляет материальную опору: есть ли под деньгами быт, запас, привычка считать. Частая картина раздела — сильный вход и провальное условие: деньги приходят и тут же уходят, потому что условие не выполняется."
+   ],
+   "reading": "Смотрите вход, условие, итог и земную опору. Дырка обычно во втором аркане — там, где условие годами не выполняется.",
+   "points": [
+    {
+     "key": "descendants",
+     "title": "Дети и продолжение рода",
+     "href": "/encyclopedia/position/descendants"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Манипура",
+     "href": "/encyclopedia/chakra/manipura"
+    },
+    {
+     "label": "Муладхара",
+     "href": "/encyclopedia/chakra/muladhara"
+    }
+   ],
+   "seo": {
+    "title": "Деньги в матрице судьбы — денежный канал по дате рождения",
+    "description": "Деньги в матрице судьбы: денежный канал, условие потока, итог и земная опора. Как понять свой способ зарабатывать и где перекрыт поток.",
+    "queries": [
+     "деньги в матрице судьбы",
+     "денежный канал матрица судьбы",
+     "денежная матрица по дате рождения",
+     "матрица судьбы про деньги",
+     "деньги в матрице судьбы в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "money40",
+   "kind": "section",
+   "title": "Как меняются деньги после 40 лет",
+   "lead": "Вторая половина пути живёт по другой энергии.",
+   "access": "paid",
+   "meaning": [
+    "После сорока денежная схема меняется, и это одно из самых проверяемых утверждений методики: то, что кормило в тридцать, к пятидесяти отдаёт заметно меньше. Раздел показывает, на что смещается опора.",
+    "Обычно вторая половина требует перехода от скорости к весу: не больше проектов, а дороже; не новые ниши, а имя в старой. Кто держится за прежний способ, работает больше при том же результате — и объясняет это кризисом или возрастом."
+   ],
+   "reading": "Первый аркан — новая логика дохода, второй — опора, на которую переносится вес. Сравните с тем, как вы зарабатываете сейчас.",
+   "points": [
+    {
+     "key": "comfort_east",
+     "title": "Зона комфорта: восток",
+     "href": "/encyclopedia/position/comfort_east"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Деньги после 40 лет по матрице судьбы",
+    "description": "Как меняются деньги после 40 лет по матрице судьбы: на что смещается опора во второй половине пути и почему прежний способ начинает отдавать меньше.",
+    "queries": [
+     "деньги после 40 лет матрица судьбы",
+     "доход после 40 по дате рождения",
+     "вторая половина жизни матрица судьбы",
+     "аркан денег после сорока",
+     "как меняются деньги после 40 лет в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "relations",
+   "kind": "section",
+   "title": "Отношения в матрице судьбы",
+   "lead": "Что вы приносите в пару и что ищете в другом.",
+   "access": "paid",
+   "meaning": [
+    "Линия отношений описывает не идеального партнёра, а вас в паре: что вы приносите, чего ждёте и на чём обычно спотыкаетесь. Совместимость считается потом, и без этого раздела она бесполезна.",
+    "Три шага линии складываются в узнаваемый сюжет: с чем человек входит в отношения, как это проявляется через год и во что превращается к пятому. Северная точка добавляет главное для быта — от чего вам вдвоём спокойно."
+   ],
+   "reading": "Читайте линию как историю: вход, проявление, итог. Точка комфорта в паре показывает, что держит вас вместе в обычные дни.",
+   "points": [
+    {
+     "key": "mother_line",
+     "title": "Женская линия рода",
+     "href": "/encyclopedia/position/mother_line"
+    },
+    {
+     "key": "comfort_north",
+     "title": "Зона комфорта: север",
+     "href": "/encyclopedia/position/comfort_north"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Анахата",
+     "href": "/encyclopedia/chakra/anahata"
+    }
+   ],
+   "seo": {
+    "title": "Отношения в матрице судьбы — линия любви",
+    "description": "Отношения в матрице судьбы: линия любви из трёх арканов и точка комфорта в паре. Что вы приносите в отношения и на чём обычно спотыкаетесь.",
+    "queries": [
+     "матрица судьбы отношения",
+     "линия любви матрица судьбы",
+     "аркан отношений по дате рождения",
+     "матрица судьбы любовь",
+     "отношения в матрице судьбы в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "parents_children",
+   "kind": "section",
+   "title": "Карма отношений с родителями и детьми",
+   "lead": "Что передано вам и что вы передаёте дальше.",
+   "access": "paid",
+   "meaning": [
+    "Отношения с родителями и с детьми в карте стоят рядом не случайно: чаще всего человек передаёт дальше ровно то, что получил, и замечает это в момент, когда слышит из своего рта фразу матери.",
+    "Аркан отца и аркан матери показывают, что пришло с каждой стороны, а точка продолжения рода — что уходит дальше. Раздел не назначает виноватых: он показывает, где цепочка повторяется, чтобы её можно было прервать сознательно, а не через ссору."
+   ],
+   "reading": "Сравните аркан отца и матери с тем, как вы ведёте себя с детьми. Совпадение — та самая цепочка, которую можно прервать.",
+   "points": [
+    {
+     "key": "father_line",
+     "title": "Мужская линия рода",
+     "href": "/encyclopedia/position/father_line"
+    },
+    {
+     "key": "mother_line",
+     "title": "Женская линия рода",
+     "href": "/encyclopedia/position/mother_line"
+    },
+    {
+     "key": "descendants",
+     "title": "Дети и продолжение рода",
+     "href": "/encyclopedia/position/descendants"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Анахата",
+     "href": "/encyclopedia/chakra/anahata"
+    },
+    {
+     "label": "Свадхистана",
+     "href": "/encyclopedia/chakra/svadhisthana"
+    }
+   ],
+   "seo": {
+    "title": "Карма отношений с родителями и детьми — матрица судьбы",
+    "description": "Родители и дети в матрице судьбы: аркан отца, аркан матери и точка продолжения рода. Где сценарий повторяется и как его прервать без ссоры.",
+    "queries": [
+     "матрица судьбы дети",
+     "карма отношений с родителями",
+     "аркан детей матрица судьбы",
+     "отношения с матерью по дате рождения",
+     "карма отношений с родителями и детьми в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "ancestry",
+   "kind": "section",
+   "title": "Родовые задачи до седьмого колена",
+   "lead": "Программа рода и ваша роль в ней.",
+   "access": "paid",
+   "meaning": [
+    "Родовые задачи до седьмого колена — про то, что семья не доделала, и про вашу роль в этой истории. Кому-то досталось продолжить начатое, кому-то — остановить повторяющееся, а кому-то вытащить наверх талант, который в роду прятали.",
+    "Наследие, две ветви и планетарная задача читаются вместе. Полезная проверка — поговорить со старшими: обычно в семье уже есть три-четыре человека с той же темой, и по их судьбам видно, чем заканчивается каждый способ её решать."
+   ],
+   "reading": "Наследие — что получено, ветви — как это разложилось по линиям, планетарная задача — что уходит дальше рода.",
+   "points": [
+    {
+     "key": "inheritance",
+     "title": "Наследие рода",
+     "href": "/encyclopedia/position/inheritance"
+    },
+    {
+     "key": "planetary",
+     "title": "Планетарная задача",
+     "href": "/encyclopedia/position/planetary"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Родовые задачи до седьмого колена — матрица судьбы",
+    "description": "Родовая карма в матрице судьбы: полученное наследие, мужская и женская ветви, задача рода. Как понять свою роль в семейной истории по датам.",
+    "queries": [
+     "родовая карма матрица судьбы",
+     "матрица судьбы род до седьмого колена",
+     "родовые задачи по дате рождения",
+     "аркан рода",
+     "родовые задачи до седьмого колена в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "body_resource",
+   "kind": "section",
+   "title": "Ресурс тела и восстановление",
+   "lead": "Как вы наполняетесь и где теряете силы. Это не медицинская рекомендация.",
+   "access": "paid",
+   "meaning": [
+    "Нижний уровень карты отвечает за опору: сон, еду, движение, деньги на месяц вперёд. Раздел говорит о ресурсе и восстановлении, а не о состоянии тела — медицинских выводов из арканов делать нельзя, и мы их не делаем.",
+    "Практическая польза здесь в режиме. По этим трём точкам видно, чем человек наполняется — тишиной, водой, людьми, нагрузкой, — и где он привычно теряет силы. Такие вещи выглядят банально, пока не сравнишь два месяца жизни: с режимом и без."
+   ],
+   "reading": "Опора тела, энергия опоры и итог. Проверяйте не по ощущениям, а по неделе: что делали и сколько сил осталось.",
+   "points": [],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Муладхара",
+     "href": "/encyclopedia/chakra/muladhara"
+    }
+   ],
+   "seo": {
+    "title": "Ресурс тела и восстановление — матрица судьбы",
+    "description": "Ресурс тела в матрице судьбы: чем человек наполняется и где теряет силы. Разбор нижнего уровня карты без медицинских утверждений и оценок состояния.",
+    "queries": [
+     "ресурс тела матрица судьбы",
+     "восстановление энергии по матрице",
+     "опора тела аркан",
+     "матрица судьбы силы и энергия",
+     "ресурс тела и восстановление в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "chakras",
+   "kind": "section",
+   "title": "Карта энергий по чакрам",
+   "lead": "Семь уровней в трёх колонках: материя, энергия и чувства.",
+   "access": "paid",
+   "meaning": [
+    "Карта энергий — семь уровней в трёх колонках, и это самый наглядный раздел отчёта. Каждая строка отвечает за свою область жизни: от опоры и денег до смысла, а колонки показывают, где эта область живёт — в материи, в силах или в чувствах.",
+    "Смотреть надо не на отдельные числа, а на провалы и перегревы. Если материальная колонка полна, а колонка чувств пуста, человек выглядит успешным и живёт всухую; обратный случай — богатая внутренняя жизнь без быта и денег. Итоги трёх колонок дают общий перекос."
+   ],
+   "reading": "Сначала итоги трёх колонок — общий перекос, потом слабая строка. Начинать выправлять всегда снизу, с опоры.",
+   "points": [],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Сахасрара",
+     "href": "/encyclopedia/chakra/sahasrara"
+    },
+    {
+     "label": "Аджна",
+     "href": "/encyclopedia/chakra/ajna"
+    },
+    {
+     "label": "Вишудха",
+     "href": "/encyclopedia/chakra/vishuddha"
+    },
+    {
+     "label": "Анахата",
+     "href": "/encyclopedia/chakra/anahata"
+    },
+    {
+     "label": "Манипура",
+     "href": "/encyclopedia/chakra/manipura"
+    },
+    {
+     "label": "Свадхистана",
+     "href": "/encyclopedia/chakra/svadhisthana"
+    },
+    {
+     "label": "Муладхара",
+     "href": "/encyclopedia/chakra/muladhara"
+    }
+   ],
+   "seo": {
+    "title": "Чакры в матрице судьбы — карта энергий по дате рождения",
+    "description": "Чакры в матрице судьбы: семь уровней и три колонки — физика, энергия, эмоции. Как найти перекос по итогам колонок и с какой строки начинать.",
+    "queries": [
+     "чакры в матрице судьбы",
+     "расчет чакр по дате рождения",
+     "карта энергий матрица судьбы",
+     "чакры по матрице судьбы значение",
+     "карта энергий по чакрам в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "rest",
+   "kind": "section",
+   "title": "Ваш идеальный формат отдыха",
+   "lead": "Чем вы восстанавливаетесь по-настоящему.",
+   "access": "paid",
+   "meaning": [
+    "Отдых — раздел, который чаще всего игнорируют, а потом удивляются выгоранию. Восстанавливает не то, что принято считать отдыхом, а то, что подходит конкретной энергии: одному нужны люди и праздник, другому — руки в земле и полное молчание.",
+    "Здесь две точки: радость с уровня творчества и общее состояние покоя из центра карты. Если они спорят, отдых приходится делить на два формата — иначе человек всё время выбирает не тот и возвращается в понедельник уставшим сильнее, чем уходил."
+   ],
+   "reading": "Первая точка — чем радоваться, вторая — в чём покой. Спорят между собой — берите оба формата по отдельности.",
+   "points": [
+    {
+     "key": "center",
+     "title": "Центр матрицы",
+     "href": "/encyclopedia/position/center"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [
+    {
+     "label": "Свадхистана",
+     "href": "/encyclopedia/chakra/svadhisthana"
+    }
+   ],
+   "seo": {
+    "title": "Идеальный формат отдыха по матрице судьбы",
+    "description": "Какой отдых восстанавливает именно вас: разбор двух точек матрицы судьбы — радости и покоя. Почему обычный отпуск иногда утомляет сильнее работы.",
+    "queries": [
+     "идеальный отдых по матрице судьбы",
+     "как отдыхать по дате рождения",
+     "аркан отдыха",
+     "матрица судьбы отдых и восстановление",
+     "ваш идеальный формат отдыха в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "loops",
+   "kind": "section",
+   "title": "Программы: что повторяется по кругу",
+   "lead": "Сюжеты, которые возвращаются, пока не пройдены.",
+   "access": "paid",
+   "meaning": [
+    "Программы в матрице судьбы — сюжеты, которые возвращаются: те же партнёры с другими именами, те же увольнения, те же долги. Механика простая: пока человек делает привычный выбор, ситуация повторяется, потому что он сам её собирает.",
+    "Раздел показывает корень программы, точку, где она держится, и выход. Выход почти всегда неудобный — он требует того самого действия, которого человек избегает всю жизнь: сказать прямо, уйти, попросить, отказать. Зато после него сюжет действительно закрывается."
+   ],
+   "reading": "Корень — откуда сюжет, центр — чем держится, точка выхода — что нужно сделать иначе. Выход обычно самый неприятный из вариантов.",
+   "points": [
+    {
+     "key": "center",
+     "title": "Центр матрицы",
+     "href": "/encyclopedia/position/center"
+    },
+    {
+     "key": "harmony",
+     "title": "Духовная гармония",
+     "href": "/encyclopedia/position/harmony"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Программы в матрице судьбы — что повторяется по кругу",
+    "description": "Программы в матрице судьбы: как читать повторяющиеся сюжеты по корню, центру и точке выхода. Почему выход всегда требует неудобного действия.",
+    "queries": [
+     "программы в матрице судьбы",
+     "программа 6 матрица судьбы",
+     "повторяющиеся сценарии по дате рождения",
+     "как убрать программу матрица",
+     "программы: что повторяется по кругу в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "years",
+   "kind": "section",
+   "title": "Разбор по годам до 80 лет",
+   "lead": "Какая энергия ведёт вас в каждом десятилетии.",
+   "access": "paid",
+   "meaning": [
+    "Возрастная шкала раскладывает жизнь на восемь десятилетий, и у каждого своя ведущая энергия. Это не предсказание событий, а описание фона: в одном десятилетии всё даётся через людей, в другом — через одиночество и мастерство.",
+    "Шкалу удобно проверять на прошлом. Возьмите свой отрезок с двадцати до тридцати и сравните с арканом — обычно совпадает так, что дальше человек начинает относиться к разделу серьёзнее. Следующий отрезок читается уже как подсказка, к чему готовиться."
+   ],
+   "reading": "Сначала проверьте прожитые десятилетия, потом читайте текущее. Аркан описывает фон и способ, а не конкретные события.",
+   "points": [
+    {
+     "key": "day",
+     "title": "Аркан дня рождения — визитка",
+     "href": "/encyclopedia/position/day"
+    },
+    {
+     "key": "month",
+     "title": "Аркан месяца рождения",
+     "href": "/encyclopedia/position/month"
+    },
+    {
+     "key": "year",
+     "title": "Аркан года рождения — опора рода",
+     "href": "/encyclopedia/position/year"
+    },
+    {
+     "key": "mission",
+     "title": "Миссия",
+     "href": "/encyclopedia/position/mission"
+    },
+    {
+     "key": "father_line",
+     "title": "Мужская линия рода",
+     "href": "/encyclopedia/position/father_line"
+    },
+    {
+     "key": "mother_line",
+     "title": "Женская линия рода",
+     "href": "/encyclopedia/position/mother_line"
+    },
+    {
+     "key": "descendants",
+     "title": "Дети и продолжение рода",
+     "href": "/encyclopedia/position/descendants"
+    },
+    {
+     "key": "inheritance",
+     "title": "Наследие рода",
+     "href": "/encyclopedia/position/inheritance"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "links": [],
+   "seo": {
+    "title": "Разбор по годам до 80 лет — матрица судьбы",
+    "description": "Возрастная шкала матрицы судьбы: восемь десятилетий и ведущий аркан каждого. Как проверить шкалу на прожитых годах и что она говорит про следующий отрезок.",
+    "queries": [
+     "матрица судьбы по годам",
+     "возрастная шкала матрицы судьбы",
+     "аркан десятилетия матрица судьбы",
+     "разбор по годам матрица судьбы",
+     "разбор по годам до 80 лет в матрице судьбы"
+    ]
+   }
+  },
+  {
+   "key": "day",
+   "kind": "point",
+   "title": "Аркан дня рождения — визитка",
+   "lead": "Ядро характера и то, что люди считывают в первые минуты.",
+   "access": "free",
+   "formula": "Число дня рождения, сведённое к 1–22: 27-е даёт 5, 22-е остаётся 22.",
+   "meaning": [
+    "Визитка — самая честная точка карты, потому что её видно снаружи. Она отвечает не за то, каким человек себя считает, а за то, каким его считают: манера входить в комнату, темп речи, первая реакция на неожиданность.",
+    "Эту энергию не надо развивать — она и так работает с рождения. Смысл в том, чтобы её признать и не воевать с ней. Человек с быстрым арканом дня, заставляющий себя быть медленным и основательным, всю жизнь чувствует себя не на своём месте, хотя дело всего лишь в темпе."
+   ],
+   "reading": "Сравните аркан дня с тем, что о вас говорят при знакомстве, — совпадение обычно точнее самооценки.",
+   "sections": [
+    {
+     "key": "character",
+     "title": "Характер и личные качества",
+     "href": "/encyclopedia/position/character"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Визитка в матрице судьбы — аркан дня рождения",
+    "description": "Визитка в матрице судьбы: аркан дня рождения, ядро характера и первое впечатление. Как считается точка и что она говорит о вашем темпе и манере.",
+    "queries": [
+     "визитка в матрице судьбы",
+     "аркан визитка",
+     "аркан дня рождения",
+     "матрица судьбы визитка значение",
+     "аркан дня рождения — визитка матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "month",
+   "kind": "point",
+   "title": "Аркан месяца рождения",
+   "lead": "То, что дано без усилий, — врождённый инструмент.",
+   "access": "free",
+   "formula": "Номер месяца рождения: январь — 1, декабрь — 12.",
+   "meaning": [
+    "Аркан месяца отвечает за дар, который человек не зарабатывал. Он проявляется рано и кажется естественным: одному легко объяснять, другому — успокаивать, третьему — считать. Именно поэтому такой талант часто не ценят: то, что даётся само, редко считают заслугой.",
+    "В карте эта точка стоит в начале линии таланта — с неё начинается путь к профессии. Дар без формы остаётся домашним фокусом; форму даёт следующий аркан линии, а месяц отвечает только за сырьё, зато самого высокого качества."
+   ],
+   "reading": "Ищите, что у вас получалось само лет с семи. Это и есть содержание точки, и с него начинается линия таланта.",
+   "sections": [
+    {
+     "key": "character",
+     "title": "Характер и личные качества",
+     "href": "/encyclopedia/position/character"
+    },
+    {
+     "key": "profession",
+     "title": "Профессия и дело по душе",
+     "href": "/encyclopedia/position/profession"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Аркан месяца рождения в матрице судьбы",
+    "description": "Аркан месяца рождения в матрице судьбы: врождённый дар, который даётся без усилий. Где он стоит в линии таланта и почему его обычно недооценивают.",
+    "queries": [
+     "аркан месяца рождения",
+     "что дано от рождения матрица судьбы",
+     "врожденный талант по дате рождения",
+     "второй аркан личности",
+     "аркан месяца рождения матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "year",
+   "kind": "point",
+   "title": "Аркан года рождения — опора рода",
+   "lead": "Что стоит за спиной: сила и сценарии семьи.",
+   "access": "free",
+   "formula": "Цифры года складываются, пока сумма не станет 22 или меньше: 1987 → 25 → 7.",
+   "meaning": [
+    "Год рождения в матрице отвечает за родовую опору — то, что человек получил вместе с фамилией. Здесь и сила: выносливость, ремесло, умение выживать; и груз: страхи, запреты, привычные способы решать беду.",
+    "Точка работает как фон и включается в трудную минуту. Пока всё спокойно, человек живёт своим характером; когда прижало, из него говорит род — тем самым голосом, который он слышал в детстве. Поэтому аркан года удобно проверять по кризисам, а не по обычным дням."
+   ],
+   "reading": "Вспомните, как в семье реагировали на потерю денег или тяжёлый период. Этот образ действий и есть содержание аркана года.",
+   "sections": [
+    {
+     "key": "character",
+     "title": "Характер и личные качества",
+     "href": "/encyclopedia/position/character"
+    },
+    {
+     "key": "past_lives",
+     "title": "Задачи прошлых воплощений",
+     "href": "/encyclopedia/position/past_lives"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Аркан года рождения в матрице судьбы — опора рода",
+    "description": "Аркан года рождения в матрице судьбы: родовая опора, сила и сценарии семьи. Как считается точка и почему она включается именно в трудную минуту.",
+    "queries": [
+     "аркан года рождения",
+     "опора рода матрица судьбы",
+     "как считать аркан года",
+     "родовой аркан по дате рождения",
+     "аркан года рождения — опора рода матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "mission",
+   "kind": "point",
+   "title": "Миссия",
+   "lead": "Общий вектор пути: куда ведёт линия, если не сопротивляться.",
+   "access": "free",
+   "formula": "Сумма арканов дня, месяца и года, сведённая к 1–22.",
+   "meaning": [
+    "Миссия собирается из трёх личных точек и потому не приходит извне: она уже заложена в том, что человеку дано. Это не должность и не профессия, а направление, в котором его усилия дают наибольший результат.",
+    "Проверяется миссия задним числом. Если посмотреть на свои удачные периоды, в них обычно есть общее — не сфера, а способ действия. Он и записан в этой точке. Дальше вопрос простой: сколько лет человек тратит на объезд, потому что рядом платили лучше."
+   ],
+   "reading": "Соберите три-четыре периода, когда всё складывалось, и найдите в них общий способ действия — он совпадёт с арканом миссии.",
+   "sections": [
+    {
+     "key": "realisation",
+     "title": "Путь самореализации",
+     "href": "/encyclopedia/position/realisation"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Миссия в матрице судьбы — как считать и читать",
+    "description": "Миссия в матрице судьбы: сумма дня, месяца и года рождения. Что означает точка миссии, чем она отличается от профессии и как проверить её по своим удачным периодам.",
+    "queries": [
+     "миссия в матрице судьбы",
+     "аркан миссии",
+     "как считается миссия матрица",
+     "предназначение и миссия разница",
+     "миссия матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "center",
+   "kind": "point",
+   "title": "Центр матрицы",
+   "lead": "Сердце карты: главное состояние человека и его зона комфорта.",
+   "access": "free",
+   "formula": "Сумма дня, месяца, года и миссии, сведённая к 1–22.",
+   "meaning": [
+    "Центр — самая спрашиваемая точка карты, и не зря: он собирает всё личное в одно состояние. Это то, каким человек бывает, когда его никто не видит и никто ничего не требует, — базовая настройка, к которой он возвращается после любого напряжения.",
+    "Через центр проходят три важные линии: денежная, любовная и линия таланта. Поэтому его аркан слышно в каждой сфере, а не только в характере. Если человек живёт против своего центра — работает в неподходящем темпе, среди неподходящих людей, — устаёт он не от объёма дел, а от постоянного расхождения с собой."
+   ],
+   "reading": "Аркан центра — ваше состояние покоя. Если в жизни его нет ни в одном дне недели, начинать надо отсюда, а не с планов.",
+   "sections": [
+    {
+     "key": "comfort",
+     "title": "Что даёт вам внутренний комфорт",
+     "href": "/encyclopedia/position/comfort"
+    },
+    {
+     "key": "rest",
+     "title": "Ваш идеальный формат отдыха",
+     "href": "/encyclopedia/position/rest"
+    },
+    {
+     "key": "loops",
+     "title": "Программы: что повторяется по кругу",
+     "href": "/encyclopedia/position/loops"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Центр в матрице судьбы — аркан в центре карты",
+    "description": "Центр в матрице судьбы: как считается аркан в центре, что он означает и почему его слышно в деньгах, отношениях и таланте. Разбор главной точки карты.",
+    "queries": [
+     "центр в матрице судьбы",
+     "аркан в центре",
+     "5 в центре матрицы судьбы",
+     "матрица судьбы сердце карты",
+     "что означает центр матрицы",
+     "центр матрицы матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "father_line",
+   "kind": "point",
+   "title": "Мужская линия рода",
+   "lead": "Что пришло по отцовской стороне: сила, ремесло, способ решать.",
+   "access": "free",
+   "formula": "Сумма арканов дня и месяца.",
+   "meaning": [
+    "Мужская линия отвечает за то, как в человеке живёт отцовское: умение работать и держать слово, отношение к деньгам и власти, привычка защищать или уходить. Совпадение с реальным отцом бывает прямым, а бывает зеркальным — тогда человек делает наоборот, но всё так же по отцу.",
+    "Эта точка полезна тем, кто разбирается со своим отношением к силе. По ней видно, какой ресурс лежит на этой стороне рода и в какой форме он приходит: одному отцовское даёт спокойную опору, другому — вечное доказательство, что он справится сам."
+   ],
+   "reading": "Сверьте аркан с судьбой отца и деда: где совпало — ресурс проверен, где наоборот — вы всё ещё в диалоге с этой линией.",
+   "sections": [
+    {
+     "key": "family_gifts",
+     "title": "Поддержка и дары вашего рода",
+     "href": "/encyclopedia/position/family_gifts"
+    },
+    {
+     "key": "parents_children",
+     "title": "Карма отношений с родителями и детьми",
+     "href": "/encyclopedia/position/parents_children"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Мужская линия рода в матрице судьбы",
+    "description": "Мужская линия рода в матрице судьбы: аркан отцовской стороны, какая сила по ней приходит и как читать совпадение или зеркальность с судьбой отца.",
+    "queries": [
+     "мужская линия рода матрица судьбы",
+     "линия отца в матрице судьбы",
+     "аркан отца",
+     "отцовская линия по дате рождения"
+    ]
+   }
+  },
+  {
+   "key": "mother_line",
+   "kind": "point",
+   "title": "Женская линия рода",
+   "lead": "Материнская сторона: тепло, чувства и умение держать дом.",
+   "access": "free",
+   "formula": "Сумма арканов месяца и года.",
+   "meaning": [
+    "Женская линия говорит о том, что пришло от матери и от женщин рода: способ любить, отношение к телу и деньгам в быту, привычка терпеть или требовать. С этой точки начинается линия отношений, и по ней видно, что человек считает нормой в паре.",
+    "Здесь же лежит ответ на частый вопрос, почему в отношениях повторяется материнский сценарий. Не потому, что «карма не отработана», а потому, что образ был единственным на глазах двадцать лет. Названный аркан делает сценарий видимым, и дальше его можно выбирать, а не воспроизводить."
+   ],
+   "reading": "Аркан женской линии стоит первым в линии отношений: прочитайте оба места вместе, и повторяющийся сюжет станет очевиден.",
+   "sections": [
+    {
+     "key": "family_gifts",
+     "title": "Поддержка и дары вашего рода",
+     "href": "/encyclopedia/position/family_gifts"
+    },
+    {
+     "key": "parents_children",
+     "title": "Карма отношений с родителями и детьми",
+     "href": "/encyclopedia/position/parents_children"
+    },
+    {
+     "key": "relations",
+     "title": "Отношения в матрице судьбы",
+     "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Женская линия рода в матрице судьбы",
+    "description": "Женская линия рода в матрице судьбы: аркан материнской стороны, как он влияет на отношения и почему материнский сценарий повторяется в паре.",
+    "queries": [
+     "женская линия рода матрица судьбы",
+     "линия матери в матрице судьбы",
+     "аркан матери",
+     "материнская линия по дате рождения"
+    ]
+   }
+  },
+  {
+   "key": "descendants",
+   "kind": "point",
+   "title": "Дети и продолжение рода",
+   "lead": "Что уходит дальше: дети, ученики, сделанное дело.",
+   "access": "free",
+   "formula": "Сумма арканов года и миссии.",
+   "meaning": [
+    "Точка продолжения отвечает за всё, что человек передаёт вперёд. Дети здесь не единственный вариант: ученики, книга, дело, которое живёт без основателя, — та же энергия. Пустой эта позиция не бывает, вопрос только в форме.",
+    "С неё же начинается денежная линия, и это не совпадение методики: деньги в карте приходят через то, что человек создаёт и отдаёт другим. Отсюда практический вывод — когда доход падает, стоит смотреть не на экономику, а на то, что вы давно перестали давать людям."
+   ],
+   "reading": "Читайте точку вместе с денежной линией: одна и та же энергия отвечает и за передачу дальше, и за вход дохода.",
+   "sections": [
+    {
+     "key": "parents_children",
+     "title": "Карма отношений с родителями и детьми",
+     "href": "/encyclopedia/position/parents_children"
+    },
+    {
+     "key": "money",
+     "title": "Деньги в матрице судьбы",
+     "href": "/encyclopedia/position/money"
+    },
+    {
+     "key": "resources",
+     "title": "Что открывает вам блага и ресурс",
+     "href": "/encyclopedia/position/resources"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Дети и продолжение рода в матрице судьбы",
+    "description": "Точка детей и продолжения рода в матрице судьбы: что человек передаёт дальше и почему с этого же места начинается денежная линия карты.",
+    "queries": [
+     "дети в матрице судьбы",
+     "продолжение рода аркан",
+     "аркан детей по дате рождения",
+     "матрица судьбы про детей",
+     "дети и продолжение рода матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "inheritance",
+   "kind": "point",
+   "title": "Наследие рода",
+   "lead": "Полученное на входе: и дар, и задача до сорока лет.",
+   "access": "free",
+   "formula": "Сумма арканов миссии и дня.",
+   "meaning": [
+    "Наследие — это то, с чем человек пришёл: чужие незакрытые дела, семейные правила, а вместе с ними накопленная родом сила. В первой половине жизни эта точка ведёт себя как задача, во второй — как ресурс, если задача прожита.",
+    "Аркан наследия стоит в двух местах отчёта — в кармической задаче до сорока и в кармическом хвосте, — и это подсказывает порядок работы. Сначала человек делает то, что от него ждали, потом обнаруживает, чего хотел сам. Пропустить первую часть удаётся редко, зато можно сократить, назвав её вслух."
+   ],
+   "reading": "Одна точка отвечает и за задачу до сорока, и за корень хвоста. Читайте её как одну тему, а не как два разных предсказания.",
+   "sections": [
+    {
+     "key": "karma40",
+     "title": "Кармическая задача до 40 лет",
+     "href": "/encyclopedia/position/karma40"
+    },
+    {
+     "key": "ancestry",
+     "title": "Родовые задачи до седьмого колена",
+     "href": "/encyclopedia/position/ancestry"
+    },
+    {
+     "key": "past_lives",
+     "title": "Задачи прошлых воплощений",
+     "href": "/encyclopedia/position/past_lives"
+    },
+    {
+     "key": "years",
+     "title": "Разбор по годам до 80 лет",
+     "href": "/encyclopedia/position/years"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Наследие рода в матрице судьбы — аркан на входе",
+    "description": "Наследие рода в матрице судьбы: что человек получает на входе, как эта точка связана с задачей до 40 лет и с кармическим хвостом карты.",
+    "queries": [
+     "наследие рода матрица судьбы",
+     "полученное наследие аркан",
+     "аркан наследия по дате рождения",
+     "юго-западная точка матрицы"
+    ]
+   }
+  },
+  {
+   "key": "comfort_west",
+   "kind": "point",
+   "title": "Зона комфорта: запад",
+   "lead": "Точка между визиткой и центром — через что решается ранняя задача.",
+   "access": "free",
+   "formula": "Сумма аркана дня и аркана центра.",
+   "meaning": [
+    "Западная точка соединяет то, каким человека видят, с тем, какой он внутри. В отчёте она отвечает за способ: через что именно проходится кармическая задача первой половины жизни — через людей, через дело, через одиночество или через прямой разговор.",
+    "Практически это подсказка о поведении, а не о событиях. Один и тот же урок можно тянуть годами не потому, что он тяжёлый, а потому, что человек выбирает не свой способ его решать: терпит там, где надо говорить, или спорит там, где надо ждать."
+   ],
+   "reading": "Смотрите точку как ответ на вопрос «как», а не «что». Сюжет повторяется — значит, способ не тот.",
+   "sections": [
+    {
+     "key": "karma40",
+     "title": "Кармическая задача до 40 лет",
+     "href": "/encyclopedia/position/karma40"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Западная точка комфорта в матрице судьбы",
+    "description": "Западная зона комфорта в матрице судьбы: точка между визиткой и центром. Через что решается кармическая задача до 40 лет и почему сюжет повторяется.",
+    "queries": [
+     "западная точка матрицы судьбы",
+     "зона комфорта запад",
+     "через что решается карма матрица",
+     "аркан между днем и центром",
+     "зона комфорта: запад матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "comfort_north",
+   "kind": "point",
+   "title": "Зона комфорта: север",
+   "lead": "Комфорт в отношениях: от чего вам спокойно рядом с другим.",
+   "access": "free",
+   "formula": "Сумма аркана месяца и аркана центра.",
+   "meaning": [
+    "Северная точка отвечает за уют в паре и вообще в близости. Она показывает не тип партнёра, а обстановку, в которой человек перестаёт защищаться: одному нужны разговоры до ночи, другому — молчание в одной комнате, третьему — общее дело и никаких выяснений.",
+    "Расхождение по этой точке — частая причина ссор у людей, которые друг друга любят. Оба стараются, каждый даёт своё, и оба остаются голодными. Названная разница снимает половину претензий: становится ясно, что партнёр не холоден, а просто отдыхает иначе."
+   ],
+   "reading": "Сравните свою северную точку с тем, что делает партнёр, когда хочет быть ближе. Обычно там и лежит непонимание.",
+   "sections": [
+    {
+     "key": "comfort",
+     "title": "Что даёт вам внутренний комфорт",
+     "href": "/encyclopedia/position/comfort"
+    },
+    {
+     "key": "relations",
+     "title": "Отношения в матрице судьбы",
+     "href": "/encyclopedia/position/relations"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Комфорт в отношениях — северная точка матрицы судьбы",
+    "description": "Северная зона комфорта в матрице судьбы: от чего вам спокойно рядом с другим человеком. Как эта точка объясняет ссоры между любящими людьми.",
+    "queries": [
+     "комфорт в отношениях матрица судьбы",
+     "северная точка матрицы судьбы",
+     "зона комфорта север",
+     "аркан комфорта в паре",
+     "зона комфорта: север матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "comfort_east",
+   "kind": "point",
+   "title": "Зона комфорта: восток",
+   "lead": "Опора зрелости: на что переносится вес после сорока.",
+   "access": "free",
+   "formula": "Сумма аркана года и аркана центра.",
+   "meaning": [
+    "Восточная точка связывает родовую опору с личным центром, и её время приходит во второй половине жизни. Там, где до сорока человек тянул на энергии и скорости, после сорока начинает работать вес: имя, опыт, накопленные связи, спокойная репутация.",
+    "В деньгах это выглядит как смена схемы: меньше движений, дороже каждое. Кто вовремя переносит опору на эту точку, зарабатывает больше при меньшей суете; кто держится за прежний способ, к пятидесяти работает вдвое, а получает столько же."
+   ],
+   "reading": "Читайте вместе с разделом про деньги после сорока: точка показывает, на что опираться, когда прежний способ выдыхается.",
+   "sections": [
+    {
+     "key": "money40",
+     "title": "Как меняются деньги после 40 лет",
+     "href": "/encyclopedia/position/money40"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Восточная точка комфорта в матрице судьбы",
+    "description": "Восточная зона комфорта в матрице судьбы: опора второй половины жизни. Как меняется способ зарабатывать после сорока и на что переносится вес.",
+    "queries": [
+     "восточная точка матрицы судьбы",
+     "зона комфорта восток",
+     "опора после 40 матрица судьбы",
+     "аркан между годом и центром",
+     "зона комфорта: восток матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "comfort_south",
+   "kind": "point",
+   "title": "Зона комфорта: юг — аркан под сердцем",
+   "lead": "Комфорт в деле: в какой работе вам не тяжело.",
+   "access": "free",
+   "formula": "Сумма аркана миссии и аркана центра.",
+   "meaning": [
+    "Точку под сердцем спрашивают почти так же часто, как центр. Она отвечает за рабочий комфорт: в каком темпе, в каком окружении и с какой долей риска человек делает своё дело без насилия над собой.",
+    "Полезнее всего сравнить её с текущей работой. Совпадает — усталость нормальная, к вечеру и по делу. Не совпадает — устаёт человек с утра, ещё не начав, и объясняет это ленью, хотя дело в форме: не тот темп, не то количество людей, не та мера ответственности."
+   ],
+   "reading": "Сверьте аркан под сердцем с условиями своей работы: темп, люди, риск. Расхождение объясняет усталость без нагрузки.",
+   "sections": [
+    {
+     "key": "comfort",
+     "title": "Что даёт вам внутренний комфорт",
+     "href": "/encyclopedia/position/comfort"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Аркан под сердцем в матрице судьбы — южная точка",
+    "description": "Аркан под сердцем в матрице судьбы: южная зона комфорта и рабочее состояние. В каком темпе и окружении вам не тяжело работать.",
+    "queries": [
+     "аркан под сердцем",
+     "матрица судьбы сердце",
+     "южная точка матрицы судьбы",
+     "зона комфорта юг",
+     "комфорт в деле матрица судьбы",
+     "зона комфорта: юг — аркан под сердцем матрица судьбы"
+    ]
+   }
+  },
+  {
+   "key": "harmony",
+   "kind": "point",
+   "title": "Духовная гармония",
+   "lead": "Точка согласия с собой: где сходятся небо и земля карты.",
+   "access": "free",
+   "formula": "Сумма итога небесной линии и итога земной линии.",
+   "meaning": [
+    "Гармония в карте — не про блаженство, а про сведение двух половин: внутренней работы и материальной жизни. Точка показывает, в каком действии человек одновременно спокоен и на земле, — а такое действие у каждого своё и обычно очень конкретное.",
+    "В отчёте она встречается дважды: в предназначении и как точка выхода из повторяющихся программ. Это логично: сюжет перестаёт крутиться именно там, где человек делает что-то в согласии с собой, а не по инерции и не назло."
+   ],
+   "reading": "Ищите занятие, после которого нет ни пустоты, ни вины. Аркан гармонии описывает именно его, а не абстрактный покой.",
+   "sections": [
+    {
+     "key": "purpose",
+     "title": "Ваше предназначение",
+     "href": "/encyclopedia/position/purpose"
+    },
+    {
+     "key": "loops",
+     "title": "Программы: что повторяется по кругу",
+     "href": "/encyclopedia/position/loops"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Духовная гармония в матрице судьбы",
+    "description": "Духовная гармония в матрице судьбы: точка, где сходятся небесная и земная линии. Почему она же служит выходом из повторяющихся программ.",
+    "queries": [
+     "духовная гармония матрица судьбы",
+     "аркан гармонии",
+     "небо и земля в матрице судьбы",
+     "точка выхода из программы"
+    ]
+   }
+  },
+  {
+   "key": "planetary",
+   "kind": "point",
+   "title": "Планетарная задача",
+   "lead": "Что идёт через человека дальше его собственной жизни.",
+   "access": "free",
+   "formula": "Сумма итогов мужской и женской ветвей рода.",
+   "meaning": [
+    "Планетарная задача собирается из двух родовых ветвей, и это её главный смысл: через человека доделывается что-то, начатое до него. Звучит громко, а выглядит буднично — учитель, который выпустил тридцать классов, или инженер в третьем поколении.",
+    "Точку не стоит читать как обязанность спасать мир. Практический вопрос мягче: что вы делаете такого, что переживёт вас на пару поколений. Если ответа нет совсем, это не приговор, а подсказка, куда смотреть после того, как закрыты личные уровни."
+   ],
+   "reading": "Сначала личное и социальное предназначение, потом эта точка. В обратном порядке получаются красивые слова без дел.",
+   "sections": [
+    {
+     "key": "purpose",
+     "title": "Ваше предназначение",
+     "href": "/encyclopedia/position/purpose"
+    },
+    {
+     "key": "ancestry",
+     "title": "Родовые задачи до седьмого колена",
+     "href": "/encyclopedia/position/ancestry"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Планетарная задача в матрице судьбы",
+    "description": "Планетарная задача в матрице судьбы: сумма родовых ветвей и то, что идёт через человека дальше его жизни. Как читать точку без пафоса.",
+    "queries": [
+     "планетарная задача матрица судьбы",
+     "аркан планетарной задачи",
+     "задача рода матрица судьбы",
+     "высшее предназначение по дате рождения"
+    ]
+   }
+  },
+  {
+   "key": "purpose_personal",
+   "kind": "point",
+   "title": "Личное предназначение",
+   "lead": "То, что нужно сделать для себя, независимо от чужих оценок.",
+   "access": "free",
+   "formula": "Сумма арканов дня и года.",
+   "meaning": [
+    "Личное предназначение — первый уровень, и он про собственную жизнь: какой человек должен стать сам, чему научиться, что перестать терпеть. Никто снаружи это не оценит и не наградит, и в этом вся сложность.",
+    "Пока уровень не сделан, следующий не включается по-настоящему. Отсюда знакомая картина: человек много помогает другим, его хвалят, а внутри пусто. Порядок работы упрямый — сначала своё, потом общественное, и никак иначе."
+   ],
+   "reading": "Спросите себя, что вы отложили «на потом» лет десять назад. Аркан личного предназначения обычно про это.",
+   "sections": [
+    {
+     "key": "realisation",
+     "title": "Путь самореализации",
+     "href": "/encyclopedia/position/realisation"
+    },
+    {
+     "key": "purpose",
+     "title": "Ваше предназначение",
+     "href": "/encyclopedia/position/purpose"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Личное предназначение в матрице судьбы",
+    "description": "Личное предназначение в матрице судьбы: сумма дня и года рождения. Что человеку нужно сделать для себя и почему без этого уровня не работает социальный.",
+    "queries": [
+     "личное предназначение матрица судьбы",
+     "аркан личного предназначения",
+     "предназначение для себя по дате рождения",
+     "первый уровень предназначения"
+    ]
+   }
+  },
+  {
+   "key": "purpose_social",
+   "kind": "point",
+   "title": "Социальное предназначение",
+   "lead": "То, за что вас знают люди и чем вы полезны многим.",
+   "access": "free",
+   "formula": "Сумма арканов месяца и миссии.",
+   "meaning": [
+    "Социальный уровень отвечает на вопрос, каким делом человек становится нужен посторонним. Это не обязательно публичность: мастер, к которому едут из другого города, работает на этом же уровне, просто без камер.",
+    "Точка складывается из врождённого дара и общего вектора пути, поэтому она редко бывает неожиданной — люди обычно узнают в ней то, что им давно говорят со стороны. Совет здесь простой: спросите пятерых, за чем они к вам приходят, и сравните с арканом."
+   ],
+   "reading": "Сравните аркан с тем, за чем к вам чаще всего обращаются. Совпадение показывает, где ваш вклад уже виден.",
+   "sections": [
+    {
+     "key": "realisation",
+     "title": "Путь самореализации",
+     "href": "/encyclopedia/position/realisation"
+    },
+    {
+     "key": "purpose",
+     "title": "Ваше предназначение",
+     "href": "/encyclopedia/position/purpose"
+    }
+   ],
+   "arcana": [
+    {
+     "n": 1,
+     "title": "Маг",
+     "href": "/encyclopedia/arcanum/1"
+    },
+    {
+     "n": 2,
+     "title": "Жрица",
+     "href": "/encyclopedia/arcanum/2"
+    },
+    {
+     "n": 3,
+     "title": "Императрица",
+     "href": "/encyclopedia/arcanum/3"
+    },
+    {
+     "n": 4,
+     "title": "Император",
+     "href": "/encyclopedia/arcanum/4"
+    },
+    {
+     "n": 5,
+     "title": "Иерофант",
+     "href": "/encyclopedia/arcanum/5"
+    },
+    {
+     "n": 6,
+     "title": "Влюблённые",
+     "href": "/encyclopedia/arcanum/6"
+    },
+    {
+     "n": 7,
+     "title": "Колесница",
+     "href": "/encyclopedia/arcanum/7"
+    },
+    {
+     "n": 8,
+     "title": "Сила",
+     "href": "/encyclopedia/arcanum/8"
+    },
+    {
+     "n": 9,
+     "title": "Отшельник",
+     "href": "/encyclopedia/arcanum/9"
+    },
+    {
+     "n": 10,
+     "title": "Колесо",
+     "href": "/encyclopedia/arcanum/10"
+    },
+    {
+     "n": 11,
+     "title": "Справедливость",
+     "href": "/encyclopedia/arcanum/11"
+    },
+    {
+     "n": 12,
+     "title": "Повешенный",
+     "href": "/encyclopedia/arcanum/12"
+    },
+    {
+     "n": 13,
+     "title": "Смерть",
+     "href": "/encyclopedia/arcanum/13"
+    },
+    {
+     "n": 14,
+     "title": "Умеренность",
+     "href": "/encyclopedia/arcanum/14"
+    },
+    {
+     "n": 15,
+     "title": "Дьявол",
+     "href": "/encyclopedia/arcanum/15"
+    },
+    {
+     "n": 16,
+     "title": "Башня",
+     "href": "/encyclopedia/arcanum/16"
+    },
+    {
+     "n": 17,
+     "title": "Звезда",
+     "href": "/encyclopedia/arcanum/17"
+    },
+    {
+     "n": 18,
+     "title": "Луна",
+     "href": "/encyclopedia/arcanum/18"
+    },
+    {
+     "n": 19,
+     "title": "Солнце",
+     "href": "/encyclopedia/arcanum/19"
+    },
+    {
+     "n": 20,
+     "title": "Суд",
+     "href": "/encyclopedia/arcanum/20"
+    },
+    {
+     "n": 21,
+     "title": "Мир",
+     "href": "/encyclopedia/arcanum/21"
+    },
+    {
+     "n": 22,
+     "title": "Шут",
+     "href": "/encyclopedia/arcanum/22"
+    }
+   ],
+   "seo": {
+    "title": "Социальное предназначение в матрице судьбы",
+    "description": "Социальное предназначение в матрице судьбы: сумма месяца и миссии. Чем человек полезен многим и как проверить точку по тому, за чем к вам приходят.",
+    "queries": [
+     "социальное предназначение матрица судьбы",
+     "аркан социального предназначения",
+     "чем я полезен людям по дате рождения",
+     "второй уровень предназначения"
+    ]
+   }
+  }
+ ]
+}

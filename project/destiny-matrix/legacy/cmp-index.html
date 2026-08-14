@@ -1,0 +1,77 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Старшие арканы — варианты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16283c;--dim:#5a6d7d;--dim2:#8395a3;--line:#dee6ea;--teal:#0e8f88;--gold:#b8902a}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f4;color:var(--ink);padding:34px 22px;
+  font:15px/1.5 Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1560px;margin:0 auto}
+h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:40px;line-height:1.1;
+  letter-spacing:.01em;margin:0 0 10px;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
+h1 span{color:var(--teal);font-variant-numeric:lining-nums}
+.sub{color:var(--dim);font-size:14.4px;max-width:78ch;margin:0 0 20px}
+.prm{color:var(--dim2);font-size:12.4px;max-width:118ch;margin:0 0 20px;line-height:1.5}
+.prm b{color:var(--dim);font-weight:600}
+.bar{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 24px}
+.bar span,.bar a{font-size:12.4px;color:var(--dim);background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;text-decoration:none}
+.bar a:hover{border-color:var(--teal);color:#0b7a74}
+
+.tiles,.grid{display:grid;gap:16px;grid-template-columns:repeat(6,1fr)}
+@media(max-width:1400px){.tiles,.grid{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:1150px){.tiles,.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.tiles,.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:620px){.tiles,.grid{grid-template-columns:repeat(2,1fr)}}
+
+figure,.tile{margin:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;
+  text-decoration:none;display:block;box-shadow:0 10px 26px -18px rgba(18,40,60,.34)}
+.tile{transition:border-color .15s,transform .15s}
+.tile:hover{border-color:var(--teal);transform:translateY(-2px)}
+figure img,.tile img{display:block;width:100%;height:auto;border-radius:7px}
+.tile .empty{aspect-ratio:2/3;display:grid;place-items:center;color:#a9b8c2;font-size:12.5px;
+  background:#f4f7f8;border-radius:7px}
+
+.cap{display:block;text-align:center;padding:9px 2px 3px}
+.cap .rom{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:15.5px;
+  color:var(--gold);letter-spacing:.09em;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
+.cap .name{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:20px;
+  color:var(--ink);letter-spacing:.015em;display:block;margin-top:1px;line-height:1.15}
+.cap .cnt{font-size:11.6px;color:var(--dim2);letter-spacing:.04em;display:block;margin-top:3px}
+
+figcaption{text-align:center;padding-top:8px;font-size:12.2px;color:var(--dim2);letter-spacing:.03em}
+figcaption b{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;font-size:17.5px;
+  color:var(--teal);letter-spacing:.02em;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
+.nav{margin:28px 0 0;font-size:13px;color:var(--dim);line-height:2}
+.nav a{color:#0b7a74;margin-right:13px;text-decoration:none;border-bottom:1px solid #cfe3e1}
+.nav a:hover{border-color:#0b7a74}
+.nav .home{font-weight:600}
+</style></head><body><div class=wrap>
+<h1>Старшие арканы — <span>3</span> вариантов, по 3 на карту</h1>
+<p class=sub>dev с рабочим guidance 3.5, сиды как в первом прогоне. Открой аркан и выбери сид — по нему карта воспроизводится точно, в любом разрешении.</p>
+<div class="tiles">
+<a class="tile" href="cmp-fool.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">0</span><span class="name">Шут</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-magician.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">I</span><span class="name">Магистр</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-priestess.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">II</span><span class="name">Верховная Жрица</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-empress.html"><img src="gen/100/empress/seed-0001.png" alt="" loading="lazy"><span class="cap"><span class="rom">III</span><span class="name">Императрица</span><span class="cnt">3 вариантов</span></span></a>
+<a class="tile" href="cmp-emperor.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">IV</span><span class="name">Император</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-hierophant.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">V</span><span class="name">Иерофант</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-lovers.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">VI</span><span class="name">Влюблённые</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-chariot.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">VII</span><span class="name">Колесница</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-strength.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">VIII</span><span class="name">Сила</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-hermit.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">IX</span><span class="name">Отшельник</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-wheel.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">X</span><span class="name">Колесо Фортуны</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-justice.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XI</span><span class="name">Правосудие</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-hanged.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XII</span><span class="name">Повешенный</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-death.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XIII</span><span class="name">Смерть</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-temperance.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XIV</span><span class="name">Умеренность</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-devil.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XV</span><span class="name">Дьявол</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-tower.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XVI</span><span class="name">Башня</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-star.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XVII</span><span class="name">Звезда</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-moon.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XVIII</span><span class="name">Луна</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-sun.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XIX</span><span class="name">Солнце</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-judgement.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XX</span><span class="name">Суд</span><span class="cnt">0 вариантов</span></span></a>
+<a class="tile" href="cmp-world.html"><div class="empty">ещё нет</div><span class="cap"><span class="rom">XXI</span><span class="name">Мир</span><span class="cnt">0 вариантов</span></span></a>
+</div>
+</div></body></html>

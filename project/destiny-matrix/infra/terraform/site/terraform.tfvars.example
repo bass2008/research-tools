@@ -1,0 +1,14 @@
+domain        = "matritsa.webstudiolab.ru"
+dns_zone_name = "webstudiolab-ru"
+
+# Node-раскладка: домен держит A-запись на VM (корень ../server), бакет — только ассеты.
+# Включать обратно, только если сайт снова станет статикой в бакете.
+manage_dns   = false
+enable_https = false
+
+# Требует manage_dns = true. Ниже ~250 ГБ исходящего трафика в месяц бакет дешевле; ../README.md §5.
+enable_cdn = false
+
+# Ассеты заливает ./deploy.sh. Включать только если хочется видеть каждый файл в state,
+# и сначала прочитать ../README.md §2.
+manage_objects = false
