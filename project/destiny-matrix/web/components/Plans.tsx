@@ -23,14 +23,17 @@ function features(t: Tariff): string[] {
 
 export default function Plans({ place = "plans" }: { place?: string }) {
   const tariffs = useTariffs();
-  // Выделяем самый дорогой тариф, а не рекламируемый: подписка стоит дороже и должна
-  // выглядеть дороже. Считаем по цене, чтобы выделение не зависело от id и порядка.
+  // Сравнивать не с чем, пока продаём один тариф: ни шапки «Одна дата», ни выделения
+  // «выгоднее» — они появятся сами, когда в витрине снова станет больше одного тарифа.
+  const compare = tariffs.length > 1;
+  // Выделяем самый дорогой: он должен выглядеть дороже. Считаем по цене, чтобы выделение
+  // не зависело от id и порядка.
   const premium = tariffs.reduce((a, b) => (b.price > a.price ? b : a), tariffs[0]);
   return (
-    <div className="plans" id="plans">
+    <div className={compare ? "plans" : "plans single"} id="plans">
       {tariffs.map((t) => (
-        <div className={t.id === premium?.id ? "plan premium" : "plan"} key={t.id}>
-          <div className="pcap">{capLabel(t)}</div>
+        <div className={compare && t.id === premium?.id ? "plan premium" : "plan"} key={t.id}>
+          {compare ? <div className="pcap">{capLabel(t)}</div> : null}
           <div className="in">
             <h3>{t.name}</h3>
             <div className="price">

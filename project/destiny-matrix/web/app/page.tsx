@@ -64,7 +64,7 @@ export default async function HomePage() {
             <div className="pricelead">
               <b>{money(main.price)} ₽</b>
               <span className="what">
-                полный разбор, все 20 разделов, {periodLabel(main) === "навсегда" ? "без подписки" : periodLabel(main)}
+                полный разбор, все 20 разделов, {periodLabel(main) === "навсегда" ? "один платёж" : periodLabel(main)}
               </span>
               <span className="free">карта и 2 раздела — бесплатно, без регистрации</span>
             </div>
@@ -78,7 +78,7 @@ export default async function HomePage() {
               <span className="chip">
                 ✦ <b>Разбор по годам</b> до 80 лет
               </span>
-              <span className="chip">✦ Без подписки и автосписаний</span>
+              <span className="chip">✦ Один платёж, без списаний</span>
             </div>
             <p className="small" style={{ marginTop: 12 }}>
               Тарифы: {tariffs.map((t) => `${t.name} — ${money(t.price)} ₽`).join(" · ")}.{" "}

@@ -53,7 +53,7 @@ export default async function OfertaPage() {
         <h2>1. Стороны и термины</h2>
         <p>
           <b>Исполнитель</b> — <P>{LEGAL.entity}</P>, ИНН <P>{LEGAL.inn}</P>, ОГРНИП <P>{LEGAL.ogrnip}</P>
-          , адрес: <P>{LEGAL.address}</P>, почта: <P>{LEGAL.email}</P>.
+          , почта: <P>{LEGAL.email}</P>.
         </p>
         <p>
           <b>Заказчик</b> — дееспособное физическое лицо старше 18 лет, принявшее условия настоящей
@@ -176,7 +176,7 @@ export default async function OfertaPage() {
         <h2>11. Реквизиты</h2>
         <p>
           <P>{LEGAL.entity}</P> · ИНН <P>{LEGAL.inn}</P> · ОГРНИП <P>{LEGAL.ogrnip}</P> · адрес:{" "}
-          <P>{LEGAL.address}</P> · почта: <P>{LEGAL.email}</P> · телефон: <P>{LEGAL.phone}</P>.
+          Почта: <P>{LEGAL.email}</P> · телефон: <P>{LEGAL.phone}</P>.
         </p>
       </div>
     </main>

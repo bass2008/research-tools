@@ -3,26 +3,29 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-VM=arcana-app
 SITE=https://arcana-sense.ru
-IP="$(yc compute instance get --name $VM --format json | jq -r '.network_interfaces[0].primary_v4_address.one_to_one_nat.address')"
-REGISTRY="cr.yandex/$(yc container registry get --name arcana --format json | jq -r .id)"
-# из грязного дерева тег дополняем временем: иначе два релиза подряд имеют один тег и pull
-# на машине не видит разницы
+IP=84.201.157.100
+REGISTRY=cr.yandex/crp68mnbmb6e88p35jsq
+# грязное дерево — тег со временем: иначе pull на машине не видит разницы
 TAG="$(git rev-parse --short HEAD)$(git diff --quiet HEAD -- .. || TZ=Europe/Moscow date '+-dirty%H%M')"
 
 export SITE_URL="$SITE" BUILD_COMMIT="$TAG" BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"
 
-echo "== сборка $TAG"
-docker compose build
+# zstd вместо gzip: тяжёлый слой 30 МБ против 191. force-compression обязателен —
+# иначе слои из кеша останутся gzip
+ZSTD="compression=zstd,compression-level=10,force-compression=true"
 
-echo "== отправка в реестр"
+echo "== сборка и отправка $TAG"
 yc container registry configure-docker >/dev/null
-for svc in api web; do
-  docker tag "arcana-$svc:latest" "$REGISTRY/$svc:$TAG"
-  docker push -q "$REGISTRY/$svc:$TAG"
-done
+docker buildx build --push -f api.Dockerfile \
+  --output "type=image,name=$REGISTRY/api:$TAG,$ZSTD" ..
+docker buildx build --push -f web.Dockerfile \
+  --build-arg "NEXT_PUBLIC_SITE_URL=$SITE" \
+  --build-arg "BUILD_COMMIT=$BUILD_COMMIT" \
+  --build-arg "BUILD_BRANCH=$BUILD_BRANCH" \
+  --build-arg "BUILD_TIME=$BUILD_TIME" \
+  --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
 
 echo "== запуск на $IP"
 scp -q -o StrictHostKeyChecking=accept-new compose.server.yml "ubuntu@$IP:/srv/arcana/docker-compose.yml"

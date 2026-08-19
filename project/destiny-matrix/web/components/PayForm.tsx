@@ -314,16 +314,16 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   return (
     <form className="panel paybox" data-testid="pay-modal" onSubmit={submit}>
       <h3>Что покупаем</h3>
-      <div className="cap">Все 20 разделов разбора открывает любой из тарифов — разница в числе дат и сроке.</div>
+      <div className="cap">
+        {tariffs.length > 1
+          ? "Все 20 разделов разбора открывает любой из тарифов — разница в числе дат и сроке."
+          : "Все 20 разделов разбора по одной дате рождения. Один платёж, доступ остаётся навсегда."}
+      </div>
 
-      {/* выбор рисуем только когда есть из чего выбирать: сейчас продаём один тариф */}
-      <div
-        className="tchoice"
-        role="radiogroup"
-        aria-label="Тариф"
-        data-testid="tariff-choice"
-        hidden={tariffs.length < 2}
-      >
+      {/* выбор не рисуем вовсе, пока продаём один тариф: скрытый стилями блок оставлял бы
+          в разметке подписи вроде «Подписка» и «Одна дата» */}
+      {tariffs.length > 1 ? (
+      <div className="tchoice" role="radiogroup" aria-label="Тариф" data-testid="tariff-choice">
         {tariffs.map((t) => (
           <label className={t.id === tariff.id ? "topt on" : "topt"} key={t.id}>
             <input
@@ -349,6 +349,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
           </label>
         ))}
       </div>
+      ) : null}
 
       {!tariff.scope.includes("all") ? (
         <div className="paytarget">

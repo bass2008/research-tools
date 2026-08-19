@@ -12,10 +12,11 @@ WORKDIR /srv
 COPY api/requirements.txt api/requirements.txt
 RUN pip install --no-cache-dir -r api/requirements.txt
 
+# Порядок слоёв — от редко меняющегося к часто: контент энциклопедии 12,6 МБ переезжал бы при
+# каждой правке кода, если бы стоял после него. Код идёт последним и весит 200 кБ.
+COPY web/content ./web/content
 COPY engine ./engine
 COPY api/app ./api/app
-# энциклопедия читается на запрос; путь по умолчанию — <корень продукта>/web/content
-COPY web/content ./web/content
 
 WORKDIR /srv/api
 

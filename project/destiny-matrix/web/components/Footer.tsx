@@ -15,11 +15,11 @@ export default function Footer() {
           <p>{DISCLAIMER}</p>
         </div>
         <div>
+          {/* в подвале — только кто исполнитель и куда писать; номера на странице контактов */}
+          <p>{LEGAL.entity}</p>
           <p>
-            {LEGAL.entity} · ИНН {LEGAL.inn}
+            <Link href="/contacts">Контакты и реквизиты</Link>
           </p>
-          <p>ОГРНИП {LEGAL.ogrnip}</p>
-          <p>{LEGAL.address}</p>
           <p><a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a></p>
         </div>
         <div>

@@ -418,6 +418,8 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 /* тарифы */
 /* Тарифов два: колонки по числу карточек, а не фиксированные четыре — иначе половина
    ряда пустует. max-width держит карточку читаемой, когда тариф останется один. */
+/* один тариф в витрине: карточка не должна растягиваться во всю ширину и выглядеть как баннер */
+.plans.single { grid-template-columns: minmax(0, 460px); justify-content: center; }
 .plans {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

@@ -90,7 +90,7 @@ export default function RefundPage() {
         </p>
         <p>
           Реквизиты для претензий: <P>{LEGAL.entity}</P>, ИНН <P>{LEGAL.inn}</P>, адрес:{" "}
-          <P>{LEGAL.address}</P>, почта: <P>{LEGAL.email}</P>.
+          Почта: <P>{LEGAL.email}</P>.
         </p>
       </div>
     </main>

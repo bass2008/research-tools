@@ -107,7 +107,7 @@ export default function ReportView({
           <h3>Осталось {locked.length} разделов под замком</h3>
           <p>
             Полный разбор открывает деньги, отношения, родовые задачи, программы и разбор по годам до 80
-            лет. От {money(lead.price)} ₽ — тариф выбираете на странице оплаты.
+            лет. {money(lead.price)} ₽ — один платёж, доступ остаётся навсегда.
           </p>
           <div className="alllist">
             {locked.map((s) => (
