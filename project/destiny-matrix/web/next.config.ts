@@ -7,6 +7,10 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Адрес, с которого браузер берёт `_next/static`. Пусто — раздаёт тот же сервер; на проде сюда
+  // ставится бакет Object Storage или CDN поверх него (infra/terraform/site). Значение
+  // вшивается в разметку на сборке, поэтому смена адреса требует пересборки фронта.
+  assetPrefix: process.env.NEXT_ASSET_PREFIX || undefined,
   // deploy.sh забирает .next/standalone и перезапускает службу
   output: "standalone",
   async rewrites() {

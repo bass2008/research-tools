@@ -20,9 +20,14 @@ class MatrixIn(BirthIn):
     title: str | None = Field(default=None, max_length=200)
 
 
+class MatrixTitleIn(BaseModel):
+    # пустая строка — сброс подписи: в кабинете тогда снова показывается дата
+    title: str | None = Field(default=None, max_length=200)
+
+
 class Credentials(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=6, max_length=200)
+    password: str = Field(min_length=3, max_length=200)
 
     @field_validator("email")
     @classmethod

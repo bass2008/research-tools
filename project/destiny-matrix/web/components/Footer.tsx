@@ -2,13 +2,15 @@ import Link from "next/link";
 
 import { DISCLAIMER, LEGAL } from "@/lib/site";
 
+import Logo from "./Logo";
+
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="wrap frow">
         <div>
           <div className="logo" style={{ marginBottom: 8 }}>
-            <i>✦</i> Матрица судьбы
+            <Logo height={56} />
           </div>
           <p>{DISCLAIMER}</p>
         </div>
@@ -18,7 +20,7 @@ export default function Footer() {
           </p>
           <p>ОГРНИП {LEGAL.ogrnip}</p>
           <p>{LEGAL.address}</p>
-          <p>{LEGAL.email}</p>
+          <p><a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a></p>
         </div>
         <div>
           <p>

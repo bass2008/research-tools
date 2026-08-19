@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 
 export const SITE = {
-  name: "Матрица судьбы",
-  short: "Матрица судьбы",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://matritsa.webstudiolab.ru",
+  // Бренд — Arcana Sense; «матрица судьбы» остаётся товарным словом в заголовках и текстах:
+  // это поисковый запрос, ради которого страницы и написаны, из SEO его убирать нельзя.
+  name: "Arcana Sense",
+  short: "Arcana Sense",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://arcana-sense.ru",
   ogImage: "/og.png",
   ogWidth: 1200,
   ogHeight: 630,
@@ -17,8 +19,8 @@ export const LEGAL = {
   inn: "⟨ИНН⟩",
   ogrnip: "⟨ОГРНИП⟩",
   address: "⟨адрес регистрации⟩",
-  email: "⟨почта для обращений⟩",
-  site: "⟨адрес сайта⟩",
+  email: "hello@arcana-sense.ru",
+  site: "arcana-sense.ru",
   phone: "⟨телефон⟩",
   rknNotice: "⟨дата и номер уведомления РКН⟩",
   updated: "⟨дата публикации⟩",

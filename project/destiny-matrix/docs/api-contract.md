@@ -39,19 +39,24 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 | POST | `/matrix/calc` | `{birth: "YYYY-MM-DD", sex: "m"\|"f"}` | `MatrixResponse` |
 | POST | `/auth/register` | `{email, password}` | `{token, user}` |
 | POST | `/auth/login` | `{email, password}` | `{token, user}` |
-| GET | `/auth/me` | — | `{user, access: {scopes, rights}, matrices_used, can_store, unlimited, until}` |
+| GET | `/auth/me` | — | `{user, access: {scopes, rights}, matrices_used, matrices_limit, can_store, unlimited, until}` |
 | POST | `/payments/mock` | `{tariff: "single"\|"month", email, matrix_id?, birth?, sex?}` | `{ok: true, payment_id, tariff, entitlement, matrix_id, user, autoregistered, token, requires_login?}` |
-| GET | `/matrices` | — | `{items: [{id, birth, sex, created_at, title}]}` |
+| GET | `/matrices` | — | `{items: [{id, birth, sex, created_at, title, access, access_until}]}` |
 | POST | `/matrices` | `{birth, sex, title?}` | `{id, ...MatrixResponse}` |
 | GET | `/matrices/{id}` | — | `MatrixResponse` (в нём `unlocked` — открыт ли платный разбор этой даты) |
+| PATCH | `/matrices/{id}` | `{title}` | строка списка; пустое имя возвращает подпись по умолчанию (дату) |
+| GET | `/payments` | — | `{items: [{id, amount, tariff, matrix_id, external_id, created_at, paid_at, refunded_at}]}` |
+| GET | `/admin/users` | — | `{items: [{id, email, created_at, is_admin, matrices, payments, spent, scopes, owned, until, rights}]}` |
+| GET | `/admin/users/{id}` | — | `{user, matrices, payments, rights}` |
+| GET | `/admin/payments` | — | все платежи с почтой плательщика |
 | GET | `/encyclopedia/arcanum/{n}` | n = 1..22 | `ArcanumEntry` |
 | GET | `/encyclopedia/index` | — | `{arcana: [...], positions: [...], combinations_count}` |
 | POST | `/leads` | `{email, source?}` | `{ok: true}` |
 | GET | `/health` | — | `{ok: true, db: bool}` |
 
 Авторизация — заголовок `Authorization: Bearer <token>`, JWT, срок 30 дней.
-Ошибки: `{detail: "текст"}` с кодами 400 (валидация), 401 (нет токена), 402 (лимит тарифа
-исчерпан), 404, 422 (схема).
+Ошибки: `{detail: "текст"}` с кодами 400 (валидация), 401 (нет токена), 402 (слоты хранения
+кончились), 404, 422 (схема).
 
 ### MatrixResponse
 
@@ -114,10 +119,21 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 Перелинковка обязательна: из каждой позиции отчёта — ссылка на аркан; из аркана — на все его
 сочетания и на позиции, где он встречается; из сочетания — на оба аркана. Тупиков быть не должно.
 
+## Админка
+
+Признак админа — почта из `ADMIN_EMAILS` (по умолчанию `snborodaenko@mail.ru`), а не колонка в
+`users`: схема без миграций, и новое поле заставило бы пересоздавать таблицу вместе с платежами.
+`python -m app.schema ensure` создаёт этого пользователя, если его нет, с паролем из
+`ADMIN_PASSWORD` — поэтому после чистки базы админ существует всегда. Ветка `/admin/*` только
+читает; посторонним отвечает 404, а не 403: существование админских адресов знать незачем.
+`GET /auth/me` отдаёт `is_admin` — по нему фронт показывает ссылку, но доступ решает апстрим.
+
 ## Мок-оплаты
 
 `POST /api/payments/mock` всегда отвечает успехом. Если пользователя с такой почтой нет —
 создаётся автоматически (пароль генерируется, возвращается токен), поле `autoregistered: true`.
+Сайт этой ветки не использует: форма оплаты спрашивает пароль рядом с почтой и регистрирует
+аккаунт до платежа, поэтому автосоздание остаётся только для прямых запросов к api.
 
 **Токен выдаётся только вместе с автосозданием аккаунта.** Для известной почты приходит
 `token: null` и `requires_login: true` — тариф начисляется владельцу, но доступ он получает
@@ -156,10 +172,14 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 5. Сессия — только httpOnly-кука `destiny_session`, выставляемая BFF. Ни один тест и ни один
    компонент не имеет права читать токен из JavaScript.
 6. `GET /auth/me` описывает доступ правами, а не тарифом: `access.scopes`, `can_store`,
-   `unlimited`, `until`, `matrices_used`. Поля `tariff` и `matrices_limit` больше нет — фронт,
-   который его читал, показывал оплатившему «не оплачен» и шесть разделов.
+   `unlimited`, `until`, `matrices_used`, `matrices_limit`. Поля `tariff` больше нет — фронт,
+   который его читал, показывал оплатившему «не оплачен» и шесть разделов. `matrices_limit`
+   считается по правам (`null` — без ограничения), а не берётся из тарифа.
 7. Открыт ли разбор конкретной матрицы, решает апстрим (`unlocked` в `GET /matrices/{id}`).
-   Фронт этот вывод только печатает: правила прав в двух местах разошлись бы.
+   Фронт этот вывод только печатает: правила прав в двух местах разошлись бы. Кабинету нужен не
+   только факт, но и вид доступа, поэтому строки списка несут `access`: `forever` — куплена
+   бессрочным правом, `subscription` (+`access_until`) — открыта, пока действует срочное,
+   `locked` — закрыта и предлагается к выкупу.
 8. Список тарифов BFF не знает: он проверяет форму кода, существование — апстрим по базе.
    Захардкоженный список в BFF уже ломал оплату — новые тарифы отбивались как «неизвестный».
 

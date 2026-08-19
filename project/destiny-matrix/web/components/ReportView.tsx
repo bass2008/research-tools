@@ -107,7 +107,7 @@ export default function ReportView({
           <h3>Осталось {locked.length} разделов под замком</h3>
           <p>
             Полный разбор открывает деньги, отношения, родовые задачи, программы и разбор по годам до 80
-            лет. Один платёж, без подписки.
+            лет. От {money(lead.price)} ₽ — тариф выбираете на странице оплаты.
           </p>
           <div className="alllist">
             {locked.map((s) => (
@@ -117,7 +117,7 @@ export default function ReportView({
             ))}
           </div>
           <UnlockCta place="report_bottom" testId="unlock-cta">
-            Открыть за {money(lead.price)} ₽
+            Купить
           </UnlockCta>
           <p className="small" style={{ marginTop: 10 }}>
             Уже оплачивали? <Link href="/login">Войдите</Link> — доступ привязан к аккаунту, а не к

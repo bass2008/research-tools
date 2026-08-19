@@ -23,11 +23,11 @@ variable "yc_zone" {
 variable "state_bucket_name" {
   type        = string
   description = "Globally unique Object Storage bucket used only for Terraform state."
-  default     = "webstudiolab-ru-tfstate-hjb4rfs"
+  default     = "arcana-sense-ru-tfstate-hjb4rfs"
 }
 
 variable "state_service_account_name" {
   type        = string
   description = "Service account used by Terraform S3 backends."
-  default     = "webstudiolab-tfstate"
+  default     = "arcana-sense-tfstate"
 }

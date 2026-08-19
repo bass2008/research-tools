@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: "Матрица судьбы — расчёт по дате рождения с расшифровкой",
-    template: "%s — Матрица судьбы",
+    template: "%s — Arcana Sense",
   },
   description:
     "Калькулятор матрицы судьбы: октаграмма 22 арканов, карта энергий по чакрам и разбор " +

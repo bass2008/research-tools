@@ -3,9 +3,9 @@ set -euo pipefail
 
 # Приёмка бакета ассетов. Страницы здесь не лежат — их отдаёт node на VM, для сайта целиком
 # есть ../../check.sh.
-#   BUCKET=matritsa.webstudiolab.ru ./check.sh
+#   BUCKET=arcana-sense.ru ./check.sh
 
-bucket="${BUCKET:-matritsa.webstudiolab.ru}"
+bucket="${BUCKET:-arcana-sense.ru}"
 base="${ASSET_BASE:-https://storage.yandexcloud.net/${bucket}}"
 failures=0
 

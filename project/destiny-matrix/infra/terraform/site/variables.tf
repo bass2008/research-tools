@@ -23,13 +23,13 @@ variable "yc_zone" {
 variable "domain" {
   type        = string
   description = "Site FQDN without a trailing dot. Also the bucket name."
-  default     = "matritsa.webstudiolab.ru"
+  default     = "arcana-sense.ru"
 }
 
 variable "dns_zone_name" {
   type        = string
-  description = "Name of the existing Cloud DNS zone resource, created by terraform/webstudiolab.ru."
-  default     = "webstudiolab-ru"
+  description = "Name of the existing Cloud DNS zone resource, created by terraform/arcana-sense.ru."
+  default     = "arcana-sense-ru"
 }
 
 variable "manage_dns" {

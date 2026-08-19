@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
     @app.get(f"{settings.api_prefix}/tariffs", tags=["service"])
     def tariff_list(db: Session = Depends(get_db)) -> dict:
         # справочник читается из базы: цену меняем часто, пересборка для этого не нужна
-        return {"items": [t.public() for t in tariffs.all_tariffs(db)], "free_sections": 2}
+        return {"items": [t.public() for t in tariffs.public_tariffs(db)], "free_sections": 2}
 
     @app.exception_handler(ValueError)
     def value_error(_request: Request, exc: ValueError) -> JSONResponse:

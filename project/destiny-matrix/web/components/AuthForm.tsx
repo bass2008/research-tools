@@ -22,7 +22,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     e.preventDefault();
     setError(null);
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Проверьте адрес почты.");
-    if (password.length < 8) return setError("Пароль — не короче восьми знаков.");
+    if (password.length < 3) return setError("Пароль — не короче трёх знаков.");
     if (isRegister && !agreed) return setError("Нужно согласие на обработку персональных данных.");
     setBusy(true);
     try {
@@ -70,7 +70,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         autoComplete={isRegister ? "new-password" : "current-password"}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="не короче 8 знаков"
+        placeholder="не короче 3 знаков"
       />
 
       {isRegister ? (

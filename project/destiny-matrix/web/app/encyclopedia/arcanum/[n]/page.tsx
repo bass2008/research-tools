@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import ArcanumCard, { arcanumImage } from "@/components/ArcanumCard";
+import CalcPromo from "@/components/CalcPromo";
 import Price from "@/components/Price";
 
 import { ARCANA, roman } from "@/lib/arcana";
@@ -107,6 +108,18 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
           {e.meaning.split("\n\n").map((p, i) => (
             <p key={i}>{p}</p>
           ))}
+        </div>
+
+        {/* Приглашение рассчитать: аркан на странице объясняет теорию, а продукт — это карта
+            по своей дате. Дата уходит в браузер, расчёт делает главная. */}
+        <div className="section-gap">
+          <CalcPromo
+            arcanum={n}
+            caption={`${n}. ${e.title} — этот аркан может стоять и в вашей карте`}
+            title="Введите дату рождения"
+            lead="Посмотрите, где этот аркан стоит у вас. Расчёт бесплатный, без регистрации."
+            place="arcanum"
+          />
         </div>
 
         <div className="twocol section-gap">

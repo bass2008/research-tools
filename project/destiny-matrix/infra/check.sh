@@ -3,12 +3,12 @@ set -uo pipefail
 
 # Приёмка живого сайта в node-раскладке. Возвращает 0, только если сходится всё.
 #
-#   ./check.sh                                  https://matritsa.webstudiolab.ru
+#   ./check.sh                                  https://arcana-sense.ru
 #   BASE=http://127.0.0.1:3000 ./check.sh       локальный node без nginx и TLS
 #
 # Проверки, привязанные к TLS и DNS, при base на http пропускаются — это отмечается в выводе.
 
-base="${BASE:-https://matritsa.webstudiolab.ru}"
+base="${BASE:-https://arcana-sense.ru}"
 base="${base%/}"
 domain="${base#*://}"
 scheme="${base%%://*}"

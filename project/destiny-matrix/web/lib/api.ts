@@ -26,6 +26,12 @@ export interface MeResponse {
   /** ближайшая дата окончания срочного права; null — бессрочно или прав нет */
   until: string | null;
   matrices_used: number;
+  /** сколько дат можно держать в кабинете; null — без ограничения */
+  matrices_limit: number | null;
+  /** сколько дат куплено бессрочно — покупка и подписка бывают одновременно */
+  owned: number;
+  /** доступна ли админка: список админских почт живёт в конфиге апстрима */
+  is_admin: boolean;
 }
 
 export interface MatrixResponse {
@@ -36,12 +42,66 @@ export interface MatrixResponse {
   sections: SectionOut[];
 }
 
+/** Как открыта матрица: куплена бессрочно, открыта подпиской или закрыта. */
+export type MatrixAccess = "forever" | "subscription" | "locked";
+
 export interface MatrixListItem {
   id: number;
   birth: string;
   sex: Sex;
   created_at: string;
   title: string | null;
+  access: MatrixAccess;
+  /** до какого числа открыта по подписке; null — бессрочно или закрыта */
+  access_until: string | null;
+}
+
+/** Строка истории платежей. `tariff` — снимок на момент покупки, поэтому цена в истории не «плывёт». */
+export interface PaymentItem {
+  id: number;
+  amount: number;
+  tariff: { id?: string; name?: string; price?: number; scope?: string[]; period_days?: number | null };
+  matrix_id: number | null;
+  external_id: string;
+  created_at: string;
+  paid_at: string | null;
+  refunded_at: string | null;
+}
+
+/** Строка списка пользователей в админке. */
+export interface AdminUser {
+  id: number;
+  email: string;
+  created_at: string;
+  is_admin: boolean;
+  matrices: number;
+  payments: number;
+  /** уплачено всего, копейки */
+  spent: number;
+  scopes: string[];
+  owned: number;
+  until: string | null;
+  rights: number;
+}
+
+export interface AdminPayment extends PaymentItem {
+  user_id: number;
+  email: string;
+}
+
+export interface AdminUserCard {
+  user: AdminUser;
+  matrices: MatrixListItem[];
+  payments: PaymentItem[];
+  rights: Array<{
+    id: number;
+    scope: string[];
+    matrix_id: number | null;
+    starts_at: string;
+    expires_at: string | null;
+    revoked_at: string | null;
+    note: string | null;
+  }>;
 }
 
 export interface PaymentResponse {
@@ -128,10 +188,23 @@ export const api = {
       unlimited: raw.unlimited === true,
       until: typeof raw.until === "string" ? raw.until : null,
       matrices_used: Number(raw.matrices_used ?? 0),
+      matrices_limit: raw.matrices_limit === null || raw.matrices_limit === undefined
+        ? null
+        : Number(raw.matrices_limit),
+      owned: Number(raw.owned ?? 0),
+      is_admin: raw.is_admin === true,
     };
   },
 
   matrices: () => request<{ items: MatrixListItem[] }>("/matrices"),
+
+  payments: () => request<{ items: PaymentItem[] }>("/payments"),
+
+  admin: {
+    users: () => request<{ items: AdminUser[] }>("/admin/users"),
+    payments: () => request<{ items: AdminPayment[] }>("/admin/payments"),
+    user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
+  },
 
   // Дата уходит на сервер только по явному действию авторизованного пользователя:
   // «сохранить матрицу в кабинет». Анонимный расчёт остаётся в браузере.
@@ -143,10 +216,18 @@ export const api = {
 
   matrix: (id: number) => request<MatrixResponse>(`/matrices/${id}`),
 
-  payMock: (tariff: string, email: string) =>
+  /** Подписать матрицу. Пустое имя возвращает подпись по умолчанию — дату. */
+  renameMatrix: (id: number, title: string) =>
+    request<MatrixListItem>(`/matrices/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ title }),
+    }),
+
+  /** `matrixId` — какую сохранённую дату открыть; без него право ждёт следующую сохранённую. */
+  payMock: (tariff: string, email: string, matrixId?: number) =>
     request<PaymentResponse>("/payments/mock", {
       method: "POST",
-      body: JSON.stringify({ tariff, email }),
+      body: JSON.stringify({ tariff, email, ...(matrixId ? { matrix_id: matrixId } : {}) }),
     }),
 
   lead: (email: string, source?: string) =>

@@ -47,10 +47,24 @@ class Settings(BaseSettings):
 
     matrices_hard_cap: int = Field(default=2000, ge=1)
 
+    # Админ — это конфиг, а не колонка в users: схема без миграций, и новая колонка заставила бы
+    # пересоздавать таблицу. Список почт через запятую; сид создаёт первую из них, чтобы после
+    # чистки базы админ существовал всегда.
+    admin_emails: str = "snborodaenko@mail.ru"
+    admin_password: str = "123"
+
+
     @field_validator("database_url")
     @classmethod
     def _strip(cls, v: str) -> str:
         return v.strip()
+
+    @property
+    def admins(self) -> list[str]:
+        return [e.strip().lower() for e in self.admin_emails.split(",") if e.strip()]
+
+    def is_admin(self, email: str | None) -> bool:
+        return bool(email) and email.strip().lower() in self.admins
 
     @property
     def origins(self) -> list[str]:

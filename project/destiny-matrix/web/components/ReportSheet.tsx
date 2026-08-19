@@ -3,10 +3,10 @@
 import Link from "next/link";
 
 import type { Matrix } from "@/lib/matrix";
-import LocalMatrixNote from "./LocalMatrixNote";
 import LockIcon from "./LockIcon";
+import MatrixSwitch from "./MatrixSwitch";
+import SavePdfButton from "./SavePdfButton";
 import MatrixResult, { birthLabel } from "./MatrixResult";
-import Price from "./Price";
 import ReportSections from "./ReportSections";
 import UnlockCta from "./UnlockCta";
 import type { SectionOut } from "./publicSpec";
@@ -41,10 +41,16 @@ export default function ReportSheet({
         <span>/</span> <span>Мой разбор</span>
       </p>
       <h1>Разбор матрицы судьбы</h1>
-      <p className="dim">
-        {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} · тариф
-        «{planName}» — открыто {open} из {sections.length} разделов
-      </p>
+      <div className="rsub">
+        <p className="dim">
+          {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} · тариф
+          «{planName}» — открыто {open} из {sections.length} разделов
+        </p>
+        <span className="rsubact">
+          <SavePdfButton />
+          <MatrixSwitch saved={saved} currentId={currentId} />
+        </span>
+      </div>
 
       <div className="section-gap">
         <MatrixResult m={matrix} />
@@ -67,36 +73,14 @@ export default function ReportSheet({
             ))}
           </div>
           <UnlockCta place="report_upgrade">
-            Открыть все за <Price />
+            Купить
           </UnlockCta>
         </div>
       ) : null}
 
-      <LocalMatrixNote shown={matrix.birth} />
-
-      {saved.length > 1 ? (
-        <div className="panel section-gap">
-          <h3>Ваши матрицы</h3>
-          <div className="cap">Разбор печатается по выбранной — переключите, чтобы открыть другую</div>
-          <div className="taglist">
-            {saved.map((it) => (
-              <Link
-                key={it.id}
-                href={`/matrices/${it.id}`}
-                data-testid={it.id === currentId ? "matrix-current" : undefined}
-              >
-                {it.title ?? birthLabel(it.birth)}
-                {it.id === currentId ? " · открыт" : ""}
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
 
       <p className="small section-gap">
-        Разделы печатает сервер при каждом открытии страницы: в HTML для неоплатившего их нет, а
-        в браузере они не хранятся. <Link href="/account">Кабинет</Link> ·{" "}
-        <Link href="/#calc">Новый расчёт</Link>
+        <Link href="/account">Кабинет</Link> · <Link href="/#calc">Новый расчёт</Link>
       </p>
     </>
   );

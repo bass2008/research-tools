@@ -29,7 +29,7 @@ function productJsonLd(tariffs: Tariff[]) {
     name: "Матрица судьбы — полный разбор",
     description:
       "Персональный разбор по дате рождения: октаграмма арканов, карта энергий по чакрам, 20 разделов.",
-    brand: { "@type": "Brand", name: "Матрица судьбы" },
+    brand: { "@type": "Brand", name: "Arcana Sense" },
     offers: tariffs.map((t) => ({
       "@type": "Offer",
       name: t.name,
@@ -55,7 +55,7 @@ export default async function HomePage() {
       <section className="hero">
         <div className="wrap hgrid">
           <div className="offer">
-            <span className="eyebrow">Матрица судьбы · 22 аркана</span>
+            <span className="eyebrow">Arcana Sense · матрица судьбы по 22 арканам</span>
             <h1>Разбор по дате рождения: что вам дано и через что это работает</h1>
             <p className="lede">
               Октаграмма со всеми позициями, линии рода, денежный канал, карта энергий по чакрам и

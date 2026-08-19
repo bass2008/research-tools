@@ -26,7 +26,7 @@ terraform output certbot_command
 | `yandex_vpc_security_group` | внутрь только 22, 80, 443; Postgres не выставлен наружу вообще |
 | `yandex_vpc_address` | зарезервированный IP: пока привязан, стоит столько же, сколько динамический, но переживает пересоздание VM вместе с A-записью |
 | `yandex_compute_instance` | cloud-init из `cloud-init.yaml.tftpl` |
-| `yandex_dns_recordset` | `api.matritsa.webstudiolab.ru` → IP |
+| `yandex_dns_recordset` | `api.arcana-sense.ru` → IP |
 
 `allow_stopping_for_update = true`: смена `core_fraction` или памяти перезапускает машину,
 а не пересоздаёт её.

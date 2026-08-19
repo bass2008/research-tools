@@ -5,7 +5,7 @@ variable "folder_id" {
 
 variable "domain" {
   type        = string
-  description = "Public FQDN of the site without a trailing dot, e.g. matritsa.webstudiolab.ru."
+  description = "Public FQDN of the site without a trailing dot, e.g. arcana-sense.ru."
 
   validation {
     condition     = !endswith(var.domain, ".") && length(split(".", var.domain)) >= 2

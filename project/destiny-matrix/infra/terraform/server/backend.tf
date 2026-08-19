@@ -4,7 +4,7 @@ terraform {
       s3 = "https://storage.yandexcloud.net"
     }
 
-    bucket = "webstudiolab-ru-tfstate-hjb4rfs"
+    bucket = "arcana-sense-ru-tfstate-hjb4rfs"
     region = "ru-central1"
     key    = "matritsa/server/terraform.tfstate"
 

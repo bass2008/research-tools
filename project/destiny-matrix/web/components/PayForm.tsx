@@ -1,49 +1,45 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ApiError, api } from "@/lib/api";
+import { ApiError, api, type MatrixListItem } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { clearLead, loadBirth, loadLead, saveLead } from "@/lib/storage";
-import { money, periodLabel, type Tariff } from "@/lib/tariffs";
+import { byId, capLabel, money, periodLabel, type Tariff } from "@/lib/tariffs";
 
 import { birthLabel } from "./MatrixResult";
 import { refreshSession, useSession } from "./useSession";
 
 type Stage =
   | { kind: "form" }
-  // почта уже зарегистрирована: тариф начисляется владельцу, доступ — только его паролем
+  // почта уже зарегистрирована, а введённый пароль не подошёл: нужен пароль владельца
   | { kind: "login-needed" }
-  | { kind: "paid"; paymentId: string; password: string | null; email: string };
+  | { kind: "paid"; paymentId: string; email: string };
 
 type LeadState = "none" | "sent" | "kept";
 
-const MIN_PASSWORD = 8;
+const MIN_PASSWORD = 3;
 
-const LINK_BTN: React.CSSProperties = {
-  background: "none",
-  border: "none",
-  padding: 0,
-  font: "inherit",
-  color: "var(--gold)",
-  textDecoration: "underline",
-  cursor: "pointer",
-  width: "auto",
-};
-
-/** Пароль без похожих знаков (0/O, 1/l): его придётся перепечатывать с экрана вручную. */
-function generatePassword(): string {
-  const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = new Uint32Array(14);
-  crypto.getRandomValues(bytes);
-  return [...bytes].map((n) => alphabet[n % alphabet.length]).join("");
+/** Что даёт тариф — выводим из scope, а не из списка в разметке: тариф правят в базе. */
+function optionNote(t: Tariff): string {
+  const parts = [t.scope.includes("all") ? "любое число дат" : "одна дата"];
+  if (t.scope.includes("matrix")) parts.push("матрицы хранятся в кабинете");
+  parts.push(t.period_days === null ? "остаётся навсегда" : `открыто ${periodLabel(t)}, потом закрывается`);
+  return parts.join(" · ");
 }
 
-export default function PayForm({ tariff }: { tariff: Tariff }) {
+/**
+ * Что откроет платёж. `later` — право уйдёт без даты и сядет на первую сохранённую: так было
+ * всегда, и именно из-за этого деньги однажды открыли дату, которую никто не выбирал.
+ */
+type Target = "later" | "local" | number;
+
+export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initial: string }) {
+  const [chosen, setChosen] = useState(initial);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [ownPassword, setOwnPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -54,17 +50,21 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
   const [limitNote, setLimitNote] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [birth, setBirth] = useState<{ birth: string; sex: "m" | "f" } | null>(null);
-  // пароль, который мы сгенерировали и на который уже создан аккаунт: показать его обязаны,
-  // даже если платёж потом сорвался, иначе человек останется с аккаунтом без пароля
-  const [issued, setIssued] = useState<string | null>(null);
+  const [saved, setSaved] = useState<MatrixListItem[] | null>(null);
+  const [target, setTarget] = useState<Target | null>(null);
+  // вошли в уже существующий аккаунт: об этом надо сказать, а не проводить молча
+  const [signedInto, setSignedInto] = useState<string | null>(null);
+  const wanted = Number(useSearchParams().get("m") ?? "") || null;
   const session = useSession();
+  const tariff = byId(tariffs, chosen) ?? tariffs[0];
+  const signedIn = session.status === "user" && session.email === email.trim().toLowerCase();
 
   // Цель pay_open уходит на открытии страницы: без неё воронка обрывается между
   // «нажал купить» и «оплатил», и тест трафика не показывает, где отваливаются.
   useEffect(() => {
-    track("pay_open", { tariff: tariff.id });
+    track("pay_open", { tariff: initial });
     setBirth(loadBirth());
-  }, [tariff.id]);
+  }, [initial]);
 
   // Лид, залёгший в браузере из-за отказа сети, уходит при следующем открытии формы —
   // иначе обещание «отправится сама» было бы ложью.
@@ -82,6 +82,44 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
   useEffect(() => {
     if (session.status === "user" && session.email) setEmail((v) => v || session.email!);
   }, [session.status, session.email]);
+
+  // Список сохранённых дат нужен, чтобы человек выбрал, какую именно открыть. Гостю выбирать
+  // нечего: у него есть только дата из браузера.
+  useEffect(() => {
+    if (session.status !== "user") {
+      setSaved([]);
+      return;
+    }
+    api
+      .matrices()
+      .then((res) => setSaved(res.items))
+      .catch(() => setSaved([]));
+  }, [session.status]);
+
+  const closed = (saved ?? []).filter((m) => m.access === "locked");
+  const localSaved = birth ? (saved ?? []).find((m) => m.birth === birth.birth) : undefined;
+  const canPickLocal = Boolean(birth) && !localSaved;
+
+  // Что предложить по умолчанию: то, с чем пришли по ссылке из кабинета, иначе первая закрытая
+  // дата, иначе дата из браузера. «Позже» остаётся осознанным выбором, а не молчаливым.
+  useEffect(() => {
+    if (target !== null || saved === null) return;
+    if (wanted && (saved.some((m) => m.id === wanted) || saved.length === 0)) {
+      setTarget(wanted);
+      return;
+    }
+    const first = saved.find((m) => m.access === "locked");
+    setTarget(first ? first.id : birth && !localSaved ? "local" : "later");
+  }, [target, saved, wanted, birth, localSaved]);
+
+  const targetLabel = (): string => {
+    if (typeof target === "number") {
+      const row = (saved ?? []).find((m) => m.id === target);
+      return row ? row.title ?? birthLabel(row.birth) : "выбранная дата";
+    }
+    if (target === "local" && birth) return birthLabel(birth.birth);
+    return "дата, которую сохраните после оплаты";
+  };
 
   /** Лид уходит до оплаты. Отказ сети не теряет почту и не мешает платить. */
   const sendLead = async (mail: string): Promise<void> => {
@@ -103,11 +141,8 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
     if (!/^\S+@\S+\.\S+$/.test(mail)) return setError("Проверьте адрес почты.");
     if (!agreed) return setError("Нужно согласие на обработку персональных данных.");
     const typed = password.trim();
-    if (typed && typed.length < MIN_PASSWORD) {
-      return setError(`Пароль — не короче ${MIN_PASSWORD} знаков.`);
-    }
-    if (stage.kind === "login-needed" && !typed) {
-      return setError("Введите пароль от аккаунта на эту почту.");
+    if (!signedIn && typed.length < MIN_PASSWORD) {
+      return setError(`Пароль для входа — не короче ${MIN_PASSWORD} знаков.`);
     }
 
     setBusy(true);
@@ -123,42 +158,46 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
 
       await sendLead(mail);
 
-      // Доступ обязан работать с любого устройства, поэтому аккаунт с известным паролем
-      // создаётся до платежа: своим паролем, если его ввели, сгенерированным — если нет.
-      const secret = typed || issued || generatePassword();
-      let showPassword: string | null = typed ? null : secret;
-
+      // Доступ обязан работать с любого устройства, поэтому аккаунт создаётся до платежа —
+      // с тем паролем, который ввели рядом с почтой.
       if (live.status !== "user") {
         try {
-          await api.register(mail, secret);
-          if (!typed) setIssued(secret);
+          await api.register(mail, typed);
         } catch (err) {
           if (!(err instanceof ApiError) || err.status !== 400) throw err;
-          // почта занята: чужому аккаунту наш пароль не подойдёт — нужен пароль владельца.
-          // Свой прошлый сгенерированный (issued) подойдёт: аккаунт создан этой же формой.
-          if (!typed && !issued) {
-            setStage({ kind: "login-needed" });
-            setOwnPassword(true);
-            setError(
-              "На эту почту уже есть аккаунт. Введите его пароль — тариф начислится вам, " +
-                "и разделы откроются в аккаунте.",
-            );
-            return;
+          // почта занята: если пароль от этого же аккаунта, это просто вход — и об этом
+          // обязательно сказать, иначе человек думает, что создал новый аккаунт, а видит
+          // прошлые матрицы и платежи
+          try {
+            await api.login(mail, typed);
+            setSignedInto(mail);
+          } catch (loginErr) {
+            if (loginErr instanceof ApiError && loginErr.status === 401) {
+              setStage({ kind: "login-needed" });
+              setError(
+                "На эту почту уже есть аккаунт, и этот пароль к нему не подошёл. Введите пароль " +
+                  "аккаунта — тариф начислится ему.",
+              );
+              return;
+            }
+            throw loginErr;
           }
-          await api.login(mail, secret);
         }
-      } else {
-        showPassword = null;
       }
 
-      const res = await api.payMock(tariff.id, mail);
+      // Какую дату открыть — выбрано на этом же экране. Без выбора право уходит без матрицы
+      // и достаётся первой сохранённой: именно так деньги однажды открыли чужую по смыслу дату.
+      const forMatrix = typeof target === "number" && !tariff.scope.includes("all")
+        ? target
+        : undefined;
+      const res = await api.payMock(tariff.id, mail, forMatrix);
       track("purchase", { tariff: tariff.id });
       await refreshSession();
-      setStage({ kind: "paid", paymentId: res.payment_id, password: showPassword, email: mail });
-      // Матрица уходит в кабинет сразу после оплаты: платные разделы печатает сервер по
-      // сохранённой матрице, поэтому без неё покупателю нечего открывать. Об этом сказано в
-      // форме до кнопки оплаты.
-      void saveMatrix();
+      setStage({ kind: "paid", paymentId: res.payment_id, email: mail });
+      // Дата из браузера сохраняется в кабинет только если её и выбрали: платные разделы
+      // печатает сервер по сохранённой матрице.
+      if (target === "local") void saveMatrix();
+      else if (forMatrix) setSavedId(forMatrix);
     } catch (err) {
       if (err instanceof ApiError) {
         const tail = " Платёж не прошёл — деньги не списаны.";
@@ -187,10 +226,8 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
     } catch (err) {
       setSaveState("failed");
       if (err instanceof ApiError && err.status === 402) {
-        setLimitNote(
-          `${err.message} По этому тарифу лимит матриц исчерпан — разбор открывается по уже ` +
-            "сохранённой матрице.",
-        );
+        // слоты кончились: каждая покупка добавляет один, поэтому предлагаем купить ещё раз
+        setLimitNote(`${err.message} Уже сохранённые даты остаются открытыми.`);
         return;
       }
       setSaveNote(err instanceof ApiError ? err.message : "Не получилось сохранить матрицу.");
@@ -211,14 +248,19 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
           работает и с телефона.
         </p>
 
-        {stage.password ? (
-          <PasswordOnce password={stage.password} email={stage.email} />
-        ) : (
-          <p className="hint">
-            Вход с другого устройства — <Link href="/login">/login</Link>: почта {stage.email} и ваш
-            пароль.
+        <p className="hint">
+          Вход с другого устройства — <Link href="/login">/login</Link>: почта {stage.email} и пароль,
+          который вы задали.
+        </p>
+        {signedInto ? (
+          <p className="hint" data-testid="signed-into" style={{ textAlign: "left" }}>
+            Аккаунт на {signedInto} уже существовал — мы вошли в него, а не создали новый. Поэтому в
+            кабинете есть прежние матрицы и платежи.
           </p>
-        )}
+        ) : null}
+        <p className="hint" style={{ textAlign: "left" }}>
+          Этим платежом открыта: <b>{targetLabel()}</b>.
+        </p>
 
         <Link
           className="btn wide"
@@ -271,65 +313,130 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
 
   return (
     <form className="panel paybox" data-testid="pay-modal" onSubmit={submit}>
-      <h3>Оплата тарифа «{tariff.name}»</h3>
-      <div className="cap">
-        {money(tariff.price)} ₽ · {periodLabel(tariff)} · матриц: {(tariff.scope.includes('all') ? null : 1)}
-      </div>
+      <h3>Что покупаем</h3>
+      <div className="cap">Все 20 разделов разбора открывает любой из тарифов — разница в числе дат и сроке.</div>
 
-      <div className="payrow">
-        <span>{tariff.name}</span>
-        <span className="p">{money(tariff.price)} ₽</span>
-      </div>
-      <ul className="pmlist plus" style={{ marginTop: 12 }}>
-        {[].map((f) => (
-          <li key={f}>{f}</li>
+      {/* выбор рисуем только когда есть из чего выбирать: сейчас продаём один тариф */}
+      <div
+        className="tchoice"
+        role="radiogroup"
+        aria-label="Тариф"
+        data-testid="tariff-choice"
+        hidden={tariffs.length < 2}
+      >
+        {tariffs.map((t) => (
+          <label className={t.id === tariff.id ? "topt on" : "topt"} key={t.id}>
+            <input
+              type="radio"
+              name="tariff"
+              value={t.id}
+              data-testid={`tariff-${t.id}`}
+              checked={t.id === tariff.id}
+              onChange={() => {
+                setChosen(t.id);
+                setError(null);
+                track("tariff_select", { tariff: t.id });
+              }}
+            />
+            <span>
+              <span className="tname">{t.name}</span>
+              <span className="tsub">{optionNote(t)}</span>
+            </span>
+            <span className="tprice">
+              {`${money(t.price)} ₽`}
+              <s>{capLabel(t)}</s>
+            </span>
+          </label>
         ))}
-      </ul>
+      </div>
 
-      <label htmlFor="payemail" style={{ marginTop: 16 }}>
-        Почта для доступа
-      </label>
-      <input
-        id="payemail"
-        data-testid="pay-email"
-        name="email"
-        type="email"
-        autoComplete="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@mail.ru"
-      />
+      {!tariff.scope.includes("all") ? (
+        <div className="paytarget">
+          <label htmlFor="paytarget">Платёж откроет</label>
+          <select
+            id="paytarget"
+            data-testid="pay-target"
+            value={typeof target === "number" ? String(target) : (target ?? "later")}
+            onChange={(e) => {
+              const v = e.target.value;
+              setTarget(v === "later" || v === "local" ? v : Number(v));
+            }}
+          >
+            {closed.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title ?? birthLabel(m.birth)} — закрытая дата в кабинете
+              </option>
+            ))}
+            {canPickLocal && birth ? (
+              <option value="local">
+                {birthLabel(birth.birth)} — дата из браузера, сохраним в кабинет
+              </option>
+            ) : null}
+            <option value="later">Выберу позже — право дождётся новой даты</option>
+          </select>
+          <p className="hint" style={{ textAlign: "left" }}>
+            {target === "later"
+              ? "Право уйдёт без даты и сядет на первую дату, которую вы сохраните после оплаты."
+              : `Откроется «${targetLabel()}». Дата рождения в платёж не передаётся — только её номер в кабинете.`}
+          </p>
+        </div>
+      ) : null}
 
-      {session.status === "user" && session.email === email.trim().toLowerCase() ? (
-        <p className="hint">Вы вошли как {session.email}: тариф начислится этому аккаунту.</p>
-      ) : ownPassword || known ? (
+      {signedIn ? (
         <>
-          <label htmlFor="paypass" style={{ marginTop: 12 }}>
-            {known ? "Пароль от аккаунта на эту почту" : "Пароль для входа"}
+          <label htmlFor="payemail" style={{ marginTop: 16 }}>
+            Почта для доступа
           </label>
           <input
-            id="paypass"
-            data-testid="pay-password"
-            name="password"
-            type="password"
-            autoComplete={known ? "current-password" : "new-password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={known ? "ваш пароль" : `не короче ${MIN_PASSWORD} знаков`}
+            id="payemail"
+            data-testid="pay-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@mail.ru"
           />
-          <p className="hint">
-            {known
-              ? "Восстановления пароля на сайте пока нет: если он утерян, оплатите с другой почты."
-              : "С этим паролем вход работает с любого устройства."}
-          </p>
+          <p className="hint">Вы вошли как {session.email}: тариф начислится этому аккаунту.</p>
         </>
       ) : (
-        <p className="hint">
-          Пароль для входа сгенерируем и покажем сразу после оплаты — писем мы не отправляем.{" "}
-          <button type="button" style={LINK_BTN} onClick={() => setOwnPassword(true)}>
-            Задать свой пароль
-          </button>
-        </p>
+        <>
+          {/* Пароль спрашиваем сразу рядом с почтой: доступ живёт в аккаунте, и войти с другого
+              устройства без пароля нельзя. */}
+          <div className="payfields">
+            <div>
+              <label htmlFor="payemail">Почта для доступа</label>
+              <input
+                id="payemail"
+                data-testid="pay-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@mail.ru"
+              />
+            </div>
+            <div>
+              <label htmlFor="paypass">{known ? "Пароль этого аккаунта" : "Пароль для входа"}</label>
+              <input
+                id="paypass"
+                data-testid="pay-password"
+                name="password"
+                type="password"
+                autoComplete={known ? "current-password" : "new-password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={known ? "ваш пароль" : `не короче ${MIN_PASSWORD} знаков`}
+              />
+            </div>
+          </div>
+          <p className="hint" style={{ textAlign: "left" }}>
+            {known
+              ? "На эту почту уже есть аккаунт — нужен его пароль. Восстановления пароля на сайте пока нет: если он утерян, оплатите с другой почты."
+              : "С этой парой вход работает с любого устройства — писем мы не отправляем."}
+          </p>
+        </>
       )}
 
       <label className="consent">
@@ -346,14 +453,11 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
       </button>
 
       {error ? <div className="err">{error}</div> : null}
-      {issued ? (
-        <>
-          <p className="small" style={{ marginTop: 10 }}>
-            Аккаунт на {email.trim().toLowerCase()} уже создан этой формой. Доступ откроется, когда
-            платёж пройдёт, а пароль сохраните сейчас:
-          </p>
-          <PasswordOnce password={issued} email={email.trim().toLowerCase()} />
-        </>
+      {signedInto ? (
+        <p className="hint" data-testid="signed-into" style={{ textAlign: "left" }}>
+          Аккаунт на {signedInto} уже был — мы вошли в него, новый не создавали. Тариф начислен ему,
+          поэтому в кабинете видны прежние матрицы и платежи.
+        </p>
       ) : null}
       {lead === "kept" ? (
         <p className="hint" data-testid="lead-status">
@@ -372,31 +476,5 @@ export default function PayForm({ tariff }: { tariff: Tariff }) {
         разделы.
       </p>
     </form>
-  );
-}
-
-function PasswordOnce({ password, email }: { password: string; email: string }) {
-  return (
-    <div
-      style={{
-        marginTop: 12,
-        padding: "12px 14px",
-        border: "1px solid var(--gold)",
-        borderRadius: 12,
-        background: "var(--paper)",
-      }}
-    >
-      <div style={{ fontSize: 13, color: "var(--dim)" }}>Пароль для входа — покажем только раз:</div>
-      <div
-        data-testid="issued-password"
-        style={{ font: "700 19px var(--sans)", letterSpacing: "0.04em", margin: "6px 0" }}
-      >
-        {password}
-      </div>
-      <div style={{ fontSize: 12.5, color: "var(--dim)" }}>
-        Сохраните его сейчас: письма мы не отправляем и повторно этот пароль не покажем. Вход —{" "}
-        <Link href="/login">/login</Link>, почта {email}.
-      </div>
-    </div>
   );
 }

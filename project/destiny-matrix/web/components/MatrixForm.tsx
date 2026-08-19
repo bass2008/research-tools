@@ -48,6 +48,12 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
         setYear(y);
         setSex(stored.sex);
         setMatrix(calculate(stored.birth, stored.sex));
+        // пришли по «Рассчитать» из энциклопедии: дата уже в браузере, остаётся показать карту
+        if (window.location.hash === "#result") {
+          requestAnimationFrame(() => {
+            document.getElementById("result")?.scrollIntoView({ block: "start" });
+          });
+        }
         return;
       }
       setMatrix(calculate({ year: now.getFullYear() - 30, month: now.getMonth() + 1, day: now.getDate() }, "f"));
@@ -160,7 +166,8 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
               <h3>Открыть полный разбор</h3>
               <p>
                 Все 20 разделов по вашей дате: деньги, отношения, род до седьмого колена, карта энергий
-                по чакрам и разбор по годам до 80 лет. Один платёж, без подписки и автосписаний.
+                по чакрам и разбор по годам до 80 лет. От {money(lead.price)} ₽ — тариф выбираете на
+                странице оплаты, автосписаний нет ни в одном.
               </p>
               <div className="alllist">
                 {locked.map((s) => (
@@ -184,7 +191,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
               ) : (
                 <>
                   <UnlockCta place="allbox" testId="unlock-cta">
-                    Открыть за {money(lead.price)} ₽
+                    Купить
                   </UnlockCta>
                   {session.status === "guest" ? (
                     <p className="small" style={{ marginTop: 10 }}>

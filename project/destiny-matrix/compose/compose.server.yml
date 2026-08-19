@@ -1,0 +1,47 @@
+# Раскладка на боевой машине: образы приходят готовыми из реестра, сборки здесь нет.
+# Наружу смотрит nginx хоста, поэтому node слушает только localhost.
+name: arcana
+
+services:
+  api:
+    image: ${REGISTRY}/api:${TAG:-latest}
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+      JWT_SECRET: ${JWT_SECRET:?нужен JWT_SECRET в .env}
+      MOCK_PAYMENTS: ${MOCK_PAYMENTS:-1}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-snborodaenko@mail.ru}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123}
+    volumes:
+      - api-var:/srv/api/var
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  web:
+    image: ${REGISTRY}/web:${TAG:-latest}
+    environment:
+      API_INTERNAL_URL: http://api:8010
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-0}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      # статику отдаёт nginx хоста, поэтому контейнер выкладывает её в общий каталог
+      - /srv/arcana/static:/static-out
+    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  api-var:

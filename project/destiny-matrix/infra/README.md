@@ -1,4 +1,4 @@
-# infra — инфраструктура и деплой matritsa.webstudiolab.ru
+# infra — инфраструктура и деплой arcana-sense.ru
 
 Сайт отдаёт **node-сервер Next.js (standalone) на той же машине, что FastAPI**, nginx — единая
 точка входа с TLS. Статического экспорта в бакет больше нет: решение и его причины —
@@ -72,7 +72,7 @@ API, ставит venv, переключает симлинки `current` и п�
 **5. Приёмка**
 
 ```bash
-./check.sh                                        # BASE=https://matritsa.webstudiolab.ru
+./check.sh                                        # BASE=https://arcana-sense.ru
 ```
 
 ## deploy.sh

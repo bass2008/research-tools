@@ -5,7 +5,7 @@
 `../../site/deploy.sh`, причины в `../../README.md` §2.
 
 Зону модуль только читает: `dns_zone_id` приходит снаружи. Свою зону он не создаёт и не меняет
-никогда — она принадлежит корню `terraform/webstudiolab.ru`.
+никогда — она принадлежит корню `terraform/arcana-sense.ru`.
 
 **В текущей раскладке сайт отдаёт node на VM, а не бакет** (`../../README.md` §1), поэтому домен
 модулю не принадлежит: `manage_dns = false`, `manage_certificate = false`. Бакет остаётся
@@ -18,7 +18,7 @@ module "site" {
   source = "../modules/static-site"
 
   folder_id   = var.yc_folder_id
-  domain      = "matritsa.webstudiolab.ru"
+  domain      = "arcana-sense.ru"
   dns_zone_id = data.yandex_dns_zone.parent.id
 
   manage_dns         = false # домен держит A-запись на VM

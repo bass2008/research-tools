@@ -1,7 +1,7 @@
 resource "yandex_iam_service_account" "terraform_state" {
   folder_id   = var.yc_folder_id
   name        = var.state_service_account_name
-  description = "Access to the Web Studio Lab Terraform state bucket"
+  description = "Access to the Arcana Sense Terraform state bucket"
 }
 
 resource "yandex_resourcemanager_folder_iam_member" "terraform_state_storage" {
@@ -12,7 +12,7 @@ resource "yandex_resourcemanager_folder_iam_member" "terraform_state_storage" {
 
 resource "yandex_iam_service_account_static_access_key" "terraform_state" {
   service_account_id = yandex_iam_service_account.terraform_state.id
-  description        = "S3 credentials for the Web Studio Lab Terraform backend"
+  description        = "S3 credentials for the Arcana Sense Terraform backend"
 }
 
 resource "yandex_storage_bucket" "terraform_state" {
@@ -27,6 +27,7 @@ resource "yandex_storage_bucket" "terraform_state" {
     enabled = true
   }
 
+  # состояние terraform: случайный destroy этого бакета уносит карту всей инфраструктуры
   lifecycle {
     prevent_destroy = true
   }

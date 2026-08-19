@@ -53,7 +53,10 @@ def test_me_reports_access(client, auth):
     assert me["can_store"] is False and me["unlimited"] is False and me["until"] is None
 
 def test_short_password_is_422(client):
-    r = client.post("/api/auth/register", json={"email": "s@example.ru", "password": "123"})
+    # три знака разрешены, два — нет
+    assert client.post("/api/auth/register",
+                       json={"email": "s@example.ru", "password": "abc"}).status_code == 200
+    r = client.post("/api/auth/register", json={"email": "s2@example.ru", "password": "ab"})
     assert r.status_code == 422
 
 

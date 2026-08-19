@@ -60,6 +60,7 @@ describe("клиент API", () => {
       unlimited: true,
       until: "2026-09-12T00:00:00",
       matrices_used: 3,
+      matrices_limit: null,
     }));
     const me = await api.me();
     expect(me.scopes).toEqual(["single", "matrix", "all"]);
@@ -67,6 +68,21 @@ describe("клиент API", () => {
     expect(me.unlimited).toBe(true);
     expect(me.until).toBe("2026-09-12T00:00:00");
     expect(me.matrices_used).toBe(3);
+    expect(me.matrices_limit).toBeNull();
+  });
+
+  it("лимит хранения приходит числом: слот даёт каждая покупка разбора", async () => {
+    stubFetch(200, JSON.stringify({
+      user: { id: 1, email: "a@b.c" },
+      access: { scopes: ["single"], rights: [] },
+      can_store: false,
+      unlimited: false,
+      until: null,
+      matrices_used: 2,
+      matrices_limit: 3,
+    }));
+    const me = await api.me();
+    expect(me.matrices_limit).toBe(3);
   });
 
   it("без прав scope пустой, а сроков нет", async () => {

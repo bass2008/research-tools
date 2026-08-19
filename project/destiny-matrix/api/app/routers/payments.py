@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from .. import access, tariffs
 from ..config import settings
 from ..db import get_db
+from ..deps import current_user
 from ..models import Payment, SavedMatrix, User, utcnow
 from ..schemas import PaymentIn
 from ..security import create_token, hash_password, random_password
@@ -26,10 +27,13 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix | No
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
         return row
     if payload.birth is None:
-        # дата ещё не введена: привяжем право к последней сохранённой матрице, а если её нет —
-        # к первой, которую сохранят после оплаты (см. access.bind_single)
-        return db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id)
-                         .order_by(SavedMatrix.id.desc()).limit(1))
+        # Дата ещё не введена: право садится на последнюю сохранённую дату, которая ещё не
+        # оплачена. Если оплачены все — право уходит без матрицы и достанется следующей
+        # сохранённой (см. access.bind_single), иначе повторная покупка платила бы за уже
+        # открытую дату.
+        rows = db.scalars(select(SavedMatrix).where(SavedMatrix.user_id == user.id)
+                          .order_by(SavedMatrix.id.desc())).all()
+        return next((row for row in rows if not access.unlocked_matrix(db, user, row.id)), None)
     row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex or "f",
                       title=None)
     db.add(row)
@@ -94,3 +98,12 @@ def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
         body["token"] = None
         body["requires_login"] = True
     return body
+
+
+@router.get("")
+def listing(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
+    """История платежей кабинета. Снимок тарифа лежит в самом платеже, поэтому смена цены
+    задним числом историю не переписывает."""
+    rows = db.scalars(select(Payment).where(Payment.user_id == user.id)
+                      .order_by(Payment.id.desc())).all()
+    return {"items": [row.item() for row in rows]}

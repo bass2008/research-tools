@@ -11,6 +11,14 @@ const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
 
 const DEFAULT_UPSTREAM = "http://127.0.0.1:8010";
 
+// Кука сессии с флагом secure по http не ставится вовсе — в проде это правильно, но в
+// контейнере, который слушают на http://localhost, вход просто перестаёт работать. Поэтому
+// флаг отделён от NODE_ENV: SESSION_COOKIE_SECURE=0 разрешает http, на домене с TLS не трогать.
+const SESSION_SECURE =
+  process.env.SESSION_COOKIE_SECURE !== undefined
+    ? process.env.SESSION_COOKIE_SECURE === "1" || process.env.SESSION_COOKIE_SECURE === "true"
+    : process.env.NODE_ENV === "production";
+
 /** Адрес апстрима без хвостового `/api`: он дописывается сам. */
 export function upstreamBase(): string {
   const raw = process.env.API_INTERNAL_URL ?? process.env.API_ORIGIN ?? DEFAULT_UPSTREAM;
@@ -41,7 +49,7 @@ function setSession(res: NextResponse, token: string): void {
     value: token,
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: SESSION_SECURE,
     path: "/",
     maxAge: SESSION_MAX_AGE,
   });
@@ -53,7 +61,7 @@ export function dropSession(res: NextResponse): NextResponse {
     value: "",
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: SESSION_SECURE,
     path: "/",
     maxAge: 0,
   });
@@ -61,7 +69,7 @@ export function dropSession(res: NextResponse): NextResponse {
 }
 
 interface ForwardOptions {
-  method?: "GET" | "POST";
+  method?: "GET" | "POST" | "PATCH";
   /** подставить Authorization из куки; без куки — 401 без обращения к апстриму */
   auth?: boolean;
   body?: unknown;

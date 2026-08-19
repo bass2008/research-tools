@@ -15,9 +15,13 @@ from .models import Tariff
 SINGLE_ID = "single"
 MONTH_ID = "month"
 
+# Что показываем в витрине. Подписка в справочнике осталась — механика прав под неё написана и
+# проверена тестами, — но на сайт не выводится: пока продаём только разовый разбор.
+PUBLIC_IDS = (SINGLE_ID,)
+
 # Начальные цены намеренно низкие: проверяем, платят ли вообще, а не сколько.
 SEED = [
-    {"id": SINGLE_ID, "name": "Полный разбор одной даты", "price": 10_000,
+    {"id": SINGLE_ID, "name": "Полный разбор одной даты", "price": 25_000,
      "scope": [SINGLE], "period_days": None},
     # Доступ на срок, а не покупка: разборы открыты, пока он активен. Поэтому за единицу
     # он дешевле разового — тот остаётся у человека навсегда.
@@ -28,6 +32,11 @@ SEED = [
 
 def all_tariffs(db: Session) -> list[Tariff]:
     return list(db.scalars(select(Tariff).order_by(Tariff.price)))
+
+
+def public_tariffs(db: Session) -> list[Tariff]:
+    """Витрина: только то, что сейчас продаём."""
+    return [t for t in all_tariffs(db) if t.id in PUBLIC_IDS]
 
 
 def get(db: Session, tariff_id: str | None) -> Tariff | None:

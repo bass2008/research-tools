@@ -1,4 +1,4 @@
-# site — статика matritsa.webstudiolab.ru
+# site — статика arcana-sense.ru
 
 Корень для бакета, сертификата, CNAME и (опционально) CDN. Один вызов
 `../modules/static-site` плюс два скрипта. Полная картина, цены и обоснование выбора —
@@ -41,7 +41,7 @@ terraform apply -var enable_https=true
 Возвращает 1 при любом нарушении.
 
 ```bash
-DOMAIN=matritsa.webstudiolab.ru ./check.sh
+DOMAIN=arcana-sense.ru ./check.sh
 ```
 
 ## objects.tf

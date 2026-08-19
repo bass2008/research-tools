@@ -1,27 +1,50 @@
 locals {
-  api_fqdn = "${var.api_subdomain}.${var.site_domain}"
-  app_user = "matritsa"
-  app_dir  = "/srv/matritsa"
+  app_dir  = "/srv/arcana"
+  zone_dot = "${var.site_domain}."
 }
 
 data "yandex_compute_image" "boot" {
   family = var.image_family
 }
 
-data "yandex_dns_zone" "parent" {
+# Зона создаётся здесь же: отдельного корня под домен больше нет, а без зоны A-записи
+# некуда положить. NS домена у регистратора должны смотреть на ns1/ns2.yandexcloud.net.
+resource "yandex_dns_zone" "parent" {
+  folder_id   = var.yc_folder_id
+  name        = var.dns_zone_name
+  description = "Authoritative public zone for ${var.site_domain}"
+  zone        = local.zone_dot
+  public      = true
+}
+
+# Реестр образов: сборка идёт на машине разработчика, VM только тянет готовые образы.
+resource "yandex_container_registry" "app" {
   folder_id = var.yc_folder_id
-  name      = var.dns_zone_name
+  name      = "arcana"
+}
+
+# Аккаунт самой VM: ему нужно только читать образы из реестра.
+resource "yandex_iam_service_account" "vm" {
+  folder_id   = var.yc_folder_id
+  name        = "arcana-vm"
+  description = "Pulls container images on the application VM"
+}
+
+resource "yandex_container_registry_iam_binding" "puller" {
+  registry_id = yandex_container_registry.app.id
+  role        = "container-registry.images.puller"
+  members     = ["serviceAccount:${yandex_iam_service_account.vm.id}"]
 }
 
 resource "yandex_vpc_network" "app" {
   folder_id   = var.yc_folder_id
-  name        = "matritsa-net"
-  description = "Single network for the matritsa application VM"
+  name        = "arcana-net"
+  description = "Single network for the application VM"
 }
 
 resource "yandex_vpc_subnet" "app" {
   folder_id      = var.yc_folder_id
-  name           = "matritsa-subnet-${var.yc_zone}"
+  name           = "arcana-subnet-${var.yc_zone}"
   zone           = var.yc_zone
   network_id     = yandex_vpc_network.app.id
   v4_cidr_blocks = [var.subnet_cidr]
@@ -29,8 +52,8 @@ resource "yandex_vpc_subnet" "app" {
 
 resource "yandex_vpc_security_group" "app" {
   folder_id   = var.yc_folder_id
-  name        = "matritsa-app"
-  description = "Public HTTP/HTTPS and administrative SSH. Node, FastAPI and Postgres stay on localhost."
+  name        = "arcana-app"
+  description = "Public HTTP/HTTPS and administrative SSH. Node and FastAPI stay inside docker."
   network_id  = yandex_vpc_network.app.id
 
   ingress {
@@ -55,7 +78,7 @@ resource "yandex_vpc_security_group" "app" {
   }
 
   egress {
-    description    = "Any outbound: apt, NodeSource, pip, Let's Encrypt, payment provider callbacks"
+    description    = "Any outbound: apt, docker registry, Let's Encrypt, payment provider callbacks"
     protocol       = "ANY"
     from_port      = 0
     to_port        = 65535
@@ -63,12 +86,12 @@ resource "yandex_vpc_security_group" "app" {
   }
 }
 
-# A reserved address costs the same as a dynamic one while it is attached, and it survives
-# recreating the VM, so the DNS records and any provider whitelist stay valid.
+# Зарезервированный адрес стоит столько же, сколько динамический, пока он привязан, и переживает
+# пересоздание VM — значит A-записи и белые списки провайдеров остаются валидными.
 resource "yandex_vpc_address" "app" {
   folder_id   = var.yc_folder_id
-  name        = "matritsa-app"
-  description = "Public address of the matritsa application VM"
+  name        = "arcana-app"
+  description = "Public address of the application VM"
 
   external_ipv4_address {
     zone_id = var.yc_zone
@@ -77,11 +100,12 @@ resource "yandex_vpc_address" "app" {
 
 resource "yandex_compute_instance" "app" {
   folder_id                 = var.yc_folder_id
-  name                      = "matritsa-app"
-  hostname                  = "matritsa-app"
+  name                      = "arcana-app"
+  hostname                  = "arcana-app"
   zone                      = var.yc_zone
   platform_id               = var.platform_id
   allow_stopping_for_update = true
+  service_account_id        = yandex_iam_service_account.vm.id
 
   resources {
     cores         = var.cores
@@ -108,34 +132,60 @@ resource "yandex_compute_instance" "app" {
     ssh-keys           = "ubuntu:${var.ssh_public_key}"
     serial-port-enable = "1"
     user-data = templatefile("${path.module}/cloud-init.yaml.tftpl", {
-      api_fqdn     = local.api_fqdn
       site_fqdn    = var.site_domain
       admin_email  = var.admin_email
-      app_user     = local.app_user
       app_dir      = local.app_dir
-      web_port     = var.web_port
-      api_port     = var.api_port
-      node_major   = var.node_major
+      registry_id  = yandex_container_registry.app.id
       swap_size_mb = var.swap_size_mb
-      memory_gb    = var.memory
     })
   }
+
+  depends_on = [yandex_container_registry_iam_binding.puller]
 }
 
-# The site itself, not just the API: node on this VM serves every page, so the apex site name is an
-# A record here and the bucket CNAME is gone (../site: manage_dns = false).
+# Сайт целиком отдаёт node на этой машине, поэтому apex — A-запись, а не CNAME на бакет.
 resource "yandex_dns_recordset" "site" {
-  zone_id = data.yandex_dns_zone.parent.id
-  name    = "${var.site_domain}."
+  zone_id = yandex_dns_zone.parent.id
+  name    = local.zone_dot
   type    = "A"
   data    = [yandex_vpc_address.app.external_ipv4_address[0].address]
   ttl     = 300
 }
 
-resource "yandex_dns_recordset" "api" {
-  zone_id = data.yandex_dns_zone.parent.id
-  name    = "${local.api_fqdn}."
+resource "yandex_dns_recordset" "www" {
+  zone_id = yandex_dns_zone.parent.id
+  name    = "www.${local.zone_dot}"
   type    = "A"
   data    = [yandex_vpc_address.app.external_ipv4_address[0].address]
+  ttl     = 300
+}
+
+# ── почта ────────────────────────────────────────────────────────────────────────
+# Приём писем на домене — ImprovMX: пересылка на личный ящик, бесплатно и без своего сервера.
+# Отправку сайта он не делает (SMTP только на платном тарифе), её берёт Postbox.
+
+resource "yandex_dns_recordset" "mx" {
+  zone_id = yandex_dns_zone.parent.id
+  name    = local.zone_dot
+  type    = "MX"
+  data    = ["10 mx1.improvmx.com.", "20 mx2.improvmx.com."]
+  ttl     = 300
+}
+
+# SPF обязан быть один на домен: две записи считаются ошибкой конфигурации и письма начинают
+# попадать в спам. Поэтому здесь сразу оба отправителя — ImprovMX и Postbox.
+resource "yandex_dns_recordset" "spf" {
+  zone_id = yandex_dns_zone.parent.id
+  name    = local.zone_dot
+  type    = "TXT"
+  data    = ["\"v=spf1 include:spf.improvmx.com include:_spf.yandex.net -all\""]
+  ttl     = 300
+}
+
+resource "yandex_dns_recordset" "dmarc" {
+  zone_id = yandex_dns_zone.parent.id
+  name    = "_dmarc.${local.zone_dot}"
+  type    = "TXT"
+  data    = ["\"v=DMARC1; p=reject\""]
   ttl     = 300
 }

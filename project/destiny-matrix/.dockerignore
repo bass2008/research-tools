@@ -1,0 +1,13 @@
+# контекст api-образа — корень продукта; всё лишнее из него выкидываем
+web/node_modules
+web/.next
+web/public
+generators/out
+generators/models
+generators/logs
+legacy
+docs
+infra
+api/var
+**/__pycache__
+**/.pytest_cache

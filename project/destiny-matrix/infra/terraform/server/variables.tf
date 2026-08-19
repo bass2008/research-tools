@@ -23,19 +23,13 @@ variable "yc_zone" {
 variable "site_domain" {
   type        = string
   description = "Domain of the site. This VM serves it: node behind nginx. The API host is api.<site_domain>."
-  default     = "matritsa.webstudiolab.ru"
-}
-
-variable "api_subdomain" {
-  type        = string
-  description = "Label prepended to site_domain for the API host. Answers 301 to the site unless expose_api_host is on."
-  default     = "api"
+  default     = "arcana-sense.ru"
 }
 
 variable "dns_zone_name" {
   type        = string
-  description = "Name of the existing Cloud DNS zone resource, created by terraform/webstudiolab.ru."
-  default     = "webstudiolab-ru"
+  description = "Name of the existing Cloud DNS zone resource, created by terraform/arcana-sense.ru."
+  default     = "arcana-sense-ru"
 }
 
 variable "ssh_public_key" {
@@ -100,35 +94,6 @@ variable "swap_size_mb" {
   type        = number
   description = "Swap file size. Insurance against the OOM killer taking node or Postgres on a 2 GB box; 0 disables it."
   default     = 1024
-}
-
-variable "web_port" {
-  type        = number
-  description = "Port the Next.js standalone server listens on locally; nginx proxies both / and /api/ to it."
-  default     = 3000
-}
-
-variable "api_port" {
-  type        = number
-  description = "Port FastAPI listens on locally. The BFF inside node calls it, the browser never does. Contract: API_INTERNAL_URL=http://127.0.0.1:8010."
-  default     = 8010
-}
-
-variable "node_major" {
-  type        = number
-  description = "Node.js major version from NodeSource. 24 is the active LTS; the standalone artifact must be built on a version that speaks the same N-API."
-  default     = 24
-}
-
-variable "releases_keep" {
-  type        = number
-  description = "How many release directories to keep on the box for rollback. Each release is about 1,2 GB, mostly hardlinked to the previous one."
-  default     = 3
-
-  validation {
-    condition     = var.releases_keep >= 2
-    error_message = "releases_keep must be at least 2: rollback needs the previous release to exist."
-  }
 }
 
 variable "subnet_cidr" {

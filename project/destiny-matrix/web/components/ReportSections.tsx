@@ -12,6 +12,18 @@ import ArcanumCard from "./ArcanumCard";
 import LockIcon from "./LockIcon";
 import UnlockCta from "./UnlockCta";
 
+/**
+ * Число колонок для позиций раздела. CSS считать элементы не умеет, а auto-fit ставит по три
+ * в ряд: четвёртая карта оставалась одна в пустой строке. Четыре кладём 2×2 — как в разделах
+ * из двух позиций; десять — по четыре, иначе последний ряд снова с одной картой.
+ * undefined — раскладку выбирает auto-fit по ширине панели.
+ */
+function gridColumns(n: number): 2 | 4 | undefined {
+  if (n === 4) return 2;
+  if (n % 3 === 1) return 4;
+  return undefined;
+}
+
 export default function ReportSections({
   sections,
   checking = false,
@@ -29,9 +41,13 @@ export default function ReportSections({
     <div className="section-gap" data-testid="report">
       <div className="rhead">
         <h2>Расшифровка вашей матрицы</h2>
-        <div className="cnt">
-          <b>{open}</b> {open === 1 ? "раздел открыт" : "разделов открыто"} · <b>{locked}</b> под замком
-        </div>
+        {/* счётчик нужен, только пока есть что открывать: у оплатившего «0 под замком» — шум */}
+        {locked > 0 ? (
+          <div className="cnt">
+            <b>{open}</b> {open === 1 ? "раздел открыт" : "разделов открыто"} · <b>{locked}</b> под
+            замком
+          </div>
+        ) : null}
       </div>
 
       {sections.map((s, i) =>
@@ -49,7 +65,7 @@ export default function ReportSections({
             </summary>
             <div className="body">
               <p className="lead">{s.lead}</p>
-              <ul className="poslist">
+              <ul className="poslist" data-cols={gridColumns(s.positions.length)}>
                 {s.positions.map((p, j) => (
                   <li key={`${p.label}-${j}`}>
                     <a className="poscard" href={p.href}>

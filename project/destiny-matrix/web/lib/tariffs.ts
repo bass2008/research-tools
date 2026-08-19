@@ -15,16 +15,9 @@ export interface Tariff {
   period_days: number | null;
 }
 
-/** Запасные значения, совпадающие с наполнением справочника в api/app/tariffs.py. */
+/** Запасные значения, совпадающие с витриной в api/app/tariffs.py (PUBLIC_IDS). */
 export const FALLBACK: Tariff[] = [
-  { id: "single", name: "Полный разбор одной даты", price: 10_000, scope: ["single"], period_days: null },
-  {
-    id: "month",
-    name: "Три месяца без ограничений",
-    price: 24_000,
-    scope: ["single", "matrix", "all"],
-    period_days: 90,
-  },
+  { id: "single", name: "Полный разбор одной даты", price: 25_000, scope: ["single"], period_days: null },
 ];
 
 /** Тариф, который рекламируем и показываем в первом экране. */

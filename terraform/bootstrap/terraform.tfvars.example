@@ -1,4 +1,4 @@
 # Authentication values are exported by the bash function `tf` as TF_VAR_*.
 # Override only globally unique or installation-specific names here.
 
-state_bucket_name = "webstudiolab-ru-tfstate-hjb4rfs"
+state_bucket_name = "arcana-sense-ru-tfstate-hjb4rfs"

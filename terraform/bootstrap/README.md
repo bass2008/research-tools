@@ -19,7 +19,7 @@ State bootstrap остаётся локальным. Его нельзя уда�
 ## Подключение другого root-проекта
 
 ```bash
-cd /home/sergey/Personal/research-tools/terraform/webstudiolab.ru
+cd /home/sergey/Personal/research-tools/terraform/arcana-sense.ru
 source ../bootstrap/export-backend-env.sh
 terraform init
 ```

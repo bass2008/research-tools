@@ -10,7 +10,7 @@ const { spawn } = require("child_process");
 
 const ROOT = ".next/server/app";
 const PORT = Number(process.env.CHECK_PORT ?? 3131);
-const ON_DEMAND = ["/", "/oferta", "/pay/single", "/pay/month"];
+const ON_DEMAND = ["/", "/oferta", "/pay", "/pay/single"];
 
 const diskFiles = [];
 (function walk(dir) {
@@ -29,7 +29,8 @@ const route = (f) => {
 const pages = new Map(diskFiles.map((f) => [route(f), fs.readFileSync(f, "utf8")]));
 
 const known = new Set([...pages.keys(), ...ON_DEMAND]);
-const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/, /^\/matrices(\/\d+)?$/];
+const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/,
+  /^\/matrices(\/\d+)?$/, /^\/admin(\/users\/\d+)?$/];
 
 let fails = [];
 const fail = (msg) => fails.push(msg);
@@ -70,29 +71,31 @@ async function serve() {
 const norm = (html) => html.replace(/\u00a0/g, " ").replace(/&nbsp;/g, " ");
 const money = (kopecks) => Math.round(kopecks / 100).toLocaleString("ru-RU").replace(/\u00a0/g, " ");
 
-/** Цена, которую сервер напечатал бы сам: из api через BFF, иначе из запасного набора. */
-async function leadPrice() {
+/** Прайс, который сервер напечатал бы сам: из api через BFF, иначе из запасного набора. */
+async function priceList() {
   try {
     const res = await fetch(`http://127.0.0.1:${PORT}/api/tariffs`);
     if (res.ok) {
       const items = (await res.json()).items;
       if (Array.isArray(items) && items.length) {
         const single = items.find((t) => t.id === "single") ?? items[0];
-        return single.price;
+        return { lead: single.price, all: items.map((t) => t.price) };
       }
     }
   } catch {
     /* api не поднят — сверяем с запасным набором, его же покажет и страница */
   }
-  const m = /price: ([\d_]+)/.exec(fs.readFileSync("lib/tariffs.ts", "utf8"));
-  return m ? Number(m[1].replace(/_/g, "")) : null;
+  const all = [...fs.readFileSync("lib/tariffs.ts", "utf8").matchAll(/price: ([\d_]+)/g)].map((m) =>
+    Number(m[1].replace(/_/g, "")),
+  );
+  return all.length ? { lead: all[0], all } : null;
 }
 
 async function loadOnDemand() {
   const proc = await serve();
   let price = null;
   try {
-    price = await leadPrice();
+    price = await priceList();
     for (const r of ON_DEMAND) {
       const res = await fetch(`http://127.0.0.1:${PORT}${r}`);
       if (!res.ok) {
@@ -174,16 +177,17 @@ for (const [r, html] of pages) {
 }
 
 // прайс
-function checkPrice(leadPrice) {
+function checkPrice(prices) {
 const home = norm(pages.get("/") ?? "");
 if (!home) {
   fail("главная не получена — прайс проверять нечем");
   return;
 }
-if (leadPrice === null) {
-  fail("не удалось узнать цену рекламируемого тарифа ни из api, ни из запасного набора");
+if (prices === null) {
+  fail("не удалось узнать прайс ни из api, ни из запасного набора");
   return;
 }
+const leadPrice = prices.lead;
 // Числа тут не зашиты намеренно: цену меняют в базе, и приёмка сверяет страницу с тем же
 // источником, из которого её берёт сервер.
 const label = `${money(leadPrice)} ₽`;
@@ -208,6 +212,13 @@ for (const m of home.matchAll(/href="\/pay\/[^"]*"/g)) {
 // страница оплаты обязана показывать ту же цену, что спишет касса
 const pay = norm(pages.get("/pay/single") ?? "");
 if (pay && !pay.includes(label)) fail(`/pay/single: цена не совпадает с прайсом (${label})`);
+
+// выбор тарифа на /pay должен быть настоящим: видны все цены прайса, а не только ведущая
+const choice = norm(pages.get("/pay") ?? "");
+for (const p of prices.all) {
+  const one = `${money(p)} ₽`;
+  if (choice && !choice.includes(one)) fail(`/pay: в выборе тарифа нет цены ${one}`);
+}
 }
 
 // Реквизиты: критерий один на весь сайт — реквизит либо настоящий, либо

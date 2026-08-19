@@ -9,15 +9,37 @@ from __future__ import annotations
 
 import sys
 
+from .config import settings
 from .db import Base, SessionLocal, engine
 from . import models  # noqa: F401  — модели должны быть импортированы до create_all
 from . import tariffs
+from .models import User
+from .security import hash_password
+
+
+def seed_admin() -> str | None:
+    """Админ должен существовать всегда, в том числе на пустой базе после чистки.
+
+    Пароль ставится только при создании: у живого аккаунта его не перетираем.
+    """
+    email = next(iter(settings.admins), None)
+    if not email:
+        return None
+    with SessionLocal() as db:
+        if db.query(User).filter(User.email == email).first() is None:
+            db.add(User(email=email, password_hash=hash_password(settings.admin_password)))
+            db.commit()
+            return f"{email} (создан, пароль из ADMIN_PASSWORD)"
+        return f"{email} (уже есть)"
 
 
 def ensure() -> None:
     Base.metadata.create_all(engine)
     with SessionLocal() as db:
         rows = tariffs.seed(db)
+    admin = seed_admin()
+    if admin:
+        print(f"админ: {admin}")
     print(f"схема на месте, тарифов: {len(rows)}")
     for t in rows:
         print(f"  {t.id:8s} {t.name:28s} {t.price / 100:8.2f} ₽  "

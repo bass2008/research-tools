@@ -15,7 +15,7 @@ export async function credentials(req: Request, action: "login" | "register") {
   const mail = email(body);
   const password = String(body.password ?? "");
   if (!EMAIL_RE.test(mail)) return json({ detail: "Проверьте адрес почты" }, 400);
-  if (password.length < 6) return json({ detail: "Пароль — не короче шести знаков" }, 400);
+  if (password.length < 3) return json({ detail: "Пароль — не короче трёх знаков" }, 400);
   return forward(`/auth/${action}`, {
     method: "POST",
     body: { email: mail, password },
@@ -30,10 +30,17 @@ export async function payment(req: Request) {
   if (!EMAIL_RE.test(mail)) return json({ detail: "Проверьте адрес почты" }, 400);
   // сам список тарифов живёт в базе: здесь проверяем только форму кода, существование — апстрим
   if (!/^[a-z][a-z0-9_-]{0,15}$/.test(tariff)) return json({ detail: "Неизвестный тариф" }, 400);
-  // дата рождения в платёж не передаётся: наверх уходят только тариф и почта
+  // Какую дату открыть — выбирает человек на экране оплаты, поэтому наверх уходит её id.
+  // Сама дата рождения в платёж по-прежнему не передаётся: id не раскрывает её и принадлежность
+  // матрицы апстрим проверяет по владельцу.
+  const raw = body.matrix_id;
+  const matrixId = raw === undefined || raw === null || raw === "" ? undefined : Number(raw);
+  if (matrixId !== undefined && (!Number.isInteger(matrixId) || matrixId <= 0)) {
+    return json({ detail: "Неверная матрица" }, 400);
+  }
   return forward("/payments/mock", {
     method: "POST",
-    body: { tariff, email: mail },
+    body: { tariff, email: mail, ...(matrixId === undefined ? {} : { matrix_id: matrixId }) },
     capture: true,
   });
 }

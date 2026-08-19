@@ -18,7 +18,7 @@ infra/terraform/
 
 | было | стало | почему |
 |---|---|---|
-| `matritsa.webstudiolab.ru` → CNAME на бакет | **A-запись на VM** | CNAME и A на одном имени не сосуществуют; страницы печатает node |
+| `arcana-sense.ru` → CNAME на бакет | **A-запись на VM** | CNAME и A на одном имени не сосуществуют; страницы печатает node |
 | TLS: сертификат Certificate Manager на бакете | **certbot на nginx** | сертификат CM прикрепляется к бакету, CDN и балансировщику, но не к nginx |
 | весь `out/` в бакет | **`_next/static` и `public` в бакет**, страницы на диске VM | бакет кода не выполняет: `Set-Cookie` по телу запроса он сформировать не может |
 | `trailingSlash: true` обязателен | не нужен | node отдаёт и `/path`, и `/path/` (проверено: `/encyclopedia/arcanum/14/` → 308 на канонический адрес) |
@@ -171,7 +171,7 @@ DNS, бакетом и ключом; артефакт сборки кладёт 
 | Хранение в бакете, standard | 0,0033 ₽/ГБ·ч, первый 1 ГБ·мес бесплатно | ассеты 2,4 МБ → 0 ₽ |
 | Исходящий трафик из бакета | 0 до 100 ГБ/мес, дальше 1,67994 ₽/ГБ | пока `assetPrefix` не задан — почти ноль |
 | PUT/POST/LIST в бакет | 0,5692 ₽ за 1 000, первые 10 000/мес бесплатно | релиз ≈ 57 объектов → 0 ₽ |
-| Зона Cloud DNS | 0,0592 ₽/зона·ч = 43,22 ₽/мес | уже платится за `webstudiolab.ru`; поддомен зону не добавляет |
+| Зона Cloud DNS | 0,0592 ₽/зона·ч = 43,22 ₽/мес | уже платится за `arcana-sense.ru`; поддомен зону не добавляет |
 | Сертификат Let's Encrypt | 0 | certbot на машине |
 
 Итого: **≈ 1 300 ₽/мес**, из них 1 297 — машина.
@@ -258,7 +258,7 @@ DATABASE_URL=postgresql+psycopg2://matritsa@/matritsa?host=/var/run/postgresql
 репозиторий (`<релиз>/api`, `<релиз>/engine`, `<релиз>/web/content`), потому что
 `api` импортирует `engine` из корня.
 
-**`tests/selenium`** — `SELENIUM_BASE_URL=https://matritsa.webstudiolab.ru` попадает на nginx и
+**`tests/selenium`** — `SELENIUM_BASE_URL=https://arcana-sense.ru` попадает на nginx и
 дальше на node; локально тот же сценарий работает против `next start` на 3000.
 
 ## 8. Чего здесь нет

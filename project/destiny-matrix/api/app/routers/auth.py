@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import access
+from ..config import settings
 from ..db import get_db
 from ..deps import current_user
 from ..models import SavedMatrix, User
@@ -50,6 +51,12 @@ def me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dic
         "user": user.public(),
         "access": rights,
         "matrices_used": int(used),
+        # сколько дат можно держать: None — без ограничения, иначе бесплатная плюс купленные
+        "matrices_limit": rights["matrices_limit"],
+        # сколько дат куплено бессрочно — показывается рядом с подпиской, а не вместо неё
+        "owned": rights["owned"],
+        # признак админа: список почт в конфиге, поэтому колонки в users для этого нет
+        "is_admin": settings.is_admin(user.email),
         "can_store": rights["can_store"],
         "unlimited": rights["unlimited_matrices"],
         "until": rights["until"],

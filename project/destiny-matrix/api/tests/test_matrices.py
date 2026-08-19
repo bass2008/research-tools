@@ -40,14 +40,14 @@ def test_missing_matrix_is_404(client, auth):
 
 
 def test_second_matrix_needs_storage_right(client, auth):
-    """Без права хранения кабинет держит одну матрицу — иначе месячный тариф ничего не даёт."""
+    """Бесплатный слот один: вторая дата требует покупки, и в отказе назван продаваемый тариф."""
     headers = auth("one@example.ru")
     assert client.post("/api/matrices", json=BIRTH, headers=headers).status_code == 200
     refused = client.post("/api/matrices", json={"birth": "1990-01-01", "sex": "f"},
                           headers=headers)
     assert refused.status_code == 402
     detail = refused.json()["detail"]
-    assert "Три месяца без ограничений" in detail and isinstance(detail, str)
+    assert "Полный разбор одной даты" in detail and isinstance(detail, str)
 
 
 def test_month_right_allows_many(client, paid):
@@ -74,10 +74,15 @@ def test_single_right_unlocks_only_its_matrix(client, db):
     bought = client.get(f"/api/matrices/{paid['matrix_id']}", headers=headers).json()
     assert bought["unlocked"] is True
 
-    # вторая дата требует права хранения, поэтому её и сохранить нельзя — доступа тоже нет
+    # вторую дату сохранить можно — бесплатный слот, — но разбор по ней закрыт: за неё не платили
     other = client.post("/api/matrices", json={"birth": "1990-01-01", "sex": "f"},
                         headers=headers)
-    assert other.status_code == 402
+    assert other.status_code == 200 and other.json()["unlocked"] is False
+
+    # третью не даём: слоты кончились, покупать надо ещё раз
+    third = client.post("/api/matrices", json={"birth": "1989-03-03", "sex": "f"},
+                        headers=headers)
+    assert third.status_code == 402 and "оплаченные даты заняты" in third.json()["detail"]
 
 
 def test_future_date_is_400_and_saves_nothing(client, auth, db):
@@ -85,3 +90,48 @@ def test_future_date_is_400_and_saves_nothing(client, auth, db):
     r = client.post("/api/matrices", json={"birth": "2999-01-01", "sex": "f"}, headers=headers)
     assert r.status_code == 400 and "будущем" in r.json()["detail"]
     assert db.scalar(select(SavedMatrix).limit(1)) is None
+
+
+def test_listing_marks_paid_and_locked_dates(client, db):
+    """В кабинете видно, какая дата куплена навсегда, а какая закрыта."""
+    paid = client.post("/api/payments/mock",
+                       json={"tariff": "single", "email": "mark@example.ru"}).json()
+    headers = {"Authorization": f"Bearer {paid['token']}"}
+    bought = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
+                         headers=headers).json()
+    free = client.post("/api/matrices", json={"birth": "1992-02-02", "sex": "f"},
+                       headers=headers).json()
+    by_id = {row["id"]: row for row in client.get("/api/matrices", headers=headers).json()["items"]}
+    assert by_id[bought["id"]]["access"] == "forever"
+    assert by_id[bought["id"]]["access_until"] is None
+    assert by_id[free["id"]]["access"] == "locked"
+
+
+def test_subscription_marks_every_date_with_end_date(client, db):
+    """Подписка открывает все даты и показывает, до какого числа."""
+    paid = client.post("/api/payments/mock",
+                       json={"tariff": "month", "email": "submark@example.ru"}).json()
+    headers = {"Authorization": f"Bearer {paid['token']}"}
+    for day in ("01", "02"):
+        client.post("/api/matrices", json={"birth": f"1993-03-{day}", "sex": "f"}, headers=headers)
+    rows = client.get("/api/matrices", headers=headers).json()["items"]
+    assert [r["access"] for r in rows] == ["subscription", "subscription"]
+    assert all(r["access_until"] for r in rows)
+
+
+def test_rename_matrix(client, auth, db):
+    """Подпись матрицы правится из кабинета; пустое имя возвращает подпись по умолчанию."""
+    headers = auth("name@example.ru")
+    row = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
+                      headers=headers).json()
+    named = client.patch(f"/api/matrices/{row['id']}", json={"title": "  Мама  "}, headers=headers)
+    assert named.status_code == 200 and named.json()["title"] == "Мама"
+    assert client.get("/api/matrices", headers=headers).json()["items"][0]["title"] == "Мама"
+
+    reset = client.patch(f"/api/matrices/{row['id']}", json={"title": ""}, headers=headers)
+    assert reset.json()["title"] == "Матрица 1 января 1991"
+
+    # чужую подписать нельзя: её как бы и нет
+    other = auth("other-name@example.ru")
+    assert client.patch(f"/api/matrices/{row['id']}", json={"title": "чужая"},
+                        headers=other).status_code == 404

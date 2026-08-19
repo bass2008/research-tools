@@ -24,6 +24,12 @@ export interface Session {
   /** до какого числа действует срочное право; null — бессрочно или прав нет */
   until: string | null;
   used: number;
+  /** сколько дат можно держать: null — без ограничения */
+  limit: number | null;
+  /** сколько дат куплено бессрочно */
+  owned: number;
+  /** доступна ли админка */
+  admin: boolean;
   /** подсказка из кеша браузера: доступ не даёт, только объясняет ожидание */
   cached: boolean;
   error: string | null;
@@ -38,6 +44,9 @@ const EMPTY: Session = {
   unlimited: false,
   until: null,
   used: 0,
+  limit: 1,
+  owned: 0,
+  admin: false,
   cached: false,
   error: null,
 };
@@ -69,6 +78,9 @@ export function refreshSession(): Promise<Session> {
         unlimited: me.unlimited,
         until: me.until,
         used: me.matrices_used,
+        limit: me.matrices_limit,
+        owned: me.owned,
+        admin: me.is_admin,
         cached: paid,
         error: null,
       });

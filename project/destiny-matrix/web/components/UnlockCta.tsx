@@ -3,13 +3,13 @@
 import Link from "next/link";
 
 import { track } from "@/lib/analytics";
-import { money } from "@/lib/tariffs";
 
 import { useLead } from "./TariffsProvider";
 
 /**
  * Кнопка покупки. Отдельным клиентским компонентом, чтобы вокруг неё жила серверная разметка:
  * страница разбора печатается на сервере, а цель Метрики без обработчика клика не поставить.
+ * Ведёт на `/pay` — выбор тарифа там, а не в кнопке: подписка тоже валидный выбор.
  */
 export default function UnlockCta({
   place,
@@ -29,10 +29,10 @@ export default function UnlockCta({
     <Link
       className={className}
       data-testid={testId}
-      href={`/pay/${lead.id}`}
+      href="/pay"
       onClick={() => track("buy_click", { tariff: lead.id, place, ...(section ? { section } : {}) })}
     >
-      {children ?? `Открыть за ${money(lead.price)} ₽`}
+      {children ?? "Купить"}
     </Link>
   );
 }
