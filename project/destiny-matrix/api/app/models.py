@@ -82,6 +82,14 @@ class User(Base):
         return {"id": self.id, "email": self.email, "created_at": iso(self.created_at)}
 
 
+MONTHS = ("января", "февраля", "марта", "апреля", "мая", "июня",
+          "июля", "августа", "сентября", "октября", "ноября", "декабря")
+
+
+def default_title(birth: dt.date) -> str:
+    return f"Матрица {birth.day} {MONTHS[birth.month - 1]} {birth.year}"
+
+
 class SavedMatrix(Base):
     __tablename__ = "matrices"
 
@@ -175,3 +183,37 @@ class Lead(Base):
     source: Mapped[str | None] = mapped_column(String(64))
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                     default=utcnow, server_default=func.now())
+
+
+class ReportJob(Base):
+    """Задача на печать PDF. Пользователь её не видит: для него запрос синхронный, а таблица
+    нужна админу, чтобы видеть, сколько разборов печатали и сколько это заняло."""
+    __tablename__ = "report_jobs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
+                                        index=True, nullable=False)
+    matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id", ondelete="CASCADE"),
+                                           index=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="running")
+    object_key: Mapped[str | None] = mapped_column(String(300))
+    size_bytes: Mapped[int | None] = mapped_column(Integer)
+    error: Mapped[str | None] = mapped_column(String(300))
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                                    default=utcnow, server_default=func.now())
+    started_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[User] = relationship()
+    matrix: Mapped[SavedMatrix] = relationship()
+
+    def seconds(self) -> float | None:
+        if self.started_at is None or self.finished_at is None:
+            return None
+        return round((as_utc(self.finished_at) - as_utc(self.started_at)).total_seconds(), 1)
+
+    def item(self) -> dict:
+        return {"id": self.id, "matrix_id": self.matrix_id, "status": self.status,
+                "created_at": iso(self.created_at), "started_at": iso(self.started_at),
+                "finished_at": iso(self.finished_at), "seconds": self.seconds(),
+                "size_bytes": self.size_bytes, "error": self.error}

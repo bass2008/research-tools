@@ -189,3 +189,144 @@ resource "yandex_dns_recordset" "dmarc" {
   data    = ["\"v=DMARC1; p=reject\""]
   ttl     = 300
 }
+
+# ── отправка писем ───────────────────────────────────────────────────────────────
+# Адрес и DKIM-ключи Postbox создаются в консоли: ресурсов postbox в terraform-провайдере нет.
+# Всё остальное — здесь: записи DKIM, аккаунт-отправитель, его роль и ключ для SMTP.
+
+resource "yandex_dns_recordset" "dkim" {
+  for_each = toset(["1", "2"])
+
+  zone_id = yandex_dns_zone.parent.id
+  name    = "${var.postbox_identity}-${each.key}._domainkey.${local.zone_dot}"
+  type    = "CNAME"
+  data    = ["${var.postbox_identity}-${each.key}.dkim.pstbx.ru"]
+  # 600 — как поставил Postbox при создании записей; менять незачем
+  ttl = 600
+}
+
+resource "yandex_iam_service_account" "mailer" {
+  folder_id   = var.yc_folder_id
+  name        = "arcana-mailer"
+  description = "Sends transactional email through Postbox"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "mailer" {
+  folder_id = var.yc_folder_id
+  role      = "postbox.sender"
+  member    = "serviceAccount:${yandex_iam_service_account.mailer.id}"
+}
+
+# API-ключ, а не статический: письма уходят по SMTP, там логин — идентификатор этого ключа.
+resource "yandex_iam_service_account_api_key" "mailer" {
+  service_account_id = yandex_iam_service_account.mailer.id
+  description        = "SMTP credentials for Postbox"
+  scopes             = ["yc.postbox.send"]
+
+  # у провайдера рядом со scopes живёт устаревшее scope: без этого план всегда «1 to change»
+  lifecycle {
+    ignore_changes = [scope]
+  }
+}
+
+# ── резервные копии базы ─────────────────────────────────────────────────────────
+# Бакет создаётся ключами отдельного аккаунта: провайдер настраивает lifecycle и версии
+# только по S3-подписи, IAM-токена для этого не хватает.
+
+resource "yandex_iam_service_account" "backup" {
+  folder_id   = var.yc_folder_id
+  name        = "arcana-backup"
+  description = "Owns the database backup bucket"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "backup" {
+  folder_id = var.yc_folder_id
+  # admin, а не editor: версионирование и правила жизни ставит только администратор бакета
+  role   = "storage.admin"
+  member = "serviceAccount:${yandex_iam_service_account.backup.id}"
+}
+
+resource "yandex_iam_service_account_static_access_key" "backup" {
+  service_account_id = yandex_iam_service_account.backup.id
+  description        = "S3 credentials for the backup bucket"
+}
+
+resource "yandex_storage_bucket" "backups" {
+  folder_id  = var.yc_folder_id
+  bucket     = var.backup_bucket
+  access_key = yandex_iam_service_account_static_access_key.backup.access_key
+  secret_key = yandex_iam_service_account_static_access_key.backup.secret_key
+
+  # копии не перезаписывают друг друга по имени, но версии страхуют от случайного delete
+  versioning { enabled = true }
+
+  lifecycle_rule {
+    id      = "expire-old"
+    enabled = true
+    expiration { days = 90 }
+    noncurrent_version_expiration { days = 30 }
+  }
+
+  force_destroy = false
+
+  depends_on = [yandex_resourcemanager_folder_iam_member.backup]
+}
+
+# Статус адресов и режим аккаунта Postbox читаются только по S3-подписи (SES-совместимый API),
+# поэтому у отправителя есть и статический ключ, и право смотреть настройки.
+resource "yandex_resourcemanager_folder_iam_member" "mailer_viewer" {
+  folder_id = var.yc_folder_id
+  role      = "postbox.auditor"
+  member    = "serviceAccount:${yandex_iam_service_account.mailer.id}"
+}
+
+resource "yandex_iam_service_account_static_access_key" "mailer" {
+  service_account_id = yandex_iam_service_account.mailer.id
+  description        = "SES-compatible API access for Postbox diagnostics"
+}
+
+# ── готовые PDF ──────────────────────────────────────────────────────────────────
+# Отдельный бакет, а не префикс в бэкапах: в отчётах дата рождения, у них свой срок жизни и свой
+# ключ доступа, который лежит на машине с api.
+
+resource "yandex_iam_service_account" "reports" {
+  folder_id   = var.yc_folder_id
+  name        = "arcana-reports"
+  description = "Reads and writes the generated report PDFs"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "reports" {
+  folder_id = var.yc_folder_id
+  role      = "storage.admin"
+  member    = "serviceAccount:${yandex_iam_service_account.reports.id}"
+}
+
+resource "yandex_iam_service_account_static_access_key" "reports" {
+  service_account_id = yandex_iam_service_account.reports.id
+  description        = "S3 credentials for the reports bucket"
+}
+
+resource "yandex_storage_bucket" "reports" {
+  folder_id  = var.yc_folder_id
+  bucket     = var.reports_bucket
+  access_key = yandex_iam_service_account_static_access_key.reports.access_key
+  secret_key = yandex_iam_service_account_static_access_key.reports.secret_key
+
+  # ссылка выдаётся с подписью на час, публичного доступа нет
+  anonymous_access_flags {
+    read        = false
+    list        = false
+    config_read = false
+  }
+
+  lifecycle_rule {
+    id      = "expire-old"
+    enabled = true
+    # отчёт печатается заново по кнопке, поэтому годами хранить его незачем
+    expiration { days = 180 }
+  }
+
+  force_destroy = false
+
+  depends_on = [yandex_resourcemanager_folder_iam_member.reports]
+}

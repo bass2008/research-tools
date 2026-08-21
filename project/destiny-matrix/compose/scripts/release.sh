@@ -20,6 +20,8 @@ echo "== сборка и отправка $TAG"
 yc container registry configure-docker >/dev/null
 docker buildx build --push -f api.Dockerfile \
   --output "type=image,name=$REGISTRY/api:$TAG,$ZSTD" ..
+docker buildx build --push -f browser.Dockerfile \
+  --output "type=image,name=$REGISTRY/browser:$TAG,$ZSTD" .
 docker buildx build --push -f web.Dockerfile \
   --build-arg "NEXT_PUBLIC_SITE_URL=$SITE" \
   --build-arg "BUILD_COMMIT=$BUILD_COMMIT" \
@@ -28,7 +30,8 @@ docker buildx build --push -f web.Dockerfile \
   --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
 
 echo "== запуск на $IP"
-scp -q -o StrictHostKeyChecking=accept-new compose.server.yml "ubuntu@$IP:/srv/arcana/docker-compose.yml"
+# на машину едет только база: без override там нет ни сборки, ни dev-секретов
+scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "ubuntu@$IP:/srv/arcana/docker-compose.yml"
 ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
   && sudo sed -i '/^TAG=/d;/^REGISTRY=/d' .env \
   && printf 'REGISTRY=%s\nTAG=%s\n' '$REGISTRY' '$TAG' | sudo tee -a .env >/dev/null \

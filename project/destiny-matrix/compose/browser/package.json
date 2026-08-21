@@ -1,0 +1,9 @@
+{
+  "name": "arcana-browser",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "dependencies": {
+    "puppeteer-core": "^24.10.0"
+  }
+}

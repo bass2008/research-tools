@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ApiError, api, type AdminPayment, type AdminUser } from "@/lib/api";
+import { ApiError, api, type AdminPayment, type AdminReportJob, type AdminUser } from "@/lib/api";
 import { money } from "@/lib/tariffs";
 import { buildInfo } from "@/lib/version";
 
@@ -31,13 +31,17 @@ function accessLine(u: AdminUser): string {
 export default function AdminView() {
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [payments, setPayments] = useState<AdminPayment[] | null>(null);
+  const [jobs, setJobs] = useState<AdminReportJob[] | null>(null);
+  const [avgSeconds, setAvgSeconds] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void Promise.all([api.admin.users(), api.admin.payments()])
-      .then(([u, p]) => {
+    void Promise.all([api.admin.users(), api.admin.payments(), api.admin.reports()])
+      .then(([u, p, r]) => {
         setUsers(u.items);
         setPayments(p.items);
+        setJobs(r.items);
+        setAvgSeconds(r.avg_seconds);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Админка недоступна."));
   }, []);
@@ -165,6 +169,63 @@ export default function AdminView() {
                     <td className="num">{money(p.amount)} ₽</td>
                     <td>{p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}</td>
                     <td className="small">{p.external_id}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="panel section-gap">
+        <h3>Очередь отчётов</h3>
+        <div className="cap">
+          {jobs === null
+            ? "Печать PDF: что запрашивали и сколько это заняло"
+            : `Печатей: ${jobs.length} · в работе: ${jobs.filter((j) => j.status === "running").length}` +
+              ` · с ошибкой: ${jobs.filter((j) => j.status === "failed").length}` +
+              (avgSeconds ? ` · в среднем ${avgSeconds} с` : "")}
+        </div>
+        <div className="tablewrap">
+          <table className="admtable" data-testid="admin-reports">
+            <thead>
+              <tr>
+                <th>Начало</th>
+                <th>Почта</th>
+                <th>Матрица</th>
+                <th>Статус</th>
+                <th>Заняло</th>
+                <th>Размер</th>
+              </tr>
+            </thead>
+            <tbody>
+              {jobs === null ? (
+                <tr>
+                  <td colSpan={6} className="skeleton">
+                    Загружаем…
+                  </td>
+                </tr>
+              ) : jobs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="dim">
+                    PDF ещё никто не печатал.
+                  </td>
+                </tr>
+              ) : (
+                jobs.map((j) => (
+                  <tr key={j.id} data-testid="admin-report-row">
+                    <td className="small">{when(j.started_at ?? j.created_at)}</td>
+                    <td>
+                      <Link href={`/admin/users/${j.user_id}`}>{j.email}</Link>
+                    </td>
+                    <td className="num">{j.matrix_id}</td>
+                    <td title={j.error ?? undefined}>
+                      {j.status === "done" ? "готов" : j.status === "running" ? "печатается" : "ошибка"}
+                    </td>
+                    <td className="num">{j.seconds === null ? "—" : `${j.seconds} с`}</td>
+                    <td className="num">
+                      {j.size_bytes === null ? "—" : `${Math.round(j.size_bytes / 1024)} КБ`}
+                    </td>
                   </tr>
                 ))
               )}

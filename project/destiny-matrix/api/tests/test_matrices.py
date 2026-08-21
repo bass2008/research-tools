@@ -95,10 +95,9 @@ def test_future_date_is_400_and_saves_nothing(client, auth, db):
 def test_listing_marks_paid_and_locked_dates(client, db):
     """В кабинете видно, какая дата куплена навсегда, а какая закрыта."""
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "mark@example.ru"}).json()
+                       json={"tariff": "single", "email": "mark@example.ru", "birth": "1993-07-07"}).json()
     headers = {"Authorization": f"Bearer {paid['token']}"}
-    bought = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
-                         headers=headers).json()
+    bought = paid["matrix"]                       # дату из платежа сервер сохранил сам
     free = client.post("/api/matrices", json={"birth": "1992-02-02", "sex": "f"},
                        headers=headers).json()
     by_id = {row["id"]: row for row in client.get("/api/matrices", headers=headers).json()["items"]}

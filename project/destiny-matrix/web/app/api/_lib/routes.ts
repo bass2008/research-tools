@@ -30,17 +30,31 @@ export async function payment(req: Request) {
   if (!EMAIL_RE.test(mail)) return json({ detail: "Проверьте адрес почты" }, 400);
   // сам список тарифов живёт в базе: здесь проверяем только форму кода, существование — апстрим
   if (!/^[a-z][a-z0-9_-]{0,15}$/.test(tariff)) return json({ detail: "Неизвестный тариф" }, 400);
-  // Какую дату открыть — выбирает человек на экране оплаты, поэтому наверх уходит её id.
-  // Сама дата рождения в платёж по-прежнему не передаётся: id не раскрывает её и принадлежность
-  // матрицы апстрим проверяет по владельцу.
+  // Цель платежа: либо номер уже сохранённой матрицы, либо дата, которую сервер сохранит сам.
+  // Без цели апстрим откажет — разовый тариф впрок не продаётся. Платёжному провайдеру дата
+  // не уходит: он видит только сумму и почту.
   const raw = body.matrix_id;
   const matrixId = raw === undefined || raw === null || raw === "" ? undefined : Number(raw);
   if (matrixId !== undefined && (!Number.isInteger(matrixId) || matrixId <= 0)) {
     return json({ detail: "Неверная матрица" }, 400);
   }
+  const birth = body.birth === undefined || body.birth === null || body.birth === ""
+    ? undefined
+    : String(body.birth);
+  const sex = body.sex === undefined || body.sex === null || body.sex === "" ? undefined : String(body.sex);
+  if (birth !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(birth)) {
+    return json({ detail: "Дата — в формате YYYY-MM-DD" }, 400);
+  }
+  if (sex !== undefined && sex !== "m" && sex !== "f") return json({ detail: "Пол — m или f" }, 400);
   return forward("/payments/mock", {
     method: "POST",
-    body: { tariff, email: mail, ...(matrixId === undefined ? {} : { matrix_id: matrixId }) },
+    body: {
+      tariff,
+      email: mail,
+      ...(matrixId === undefined ? {} : { matrix_id: matrixId }),
+      ...(birth === undefined ? {} : { birth }),
+      ...(sex === undefined ? {} : { sex }),
+    },
     capture: true,
   });
 }

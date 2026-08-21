@@ -13,7 +13,7 @@ from .. import access
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Payment, SavedMatrix, User, iso
+from ..models import Payment, ReportJob, SavedMatrix, User, iso
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -65,6 +65,25 @@ def payments(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> di
                       for payment, email in rows]}
 
 
+@router.get("/reports")
+def reports(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Очередь печати: что печатали, сколько это заняло и что упало. Клиенту она не видна —
+    для него запрос синхронный."""
+    rows = db.execute(
+        select(ReportJob, User.email).join(User, User.id == ReportJob.user_id)
+        .order_by(ReportJob.id.desc())
+    ).all()
+    running = sum(1 for job, _e in rows if job.status == "running")
+    done = [job.seconds() for job, _e in rows if job.status == "done" and job.seconds()]
+    return {
+        "items": [{**job.item(), "user_id": job.user_id, "email": email} for job, email in rows],
+        "running": running,
+        "failed": sum(1 for job, _e in rows if job.status == "failed"),
+        # среднее время печати: по нему видно, хватает ли машине процессора
+        "avg_seconds": round(sum(done) / len(done), 1) if done else None,
+    }
+
+
 @router.get("/users/{user_id}")
 def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     """Карточка пользователя: его матрицы и его платежи."""
@@ -83,4 +102,7 @@ def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_d
         "matrices": [{**m.item(), **access.matrix_state(rights, m.id)} for m in matrices],
         "payments": [p.item() for p in payment_rows],
         "rights": [r.item() for r in rights],
+        "reports": [job.item() for job in db.scalars(
+            select(ReportJob).where(ReportJob.user_id == user.id)
+            .order_by(ReportJob.id.desc())).all()],
     }

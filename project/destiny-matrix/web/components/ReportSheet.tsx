@@ -24,41 +24,48 @@ export default function ReportSheet({
   planName,
   saved,
   currentId,
+  printing = false,
 }: {
   matrix: Matrix;
   sections: SectionOut[];
   planName: string;
   saved: SavedMatrix[];
   currentId: number;
+  /** страница печатается в PDF: кнопки и переключатели в файл не нужны */
+  printing?: boolean;
 }) {
   const open = sections.filter((s) => s.positions.length).length;
   const locked = sections.filter((s) => !s.positions.length);
 
   return (
     <>
-      <p className="crumbs">
-        <Link href="/">Главная</Link> <span>/</span> <Link href="/account">Кабинет</Link>{" "}
-        <span>/</span> <span>Мой разбор</span>
-      </p>
+      {printing ? null : (
+        <p className="crumbs">
+          <Link href="/">Главная</Link> <span>/</span> <Link href="/account">Кабинет</Link>{" "}
+          <span>/</span> <span>Мой разбор</span>
+        </p>
+      )}
       <h1>Разбор матрицы судьбы</h1>
       <div className="rsub">
         <p className="dim">
           {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} · тариф
           «{planName}» — открыто {open} из {sections.length} разделов
         </p>
-        <span className="rsubact">
-          <SavePdfButton />
-          <MatrixSwitch saved={saved} currentId={currentId} />
-        </span>
+        {printing ? null : (
+          <span className="rsubact">
+            <SavePdfButton matrixId={currentId} />
+            <MatrixSwitch saved={saved} currentId={currentId} />
+          </span>
+        )}
       </div>
 
       <div className="section-gap">
-        <MatrixResult m={matrix} />
+        <MatrixResult m={matrix} printing={printing} />
       </div>
 
-      <ReportSections sections={sections} />
+      <ReportSections sections={sections} matrixId={currentId} printing={printing} />
 
-      {locked.length ? (
+      {locked.length && !printing ? (
         <div className="allbox">
           <h3>Ещё {locked.length} разделов в полном разборе</h3>
           <p>
@@ -72,16 +79,20 @@ export default function ReportSheet({
                 </span>
             ))}
           </div>
-          <UnlockCta place="report_upgrade">
+          <UnlockCta place="report_upgrade" matrixId={currentId}>
             Купить
           </UnlockCta>
         </div>
       ) : null}
 
 
-      <p className="small section-gap">
-        <Link href="/account">Кабинет</Link> · <Link href="/#calc">Новый расчёт</Link>
-      </p>
+      {printing ? (
+        <p className="small section-gap dim">Arcana Sense · arcana-sense.ru</p>
+      ) : (
+        <p className="small section-gap">
+          <Link href="/account">Кабинет</Link> · <Link href="/#calc">Новый расчёт</Link>
+        </p>
+      )}
     </>
   );
 }

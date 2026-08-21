@@ -97,7 +97,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           </>
         ) : (
           <>
-            Нет аккаунта? <Link href="/register">Зарегистрироваться</Link>
+            Нет аккаунта? <Link href="/register">Зарегистрироваться</Link> · забыли пароль?{" "}
+            <Link href="/forgot">Восстановить</Link>
           </>
         )}
       </p>

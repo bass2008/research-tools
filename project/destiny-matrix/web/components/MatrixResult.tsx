@@ -35,7 +35,7 @@ function Bub({ v, gold = false }: { v: number; gold?: boolean }) {
   );
 }
 
-export default function MatrixResult({ m }: { m: Matrix }) {
+export default function MatrixResult({ m, printing = false }: { m: Matrix; printing?: boolean }) {
 
   // Имена — короткая форма канона из lib/encyclopedia.ts: одно число называется на сайте
   // одинаково в карте, в разборе, в таблице позиций и в справочнике. Второй строкой идёт
@@ -140,7 +140,7 @@ export default function MatrixResult({ m }: { m: Matrix }) {
         <div className="mp">
           {main.map(([who, v, hint]) => (
             <a className="mpc" key={who} href={`/encyclopedia/arcanum/${v}`}>
-              <ArcanumCard n={v} size="grid" decorative />
+              <ArcanumCard n={v} size="grid" decorative half={printing} />
               <span className="mpcap">
                 <span className="who">{who}</span>
                 <span className="nm">

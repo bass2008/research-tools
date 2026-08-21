@@ -31,3 +31,46 @@ output "monthly_cost_rub" {
     var.cores, var.core_fraction, var.memory, var.disk_type, var.disk_size,
   )
 }
+
+output "smtp_user" {
+  description = "SMTP login for Postbox: the API key id."
+  value       = yandex_iam_service_account_api_key.mailer.id
+}
+
+output "smtp_password" {
+  description = "SMTP password for Postbox."
+  value       = yandex_iam_service_account_api_key.mailer.secret_key
+  sensitive   = true
+}
+
+output "backup_bucket" {
+  description = "Bucket where backup.sh puts the dumps."
+  value       = yandex_storage_bucket.backups.bucket
+}
+
+output "postbox_api_key_id" {
+  description = "Static key id for the Postbox SES-compatible API."
+  value       = yandex_iam_service_account_static_access_key.mailer.access_key
+}
+
+output "postbox_api_secret" {
+  description = "Static key secret for the Postbox SES-compatible API."
+  value       = yandex_iam_service_account_static_access_key.mailer.secret_key
+  sensitive   = true
+}
+
+output "reports_bucket" {
+  description = "Bucket where the generated PDFs are stored."
+  value       = yandex_storage_bucket.reports.bucket
+}
+
+output "reports_access_key" {
+  description = "Static key id for the reports bucket (goes to the api container)."
+  value       = yandex_iam_service_account_static_access_key.reports.access_key
+}
+
+output "reports_secret_key" {
+  description = "Static key secret for the reports bucket."
+  value       = yandex_iam_service_account_static_access_key.reports.secret_key
+  sensitive   = true
+}

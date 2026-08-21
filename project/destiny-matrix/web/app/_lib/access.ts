@@ -105,6 +105,35 @@ export async function readMatrixUnlocked(id: number): Promise<boolean> {
   return res.ok && (res.body as { unlocked?: unknown } | null)?.unlocked === true;
 }
 
+export interface PrintPage {
+  id: number;
+  birth: string;
+  sex: "m" | "f";
+  title: string | null;
+  unlocked: boolean;
+  plan: string;
+}
+
+/**
+ * Страница печати: её открывает браузерный сервис, у которого куки владельца нет и быть не
+ * должно. Вместо неё — пропуск на одну матрицу, живущий минуту.
+ */
+export async function readPrintPage(id: number, token: string): Promise<PrintPage | null> {
+  const res = await upstream(`/reports/page/${id}?t=${encodeURIComponent(token)}`, "");
+  if (!res.ok || !res.body || typeof res.body !== "object") return null;
+  const row = res.body as Record<string, unknown>;
+  const birth = String(row.birth ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return null;
+  return {
+    id: Number(row.id),
+    birth,
+    sex: row.sex === "f" ? "f" : "m",
+    title: typeof row.title === "string" ? row.title : null,
+    unlocked: row.unlocked === true,
+    plan: typeof row.plan === "string" ? row.plan : "разбор",
+  };
+}
+
 /** Как назвать доступ в отчёте: имя тарифа берём из базы, а не из кода. */
 export function planLabel(access: Access, tariffs: Tariff[], unlocked: boolean): string {
   if (access.unlimited) {

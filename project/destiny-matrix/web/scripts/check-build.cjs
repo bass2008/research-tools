@@ -30,6 +30,7 @@ const pages = new Map(diskFiles.map((f) => [route(f), fs.readFileSync(f, "utf8")
 
 const known = new Set([...pages.keys(), ...ON_DEMAND]);
 const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/,
+  /^\/forgot$/, /^\/reset$/,
   /^\/matrices(\/\d+)?$/, /^\/admin(\/users\/\d+)?$/];
 
 let fails = [];

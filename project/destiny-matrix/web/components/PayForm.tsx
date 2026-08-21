@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ApiError, api, type MatrixListItem } from "@/lib/api";
+import { ApiError, api, type MatrixListItem, type PaymentResponse } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { clearLead, loadBirth, loadLead, saveLead } from "@/lib/storage";
 import { byId, capLabel, money, periodLabel, type Tariff } from "@/lib/tariffs";
@@ -16,9 +16,11 @@ type Stage =
   | { kind: "form" }
   // почта уже зарегистрирована, а введённый пароль не подошёл: нужен пароль владельца
   | { kind: "login-needed" }
-  | { kind: "paid"; paymentId: string; email: string };
+  | { kind: "paid"; paymentId: string; email: string; matrix: PaidMatrix | null };
 
 type LeadState = "none" | "sent" | "kept";
+
+type PaidMatrix = NonNullable<PaymentResponse["matrix"]>;
 
 const MIN_PASSWORD = 3;
 
@@ -30,11 +32,8 @@ function optionNote(t: Tariff): string {
   return parts.join(" · ");
 }
 
-/**
- * Что откроет платёж. `later` — право уйдёт без даты и сядет на первую сохранённую: так было
- * всегда, и именно из-за этого деньги однажды открыли дату, которую никто не выбирал.
- */
-type Target = "later" | "local" | number;
+/** Что откроет платёж: сохранённая дата по номеру или дата из браузера. Без цели не платим. */
+type Target = "local" | number;
 
 export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initial: string }) {
   const [chosen, setChosen] = useState(initial);
@@ -45,10 +44,6 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState<Stage>({ kind: "form" });
   const [lead, setLead] = useState<LeadState>("none");
-  const [saveState, setSaveState] = useState<"no" | "busy" | "done" | "failed">("no");
-  const [saveNote, setSaveNote] = useState<string | null>(null);
-  const [limitNote, setLimitNote] = useState<string | null>(null);
-  const [savedId, setSavedId] = useState<number | null>(null);
   const [birth, setBirth] = useState<{ birth: string; sex: "m" | "f" } | null>(null);
   const [saved, setSaved] = useState<MatrixListItem[] | null>(null);
   const [target, setTarget] = useState<Target | null>(null);
@@ -101,7 +96,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   const canPickLocal = Boolean(birth) && !localSaved;
 
   // Что предложить по умолчанию: то, с чем пришли по ссылке из кабинета, иначе первая закрытая
-  // дата, иначе дата из браузера. «Позже» остаётся осознанным выбором, а не молчаливым.
+  // дата, иначе дата из браузера. Если нечего открывать — платить не даём.
   useEffect(() => {
     if (target !== null || saved === null) return;
     if (wanted && (saved.some((m) => m.id === wanted) || saved.length === 0)) {
@@ -109,8 +104,9 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       return;
     }
     const first = saved.find((m) => m.access === "locked");
-    setTarget(first ? first.id : birth && !localSaved ? "local" : "later");
-  }, [target, saved, wanted, birth, localSaved]);
+    if (first) setTarget(first.id);
+    else if (canPickLocal) setTarget("local");
+  }, [target, saved, wanted, canPickLocal]);
 
   const targetLabel = (): string => {
     if (typeof target === "number") {
@@ -118,7 +114,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       return row ? row.title ?? birthLabel(row.birth) : "выбранная дата";
     }
     if (target === "local" && birth) return birthLabel(birth.birth);
-    return "дата, которую сохраните после оплаты";
+    return "дата не выбрана";
   };
 
   /** Лид уходит до оплаты. Отказ сети не теряет почту и не мешает платить. */
@@ -176,7 +172,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
               setStage({ kind: "login-needed" });
               setError(
                 "На эту почту уже есть аккаунт, и этот пароль к нему не подошёл. Введите пароль " +
-                  "аккаунта — тариф начислится ему.",
+                  "аккаунта или восстановите его на /forgot — тариф начислится ему.",
               );
               return;
             }
@@ -185,22 +181,32 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
         }
       }
 
-      // Какую дату открыть — выбрано на этом же экране. Без выбора право уходит без матрицы
-      // и достаётся первой сохранённой: именно так деньги однажды открыли чужую по смыслу дату.
-      const forMatrix = typeof target === "number" && !tariff.scope.includes("all")
-        ? target
-        : undefined;
-      const res = await api.payMock(tariff.id, mail, forMatrix);
+      // Цель платежа обязательна для тарифа на одну дату: без неё сервер откажет, и это верно —
+      // право, которому не к чему прилипнуть, оставляет человека с оплатой и без разбора.
+      const forAll = tariff.scope.includes("all");
+      const aim = forAll
+        ? undefined
+        : typeof target === "number"
+          ? { matrixId: target }
+          : birth
+            ? { birth: birth.birth, sex: birth.sex }
+            : undefined;
+      if (!forAll && !aim) {
+        setError("Сначала введите дату рождения — платёж открывает конкретную дату.");
+        return;
+      }
+      const res = await api.payMock(tariff.id, mail, aim);
       track("purchase", { tariff: tariff.id });
       await refreshSession();
-      setStage({ kind: "paid", paymentId: res.payment_id, email: mail });
-      // Дата из браузера сохраняется в кабинет только если её и выбрали: платные разделы
-      // печатает сервер по сохранённой матрице.
-      if (target === "local") void saveMatrix();
-      else if (forMatrix) setSavedId(forMatrix);
+      setStage({ kind: "paid", paymentId: res.payment_id, email: mail, matrix: res.matrix });
     } catch (err) {
       if (err instanceof ApiError) {
         const tail = " Платёж не прошёл — деньги не списаны.";
+        if (err.status === 401) {
+          setStage({ kind: "login-needed" });
+          setError("Сессия истекла — введите пароль аккаунта ещё раз." + tail);
+          return;
+        }
         setError(
           err.status === 0
             ? "Сервер не ответил, платёж не прошёл — деньги не списаны. Попробуйте ещё раз."
@@ -211,26 +217,6 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       }
     } finally {
       setBusy(false);
-    }
-  };
-
-  const saveMatrix = async () => {
-    if (!birth) return;
-    setSaveState("busy");
-    setSaveNote(null);
-    setLimitNote(null);
-    try {
-      const saved = await api.saveMatrix(birth.birth, birth.sex);
-      setSavedId(saved.id);
-      setSaveState("done");
-    } catch (err) {
-      setSaveState("failed");
-      if (err instanceof ApiError && err.status === 402) {
-        // слоты кончились: каждая покупка добавляет один, поэтому предлагаем купить ещё раз
-        setLimitNote(`${err.message} Уже сохранённые даты остаются открытыми.`);
-        return;
-      }
-      setSaveNote(err instanceof ApiError ? err.message : "Не получилось сохранить матрицу.");
     }
   };
 
@@ -258,46 +244,25 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
             кабинете есть прежние матрицы и платежи.
           </p>
         ) : null}
-        <p className="hint" style={{ textAlign: "left" }}>
-          Этим платежом открыта: <b>{targetLabel()}</b>.
-        </p>
+        {stage.matrix ? (
+          <p className="hint" style={{ textAlign: "left" }}>
+            Этим платежом открыта: <b>{stage.matrix.title ?? birthLabel(stage.matrix.birth)}</b>.
+          </p>
+        ) : null}
 
         <Link
           className="btn wide"
-          href={savedId ? `/report?m=${savedId}` : "/report"}
+          href={stage.matrix ? `/report?m=${stage.matrix.id}` : "/report"}
           style={{ marginTop: 14 }}
         >
           Открыть полный разбор
         </Link>
 
-        {birth ? (
-          <div style={{ marginTop: 14 }}>
-            <p className="small">
-              Матрица на {birthLabel(birth.birth)} посчитана в браузере, а платные разделы печатает
-              сервер — поэтому после оплаты она сохранена в кабинет. Дальше разбор открывается с любого
-              устройства.
-            </p>
-            <button
-              className="btn ghost sm"
-              data-testid="save-matrix"
-              onClick={saveMatrix}
-              disabled={saveState === "busy" || saveState === "done"}
-            >
-              {saveState === "done"
-                ? "Сохранено в кабинете"
-                : saveState === "busy"
-                  ? "Сохраняем…"
-                  : saveState === "failed"
-                    ? "Сохранить ещё раз"
-                    : "Сохранить матрицу в кабинет"}
-            </button>
-            {limitNote ? (
-              <div className="err" data-testid="limit-message" role="status">
-                {limitNote}
-              </div>
-            ) : null}
-            {saveNote ? <div className="err">{saveNote}</div> : null}
-          </div>
+        {stage.matrix ? (
+          <p className="small" data-testid="paid-matrix">
+            {stage.matrix.title ?? birthLabel(stage.matrix.birth)} сохранена в кабинете — платные
+            разделы печатает сервер, поэтому разбор открывается с любого устройства.
+          </p>
         ) : null}
 
         {lead === "kept" ? (
@@ -357,12 +322,13 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
           <select
             id="paytarget"
             data-testid="pay-target"
-            value={typeof target === "number" ? String(target) : (target ?? "later")}
+            value={typeof target === "number" ? String(target) : (target ?? "none")}
             onChange={(e) => {
               const v = e.target.value;
-              setTarget(v === "later" || v === "local" ? v : Number(v));
+              setTarget(v === "local" ? v : v === "none" ? null : Number(v));
             }}
           >
+            {target === null ? <option value="none">Дата не выбрана</option> : null}
             {closed.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.title ?? birthLabel(m.birth)} — закрытая дата в кабинете
@@ -373,12 +339,16 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
                 {birthLabel(birth.birth)} — дата из браузера, сохраним в кабинет
               </option>
             ) : null}
-            <option value="later">Выберу позже — право дождётся новой даты</option>
           </select>
           <p className="hint" style={{ textAlign: "left" }}>
-            {target === "later"
-              ? "Право уйдёт без даты и сядет на первую дату, которую вы сохраните после оплаты."
-              : `Откроется «${targetLabel()}». Дата рождения в платёж не передаётся — только её номер в кабинете.`}
+            {target === null ? (
+              <>
+                Дата не выбрана: платёж открывает конкретную дату.{" "}
+                <Link href="/">Введите её на главной</Link> — расчёт бесплатный.
+              </>
+            ) : (
+              `Откроется «${targetLabel()}». Платёжному провайдеру дата не передаётся.`
+            )}
           </p>
         </div>
       ) : null}
@@ -434,7 +404,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
           </div>
           <p className="hint" style={{ textAlign: "left" }}>
             {known
-              ? "На эту почту уже есть аккаунт — нужен его пароль. Восстановления пароля на сайте пока нет: если он утерян, оплатите с другой почты."
+              ? "На эту почту уже есть аккаунт — нужен его пароль. Забыли его? Восстановите на странице /forgot."
               : "С этой парой вход работает с любого устройства — писем мы не отправляем."}
           </p>
         </>
@@ -472,9 +442,8 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       ) : null}
 
       <p className="hint">
-        Дата рождения в платёж не передаётся: в ссылку оплаты она не попадает. После оплаты
-        посчитанная в браузере матрица сохраняется в ваш кабинет — по ней сервер и печатает платные
-        разделы.
+        Платёжному провайдеру дата рождения не передаётся: в ссылку оплаты она не попадает. Выбранная
+        дата сохраняется в ваш кабинет — по ней сервер печатает платные разделы.
       </p>
     </form>
   );

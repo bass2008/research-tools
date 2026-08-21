@@ -10,19 +10,11 @@ from .. import access, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import SavedMatrix, User, iso
+from ..models import SavedMatrix, User, default_title, iso
 from ..report import build_report
 from ..schemas import MatrixIn, MatrixTitleIn
 
 router = APIRouter(prefix="/matrices", tags=["matrices"])
-
-MONTHS = ("января", "февраля", "марта", "апреля", "мая", "июня",
-          "июля", "августа", "сентября", "октября", "ноября", "декабря")
-
-
-def _default_title(birth: dt.date) -> str:
-    return f"Матрица {birth.day} {MONTHS[birth.month - 1]} {birth.year}"
-
 
 def _saved(db: Session, user_id: int) -> int:
     return int(db.scalar(select(func.count(SavedMatrix.id))
@@ -71,7 +63,7 @@ def create(payload: MatrixIn, user: User = Depends(current_user),
             raise _needs_storage_right(db, used)
         try:
             row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
-                              title=(payload.title or _default_title(payload.birth)))
+                              title=(payload.title or default_title(payload.birth)))
             build_report(payload.birth, payload.sex, unlocked=False)
         except ValueError as exc:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -90,6 +82,14 @@ def create(payload: MatrixIn, user: User = Depends(current_user),
             **access.matrix_state(access.active_rights(db, user), row.id), **report}
 
 
+def one_body(db: Session, user: User, row: SavedMatrix) -> dict:
+    """Тело одной матрицы. Тем же составом её отдаёт страница печати, поэтому не в эндпоинте."""
+    report = build_report(row.birth, row.sex,
+                          unlocked=access.unlocked_matrix(db, user, row.id))
+    return {"id": row.id, "title": row.title, "created_at": iso(row.created_at),
+            **access.matrix_state(access.active_rights(db, user), row.id), **report}
+
+
 @router.get("/{matrix_id}")
 def one(matrix_id: int, user: User = Depends(current_user),
         db: Session = Depends(get_db)) -> dict:
@@ -97,10 +97,7 @@ def one(matrix_id: int, user: User = Depends(current_user),
     # чужая матрица отдаёт 404, а не 403: существование чужих записей знать незачем
     if row is None or row.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
-    report = build_report(row.birth, row.sex,
-                          unlocked=access.unlocked_matrix(db, user, row.id))
-    return {"id": row.id, "title": row.title, "created_at": iso(row.created_at),
-            **access.matrix_state(access.active_rights(db, user), row.id), **report}
+    return one_body(db, user, row)
 
 
 @router.patch("/{matrix_id}")
@@ -111,7 +108,7 @@ def rename(matrix_id: int, payload: MatrixTitleIn, user: User = Depends(current_
     if row is None or row.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
     title = (payload.title or "").strip()
-    row.title = title or _default_title(row.birth)
+    row.title = title or default_title(row.birth)
     db.commit()
     db.refresh(row)
     return {**row.item(), **access.matrix_state(access.active_rights(db, user), row.id)}

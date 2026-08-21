@@ -35,6 +35,20 @@ class Credentials(BaseModel):
         return v.strip().lower()
 
 
+class ResetRequest(BaseModel):
+    email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def _normalize(cls, v: str) -> str:
+        return v.strip().lower()
+
+
+class ResetApply(BaseModel):
+    token: str = Field(min_length=20, max_length=2000)
+    password: str = Field(min_length=3, max_length=200)
+
+
 class PaymentIn(BaseModel):
     tariff: TariffId
     email: EmailStr
@@ -57,3 +71,7 @@ class LeadIn(BaseModel):
     @classmethod
     def _normalize(cls, v: str) -> str:
         return v.strip().lower()
+
+
+class ReportRequest(BaseModel):
+    matrix_id: int

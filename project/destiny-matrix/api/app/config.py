@@ -47,6 +47,37 @@ class Settings(BaseSettings):
 
     matrices_hard_cap: int = Field(default=2000, ge=1)
 
+    # Почта. Без smtp_user и smtp_password отправка выключена: локально и в тестах письма
+    # только пишутся в лог.
+    smtp_host: str = "postbox.cloud.yandex.net"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    mail_from: str = "noreply@arcana-sense.ru"
+    mail_from_name: str = "Arcana Sense"
+    mail_reply_to: str = "hello@arcana-sense.ru"
+    site_url: str = "https://arcana-sense.ru"
+
+    # срок жизни ссылки на сброс пароля
+    reset_ttl_hours: int = Field(default=4, ge=1, le=72)
+
+    # Печать PDF. Браузер живёт отдельным контейнером: повышенные права нужны только ему,
+    # и наши секреты он не видит. Без browser_url печать отключена.
+    browser_url: str = ""
+    browser_secret: str = ""
+    browser_timeout_seconds: int = Field(default=180, ge=10, le=900)
+    # адрес, по которому браузер видит фронт (внутренняя сеть compose)
+    web_internal_url: str = "http://web:3000"
+    print_token_ttl_seconds: int = Field(default=120, ge=30, le=900)
+
+    # Object Storage под готовые отчёты. Без ключей печать отключена — файлу негде лежать.
+    s3_endpoint: str = "https://storage.yandexcloud.net"
+    s3_region: str = "ru-central1"
+    s3_reports_bucket: str = ""
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+    report_link_ttl_seconds: int = Field(default=3600, ge=60, le=86_400)
+
     # Админ — это конфиг, а не колонка в users: схема без миграций, и новая колонка заставила бы
     # пересоздавать таблицу. Список почт через запятую; сид создаёт первую из них, чтобы после
     # чистки базы админ существовал всегда.
@@ -62,6 +93,10 @@ class Settings(BaseSettings):
     @property
     def admins(self) -> list[str]:
         return [e.strip().lower() for e in self.admin_emails.split(",") if e.strip()]
+
+    @property
+    def pdf_enabled(self) -> bool:
+        return bool(self.browser_url and self.s3_reports_bucket and self.s3_access_key)
 
     def is_admin(self, email: str | None) -> bool:
         return bool(email) and email.strip().lower() in self.admins
@@ -82,6 +117,10 @@ class Settings(BaseSettings):
             raise RuntimeError("JWT_SECRET не задан: в проде ключ обязателен явно")
         if len(self.jwt_secret.encode()) < 32:
             raise RuntimeError("JWT_SECRET короче 32 байт: для HS256 этого мало")
+        # печать включена, а секрет браузерного сервиса дефолтный — значит напечатать что угодно
+        # может любой, кто попал во внутреннюю сеть
+        if self.browser_url and self.browser_secret in ("", "dev-browser-secret"):
+            raise RuntimeError("BROWSER_SECRET не задан: печать в проде без него открыта всем")
 
 
 @lru_cache

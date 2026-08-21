@@ -8,36 +8,47 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .. import access, tariffs
+from .. import access, mail, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Payment, SavedMatrix, User, utcnow
+from ..models import Payment, SavedMatrix, User, default_title, utcnow
 from ..schemas import PaymentIn
 from ..security import create_token, hash_password, random_password
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
 
-def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix | None:
-    """Разовый тариф покупают для конкретной даты, поэтому право нужно к чему-то привязать."""
+def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
+    """За какую дату платят. Разовый тариф без цели не продаётся: право, которому не к чему
+    прилипнуть, оставляет человека с оплатой и без разбора."""
     if payload.matrix_id is not None:
         row = db.get(SavedMatrix, payload.matrix_id)
         if row is None or row.user_id != user.id:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
-        return row
-    if payload.birth is None:
-        # Дата ещё не введена: право садится на последнюю сохранённую дату, которая ещё не
-        # оплачена. Если оплачены все — право уходит без матрицы и достанется следующей
-        # сохранённой (см. access.bind_single), иначе повторная покупка платила бы за уже
-        # открытую дату.
+    elif payload.birth is not None:
+        # та же дата второй раз — та же запись: платёж не должен плодить дубли
+        row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
+                                                 SavedMatrix.birth == payload.birth,
+                                                 SavedMatrix.sex == (payload.sex or "f")))
+        if row is None:
+            row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex or "f",
+                              title=default_title(payload.birth))
+            db.add(row)
+            db.flush()
+    else:
+        # дату могли сохранить до оплаты: платят за последнюю, которая ещё закрыта
         rows = db.scalars(select(SavedMatrix).where(SavedMatrix.user_id == user.id)
                           .order_by(SavedMatrix.id.desc())).all()
-        return next((row for row in rows if not access.unlocked_matrix(db, user, row.id)), None)
-    row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex or "f",
-                      title=None)
-    db.add(row)
-    db.flush()
+        found = next((r for r in rows if not access.unlocked_matrix(db, user, r.id)), None)
+        if found is None:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                                detail="Укажите дату, за которую платите: доступ к одной дате "
+                                       "нельзя купить впрок")
+        row = found
+    if access.unlocked_matrix(db, user, row.id):
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            detail="Эта дата уже открыта — второй раз платить не нужно")
     return row
 
 
@@ -90,6 +101,8 @@ def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
         "tariff": tariff.public(),
         "entitlement": right.item(),
         "matrix_id": matrix.id if matrix else None,
+        # что именно открылось — по данным сервера: экран после оплаты не должен додумывать
+        "matrix": matrix.item() if matrix else None,
         "mock": True,
     }
     if autoregistered:
@@ -97,6 +110,10 @@ def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
     else:
         body["token"] = None
         body["requires_login"] = True
+
+    # письмо после оплаты — единственное подтверждение доступа, которое остаётся у человека
+    # на руках; отказ почты платёж не отменяет
+    mail.purchase(user.email, tariff.name, payment.external_id)
     return body
 
 

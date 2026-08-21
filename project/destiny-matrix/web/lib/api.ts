@@ -84,6 +84,24 @@ export interface AdminUser {
   rights: number;
 }
 
+export interface ReportJobItem {
+  id: number;
+  matrix_id: number;
+  status: "running" | "done" | "failed";
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  /** сколько заняла печать; по нему видно, хватает ли машине процессора */
+  seconds: number | null;
+  size_bytes: number | null;
+  error: string | null;
+}
+
+export interface AdminReportJob extends ReportJobItem {
+  user_id: number;
+  email: string;
+}
+
 export interface AdminPayment extends PaymentItem {
   user_id: number;
   email: string;
@@ -112,6 +130,9 @@ export interface PaymentResponse {
   /** true — BFF получил токен и поставил куку; false — тариф начислен владельцу почты */
   authenticated: boolean;
   requires_login?: boolean;
+  /** какая дата открыта платежом — по данным сервера, а не по состоянию браузера */
+  matrix_id: number | null;
+  matrix: { id: number; birth: string; sex: "m" | "f"; title: string | null } | null;
 }
 
 export class ApiError extends Error {
@@ -176,6 +197,19 @@ export const api = {
 
   logout: () => request<{ ok: true }>("/auth/logout", { method: "POST" }),
 
+  /** Ответ одинаков для существующей и неизвестной почты: форма не должна работать проверкой адресов. */
+  resetRequest: (email: string) =>
+    request<{ ok: true; sent: boolean }>("/auth/reset/request", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  resetApply: (token: string, password: string) =>
+    request<AuthResponse>("/auth/reset/apply", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    }),
+
   // Признак доступа берётся только отсюда: в localStorage он не хранится, а лишь кешируется
   // для мгновенной отрисовки (см. lib/storage.ts).
   me: async (): Promise<MeResponse> => {
@@ -204,6 +238,8 @@ export const api = {
     users: () => request<{ items: AdminUser[] }>("/admin/users"),
     payments: () => request<{ items: AdminPayment[] }>("/admin/payments"),
     user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
+    reports: () => request<{ items: AdminReportJob[]; running: number; failed: number;
+                            avg_seconds: number | null }>("/admin/reports"),
   },
 
   // Дата уходит на сервер только по явному действию авторизованного пользователя:
@@ -224,10 +260,26 @@ export const api = {
     }),
 
   /** `matrixId` — какую сохранённую дату открыть; без него право ждёт следующую сохранённую. */
-  payMock: (tariff: string, email: string, matrixId?: number) =>
+  payMock: (
+    tariff: string,
+    email: string,
+    target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
+  ) =>
     request<PaymentResponse>("/payments/mock", {
       method: "POST",
-      body: JSON.stringify({ tariff, email, ...(matrixId ? { matrix_id: matrixId } : {}) }),
+      body: JSON.stringify({
+        tariff,
+        email,
+        ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
+        ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
+      }),
+    }),
+
+  reportPdf: (matrixId: number) =>
+    request<{ job_id: number; status: string; cached: boolean; url: string; size_bytes: number | null;
+              seconds: number | null }>("/reports/pdf", {
+      method: "POST",
+      body: JSON.stringify({ matrix_id: matrixId }),
     }),
 
   lead: (email: string, source?: string) =>

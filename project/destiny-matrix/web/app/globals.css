@@ -735,6 +735,62 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 /* ── печать: тот же разбор, но листом ────────────────────────────────────────────────
    Кнопка «Сохранить как PDF» открывает диалог печати браузера, поэтому вид файла задаётся
    здесь. Убираем всё, что на бумаге не работает: шапку, подвал, кнопки, продажу. */
+/* печать идёт на сервере и на слабом CPU занимает десятки секунд: пока идёт — по кнопке
+   бежит полоса, а сама она заблокирована */
+.pdfbtn.working { position: relative; overflow: hidden; color: var(--dim); cursor: progress; }
+.pdfbtn.working::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(14, 143, 136, 0.28), transparent);
+  animation: pdfrun 1.1s linear infinite;
+}
+@keyframes pdfrun {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+/* Разбиение PDF по страницам — на случай печати в A4 (SINGLE_PAGE=0 у сервиса печати). По
+   умолчанию файл печатается одним листом во всю длину, и разрывов в нём нет вовсе. Правила висят
+   на классе, а не в @media print: печать идёт в режиме screen, и печатный блок к ней не
+   применяется. */
+/* Запрет разрыва — только на мелком: карточка позиции, карта с подписью, строка таблицы. Целый
+   раздел (.acc) так помечать нельзя — он уезжает на следующую страницу целиком и оставляет
+   полстраницы пустой (проверено: 34 страницы превратились в 45). */
+.printmode .poscard,
+.printmode .mpc,
+.printmode .postab tr,
+.printmode .chak .row { break-inside: avoid; }
+/* Всё, что крупнее карточки, рвать разрешено: запрет гнал целые разделы на новую страницу и
+   раздувал файл с 34 страниц до 45. Текст позиции продолжится на следующей странице — это
+   читается нормально, в отличие от разрезанной пополам карты. */
+/* Шесть главных точек — это ряд из шести карт. На сайте колонки подбирает auto-fit по ширине
+   окна, а в печати ширина фиксированная, и шестая карта срывалась на вторую строку. */
+.printmode .mp { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.printmode .acc,
+.printmode .mp,
+.printmode .poslist,
+.printmode .poslist li,
+.printmode .panel { break-inside: auto; }
+/* Заголовок и подпись под ним держатся вместе со следующим блоком: без .cap в этом списке
+   «Главные точки» печатались одни, а сетка карт уезжала на следующую страницу. */
+.printmode h1,
+.printmode h2,
+.printmode h3,
+.printmode summary,
+.printmode .cap { break-after: avoid; }
+/* Тени печатаются полноразмерными серыми масками — по одной на панель, десятки на файл. */
+.printmode .panel,
+.printmode .acc,
+.printmode .poscard { box-shadow: none; }
+.printmode .postab tr,
+.printmode .chak .row { break-inside: avoid; }
+/* страница печати: шапку и подвал рисует общий layout, в PDF им места нет */
+body:has(.printmode) .site-header,
+body:has(.printmode) .site-footer { display: none; }
+body:has(.printmode) { background: #fff; }
+.printmode .wrap { max-width: 1120px; }
+
 @media print {
   .site-header,
   .site-footer,

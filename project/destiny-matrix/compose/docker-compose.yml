@@ -1,60 +1,85 @@
-# Весь продукт двумя контейнерами: FastAPI и node-сервер Next.js. Раскладка та же, что на
-# машине (docs/api-contract.md, «Раскладка деплоя»): браузер ходит только во фронт, а фронт
-# своим BFF — в api по внутренней сети. Порт api наружу открыт только для отладки.
+# Состав продукта — один раз и для всех раскладок: FastAPI, node-сервер Next.js и Chromium для
+# печати PDF. Браузер ходит только во фронт, фронт своим BFF — в api по внутренней сети.
+#
+# Этот файл едет на боевую машину как есть: там образы приходят готовыми из реестра. Локально
+# рядом лежит docker-compose.override.yml — compose подхватывает его сам и добавляет сборку из
+# исходников, порты наружу и dev-значения секретов. На машине override отсутствует, поэтому
+# dev-надстройка туда физически не попадает.
 name: arcana
 
 services:
   api:
-    build:
-      context: ..
-      dockerfile: compose/api.Dockerfile
+    image: ${REGISTRY:-arcana}/api:${TAG:-dev}
+    # Секреты — только файлом, и ни одной строкой в environment: явное значение в compose имеет
+    # приоритет над env_file, поэтому `S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}` затирал бы ключ из файла
+    # пустой строкой. Обязательность секретов в проде проверяет сам api (settings.check).
+    env_file:
+      - path: .env
+        required: false
     environment:
-      APP_ENV: ${APP_ENV:-dev}
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-меняется-в-проде-обязательно}
+      APP_ENV: ${APP_ENV:-prod}
       MOCK_PAYMENTS: ${MOCK_PAYMENTS:-1}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-snborodaenko@mail.ru}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123}
       MATRICES_HARD_CAP: ${MATRICES_HARD_CAP:-2000}
+      SITE_URL: ${SITE_URL:-https://arcana-sense.ru}
+      # печать PDF: браузер отдельным сервисом, готовые файлы — в Object Storage
+      BROWSER_URL: ${BROWSER_URL:-http://browser:3001}
+      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://web:3000}
     volumes:
       # база переживает пересборку образа: платежи и матрицы не одноразовые
       - api-var:/srv/api/var
-    ports:
-      - "127.0.0.1:${API_PORT:-8010}:8010"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
-      interval: 5s
-      timeout: 4s
+      interval: 10s
+      timeout: 5s
       retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  # Chromium для печати PDF. Отдельный контейнер: повышенные права и 300+ МБ памяти на печать
+  # не должны жить рядом с сайтом, а зависший браузер лечится перезапуском одного сервиса.
+  browser:
+    image: ${REGISTRY:-arcana}/browser:${TAG:-dev}
+    # тот же файл секретов, что у api: BROWSER_SECRET у них обязан совпадать
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MAX_JOBS: ${BROWSER_MAX_JOBS:-50}
+      MAX_RSS_MB: ${BROWSER_MAX_RSS_MB:-400}
+    # жёсткая граница вместо надежды на oom_score: node с сайтом за ней в безопасности
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
       start_period: 5s
     restart: unless-stopped
 
   web:
-    build:
-      context: ../web
-      dockerfile: ../compose/web.Dockerfile
-      args:
-        NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
-        # версия сборки: отдаётся на /version/current.txt и видна в админке
-        BUILD_COMMIT: ${BUILD_COMMIT:-—}
-        BUILD_BRANCH: ${BUILD_BRANCH:-—}
-        BUILD_TIME: ${BUILD_TIME:-—}
+    image: ${REGISTRY:-arcana}/web:${TAG:-dev}
     environment:
       # BFF ходит в api по имени сервиса — наружу этот адрес не попадает
       API_INTERNAL_URL: http://api:8010
-      NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
-      # по http кука с secure не ставится и вход не работает; на домене с TLS поставить 1
-      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-0}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-1}
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      # наружу смотрит nginx хоста, поэтому node слушает только localhost
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    volumes:
+      # статику отдаёт nginx хоста, поэтому контейнер выкладывает её в общий каталог
+      - ${STATIC_DIR:-/srv/arcana/static}:/static-out
+    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
     depends_on:
       api:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
-      interval: 5s
-      timeout: 4s
+      interval: 10s
+      timeout: 5s
       retries: 12
-      start_period: 5s
+      start_period: 10s
     restart: unless-stopped
 
 volumes:

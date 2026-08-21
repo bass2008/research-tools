@@ -101,3 +101,21 @@ variable "subnet_cidr" {
   description = "IPv4 range of the single subnet."
   default     = "10.10.0.0/24"
 }
+
+variable "postbox_identity" {
+  type        = string
+  description = "Postbox identity id: the DKIM CNAME records are named after it."
+  default     = "egt9t0234kcdnqq4953i"
+}
+
+variable "backup_bucket" {
+  type        = string
+  description = "Bucket for database dumps; each product keeps its own prefix inside."
+  default     = "db-backups-hjb4rfs"
+}
+
+variable "reports_bucket" {
+  type        = string
+  description = "Bucket for generated report PDFs."
+  default     = "arcana-reports-hjb4rfs"
+}

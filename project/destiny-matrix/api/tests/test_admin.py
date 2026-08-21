@@ -7,9 +7,10 @@ from app.config import settings
 def test_admin_sees_users_and_payments(client, auth, db):
     # обычный аккаунт с покупкой — он должен попасть в список
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "buyer@example.ru"}).json()
+                       json={"tariff": "single", "email": "buyer@example.ru", "birth": "1990-05-05"}).json()
     buyer = {"Authorization": f"Bearer {paid['token']}"}
-    client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"}, headers=buyer)
+    # матрицу создал сам платёж: разовый тариф покупают за конкретную дату
+    assert paid["matrix"]["birth"] == "1990-05-05"
 
     admin = auth(settings.admins[0])
     rows = client.get("/api/admin/users", headers=admin).json()["items"]

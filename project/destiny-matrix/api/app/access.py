@@ -72,15 +72,19 @@ def matrix_state(rights: list[Entitlement], matrix_id: int) -> dict:
 
 def bind_single(db: Session, user: User, matrix_id: int,
                 now: dt.datetime | None = None) -> bool:
-    """Привязать разовое право к матрице, если оно куплено раньше, чем введена дата.
+    """Привязать разовое право к матрице, если оно осталось без неё.
 
-    Дата рождения в платёжный запрос не входит (так обещано в оферте), поэтому купленное право
-    приходит без матрицы. Оплаченной становится первая дата, к которой право применили.
+    Новые платежи всегда указывают дату, так что таких прав больше не появляется. Функция лечит
+    права, купленные до этого правила: оплаченной становится первая дата, к которой их применили.
     """
     for right in active_rights(db, user, now):
         kinds = right.scopes()
         if SINGLE in kinds and ALL not in kinds and right.matrix_id is None:
             right.matrix_id = matrix_id
+            # история платежей обязана показывать дату, которую открыл платёж
+            payment = db.get(Payment, right.payment_id) if right.payment_id else None
+            if payment is not None and payment.matrix_id is None:
+                payment.matrix_id = matrix_id
             db.commit()
             return True
     return False

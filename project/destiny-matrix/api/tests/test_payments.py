@@ -56,20 +56,25 @@ def test_prices_come_from_database(client, db):
     assert payment.amount == 19_900
 
 
-def test_single_without_date_binds_to_first_saved_matrix(client, db):
-    """Дата в платёж не уходит, поэтому право приходит без матрицы и находит её при сохранении."""
-    paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "late@example.ru"}).json()
-    assert paid["matrix_id"] is None and paid["entitlement"]["matrix_id"] is None
-    headers = {"Authorization": f"Bearer {paid['token']}"}
+def test_single_without_target_is_rejected(client, db):
+    """Разовый тариф впрок не продаётся: право, которому не к чему прилипнуть, — оплата без разбора."""
+    r = client.post("/api/payments/mock", json={"tariff": "single", "email": "late@example.ru"})
+    assert r.status_code == 400 and "Укажите дату" in r.json()["detail"]
+    # ни платежа, ни пользователя после отказа не остаётся
+    assert db.scalar(select(Payment).limit(1)) is None
+    assert db.scalar(select(User).where(User.email == "late@example.ru")) is None
 
-    saved = client.post("/api/matrices", json={"birth": "1990-02-03", "sex": "f"},
-                        headers=headers).json()
+
+def test_single_creates_and_opens_the_date_from_payment(client, db):
+    """Дата из платежа сохраняется сразу: разбор открыт с любого устройства, без второго шага."""
+    paid = client.post("/api/payments/mock",
+                       json={"tariff": "single", "email": "now@example.ru",
+                             "birth": "1990-02-03", "sex": "f"}).json()
+    assert paid["matrix"]["birth"] == "1990-02-03" and paid["entitlement"]["matrix_id"] == paid["matrix_id"]
+    headers = {"Authorization": f"Bearer {paid['token']}"}
+    saved = client.get(f"/api/matrices/{paid['matrix_id']}", headers=headers).json()
     assert saved["unlocked"] is True
     assert all(s["positions"] for s in saved["sections"] if s["access"] == "paid")
-
-    row = db.scalar(select(Entitlement).where(Entitlement.user_id == saved_user(db, "late@example.ru")))
-    assert row.matrix_id == saved["id"]
 
 
 def test_single_without_date_binds_to_existing_matrix(client, auth, db):
@@ -81,7 +86,7 @@ def test_single_without_date_binds_to_existing_matrix(client, auth, db):
 
     paid = client.post("/api/payments/mock",
                        json={"tariff": "single", "email": "has@example.ru"}).json()
-    assert paid["matrix_id"] == saved["id"]
+    assert paid["matrix_id"] == saved["id"]      # закрытая дата у аккаунта одна, платить есть за что
     again = client.get(f"/api/matrices/{saved['id']}", headers=headers).json()
     assert again["unlocked"] is True
 
@@ -89,10 +94,10 @@ def test_single_without_date_binds_to_existing_matrix(client, auth, db):
 def test_second_date_stays_closed_after_single(client, db):
     """Разовое право прилипает к одной дате: вторая сохраняется, но остаётся закрытой."""
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "one@example.ru"}).json()
+                       json={"tariff": "single", "email": "one@example.ru",
+                             "birth": "1991-01-01", "sex": "f"}).json()
     headers = {"Authorization": f"Bearer {paid['token']}"}
-    first = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
-                        headers=headers).json()
+    first = client.get(f"/api/matrices/{paid['matrix_id']}", headers=headers).json()
     assert first["unlocked"] is True
     second = client.post("/api/matrices", json={"birth": "1992-02-02", "sex": "f"},
                          headers=headers)
@@ -102,19 +107,19 @@ def test_second_date_stays_closed_after_single(client, db):
 def test_single_bought_twice_opens_two_dates(client, db):
     """Разовый покупают сколько угодно раз: каждая покупка открывает свою дату."""
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "twice@example.ru"}).json()
+                       json={"tariff": "single", "email": "twice@example.ru",
+                             "birth": "1991-01-01", "sex": "f"}).json()
     headers = {"Authorization": f"Bearer {paid['token']}"}
-    first = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
-                        headers=headers).json()
+    first = client.get(f"/api/matrices/{paid['matrix_id']}", headers=headers).json()
     assert first["unlocked"] is True
 
-    # вторая покупка не должна сесть на уже оплаченную дату: право уходит без матрицы
+    # вторая покупка называет свою дату и не садится на уже оплаченную
     again = client.post("/api/payments/mock",
-                        json={"tariff": "single", "email": "twice@example.ru"}).json()
-    assert again["matrix_id"] is None
+                        json={"tariff": "single", "email": "twice@example.ru",
+                              "birth": "1992-02-02", "sex": "f"}).json()
+    assert again["matrix_id"] != paid["matrix_id"]
 
-    second = client.post("/api/matrices", json={"birth": "1992-02-02", "sex": "f"},
-                         headers=headers).json()
+    second = client.get(f"/api/matrices/{again['matrix_id']}", headers=headers).json()
     assert second["unlocked"] is True
     # первая дата открытой и осталась: права не переезжают
     assert client.get(f"/api/matrices/{first['id']}", headers=headers).json()["unlocked"] is True
@@ -126,7 +131,8 @@ def test_single_bought_twice_opens_two_dates(client, db):
 def test_repeated_save_of_same_date_does_not_spend_slot(client, db):
     """Та же дата второй раз — это то же самое хранилище, а не новая матрица."""
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "same@example.ru"}).json()
+                       json={"tariff": "single", "email": "same@example.ru",
+                             "birth": "1991-01-01", "sex": "f"}).json()
     headers = {"Authorization": f"Bearer {paid['token']}"}
     first = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
                         headers=headers).json()
@@ -148,9 +154,6 @@ def test_subscription_stores_any_number_of_dates(client, db):
     me = client.get("/api/auth/me", headers=headers).json()
     assert me["matrices_used"] == 5 and me["matrices_limit"] is None
 
-
-def saved_user(db, email: str) -> int:
-    return db.scalar(select(User.id).where(User.email == email))
 
 
 def test_known_email_gets_right_but_no_token(client, auth):
@@ -199,7 +202,8 @@ def test_mock_flag_exists_in_settings():
 def test_payments_listing_shows_own_history(client, auth, db):
     """Кабинет показывает свои платежи со снимком тарифа и не показывает чужие."""
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "hist@example.ru"}).json()
+                       json={"tariff": "single", "email": "hist@example.ru",
+                             "birth": "1990-01-01"}).json()
     headers = {"Authorization": f"Bearer {paid['token']}"}
     client.post("/api/payments/mock", json={"tariff": "month", "email": "hist@example.ru"})
     rows = client.get("/api/payments", headers=headers).json()["items"]
@@ -218,10 +222,10 @@ def test_payment_opens_the_chosen_date(client, db):
     ту, что сохранена позже, — деньги открыли не то, что человек выбирал.
     """
     paid = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "pick@example.ru"}).json()
+                       json={"tariff": "single", "email": "pick@example.ru",
+                             "birth": "1991-01-01", "sex": "f"}).json()
     headers = {"Authorization": f"Bearer {paid['token']}"}
-    first = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
-                        headers=headers).json()
+    first = client.get(f"/api/matrices/{paid['matrix_id']}", headers=headers).json()
     second = client.post("/api/matrices", json={"birth": "1992-02-02", "sex": "m"},
                          headers=headers).json()
     assert first["unlocked"] is True and second["unlocked"] is False
@@ -239,10 +243,38 @@ def test_payment_opens_the_chosen_date(client, db):
 def test_payment_for_someone_elses_date_is_404(client, db):
     """Чужую дату оплатить нельзя: её как бы и нет."""
     mine = client.post("/api/payments/mock",
-                       json={"tariff": "single", "email": "own@example.ru"}).json()
-    headers = {"Authorization": f"Bearer {mine['token']}"}
-    row = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
-                      headers=headers).json()
+                       json={"tariff": "single", "email": "own@example.ru",
+                             "birth": "1991-01-01", "sex": "f"}).json()
     r = client.post("/api/payments/mock",
-                    json={"tariff": "single", "email": "alien@example.ru", "matrix_id": row["id"]})
+                    json={"tariff": "single", "email": "alien@example.ru",
+                          "matrix_id": mine["matrix_id"]})
     assert r.status_code == 404
+
+
+def test_paying_twice_for_the_same_date_is_rejected(client, db):
+    """Открытую дату второй раз не продаём: это оплата за то, что уже есть."""
+    paid = client.post("/api/payments/mock",
+                       json={"tariff": "single", "email": "dup@example.ru",
+                             "birth": "1994-04-04", "sex": "f"}).json()
+    by_date = client.post("/api/payments/mock",
+                          json={"tariff": "single", "email": "dup@example.ru",
+                                "birth": "1994-04-04", "sex": "f"})
+    assert by_date.status_code == 409 and "уже открыта" in by_date.json()["detail"]
+    by_id = client.post("/api/payments/mock",
+                        json={"tariff": "single", "email": "dup@example.ru",
+                              "matrix_id": paid["matrix_id"]})
+    assert by_id.status_code == 409
+    user = db.scalar(select(User).where(User.email == "dup@example.ru"))
+    assert len(db.scalars(select(Payment).where(Payment.user_id == user.id)).all()) == 1
+
+
+def test_every_single_right_has_a_date(client, db):
+    """Инвариант: у разового права всегда есть матрица, и платёж помнит ту же."""
+    for i, day in enumerate(("05", "06", "07"), start=1):
+        client.post("/api/payments/mock", json={"tariff": "single", "email": "inv@example.ru",
+                                                "birth": f"1995-05-{day}", "sex": "f"})
+    user = db.scalar(select(User).where(User.email == "inv@example.ru"))
+    rights = db.scalars(select(Entitlement).where(Entitlement.user_id == user.id)).all()
+    payments = db.scalars(select(Payment).where(Payment.user_id == user.id)).all()
+    assert len(rights) == 3 and all(r.matrix_id is not None for r in rights)
+    assert {p.matrix_id for p in payments} == {r.matrix_id for r in rights}

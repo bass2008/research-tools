@@ -28,11 +28,16 @@ export default function ReportSections({
   sections,
   checking = false,
   place = "report",
+  matrixId,
+  printing = false,
 }: {
   sections: SectionOut[];
   /** сервер ещё не ответил про доступ: замок показываем, но продавать нечего */
   checking?: boolean;
   place?: string;
+  matrixId?: number | null;
+  /** печать в PDF: разделы раскрыты, кнопок покупки нет */
+  printing?: boolean;
 }) {
   const open = sections.filter((s) => s.positions.length > 0).length;
   const locked = sections.length - open;
@@ -55,7 +60,7 @@ export default function ReportSections({
           <details
             className="acc"
             key={s.key}
-            open={i === 0}
+            open={printing || i === 0}
             data-testid={`section-${s.key}`}
             data-locked="false"
           >
@@ -70,7 +75,7 @@ export default function ReportSections({
                   <li key={`${p.label}-${j}`}>
                     <a className="poscard" href={p.href}>
                       <span className="who">{p.label}</span>
-                      <ArcanumCard n={p.arcanum} size="grid" decorative />
+                      <ArcanumCard n={p.arcanum} size="grid" decorative half={printing} />
                       <span className="lb">
                         <span className="nm">
                           <span className="rn">{p.arcanum}</span> {arcanumTitle(p.arcanum)}
@@ -90,15 +95,15 @@ export default function ReportSections({
           </details>
         ) : (
           <div className="acc lock" key={s.key} data-testid={`section-${s.key}`} data-locked="true">
-            {checking ? (
+            {checking || printing ? (
               <span className="head">
                 {s.title}
                 <span className="unlock">
-                  <LockIcon /> Проверяем доступ…
+                  <LockIcon /> {printing ? "Не открыт" : "Проверяем доступ…"}
                 </span>
               </span>
             ) : (
-              <UnlockCta className="head" place={place} section={s.key}>
+              <UnlockCta className="head" place={place} section={s.key} matrixId={matrixId}>
                 {s.title}
                 <span className="unlock">
                   <LockIcon /> Открыть
