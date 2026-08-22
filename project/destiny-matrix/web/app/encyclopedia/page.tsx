@@ -17,6 +17,7 @@ import {
   positionHref,
 } from "@/lib/encyclopedia";
 import { pageMeta } from "@/lib/site";
+import { counted, plural } from "@/lib/plural";
 
 export const metadata: Metadata = pageMeta({
   title: "Энциклопедия матрицы судьбы: 22 аркана, позиции карты, чакры и сочетания",
@@ -67,8 +68,11 @@ export default function EncyclopediaIndexPage() {
         </p>
         <h1>Энциклопедия матрицы судьбы</h1>
         <p className="dim prose">
-          Справочник, на который ссылается каждая позиция отчёта: {ARCANA.length} арканов,{" "}
-          {POSITIONS.length} позиций карты, {CHAKRA_PAGES.length} чакр и {combos.length} сочетаний — всего{" "}
+          Справочник, на который ссылается каждая позиция отчёта:{" "}
+          {counted(ARCANA.length, "аркан", "аркана", "арканов")},{" "}
+          {counted(POSITIONS.length, "позиция", "позиции", "позиций")} карты,{" "}
+          {counted(CHAKRA_PAGES.length, "чакра", "чакры", "чакр")} и{" "}
+          {counted(combos.length, "сочетание", "сочетания", "сочетаний")} — всего{" "}
           {ENCYCLOPEDIA_PAGE_COUNT} страниц. Разборы всех 5544 карт — в{" "}
           <Link href="/matrix">каталоге матриц</Link>, расчёт по своей дате —{" "}
           <Link href="/#calc">на главной</Link>.
@@ -129,7 +133,8 @@ export default function EncyclopediaIndexPage() {
 
         <h2 className="section-gap">Сочетания арканов</h2>
         <p className="dim">
-          {combos.length} страниц: каждая пара арканов от 1–2 до 21–22. Ниже — вход по первому аркану.
+          {counted(combos.length, "страница", "страницы", "страниц")}: каждая пара арканов от 1–2
+          до 21–22. Ниже — вход по первому аркану.
         </p>
         <div className="cardgrid">
           {ARCANA.map((a) => (

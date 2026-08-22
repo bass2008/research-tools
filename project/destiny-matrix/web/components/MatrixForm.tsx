@@ -88,7 +88,8 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
 
   // Платные разделы на лендинг не приходят вовсе: их печатает сервер на /report по
   // сохранённой матрице. Здесь всегда два открытых раздела и восемнадцать имён под замком.
-  const granted = session.status === "user" && session.paid;
+  // право на любые даты открывает и эту; разовая покупка — только оплаченную дату
+  const anyDate = session.status === "user" && session.unlimited;
   const sections = matrix ? buildFree(matrix, texts) : [];
   const locked = sections.filter((s) => !s.positions.length);
 
@@ -176,11 +177,11 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
                 </span>
                 ))}
               </div>
-              {granted && matrix ? (
+              {anyDate && matrix ? (
                 <>
                   <p className="small">
-                    Тариф «{granted}» уже оплачен. Толкования печатает сервер, поэтому сохраните эту дату
-                    в кабинет — разбор откроется на отдельной странице.
+                    Ваш тариф открывает любые даты. Толкования печатает сервер, поэтому сохраните эту
+                    дату в кабинет — разбор откроется на отдельной странице.
                   </p>
                   <SaveMatrixButton
                     birth={matrix.birth}
@@ -207,7 +208,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
 
             <p className="small section-gap">
               Полный отчёт по этой же дате открывается на отдельной странице:{" "}
-              <Link href="/report">{granted ? "все разделы вашего тарифа" : "два раздела бесплатно"}</Link>
+              <Link href="/report">{anyDate ? "все разделы вашего тарифа" : "два раздела бесплатно"}</Link>
               .
             </p>
           </section>

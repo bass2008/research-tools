@@ -1,5 +1,5 @@
 import { arcanum, arcanumTitle } from "@/lib/arcana";
-import type { Matrix } from "@/lib/matrix";
+import { birthLabel, type Matrix } from "@/lib/matrix";
 
 import ArcanumCard from "./ArcanumCard";
 import Octagram from "./Octagram";
@@ -16,16 +16,6 @@ const CHAKRA_COLORS: Record<string, string> = {
   svadhisthana: "#dd7b2a",
   muladhara: "#c9453a",
 };
-
-const MONTHS = [
-  "января", "февраля", "марта", "апреля", "мая", "июня",
-  "июля", "августа", "сентября", "октября", "ноября", "декабря",
-];
-
-export function birthLabel(birth: string): string {
-  const [y, m, d] = birth.split("-").map(Number);
-  return `${d} ${MONTHS[m - 1]} ${y}`;
-}
 
 function Bub({ v, gold = false }: { v: number; gold?: boolean }) {
   return (
@@ -192,3 +182,5 @@ export default function MatrixResult({ m, printing = false }: { m: Matrix; print
     </>
   );
 }
+
+export { birthLabel };

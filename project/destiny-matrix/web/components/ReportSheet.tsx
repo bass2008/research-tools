@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import type { Matrix } from "@/lib/matrix";
+import { counted } from "@/lib/plural";
 import LockIcon from "./LockIcon";
 import MatrixSwitch from "./MatrixSwitch";
 import SavePdfButton from "./SavePdfButton";
@@ -49,7 +50,7 @@ export default function ReportSheet({
       <div className="rsub">
         <p className="dim">
           {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} · тариф
-          «{planName}» — открыто {open} из {sections.length} разделов
+          «{planName}» — открыто {open} из {counted(sections.length, "раздела", "разделов", "разделов")}
         </p>
         {printing ? null : (
           <span className="rsubact">
@@ -67,7 +68,7 @@ export default function ReportSheet({
 
       {locked.length && !printing ? (
         <div className="allbox">
-          <h3>Ещё {locked.length} разделов в полном разборе</h3>
+          <h3>Ещё {counted(locked.length, "раздел", "раздела", "разделов")} в полном разборе</h3>
           <p>
             Ваш тариф открывает часть платных разделов. Полный разбор добавляет остальные — одним
             платежом.

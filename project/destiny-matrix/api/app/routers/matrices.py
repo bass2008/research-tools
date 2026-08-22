@@ -27,11 +27,12 @@ def _needs_storage_right(db: Session, used: int) -> HTTPException:
     Названия тарифов берём из справочника: они живут в базе и меняются без правки кода.
     """
     single = next((t for t in tariffs.public_tariffs(db) if access.ALL not in t.scopes()), None)
-    offer = f"«{single.name}» откроет ещё одну" if single else ""
+    # Про «оплаченные даты» говорить нельзя: чаще всего человек ещё ничего не покупал, и такой
+    # текст читается как отказ в том, за что он уже заплатил.
+    offer = f" «{single.name}» добавит ещё одно место." if single else ""
     return HTTPException(
         status.HTTP_402_PAYMENT_REQUIRED,
-        detail=f"Сохранено {used} — все оплаченные даты заняты. {offer}." if offer
-        else f"Сохранено {used} — все оплаченные даты заняты.",
+        detail=f"Мест для хранения дат больше нет: занято {used}.{offer}",
     )
 
 

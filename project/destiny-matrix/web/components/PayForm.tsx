@@ -1,11 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ApiError, api, type MatrixListItem, type PaymentResponse } from "@/lib/api";
 import { track } from "@/lib/analytics";
+import {
+  alreadyOpen,
+  fromValue,
+  options as targetOptions,
+  pickTarget,
+  stillValid,
+  targetLabel as labelOf,
+  targetValue,
+  type Target,
+} from "@/lib/paytarget";
 import { clearLead, loadBirth, loadLead, saveLead } from "@/lib/storage";
 import { byId, capLabel, money, periodLabel, type Tariff } from "@/lib/tariffs";
 
@@ -32,9 +42,6 @@ function optionNote(t: Tariff): string {
   return parts.join(" · ");
 }
 
-/** Что откроет платёж: сохранённая дата по номеру или дата из браузера. Без цели не платим. */
-type Target = "local" | number;
-
 export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initial: string }) {
   const [chosen, setChosen] = useState(initial);
   const [email, setEmail] = useState("");
@@ -46,10 +53,17 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   const [lead, setLead] = useState<LeadState>("none");
   const [birth, setBirth] = useState<{ birth: string; sex: "m" | "f" } | null>(null);
   const [saved, setSaved] = useState<MatrixListItem[] | null>(null);
-  const [target, setTarget] = useState<Target | null>(null);
+  const [target, setTarget] = useState<Target>(null);
+  // человек сам выбрал в списке: с этого момента адрес его выбор не перебивает
+  const [picked, setPicked] = useState(false);
   // вошли в уже существующий аккаунт: об этом надо сказать, а не проводить молча
   const [signedInto, setSignedInto] = useState<string | null>(null);
-  const wanted = Number(useSearchParams().get("m") ?? "") || null;
+  const params = useSearchParams();
+  const wanted = Number(params.get("m") ?? "") || null;
+  // Чек живёт по своему адресу: пока он был только состоянием формы, «Купить» из шапки
+  // возвращал прошлую покупку вместо новой формы.
+  const receipt = params.get("paid");
+  const router = useRouter();
   const session = useSession();
   const tariff = byId(tariffs, chosen) ?? tariffs[0];
   const signedIn = session.status === "user" && session.email === email.trim().toLowerCase();
@@ -60,6 +74,21 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
     track("pay_open", { tariff: initial });
     setBirth(loadBirth());
   }, [initial]);
+
+  // Дата в браузере могла смениться, пока форма открыта: человек уходит считать другую и
+  // возвращается назад, а Next восстанавливает состояние сегмента. Из-за этого платёж однажды
+  // ушёл за прежнюю дату, поэтому дату перечитываем и на возврате к вкладке.
+  useEffect(() => {
+    const refresh = () => setBirth(loadBirth());
+    window.addEventListener("focus", refresh);
+    window.addEventListener("pageshow", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("pageshow", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, []);
 
   // Лид, залёгший в браузере из-за отказа сети, уходит при следующем открытии формы —
   // иначе обещание «отправится сама» было бы ложью.
@@ -79,8 +108,11 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   }, [session.status, session.email]);
 
   // Список сохранённых дат нужен, чтобы человек выбрал, какую именно открыть. Гостю выбирать
-  // нечего: у него есть только дата из браузера.
+  // нечего: у него есть только дата из браузера. Пока сессия не подтверждена, список остаётся
+  // пустым (null): раньше «гость» выставлялся на время ожидания ответа, и цель успевала встать
+  // на дату из браузера ещё до того, как приходили сохранённые записи.
   useEffect(() => {
+    if (session.status === "loading") return;
     if (session.status !== "user") {
       setSaved([]);
       return;
@@ -91,31 +123,24 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       .catch(() => setSaved([]));
   }, [session.status]);
 
-  const closed = (saved ?? []).filter((m) => m.access === "locked");
-  const localSaved = birth ? (saved ?? []).find((m) => m.birth === birth.birth) : undefined;
-  const canPickLocal = Boolean(birth) && !localSaved;
+  const choices = saved === null ? [] : targetOptions(saved, birth);
+  const chosenLabel = labelOf(target, saved ?? [], birth);
+  const opened = alreadyOpen(saved ?? [], birth);
 
-  // Что предложить по умолчанию: то, с чем пришли по ссылке из кабинета, иначе первая закрытая
-  // дата, иначе дата из браузера. Если нечего открывать — платить не даём.
+  // Цель считаем одной функцией и только по загруженному списку. Дата из адреса главнее уже
+  // выбранной, пока человек не тронул список руками: ссылка «Открыть — 250 ₽» из кабинета обещает
+  // конкретную дату, и платёж обязан уйти за неё.
   useEffect(() => {
-    if (target !== null || saved === null) return;
-    if (wanted && (saved.some((m) => m.id === wanted) || saved.length === 0)) {
-      setTarget(wanted);
+    if (saved === null) return;
+    const list = targetOptions(saved, birth);
+    const asked = wanted === null ? null : pickTarget(saved, birth, wanted);
+    if (!picked && asked !== null && targetValue(asked) === String(wanted)) {
+      if (targetValue(target) !== String(wanted)) setTarget(asked);
       return;
     }
-    const first = saved.find((m) => m.access === "locked");
-    if (first) setTarget(first.id);
-    else if (canPickLocal) setTarget("local");
-  }, [target, saved, wanted, canPickLocal]);
-
-  const targetLabel = (): string => {
-    if (typeof target === "number") {
-      const row = (saved ?? []).find((m) => m.id === target);
-      return row ? row.title ?? birthLabel(row.birth) : "выбранная дата";
-    }
-    if (target === "local" && birth) return birthLabel(birth.birth);
-    return "дата не выбрана";
-  };
+    if (stillValid(target, list)) return;
+    setTarget(pickTarget(saved, birth, wanted));
+  }, [saved, birth, wanted, target, picked]);
 
   /** Лид уходит до оплаты. Отказ сети не теряет почту и не мешает платить. */
   const sendLead = async (mail: string): Promise<void> => {
@@ -136,9 +161,21 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
     const mail = email.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(mail)) return setError("Проверьте адрес почты.");
     if (!agreed) return setError("Нужно согласие на обработку персональных данных.");
-    const typed = password.trim();
+    // Про чужую почту говорим раньше, чем про пароль: вошедшему человеку бессмысленно требовать
+    // пароль от аккаунта, которым он не пользуется.
+    if (session.status === "user" && session.email && session.email !== mail) {
+      return setError(
+        `Вы вошли как ${session.email}: тариф начислится этому аккаунту. Чтобы оплатить на другую ` +
+          "почту, сначала выйдите из аккаунта.",
+      );
+    }
+    const typed = password;
     if (!signedIn && typed.length < MIN_PASSWORD) {
       return setError(`Пароль для входа — не короче ${MIN_PASSWORD} знаков.`);
+    }
+    const forAll = tariff.scope.includes("all");
+    if (!forAll && target === null) {
+      return setError("Сначала введите дату рождения — платёж открывает конкретную дату.");
     }
 
     setBusy(true);
@@ -181,24 +218,31 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
         }
       }
 
-      // Цель платежа обязательна для тарифа на одну дату: без неё сервер откажет, и это верно —
-      // право, которому не к чему прилипнуть, оставляет человека с оплатой и без разбора.
-      const forAll = tariff.scope.includes("all");
-      const aim = forAll
-        ? undefined
-        : typeof target === "number"
-          ? { matrixId: target }
-          : birth
-            ? { birth: birth.birth, sex: birth.sex }
-            : undefined;
+      // Платим ровно за то, что напечатано на кнопке: цель одна на список, надпись и запрос.
+      const aim =
+        target === null || forAll
+          ? undefined
+          : target.kind === "matrix"
+            ? { matrixId: target.id }
+            : birth
+              ? { birth: birth.birth, sex: birth.sex }
+              : undefined;
       if (!forAll && !aim) {
         setError("Сначала введите дату рождения — платёж открывает конкретную дату.");
         return;
       }
-      const res = await api.payMock(tariff.id, mail, aim);
+      const res = await api.payStart(tariff.id, mail, aim);
+      if (res.payment_url) {
+        window.location.href = res.payment_url;
+        return;
+      }
       track("purchase", { tariff: tariff.id });
       await refreshSession();
       setStage({ kind: "paid", paymentId: res.payment_id, email: mail, matrix: res.matrix });
+      // Кеш сегментов держит страницы, напечатанные до оплаты: без сброса «назад» возвращал
+      // разбор с замками. Адрес с `paid` отделяет чек от формы.
+      router.replace(`/pay?paid=${encodeURIComponent(res.payment_id)}`, { scroll: false });
+      router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {
         const tail = " Платёж не прошёл — деньги не списаны.";
@@ -220,7 +264,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
     }
   };
 
-  if (stage.kind === "paid") {
+  if (stage.kind === "paid" && receipt) {
     return (
       <div className="panel paybox">
         <h3>Доступ открыт</h3>
@@ -322,32 +366,34 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
           <select
             id="paytarget"
             data-testid="pay-target"
-            value={typeof target === "number" ? String(target) : (target ?? "none")}
+            value={targetValue(target)}
             onChange={(e) => {
-              const v = e.target.value;
-              setTarget(v === "local" ? v : v === "none" ? null : Number(v));
+              setPicked(true);
+              setTarget(fromValue(e.target.value));
             }}
           >
             {target === null ? <option value="none">Дата не выбрана</option> : null}
-            {closed.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.title ?? birthLabel(m.birth)} — закрытая дата в кабинете
+            {choices.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
-            {canPickLocal && birth ? (
-              <option value="local">
-                {birthLabel(birth.birth)} — дата из браузера, сохраним в кабинет
-              </option>
-            ) : null}
           </select>
           <p className="hint" style={{ textAlign: "left" }}>
-            {target === null ? (
+            {target === null && opened ? (
+              <span data-testid="pay-open-note">
+                Разбор «{labelOf({ kind: "matrix", id: opened.id }, saved ?? [], birth)}» уже открыт
+                — второй раз платить не нужно.{" "}
+                <Link href={`/report?m=${opened.id}`}>Открыть разбор</Link>. Другую дату можно{" "}
+                <Link href="/">посчитать на главной</Link>.
+              </span>
+            ) : target === null ? (
               <>
                 Дата не выбрана: платёж открывает конкретную дату.{" "}
                 <Link href="/">Введите её на главной</Link> — расчёт бесплатный.
               </>
             ) : (
-              `Откроется «${targetLabel()}». Платёжному провайдеру дата не передаётся.`
+              `Откроется «${chosenLabel}». Платёжному провайдеру дата не передаётся.`
             )}
           </p>
         </div>
@@ -414,13 +460,23 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
         <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
         <span>
           Согласен(на) на обработку персональных данных на условиях{" "}
-          <Link href="/privacy">политики</Link>, принимаю <Link href="/oferta">оферту</Link> и{" "}
-          <Link href="/refund">условия возврата</Link>.
+          <Link href="/privacy" target="_blank" rel="noopener">политики</Link>, принимаю <Link href="/oferta" target="_blank" rel="noopener">оферту</Link> и{" "}
+          <Link href="/refund" target="_blank" rel="noopener">условия возврата</Link>.
         </span>
       </label>
 
-      <button className="btn wide" data-testid="pay-submit" style={{ marginTop: 14 }} disabled={busy}>
-        {busy ? "Проводим платёж…" : `Оплатить ${money(tariff.price)} ₽`}
+      {/* Без цели платить нечего: кнопка гасится, а не отказывает после списания. */}
+      <button
+        className="btn wide"
+        data-testid="pay-submit"
+        style={{ marginTop: 14 }}
+        disabled={busy || (!tariff.scope.includes("all") && target === null)}
+      >
+        {busy
+          ? "Проводим платёж…"
+          : `Оплатить ${money(tariff.price)} ₽${
+              tariff.scope.includes("all") || chosenLabel === null ? "" : ` · ${chosenLabel}`
+            }`}
       </button>
 
       {error ? <div className="err">{error}</div> : null}

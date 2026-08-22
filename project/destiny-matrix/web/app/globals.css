@@ -80,20 +80,29 @@ li { margin-bottom: 0.35em; }
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
 }
-.hrow { display: flex; align-items: center; gap: 18px; padding: 11px 0; }
-.logo { display: flex; align-items: center; gap: 8px; font: 600 17px var(--ser); white-space: nowrap; color: var(--text); }
+.hrow { display: flex; align-items: center; gap: 18px; padding-top: 11px; padding-bottom: 11px; }
+.logo { display: flex; align-items: center; gap: 8px; flex: none; font: 600 17px var(--ser); white-space: nowrap; color: var(--text); }
 .logo i { font-style: normal; color: var(--gold); }
 .logo:hover { text-decoration: none; }
 /* Логотип — печать с монограммой: на узком экране подпись «Аркана Сенс» съедает высоту,
    поэтому на мобильном знак ужимается. */
 .brandmark { display: block; }
 .logo:hover .brandmark text { fill: var(--gold2); }
-@media (max-width: 620px) { .site-header .brandmark { height: 42px; } }
+.brandmark.compact { display: none; }
+/* На телефоне в шапку не влезают ни начертание, ни почта: остаётся печать, «Кабинет» и «Купить». */
+@media (max-width: 620px) {
+  .hrow { gap: 10px; }
+  .site-header .brandmark { display: none; }
+  .site-header .brandmark.compact { display: block; height: 38px; }
+  .site-header .user-email,
+  .site-header [data-testid="nav-register"] { display: none; }
+  .site-header .btn.sm { padding: 11px 14px; font-size: 13.5px; }
+}
 .hnav { display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none; }
 .hnav::-webkit-scrollbar { display: none; }
 .hnav a { padding: 7px 12px; border-radius: 9px; font: 600 13px var(--sans); color: var(--dim); white-space: nowrap; }
 .hnav a:hover { color: var(--text); text-decoration: none; }
-.hspacer { margin-left: auto; }
+.hspacer { margin-left: auto; min-width: 0; }
 @media (max-width: 980px) { .hnav { display: none; } }
 
 /* buttons */
@@ -138,7 +147,7 @@ li { margin-bottom: 0.35em; }
   gap: clamp(18px, 2.4vw, 34px);
   align-items: start;
 }
-@media (max-width: 940px) { .hgrid { grid-template-columns: 1fr; row-gap: 16px; } }
+@media (max-width: 940px) { .hgrid { grid-template-columns: minmax(0, 1fr); row-gap: 16px; } }
 /* MatrixForm отдаёт фрагментом форму и результат, поэтому оба — элементы этой же сетки.
    Без растяжки результат печатался в колонке 1fr и был вдвое уже страницы. */
 .hgrid > #result { grid-column: 1 / -1; }
@@ -173,10 +182,11 @@ li { margin-bottom: 0.35em; }
 .form { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: var(--sh2); }
 .form h2 { font-size: clamp(20px, 2vw, 24px); margin-bottom: 4px; }
 .form .sub { font-size: 13.2px; color: var(--dim2); margin-bottom: 15px; }
-.fields { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 8px; }
+.fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 8px; }
 label { display: block; font: 700 10.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); margin-bottom: 6px; }
 select, input {
   width: 100%;
+  min-width: 0;
   padding: 12px 10px;
   border-radius: 11px;
   border: 1px solid var(--line2);
@@ -204,7 +214,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .hint { font-size: 12px; color: var(--dim2); margin-top: 10px; text-align: center; }
 .err { margin-top: 10px; font-size: 13px; color: var(--warn); }
 .okmsg { margin-top: 10px; font-size: 13px; color: var(--ok); }
-.consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; font-size: 12.4px; color: var(--dim); line-height: 1.45; cursor: pointer; text-transform: none; letter-spacing: 0; }
+.consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; font-size: 12.4px; color: var(--dim); line-height: 1.7; cursor: pointer; text-transform: none; letter-spacing: 0; }
 /* Общее правило `select, input` выше гасит appearance, и штатная галочка не рисуется вовсе:
    чекбокс выглядел пустым квадратом, а клик — «не нажимается». Рисуем отметку сами. */
 .consent input[type="checkbox"] {
@@ -220,6 +230,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   cursor: pointer;
   transition: 0.15s;
 }
+.consent a { display: inline-block; padding: 2px 1px; }
 .consent input[type="checkbox"]:hover { border-color: var(--gold); }
 .consent input[type="checkbox"]:checked { background: var(--gold); border-color: var(--gold); }
 .consent input[type="checkbox"]:checked::after {
@@ -251,7 +262,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 /* svg сохраняет пропорции сам (preserveAspectRatio), поэтому лишнюю высоту он отдаёт
    полям, а рисунок остаётся по центру */
 .rgrid > .panel > .oct { flex: 1; min-height: 0; }
-@media (max-width: 980px) { .rgrid { grid-template-columns: 1fr; } }
+@media (max-width: 980px) { .rgrid { grid-template-columns: minmax(0, 1fr); } }
 .section-gap { margin-top: clamp(18px, 2.4vw, 28px); }
 
 /* октаграмма */
@@ -274,10 +285,18 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .chak td:last-child { border-radius: 0 9px 9px 0; }
 .chak .tot td { background: #e6f2f1; color: var(--gold2); }
 .chak .tot td:first-child { background: #e6f2f1; color: var(--gold2); }
+/* На 320 px строка чакры не умещается: название уровня плюс три числа дают min-content шире
+   панели. Ужимаем ячейки — прокрутка таблицы вбок здесь хуже мелкого шрифта. */
+@media (max-width: 400px) {
+  .chak { font-size: 12.2px; }
+  .chak td { padding: 8px 3px; }
+  .chak td:first-child { padding-left: 8px; }
+  .chak th { padding: 0 3px 6px; }
+}
 
 /* мини-блоки и главные точки */
 .mini { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
-@media (max-width: 560px) { .mini { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .mini { grid-template-columns: minmax(0, 1fr); } }
 .mb { border: 1px solid var(--line); border-radius: 13px; padding: 15px; background: var(--card); box-shadow: var(--sh); }
 .mb h4 { font-size: 13.4px; margin-bottom: 4px; color: var(--gold2); }
 .mb p { font-size: 11.8px; color: var(--dim2); margin: 0 0 8px; line-height: 1.45; }
@@ -359,7 +378,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .poslist[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .poslist[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 900px) { .poslist[data-cols="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 620px) { .poslist[data-cols] { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .poslist[data-cols] { grid-template-columns: minmax(0, 1fr); } }
 .poslist li { margin: 0; }
 .poscard { display: block; text-align: center; color: var(--text); }
 .poscard:hover { text-decoration: none; }
@@ -429,7 +448,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   margin-left: auto;
   margin-right: auto;
 }
-@media (max-width: 620px) { .plans { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .plans { grid-template-columns: minmax(0, 1fr); } }
 .plan { border: 1px solid var(--line); border-radius: var(--r); background: var(--card); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh); }
 .plan .pcap { padding: 11px; text-align: center; font: 700 11.5px var(--sans); letter-spacing: 0.12em; text-transform: uppercase; background: var(--gold); color: #fff; }
 /* Премиальный тариф выделяется материалом, а не цветом: тёплая бумага вместо белого,
@@ -459,7 +478,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .edit { border-top: 1px solid var(--line); margin-top: clamp(26px, 3.4vw, 44px); padding: clamp(26px, 3.4vw, 40px) 0 clamp(20px, 3vw, 34px); }
 .pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 20px; }
 @media (max-width: 900px) { .pillars { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .pillars { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .pillars { grid-template-columns: minmax(0, 1fr); } }
 .pil h4 { font-family: var(--ser); font-size: 19px; color: var(--gold2); margin-bottom: 6px; }
 .pil p { font-size: 13.4px; color: var(--dim); margin: 0; }
 .quote { margin: clamp(28px, 3.6vw, 46px) auto 0; max-width: 62ch; text-align: center; }
@@ -479,7 +498,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .prose h2 { font-size: clamp(19px, 2.2vw, 24px); margin-top: 1.6em; }
 .prose h3 { font-family: var(--ser); font-size: 19px; margin-top: 1.4em; }
 .prose p, .prose li { color: var(--dim); font-size: 15.4px; }
-.prose .placeholder { color: var(--accent2); font-weight: 700; white-space: nowrap; }
+.prose .placeholder { color: var(--accent2); font-weight: 700; overflow-wrap: anywhere; }
 .updated { font-size: 13px; color: var(--dim2); margin-bottom: 1.4em; }
 .crumbs { font-size: 13px; color: var(--dim2); margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
 .crumbs a { color: var(--dim); }
@@ -498,7 +517,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .kv dt { font: 700 10.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); padding-top: 4px; }
 .kv dd { margin: 0; color: var(--dim); }
 .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 760px) { .twocol { grid-template-columns: 1fr; } .kv { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .twocol { grid-template-columns: minmax(0, 1fr); } .kv { grid-template-columns: minmax(0, 1fr); } }
 .pmlist { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .pmlist li { position: relative; padding-left: 20px; font-size: 14px; color: var(--dim); margin: 0; }
 .pmlist.plus li::before { content: "＋"; position: absolute; left: 0; color: var(--ok); }
@@ -571,7 +590,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 
 /* почта и пароль в одну строку: пароль спрашиваем сразу, а не после оплаты */
 .payfields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-@media (max-width: 620px) { .payfields { grid-template-columns: 1fr; gap: 10px; } }
+@media (max-width: 620px) { .payfields { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
 
 /* выбор тарифа на странице оплаты */
 .tchoice { display: grid; gap: 10px; margin: 4px 0 6px; }
@@ -650,7 +669,8 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .badge.own .lifetime { margin-right: 5px; }
 /* подпись матрицы правится тут же, в строке: имя, карандаш, метка доступа */
 .matname { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
-.matname input { width: auto; min-width: 200px; padding: 7px 10px; font: 600 14px var(--sans); }
+.matname { min-width: 0; }
+.matname input { width: auto; min-width: 0; flex: 1 1 140px; padding: 7px 10px; font: 600 14px var(--sans); }
 .iconbtn {
   background: none;
   border: 0;
@@ -709,6 +729,17 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   background-position: right 11px center;
 }
 .matact { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+/* Строка даты на телефоне: с открытым полем подписи содержимое не влезало в одну линию и
+   выносило кабинет за край экрана. */
+@media (max-width: 620px) {
+  .matrow { flex-wrap: wrap; }
+  .matrow > * { min-width: 0; }
+  .matact { justify-content: flex-start; }
+}
+/* Подпись цели платежа обязана целиком влезать в поле: на 320 px не хватало пары пикселей. */
+@media (max-width: 400px) {
+  .paytarget select { font-size: 12.6px; padding-left: 10px; padding-right: 8px; }
+}
 .skeleton { color: var(--dim2); font-size: 14px; }
 
 /* первый экран на 390 px: оффер, цена и кнопка обязаны быть выше сгиба */

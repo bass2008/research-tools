@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import { ApiError, api, type AdminUserCard } from "@/lib/api";
 import { money } from "@/lib/tariffs";
+import { paymentTargetLabel } from "@/lib/paytarget";
+import { counted, plural } from "@/lib/plural";
 
 import { birthLabel } from "./MatrixResult";
 
@@ -66,7 +68,7 @@ export default function AdminUserView({ id }: { id: number }) {
           <dd>{u.scopes.includes("all") ? (u.until ? `до ${when(u.until)}` : "активна") : "нет"}</dd>
           <dt>Уплачено</dt>
           <dd>
-            {money(u.spent)} ₽ за {u.payments} платежей
+            {money(u.spent)} ₽ за {counted(u.payments, "платёж", "платежа", "платежей")}
           </dd>
           <dt>Действующих прав</dt>
           <dd>{u.rights}</dd>
@@ -122,7 +124,7 @@ export default function AdminUserView({ id }: { id: number }) {
                 <th>Тариф</th>
                 <th>Сумма</th>
                 <th>Статус</th>
-                <th>Дата в платеже</th>
+                <th>За какую дату</th>
                 <th>Номер</th>
               </tr>
             </thead>
@@ -140,7 +142,7 @@ export default function AdminUserView({ id }: { id: number }) {
                     <td>{p.tariff.name ?? "—"}</td>
                     <td className="num">{money(p.amount)} ₽</td>
                     <td>{p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}</td>
-                    <td>{p.matrix_id ?? "—"}</td>
+                    <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
                   </tr>
                 ))

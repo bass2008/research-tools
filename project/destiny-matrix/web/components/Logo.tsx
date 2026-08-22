@@ -5,14 +5,23 @@
  * Шрифт берётся из той же переменной, что и заголовки сайта (--ser): начертание логотипа и
  * заголовков обязано совпадать, иначе логотип выглядит вставленным из чужого макета.
  */
-export default function Logo({ caption = true, height = 44 }: { caption?: boolean; height?: number }) {
+export default function Logo({
+  caption = true,
+  height = 44,
+  compact = false,
+}: {
+  caption?: boolean;
+  height?: number;
+  compact?: boolean;
+}) {
   return (
     <svg
-      viewBox="0 0 214 52"
+      viewBox={compact ? "0 0 52 52" : "0 0 214 52"}
       height={height}
-      role="img"
-      aria-label="Arcana Sense"
-      className="brandmark"
+      role={compact ? undefined : "img"}
+      aria-label={compact ? undefined : "Arcana Sense"}
+      aria-hidden={compact ? true : undefined}
+      className={compact ? "brandmark compact" : "brandmark"}
     >
       <circle cx="26" cy="26" r="22" fill="none" stroke="var(--accent)" strokeWidth="1.2" />
       <circle
@@ -35,10 +44,12 @@ export default function Logo({ caption = true, height = 44 }: { caption?: boolea
       >
         AS
       </text>
-      <text x="60" y={caption ? 25 : 33} fontFamily="var(--ser)" fontSize="22" fill="var(--text)">
-        Arcana Sense
-      </text>
-      {caption ? (
+      {compact ? null : (
+        <text x="60" y={caption ? 25 : 33} fontFamily="var(--ser)" fontSize="22" fill="var(--text)">
+          Arcana Sense
+        </text>
+      )}
+      {caption && !compact ? (
         <text x="61" y="39" fontFamily="var(--sans)" fontSize="8" fill="var(--dim2)" letterSpacing="2.1">
           НАЙДИ СВОЙ СМЫСЛ
         </text>

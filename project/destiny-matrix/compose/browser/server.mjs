@@ -72,13 +72,16 @@ async function onePage(page, marks) {
     w: document.documentElement.scrollWidth,
     h: document.documentElement.scrollHeight,
   }));
-  const LIMIT_PT = 14_400;
-  const pt = (px) => px * 0.75;
-  const scale = Math.min(1, LIMIT_PT / pt(size.h));
-  marks.push(`лист ${size.w}×${size.h} px, масштаб ${scale.toFixed(2)}`);
+  // Предел считаем в пикселях, а не в пунктах: 14 400 pt — это 19 200 px, и раньше масштаб
+  // подбирался по пунктам, а лист задавался в пикселях. Итог был 14 428 pt, Chromium срезал
+  // низ — в файле пропадала подпись под разбором. Пара пикселей запаса гасит округление.
+  const LIMIT_PX = 19_190;
+  const scale = Math.min(1, LIMIT_PX / size.h);
+  const height = Math.floor(size.h * scale);
+  marks.push(`лист ${size.w}×${size.h} px → ${height} px, масштаб ${scale.toFixed(3)}`);
   return page.pdf({
     width: `${Math.round(size.w * scale)}px`,
-    height: `${Math.round(size.h * scale)}px`,
+    height: `${height}px`,
     scale,
     printBackground: true,
     margin: { top: "0", bottom: "0", left: "0", right: "0" },

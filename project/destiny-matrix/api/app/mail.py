@@ -16,13 +16,15 @@ log = logging.getLogger("arcana.mail")
 
 
 def enabled() -> bool:
+    if settings.mail_to_log:
+        return False
     return bool(settings.smtp_user and settings.smtp_password)
 
 
 def send(to: str, subject: str, body: str) -> bool:
     if not enabled():
         log.warning("письмо не отправлено (SMTP не настроен): %s → %s", subject, to)
-        if settings.mock_payments:              # на дев-стенде письма читают из лога
+        if settings.mock_payments or settings.mail_to_log:   # на стенде письма читают из лога
             log.warning("%s", body)
         return False
     msg = EmailMessage()
@@ -68,6 +70,19 @@ def welcome(to: str) -> bool:
         "Если аккаунт создавали не вы, ответьте на это письмо.",
     ])
     return send(to, "Arcana Sense — аккаунт создан", body)
+
+
+def refund(to: str, tariff_name: str, payment_id: str) -> bool:
+    body = "\n".join([
+        f"Платёж возвращён: {tariff_name}.",
+        f"Номер платежа: {payment_id}.",
+        "",
+        "Доступ к платным разделам закрыт, сохранённые даты остались в кабинете.",
+        "Деньги вернутся тем же способом, которым платили — обычно в течение нескольких дней.",
+        "",
+        "Если возврат оформляли не вы, ответьте на это письмо.",
+    ])
+    return send(to, "Arcana Sense — платёж возвращён", body)
 
 
 def reset(to: str, link: str, hours: int) -> bool:

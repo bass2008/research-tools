@@ -10,10 +10,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .. import access
+from .. import payments as gateway
+from ..routers.payments import apply as apply_payment
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Payment, ReportJob, SavedMatrix, User, iso
+from ..models import Payment, PaymentSweep, ReportJob, SavedMatrix, User, iso
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -61,8 +63,29 @@ def payments(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> di
         select(Payment, User.email).join(User, User.id == Payment.user_id)
         .order_by(Payment.id.desc())
     ).all()
-    return {"items": [{**payment.item(), "user_id": payment.user_id, "email": email}
+    dates = {m.id: m.item() for m in db.scalars(select(SavedMatrix)).all()}
+    return {"items": [{**payment.item(), "user_id": payment.user_id, "email": email,
+                       "matrix": dates.get(payment.matrix_id)}
                       for payment, email in rows]}
+
+
+@router.post("/payments/{payment_id}/refund")
+def refund(payment_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Отмена платежа: до списания это отмена, после — возврат. Права снимаются по уведомлению
+    банка, но статус применяем сразу, чтобы доступ не оставался открытым до его прихода."""
+    payment = db.get(Payment, payment_id)
+    if payment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+    provider = gateway.get(payment.provider)
+    if provider is None or not provider.enabled():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                            detail="Этот платёж отменить нельзя: способ оплаты недоступен")
+    try:
+        update = provider.cancel(payment.external_id)
+    except gateway.PaymentError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    apply_payment(db, payment, update)
+    return {"ok": True, "status": payment.status, "refunded_at": iso(payment.refunded_at)}
 
 
 @router.get("/reports")
@@ -84,6 +107,13 @@ def reports(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dic
     }
 
 
+@router.get("/sweeps")
+def sweeps(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Прогоны досверки платежей: когда, сколько заявок опрошено и что изменилось."""
+    rows = db.scalars(select(PaymentSweep).order_by(PaymentSweep.id.desc()).limit(50)).all()
+    return {"items": [row.item() for row in rows]}
+
+
 @router.get("/users/{user_id}")
 def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     """Карточка пользователя: его матрицы и его платежи."""
@@ -100,7 +130,9 @@ def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_d
     return {
         "user": _row(db, user),
         "matrices": [{**m.item(), **access.matrix_state(rights, m.id)} for m in matrices],
-        "payments": [p.item() for p in payment_rows],
+        "payments": [{**p.item(),
+                      "matrix": next((m.item() for m in matrices if m.id == p.matrix_id), None)}
+                     for p in payment_rows],
         "rights": [r.item() for r in rights],
         "reports": [job.item() for job in db.scalars(
             select(ReportJob).where(ReportJob.user_id == user.id)

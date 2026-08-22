@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -8,7 +10,7 @@ from .. import access, reports, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import ReportJob, SavedMatrix, User, utcnow
+from ..models import ReportJob, SavedMatrix, User, as_utc, utcnow
 from ..schemas import ReportRequest
 from ..security import create_print_token, read_print_token
 
@@ -27,6 +29,40 @@ def _ready(db: Session, user: User, matrix_id: int) -> ReportJob | None:
                       .where(ReportJob.user_id == user.id, ReportJob.matrix_id == matrix_id,
                              ReportJob.status == "done")
                       .order_by(ReportJob.id.desc())).first()
+
+
+def _running(db: Session, user: User, matrix_id: int) -> ReportJob | None:
+    """Печать этой же матрицы, уже запущенная другим запросом. Задачу старше окна печати считаем
+    брошенной: браузер мог умереть, и ждать её бессмысленно."""
+    row = db.scalars(select(ReportJob)
+                     .where(ReportJob.user_id == user.id, ReportJob.matrix_id == matrix_id,
+                            ReportJob.status == "running")
+                     .order_by(ReportJob.id.desc())).first()
+    if row is None:
+        return None
+    started = as_utc(row.started_at or row.created_at)
+    if (utcnow() - started).total_seconds() > settings.browser_timeout_seconds + 30:
+        row.status = "failed"
+        row.error = "печать не завершилась: задача брошена"
+        row.finished_at = utcnow()
+        db.commit()
+        return None
+    return row
+
+
+def _wait_for(db: Session, job: ReportJob) -> ReportJob | None:
+    """Дождаться чужой печати вместо запуска своей: человек обновил страницу и нажал снова, а
+    второй рендер — это ещё полминуты ожидания и второй файл в хранилище."""
+    deadline = time.monotonic() + settings.print_wait_seconds
+    while time.monotonic() < deadline:
+        time.sleep(0.5)
+        db.expire(job)
+        db.refresh(job)
+        if job.status == "done" and job.object_key:
+            return job
+        if job.status != "running":
+            return None
+    return None
 
 
 @router.post("/render")
@@ -49,6 +85,18 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
     if not settings.pdf_enabled:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
                             detail="Печать PDF не настроена")
+
+    busy = _running(db, user, row.id)
+    if busy is not None:
+        waited = _wait_for(db, busy)
+        if waited is not None:
+            return {"job_id": waited.id, "status": "done", "cached": True,
+                    "url": reports.link(waited.object_key), "size_bytes": waited.size_bytes,
+                    "seconds": waited.seconds()}
+        if busy.status == "running":
+            raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT,
+                                detail="Печать этого разбора всё ещё идёт — откройте страницу "
+                                       "через минуту, файл появится сам")
 
     job = ReportJob(user_id=user.id, matrix_id=row.id, status="running", started_at=utcnow())
     db.add(job)

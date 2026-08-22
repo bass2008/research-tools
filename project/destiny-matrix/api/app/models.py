@@ -125,6 +125,11 @@ class Payment(Base):
     paid_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     refunded_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     external_id: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    provider: Mapped[str] = mapped_column(String(16), nullable=False, default="mock",
+                                          server_default="mock")
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="NEW",
+                                        server_default="NEW")
+    pay_url: Mapped[str | None] = mapped_column(String(300))
 
     user: Mapped[User] = relationship(back_populates="payments")
 
@@ -134,6 +139,7 @@ class Payment(Base):
     def item(self) -> dict:
         return {"id": self.id, "amount": self.amount, "tariff": self.body(),
                 "matrix_id": self.matrix_id, "external_id": self.external_id,
+                "provider": self.provider, "status": self.status,
                 "created_at": iso(self.created_at), "paid_at": iso(self.paid_at),
                 "refunded_at": iso(self.refunded_at)}
 
@@ -217,3 +223,33 @@ class ReportJob(Base):
                 "created_at": iso(self.created_at), "started_at": iso(self.started_at),
                 "finished_at": iso(self.finished_at), "seconds": self.seconds(),
                 "size_bytes": self.size_bytes, "error": self.error}
+
+
+class PaymentSweep(Base):
+    """Прогон досверки платежей. Задача создаётся только когда есть что опрашивать: пустые
+    прогоны раз в пять минут засорили бы очередь."""
+    __tablename__ = "payment_sweeps"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="running")
+    started_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                                    default=utcnow, server_default=func.now())
+    finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    checked: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    changed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    log: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    error: Mapped[str | None] = mapped_column(String(300))
+
+    def entries(self) -> list[dict]:
+        return json.loads(self.log)
+
+    def seconds(self) -> float | None:
+        if self.finished_at is None:
+            return None
+        return round((as_utc(self.finished_at) - as_utc(self.started_at)).total_seconds(), 1)
+
+    def item(self) -> dict:
+        return {"id": self.id, "status": self.status, "checked": self.checked,
+                "changed": self.changed, "seconds": self.seconds(),
+                "started_at": iso(self.started_at), "finished_at": iso(self.finished_at),
+                "error": self.error, "log": self.entries()}

@@ -5,6 +5,7 @@
 import Link from "next/link";
 
 import { arcanumTitle } from "@/lib/arcana";
+import { counted, plural } from "@/lib/plural";
 
 import type { SectionOut } from "./publicSpec";
 import { positionHref } from "./publicSpec";
@@ -49,8 +50,8 @@ export default function ReportSections({
         {/* счётчик нужен, только пока есть что открывать: у оплатившего «0 под замком» — шум */}
         {locked > 0 ? (
           <div className="cnt">
-            <b>{open}</b> {open === 1 ? "раздел открыт" : "разделов открыто"} · <b>{locked}</b> под
-            замком
+            <b>{open}</b> {plural(open, "раздел открыт", "раздела открыто", "разделов открыто")} ·{" "}
+            <b>{locked}</b> под замком
           </div>
         ) : null}
       </div>

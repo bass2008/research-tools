@@ -39,6 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       priority: 0.4,
     })),
+    { url: abs("/contacts"), lastModified: now, priority: 0.3 },
     { url: abs("/oferta"), lastModified: now, priority: 0.3 },
     { url: abs("/privacy"), lastModified: now, priority: 0.3 },
     { url: abs("/refund"), lastModified: now, priority: 0.3 },

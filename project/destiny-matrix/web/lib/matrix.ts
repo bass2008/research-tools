@@ -6,6 +6,20 @@ export const ARCANA_MAX = 22;
 
 export type Sex = "m" | "f";
 
+const MONTHS = [
+  "января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря",
+];
+
+export function birthLabel(birth: string): string {
+  const [y, m, d] = birth.split("-").map(Number);
+  return `${d} ${MONTHS[m - 1]} ${y}`;
+}
+
+export function sexLabel(sex: Sex): string {
+  return sex === "f" ? "женская" : "мужская";
+}
+
 export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = [
   ["sahasrara", "Сахасрара", "связь с большим замыслом"],
   ["ajna", "Аджна", "видение и интуиция"],

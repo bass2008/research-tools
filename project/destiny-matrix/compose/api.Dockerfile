@@ -12,6 +12,12 @@ WORKDIR /srv
 COPY api/requirements.txt api/requirements.txt
 RUN pip install --no-cache-dir -r api/requirements.txt
 
+# securepay.tinkoff.ru выпущен корнем Минцифры, которого нет ни в одном базовом образе: без него
+# любой вызов эквайринга падает на проверке сертификата
+COPY api/certs/russian-trusted-ca.pem /usr/local/share/ca-certificates/russian-trusted-ca.crt
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+ && update-ca-certificates && rm -rf /var/lib/apt/lists/*
+
 # Порядок слоёв — от редко меняющегося к часто: контент энциклопедии 12,6 МБ переезжал бы при
 # каждой правке кода, если бы стоял после него. Код идёт последним и весит 200 кБ.
 COPY web/content ./web/content

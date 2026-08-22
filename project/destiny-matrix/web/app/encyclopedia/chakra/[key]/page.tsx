@@ -8,6 +8,7 @@ import { ARCANA } from "@/lib/arcana";
 import { CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref } from "@/lib/encyclopedia";
 import { chakraContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
+import { NOT_FOUND_META } from "@/lib/seo";
 
 type Params = { key: string };
 
@@ -17,7 +18,9 @@ export function generateStaticParams(): Params[] {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const c = chakraByKey((await params).key);
-  if (!c) return {};
+  // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
+  // несуществующая страница выглядела как главная.
+  if (!c) return NOT_FOUND_META;
   const extra = chakraContent(c.key);
   return pageMeta({
     title: extra?.seo?.title ?? `${c.title} — чакра ${c.index} в матрице судьбы`,

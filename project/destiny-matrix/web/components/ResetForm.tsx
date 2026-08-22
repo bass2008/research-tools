@@ -18,10 +18,10 @@ export default function ResetForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.trim().length < 3) return setError("Пароль — не короче трёх знаков.");
+    if (password.length < 3) return setError("Пароль — не короче трёх знаков.");
     setBusy(true);
     try {
-      await api.resetApply(token, password.trim());
+      await api.resetApply(token, password);
       await refreshSession();
       router.push("/account");
     } catch (err) {

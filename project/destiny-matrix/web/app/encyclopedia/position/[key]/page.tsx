@@ -9,6 +9,7 @@ import { POSITIONS, arcanumHref, positionByKey, positionHref } from "@/lib/encyc
 import { arcanumInPosition, positionContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
 import { sectionByKey } from "@/lib/sections";
+import { NOT_FOUND_META } from "@/lib/seo";
 
 type Params = { key: string };
 
@@ -18,7 +19,9 @@ export function generateStaticParams(): Params[] {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const p = positionByKey((await params).key);
-  if (!p) return {};
+  // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
+  // несуществующая страница выглядела как главная.
+  if (!p) return NOT_FOUND_META;
   const kind = p.kind === "section" ? "раздел разбора" : "позиция матрицы";
   const extra = positionContent(p.key);
   return pageMeta({

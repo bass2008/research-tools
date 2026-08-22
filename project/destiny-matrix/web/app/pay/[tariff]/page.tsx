@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { pageMeta } from "@/lib/site";
 import { byId, getTariffs, money, periodLabel } from "@/lib/tariffs";
+import { NOT_FOUND_META } from "@/lib/seo";
 
 import PayScreen from "../PayScreen";
 
@@ -13,7 +14,9 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const t = byId(await getTariffs(), (await params).tariff);
-  if (!t) return {};
+  // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
+  // несуществующая страница выглядела как главная.
+  if (!t) return NOT_FOUND_META;
   return pageMeta({
     title: `Оплата тарифа «${t.name}» — ${money(t.price)} ₽`,
     description: `${t.name}: ${money(t.price)} ₽, ${periodLabel(t)}. Тариф можно сменить на самой странице оплаты.`,

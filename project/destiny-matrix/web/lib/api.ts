@@ -62,6 +62,8 @@ export interface PaymentItem {
   amount: number;
   tariff: { id?: string; name?: string; price?: number; scope?: string[]; period_days?: number | null };
   matrix_id: number | null;
+  /** какую дату открыл платёж: номер записи админу ничего не говорит */
+  matrix?: MatrixListItem | null;
   external_id: string;
   created_at: string;
   paid_at: string | null;
@@ -100,6 +102,19 @@ export interface ReportJobItem {
 export interface AdminReportJob extends ReportJobItem {
   user_id: number;
   email: string;
+}
+
+export interface SweepRun {
+  id: number;
+  status: "running" | "done";
+  checked: number;
+  changed: number;
+  seconds: number | null;
+  started_at: string;
+  finished_at: string | null;
+  error: string | null;
+  log: Array<{ payment: number; email: string; was: string; now?: string; paid?: boolean;
+               error?: string }>;
 }
 
 export interface AdminPayment extends PaymentItem {
@@ -240,6 +255,7 @@ export const api = {
     user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
     reports: () => request<{ items: AdminReportJob[]; running: number; failed: number;
                             avg_seconds: number | null }>("/admin/reports"),
+    sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
   },
 
   // Дата уходит на сервер только по явному действию авторизованного пользователя:
@@ -273,6 +289,31 @@ export const api = {
         ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
         ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
       }),
+    }),
+
+  payStart: (
+    tariff: string,
+    email: string,
+    target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
+  ) =>
+    request<PaymentResponse & { order_id: string; payment_url: string | null; status: string }>(
+      "/payments/start",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          tariff,
+          email,
+          ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
+          ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
+        }),
+      },
+    ),
+
+  paySync: (orderId: string) =>
+    request<{ ok: true; status: string; paid: boolean; matrix_id: number | null;
+              payment_id: string }>("/payments/sync", {
+      method: "POST",
+      body: JSON.stringify({ order_id: orderId }),
     }),
 
   reportPdf: (matrixId: number) =>

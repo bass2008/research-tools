@@ -33,7 +33,7 @@ def register(payload: Credentials, db: Session = Depends(get_db)) -> dict:
                             detail="Эта почта уже зарегистрирована") from None
     db.refresh(user)
     mail.welcome(user.email)
-    return {"token": create_token(user.id), "user": user.public()}
+    return {"token": create_token(user.id, user.password_hash), "user": user.public()}
 
 
 @router.post("/login")
@@ -41,7 +41,7 @@ def login(payload: Credentials, db: Session = Depends(get_db)) -> dict:
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Неверная почта или пароль")
-    return {"token": create_token(user.id), "user": user.public()}
+    return {"token": create_token(user.id, user.password_hash), "user": user.public()}
 
 
 @router.get("/me")
@@ -91,4 +91,4 @@ def reset_apply(payload: ResetApply, db: Session = Depends(get_db)) -> dict:
                             detail="Ссылка уже использована — запросите новую")
     user.password_hash = hash_password(payload.password)
     db.commit()
-    return {"token": create_token(user.id), "user": user.public()}
+    return {"token": create_token(user.id, user.password_hash), "user": user.public()}

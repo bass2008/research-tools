@@ -17,6 +17,7 @@ import {
 } from "@/lib/encyclopedia";
 import { arcanumContent, arcanumInPosition } from "@/lib/content";
 import { SITE, pageMeta } from "@/lib/site";
+import { NOT_FOUND_META } from "@/lib/seo";
 
 type Params = { n: string };
 
@@ -53,7 +54,9 @@ function num(raw: string): number | null {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const n = num((await params).n);
-  if (!n) return {};
+  // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
+  // несуществующая страница выглядела как главная.
+  if (!n) return NOT_FOUND_META;
   const e = entry(n);
   return pageMeta({ title: e.seo.title, description: e.seo.description, path: arcanumHref(n) });
 }

@@ -2,7 +2,6 @@
 
 // Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { useSession } from "./useSession";
 
@@ -27,7 +26,6 @@ const BTN: React.CSSProperties = {
 
 export default function SessionBadge() {
   const session = useSession();
-  const router = useRouter();
 
   if (session.status === "loading") {
     return <span style={{ ...ROW, color: "var(--dim2)" }}>проверяем доступ…</span>;
@@ -57,7 +55,10 @@ export default function SessionBadge() {
         style={BTN}
         onClick={async () => {
           await session.signOut();
-          router.push("/");
+          // Полная перезагрузка, а не router.push: клиентский кеш роутера держит уже
+          // напечатанные страницы, и после выхода прошлый разбор с датой рождения оставался
+          // виден по той же ссылке.
+          window.location.assign("/");
         }}
       >
         Выйти

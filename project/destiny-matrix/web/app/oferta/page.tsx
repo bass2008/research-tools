@@ -175,8 +175,8 @@ export default async function OfertaPage() {
 
         <h2>11. Реквизиты</h2>
         <p>
-          <P>{LEGAL.entity}</P> · ИНН <P>{LEGAL.inn}</P> · ОГРНИП <P>{LEGAL.ogrnip}</P> · адрес:{" "}
-          Почта: <P>{LEGAL.email}</P> · телефон: <P>{LEGAL.phone}</P>.
+          <P>{LEGAL.entity}</P> · ИНН <P>{LEGAL.inn}</P> · ОГРНИП <P>{LEGAL.ogrnip}</P> · почта:{" "}
+          <P>{LEGAL.email}</P>.
         </p>
       </div>
     </main>

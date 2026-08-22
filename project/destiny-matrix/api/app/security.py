@@ -29,11 +29,15 @@ def random_password(length: int = 18) -> str:
     return secrets.token_urlsafe(length)
 
 
-def create_token(user_id: int, ttl_days: int | None = None) -> str:
+def create_token(user_id: int, password_hash: str, ttl_days: int | None = None) -> str:
+    """Сессия привязана к текущему паролю: в подписи лежит его отпечаток, поэтому смена пароля
+    гасит все ранее выданные токены — на всех устройствах сразу."""
     now = dt.datetime.now(dt.timezone.utc)
     ttl = settings.jwt_ttl_days if ttl_days is None else ttl_days
     payload = {
         "sub": str(user_id),
+        "typ": "session",
+        "pwd": password_fingerprint(password_hash),
         "iat": int(now.timestamp()),
         "exp": int((now + dt.timedelta(days=ttl)).timestamp()),
     }
@@ -69,10 +73,14 @@ def password_fingerprint(password_hash: str) -> str:
     return hashlib.sha256(password_hash.encode()).hexdigest()[:16]
 
 
-def read_token(token: str) -> int | None:
+def read_token(token: str) -> tuple[int, str] | None:
+    """Возвращает id пользователя и отпечаток пароля, под который выдана сессия. Пропуска для
+    сброса и печати сессией не считаются: у них свой typ."""
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
-        return int(payload["sub"])
+        if payload.get("typ") != "session":
+            return None
+        return int(payload["sub"]), str(payload["pwd"])
     except (jwt.PyJWTError, KeyError, TypeError, ValueError):
         return None
 

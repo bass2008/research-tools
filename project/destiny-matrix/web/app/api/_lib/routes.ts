@@ -23,7 +23,7 @@ export async function credentials(req: Request, action: "login" | "register") {
   });
 }
 
-export async function payment(req: Request) {
+export async function payment(req: Request, path = "/payments/mock") {
   const body = await readJson(req);
   const mail = email(body);
   const tariff = String(body.tariff ?? "");
@@ -46,7 +46,7 @@ export async function payment(req: Request) {
     return json({ detail: "Дата — в формате YYYY-MM-DD" }, 400);
   }
   if (sex !== undefined && sex !== "m" && sex !== "f") return json({ detail: "Пол — m или f" }, 400);
-  return forward("/payments/mock", {
+  return forward(path, {
     method: "POST",
     body: {
       tariff,

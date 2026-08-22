@@ -24,19 +24,22 @@ docker buildx build --push -f browser.Dockerfile \
   --output "type=image,name=$REGISTRY/browser:$TAG,$ZSTD" .
 docker buildx build --push -f web.Dockerfile \
   --build-arg "NEXT_PUBLIC_SITE_URL=$SITE" \
+  --build-arg "NEXT_PUBLIC_METRIKA_ID=${METRIKA_ID:-111856670}" \
   --build-arg "BUILD_COMMIT=$BUILD_COMMIT" \
   --build-arg "BUILD_BRANCH=$BUILD_BRANCH" \
   --build-arg "BUILD_TIME=$BUILD_TIME" \
   --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
 
 echo "== запуск на $IP"
-# на машину едет только база: без override там нет ни сборки, ни dev-секретов
+# На машину едет только база: без override там нет ни сборки, ни dev-секретов.
+# Всё, кроме systemctl, делает ubuntu: он в группе docker, а .env принадлежит ему. Через sudo
+# логин и pull расходились — токен писался в ~ubuntu, а читался из /root.
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "ubuntu@$IP:/srv/arcana/docker-compose.yml"
 ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
-  && sudo sed -i '/^TAG=/d;/^REGISTRY=/d' .env \
-  && printf 'REGISTRY=%s\nTAG=%s\n' '$REGISTRY' '$TAG' | sudo tee -a .env >/dev/null \
+  && sed -i '/^TAG=/d;/^REGISTRY=/d' .env \
+  && printf 'REGISTRY=%s\nTAG=%s\n' '$REGISTRY' '$TAG' >> .env \
   && /usr/local/bin/arcana-registry-login \
-  && sudo docker compose pull -q && sudo systemctl restart arcana"
+  && docker compose pull -q && sudo systemctl restart arcana"
 
 echo "== проверка"
 until curl -sf -o /dev/null "$SITE/"; do sleep 3; done

@@ -6,7 +6,7 @@
  * страницу открывает Chromium с нашими параметрами, PDF ложится в хранилище и живёт там — второе
  * нажатие отдаёт тот же файл, ничего не печатая заново.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
 import { track } from "@/lib/analytics";
@@ -20,9 +20,14 @@ export default function SavePdfButton({
   matrixId: number;
   label?: string;
 }) {
+  // до гидратации обработчик клика не подключён: без этого кнопка выглядела рабочей, а нажатие
+  // не делало ничего
+  const [ready, setReady] = useState(false);
   const [state, setState] = useState<State>("idle");
   const [url, setUrl] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+
+  useEffect(() => setReady(true), []);
 
   const open = (href: string) => window.open(href, "_blank", "noopener");
 
@@ -56,7 +61,7 @@ export default function SavePdfButton({
         className={state === "busy" ? "btn ghost sm pdfbtn working" : "btn ghost sm pdfbtn"}
         data-testid="save-pdf"
         onClick={click}
-        disabled={state === "busy"}
+        disabled={!ready || state === "busy"}
         aria-busy={state === "busy"}
       >
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">

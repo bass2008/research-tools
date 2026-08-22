@@ -78,8 +78,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
           <span>
             Согласен(на) на обработку персональных данных на условиях{" "}
-            <Link href="/privacy">политики обработки персональных данных</Link> и принимаю{" "}
-            <Link href="/oferta">публичную оферту</Link>.
+            <Link href="/privacy" target="_blank" rel="noopener">политики обработки персональных данных</Link> и принимаю{" "}
+            <Link href="/oferta" target="_blank" rel="noopener">публичную оферту</Link>.
           </span>
         </label>
       ) : null}

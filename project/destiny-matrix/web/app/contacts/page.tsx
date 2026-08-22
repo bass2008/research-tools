@@ -47,6 +47,15 @@ export default function ContactsPage() {
           <dd>
             <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>
           </dd>
+          {/* телефон печатается только здесь и только когда задан: его требует эквайрер, закон — нет */}
+          {LEGAL.phone ? (
+            <>
+              <dt>Телефон</dt>
+              <dd>
+                <a href={`tel:${LEGAL.phone.replace(/[^+\d]/g, "")}`}>{LEGAL.phone}</a>
+              </dd>
+            </>
+          ) : null}
         </dl>
 
         <h2>Документы</h2>

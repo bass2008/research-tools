@@ -33,8 +33,37 @@ def seed_admin() -> str | None:
         return f"{email} (уже есть)"
 
 
+def add_missing_columns() -> list[str]:
+    """create_all не трогает существующие таблицы, поэтому новые колонки доезжают через ALTER —
+    иначе пришлось бы ронять таблицу с платежами."""
+    from sqlalchemy import inspect, text
+    wanted = {
+        "payments": {
+            "provider": "VARCHAR(16) NOT NULL DEFAULT 'mock'",
+            "status": "VARCHAR(24) NOT NULL DEFAULT 'NEW'",
+            "pay_url": "VARCHAR(300)",
+        },
+    }
+    added: list[str] = []
+    inspector = inspect(engine)
+    with engine.begin() as conn:
+        for table, columns in wanted.items():
+            if table not in inspector.get_table_names():
+                continue
+            have = {c["name"] for c in inspector.get_columns(table)}
+            for name, definition in columns.items():
+                if name in have:
+                    continue
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {definition}"))
+                added.append(f"{table}.{name}")
+    return added
+
+
 def ensure() -> None:
     Base.metadata.create_all(engine)
+    new_columns = add_missing_columns()
+    if new_columns:
+        print("добавлены колонки: " + ", ".join(new_columns))
     with SessionLocal() as db:
         rows = tariffs.seed(db)
     admin = seed_admin()

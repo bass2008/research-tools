@@ -1,0 +1,75 @@
+"""Браузерные сценарии: ходим по сайту так, как ходит человек — кликами, без подмены состояния.
+
+Стенд поднимается заранее (compose/scripts/run.sh) и должен работать на мок-оплате:
+PAYMENT_PROVIDER=mock, иначе тесты уйдут на живую форму банка.
+"""
+from __future__ import annotations
+
+import os
+import pathlib
+import subprocess
+import uuid
+
+import pytest
+from playwright.sync_api import Page, sync_playwright
+
+BASE = os.environ.get("E2E_URL", "http://127.0.0.1:3000")
+ADMIN = (os.environ.get("E2E_ADMIN", "snborodaenko@mail.ru"), os.environ.get("E2E_ADMIN_PASSWORD", "123"))
+
+
+def pytest_configure(config):
+    import urllib.request
+    try:
+        urllib.request.urlopen(f"{BASE}/api/health", timeout=5)
+    except OSError as exc:
+        raise pytest.UsageError(f"стенд не отвечает на {BASE}: {exc}. Поднимите compose/scripts/run.sh")
+
+
+@pytest.fixture(scope="session")
+def browser():
+    with sync_playwright() as pw:
+        instance = pw.chromium.launch(args=["--no-sandbox"])
+        yield instance
+        instance.close()
+
+
+@pytest.fixture
+def page(browser) -> Page:
+    context = browser.new_context(viewport={"width": 1360, "height": 950}, locale="ru-RU")
+    page = context.new_page()
+    page.set_default_timeout(15_000)
+    yield page
+    context.close()
+
+
+@pytest.fixture
+def mail() -> str:
+    return f"e2e-{uuid.uuid4().hex[:10]}@example.ru"
+
+
+@pytest.fixture
+def api_log():
+    """Письма на стенде не уходят по SMTP, а пишутся в лог — оттуда берём ссылку на сброс."""
+    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
+
+    def read(pattern: str) -> str | None:
+        out = subprocess.run(["docker", "compose", "-f", str(compose),
+                              "logs", "--no-log-prefix", "--tail", "3000", "api"],
+                             capture_output=True, text=True).stdout
+        found = [line for line in out.splitlines() if pattern in line]
+        return found[-1] if found else None
+    return read
+
+
+@pytest.fixture
+def api_notify():
+    """Послать стенду подписанное уведомление — то, что банк не может доставить на 127.0.0.1."""
+    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
+
+    def send(payment_id: str, status: str = "CONFIRMED") -> str:
+        done = subprocess.run(["docker", "compose", "-f", str(compose), "exec", "-T", "api",
+                               "python", "-m", "app.selfnotify", str(payment_id), status],
+                              capture_output=True, text=True)
+        assert done.returncode == 0, done.stderr or done.stdout
+        return done.stdout.strip()
+    return send

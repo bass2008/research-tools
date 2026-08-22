@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     # только пишутся в лог.
     smtp_host: str = "postbox.cloud.yandex.net"
     smtp_port: int = 587
+    # стенд и браузерные сценарии не должны слать письма людям: письмо уходит в лог
+    mail_to_log: bool = False
     smtp_user: str = ""
     smtp_password: str = ""
     mail_from: str = "noreply@arcana-sense.ru"
@@ -77,6 +79,18 @@ class Settings(BaseSettings):
     s3_access_key: str = ""
     s3_secret_key: str = ""
     report_link_ttl_seconds: int = Field(default=3600, ge=60, le=86_400)
+    # сколько ждать печать, уже запущенную другим запросом, прежде чем печатать самим
+    print_wait_seconds: int = Field(default=120, ge=1, le=600)
+
+    # Кем принимать оплату: пусто — живым эквайрингом, если он настроен, иначе моком. Явное имя
+    # нужно браузерным сценариям: они не должны ходить в банк.
+    payment_provider: str = ""
+
+    # Эквайринг Т-Банка. Без ключей приём оплаты остаётся мок-режимом.
+    tbank_terminal_key: str = ""
+    tbank_password: str = ""
+    tbank_api_url: str = "https://securepay.tinkoff.ru/v2"
+    tbank_timeout_seconds: int = Field(default=20, ge=5, le=120)
 
     # Админ — это конфиг, а не колонка в users: схема без миграций, и новая колонка заставила бы
     # пересоздавать таблицу. Список почт через запятую; сид создаёт первую из них, чтобы после
@@ -93,6 +107,10 @@ class Settings(BaseSettings):
     @property
     def admins(self) -> list[str]:
         return [e.strip().lower() for e in self.admin_emails.split(",") if e.strip()]
+
+    @property
+    def tbank_enabled(self) -> bool:
+        return bool(self.tbank_terminal_key and self.tbank_password)
 
     @property
     def pdf_enabled(self) -> bool:

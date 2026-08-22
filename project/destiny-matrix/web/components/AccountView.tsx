@@ -7,16 +7,14 @@ import { ApiError, api, type MatrixListItem, type PaymentItem } from "@/lib/api"
 import { calculate } from "@/lib/matrix";
 import { loadBirth } from "@/lib/storage";
 import { money } from "@/lib/tariffs";
+import { counted } from "@/lib/plural";
 
 import { birthLabel } from "./MatrixResult";
 import SaveMatrixButton from "./SaveMatrixButton";
 import { useTariffs } from "./TariffsProvider";
 import { useSession } from "./useSession";
 
-function dateCount(n: number): string {
-  const tail = n % 100 >= 11 && n % 100 <= 14 ? 5 : n % 10;
-  return `${n} ${tail === 1 ? "дата" : tail >= 2 && tail <= 4 ? "даты" : "дат"}`;
-}
+const dateCount = (n: number) => counted(n, "дата", "даты", "дат");
 
 /**
  * Подпись матрицы прямо в строке списка: имя, а рядом карандаш. Имя нужно, чтобы список из
@@ -151,7 +149,7 @@ export default function AccountView() {
   useEffect(() => {
     if (session.status !== "user") return;
     void reload();
-  }, [session.status, reload]);
+  }, [session.status, session.email, reload]);
 
   // уведомление живёт несколько секунд: постоянная плашка «имя изменено» мешала бы читать список
   useEffect(() => {

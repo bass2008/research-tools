@@ -104,6 +104,13 @@ write_files:
       TLS: sudo certbot --nginx -d ${site_fqdn} -d www.${site_fqdn} --agree-tos -m ${admin_email} --redirect
       После выпуска сертификата поставить SESSION_COOKIE_SECURE=1 в .env и перезапустить службу.
 
+  - path: /etc/cron.d/arcana-sweep
+    permissions: "0644"
+    content: |
+      # Досверка платежей: уведомление могло не дойти, тогда исход подтянет опрос.
+      # Задача в очереди создаётся только когда есть что опрашивать.
+      */5 * * * * root cd ${app_dir} && /usr/bin/docker compose exec -T api python -m app.sweep >> /var/log/arcana-sweep.log 2>&1
+
 runcmd:
   - [ bash, -c, "fallocate -l ${swap_size_mb}M /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab" ]
   - [ bash, -c, "mkdir -p ${app_dir}/static && chown -R ubuntu:ubuntu ${app_dir}" ]

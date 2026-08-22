@@ -16,6 +16,10 @@ COPY . .
 ARG NEXT_PUBLIC_SITE_URL=https://arcana-sense.ru
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 # откуда браузер берёт `_next/static`: пусто — с того же сервера, иначе бакет или CDN
+# Счётчик включается только там, где передан номер: локальные прогоны и тесты статистику не пачкают.
+ARG NEXT_PUBLIC_METRIKA_ID=""
+ENV NEXT_PUBLIC_METRIKA_ID=${NEXT_PUBLIC_METRIKA_ID}
+
 ARG NEXT_ASSET_PREFIX=""
 ENV NEXT_ASSET_PREFIX=${NEXT_ASSET_PREFIX}
 # версия сборки: её отдаёт /version/current.txt и показывает админка

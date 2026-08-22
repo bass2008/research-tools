@@ -9,6 +9,7 @@ import { arcanum, roman } from "@/lib/arcana";
 import { allCombinationSlugs, arcanumHref, combination, combinationHref, parseCombinationSlug } from "@/lib/encyclopedia";
 import { combinationContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
+import { NOT_FOUND_META } from "@/lib/seo";
 
 type Params = { pair: string };
 
@@ -18,7 +19,9 @@ export function generateStaticParams(): Params[] {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const pair = parseCombinationSlug((await params).pair);
-  if (!pair) return {};
+  // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
+  // несуществующая страница выглядела как главная.
+  if (!pair) return NOT_FOUND_META;
   const [a, b] = pair;
   const c = combination(a, b);
   const extra = combinationContent(c.slug);

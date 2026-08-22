@@ -4,6 +4,7 @@ import Link from "next/link";
 import { matrixCount } from "@/lib/content";
 import Price from "@/components/Price";
 import { pageMeta } from "@/lib/site";
+import { counted, plural } from "@/lib/plural";
 import { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } from "./matrices";
 
 export const metadata: Metadata = pageMeta({
@@ -52,7 +53,8 @@ export default function MatrixIndexPage() {
           <>
             <h2 className="section-gap">Вход по аркану дня</h2>
             <p className="dim">
-              Внутри каждой страницы — ссылки на все 12 месяцев, все {years.length} арканов года и все
+              Внутри каждой страницы — ссылки на все 12 месяцев, все{" "}
+              {counted(years.length, "аркан", "аркана", "арканов")} года и все
               22 аркана дня, поэтому от любой карты можно дойти до любой другой.
             </p>
             <div className="cardgrid">

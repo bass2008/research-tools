@@ -11,6 +11,7 @@ import { POSITIONS, arcanumHref, chakraHref, positionHref } from "@/lib/encyclop
 import type { Matrix } from "@/lib/matrix";
 import { build } from "@/lib/sections";
 import { SITE, pageMeta } from "@/lib/site";
+import { NOT_FOUND_META } from "@/lib/seo";
 
 import {
   MONTHS_GEN,
@@ -25,7 +26,9 @@ import {
 
 type Params = { slug: string };
 
-export const dynamicParams = false;
+// false отдавал 404 ещё на маршрутизации, до generateMetadata, и на неизвестном слаге
+// в заголовке вкладки оставался заголовок главной
+export const dynamicParams = true;
 
 export function generateStaticParams(): Params[] {
   return matrixSlugs().map((slug) => ({ slug }));
@@ -74,7 +77,9 @@ function seo(slug: string) {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const data = seo((await params).slug);
-  if (!data) return {};
+  // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
+  // несуществующая страница выглядела как главная.
+  if (!data) return NOT_FOUND_META;
   return pageMeta({
     title: data.title,
     description: data.description,

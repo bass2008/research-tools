@@ -5,9 +5,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ApiError, api, type AdminPayment, type AdminReportJob, type AdminUser } from "@/lib/api";
+import { ApiError, api, type AdminPayment, type AdminReportJob, type AdminUser,
+         type SweepRun } from "@/lib/api";
 import { money } from "@/lib/tariffs";
 import { buildInfo } from "@/lib/version";
+import { paymentTargetLabel } from "@/lib/paytarget";
+import { counted, plural } from "@/lib/plural";
 
 function when(iso: string | null): string {
   if (!iso) return "—";
@@ -32,16 +35,19 @@ export default function AdminView() {
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [payments, setPayments] = useState<AdminPayment[] | null>(null);
   const [jobs, setJobs] = useState<AdminReportJob[] | null>(null);
+  const [sweeps, setSweeps] = useState<SweepRun[] | null>(null);
   const [avgSeconds, setAvgSeconds] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void Promise.all([api.admin.users(), api.admin.payments(), api.admin.reports()])
-      .then(([u, p, r]) => {
+    void Promise.all([api.admin.users(), api.admin.payments(), api.admin.reports(),
+                      api.admin.sweeps()])
+      .then(([u, p, r, s]) => {
         setUsers(u.items);
         setPayments(p.items);
         setJobs(r.items);
         setAvgSeconds(r.avg_seconds);
+        setSweeps(s.items);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Админка недоступна."));
   }, []);
@@ -58,9 +64,8 @@ export default function AdminView() {
     );
   }
 
-  const paidTotal = (payments ?? [])
-    .filter((p) => p.paid_at && !p.refunded_at)
-    .reduce((sum, p) => sum + p.amount, 0);
+  const settled = (payments ?? []).filter((p) => p.paid_at && !p.refunded_at);
+  const paidTotal = settled.reduce((sum, p) => sum + p.amount, 0);
 
   const build = buildInfo();
 
@@ -88,8 +93,12 @@ export default function AdminView() {
       <div className="panel section-gap">
         <h3>Пользователи</h3>
         <div className="cap">
-          {users ? `${users.length} всего` : "загружаем…"}
-          {payments ? ` · оплачено ${money(paidTotal)} ₽ за ${payments.length} платежей` : ""}
+          {users ? `${counted(users.length, "человек", "человека", "человек")} всего` : "загружаем…"}
+          {payments
+            ? ` · оплачено ${money(paidTotal)} ₽ за ` +
+              `${counted(settled.length, "платёж", "платежа", "платежей")}` +
+              ` · всего ${counted(payments.length, "заявка", "заявки", "заявок")}`
+            : ""}
         </div>
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-users">
@@ -106,7 +115,7 @@ export default function AdminView() {
             <tbody>
               {users === null ? (
                 <tr>
-                  <td colSpan={6} className="skeleton">
+                  <td colSpan={7} className="skeleton">
                     Загружаем…
                   </td>
                 </tr>
@@ -142,19 +151,20 @@ export default function AdminView() {
                 <th>Тариф</th>
                 <th>Сумма</th>
                 <th>Статус</th>
+                <th>За какую дату</th>
                 <th>Номер</th>
               </tr>
             </thead>
             <tbody>
               {payments === null ? (
                 <tr>
-                  <td colSpan={6} className="skeleton">
+                  <td colSpan={7} className="skeleton">
                     Загружаем…
                   </td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="dim">
+                  <td colSpan={7} className="dim">
                     Платежей нет.
                   </td>
                 </tr>
@@ -168,6 +178,7 @@ export default function AdminView() {
                     <td>{p.tariff.name ?? "—"}</td>
                     <td className="num">{money(p.amount)} ₽</td>
                     <td>{p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}</td>
+                    <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
                   </tr>
                 ))
@@ -201,7 +212,7 @@ export default function AdminView() {
             <tbody>
               {jobs === null ? (
                 <tr>
-                  <td colSpan={6} className="skeleton">
+                  <td colSpan={7} className="skeleton">
                     Загружаем…
                   </td>
                 </tr>
@@ -225,6 +236,67 @@ export default function AdminView() {
                     <td className="num">{j.seconds === null ? "—" : `${j.seconds} с`}</td>
                     <td className="num">
                       {j.size_bytes === null ? "—" : `${Math.round(j.size_bytes / 1024)} КБ`}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="panel section-gap">
+        <h3>Досверка платежей</h3>
+        <div className="cap">
+          {sweeps === null
+            ? "Опрос провайдера по платежам, о которых не пришло уведомление"
+            : sweeps.length === 0
+              ? "Прогонов не было: незакрытых платежей не появлялось"
+              : `Прогонов: ${sweeps.length} · последний опросил ${sweeps[0].checked}, ` +
+                `изменилось ${sweeps[0].changed}`}
+        </div>
+        <div className="tablewrap">
+          <table className="admtable" data-testid="admin-sweeps">
+            <thead>
+              <tr>
+                <th>Начало</th>
+                <th>Статус</th>
+                <th>Опрошено</th>
+                <th>Изменилось</th>
+                <th>Заняло</th>
+                <th>Заявки</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sweeps === null ? (
+                <tr>
+                  <td colSpan={7} className="skeleton">
+                    Загружаем…
+                  </td>
+                </tr>
+              ) : sweeps.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="dim">
+                    Пока нечего было досверять.
+                  </td>
+                </tr>
+              ) : (
+                sweeps.map((s) => (
+                  <tr key={s.id} data-testid="admin-sweep-row">
+                    <td className="small">{when(s.started_at)}</td>
+                    <td title={s.error ?? undefined}>{s.status === "done" ? "готов" : "идёт"}</td>
+                    <td className="num">{s.checked}</td>
+                    <td className="num">{s.changed}</td>
+                    <td className="num">{s.seconds === null ? "—" : `${s.seconds} с`}</td>
+                    <td className="small">
+                      {s.log.length === 0
+                        ? "—"
+                        : s.log
+                            .map((row) =>
+                              `${row.email}: ${row.was}${row.now ? ` → ${row.now}` : ""}` +
+                              (row.error ? ` (${row.error})` : ""),
+                            )
+                            .join("; ")}
                     </td>
                   </tr>
                 ))

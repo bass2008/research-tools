@@ -89,7 +89,8 @@ export default function RefundPage() {
           устроил, вы вправе обратиться в Роспотребнадзор или в суд по месту жительства.
         </p>
         <p>
-          Реквизиты для претензий: <P>{LEGAL.entity}</P>, ИНН <P>{LEGAL.inn}</P>, адрес:{" "}
+          Реквизиты для претензий: <P>{LEGAL.entity}</P>, ИНН <P>{LEGAL.inn}</P>, ОГРНИП{" "}
+          <P>{LEGAL.ogrnip}</P>.{" "}
           Почта: <P>{LEGAL.email}</P>.
         </p>
       </div>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { calculate, type Matrix } from "@/lib/matrix";
 import { loadBirth } from "@/lib/storage";
 import { money } from "@/lib/tariffs";
+import { counted, plural } from "@/lib/plural";
 
 import LockIcon from "./LockIcon";
 import MatrixResult, { birthLabel } from "./MatrixResult";
@@ -76,7 +77,8 @@ export default function ReportView({
       <h1>Разбор матрицы судьбы</h1>
       <p className="dim">
         {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} ·{" "}
-        {sections.filter((s) => s.positions.length).length} раздела открыто
+        {counted(sections.filter((s) => s.positions.length).length, "раздел", "раздела", "разделов")}{" "}
+        открыто
       </p>
 
       <div className="section-gap">

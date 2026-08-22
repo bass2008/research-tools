@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import json
 import uuid
 
@@ -8,12 +9,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .. import access, mail, tariffs
+from .. import access, mail, payments, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Payment, SavedMatrix, User, default_title, utcnow
-from ..schemas import PaymentIn
+from ..models import (Entitlement, Payment, SavedMatrix, User, default_title, utcnow)
+from ..schemas import PaymentIn, PaymentRef
 from ..security import create_token, hash_password, random_password
 
 router = APIRouter(prefix="/payments", tags=["payments"])
@@ -52,69 +53,199 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
     return row
 
 
-@router.post("/mock")
-def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
-    if not settings.mock_payments:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail="Мок-оплата отключена")
+def _buyer(db: Session, email: str) -> tuple[User, bool]:
+    user = db.scalar(select(User).where(User.email == email))
+    if user is not None:
+        return user, False
+    user = User(email=email, password_hash=hash_password(random_password()))
+    db.add(user)
+    try:
+        db.flush()
+    except IntegrityError:                   # гонка двух оплат одной почтой
+        db.rollback()
+        user = db.scalar(select(User).where(User.email == email))
+        if user is None:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                                detail="Не удалось создать пользователя") from None
+        return user, False
+    return user, True
 
-    tariff = tariffs.get(db, payload.tariff)
+
+def _target(db: Session, user: User, payload: PaymentIn, tariff) -> SavedMatrix | None:
+    if access.SINGLE in tariff.scopes() and access.ALL not in tariff.scopes():
+        return _matrix_for(db, user, payload)
+    return None
+
+
+def _tariff(db: Session, code: str):
+    tariff = tariffs.get(db, code)
     if tariff is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Такого тарифа нет")
+    return tariff
 
-    user = db.scalar(select(User).where(User.email == payload.email))
-    autoregistered = user is None
-    if user is None:
-        user = User(email=payload.email, password_hash=hash_password(random_password()))
-        db.add(user)
-        try:
-            db.flush()
-        except IntegrityError:               # гонка двух оплат одной почтой
-            db.rollback()
-            user = db.scalar(select(User).where(User.email == payload.email))
-            if user is None:
-                raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                    detail="Не удалось создать пользователя") from None
-            autoregistered = False
 
-    matrix = _matrix_for(db, user, payload) if access.SINGLE in tariff.scopes() \
-        and access.ALL not in tariff.scopes() else None
+def _grant_once(db: Session, payment: Payment, now: dt.datetime) -> Entitlement:
+    """Право на платёж выдаётся один раз: провайдер сообщает об оплате несколько раз и повторяет
+    уведомление, пока не получит подтверждение приёма."""
+    right = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
+    if right is not None:
+        return right
+    body = payment.body()
+    tariff = tariffs.get(db, body["id"]) or _tariff(db, body["id"])
+    user = db.get(User, payment.user_id)
+    payment.paid_at = payment.paid_at or now
+    return access.grant(db, user, tariff, payment=payment, matrix_id=payment.matrix_id, now=now)
 
+
+def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
+    """Единственное место, где исход платежа превращается в права. Названия статусов сюда не
+    доходят — провайдер отдаёт нормализованный исход."""
     now = utcnow()
-    payment = Payment(user_id=user.id, tariff_body=json.dumps(tariff.body(), ensure_ascii=False), amount=tariff.price,
-        matrix_id=matrix.id if matrix else None, created_at=now, paid_at=now,
-        external_id=f"mock-{uuid.uuid4().hex[:24]}")
+    payment.status = update.status or payment.status
+    outcome = update.outcome
+    if outcome is payments.Outcome.CANCELED:
+        # деньги уже списаны — значит это возврат, иначе просто снятый холд
+        outcome = (payments.Outcome.REFUNDED if payment.paid_at is not None
+                   else payments.Outcome.FAILED)
+    if outcome is payments.Outcome.PAID:
+        right = _grant_once(db, payment, now)
+        fresh = right.starts_at == now
+        db.commit()
+        if fresh:
+            mail.purchase(payment.user.email, payment.body()["name"], payment.external_id)
+    elif outcome is payments.Outcome.REFUNDED:
+        first = payment.refunded_at is None
+        payment.refunded_at = payment.refunded_at or now
+        for right in db.scalars(select(Entitlement)
+                                .where(Entitlement.payment_id == payment.id)).all():
+            right.revoked_at = right.revoked_at or now
+        db.commit()
+        if first and payment.paid_at is not None:
+            mail.refund(payment.user.email, payment.body()["name"], payment.external_id)
+    else:
+        db.commit()
+    db.refresh(payment)
+    return payment
+
+
+def _provider_of(payment: Payment) -> payments.Provider:
+    provider = payments.get(payment.provider)
+    if provider is None or not provider.enabled():
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail="Этот способ оплаты сейчас недоступен")
+    return provider
+
+
+def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
+    """Один путь для всех способов оплаты: покупатель, дата, платёж, обращение к провайдеру и
+    применение исхода. Права выдаёт только apply(), поэтому мок и живой банк не расходятся."""
+    tariff = _tariff(db, payload.tariff)
+    user, autoregistered = _buyer(db, payload.email)
+    matrix = _target(db, user, payload, tariff)
+
+    payment = Payment(user_id=user.id, tariff_body=json.dumps(tariff.body(), ensure_ascii=False),
+                      amount=tariff.price, matrix_id=matrix.id if matrix else None,
+                      external_id=f"new-{uuid.uuid4().hex[:24]}", provider=provider.name,
+                      status="NEW")
     db.add(payment)
     db.flush()
 
-    right = access.grant(db, user, tariff, payment=payment,
-                         matrix_id=matrix.id if matrix else None, now=now)
-    db.commit()
+    order = payments.order_id(payment.id)
+    try:
+        started = provider.start(order, tariff.price, tariff.name, user.email)
+    except payments.PaymentError as exc:
+        db.rollback()
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+    payment.external_id = started.external_id
+    payment.pay_url = started.pay_url
+    payment.status = started.status
+    db.flush()
+    apply(db, payment, payments.Update(external_id=started.external_id, order_id=order,
+                                       outcome=started.outcome, status=started.status))
     db.refresh(user)
 
-    # Токен выдаём только вместе с автосозданием аккаунта. Иначе достаточно знать чужую почту,
-    # чтобы «купить» и получить доступ к чужим матрицам вместе с датами рождения.
-    body = {
-        "ok": True,
-        "payment_id": payment.external_id,
-        "user": user.public(),
-        "autoregistered": autoregistered,
-        "tariff": tariff.public(),
-        "entitlement": right.item(),
-        "matrix_id": matrix.id if matrix else None,
-        # что именно открылось — по данным сервера: экран после оплаты не должен додумывать
-        "matrix": matrix.item() if matrix else None,
-        "mock": True,
-    }
-    if autoregistered:
-        body["token"] = create_token(user.id)
-    else:
-        body["token"] = None
+    right = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
+    body = {"ok": True, "order_id": order, "payment_id": payment.external_id,
+            "payment_url": payment.pay_url, "status": payment.status,
+            "paid": payment.paid_at is not None, "provider": payment.provider,
+            "user": user.public(), "autoregistered": autoregistered,
+            "tariff": tariff.public(), "entitlement": right.item() if right else None,
+            "matrix_id": matrix.id if matrix else None,
+            "matrix": matrix.item() if matrix else None}
+    # Токен выдаём только вместе с автосозданием аккаунта: иначе достаточно знать чужую почту,
+    # чтобы «купить» и попасть в чужой кабинет.
+    body["token"] = create_token(user.id, user.password_hash) if autoregistered else None
+    if not autoregistered:
         body["requires_login"] = True
-
-    # письмо после оплаты — единственное подтверждение доступа, которое остаётся у человека
-    # на руках; отказ почты платёж не отменяет
-    mail.purchase(user.email, tariff.name, payment.external_id)
     return body
+
+
+@router.post("/start")
+def start(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
+    provider = payments.active()
+    if provider is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail="Оплата не настроена")
+    return _open(db, payload, provider)
+
+
+@router.post("/notify/{provider_name}")
+def notify(provider_name: str, payload: dict, db: Session = Depends(get_db)) -> dict:
+    """Уведомление провайдера. Подлинность проверяет он сам: без неё доступ открывал бы любой."""
+    provider = payments.get(provider_name)
+    if provider is None or not provider.enabled():
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Нет такого способа оплаты")
+    try:
+        update = provider.read_notification(payload)
+    except payments.PaymentError as exc:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    payment = _find(db, update.external_id, update.order_id)
+    if payment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+    apply(db, payment, update)
+    return {"ok": True, "status": payment.status}
+
+
+@router.post("/notify")
+def notify_default(payload: dict, db: Session = Depends(get_db)) -> dict:
+    """Адрес без имени провайдера остаётся живым: он записан в платежах, созданных до перехода
+    на маршрут с именем."""
+    return notify("tbank", payload, db)
+
+
+@router.post("/sync")
+def sync(payload: PaymentRef, user: User = Depends(current_user),
+         db: Session = Depends(get_db)) -> dict:
+    """Спросить провайдера о статусе: на возвращении с формы уведомление могло не дойти."""
+    payment = _find(db, None, payload.order_id)
+    if payment is None or payment.user_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+    provider = payments.get(payment.provider)
+    if provider is not None and provider.enabled():
+        try:
+            apply(db, payment, provider.state(payment.external_id))
+        except payments.PaymentError as exc:
+            raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    return {"ok": True, "status": payment.status, "paid": payment.paid_at is not None,
+            "matrix_id": payment.matrix_id, "payment_id": payment.external_id}
+
+
+def _find(db: Session, external_id: str | None, order_id: str | None) -> Payment | None:
+    if external_id:
+        found = db.scalar(select(Payment).where(Payment.external_id == str(external_id)))
+        if found is not None:
+            return found
+    payment_id = payments.payment_id_of(order_id)
+    return db.get(Payment, payment_id) if payment_id else None
+
+
+@router.post("/mock")
+def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
+    """Оплата без денег для стенда и тестов. Идёт тем же путём, что живая, только провайдер мок."""
+    provider = payments.get("mock")
+    if provider is None or not provider.enabled():
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail="Мок-оплата отключена")
+    return {**_open(db, payload, provider), "mock": True}
 
 
 @router.get("")

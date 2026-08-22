@@ -75,3 +75,7 @@ class LeadIn(BaseModel):
 
 class ReportRequest(BaseModel):
     matrix_id: int
+
+
+class PaymentRef(BaseModel):
+    order_id: str

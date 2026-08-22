@@ -82,7 +82,9 @@ def test_single_right_unlocks_only_its_matrix(client, db):
     # третью не даём: слоты кончились, покупать надо ещё раз
     third = client.post("/api/matrices", json={"birth": "1989-03-03", "sex": "f"},
                         headers=headers)
-    assert third.status_code == 402 and "оплаченные даты заняты" in third.json()["detail"]
+    assert third.status_code == 402
+    detail = third.json()["detail"]
+    assert "Мест для хранения дат больше нет" in detail and "занято 2" in detail
 
 
 def test_future_date_is_400_and_saves_nothing(client, auth, db):

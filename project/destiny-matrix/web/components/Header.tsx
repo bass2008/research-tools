@@ -9,6 +9,7 @@ export default function Header() {
       <div className="wrap hrow">
         <Link className="logo" href="/" aria-label="Arcana Sense — на главную">
           <Logo height={54} />
+          <Logo compact height={38} />
         </Link>
         <nav className="hnav">
           <Link href="/report">Мой разбор</Link>
