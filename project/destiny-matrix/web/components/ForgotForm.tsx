@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -10,6 +11,7 @@ export default function ForgotForm() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +45,7 @@ export default function ForgotForm() {
   }
 
   return (
-    <form className="panel narrow" onSubmit={submit} data-testid="forgot-form">
+    <form method="post" className="panel narrow" onSubmit={submit} data-testid="forgot-form">
       <h3>Восстановление пароля</h3>
       <p className="dim">Пришлём ссылку для смены пароля на почту, указанную при оплате.</p>
       <label htmlFor="fmail">Почта</label>
@@ -56,7 +58,7 @@ export default function ForgotForm() {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@mail.ru"
       />
-      <button className="btn wide" data-testid="forgot-submit" style={{ marginTop: 14 }} disabled={busy}>
+      <button className="btn wide" data-testid="forgot-submit" style={{ marginTop: 14 }} disabled={busy || !hydrated}>
         {busy ? "Отправляем…" : "Прислать ссылку"}
       </button>
       {error ? <div className="err">{error}</div> : null}

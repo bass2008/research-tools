@@ -17,6 +17,10 @@ class Mock:
         return Started(external_id=f"mock-{uuid.uuid4().hex[:24]}", pay_url=None,
                        status="CONFIRMED", outcome=Outcome.PAID)
 
+    def reusable(self, status: str) -> bool:
+        # мок оплачивает сразу, незавершённых платежей у него не бывает
+        return False
+
     def state(self, external_id: str) -> Update:
         return Update(external_id=external_id, order_id=None, outcome=Outcome.PAID,
                       status="CONFIRMED")

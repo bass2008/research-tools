@@ -1,7 +1,8 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { track } from "@/lib/analytics";
 import { MatrixError, daysInMonth, toIso, type Sex } from "@/lib/matrix";
@@ -46,6 +47,10 @@ export default function CalcPromo({
   const years: number[] = [];
   for (let y = now.getFullYear(); y >= MIN_YEAR; y--) years.push(y);
 
+  // Поля тоже выключены до гидратации, а не только кнопка: React монтируется с начальным
+  // состоянием и стирает выбор, сделанный до этого, — человек считал бы чужую дату.
+  const ready = useHydrated();
+
   const submit = () => {
     const maxDay = daysInMonth(year, month);
     if (day > maxDay) {
@@ -80,7 +85,7 @@ export default function CalcPromo({
         <div className="fields">
           <div>
             <label htmlFor="pd">Число</label>
-            <select id="pd" value={day} onChange={(e) => setDay(Number(e.target.value))}>
+            <select id="pd" disabled={!ready} value={day} onChange={(e) => setDay(Number(e.target.value))}>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                 <option key={d} value={d}>
                   {d}
@@ -90,7 +95,7 @@ export default function CalcPromo({
           </div>
           <div>
             <label htmlFor="pm">Месяц</label>
-            <select id="pm" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+            <select id="pm" disabled={!ready} value={month} onChange={(e) => setMonth(Number(e.target.value))}>
               {MONTHS.map((name, i) => (
                 <option key={name} value={i + 1}>
                   {name}
@@ -100,7 +105,7 @@ export default function CalcPromo({
           </div>
           <div>
             <label htmlFor="py">Год</label>
-            <select id="py" value={year} onChange={(e) => setYear(Number(e.target.value))}>
+            <select id="py" disabled={!ready} value={year} onChange={(e) => setYear(Number(e.target.value))}>
               {years.map((y) => (
                 <option key={y} value={y}>
                   {y}
@@ -113,6 +118,7 @@ export default function CalcPromo({
           <button
             type="button"
             data-testid="promo-sex-f"
+            disabled={!ready}
             className={sex === "f" ? "on" : ""}
             onClick={() => setSex("f")}
           >
@@ -121,6 +127,7 @@ export default function CalcPromo({
           <button
             type="button"
             data-testid="promo-sex-m"
+            disabled={!ready}
             className={sex === "m" ? "on" : ""}
             onClick={() => setSex("m")}
           >
@@ -132,9 +139,10 @@ export default function CalcPromo({
           className="btn wide"
           data-testid="promo-submit"
           style={{ marginTop: 12 }}
+          disabled={!ready}
           onClick={submit}
         >
-          Рассчитать матрицу
+          {ready ? "Рассчитать матрицу" : "Секунду, готовим расчёт…"}
         </button>
         {error ? <div className="err">{error}</div> : null}
         <div className="hint">Дата не покидает браузер — считаем на месте</div>

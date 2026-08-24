@@ -9,11 +9,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .. import access, mail, payments, tariffs
+from .. import access, mail, payments, printing, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import (Entitlement, Payment, SavedMatrix, User, default_title, utcnow)
+from ..models import (Entitlement, Payment, SavedMatrix, User, as_utc, default_title,
+                      utcnow)
 from ..schemas import PaymentIn, PaymentRef
 from ..security import create_token, hash_password, random_password
 
@@ -113,6 +114,10 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
         db.commit()
         if fresh:
             mail.purchase(payment.user.email, payment.body()["name"], payment.external_id)
+            # печать начинается сразу, не дожидаясь нажатия: на слабой машине она идёт десятки
+            # секунд, и человеку незачем их ждать. Нажал раньше времени — запрос дождётся этой же
+            # печати, второго рендера не будет.
+            printing.warm(payment.user_id, payment.matrix_id)
     elif outcome is payments.Outcome.REFUNDED:
         first = payment.refunded_at is None
         payment.refunded_at = payment.refunded_at or now
@@ -136,12 +141,59 @@ def _provider_of(payment: Payment) -> payments.Provider:
     return provider
 
 
+def _reusable(db: Session, user: User, matrix: SavedMatrix | None,
+              provider: payments.Provider) -> Payment | None:
+    """Начатый, но не доведённый платёж за ту же дату. Две открытые страницы оплаты — это два
+    независимых источника события, и без этой проверки каждая выставляла свой счёт: на живом
+    терминале выходило два платежа по одной дате."""
+    if matrix is None:
+        return None
+    rows = db.scalars(
+        select(Payment).where(Payment.user_id == user.id, Payment.matrix_id == matrix.id,
+                              Payment.provider == provider.name,
+                              Payment.paid_at.is_(None), Payment.refunded_at.is_(None),
+                              Payment.order_id.is_not(None), Payment.pay_url.is_not(None))
+        .order_by(Payment.id.desc()).limit(5)
+    ).all()
+    for row in rows:
+        if (utcnow() - as_utc(row.created_at)).total_seconds() > settings.payment_reuse_seconds:
+            continue
+        # какие статусы ещё позволяют доплатить, знает провайдер, а не роутер
+        if provider.reusable(row.status):
+            return row
+    return None
+
+
+def _body(db: Session, payment: Payment, user: User, matrix: SavedMatrix | None,
+          tariff, order: str, autoregistered: bool) -> dict:
+    right = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
+    body = {"ok": True, "order_id": order, "payment_id": payment.external_id,
+            "payment_url": payment.pay_url, "status": payment.status,
+            "paid": payment.paid_at is not None, "provider": payment.provider,
+            "user": user.public(), "autoregistered": autoregistered,
+            "tariff": tariff.public(), "entitlement": right.item() if right else None,
+            "matrix_id": matrix.id if matrix else None,
+            "matrix": matrix.item() if matrix else None}
+    # Токен выдаём только вместе с автосозданием аккаунта: иначе достаточно знать чужую почту,
+    # чтобы «купить» и попасть в чужой кабинет.
+    body["token"] = create_token(user.id, user.password_hash) if autoregistered else None
+    if not autoregistered:
+        body["requires_login"] = True
+    return body
+
+
 def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     """Один путь для всех способов оплаты: покупатель, дата, платёж, обращение к провайдеру и
     применение исхода. Права выдаёт только apply(), поэтому мок и живой банк не расходятся."""
     tariff = _tariff(db, payload.tariff)
     user, autoregistered = _buyer(db, payload.email)
     matrix = _target(db, user, payload, tariff)
+
+    started_earlier = _reusable(db, user, matrix, provider)
+    if started_earlier is not None:
+        db.commit()
+        return _body(db, started_earlier, user, matrix, tariff, started_earlier.order_id or "",
+                     autoregistered)
 
     payment = Payment(user_id=user.id, tariff_body=json.dumps(tariff.body(), ensure_ascii=False),
                       amount=tariff.price, matrix_id=matrix.id if matrix else None,
@@ -160,25 +212,13 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     payment.external_id = started.external_id
     payment.pay_url = started.pay_url
     payment.status = started.status
+    payment.order_id = order
     db.flush()
     apply(db, payment, payments.Update(external_id=started.external_id, order_id=order,
                                        outcome=started.outcome, status=started.status))
     db.refresh(user)
 
-    right = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
-    body = {"ok": True, "order_id": order, "payment_id": payment.external_id,
-            "payment_url": payment.pay_url, "status": payment.status,
-            "paid": payment.paid_at is not None, "provider": payment.provider,
-            "user": user.public(), "autoregistered": autoregistered,
-            "tariff": tariff.public(), "entitlement": right.item() if right else None,
-            "matrix_id": matrix.id if matrix else None,
-            "matrix": matrix.item() if matrix else None}
-    # Токен выдаём только вместе с автосозданием аккаунта: иначе достаточно знать чужую почту,
-    # чтобы «купить» и попасть в чужой кабинет.
-    body["token"] = create_token(user.id, user.password_hash) if autoregistered else None
-    if not autoregistered:
-        body["requires_login"] = True
-    return body
+    return _body(db, payment, user, matrix, tariff, order, autoregistered)
 
 
 @router.post("/start")
@@ -231,6 +271,10 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
 
 
 def _find(db: Session, external_id: str | None, order_id: str | None) -> Payment | None:
+    if order_id:
+        exact = db.scalar(select(Payment).where(Payment.order_id == str(order_id)))
+        if exact is not None:
+            return exact
     if external_id:
         found = db.scalar(select(Payment).where(Payment.external_id == str(external_id)))
         if found is not None:

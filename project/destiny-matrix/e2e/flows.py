@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import time
 
 from playwright.sync_api import Page, expect
 
@@ -13,6 +14,21 @@ MONTHS = ("января", "февраля", "марта", "апреля", "ма�
 
 def label(day: int, month: int, year: int) -> str:
     return f"{day} {MONTHS[month - 1]} {year}"
+
+
+def slow_scripts(page: Page, ms: int = 1500) -> None:
+    """Задержать код страницы: разметка уже видна, а React ещё не подключился. Так проверяется
+    то, что человек на медленном телефоне делает всегда — трогает поля до гидратации."""
+    def hold(route):
+        time.sleep(ms / 1000)
+        route.continue_()
+
+    page.route("**/_next/static/chunks/**", hold, times=1)   # тормозим один кусок, не всю загрузку
+
+
+def no_scripts(page: Page) -> None:
+    """Страница вообще без своего кода: остаётся то, что делает сам браузер."""
+    page.route("**/_next/static/chunks/**", lambda route: route.abort())
 
 
 def calculate(page: Page, day: int, month: int, year: int, sex: str = "m") -> None:
@@ -123,7 +139,10 @@ def logout(page: Page) -> None:
         page.wait_for_timeout(700)
 
 
-GOOD_CARD = "4300000000000777"
+# Карты тестового терминала: первая проходит и формирует чек, вторая нужна для проверки
+# возврата (по ней банк делает и чек возврата), третья всегда получает отказ.
+GOOD_CARD = "4000000000000101"
+REFUND_CARD = "5000000000000108"
 BAD_CARD = "4300000000000785"
 
 
@@ -152,3 +171,12 @@ def pay_on_bank_form_start(page: Page, email: str, password: str = "1234") -> No
         page.get_by_test_id("pay-password").fill(password)
     page.locator(".consent input[type=checkbox]").check()
     page.get_by_test_id("pay-submit").click()
+
+
+def buy_on_bank(page: Page, email: str, day: int, month: int, year: int,
+                card: str = GOOD_CARD, sex: str = "m") -> None:
+    """Покупка через настоящую форму банка: расчёт, наша форма, форма банка, возврат."""
+    calculate(page, day, month, year, sex)
+    open_pay(page)
+    pay_on_bank_form_start(page, email)
+    pay_on_bank_form(page, card)

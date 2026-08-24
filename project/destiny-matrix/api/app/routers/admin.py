@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import access
+from .. import access, monitor, printing
 from .. import payments as gateway
 from ..routers.payments import apply as apply_payment
 from ..config import settings
@@ -104,6 +104,10 @@ def reports(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dic
         "failed": sum(1 for job, _e in rows if job.status == "failed"),
         # среднее время печати: по нему видно, хватает ли машине процессора
         "avg_seconds": round(sum(done) / len(done), 1) if done else None,
+        # сколько печатей идёт прямо сейчас и сколько мест всего: печать ограничена по памяти
+        "printing_now": printing.active(),
+        "print_slots": settings.print_slots,
+        "warming": printing.pending(),
     }
 
 
@@ -138,3 +142,15 @@ def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_d
             select(ReportJob).where(ReportJob.user_id == user.id)
             .order_by(ReportJob.id.desc())).all()],
     }
+
+
+@router.get("/pulse")
+def pulse(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Состояние машины и продукта сейчас. Нужна отдельно от облачного мониторинга: когда до
+    консоли не добраться, это единственное место, где видно, что происходит."""
+    return monitor.snapshot(db)
+
+
+@router.get("/errors")
+def errors(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    return {"items": monitor.last_errors(db), "hour": monitor.errors(db, 60)}

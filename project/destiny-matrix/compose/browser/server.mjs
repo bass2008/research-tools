@@ -89,7 +89,37 @@ async function onePage(page, marks) {
   });
 }
 
+// Печатей одновременно не больше, чем мест: каждая держит около 65 МБ, а контейнеру отведено 512.
+// Предел живёт здесь, а не в api: браузер один на машину, а контуров, которые к нему ходят, два.
+const SLOTS = Number(process.env.PRINT_SLOTS ?? 3);
+let busy = 0;
+const waiting = [];
+
+async function takeSlot() {
+  if (busy < SLOTS) {
+    busy += 1;
+    return;
+  }
+  await new Promise((resolve) => waiting.push(resolve));
+  busy += 1;
+}
+
+function freeSlot() {
+  busy -= 1;
+  const next = waiting.shift();
+  if (next) next();
+}
+
 async function toPdf(url) {
+  await takeSlot();
+  try {
+    return await printPage(url);
+  } finally {
+    freeSlot();
+  }
+}
+
+async function printPage(url) {
   const b = await live();
   const page = await b.newPage();
   const marks = [];

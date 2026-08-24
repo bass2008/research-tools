@@ -1,7 +1,8 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ApiError, api, type MatrixListItem, type PaymentResponse } from "@/lib/api";
@@ -49,6 +50,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
   const [stage, setStage] = useState<Stage>({ kind: "form" });
   const [lead, setLead] = useState<LeadState>("none");
   const [birth, setBirth] = useState<{ birth: string; sex: "m" | "f" } | null>(null);
@@ -64,6 +66,9 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   // возвращал прошлую покупку вместо новой формы.
   const receipt = params.get("paid");
   const router = useRouter();
+  // адрес оплаты бывает разным (/pay и /pay/<тариф>): чек обязан остаться на том же маршруте,
+  // иначе переход уводит со страницы, состояние теряется и человек видит форму вместо «Доступ открыт»
+  const here = usePathname();
   const session = useSession();
   const tariff = byId(tariffs, chosen) ?? tariffs[0];
   const signedIn = session.status === "user" && session.email === email.trim().toLowerCase();
@@ -126,12 +131,19 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   const choices = saved === null ? [] : targetOptions(saved, birth);
   const chosenLabel = labelOf(target, saved ?? [], birth);
   const opened = alreadyOpen(saved ?? [], birth);
+  // Ссылку «Открыть — 250 ₽» человек мог открыть на другом устройстве или после выхода. Номер
+  // чужой сессии не принадлежит, поэтому вместо молчаливой подмены даты просим войти.
+  const needsLogin = wanted !== null && session.status === "guest";
 
   // Цель считаем одной функцией и только по загруженному списку. Дата из адреса главнее уже
   // выбранной, пока человек не тронул список руками: ссылка «Открыть — 250 ₽» из кабинета обещает
   // конкретную дату, и платёж обязан уйти за неё.
   useEffect(() => {
     if (saved === null) return;
+    if (needsLogin) {
+      setTarget(null);
+      return;
+    }
     const list = targetOptions(saved, birth);
     const asked = wanted === null ? null : pickTarget(saved, birth, wanted);
     if (!picked && asked !== null && targetValue(asked) === String(wanted)) {
@@ -140,7 +152,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
     }
     if (stillValid(target, list)) return;
     setTarget(pickTarget(saved, birth, wanted));
-  }, [saved, birth, wanted, target, picked]);
+  }, [saved, birth, wanted, target, picked, needsLogin]);
 
   /** Лид уходит до оплаты. Отказ сети не теряет почту и не мешает платить. */
   const sendLead = async (mail: string): Promise<void> => {
@@ -241,7 +253,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       setStage({ kind: "paid", paymentId: res.payment_id, email: mail, matrix: res.matrix });
       // Кеш сегментов держит страницы, напечатанные до оплаты: без сброса «назад» возвращал
       // разбор с замками. Адрес с `paid` отделяет чек от формы.
-      router.replace(`/pay?paid=${encodeURIComponent(res.payment_id)}`, { scroll: false });
+      router.replace(`${here}?paid=${encodeURIComponent(res.payment_id)}`, { scroll: false });
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {
@@ -321,7 +333,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
   const known = stage.kind === "login-needed";
 
   return (
-    <form className="panel paybox" data-testid="pay-modal" onSubmit={submit}>
+    <form method="post" className="panel paybox" data-testid="pay-modal" onSubmit={submit}>
       <h3>Что покупаем</h3>
       <div className="cap">
         {tariffs.length > 1
@@ -380,7 +392,12 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
             ))}
           </select>
           <p className="hint" style={{ textAlign: "left" }}>
-            {target === null && opened ? (
+            {needsLogin ? (
+              <span data-testid="pay-login-note">
+                Эта дата сохранена в аккаунте — <Link href="/login">войдите</Link>, чтобы открыть
+                именно её. Другую дату можно <Link href="/">посчитать на главной</Link>.
+              </span>
+            ) : target === null && opened ? (
               <span data-testid="pay-open-note">
                 Разбор «{labelOf({ kind: "matrix", id: opened.id }, saved ?? [], birth)}» уже открыт
                 — второй раз платить не нужно.{" "}
@@ -451,7 +468,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
           <p className="hint" style={{ textAlign: "left" }}>
             {known
               ? "На эту почту уже есть аккаунт — нужен его пароль. Забыли его? Восстановите на странице /forgot."
-              : "С этой парой вход работает с любого устройства — писем мы не отправляем."}
+              : "С этой парой вход работает с любого устройства. На эту почту придёт письмо о покупке."}
           </p>
         </>
       )}
@@ -470,7 +487,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
         className="btn wide"
         data-testid="pay-submit"
         style={{ marginTop: 14 }}
-        disabled={busy || (!tariff.scope.includes("all") && target === null)}
+        disabled={busy || (!tariff.scope.includes("all") && target === null) || !hydrated}
       >
         {busy
           ? "Проводим платёж…"

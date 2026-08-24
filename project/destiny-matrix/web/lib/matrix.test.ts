@@ -113,9 +113,13 @@ describe("год", () => {
 
 describe("валидация", () => {
   it("будущая дата отклонена", () => {
+    // «завтра» считаем в местном времени: движок сравнивает с локальной датой браузера, а
+    // toISOString отдаёт UTC — ночью по Москве это давало сегодняшнее число, и тест падал.
     const t = new Date();
     t.setDate(t.getDate() + 1);
-    const iso = t.toISOString().slice(0, 10);
+    const iso = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(
+      t.getDate(),
+    ).padStart(2, "0")}`;
     expect(() => calculate(iso)).toThrow(/будущем/);
   });
 

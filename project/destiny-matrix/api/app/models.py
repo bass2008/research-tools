@@ -130,6 +130,9 @@ class Payment(Base):
     status: Mapped[str] = mapped_column(String(24), nullable=False, default="NEW",
                                         server_default="NEW")
     pay_url: Mapped[str | None] = mapped_column(String(300))
+    # номер заказа у провайдера: нужен, чтобы вернуть человека к уже начатому платежу, а не
+    # выставлять второй счёт за ту же дату
+    order_id: Mapped[str | None] = mapped_column(String(64), index=True)
 
     user: Mapped[User] = relationship(back_populates="payments")
 
@@ -253,3 +256,22 @@ class PaymentSweep(Base):
                 "changed": self.changed, "seconds": self.seconds(),
                 "started_at": iso(self.started_at), "finished_at": iso(self.finished_at),
                 "error": self.error, "log": self.entries()}
+
+
+class ErrorLog(Base):
+    """Пятисотки: по ним считается тревога и видно, что именно сломалось. Тела запросов и
+    персональных данных здесь нет намеренно — только метод, путь и голова трассировки."""
+    __tablename__ = "error_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                            default=utcnow, server_default=func.now(), index=True)
+    method: Mapped[str] = mapped_column(String(8), nullable=False)
+    path: Mapped[str] = mapped_column(String(200), nullable=False)
+    status: Mapped[int] = mapped_column(Integer, nullable=False)
+    message: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    trace: Mapped[str | None] = mapped_column(Text)
+
+    def item(self) -> dict:
+        return {"id": self.id, "at": iso(self.at), "method": self.method, "path": self.path,
+                "status": self.status, "message": self.message, "trace": self.trace}

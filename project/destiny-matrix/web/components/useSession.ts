@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { needsReload, ownerChanged } from "@/lib/session";
 import { cachePaid, cachedPaid, clearBirth, forgetSession } from "@/lib/storage";
 
 export type SessionStatus = "loading" | "guest" | "user" | "offline";
@@ -117,11 +118,6 @@ const RECHECK_AFTER_MS = 2000;
 let checkedAt = 0;
 let watching = false;
 
-/** Хозяин сессии сменился: чужую дату рождения из браузера надо убрать. */
-function ownerChanged(before: string | null, after: string | null): boolean {
-  return before !== null && before !== after;
-}
-
 function announce(): void {
   try {
     const channel = new BroadcastChannel(CHANNEL);
@@ -148,8 +144,8 @@ function watchTabs(): void {
     checkedAt = now;
     const shown = snapshot.email;
     void refreshSession().then((next) => {
-      if (next.status === "loading" || next.email === shown) return;
-      if (ownerChanged(shown, next.email)) clearBirth();
+      if (next.status === "loading" || !needsReload(shown, next.email)) return;
+      clearBirth();
       window.location.reload();
     });
   };

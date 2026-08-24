@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +15,7 @@ export default function ResetForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +46,7 @@ export default function ResetForm() {
   }
 
   return (
-    <form className="panel narrow" onSubmit={submit} data-testid="reset-form">
+    <form method="post" className="panel narrow" onSubmit={submit} data-testid="reset-form">
       <h3>Новый пароль</h3>
       <p className="dim">После смены вы сразу войдёте в кабинет.</p>
       <label htmlFor="rpass">Пароль</label>
@@ -57,7 +59,7 @@ export default function ResetForm() {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="не короче 3 знаков"
       />
-      <button className="btn wide" data-testid="reset-submit" style={{ marginTop: 14 }} disabled={busy}>
+      <button className="btn wide" data-testid="reset-submit" style={{ marginTop: 14 }} disabled={busy || !hydrated}>
         {busy ? "Меняем…" : "Сменить пароль"}
       </button>
       {error ? <div className="err">{error}</div> : null}

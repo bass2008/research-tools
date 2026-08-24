@@ -3,6 +3,8 @@
 // Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
 import Link from "next/link";
 
+import { personVisible } from "@/lib/session";
+
 import { useSession } from "./useSession";
 
 const ROW: React.CSSProperties = {
@@ -27,11 +29,12 @@ const BTN: React.CSSProperties = {
 export default function SessionBadge() {
   const session = useSession();
 
-  if (session.status === "loading") {
-    return <span style={{ ...ROW, color: "var(--dim2)" }}>проверяем доступ…</span>;
-  }
-
-  if (session.status !== "user") {
+  // Пока почта неизвестна — «проверяем доступ…»; известного человека служебной надписью не
+  // затираем: на странице возврата из оплаты сверка идёт по расписанию, и шапка мигала.
+  if (!personVisible(session.status, session.email)) {
+    if (session.status === "loading") {
+      return <span style={{ ...ROW, color: "var(--dim2)" }}>проверяем доступ…</span>;
+    }
     return (
       <span style={ROW}>
         <Link data-testid="nav-login" href="/login">

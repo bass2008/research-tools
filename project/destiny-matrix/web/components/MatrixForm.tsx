@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -65,6 +66,12 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
   const years: number[] = [];
   for (let y = now.getFullYear(); y >= MIN_YEAR; y--) years.push(y);
 
+  // До гидратации обработчик не подключён, и нажатие «Рассчитать» не делало ничего: человек на
+  // медленном телефоне решал, что сайт сломан. Пока не готовы — говорим это прямо.
+  // Поля тоже выключены до гидратации, а не только кнопка: React монтируется с начальным
+  // состоянием и стирает выбор, сделанный до этого, — человек считал бы чужую дату.
+  const ready = useHydrated();
+
   const submit = () => {
     const maxDay = daysInMonth(year, month);
     if (day > maxDay) {
@@ -101,7 +108,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
         <div className="fields">
           <div>
             <label htmlFor="d">Число</label>
-            <select id="d" value={day} onChange={(e) => setDay(Number(e.target.value))}>
+            <select id="d" disabled={!ready} value={day} onChange={(e) => setDay(Number(e.target.value))}>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((v) => (
                 <option key={v} value={v}>
                   {v}
@@ -111,7 +118,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
           </div>
           <div>
             <label htmlFor="m">Месяц</label>
-            <select id="m" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+            <select id="m" disabled={!ready} value={month} onChange={(e) => setMonth(Number(e.target.value))}>
               {MONTHS.map((nm, i) => (
                 <option key={nm} value={i + 1}>
                   {nm}
@@ -121,7 +128,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
           </div>
           <div>
             <label htmlFor="y">Год</label>
-            <select id="y" value={year} onChange={(e) => setYear(Number(e.target.value))}>
+            <select id="y" disabled={!ready} value={year} onChange={(e) => setYear(Number(e.target.value))}>
               {years.map((v) => (
                 <option key={v} value={v}>
                   {v}
@@ -134,6 +141,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
           <button
             type="button"
             data-testid="sex-f"
+            disabled={!ready}
             data-sex="f"
             className={sex === "f" ? "on" : ""}
             onClick={() => setSex("f")}
@@ -143,6 +151,7 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
           <button
             type="button"
             data-testid="sex-m"
+            disabled={!ready}
             data-sex="m"
             className={sex === "m" ? "on" : ""}
             onClick={() => setSex("m")}
@@ -150,8 +159,14 @@ export default function MatrixForm({ texts }: { texts?: PositionTexts }) {
             Мужской
           </button>
         </div>
-        <button className="btn wide" data-testid="calc-submit" style={{ marginTop: 12 }} onClick={submit}>
-          Рассчитать матрицу
+        <button
+          className="btn wide"
+          data-testid="calc-submit"
+          style={{ marginTop: 12 }}
+          disabled={!ready}
+          onClick={submit}
+        >
+          {ready ? "Рассчитать матрицу" : "Секунду, готовим расчёт…"}
         </button>
         {error ? <div className="err">{error}</div> : null}
         <div className="hint">Дата не покидает браузер — считаем на месте</div>

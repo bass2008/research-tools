@@ -42,6 +42,7 @@ def add_missing_columns() -> list[str]:
             "provider": "VARCHAR(16) NOT NULL DEFAULT 'mock'",
             "status": "VARCHAR(24) NOT NULL DEFAULT 'NEW'",
             "pay_url": "VARCHAR(300)",
+            "order_id": "VARCHAR(64)",
         },
     }
     added: list[str] = []

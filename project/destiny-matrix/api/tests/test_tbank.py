@@ -387,3 +387,100 @@ def test_admin_sees_sweep_runs(client, auth, db, bank):
     assert len(body["items"]) == 1
     run = body["items"][0]
     assert run["status"] == "done" and run["checked"] == 1 and run["log"][0]["email"] == "queue-sweep@example.ru"
+
+
+# ── Чек (фискализация) ────────────────────────────────────────────────────────────────────────
+# Боевой терминал с подключённой отправкой чеков в налоговую отклоняет Init без объекта Receipt
+# (код 309 request.validate.expected.receipt), то есть без чека покупка не работает вообще.
+
+
+def init_of(bank) -> dict:
+    return next(payload for method, payload in bank if method == "Init")
+
+
+def test_init_carries_the_receipt(client, db, bank):
+    """В банк уходит чек: адрес покупателя, режим налогообложения и одна позиция покупки."""
+    start(client, "check@example.ru")
+    receipt = init_of(bank)["Receipt"]
+
+    assert receipt["Email"] == "check@example.ru"
+    assert receipt["Taxation"] == "patent"
+    item, = receipt["Items"]
+    assert item["Name"] == "Адаптация web-страницы по параметрам заказчика"
+    assert item["Quantity"] == 1
+    assert (item["Price"], item["Amount"]) == (25_000, 25_000)
+    assert item["Tax"] == "none"
+    # «job» — «работа» по ФФД; «work» боевой терминал не признаёт и считает поле пустым
+    assert item["PaymentObject"] == "job" and item["PaymentMethod"] == "full_payment"
+
+
+def test_receipt_sum_always_matches_the_payment(client, db, bank):
+    """Сумма позиций чека обязана совпасть с суммой платежа — иначе банк откажет в приёме."""
+    from app.models import Tariff
+
+    db.get(Tariff, "single").price = 99_900
+    db.commit()
+    start(client, "sum@example.ru")
+    payload = init_of(bank)
+
+    items = payload["Receipt"]["Items"]
+    assert sum(i["Amount"] for i in items) == payload["Amount"] == 99_900
+
+
+def test_receipt_name_fits_the_bank_limit(client, db, bank, monkeypatch):
+    """Название позиции длиннее 128 символов банк не примет: режем, а не падаем."""
+    from app.payments.tbank import NAME_LIMIT
+
+    monkeypatch.setattr(payments.tbank.settings, "tbank_item_name", "Адаптация web-страницы " * 20)
+    start(client, "long@example.ru")
+
+    name = init_of(bank)["Receipt"]["Items"][0]["Name"]
+    assert len(name) == NAME_LIMIT and name.startswith("Адаптация web-страницы")
+
+
+def test_receipt_names_the_subject_of_the_contract_not_the_tariff(client, db, bank):
+    """В чеке — предмет договора, а не витринное название. Патент выдан на разработку ПО, поэтому
+    наименование позиции и описание платежа обязаны говорить о работах по адаптации страницы,
+    как бы ни назывался тариф на витрине."""
+    from app.models import Tariff
+
+    db.get(Tariff, "single").name = "Полный разбор одной даты со скидкой"
+    db.commit()
+    start(client, "subject@example.ru")
+
+    payload = init_of(bank)
+    assert payload["Receipt"]["Items"][0]["Name"] == "Адаптация web-страницы по параметрам заказчика"
+    assert payload["Description"] == "Адаптация web-страницы по параметрам заказчика"
+    assert "разбор" not in payload["Description"].lower()
+
+
+def test_receipt_follows_the_tax_mode_from_settings(client, db, bank, monkeypatch):
+    """Смена режима налогообложения — настройка на машине, а не правка кода."""
+    monkeypatch.setattr(payments.tbank.settings, "tbank_taxation", "usn_income")
+    monkeypatch.setattr(payments.tbank.settings, "tbank_vat", "vat20")
+    monkeypatch.setattr(payments.tbank.settings, "tbank_payment_object", "intellectual_activity")
+    monkeypatch.setattr(payments.tbank.settings, "tbank_payment_method", "full_prepayment")
+    start(client, "usn@example.ru")
+
+    receipt = init_of(bank)["Receipt"]
+    assert receipt["Taxation"] == "usn_income"
+    item, = receipt["Items"]
+    assert item["Tax"] == "vat20" and item["PaymentObject"] == "intellectual_activity"
+    assert item["PaymentMethod"] == "full_prepayment"
+
+
+def test_payment_without_email_never_reaches_the_bank(bank):
+    """Чек без адреса покупателя не примут, поэтому такой платёж не начинаем вовсе."""
+    with pytest.raises(payments.PaymentError):
+        payments.PROVIDERS["tbank"].start("arcana-1-x", 25_000, "Разбор", None)
+    assert bank == [], "в банк ушёл запрос без чека"
+
+
+def test_receipt_does_not_change_the_signature(client, db, bank):
+    """Подпись считается по корневым полям: чек в неё не входит, иначе Token не сойдётся."""
+    start(client, "sign@example.ru")
+    payload = init_of(bank)
+
+    without_receipt = {k: v for k, v in payload.items() if k != "Receipt"}
+    assert BANK.token({**without_receipt, "TerminalKey": "1234DEMO"}) == \
+        BANK.token({**payload, "TerminalKey": "1234DEMO"})

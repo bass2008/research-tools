@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import { useEffect, useState } from "react";
 
 import { track } from "@/lib/analytics";
@@ -17,6 +18,7 @@ export default function LeadForm({ source = "landing" }: { source?: string }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
 
   useEffect(() => {
     const kept = loadLead();
@@ -57,7 +59,7 @@ export default function LeadForm({ source = "landing" }: { source?: string }) {
   };
 
   return (
-    <form className="panel narrow" data-role="lead" onSubmit={submit} style={{ textAlign: "left" }}>
+    <form method="post" className="panel narrow" data-role="lead" onSubmit={submit} style={{ textAlign: "left" }}>
       <h3>Новые разделы разбора — на почту</h3>
       <div className="cap">Письма редкие, только о разборе; отписка одной ссылкой</div>
       <label htmlFor="leademail">Почта</label>
@@ -71,7 +73,7 @@ export default function LeadForm({ source = "landing" }: { source?: string }) {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@mail.ru"
       />
-      <button className="btn wide" data-testid="lead-submit" style={{ marginTop: 12 }} disabled={busy}>
+      <button className="btn wide" data-testid="lead-submit" style={{ marginTop: 12 }} disabled={busy || !hydrated}>
         {busy ? "Отправляем…" : "Оставить почту"}
       </button>
       <p className="hint" data-testid="lead-status" role="status" aria-live="polite">

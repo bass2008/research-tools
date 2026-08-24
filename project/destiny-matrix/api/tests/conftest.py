@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,19 @@ if str(API_DIR) not in sys.path:
 from app.db import Base, get_db  # noqa: E402
 from app.main import create_app  # noqa: E402
 from app import tariffs  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def no_warmup(monkeypatch):
+    """Прогрев печати после оплаты в контрактных тестах выключен: браузера здесь нет, а фоновый
+    поток переживал свой тест и мешал следующему. Тесты самого прогрева включают его сами."""
+    from app import printing
+
+    monkeypatch.setattr(printing.settings, "print_warmup", False)
+    yield
+    deadline = time.monotonic() + 30
+    while printing.pending() and time.monotonic() < deadline:
+        time.sleep(0.05)
 
 
 @pytest.fixture()

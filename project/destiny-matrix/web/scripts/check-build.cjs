@@ -142,7 +142,10 @@ for (const [r, html] of pages) {
 
   if (!/<title>[^<]{10,}<\/title>/.test(html)) fail(`${r}: нет содержательного <title>`);
   if (!/<meta name="description" content="[^"]{40,}"/.test(html)) fail(`${r}: нет description`);
-  if (!/rel="canonical"/.test(html)) fail(`${r}: нет canonical`);
+  // у страницы «не найдено» canonical быть не должно: с ним она объявляла себя копией главной
+  const notFound = r === "/_not-found";
+  if (!notFound && !/rel="canonical"/.test(html)) fail(`${r}: нет canonical`);
+  if (notFound && /rel="canonical"/.test(html)) fail(`${r}: у 404 не должно быть canonical`);
   if (!/property="og:image"/.test(html)) fail(`${r}: нет og:image`);
   if (!/rel="icon"/.test(html)) fail(`${r}: нет favicon`);
   if (/href="#"/.test(html)) fail(`${r}: ссылка в никуда href="#"`);

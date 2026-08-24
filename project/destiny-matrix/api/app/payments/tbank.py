@@ -14,8 +14,31 @@ from ..config import settings
 from .base import Outcome, PaymentError, Started, Update
 
 PAID = ("AUTHORIZED", "CONFIRMED")
+# ссылка на оплату ещё жива: человек либо не открывал форму, либо открыл и не доплатил
+OPEN = ("NEW", "FORM_SHOWED", "AUTHORIZING", "3DS_CHECKING", "3DS_CHECKED")
 GIVEN_BACK = ("REFUNDED", "PARTIAL_REFUNDED", "REVERSED")
 LOST = ("REJECTED", "DEADLINE_EXPIRED", "ATTEMPTS_EXPIRED", "AUTH_FAIL")
+
+NAME_LIMIT = 128        # предел банка на название позиции в чеке
+
+
+def receipt(amount: int, email: str) -> dict:
+    """Состав чека одной покупки. Сумма позиций обязана совпасть с суммой платежа, поэтому позиция
+    ровно одна: цена, количество 1 и итог — одно и то же число копеек. Наименование берём из
+    настроек, а не из тарифа: в чек уходит предмет договора, а не название с витрины."""
+    return {
+        "Email": email,
+        "Taxation": settings.tbank_taxation,
+        "Items": [{
+            "Name": settings.tbank_item_name[:NAME_LIMIT],
+            "Price": amount,
+            "Quantity": 1,
+            "Amount": amount,
+            "Tax": settings.tbank_vat,
+            "PaymentObject": settings.tbank_payment_object,
+            "PaymentMethod": settings.tbank_payment_method,
+        }],
+    }
 
 
 def outcome_of(status: str) -> Outcome:
@@ -62,20 +85,25 @@ class Tbank:
         return answer
 
     def start(self, order_id: str, amount: int, title: str, email: str | None) -> Started:
+        if not email:
+            raise PaymentError("Init: чек не составить без адреса покупателя")
         payload = {
             "Amount": amount,
             "OrderId": order_id,
-            "Description": title[:250],
+            "Description": settings.tbank_item_name[:250],
             "SuccessURL": f"{settings.site_url}/pay/done?order={order_id}",
             "FailURL": f"{settings.site_url}/pay/fail?order={order_id}",
             "NotificationURL": f"{settings.site_url}/api/payments/notify/{self.name}",
         }
-        if email:
-            payload["DATA"] = {"Email": email}
+        payload["DATA"] = {"Email": email}
+        payload["Receipt"] = receipt(amount, email)
         answer = self.call("Init", payload)
         status = str(answer.get("Status") or "NEW")
         return Started(external_id=str(answer["PaymentId"]), pay_url=answer.get("PaymentURL"),
                        status=status, outcome=outcome_of(status))
+
+    def reusable(self, status: str) -> bool:
+        return status in OPEN
 
     def state(self, external_id: str) -> Update:
         answer = self.call("GetState", {"PaymentId": external_id})

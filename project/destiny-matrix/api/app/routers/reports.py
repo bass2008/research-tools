@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import access, reports, tariffs
+from .. import access, printing, reports, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import ReportJob, SavedMatrix, User, as_utc, utcnow
+from ..models import ReportJob, SavedMatrix, User, utcnow
 from ..schemas import ReportRequest
 from ..security import create_print_token, read_print_token
 
@@ -21,32 +21,6 @@ def _own_matrix(db: Session, user: User, matrix_id: int) -> SavedMatrix:
     row = db.get(SavedMatrix, matrix_id)
     if row is None or row.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
-    return row
-
-
-def _ready(db: Session, user: User, matrix_id: int) -> ReportJob | None:
-    return db.scalars(select(ReportJob)
-                      .where(ReportJob.user_id == user.id, ReportJob.matrix_id == matrix_id,
-                             ReportJob.status == "done")
-                      .order_by(ReportJob.id.desc())).first()
-
-
-def _running(db: Session, user: User, matrix_id: int) -> ReportJob | None:
-    """Печать этой же матрицы, уже запущенная другим запросом. Задачу старше окна печати считаем
-    брошенной: браузер мог умереть, и ждать её бессмысленно."""
-    row = db.scalars(select(ReportJob)
-                     .where(ReportJob.user_id == user.id, ReportJob.matrix_id == matrix_id,
-                            ReportJob.status == "running")
-                     .order_by(ReportJob.id.desc())).first()
-    if row is None:
-        return None
-    started = as_utc(row.started_at or row.created_at)
-    if (utcnow() - started).total_seconds() > settings.browser_timeout_seconds + 30:
-        row.status = "failed"
-        row.error = "печать не завершилась: задача брошена"
-        row.finished_at = utcnow()
-        db.commit()
-        return None
     return row
 
 
@@ -75,7 +49,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
         raise HTTPException(status.HTTP_402_PAYMENT_REQUIRED,
                             detail="Разбор этой даты не оплачен")
 
-    done = _ready(db, user, row.id)
+    done = printing.ready(db, user.id, row.id)
     if done is not None and done.object_key:
         # тот же файл, а не новая печать: повторное нажатие не должно ни ждать, ни платить CPU
         return {"job_id": done.id, "status": "done", "cached": True,
@@ -86,7 +60,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
                             detail="Печать PDF не настроена")
 
-    busy = _running(db, user, row.id)
+    busy = printing.running(db, user.id, row.id)
     if busy is not None:
         waited = _wait_for(db, busy)
         if waited is not None:
@@ -98,33 +72,18 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
                                 detail="Печать этого разбора всё ещё идёт — откройте страницу "
                                        "через минуту, файл появится сам")
 
-    job = ReportJob(user_id=user.id, matrix_id=row.id, status="running", started_at=utcnow())
-    db.add(job)
-    db.commit()
-    db.refresh(job)
-
     try:
-        token = create_print_token(row.id, user.id)
-        url = f"{settings.web_internal_url.rstrip('/')}/print/report?m={row.id}&t={token}"
-        pdf = reports.render(url)
-        key = f"{user.id}/{row.id}/{job.id}.pdf"
-        reports.upload(key, pdf)
+        job = printing.run(db, user.id, row.id)
+    except printing.Busy as exc:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail="Сейчас печатается много разборов — нажмите ещё раз через "
+                                   "минуту, ваш файл встанет в очередь") from exc
     except Exception as exc:                       # noqa: BLE001
-        job.status = "failed"
-        job.error = str(exc)[:300]
-        job.finished_at = utcnow()
-        db.commit()
         raise HTTPException(status.HTTP_502_BAD_GATEWAY,
                             detail="Не удалось напечатать PDF") from exc
-
-    job.status = "done"
-    job.object_key = key
-    job.size_bytes = len(pdf)
-    job.finished_at = utcnow()
-    db.commit()
-    db.refresh(job)
-    return {"job_id": job.id, "status": "done", "cached": False, "url": reports.link(key),
-            "size_bytes": job.size_bytes, "seconds": job.seconds()}
+    return {"job_id": job.id, "status": "done", "cached": False,
+            "url": reports.link(job.object_key), "size_bytes": job.size_bytes,
+            "seconds": job.seconds()}
 
 
 @router.get("/page/{matrix_id}")

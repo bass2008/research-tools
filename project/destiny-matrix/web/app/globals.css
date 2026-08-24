@@ -151,6 +151,8 @@ li { margin-bottom: 0.35em; }
 /* MatrixForm отдаёт фрагментом форму и результат, поэтому оба — элементы этой же сетки.
    Без растяжки результат печатался в колонке 1fr и был вдвое уже страницы. */
 .hgrid > #result { grid-column: 1 / -1; }
+/* прокрутка к результату и к любому якорю останавливается под липкой шапкой, а не под ней */
+#result, [id] { scroll-margin-top: 76px; }
 .offer h1 { margin-bottom: 10px; }
 .offer .lede { font-size: 16.5px; color: var(--dim); max-width: 56ch; }
 .pricelead {
@@ -708,26 +710,16 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .paylist .small { font-weight: 500; }
 
 /* строка подписи разбора с переключателем матриц и кнопкой печати */
+/* Подпись разбора и кнопка сохранения — одна строка: подпись слева, кнопка прижата к правому краю.
+   Переключателя дат здесь нет намеренно — за другой датой человек идёт в кабинет. */
 .rsub { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.rsub > p { margin: 0; }
-.rsubact { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rsub > p { margin: 0; flex: 1 1 auto; min-width: 0; }
+.rsub > .pdfslot { flex: none; margin-left: auto; display: flex; flex-direction: column;
+  align-items: flex-end; gap: 6px; }
+.pdfslot .err { margin: 0; text-align: right; }
 .pdfbtn { gap: 7px; }
 .pdfbtn svg { flex: none; }
 .pdfbtn:hover { color: var(--gold); border-color: var(--gold); }
-.matswitch { display: flex; align-items: center; gap: 8px; margin: 0; text-transform: none; letter-spacing: 0; }
-.matswitch .cap { font: 700 10.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); }
-.matswitch select {
-  width: auto;
-  max-width: 260px;
-  padding: 8px 30px 8px 12px;
-  font: 600 13.5px var(--sans);
-  text-align: left;
-  cursor: pointer;
-  /* стрелка нарисована фоном: общий сброс appearance гасит штатную у select */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235a6d7d' stroke-width='1.6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 11px center;
-}
 .matact { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 /* Строка даты на телефоне: с открытым полем подписи содержимое не влезало в одну линию и
    выносило кабинет за край экрана. */
@@ -736,9 +728,15 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   .matrow > * { min-width: 0; }
   .matact { justify-content: flex-start; }
 }
-/* Подпись цели платежа обязана целиком влезать в поле: на 320 px не хватало пары пикселей. */
+/* Подписи в списках обязаны влезать целиком: на 320 px не хватало пары пикселей и «Сентября»
+   превращалось в «Сентябр». Правило общее для всех списков, а не только для цели платежа. */
 @media (max-width: 400px) {
-  .paytarget select { font-size: 12.6px; padding-left: 10px; padding-right: 8px; }
+  select,
+  .paytarget select { font-size: 12.6px; padding-left: 10px; padding-right: 26px; }
+  /* Трём полям даты на 320 px тесно: месяцу оставалось 93 px, и «Сентября» превращалось в
+     «Сентябр». Месяц уходит на всю ширину, число и год делят строку под ним. */
+  .fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .fields > div:nth-child(2) { grid-column: 1 / -1; order: -1; }
 }
 .skeleton { color: var(--dim2); font-size: 14px; }
 
@@ -826,7 +824,6 @@ body:has(.printmode) { background: #fff; }
   .site-header,
   .site-footer,
   .crumbs,
-  .rsubact,
   .allbox,
   .promo,
   .encref,
@@ -852,3 +849,19 @@ body:has(.printmode) { background: #fff; }
   h2 { font-size: 15pt; }
   a { color: inherit; text-decoration: none; }
 }
+
+/* Панель состояния в админке: цвет — единственный быстрый сигнал, читается раньше цифр. */
+.pgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin: 10px 0; }
+.pcard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.pcap { display: flex; justify-content: space-between; gap: 8px; }
+.pbar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 6px 0 4px; }
+.pbar > span { display: block; height: 100%; background: currentColor; }
+.pcard.lv-ok { color: var(--acc); }
+.pcard.lv-warn { color: #b8860b; }
+.pcard.lv-bad { color: #c0392b; }
+.pdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; margin-left: 6px; }
+.pdot.lv-ok { color: var(--acc); }
+.pdot.lv-warn { color: #b8860b; }
+.pdot.lv-bad { color: #c0392b; }
+.pnums { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0; }
+.ptrouble { margin: 6px 0; padding-left: 18px; color: #c0392b; }

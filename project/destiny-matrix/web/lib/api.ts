@@ -203,6 +203,31 @@ function scopeList(value: unknown): string[] {
   return value.filter((v): v is string => typeof v === "string" && v.length > 0);
 }
 
+
+export interface Pulse {
+  at: string;
+  memory: { total_mb: number; used_mb: number; percent: number };
+  cpu: { load1: number; load5: number; load15: number; cores: number; percent: number };
+  disk: { path: string; total_gb: number; free_gb: number; percent: number };
+  data_disk: { path: string; total_gb: number; free_gb: number; percent: number };
+  online: { people: number; robots: number; pages: { path: string; people: number }[] };
+  print: { active: number; waiting: number; failures_hour: number };
+  payments: { stuck: number };
+  errors: { last10min: number; hour: number };
+  crawlers: { bot: string; requests: number; mb: number }[] | null;
+  version: string;
+}
+
+export interface ErrorRow {
+  id: number;
+  at: string;
+  method: string;
+  path: string;
+  status: number;
+  message: string;
+  trace: string | null;
+}
+
 export const api = {
   register: (email: string, password: string) =>
     request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
@@ -256,6 +281,8 @@ export const api = {
     reports: () => request<{ items: AdminReportJob[]; running: number; failed: number;
                             avg_seconds: number | null }>("/admin/reports"),
     sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
+    pulse: () => request<Pulse>("/admin/pulse"),
+    errors: () => request<{ items: ErrorRow[]; hour: number }>("/admin/errors"),
   },
 
   // Дата уходит на сервер только по явному действию авторизованного пользователя:
@@ -315,6 +342,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ order_id: orderId }),
     }),
+
+  reportJobs: () =>
+    request<{ items: Array<{ id: number; matrix_id: number; status: string;
+                             size_bytes: number | null; seconds: number | null }> }>("/reports"),
 
   reportPdf: (matrixId: number) =>
     request<{ job_id: number; status: string; cached: boolean; url: string; size_bytes: number | null;

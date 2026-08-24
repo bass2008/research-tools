@@ -1,0 +1,88 @@
+# Тестовый контур на той же машине: test.arcana-sense.ru.
+#
+# Отличия от прода, и каждое — по причине:
+#   • свои образы с тегом test-*: фичи проверяются агентами до того, как уедут на прод;
+#   • своя база (том test-api-var): прогоны не засоряют данные покупателей;
+#   • тестовый терминал банка: агенты платят игрушечными картами, а не деньгами;
+#   • печать берётся у прода — браузерный контейнер один на машину, он держит до 350 МБ,
+#     и второй такой в 2 ГБ памяти не влезает. Общий предел печатей живёт внутри browser;
+#   • прогрев печати выключен: тестовых оплат десятки, и каждая занимала бы общий браузер;
+#   • письма только в лог: агенты не должны рассылать почту нашим доменом;
+#   • счётчик Метрики не собирается вовсе — статистика прода остаётся чистой.
+#
+# Поднимается отдельным проектом: docker compose -p arcana-test -f docker-compose.test.yml up -d
+name: arcana-test
+
+services:
+  # Имена сервисов уникальны на всю машину не для красоты: compose добавляет алиас по имени сервиса
+  # в каждую сеть, куда подключает контейнер. С сервисом «web» в общей сети печати имя стало
+  # неоднозначным, и браузер прода печатал страницу тестового контура — вместо разбора выходил 404.
+  test-api:
+    image: ${REGISTRY:-arcana}/api:${TAG:-test}
+    env_file:
+      - path: .env.test
+        required: false
+    environment:
+      APP_ENV: prod
+      SITE_URL: https://test.arcana-sense.ru
+      PAYMENT_PROVIDER: tbank
+      MAIL_TO_LOG: 1
+      PRINT_WARMUP: 0
+      PRINT_SLOTS: 1
+      MOCK_PAYMENTS: 1
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-snborodaenko@mail.ru}
+      MATRICES_HARD_CAP: 2000
+      BROWSER_URL: http://browser:3001
+      # адрес именно тестового web: имя «web» браузер печати резолвил бы в своей сети — то есть
+      # в прод-web, и печатал бы чужую страницу (получался файл на 50 КБ вместо трёх мегабайт)
+      WEB_INTERNAL_URL: http://test-web:3000
+      # метрики с теста в облако не отправляем: прогоны агентов смешались бы с боевыми числами
+      MONITORING_FOLDER: ""
+      BUILD_COMMIT: ${TAG:-test}
+    volumes:
+      - test-api-var:/srv/api/var
+    networks:
+      - default
+      - print
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  test-web:
+    image: ${REGISTRY:-arcana}/web:${TAG:-test}
+    environment:
+      API_INTERNAL_URL: http://test-api:8010
+      SESSION_COOKIE_SECURE: 1
+    ports:
+      # наружу смотрит nginx хоста; порт другой, чтобы не спорить с продом
+      - "127.0.0.1:${TEST_WEB_PORT:-3100}:3000"
+    volumes:
+      - ${TEST_STATIC_DIR:-/srv/arcana/static-test}:/static-out
+    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
+    networks:
+      - default
+      - print
+    depends_on:
+      test-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  test-api-var:
+
+networks:
+  # сеть только для печати: в ней у тестового api виден единственный чужой сервис — browser.
+  # Подключать тест к сети прода целиком нельзя: там есть свои api и web, и имена бы столкнулись.
+  print:
+    external: true
+    name: arcana-print

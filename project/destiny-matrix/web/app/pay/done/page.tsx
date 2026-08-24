@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMeta({
-  title: "Оплата прошла",
+  title: "Результат оплаты",
   description: "Возврат с платёжной формы: проверяем платёж и открываем разбор.",
   path: "/pay/done",
   noindex: true,

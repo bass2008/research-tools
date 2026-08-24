@@ -50,7 +50,7 @@ export default function SaveMatrixButton({
       setState("idle");
       if (err instanceof ApiError && err.status === 402) {
         // без даты в тексте: она специальная категория ПД и в сообщения не попадает
-        setLimit(`${err.message} Уже сохранённые даты остаются открытыми.`);
+        setLimit(`${err.message} Уже сохранённые даты остаются в кабинете.`);
         return;
       }
       setError(

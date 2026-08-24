@@ -4,8 +4,10 @@ import localFont from "next/font/local";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Metrika from "@/components/Metrika";
+import PulseBeacon from "@/components/PulseBeacon";
 import TariffsProvider from "@/components/TariffsProvider";
 import { SITE } from "@/lib/site";
+import { verification } from "@/lib/seo";
 
 import "./globals.css";
 
@@ -49,7 +51,9 @@ export const metadata: Metadata = {
     "Калькулятор матрицы судьбы: октаграмма 22 арканов, карта энергий по чакрам и разбор " +
     "по 20 разделам. Расчёт карты и два раздела разбора — бесплатно и без регистрации.",
   applicationName: SITE.name,
-  alternates: { canonical: SITE.url },
+  // canonical задаёт каждая страница сама (pageMeta): в корневом layout он делал главную
+  // канонической для всех 404, потому что при notFound() метаданные сегмента отбрасываются
+
   openGraph: {
     type: "website",
     siteName: SITE.name,
@@ -60,6 +64,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: [SITE.ogImage] },
   icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
   formatDetection: { telephone: false },
+  verification: verification(),
 };
 
 export const viewport: Viewport = {
@@ -81,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
         </TariffsProvider>
         <Metrika />
+        <PulseBeacon />
       </body>
     </html>
   );

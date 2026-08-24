@@ -12,6 +12,7 @@ import type { Matrix } from "@/lib/matrix";
 import { build } from "@/lib/sections";
 import { SITE, pageMeta } from "@/lib/site";
 import { NOT_FOUND_META } from "@/lib/seo";
+import { counted } from "@/lib/plural";
 
 import {
   MONTHS_GEN,
@@ -33,6 +34,9 @@ export const dynamicParams = true;
 export function generateStaticParams(): Params[] {
   return matrixSlugs().map((slug) => ({ slug }));
 }
+
+// в феврале 28 дней, в апреле, июне, сентябре и ноябре — 30: иначе пояснение обещало «30 февраля»
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 const DATES_SHOWN = 12;
 
@@ -71,7 +75,7 @@ function seo(slug: string) {
     `Разбор карты ${slug} (день ${key.day}, месяц ${key.month}, год ${key.year}): центр ` +
     `${m.center} ${arcanumTitle(m.center)}, миссия ${m.mission} ${arcanumTitle(m.mission)}, ` +
     `денежный канал ${m.money[0]}, линия отношений ${m.love[0]}. Два раздела бесплатно; ` +
-    `такую карту дают ${dates.length} дат рождения.`;
+    `такую карту дают ${counted(dates.length, "дата", "даты", "дат")} рождения.`;
   return { item, key, m, dates, title, description };
 }
 
@@ -285,8 +289,8 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         <div className="panel section-gap">
           <h3>Какие даты рождения дают эту матрицу</h3>
           <div className="cap">
-            {dates.length} дат: аркан дня повторяется каждые 22 числа, аркан года — у всех лет с той же
-            суммой цифр
+            {counted(dates.length, "дата", "даты", "дат")}: аркан дня повторяется каждые 22 числа,
+            аркан года — у всех лет с той же суммой цифр
           </div>
           <div className="taglist">
             {dates.slice(0, DATES_SHOWN).map((d) => (
@@ -295,7 +299,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
             {dates.length > DATES_SHOWN ? <span>и ещё {dates.length - DATES_SHOWN}</span> : null}
           </div>
           <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
-            {key.day + 22 <= 31
+            {key.day + 22 <= DAYS_IN_MONTH[key.month - 1]
               ? `Методика работает со свёрнутыми числами, поэтому ${key.day} и ${key.day + 22} ${MONTHS_GEN[key.month - 1]} дают одну и ту же карту.`
               : `Методика работает со свёрнутыми числами, поэтому ${key.day} ${MONTHS_GEN[key.month - 1]} любого года, который сворачивается в ${key.year}, даёт одну и ту же карту.`}
           </p>

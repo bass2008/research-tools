@@ -164,6 +164,16 @@ resource "yandex_dns_recordset" "www" {
 # Приём писем на домене — ImprovMX: пересылка на личный ящик, бесплатно и без своего сервера.
 # Отправку сайта он не делает (SMTP только на платном тарифе), её берёт Postbox.
 
+# Тестовый контур на том же адресе: отдельные образы, отдельная база и тестовый терминал банка.
+# Нужен, чтобы проверять фичи агентами, не выкатывая их на прод и не засоряя его данные.
+resource "yandex_dns_recordset" "test" {
+  zone_id = yandex_dns_zone.parent.id
+  name    = "test.${local.zone_dot}"
+  type    = "A"
+  data    = [yandex_vpc_address.app.external_ipv4_address[0].address]
+  ttl     = 300
+}
+
 resource "yandex_dns_recordset" "mx" {
   zone_id = yandex_dns_zone.parent.id
   name    = local.zone_dot

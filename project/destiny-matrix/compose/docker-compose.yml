@@ -26,9 +26,16 @@ services:
       # печать PDF: браузер отдельным сервисом, готовые файлы — в Object Storage
       BROWSER_URL: ${BROWSER_URL:-http://browser:3001}
       WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://web:3000}
+      # мониторинг: свои метрики уезжают в Yandex Cloud, токен берётся из метаданных машины.
+      # Пусто — метрики собираются только для админки и никуда не отправляются (так на стенде).
+      MONITORING_FOLDER: ${MONITORING_FOLDER:-}
+      BUILD_COMMIT: ${BUILD_COMMIT:-—}
     volumes:
       # база переживает пересборку образа: платежи и матрицы не одноразовые
       - api-var:/srv/api/var
+      # логи nginx только на чтение: краулеры ходят по страницам, до api не доходят, и увидеть их
+      # можно единственным способом — прочитать лог. Нет каталога (стенд) — счётчик молчит.
+      - ${NGINX_LOG_DIR:-/var/log/nginx}:/var/log/nginx:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
       interval: 10s
@@ -41,6 +48,11 @@ services:
   # не должны жить рядом с сайтом, а зависший браузер лечится перезапуском одного сервиса.
   browser:
     image: ${REGISTRY:-arcana}/browser:${TAG:-dev}
+    # печать одна на машину: браузер держит до 350 МБ, второй такой в 2 ГБ не влезает. Тестовый
+    # контур ходит сюда же через сеть arcana-print, а предел одновременных печатей — внутри сервиса.
+    networks:
+      - default
+      - print
     # тот же файл секретов, что у api: BROWSER_SECRET у них обязан совпадать
     env_file:
       - path: .env
@@ -84,3 +96,10 @@ services:
 
 volumes:
   api-var:
+
+networks:
+  # Общая сеть печати: одна на машину, потому что браузерный контейнер один. Создаётся вне compose
+  # (scripts/run.sh локально, release-* на машине) — иначе второй проект не смог бы к ней подключиться.
+  print:
+    external: true
+    name: arcana-print

@@ -40,6 +40,51 @@ def test_a1_payment_opens_the_card_shown_on_screen(page, mail):
         "оплатили мужскую карту, а открылась другая: " + page.inner_text("main")[:120]
 
 
+def test_date_picked_before_hydration_is_the_one_that_gets_paid(page, mail):
+    """Дата, выбранная до подключения React, не подменяется примером — и платёж идёт за неё.
+
+    React монтируется со своим начальным состоянием и стирает то, что человек уже выбрал в полях.
+    Пример карты на главной считается сам для «сегодня минус тридцать лет», поэтому подмена
+    выглядела правдоподобно: на экране появлялась дата, которую никто не вводил, и платёж уходил
+    за неё. Тот же класс, что A1: платим за то, что на экране.
+    """
+    flows.register(page, mail)
+    flows.slow_scripts(page)
+    page.goto(BASE, wait_until="commit")
+    page.select_option("#d", "12")
+    page.select_option("#m", "12")
+    page.select_option("#y", "1992")
+    page.get_by_test_id("sex-m").click()
+    page.get_by_test_id("calc-submit").click()
+    page.wait_for_timeout(1200)
+
+    shown = page.locator("#result").inner_text()
+    assert "12 декабря 1992" in shown, f"выбор до гидратации потерян, на экране: {shown[:120]}"
+
+    flows.open_pay(page)
+    assert "12 декабря 1992" in page.locator(".paybox").first.inner_text(), \
+        "форма оплаты предлагает не ту дату, что на экране"
+    flows.pay(page, mail)
+    page.goto(f"{BASE}/report", wait_until="networkidle")
+    page.wait_for_timeout(800)
+    assert "12 декабря 1992" in page.inner_text("main"), \
+        "оплачена не та дата, которую выбрали: " + page.inner_text("main")[:160]
+
+
+def test_forms_never_put_the_password_in_the_address(page, mail):
+    """Пока React не подключился, браузер отправляет форму сам — и уносит пароль в строку адреса,
+    откуда он попадает в логи сервера и в историю браузера. Проверяем и вход, и регистрацию."""
+    flows.no_scripts(page)
+    for path in ("/register", "/login"):
+        page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
+        page.fill("#email", mail)
+        page.fill("#password", "secret-1234")
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(1500)
+        assert "password=" not in page.url and "secret-1234" not in page.url, \
+            f"пароль ушёл в адрес на {path}: {page.url}"
+
+
 def test_a3_second_tab_forgets_the_previous_person(page, mail):
     """A3. Человек сменился в одной вкладке — вторая, оставленная открытой, показывает прежнего."""
     flows.buy(page, mail, 4, 4, 1994)
@@ -210,7 +255,7 @@ def test_a14_admin_summary_counts_paid_payments_only(page, mail):
         ?.closest('.panel')?.querySelector('.cap')?.innerText ?? '';
       return {paid, all: rows.length, cap};
     }""")
-    said = re.search(r"за (\d+) платеж", numbers["cap"])
+    said = re.search(r"за (\d+) плат[её]ж", numbers["cap"])
     assert said, f"сводки нет: {numbers['cap']!r}"
     assert int(said.group(1)) == numbers["paid"], (
         f"в сводке «{numbers['cap'].strip()}», а оплаченных строк {numbers['paid']} "

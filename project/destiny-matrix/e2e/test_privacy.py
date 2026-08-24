@@ -60,3 +60,24 @@ def test_report_and_account_are_not_indexed(page, mail):
         page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
         robots = page.locator("meta[name=robots]").get_attribute("content")
         assert robots and "noindex" in robots, f"{path}: {robots}"
+
+
+def test_contract_describes_work_not_a_service(page):
+    """Патент выдан на разработку ПО, включая адаптацию и модификацию (пп. 62 п. 2 ст. 346.43 НК РФ),
+    поэтому предмет договора — работы по адаптации web-страницы. Язык «информационных услуг» и
+    «доступа к материалам» этому виду деятельности не соответствует и возвращаться не должен."""
+    page.goto(f"{BASE}/oferta", wait_until="domcontentloaded")
+    page.wait_for_timeout(400)
+    text = page.inner_text("main")
+
+    assert "работ по адаптации web-страниц" in page.inner_text("h1"), page.inner_text("h1")
+    for wanted in ("адаптации и модификации web-страницы", "Результат работ", "346.43"):
+        assert wanted in text, f"в оферте нет: {wanted}"
+    for unwanted in ("оказание информационных услуг", "Услуга оказывается", "Услуга считается оказанной"):
+        assert unwanted not in text, f"в оферте осталось: {unwanted}"
+
+    page.goto(f"{BASE}/refund", wait_until="domcontentloaded")
+    page.wait_for_timeout(400)
+    back = page.inner_text("main")
+    assert "Работы считаются выполненными" in back
+    assert "отказаться от работ" in back

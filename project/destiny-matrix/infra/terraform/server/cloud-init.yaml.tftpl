@@ -50,6 +50,18 @@ write_files:
               proxy_set_header X-Forwarded-Proto $scheme;
               proxy_read_timeout 30s;
           }
+
+          # Печать PDF идёт синхронно и на слабой машине занимает под полминуты: с общим
+          # таймаутом 30 с ответ не доходил до браузера, хотя файл уже был готов.
+          location /api/reports {
+              proxy_pass http://127.0.0.1:3000;
+              proxy_http_version 1.1;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_read_timeout 200s;
+          }
       }
 
   - path: ${app_dir}/.env
@@ -96,7 +108,7 @@ write_files:
     permissions: '0644'
     content: |
       Что где на этой машине:
-        ${app_dir}/docker-compose.yml   раскладка, её приносит release.sh
+        ${app_dir}/docker-compose.yml   раскладка прода, её приносит release-prod.sh
         ${app_dir}/.env                 адрес сайта, реестр, секреты
         ${app_dir}/static/              _next/static, его отдаёт nginx с диска
         systemctl status arcana         состояние контейнеров

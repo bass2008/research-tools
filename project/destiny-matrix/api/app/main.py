@@ -7,10 +7,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import tariffs
+from . import errors, monitor, presence, tariffs
 from .db import get_db
 from .config import settings
 from .routers import ROUTERS
+from .schemas import PulseIn
 
 
 def create_app() -> FastAPI:
@@ -33,6 +34,17 @@ def create_app() -> FastAPI:
         # справочник читается из базы: цену меняем часто, пересборка для этого не нужна
         return {"items": [t.public() for t in tariffs.public_tariffs(db)], "free_sections": 2}
 
+    @app.middleware("http")
+    async def watch_failures(request: Request, call_next):
+        return await errors.watch(request, call_next)
+
+    @app.post(f"{settings.api_prefix}/pulse", tags=["service"])
+    def pulse(body: PulseIn, request: Request) -> dict:
+        """Отметка «я здесь» раз в 45 секунд. Ничего не сохраняет в базу: только счётчик в памяти,
+        по которому админка показывает, сколько человек на сайте сейчас."""
+        presence.touch(body.visitor, body.path, request.headers.get("user-agent", ""))
+        return {"ok": True}
+
     @app.exception_handler(ValueError)
     def value_error(_request: Request, exc: ValueError) -> JSONResponse:
         # движок валидирует дату сам: будущее и до 1900 года — это 400, а не 500
@@ -48,6 +60,7 @@ def create_app() -> FastAPI:
             status_code=422,
         )
 
+    monitor.start()
     return app
 
 

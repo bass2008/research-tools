@@ -1,0 +1,604 @@
+<title>Ночная смена Arcana Sense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ink: #151b2b;
+    --ink-soft: #39405a;
+    --paper: #eef1f6;
+    --surface: #ffffff;
+    --surface-2: #e6eaf2;
+    --line: #d3d9e6;
+    --muted: #69718a;
+    --accent: #a35d0c;
+    --accent-soft: #f3e6d3;
+    --ok: #26694c;
+    --ok-soft: #dcece4;
+    --alert: #9d3227;
+    --alert-soft: #f5e0dd;
+    --shadow: 0 1px 2px rgba(21, 27, 43, 0.06), 0 8px 24px rgba(21, 27, 43, 0.05);
+
+    --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --display: "Bricolage Grotesque", "IBM Plex Sans", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e8ecf6;
+      --ink-soft: #b6bed3;
+      --paper: #10141f;
+      --surface: #171d2b;
+      --surface-2: #1f2637;
+      --line: #2c3346;
+      --muted: #8b93ab;
+      --accent: #e0a45c;
+      --accent-soft: #3a2b16;
+      --ok: #6bc39a;
+      --ok-soft: #16301f;
+      --alert: #e08b80;
+      --alert-soft: #331a19;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #e8ecf6;
+    --ink-soft: #b6bed3;
+    --paper: #10141f;
+    --surface: #171d2b;
+    --surface-2: #1f2637;
+    --line: #2c3346;
+    --muted: #8b93ab;
+    --accent: #e0a45c;
+    --accent-soft: #3a2b16;
+    --ok: #6bc39a;
+    --ok-soft: #16301f;
+    --alert: #e08b80;
+    --alert-soft: #331a19;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 16.5px/1.62 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 96px; }
+
+  /* шапка */
+  .top { padding: 64px 0 34px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font: 500 12px/1 var(--mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font: 700 clamp(34px, 5.4vw, 58px)/1.04 var(--display);
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    text-wrap: balance;
+  }
+  .lede { font-size: 18.5px; color: var(--ink-soft); max-width: 66ch; margin: 0; }
+
+  /* числа */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 34px 0 0;
+  }
+  .fig { background: var(--surface); padding: 18px 18px 16px; }
+  .fig b {
+    display: block;
+    font: 500 30px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+  }
+  .fig span {
+    display: block;
+    margin-top: 7px;
+    font-size: 13.4px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* сетка: таймлайн слева, содержимое справа */
+  .body-grid {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    gap: 56px;
+    margin-top: 44px;
+    align-items: start;
+  }
+  nav.timeline { position: sticky; top: 24px; }
+  nav.timeline h2 {
+    font: 500 11.5px/1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  nav.timeline ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  nav.timeline a {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 10px;
+    padding: 7px 8px 7px 0;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-left: 2px solid var(--line);
+    padding-left: 14px;
+    font-size: 14.6px;
+  }
+  nav.timeline a time {
+    font: 400 13px/1.5 var(--mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  nav.timeline a:hover { color: var(--ink); border-left-color: var(--accent); }
+  nav.timeline a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  main { min-width: 0; }
+  section { scroll-margin-top: 24px; padding-bottom: 14px; }
+  section + section { margin-top: 52px; border-top: 1px solid var(--line); padding-top: 40px; }
+
+  h2.head {
+    font: 700 clamp(23px, 2.5vw, 30px)/1.16 var(--display);
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .when {
+    font: 400 13px/1 var(--mono);
+    color: var(--muted);
+    margin: 0 0 20px;
+    font-variant-numeric: tabular-nums;
+  }
+  h3 {
+    font: 600 17.5px/1.3 var(--sans);
+    margin: 30px 0 10px;
+  }
+  p { max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    margin: 22px 0;
+  }
+  .callout.mark { border-color: color-mix(in oklab, var(--accent) 45%, var(--line)); }
+  .callout h3 { margin-top: 0; }
+  .callout p { max-width: 62ch; }
+
+  .tablewrap { overflow-x: auto; margin: 20px 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    font: 500 11.6px/1.3 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .chip {
+    display: inline-block;
+    font: 500 12px/1 var(--mono);
+    padding: 5px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .chip.bad { background: var(--alert-soft); color: var(--alert); }
+  .chip.flat { background: var(--surface-2); color: var(--muted); }
+
+  code { font: 400 0.9em/1.5 var(--mono); background: var(--surface-2); padding: 2px 5px; border-radius: 5px; }
+  ul.plain { padding-left: 20px; max-width: 68ch; }
+  ul.plain li { margin-bottom: 8px; }
+  ol.steps { padding-left: 22px; max-width: 68ch; }
+  ol.steps li { margin-bottom: 12px; }
+
+  footer.end {
+    margin-top: 56px;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .body-grid { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+    nav.timeline { position: static; border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--surface); }
+    .top { padding-top: 40px; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">23 августа 2026 · 01:00–09:00 МСК</div>
+    <h1>Ночная смена Arcana Sense</h1>
+    <p class="lede">
+      Восемь часов без человека: тестовый эквайринг, два цикла поиска дефектов агентами, два релиза на
+      прод и проверка под нагрузкой. Здесь собраны все семь отчётов ночи — что нашли, что закрыли и в
+      каком состоянии сайт к утру.
+    </p>
+
+    <div class="figures">
+      <div class="fig"><b>15</b><span>дефектов найдено и закрыто</span></div>
+      <div class="fig"><b>28</b><span>агентов в двух циклах</span></div>
+      <div class="fig"><b>2</b><span>релиза на прод</span></div>
+      <div class="fig"><b>361</b><span>тест в наборах на утро</span></div>
+      <div class="fig"><b>10</b><span>посетителей одновременно, 0 ошибок</span></div>
+    </div>
+  </header>
+
+  <div class="body-grid">
+    <nav class="timeline">
+      <h2>Ход ночи</h2>
+      <ol>
+        <li><a href="#step1-0"><time>01:00</time> Тестовый эквайринг</a></li>
+        <li><a href="#step1-1"><time>05:00</time> Цикл после правки платежей</a></li>
+        <li><a href="#step2"><time>06:48</time> Первый релиз</a></li>
+        <li><a href="#step3-0"><time>07:00</time> Цикл на проде</a></li>
+        <li><a href="#step3-1"><time>08:15</time> Правки и второй релиз</a></li>
+        <li><a href="#step5"><time>08:20</time> Под нагрузкой</a></li>
+        <li><a href="#final"><time>09:00</time> Итог и что осталось</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="step1-0">
+        <h2 class="head">Ступень 2: живой тестовый эквайринг</h2>
+        <p class="when">01:00–05:00 · локальный стенд, DEMO-терминал Т-Банка · отчёт step1-0</p>
+
+        <p>
+          Семь сценариев на настоящей форме банка, последовательно, один платёж за раз. Четыре из них
+          дописаны этой ночью. Все зелёные.
+        </p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Сценарий</th><th>Что проверяли</th><th>Итог</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Четыре покупки подряд</td><td>успех, успех, отказ, успех — открыта ровно выбранная дата</td><td><span class="chip ok">держится</span></td></tr>
+              <tr><td>Уведомление без браузера</td><td>подпись, идемпотентность повтора</td><td><span class="chip ok">держится</span></td></tr>
+              <tr><td>Уход до возврата</td><td>доступ открывает досверка</td><td><span class="chip ok">новый тест</span></td></tr>
+              <tr><td>Отмена оплаченного</td><td>возврат, снятое право, письмо</td><td><span class="chip ok">новый тест</span></td></tr>
+              <tr><td>Снятие холда</td><td>это неудача, а не возврат</td><td><span class="chip ok">новый тест</span></td></tr>
+              <tr><td>Две вкладки на одной дате</td><td>один счёт на дату</td><td><span class="chip bad">дефект</span></td></tr>
+              <tr><td>Повторная оплата открытой даты</td><td>кнопка неактивна, есть объяснение</td><td><span class="chip ok">новый тест</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout mark">
+          <h3>Денежный дефект, который мок скрывал</h3>
+          <p>
+            Дата лежит в кабинете закрытой. Человек открывает её оплату, потом открывает ту же ссылку
+            во второй вкладке и платит. Банк выставляет <strong>два счёта по 250 ₽</strong> за одну
+            дату: <code>9100233290</code> и <code>9100233063</code>, оба в статусе <code>NEW</code>.
+          </p>
+          <p>
+            На моке этого не видно: там первый платёж подтверждается мгновенно и включает защиту «дата
+            уже открыта». Правка: платёж запомнил номер заказа, и человека возвращают к уже начатому
+            платежу вместо нового счёта — окно 30 минут. Какие статусы позволяют доплатить, знает
+            модуль провайдера, а не роутер: первую версию правки, где статусы банка оказались в
+            роутере, поймал сторож изоляции.
+          </p>
+        </div>
+
+        <p>
+          Гигиена: 23 платежа за прогон при лимите 30, пять висящих <code>NEW</code> закрыты отменой —
+          в системе банка незавершённых не осталось. Письма за прогон: 8 «аккаунт создан», 7 «доступ
+          открыт», 1 «платёж возвращён».
+        </p>
+      </section>
+
+      <section id="step1-1">
+        <h2 class="head">Цикл после правки платежей</h2>
+        <p class="when">05:00–06:40 · 7 маршрутов, 18 агентов, 0 сбоев · отчёт step1-1</p>
+
+        <p>
+          Правка тронула центральный путь создания платежа, поэтому цикл прошёл по маршрутам, задетым
+          ею и правками предыдущих кругов. Заявлено 11, подтверждено 7, отсеяно 4.
+        </p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>№</th><th>Что видит человек</th><th>Когда возникает</th><th>Почему не находили</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="num">D2</td>
+                <td>Заплатил из блока тарифов — чека нет, на экране снова форма, непонятно, прошло ли</td>
+                <td>только на входе <code>/pay/&lt;тариф&gt;</code></td>
+                <td>все сценарии заходят на оплату через кнопку в шапке</td>
+              </tr>
+              <tr>
+                <td class="num">D3</td>
+                <td>Ссылка из кабинета на другом устройстве молча платит за дату из калькулятора</td>
+                <td>адрес открыт без сессии, в браузере есть другая дата</td>
+                <td>ссылку проверяли только под своей сессией</td>
+              </tr>
+              <tr>
+                <td class="num">D4</td>
+                <td>Отказ по лимиту обещает, что сохранённые даты «остаются открытыми», хотя открытых нет</td>
+                <td>при каждом отказе по лимиту</td>
+                <td>регрессия: у дефекта было две половины, закрыли одну</td>
+              </tr>
+              <tr>
+                <td class="num">D6</td>
+                <td>«Сентябр» вместо «Сентября» в календаре</td>
+                <td>320 и 360 px, четыре длинных месяца</td>
+                <td>прошлую правку сделали адресно для одного списка</td>
+              </tr>
+              <tr>
+                <td class="num">D7</td>
+                <td>«1 дат», «2 дат» на 1178 страницах матриц</td>
+                <td>число дат оканчивается на 1–4</td>
+                <td>функция согласования есть, но эти страницы печатали число сами</td>
+              </tr>
+              <tr>
+                <td class="num">D8</td>
+                <td>126 страниц называют «8 и 30 февраля»</td>
+                <td>день + 22 не выходит за 31, но такого числа в месяце нет</td>
+                <td>инварианта не было: список дат фильтруется, пояснение под ним — нет</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Отсеяно без правки</h3>
+        <ul class="plain">
+          <li>«Назад» и F5 на экране оплаты превращают чек в форму — пожелание: деньги и цель не затронуты, второй платёж невозможен.</li>
+          <li>Адрес чека, открытый заново, отдаёт форму — тот же корень.</li>
+          <li>Переключатель дат не различает мужскую и женскую карту одной даты — <strong>вопрос владельцу</strong>.</li>
+          <li>На 320 px обрезаны названия арканов в таблице позиций — <strong>вопрос владельцу</strong>.</li>
+        </ul>
+
+        <p>
+          Один заявленный дефект — сброс пароля при живой сессии другого человека — опровергатель
+          подтвердил, а собственный прогон по тем же шагам прошёл зелёным. Тест-страж оставлен в
+          наборе: если дефект настоящий, он всплывёт.
+        </p>
+      </section>
+
+      <section id="step2">
+        <h2 class="head">Первый релиз</h2>
+        <p class="when">06:48 · da925cd-dirty1829 → 24b764c-dirty0648 · отчёт Step2</p>
+
+        <p>
+          Порог деплоя был задан заранее числами: ноль критичных дефектов, не больше трёх открытых,
+          зелёный полный прогон, пройденная ступень 2. Все четыре условия выполнились, решение
+          принималось без обсуждения.
+        </p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Страница</th><th class="num">До релиза</th><th class="num">После</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Главная</td><td class="num">1,24 с</td><td class="num">0,89 с</td></tr>
+              <tr><td><code>/api/health</code></td><td class="num">0,81 с</td><td class="num">0,60 с</td></tr>
+              <tr><td>Страница аркана</td><td class="num">1,12 с</td><td class="num">0,88 с</td></tr>
+              <tr><td>Каталог матриц</td><td class="num">1,15 с</td><td class="num">1,06 с</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Живой путь на проде прошёл целиком: расчёт, оплата настоящей формой банка тестовой картой за
+          10,3 с, чек, разбор без замков. А печать PDF не дошла до браузера — с этого началась
+          инфраструктурная часть ночи.
+        </p>
+      </section>
+
+      <section id="step3-0">
+        <h2 class="head">Цикл на проде</h2>
+        <p class="when">07:00–07:35 · 4 маршрута, 10 агентов, живой домен · отчёт Step3-0</p>
+
+        <div class="callout mark">
+          <h3>Открытие ночи: уведомления банка на прод приходят</h3>
+          <p>
+            В плане было записано обратное — что канал проверить нельзя, потому что адрес уведомлений
+            не настроен в личном кабинете терминала. Оказалось, он уходит в самом запросе на создание
+            платежа, и банк стучится на прод сам: по два уведомления на платёж, оба с ответом 200.
+          </p>
+          <p>
+            Проверено на брошенном возврате: человек не доехал до страницы «Доступ открыт», ни одного
+            запроса сверки статуса не было, а доступ всё равно открылся. Значит оплата не зависит от
+            того, вернулся человек на сайт или нет. Сверка всех 12 платежей прода с банком: ни одного
+            случая «банк считает оплаченным, а прав нет».
+          </p>
+        </div>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>№</th><th>Дефект</th><th>Категория</th><th>Важность</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="num">Q1</td><td>Форма оплаты обещает «писем мы не отправляем», а письмо приходит</td><td>текст</td><td><span class="chip flat">средняя</span></td></tr>
+              <tr><td class="num">Q2</td><td>Любой 404 объявляет каноническим адресом главную</td><td>юнит</td><td><span class="chip flat">средняя</span></td></tr>
+              <tr><td class="num">Q3</td><td>Заголовок результата уходит под липкую шапку</td><td>браузерный тест</td><td><span class="chip flat">низкая</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Что на проде проверено и держится: покупка на двух аккаунтах, отказ по карте, брошенный
+          возврат, письма через Postbox, печать 3,6 с с файлом 3,48 МБ и подписью на месте, повторная
+          печать и обновление во время печати, невозможность печати закрытого разбора, 17 публичных
+          адресов с собственными заголовками. Лимиты соблюдены: 4 платежа, 2 свежих печати, ни одной
+          пятисотки, свободной памяти не меньше 1,09 ГБ.
+        </p>
+      </section>
+
+      <section id="step3-1">
+        <h2 class="head">Правки и второй релиз</h2>
+        <p class="when">08:15 · 24b764c-dirty0815 · отчёт Step3-1</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>№</th><th>Что исправлено</th><th>Как</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="num">P1</td>
+                <td>Печать PDF обрывалась, хотя файл создавался</td>
+                <td>nginx рвал запрос на 30 с при печати в 28–30 с. Отдельный таймаут 200 с для маршрута отчётов — и в машине, и в источнике конфигурации</td>
+              </tr>
+              <tr>
+                <td class="num">P2</td>
+                <td>Клик по «Рассчитать» в первую секунду терялся</td>
+                <td>кнопка гаснет до готовности и говорит «Секунду, готовим расчёт…»</td>
+              </tr>
+              <tr>
+                <td class="num">R1</td>
+                <td>Релиз упал: на машине кончилось место</td>
+                <td>диск был занят на 100 %, докер держал 31 образ на 16 ГБ. Освобождено 13 ГБ, чистка старых образов добавлена в скрипт релиза</td>
+              </tr>
+              <tr>
+                <td class="num">R2</td>
+                <td>Досверка платежей никогда не запускалась</td>
+                <td>задача в <code>cron.d</code> отсутствовала, хотя объявлена в конфигурации сервера. Поставлена, прогнана вручную</td>
+              </tr>
+              <tr>
+                <td class="num">Q1–Q3</td>
+                <td>Находки прод-цикла</td>
+                <td>текст про письма, canonical у 404, отступ якоря под шапкой</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Три из этих пяти — отказы, которые упираются в инфраструктуру, а не в код продукта. Все они
+          проявились бы уже на живых покупателях: печать без результата, невозможность выпустить
+          обновление и потерянный доступ у того, чьё уведомление не дошло.
+        </p>
+      </section>
+
+      <section id="step5">
+        <h2 class="head">Под нагрузкой</h2>
+        <p class="when">08:20–08:40 · три волны, машина 2 vCPU / 2 ГБ · отчёт Step5</p>
+
+        <p>
+          Цель была не предел, а один ответ: держит ли машина десяток одновременных посетителей без
+          заметного замедления. Держит.
+        </p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Страница</th><th class="num">3 посетителя</th><th class="num">5</th><th class="num">10</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Главная</td><td class="num">1,16 с</td><td class="num">1,36 с</td><td class="num">2,00 с</td></tr>
+              <tr><td>Энциклопедия</td><td class="num">0,31</td><td class="num">0,24</td><td class="num">0,18</td></tr>
+              <tr><td>Страница аркана</td><td class="num">0,37</td><td class="num">0,24</td><td class="num">0,22</td></tr>
+              <tr><td>Разбор (закрытый)</td><td class="num">0,42</td><td class="num">0,60</td><td class="num">0,76</td></tr>
+              <tr><td>Расчёт в браузере</td><td class="num">1,55</td><td class="num">1,55</td><td class="num">1,54</td></tr>
+              <tr><td>Ошибок 5xx</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+              <tr><td>Память занято / свободно</td><td class="num">589 / 1377 МБ</td><td class="num">613 / 1354</td><td class="num">647 / 1320</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Десять посетителей и печать одновременно</h3>
+        <p>
+          Главная 1,77 с (максимум 1,87), остальные страницы 0,20–0,89 с, свежая печать PDF 8,0 с и
+          файл 4,1 МБ, ноль ошибок. Пик загрузки: <code>web</code> до 104 % одного ядра из двух,
+          браузерный контейнер до 29 % и 152 МБ из разрешённых 512. Свободной памяти в пике 1,20 ГБ,
+          load average 0,15.
+        </p>
+        <p>
+          Единственное, что растёт с нагрузкой, — динамическая главная: она печатается на каждый
+          запрос, потому что цена приходит из базы. Остальные страницы при большей нагрузке отдаются
+          даже быстрее: они уходят из кеша. К серьёзному трафику стоит закешировать главную и следить
+          за очередью печати — печать сериализована по построению.
+        </p>
+      </section>
+
+      <section id="final">
+        <h2 class="head">Итог и что осталось</h2>
+        <p class="when">09:00 · отчёт FinalStep</p>
+
+        <p>
+          Все девять пунктов плана пройдены, ни один шаг не пропущен, остановок с ожиданием человека не
+          было. 15 дефектов найдено и закрыто — каждый сначала красным тестом, потом правкой, потом
+          зелёным.
+        </p>
+
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Состояние на утро</th><th>Значение</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Прод</td><td class="num">24b764c-dirty0815, все сервисы healthy</td></tr>
+              <tr><td>Диск машины</td><td class="num">7,1 из 19 ГБ</td></tr>
+              <tr><td>Оплата на проде</td><td>DEMO-терминал Т-Банка</td></tr>
+              <tr><td>База прода</td><td class="num">4 аккаунта, 5 платежей</td></tr>
+              <tr><td>Досверка</td><td>cron каждые 5 минут</td></tr>
+              <tr><td>Бэкапы</td><td class="num">4 копии, последняя 08:29</td></tr>
+              <tr><td>Тесты</td><td class="num">api 130 · фронт 157 · браузерных 74 · приёмка чистая</td></tr>
+              <tr><td>Git</td><td>не тронут: ни коммитов, ни push</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Что осталось человеку</h3>
+        <ol class="steps">
+          <li><strong>Посмотреть дерево и закоммитить</strong> — ночь ничего не коммитила.</li>
+          <li>
+            <strong>Решить про терминал.</strong> Сейчас на проде DEMO: любой посетитель может «купить»
+            разбор тестовой картой. Перед анонсом нужен либо боевой терминал, либо мок-оплата, либо
+            закрытая покупка.
+          </li>
+          <li>
+            <strong>Два вопроса из отсева.</strong> Показывать ли пол в переключателе, когда на одну
+            дату сохранены мужская и женская карты. Подрезать ли названия арканов в таблице позиций на
+            320 px.
+          </li>
+          <li>
+            <strong>Открытый вопрос журнала.</strong> Сброс пароля при живой сессии другого человека:
+            опровергатель подтвердил, собственный прогон — нет. Тест-страж стоит в наборе.
+          </li>
+        </ol>
+
+        <p>Затыков нет: всё, что планировалось на ночь, сделано.</p>
+      </section>
+
+      <footer class="end">
+        Отчёты по шагам — в <code>tools/benchmark-testing/out/</code>. Метод цикла —
+        <code>testing-cycle.md</code>, правила для агентов — <code>user-testing-agent-rules.md</code>.
+      </footer>
+    </main>
+  </div>
+</div>

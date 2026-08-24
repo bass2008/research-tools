@@ -25,10 +25,17 @@ def pytest_configure(config):
         raise pytest.UsageError(f"стенд не отвечает на {BASE}: {exc}. Поднимите compose/scripts/run.sh")
 
 
+# Счётчик Метрики в прогонах не должен срабатывать: иначе один цикл добавляет к статистике сайта
+# восемь десятков «посетителей» с адреса машины, и отчёты перестают показывать живых людей.
+# Глушим подменой адресов, а не перехватом запросов: перехват включает обработку всей сети в
+# Playwright и под нагрузкой полного прогона регистрация не успевала за таймаут.
+COUNTERS = "MAP mc.yandex.ru 0.0.0.0, MAP mc.yandex.com 0.0.0.0, MAP mc.webvisor.org 0.0.0.0"
+
+
 @pytest.fixture(scope="session")
 def browser():
     with sync_playwright() as pw:
-        instance = pw.chromium.launch(args=["--no-sandbox"])
+        instance = pw.chromium.launch(args=["--no-sandbox", f"--host-resolver-rules={COUNTERS}"])
         yield instance
         instance.close()
 

@@ -11,6 +11,7 @@ import { money } from "@/lib/tariffs";
 import { buildInfo } from "@/lib/version";
 import { paymentTargetLabel } from "@/lib/paytarget";
 import { counted, plural } from "@/lib/plural";
+import AdminPulse from "./AdminPulse";
 
 function when(iso: string | null): string {
   if (!iso) return "—";
@@ -71,6 +72,8 @@ export default function AdminView() {
 
   return (
     <>
+      <AdminPulse />
+
       <div className="panel">
         <h3>Версия на сервере</h3>
         <div className="cap">Вшита в образ на сборке — совпадает с тем, что реально запущено</div>

@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { resultTitle } from "@/lib/payresult";
 
 import { refreshSession } from "./useSession";
 
-type Stage = "checking" | "paid" | "pending" | "failed" | "error";
+import type { PayStage as Stage } from "@/lib/payresult";
+
+
 
 const WAIT_STEPS = [0, 2000, 4000, 8000];
 
@@ -15,6 +18,12 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
   const [stage, setStage] = useState<Stage>(outcome === "fail" ? "failed" : "checking");
   const [note, setNote] = useState<string | null>(null);
   const [matrixId, setMatrixId] = useState<number | null>(null);
+
+  // Заголовок вкладки следует за состоянием: статический «Оплата прошла» обещал исход ещё до
+  // ответа банка, а при отказе по карте говорил то же самое.
+  useEffect(() => {
+    document.title = `${resultTitle(stage)} — Arcana Sense`;
+  }, [stage]);
 
   // Уведомление банка и возврат покупателя идут независимо, поэтому статус переспрашиваем
   // несколько раз: к моменту редиректа платёж мог быть ещё AUTHORIZED.

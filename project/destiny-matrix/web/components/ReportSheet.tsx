@@ -5,7 +5,6 @@ import Link from "next/link";
 import type { Matrix } from "@/lib/matrix";
 import { counted } from "@/lib/plural";
 import LockIcon from "./LockIcon";
-import MatrixSwitch from "./MatrixSwitch";
 import SavePdfButton from "./SavePdfButton";
 import MatrixResult, { birthLabel } from "./MatrixResult";
 import ReportSections from "./ReportSections";
@@ -53,9 +52,10 @@ export default function ReportSheet({
           «{planName}» — открыто {open} из {counted(sections.length, "раздела", "разделов", "разделов")}
         </p>
         {printing ? null : (
-          <span className="rsubact">
-            <SavePdfButton matrixId={currentId} />
-            <MatrixSwitch saved={saved} currentId={currentId} />
+          /* кнопка и её сообщение живут в одной ячейке: иначе текст ошибки становился третьим
+             элементом строки и сдвигал кнопку от правого края */
+          <span className="pdfslot">
+            <SavePdfButton matrixId={currentId} hint={birthLabel(matrix.birth)} />
           </span>
         )}
       </div>

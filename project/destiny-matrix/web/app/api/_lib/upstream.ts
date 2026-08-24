@@ -75,6 +75,7 @@ interface ForwardOptions {
   body?: unknown;
   /** забрать token из ответа в куку и убрать его из тела */
   capture?: boolean;
+  agent?: string | null;
 }
 
 /** Проксировать запрос в api. Тело всегда JSON, ошибки — в форме контракта `{detail}`. */
@@ -87,6 +88,9 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
     if (!token) return json({ detail: "Нужен вход: сессии нет" }, 401);
     headers.Authorization = `Bearer ${token}`;
   }
+  // User-Agent пробрасываем только там, где он нужен: по нему api отличает роботов от людей
+  // в счётчике присутствия. Собственный агент node-сервера сделал бы роботами всех.
+  if (opts.agent) headers["User-Agent"] = opts.agent;
   let payload: string | undefined;
   if (opts.body !== undefined) {
     payload = JSON.stringify(opts.body);

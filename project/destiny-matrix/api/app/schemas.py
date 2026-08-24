@@ -79,3 +79,9 @@ class ReportRequest(BaseModel):
 
 class PaymentRef(BaseModel):
     order_id: str
+
+
+class PulseIn(BaseModel):
+    """Отметка присутствия. Идентификатор анонимный, живёт во вкладке и ни с чем не связан."""
+    visitor: str = Field(min_length=6, max_length=64)
+    path: str = Field(default="/", max_length=200)

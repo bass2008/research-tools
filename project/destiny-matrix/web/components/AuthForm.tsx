@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/lib/hydrated";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,6 +16,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const hydrated = useHydrated();
 
   const isRegister = mode === "register";
 
@@ -39,7 +41,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   };
 
   return (
-    <form className="form narrow" onSubmit={submit}>
+    <form method="post" className="form narrow" onSubmit={submit}>
       <h2>{isRegister ? "Регистрация" : "Вход"}</h2>
       <div className="sub">
         {isRegister
@@ -84,7 +86,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         </label>
       ) : null}
 
-      <button className="btn wide" data-testid="auth-submit" style={{ marginTop: 14 }} disabled={busy}>
+      <button className="btn wide" data-testid="auth-submit" style={{ marginTop: 14 }} disabled={busy || !hydrated}>
         {busy ? "Отправляем…" : isRegister ? "Создать аккаунт" : "Войти"}
       </button>
 
