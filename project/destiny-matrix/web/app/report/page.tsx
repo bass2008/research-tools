@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({
   title: "Мой разбор матрицы судьбы",
   description:
-    "Личный отчёт по матрице судьбы: октаграмма, позиции карты и шесть открытых разделов, " +
+    "Личный отчёт по матрице судьбы: октаграмма, позиции карты и два открытых раздела, " +
     "остальные — в полном разборе.",
   path: "/report",
   noindex: true,

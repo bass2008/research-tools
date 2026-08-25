@@ -148,7 +148,7 @@ export default function MatrixResult({ m, printing = false }: { m: Matrix; print
         <h3>Все позиции карты</h3>
         <div className="cap">Позиция · аркан · как читается</div>
         <div className="tabscroll">
-          <table className="postab">
+          <table className="postab short">
             <thead>
               <tr>
                 <th>Позиция</th>

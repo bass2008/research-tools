@@ -1,6 +1,6 @@
 /** Экран возврата из формы оплаты. */
 
-export type PayStage = "checking" | "paid" | "pending" | "failed" | "error";
+export type PayStage = "checking" | "paid" | "refunded" | "pending" | "failed" | "error";
 
 /**
  * Заголовок вкладки. Раньше он был статическим — «Оплата прошла», — и обещал исход ещё до ответа
@@ -11,6 +11,8 @@ export function resultTitle(stage: PayStage): string {
   switch (stage) {
     case "paid":
       return "Оплата прошла";
+    case "refunded":
+      return "Платёж возвращён";
     case "failed":
       return "Платёж не прошёл";
     case "pending":

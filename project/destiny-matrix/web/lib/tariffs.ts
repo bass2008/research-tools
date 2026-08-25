@@ -63,6 +63,21 @@ export function lead(list: Tariff[]): Tariff {
 // её живой на клиенте — `TariffsProvider` через BFF. Зашитого прайса в разметке нет нигде.
 
 /** Серверная загрузка справочника. Кешировать нельзя: цену меняем на ходу. */
+/** Чем принимаются деньги: true — мок, деньги ненастоящие. Приходит с сервера, потому что вшитое
+ *  в страницу предупреждение «оплата тестовая» показывалось людям уже после боевого списания. */
+export async function testPayments(): Promise<boolean> {
+  const base = process.env.API_INTERNAL_URL ?? "http://127.0.0.1:8010";
+  try {
+    const res = await fetch(`${base}/api/tariffs`, { cache: "no-store" });
+    if (!res.ok) return false;
+    const body = (await res.json()) as { test_payments?: boolean };
+    return body.test_payments === true;
+  } catch {
+    // молчим о тестовом приёме, если сервер не ответил: обещать лишнее хуже, чем промолчать
+    return false;
+  }
+}
+
 export async function getTariffs(): Promise<Tariff[]> {
   const base = process.env.API_INTERNAL_URL ?? "http://127.0.0.1:8010";
   try {

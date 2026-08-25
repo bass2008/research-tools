@@ -43,7 +43,10 @@ function optionNote(t: Tariff): string {
   return parts.join(" · ");
 }
 
-export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initial: string }) {
+export default function PayForm({ tariffs, initial, test = false }: { tariffs: Tariff[]; initial: string
+  /** деньги ненастоящие: предупреждение показываем только тогда */
+  test?: boolean;
+}) {
   const [chosen, setChosen] = useState(initial);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -284,8 +287,8 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
           Платёж {stage.paymentId} · тариф «{tariff.name}»
         </div>
         <p className="dim">
-          Это тестовый приём оплаты: настоящий провайдер подключается позже за тем же интерфейсом, номер
-          платежа уже реальный. Разделы открыты в аккаунте{" "}
+          {test ? "Это тестовый приём оплаты: списаний не происходит. " : ""}
+          Разделы открыты в аккаунте{" "}
           <b data-testid="account-email">{stage.email}</b>, а не в этом браузере, — поэтому доступ
           работает и с телефона.
         </p>
@@ -478,7 +481,12 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
       )}
 
       <label className="consent">
-        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+        <input
+          type="checkbox"
+          disabled={!hydrated}
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+        />
         <span>
           Согласен(на) на обработку персональных данных на условиях{" "}
           <Link href="/privacy" target="_blank" rel="noopener">политики</Link>, принимаю <Link href="/oferta" target="_blank" rel="noopener">оферту</Link> и{" "}

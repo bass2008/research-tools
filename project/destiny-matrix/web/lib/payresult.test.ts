@@ -16,3 +16,10 @@ describe("заголовок страницы возврата из оплаты
     expect(resultTitle(stage)).toBe(title);
   });
 });
+
+describe("возвращённый платёж", () => {
+  it("не выдаётся за успешную оплату", () => {
+    expect(resultTitle("refunded")).toBe("Платёж возвращён");
+    expect(resultTitle("refunded")).not.toBe(resultTitle("paid"));
+  });
+});

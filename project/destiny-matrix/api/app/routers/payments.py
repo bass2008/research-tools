@@ -159,7 +159,17 @@ def _reusable(db: Session, user: User, matrix: SavedMatrix | None,
         if (utcnow() - as_utc(row.created_at)).total_seconds() > settings.payment_reuse_seconds:
             continue
         # какие статусы ещё позволяют доплатить, знает провайдер, а не роутер
-        if provider.reusable(row.status):
+        if not provider.reusable(row.status):
+            continue
+        # Спрашиваем провайдера, жива ли ссылка. Без этого после отказа карты человек попадал на
+        # страницу уже отклонённого платежа и вылетал на «Платёж не прошёл», не увидев формы: у нас
+        # статус оставался NEW, потому что уведомление на отказ не приходит, а страница отказа
+        # сверку не делала. Заплатить другой картой было нельзя целых полчаса.
+        try:
+            apply(db, row, provider.state(row.external_id))
+        except payments.PaymentError:
+            continue                               # провайдер не ответил — старый счёт не предлагаем
+        if row.paid_at is None and row.refunded_at is None and provider.reusable(row.status):
             return row
     return None
 

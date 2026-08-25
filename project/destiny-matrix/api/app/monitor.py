@@ -61,7 +61,10 @@ def disk(path: str = "/") -> dict:
     total = st.f_blocks * st.f_frsize
     free = st.f_bavail * st.f_frsize
     used = total - free
+    # проценты и подписи в панели говорят об одном и том же — о занятом месте; свободное оставляем
+    # рядом, потому что решение «чистить или нет» принимается по нему
     return {"path": path, "total_gb": round(total / 2**30, 1), "free_gb": round(free / 2**30, 1),
+            "used_gb": round(used / 2**30, 1),
             "percent": round(used * 100 / total, 1) if total else 0.0}
 
 

@@ -33,7 +33,13 @@ export default function SessionBadge() {
   // затираем: на странице возврата из оплаты сверка идёт по расписанию, и шапка мигала.
   if (!personVisible(session.status, session.email)) {
     if (session.status === "loading") {
-      return <span style={{ ...ROW, color: "var(--dim2)" }}>проверяем доступ…</span>;
+      // На 320–390 px полная надпись обрезалась посреди слова и заезжала под «Кабинет»:
+      // короткое слово влезает, а смысл тот же — сверка ещё идёт.
+      return (
+        <span style={{ ...ROW, color: "var(--dim2)" }} className="checking">
+          проверяем…
+        </span>
+      );
     }
     return (
       <span style={ROW}>

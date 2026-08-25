@@ -57,6 +57,72 @@ def test_pdf_is_generated_and_downloads(page, mail):
         assert file.read(5).startswith(b"%PDF")
 
 
+def test_admin_returns_a_payment_from_the_interface(page, mail):
+    """Возврат из админки: раньше он существовал только запросом к api — кнопки не было, и вернуть
+    деньги через интерфейс было нельзя. Проверяем весь путь: покупка, возврат кнопкой, закрытый
+    разбор у покупателя."""
+    flows.buy(page, mail, 7, 7, 1997)
+    page.goto(f"{BASE}/report", wait_until="networkidle")
+    assert "мужская карта" in page.inner_text("main") or "7 июля 1997" in page.inner_text("main")
+
+    flows.logout(page)
+    flows.login(page, *ADMIN)
+    page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
+    row = page.locator("[data-testid=admin-payment-row]", has_text=mail).first
+    expect(row).to_be_visible(timeout=20_000)
+
+    # Подтверждение обязано назвать сам платёж: у покупателя с двумя оплатами сумма и почта
+    # совпадают побайтово, и по ним строки не различить.
+    asked: list[str] = []
+
+    def confirm(dialog):
+        asked.append(dialog.message)
+        dialog.accept()
+
+    page.once("dialog", confirm)
+    row.get_by_test_id("refund").click()
+    expect(row).to_contain_text("возвращён", timeout=30_000)
+    assert asked, "интерфейс не спросил подтверждения"
+    assert mail in asked[0] and "250" in asked[0], asked[0]
+    external = row.locator("td").nth(6).inner_text().strip()
+    assert external and external in asked[0], f"в подтверждении нет номера платежа: {asked[0]}"
+    expect(row).to_contain_text("возвращён", timeout=30_000)
+    assert row.get_by_test_id("refund").count() == 0, "кнопка осталась на возвращённом платеже"
+
+    # Право проверяем в кабинете, а не на /report: там дата берётся из браузера, а после нового
+    # входа её нет — страница честно говорит «дата не выбрана», и это ничего не сказало бы о праве.
+    flows.logout(page)
+    flows.login(page, mail)
+    page.goto(f"{BASE}/account", wait_until="networkidle")
+    page.wait_for_timeout(800)
+    cards = flows.matrix_cards(page)
+    assert cards.count() >= 1, "дата исчезла из кабинета — возврат не должен её удалять"
+    assert "куплена" not in cards.first.inner_text().lower(), \
+        f"право осталось после возврата: {cards.first.inner_text()[:120]}"
+
+
+def test_failed_refund_does_not_wipe_the_admin_screen(page, mail):
+    """Отказ возврата раньше уходил в общую ошибку, и вместо сообщения у строки админка целиком
+    подменялась экраном «Админка недоступна»: проверить, ушли ли деньги, становилось нечем."""
+    flows.buy(page, mail, 9, 9, 1999)
+    flows.logout(page)
+    flows.login(page, *ADMIN)
+    page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
+    row = page.locator("[data-testid=admin-payment-row]", has_text=mail).first
+    expect(row).to_be_visible(timeout=20_000)
+
+    page.route("**/api/admin/payments/*/refund", lambda route: route.abort())
+    page.once("dialog", lambda d: d.accept())
+    row.get_by_test_id("refund").click()
+
+    expect(page.get_by_test_id("refund-error")).to_be_visible(timeout=20_000)
+    expect(page.get_by_test_id("admin-payments")).to_be_visible()
+    expect(page.get_by_test_id("admin-users")).to_be_visible()
+    assert "Админка недоступна" not in page.inner_text("main")
+    expect(row).to_contain_text("оплачен")
+    assert row.get_by_test_id("refund").count() == 1, "кнопка исчезла, хотя возврат не прошёл"
+
+
 def test_admin_sees_what_happens_right_now(page, browser, mail):
     """Панель состояния: люди на сайте, машина, печать, платежи. Гостя считаем настоящим —
     прогоны ходят под headless и попадают в роботов, поэтому здесь браузер представляется обычным.

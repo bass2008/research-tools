@@ -90,7 +90,7 @@ class Tbank:
         payload = {
             "Amount": amount,
             "OrderId": order_id,
-            "Description": settings.tbank_item_name[:250],
+            "Description": settings.tbank_order_description[:250],
             "SuccessURL": f"{settings.site_url}/pay/done?order={order_id}",
             "FailURL": f"{settings.site_url}/pay/fail?order={order_id}",
             "NotificationURL": f"{settings.site_url}/api/payments/notify/{self.name}",

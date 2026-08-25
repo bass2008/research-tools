@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import errors, monitor, presence, tariffs
+from . import errors, monitor, payments, presence, tariffs
 from .db import get_db
 from .config import settings
 from .routers import ROUTERS
@@ -31,8 +31,12 @@ def create_app() -> FastAPI:
 
     @app.get(f"{settings.api_prefix}/tariffs", tags=["service"])
     def tariff_list(db: Session = Depends(get_db)) -> dict:
-        # справочник читается из базы: цену меняем часто, пересборка для этого не нужна
-        return {"items": [t.public() for t in tariffs.public_tariffs(db)], "free_sections": 2}
+        # справочник читается из базы: цену меняем часто, пересборка для этого не нужна.
+        # test_payments говорит витрине, чем принимаются деньги: предупреждение «оплата тестовая»
+        # было вшито в страницу и показывалось на боевом терминале после списания 250 рублей.
+        provider = payments.active()
+        return {"items": [t.public() for t in tariffs.public_tariffs(db)], "free_sections": 2,
+                "test_payments": provider is None or provider.name == "mock"}
 
     @app.middleware("http")
     async def watch_failures(request: Request, call_next):

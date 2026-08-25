@@ -11,8 +11,9 @@ def test_purchase_sends_letter(client, monkeypatch):
     r = client.post("/api/payments/mock", json={"tariff": "single", "email": "buy@example.ru", "birth": "1985-03-03"})
     assert r.status_code == 200
     to, subject, body = sent[0]
-    # тема говорит о работах, а не об услуге: предмет договора — адаптация web-страницы
-    assert to == "buy@example.ru" and "работы выполнены" in subject.lower()
+    # письмо юридического значения не имеет, поэтому язык человеческий: «разбор», а не «работы»
+    assert to == "buy@example.ru" and "разбор готов" in subject.lower()
+    assert "работ" not in body and "задани" not in body, body
     assert r.json()["payment_id"] in body
     # дата рождения в письме недопустима: специальная категория данных
     assert "1990" not in body and "birth" not in body

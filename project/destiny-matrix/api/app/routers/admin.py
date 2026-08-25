@@ -76,6 +76,12 @@ def refund(payment_id: int, _: User = Depends(admin_user), db: Session = Depends
     payment = db.get(Payment, payment_id)
     if payment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+    # Возврат идемпотентен: повторное нажатие отдаёт текущее состояние, а не ошибку. Иначе
+    # устаревшая вкладка получала отказ банка «уже возвращён», а строка оставалась «оплачен» с
+    # живой кнопкой — интерфейс уверял, что деньги на месте, хотя они уже вернулись.
+    if payment.refunded_at is not None:
+        return {"ok": True, "status": payment.status, "refunded_at": iso(payment.refunded_at),
+                "already": True}
     provider = gateway.get(payment.provider)
     if provider is None or not provider.enabled():
         raise HTTPException(status.HTTP_400_BAD_REQUEST,

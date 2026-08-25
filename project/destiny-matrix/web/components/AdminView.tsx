@@ -39,6 +39,47 @@ export default function AdminView() {
   const [sweeps, setSweeps] = useState<SweepRun[] | null>(null);
   const [avgSeconds, setAvgSeconds] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refunding, setRefunding] = useState<number | null>(null);
+  // Отказ возврата живёт отдельно от общей ошибки: раньше он уходил в setError, и вместо сообщения
+  // у строки админка целиком подменялась экраном «Админка недоступна» — проверить, прошли ли
+  // деньги, становилось нечем.
+  const [refundError, setRefundError] = useState<string | null>(null);
+
+  // Возврат необратим и трогает деньги, поэтому спрашиваем подтверждение и называем платёж целиком:
+  // у покупателя с двумя оплатами сумма и почта совпадают, и по ним строки не различить.
+  const refund = async (p: AdminPayment) => {
+    const ok = window.confirm(
+      `Вернуть ${money(p.amount)} ₽ покупателю ${p.email}?\n` +
+        `Платёж ${p.external_id}, ${paymentTargetLabel(p)}.\n` +
+        "Разбор закроется, покупателю уйдёт письмо. Отменить возврат нельзя.",
+    );
+    if (!ok) return;
+    setRefunding(p.id);
+    setRefundError(null);
+    try {
+      const answer = await api.admin.refund(p.id);
+      // Правим только эту строку, не перезагружая список: при обновлении новые платежи встают
+      // сверху, и в той же точке экрана оказывается кнопка другого покупателя.
+      setPayments((rows) =>
+        (rows ?? []).map((row) =>
+          row.id === p.id
+            ? { ...row, refunded_at: answer.refunded_at ?? new Date().toISOString() }
+            : row,
+        ),
+      );
+      // Сводка и список людей считаются на сервере — после возврата они устарели, обновляем их.
+      void api.admin
+        .users()
+        .then((fresh) => setUsers(fresh.items))
+        .catch(() => {
+          /* список людей — не повод ронять экран возврата */
+        });
+    } catch (err) {
+      setRefundError(err instanceof ApiError ? err.message : "Возврат не прошёл.");
+    } finally {
+      setRefunding(null);
+    }
+  };
 
   useEffect(() => {
     void Promise.all([api.admin.users(), api.admin.payments(), api.admin.reports(),
@@ -145,6 +186,11 @@ export default function AdminView() {
       <div className="panel section-gap">
         <h3>Все платежи</h3>
         <div className="cap">Цена в строке — снимок тарифа на момент покупки</div>
+        {refundError ? (
+          <p className="err" data-testid="refund-error" role="status">
+            Возврат не прошёл: {refundError}. Деньги могли не уйти — проверьте строку платежа.
+          </p>
+        ) : null}
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-payments">
             <thead>
@@ -156,18 +202,19 @@ export default function AdminView() {
                 <th>Статус</th>
                 <th>За какую дату</th>
                 <th>Номер</th>
+                <th aria-label="Действия" />
               </tr>
             </thead>
             <tbody>
               {payments === null ? (
                 <tr>
-                  <td colSpan={7} className="skeleton">
+                  <td colSpan={8} className="skeleton">
                     Загружаем…
                   </td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="dim">
+                  <td colSpan={8} className="dim">
                     Платежей нет.
                   </td>
                 </tr>
@@ -180,9 +227,26 @@ export default function AdminView() {
                     </td>
                     <td>{p.tariff.name ?? "—"}</td>
                     <td className="num">{money(p.amount)} ₽</td>
-                    <td>{p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}</td>
+                    {/* состояние ещё и атрибутом: по тексту проверять ненадёжно — «не оплачен»
+                        содержит «оплачен» как подстроку */}
+                    <td data-paid={p.paid_at && !p.refunded_at ? "1" : "0"}>
+                      {p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}
+                    </td>
                     <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
+                    <td className="act">
+                      {p.paid_at && !p.refunded_at ? (
+                        <button
+                          type="button"
+                          className="btn ghost sm"
+                          data-testid="refund"
+                          disabled={refunding === p.id}
+                          onClick={() => refund(p)}
+                        >
+                          {refunding === p.id ? "Возвращаем…" : "Вернуть"}
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))
               )}

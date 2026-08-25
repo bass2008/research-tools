@@ -214,7 +214,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
           <h3>Все позиции этой карты</h3>
           <div className="cap">Позиция · аркан · как читается</div>
           <div className="tabscroll">
-            <table className="postab">
+            <table className="postab short">
               <thead>
                 <tr>
                   <th>Позиция</th>

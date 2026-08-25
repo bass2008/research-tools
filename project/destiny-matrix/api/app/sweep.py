@@ -16,12 +16,18 @@ from sqlalchemy.orm import Session
 
 from . import payments
 from .db import SessionLocal
-from .models import Payment, PaymentSweep, utcnow
+from .config import settings
+from .models import Payment, PaymentSweep, as_utc, utcnow
 
 # исход уже известен: спрашивать нечего
 SETTLED = ("REFUNDED", "PARTIAL_REFUNDED", "REVERSED", "REJECTED", "CANCELED",
            "DEADLINE_EXPIRED", "ATTEMPTS_EXPIRED", "AUTH_FAIL")
 WINDOW_HOURS = 24
+
+# Наш собственный статус, не банковский: человек ушёл с формы и не вернулся. Спрашивать про такой
+# платёж больше нечего, но право он не закрывает — если оплата всё же случится, уведомление банка
+# обработается как обычно и доступ откроется.
+ABANDONED = "ABANDONED"
 
 
 def pending(db: Session, now: dt.datetime | None = None) -> list[Payment]:
@@ -33,13 +39,21 @@ def pending(db: Session, now: dt.datetime | None = None) -> list[Payment]:
                       .order_by(Payment.id)).all()
     out = []
     for row in rows:
-        if row.status in SETTLED:
+        if row.status in SETTLED or row.status == ABANDONED:
             continue
         provider = payments.get(row.provider)
         if provider is None or not provider.enabled():
             continue
         out.append(row)
     return out
+
+
+def _abandoned(payment: Payment, provider) -> bool:
+    """Счёт открыт дольше порога и всё ещё не оплачен — человек до формы не вернулся."""
+    if payment.paid_at is not None or not provider.reusable(payment.status):
+        return False
+    age = (utcnow() - as_utc(payment.created_at)).total_seconds()
+    return age >= settings.payment_abandon_seconds
 
 
 def run(db: Session | None = None) -> PaymentSweep | None:
@@ -71,6 +85,11 @@ def run(db: Session | None = None) -> PaymentSweep | None:
                 record["outcome"] = str(update.outcome)
                 record["paid"] = payment.paid_at is not None
                 if payment.status != was:
+                    changed += 1
+                elif _abandoned(payment, provider):
+                    payment.status = ABANDONED
+                    record["now"] = ABANDONED
+                    record["abandoned"] = True
                     changed += 1
             except payments.PaymentError as exc:
                 record["error"] = str(exc)[:200]

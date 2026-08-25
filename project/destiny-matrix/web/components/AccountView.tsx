@@ -259,7 +259,7 @@ export default function AccountView() {
 
       <div className="panel section-gap">
         <h3>Сохранённые матрицы</h3>
-        <div className="cap">Дата рождения уходит на сервер только здесь — по вашему действию</div>
+        <div className="cap">Дата рождения уходит на сервер по вашему действию: этой кнопкой или при оплате разбора</div>
         {note ? (
           <div className="okmsg" role="status" data-testid="account-note">
             {note}

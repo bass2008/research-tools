@@ -82,14 +82,16 @@ export default function AdminPulse() {
       )}
 
       <div className="pgrid">
+        {/* Все четыре плитки говорят об одном: сколько занято. Раньше у дисков процент был про
+            занятое, а подпись — про свободное, и цифры читались как «остаток». */}
         <Bar label="Память" percent={pulse.memory.percent}
-             note={`${pulse.memory.used_mb} из ${pulse.memory.total_mb} МБ`} />
+             note={`занято ${pulse.memory.used_mb} из ${pulse.memory.total_mb} МБ`} />
         <Bar label="Процессор" percent={pulse.cpu.percent}
              note={`load ${pulse.cpu.load1} на ${pulse.cpu.cores} ядра`} />
         <Bar label="Диск" percent={pulse.disk.percent}
-             note={`свободно ${pulse.disk.free_gb} ГБ из ${pulse.disk.total_gb}`} />
+             note={`занято ${pulse.disk.used_gb} из ${pulse.disk.total_gb} ГБ · свободно ${pulse.disk.free_gb} ГБ`} />
         <Bar label="Том с базой" percent={pulse.data_disk.percent}
-             note={`свободно ${pulse.data_disk.free_gb} ГБ · ${pulse.data_disk.path}`} />
+             note={`занято ${pulse.data_disk.used_gb} из ${pulse.data_disk.total_gb} ГБ · ${pulse.data_disk.path}`} />
       </div>
 
       <div className="pnums">

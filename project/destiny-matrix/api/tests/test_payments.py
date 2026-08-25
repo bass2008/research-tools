@@ -278,3 +278,17 @@ def test_every_single_right_has_a_date(client, db):
     payments = db.scalars(select(Payment).where(Payment.user_id == user.id)).all()
     assert len(rights) == 3 and all(r.matrix_id is not None for r in rights)
     assert {p.matrix_id for p in payments} == {r.matrix_id for r in rights}
+
+
+def test_showcase_knows_whether_money_is_real(client, monkeypatch):
+    """Витрина не должна догадываться о провайдере сама: предупреждение «оплата тестовая» было
+    вшито в страницу и после подключения банка показывалось людям, у которых списали 250 рублей."""
+    from app import payments
+
+    assert client.get("/api/tariffs").json()["test_payments"] is True, "мок — оплата тестовая"
+
+    monkeypatch.setattr(payments.tbank.settings, "tbank_terminal_key", "1234DEMO")
+    monkeypatch.setattr(payments.tbank.settings, "tbank_password", "secret")
+    monkeypatch.setattr(payments.PROVIDERS["mock"], "enabled", lambda: False)
+    assert client.get("/api/tariffs").json()["test_payments"] is False, \
+        "с живым терминалом деньги настоящие, предупреждать о тестовом приёме нельзя"

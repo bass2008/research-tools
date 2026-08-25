@@ -71,7 +71,9 @@ def test_contract_describes_work_not_a_service(page):
     text = page.inner_text("main")
 
     assert "работ по адаптации web-страниц" in page.inner_text("h1"), page.inner_text("h1")
-    for wanted in ("адаптации и модификации web-страницы", "Результат работ", "346.43"):
+    # договор обязан называть то же, что уходит в чек: иначе проверяющий видит одно, покупатель другое
+    for wanted in ("адаптации и модификации web-страницы", "Результат работ", "346.43",
+                   "матрицу судьбы", "Адаптация web-страницы: персональный расчёт матрицы судьбы"):
         assert wanted in text, f"в оферте нет: {wanted}"
     for unwanted in ("оказание информационных услуг", "Услуга оказывается", "Услуга считается оказанной"):
         assert unwanted not in text, f"в оферте осталось: {unwanted}"
@@ -81,3 +83,54 @@ def test_contract_describes_work_not_a_service(page):
     back = page.inner_text("main")
     assert "Работы считаются выполненными" in back
     assert "отказаться от работ" in back
+    # но пояснения на той же странице читает человек, а не юрист
+    assert "разбор одной даты" in back, "в условиях возврата пропал человеческий язык"
+
+
+def test_documents_do_not_contradict_each_other(page):
+    """Документы читает один человек, и расхождения в них замечает он же. Здесь собраны те
+    несогласованности, которые цикл нашёл в текстах: обещания про дату рождения, момент выполнения
+    работ, сроки ответа и числа, которых не было в действительности."""
+    def text_of(path: str) -> str:
+        page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
+        page.wait_for_timeout(300)
+        return page.inner_text("main")
+
+    privacy, oferta, refund, contacts = (text_of(p) for p in
+                                         ("/privacy", "/oferta", "/refund", "/contacts"))
+
+    # дата рождения попадает на сервер не только по кнопке в кабинете, но и при оплате
+    assert "оплатили разбор" in privacy, "политика умалчивает, что покупка отправляет дату на сервер"
+
+    # момент выполнения работ — один и тот же в договоре и в условиях возврата
+    assert "момента передачи результата" in refund, refund[:200]
+
+    # сроки ответа: 10 рабочих дней по претензиям в обоих документах
+    assert "10 рабочих дней" in oferta and "10 рабочих дней" in contacts
+
+    # состав договора читается и на телефоне: третья колонка таблицы тарифа не скрывается
+    page.set_viewport_size({"width": 390, "height": 900})
+    page.goto(f"{BASE}/oferta", wait_until="domcontentloaded")
+    page.wait_for_timeout(400)
+    head = page.locator("table.postab th").nth(2)
+    assert head.is_visible(), "на телефоне из договора исчезла колонка «Что входит в результат»"
+    assert page.locator("table.postab td.vl").first.is_visible(), "состав тарифа скрыт"
+    page.set_viewport_size({"width": 1360, "height": 950})
+
+
+def test_pages_promise_only_what_they_give(page):
+    """Описания страниц обещали больше, чем страница даёт: шесть открытых разделов вместо двух,
+    выбор тарифа, которого нет, и число страниц справочника, не сходившееся с перечислением."""
+    page.goto(f"{BASE}/report", wait_until="domcontentloaded")
+    described = page.locator('meta[name=description]').get_attribute("content") or ""
+    assert "шесть" not in described, described
+    assert "два открытых раздела" in described, described
+
+    page.goto(f"{BASE}/pay", wait_until="domcontentloaded")
+    assert "выбор тарифа" not in (page.title() or "").lower(), page.title()
+
+    page.goto(f"{BASE}/encyclopedia", wait_until="domcontentloaded")
+    page.wait_for_timeout(300)
+    body = page.inner_text("main")
+    assert "297" in body and "298 страниц" not in body, \
+        "число страниц справочника снова не сходится с перечислением"

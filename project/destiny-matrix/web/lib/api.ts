@@ -208,8 +208,8 @@ export interface Pulse {
   at: string;
   memory: { total_mb: number; used_mb: number; percent: number };
   cpu: { load1: number; load5: number; load15: number; cores: number; percent: number };
-  disk: { path: string; total_gb: number; free_gb: number; percent: number };
-  data_disk: { path: string; total_gb: number; free_gb: number; percent: number };
+  disk: { path: string; total_gb: number; free_gb: number; used_gb: number; percent: number };
+  data_disk: { path: string; total_gb: number; free_gb: number; used_gb: number; percent: number };
   online: { people: number; robots: number; pages: { path: string; people: number }[] };
   print: { active: number; waiting: number; failures_hour: number };
   payments: { stuck: number };
@@ -282,6 +282,12 @@ export const api = {
                             avg_seconds: number | null }>("/admin/reports"),
     sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
     pulse: () => request<Pulse>("/admin/pulse"),
+    /** Вернуть платёж: снимает право, закрывает разбор и пишет покупателю письмо. */
+    refund: (id: number) =>
+      request<{ ok: true; status: string; refunded_at: string | null }>(
+        `/admin/payments/${id}/refund`,
+        { method: "POST" },
+      ),
     errors: () => request<{ items: ErrorRow[]; hour: number }>("/admin/errors"),
   },
 

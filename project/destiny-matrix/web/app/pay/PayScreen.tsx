@@ -5,7 +5,17 @@ import type { Tariff } from "@/lib/tariffs";
 
 // Экран оплаты один на два маршрута: `/pay` (выбор с нуля) и `/pay/<тариф>` (тариф выбран
 // ссылкой из карточки). Отличаются только тем, что отмечено при открытии.
-export default function PayScreen({ tariffs, initial }: { tariffs: Tariff[]; initial: string }) {
+export default function PayScreen({
+  tariffs,
+  initial,
+  test,
+}: {
+  tariffs: Tariff[];
+  initial: string;
+  /** true — деньги ненастоящие (мок). Приходит с сервера: вшитое обещание «оплата тестовая»
+   *  показывалось покупателям и после подключения боевого терминала. */
+  test: boolean;
+}) {
   return (
     <main className="page">
       <div className="wrap">
@@ -15,10 +25,10 @@ export default function PayScreen({ tariffs, initial }: { tariffs: Tariff[]; ini
         </p>
         <h1>Оплата</h1>
         <p className="dim">
-          Оставьте почту и пароль — доступ живёт в аккаунте, а не в браузере. Приём оплаты сейчас
-          тестовый: провайдер подключается за тем же интерфейсом. Платёж один, списаний больше нет.
+          Оставьте почту и пароль — доступ живёт в аккаунте, а не в браузере.
+          {test ? " Приём оплаты сейчас тестовый: списаний не происходит." : ""}
         </p>
-        <PayForm tariffs={tariffs} initial={initial} />
+        <PayForm tariffs={tariffs} initial={initial} test={test} />
       </div>
     </main>
   );

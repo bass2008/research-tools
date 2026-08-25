@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { pageMeta } from "@/lib/site";
-import { byId, getTariffs, money, periodLabel } from "@/lib/tariffs";
+import { byId, getTariffs, money, periodLabel, testPayments } from "@/lib/tariffs";
 import { NOT_FOUND_META } from "@/lib/seo";
 
 import PayScreen from "../PayScreen";
@@ -30,5 +30,5 @@ export default async function PayPage({ params }: { params: Promise<Params> }) {
   const t = byId(tariffs, (await params).tariff);
   if (!t) notFound();
 
-  return <PayScreen tariffs={tariffs} initial={t.id} />;
+  return <PayScreen tariffs={tariffs} initial={t.id} test={await testPayments()} />;
 }

@@ -36,6 +36,12 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
         if (pause) await new Promise((r) => setTimeout(r, pause));
         try {
           const res = await api.paySync(order);
+          // Возврат проверяем раньше оплаты: у возвращённого платежа отметка об оплате остаётся,
+          // и страница поздравляла с покупкой при каждой перезагрузке, хотя деньги уже вернулись.
+          if (["REFUNDED", "PARTIAL_REFUNDED"].includes(res.status)) {
+            setStage("refunded");
+            return;
+          }
           if (res.paid) {
             setMatrixId(res.matrix_id);
             await refreshSession();
@@ -75,6 +81,24 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
         <p className="hint">
           <Link href="/account">Кабинет</Link>
         </p>
+      </div>
+    );
+  }
+
+  if (stage === "refunded") {
+    return (
+      <div className="panel paybox">
+        <h3>Платёж возвращён</h3>
+        <p className="dim">
+          Деньги вернулись тем же способом, которым платили. Разбор закрыт, сохранённая дата осталась
+          в кабинете — при желании можно оплатить снова.
+        </p>
+        <Link className="btn wide" href="/pay">
+          Оплатить снова
+        </Link>
+        <Link className="btn ghost wide" href="/account" style={{ marginTop: 8 }}>
+          Кабинет
+        </Link>
       </div>
     );
   }

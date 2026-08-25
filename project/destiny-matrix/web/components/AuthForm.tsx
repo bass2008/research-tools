@@ -79,7 +79,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       {isRegister ? (
         <label className="consent">
-          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+          <input
+            type="checkbox"
+            disabled={!hydrated}
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+          />
           <span>
             Согласен(на) на обработку персональных данных на условиях{" "}
             <Link href="/privacy" target="_blank" rel="noopener">политики обработки персональных данных</Link> и принимаю{" "}

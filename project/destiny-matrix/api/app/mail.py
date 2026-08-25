@@ -48,16 +48,16 @@ def send(to: str, subject: str, body: str) -> bool:
 
 def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = None) -> bool:
     lines = [
-        f"Работы выполнены: {tariff_name}.",
+        f"Ваш разбор готов: {tariff_name}.",
         f"Номер платежа: {payment_id}.",
         "",
-        f"Результат — персональная страница: {settings.site_url}/report",
+        f"Смотреть разбор — {settings.site_url}/report",
         f"Кабинет — {settings.site_url}/account",
     ]
     if password:
         lines += ["", f"Вход: {to}", f"Пароль: {password}"]
-    lines += ["", "Если страница не открылась, ответьте на это письмо."]
-    return send(to, "Arcana Sense — работы выполнены", "\n".join(lines))
+    lines += ["", "Если разбор не открылся, ответьте на это письмо."]
+    return send(to, "Arcana Sense — ваш разбор готов", "\n".join(lines))
 
 
 def welcome(to: str) -> bool:
@@ -65,7 +65,7 @@ def welcome(to: str) -> bool:
         f"Аккаунт создан: {to}.",
         "",
         f"Кабинет — {settings.site_url}/account",
-        "Результат работ по заданию передаётся сразу после оплаты.",
+        "Разбор открывается сразу после оплаты.",
         "",
         "Если аккаунт создавали не вы, ответьте на это письмо.",
     ])
@@ -77,7 +77,7 @@ def refund(to: str, tariff_name: str, payment_id: str) -> bool:
         f"Платёж возвращён: {tariff_name}.",
         f"Номер платежа: {payment_id}.",
         "",
-        "Доступ к результату работ закрыт, сохранённые задания остались в кабинете.",
+        "Разбор закрыт, сохранённые даты остались в кабинете.",
         "Деньги вернутся тем же способом, которым платили — обычно в течение нескольких дней.",
         "",
         "Если возврат оформляли не вы, ответьте на это письмо.",

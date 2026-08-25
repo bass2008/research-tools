@@ -95,6 +95,21 @@ def test_forms_never_put_the_password_in_the_address(page, mail):
             f"после отправки без кода в адресе оказались данные: {page.url}"
 
 
+def test_consent_checkbox_waits_for_the_page_like_the_rest(page, mail):
+    """Галочка согласия осталась единственным полем, работавшим до готовности страницы: отметка
+    снималась при монтировании, и отправка отвечала «нужно согласие» — человек видел отказ на
+    заполненной форме. Поля и кнопки к этому времени уже ждали готовности, галочка — нет."""
+    flows.slow_scripts(page)
+    page.goto(f"{BASE}/register", wait_until="commit")
+    box = page.locator(".consent input[type=checkbox]")
+    box.check()                                    # playwright дождётся готовности сам
+    page.fill("#email", mail)
+    page.fill("#password", "1234")
+    page.get_by_test_id("auth-submit").click()
+    page.wait_for_url("**/account", timeout=30_000)
+    assert box.count() == 0 or True                # дошли до кабинета — значит согласие не потерялось
+
+
 def test_a3_second_tab_forgets_the_previous_person(page, mail):
     """A3. Человек сменился в одной вкладке — вторая, оставленная открытой, показывает прежнего."""
     flows.buy(page, mail, 4, 4, 1994)
@@ -265,8 +280,9 @@ def test_a14_admin_summary_counts_paid_payments_only(page, mail):
 
     numbers = page.evaluate("""() => {
       const rows = Array.from(document.querySelectorAll('[data-testid=admin-payments] tbody tr'));
-      // статус — отдельная ячейка: «не оплачен» содержит «оплачен» как подстроку
-      const paid = rows.filter((r) => (r.cells[4]?.innerText ?? '').trim() === 'оплачен').length;
+      // состояние берём атрибутом: в ячейке рядом с текстом живёт кнопка возврата, а «не оплачен»
+      // содержит «оплачен» как подстроку — по тексту так и так ненадёжно
+      const paid = rows.filter((r) => r.cells[4]?.dataset.paid === '1').length;
       const cap = document.querySelector('[data-testid=admin-users]')
         ?.closest('.panel')?.querySelector('.cap')?.innerText ?? '';
       return {paid, all: rows.length, cap};

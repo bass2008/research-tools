@@ -22,7 +22,7 @@ import { counted, plural } from "@/lib/plural";
 export const metadata: Metadata = pageMeta({
   title: "Энциклопедия матрицы судьбы: 22 аркана, позиции карты, чакры и сочетания",
   description:
-    "Справочник по матрице судьбы: значения 22 арканов, 37 позиций карты, 7 чакр и 231 сочетание " +
+    "Справочник по матрице судьбы: значения 22 арканов, 37 позиций карты, 7 чакр и 231 сочетание — " +
     "арканов. Все страницы с перекрёстными ссылками.",
   path: "/encyclopedia",
 });
@@ -73,7 +73,8 @@ export default function EncyclopediaIndexPage() {
           {counted(POSITIONS.length, "позиция", "позиции", "позиций")} карты,{" "}
           {counted(CHAKRA_PAGES.length, "чакра", "чакры", "чакр")} и{" "}
           {counted(combos.length, "сочетание", "сочетания", "сочетаний")} — всего{" "}
-          {ENCYCLOPEDIA_PAGE_COUNT} страниц. Разборы всех 5544 карт — в{" "}
+          {counted(ENCYCLOPEDIA_PAGE_COUNT - 1, "страница", "страницы", "страниц")} справочника, не
+          считая этой. Разборы всех 5544 карт — в{" "}
           <Link href="/matrix">каталоге матриц</Link>, расчёт по своей дате —{" "}
           <Link href="/#calc">на главной</Link>.
         </p>

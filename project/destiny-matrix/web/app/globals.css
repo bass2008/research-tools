@@ -345,7 +345,14 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .postab .ar { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .postab .vl { color: var(--dim); font-size: 13.2px; }
 .tabscroll { overflow-x: auto; }
-@media (max-width: 700px) { .postab .vl, .postab th:nth-child(3) { display: none; } }
+/* На узком экране третья колонка прячется — но только там, где она пояснение к очевидному.
+   В таблице договора это состав того, за что человек платит: скрывать его нельзя, поэтому
+   правило действует по метке, а не на все таблицы разом. */
+@media (max-width: 700px) {
+  .postab.short .vl,
+  .postab.short th:nth-child(3) { display: none; }
+  .postab .vl { font-size: 12.6px; }
+}
 
 /* разделы отчёта */
 .acc { border: 1px solid var(--line); border-radius: 13px; background: var(--card); margin-bottom: 8px; overflow: hidden; box-shadow: var(--sh); }
@@ -865,3 +872,10 @@ body:has(.printmode) { background: #fff; }
 .pdot.lv-bad { color: #c0392b; }
 .pnums { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0; }
 .ptrouble { margin: 6px 0; padding-left: 18px; color: #c0392b; }
+
+/* Столбец действий в админских таблицах: кнопка прижата к правому краю строки. */
+.postab td.act { text-align: right; white-space: nowrap; }
+
+/* Служебная надпись в шапке не должна заезжать под кнопку: на узком экране прячем её вовсе —
+   сверка доступа идёт доли секунды, и её отсутствие человеку ничего не ломает. */
+@media (max-width: 400px) { .site-header .checking { display: none; } }

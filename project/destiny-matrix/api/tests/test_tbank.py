@@ -36,8 +36,11 @@ def bank(monkeypatch):
     def fake_call(method, payload):
         calls.append((method, payload))
         if method == "Init":
-            return {"Success": True, "PaymentId": "900001", "Status": "NEW",
-                    "PaymentURL": "https://pay.tbank.ru/xyz", "OrderId": payload["OrderId"]}
+            # номер у каждого счёта свой, как у настоящего банка: колонка external_id уникальна,
+            # и повторная выдача одного номера ломала сценарии с двумя платежами
+            number = 900_000 + sum(1 for m, _ in calls if m == "Init")
+            return {"Success": True, "PaymentId": str(number), "Status": "NEW",
+                    "PaymentURL": f"https://pay.tbank.ru/xyz{number}", "OrderId": payload["OrderId"]}
         if method == "GetState":
             return {"Success": True, "Status": "CONFIRMED", "PaymentId": payload["PaymentId"]}
         return {"Success": True}
@@ -59,7 +62,7 @@ def start(client, email="buy@example.ru", birth="1990-01-01"):
 
 def test_start_creates_pending_payment(client, db, bank):
     body = start(client)
-    assert body["payment_url"] == "https://pay.tbank.ru/xyz" and body["status"] == "NEW"
+    assert body["payment_url"].startswith("https://pay.tbank.ru/xyz") and body["status"] == "NEW"
     payment = db.scalars(select(Payment)).one()
     assert payment.provider == "tbank" and payment.status == "NEW" and payment.paid_at is None
     # права до оплаты нет: их выдаёт уведомление банка
@@ -406,7 +409,9 @@ def test_init_carries_the_receipt(client, db, bank):
     assert receipt["Email"] == "check@example.ru"
     assert receipt["Taxation"] == "patent"
     item, = receipt["Items"]
-    assert item["Name"] == "Адаптация web-страницы по параметрам заказчика"
+    # наименование читают двое: налоговая ищет вид деятельности, покупатель — что он купил
+    assert item["Name"].startswith("Адаптация web-страницы"), item["Name"]
+    assert "матрицы судьбы" in item["Name"], item["Name"]
     assert item["Quantity"] == 1
     assert (item["Price"], item["Amount"]) == (25_000, 25_000)
     assert item["Tax"] == "none"
@@ -449,9 +454,16 @@ def test_receipt_names_the_subject_of_the_contract_not_the_tariff(client, db, ba
     start(client, "subject@example.ru")
 
     payload = init_of(bank)
-    assert payload["Receipt"]["Items"][0]["Name"] == "Адаптация web-страницы по параметрам заказчика"
-    assert payload["Description"] == "Адаптация web-страницы по параметрам заказчика"
-    assert "разбор" not in payload["Description"].lower()
+    name = payload["Receipt"]["Items"][0]["Name"]
+    assert "Адаптация web-страницы" in name and "матрицы судьбы" in name, name
+    assert "скидк" not in name.lower(), "в чек попало витринное название тарифа"
+
+    # Описание заказа человек читает на форме банка перед вводом карты. Отчётности в нём нет,
+    # поэтому вида деятельности там быть не должно — только то, что покупатель узнаёт.
+    shown = payload["Description"]
+    assert "матриц" in shown.lower(), shown
+    assert "адаптация" not in shown.lower() and "web-страниц" not in shown.lower(), \
+        f"канцелярит на форме оплаты: {shown}"
 
 
 def test_receipt_follows_the_tax_mode_from_settings(client, db, bank, monkeypatch):
@@ -484,3 +496,85 @@ def test_receipt_does_not_change_the_signature(client, db, bank):
     without_receipt = {k: v for k, v in payload.items() if k != "Receipt"}
     assert BANK.token({**without_receipt, "TerminalKey": "1234DEMO"}) == \
         BANK.token({**payload, "TerminalKey": "1234DEMO"})
+
+
+def test_sweep_stops_asking_about_an_abandoned_payment(client, db, bank, monkeypatch):
+    """Человек ушёл с формы банка. Раньше досверка спрашивала про такой счёт сутки — каждые пять
+    минут новая запись. Теперь после порога платёж закрывается как брошенный, и опрос прекращается,
+    но право остаётся возможным: если оплата всё же случится, уведомление откроет доступ."""
+    import datetime as dt
+
+    from app import sweep
+    from app.models import Payment
+
+    monkeypatch.setattr(payments.PROVIDERS["tbank"], "state",
+                        lambda pid: payments.Update(external_id=pid, order_id=None,
+                                                    outcome=payments.Outcome.PENDING, status="NEW"))
+    body = start(client, "left-the-form@example.ru")
+    payment = db.scalars(select(Payment)).one()
+
+    first = sweep.run(db)
+    assert first is not None and payment.status == "NEW", "свежий счёт брошенным считать нельзя"
+
+    payment.created_at = payment.created_at - dt.timedelta(hours=2)
+    db.commit()
+    second = sweep.run(db)
+    assert second is not None and second.entries()[0].get("abandoned") is True
+    db.refresh(payment)
+    assert payment.status == sweep.ABANDONED
+
+    assert sweep.run(db) is None, "досверка снова взялась за брошенный платёж"
+
+    note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+    assert client.post("/api/payments/notify", json=note).status_code == 200
+    db.refresh(payment)
+    assert payment.paid_at is not None, "опоздавшая оплата обязана открыть доступ"
+    assert db.scalars(select(Entitlement)).one().active() is True
+
+
+def test_declined_card_does_not_block_a_second_attempt(client, db, bank, monkeypatch):
+    """Карту отклонили — человек обязан иметь возможность заплатить другой. Раньше он попадал на
+    страницу уже отклонённого платежа и вылетал на «Платёж не прошёл», не увидев формы: статус у
+    нас оставался NEW (на отказ уведомление не приходит), а старая ссылка предлагалась ещё полчаса."""
+    from app.models import Payment
+
+    first = start(client, "declined@example.ru", "1994-04-04")
+    monkeypatch.setattr(payments.PROVIDERS["tbank"], "state",
+                        lambda pid: payments.Update(external_id=pid, order_id=None,
+                                                    outcome=payments.Outcome.FAILED,
+                                                    status="REJECTED"))
+    again = client.post("/api/payments/start",
+                        json={"tariff": "single", "email": "declined@example.ru",
+                              "birth": "1994-04-04"}).json()
+
+    assert again.get("order_id") != first["order_id"], "предложен счёт отклонённого платежа"
+    assert again.get("payment_url"), f"новый счёт не выставлен — платить нечем: {again}"
+    rejected = db.get(Payment, int(first["order_id"].split("-")[1]))
+    assert rejected.status == "REJECTED", "отказ банка не записан"
+
+
+def test_second_refund_returns_state_instead_of_an_error(client, auth, db, bank, monkeypatch):
+    """Повторный возврат отдаёт текущее состояние: устаревшая вкладка получала отказ банка и
+    оставляла строку «оплачен» с живой кнопкой — интерфейс уверял, что деньги на месте."""
+    from app.config import settings
+    from app.models import Payment
+
+    body = paid_once(client, bank, "twice-refund@example.ru", "1995-05-05")
+    monkeypatch.setattr(payments.PROVIDERS["tbank"], "cancel",
+                        lambda pid: payments.Update(external_id=pid, order_id=None,
+                                                    outcome=payments.Outcome.REFUNDED,
+                                                    status="REFUNDED"))
+    admin = auth(settings.admins[0])
+    payment = db.scalars(select(Payment)).one()
+
+    first = client.post(f"/api/admin/payments/{payment.id}/refund", headers=admin)
+    assert first.status_code == 200 and first.json()["refunded_at"]
+
+    def refuse(_pid):
+        raise payments.PaymentError("Cancel: платёж уже возвращён (код 9999)")
+
+    monkeypatch.setattr(payments.PROVIDERS["tbank"], "cancel", refuse)
+    second = client.post(f"/api/admin/payments/{payment.id}/refund", headers=admin)
+    assert second.status_code == 200, second.text
+    assert second.json()["already"] is True and second.json()["refunded_at"]
