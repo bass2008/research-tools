@@ -90,6 +90,15 @@ variable "image_family" {
   default     = "ubuntu-2404-lts"
 }
 
+# Конкретный образ, а не «последний из семейства». С family Яндекс обновляет образ раз в неделю,
+# terraform видит новый id и требует ЗАМЕНИТЬ машину — то есть снести диск с базой. Обновление
+# образа теперь осознанное действие: поменять это значение и применить.
+variable "image_id" {
+  type        = string
+  default     = "fd8n7088reip5bg4dn09" # ubuntu-24-04-lts-v20260824
+  description = "Boot image id. Pinned on purpose: see the comment above."
+}
+
 variable "swap_size_mb" {
   type        = number
   description = "Swap file size. Insurance against the OOM killer taking node or Postgres on a 2 GB box; 0 disables it."

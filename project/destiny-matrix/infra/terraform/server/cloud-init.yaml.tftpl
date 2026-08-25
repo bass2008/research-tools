@@ -22,19 +22,18 @@ write_files:
       gzip_min_length 1024;
       gzip_types text/plain text/css application/javascript application/json image/svg+xml application/xml;
 
+  # Здесь лежит только минимум, чтобы машина ответила на 80 порт и certbot смог выписать
+  # сертификат. Рабочие конфиги — прод, тестовый домен, фильтры сканеров — живут в репозитории
+  # (infra/nginx) и приезжают скриптом infra/deploy-nginx.sh. Держать их в двух местах нельзя:
+  # копии расходятся, а правки руками на машине теряются при пересоздании.
   - path: /etc/nginx/sites-available/arcana.conf
     permissions: '0644'
     content: |
-      # Единая точка входа. И страницы, и /api/ уходят на node в контейнере: BFF внутри Next сам
-      # ходит в FastAPI по внутренней сети docker и сам ставит httpOnly-куку. Прямого пути от
-      # браузера к FastAPI нет — иначе токен приходит телом ответа, и его читает JavaScript.
       server {
           listen 80 default_server;
           listen [::]:80 default_server;
           server_name ${site_fqdn} www.${site_fqdn} _;
 
-          # Чанки с хешем в имени отдаёт nginx с диска: контейнер выкладывает их в этот каталог
-          # при старте, node на них не тратит цикл событий.
           location /_next/static/ {
               alias ${app_dir}/static/;
               access_log off;
@@ -42,18 +41,6 @@ write_files:
           }
 
           location / {
-              proxy_pass http://127.0.0.1:3000;
-              proxy_http_version 1.1;
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_read_timeout 30s;
-          }
-
-          # Печать PDF идёт синхронно и на слабой машине занимает под полминуты: с общим
-          # таймаутом 30 с ответ не доходил до браузера, хотя файл уже был готов.
-          location /api/reports {
               proxy_pass http://127.0.0.1:3000;
               proxy_http_version 1.1;
               proxy_set_header Host $host;
