@@ -68,6 +68,10 @@ export interface PaymentItem {
   created_at: string;
   paid_at: string | null;
   refunded_at: string | null;
+  /** Состояние, вычисленное сервером: new | paid | refunded | failed | abandoned. Экраны его
+   *  только показывают — раньше каждый собирал исход из отметок сам, и порядок проверок решал
+   *  результат: возвращённый платёж выглядел оплаченным. */
+  state?: "new" | "paid" | "refunded" | "failed" | "abandoned";
 }
 
 /** Строка списка пользователей в админке. */
@@ -343,7 +347,10 @@ export const api = {
     ),
 
   paySync: (orderId: string) =>
-    request<{ ok: true; status: string; paid: boolean; matrix_id: number | null;
+    request<{ ok: true; status: string;
+              /** состояние, решённое сервером: экраны его не пересчитывают */
+              state: "new" | "paid" | "refunded" | "failed" | "abandoned";
+              paid: boolean; matrix_id: number | null;
               payment_id: string }>("/payments/sync", {
       method: "POST",
       body: JSON.stringify({ order_id: orderId }),

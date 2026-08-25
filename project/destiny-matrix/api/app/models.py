@@ -139,12 +139,31 @@ class Payment(Base):
     def body(self) -> dict:
         return json.loads(self.tariff_body)
 
+    def state(self) -> str:
+        """Одно состояние вместо трёх отметок. Раньше каждый экран собирал исход сам, и порядок
+        проверок решал результат: страница возврата смотрела на «оплачено» раньше, чем на «возврат»,
+        и поздравляла с покупкой уже возвращённого платежа. Отметка об оплате — факт истории, она
+        остаётся навсегда, поэтому первым проверяется возврат."""
+        if self.refunded_at is not None or self.status in ("REFUNDED", "PARTIAL_REFUNDED"):
+            return "refunded"
+        if self.paid_at is not None:
+            return "paid"
+        if self.status == "ABANDONED":
+            return "abandoned"
+        if self.status in ("REJECTED", "DEADLINE_EXPIRED", "ATTEMPTS_EXPIRED", "AUTH_FAIL",
+                           "REVERSED", "CANCELED"):
+            return "failed"
+        return "new"
+
     def item(self) -> dict:
         return {"id": self.id, "amount": self.amount, "tariff": self.body(),
                 "matrix_id": self.matrix_id, "external_id": self.external_id,
-                "provider": self.provider, "status": self.status,
+                "provider": self.provider, "status": self.status, "state": self.state(),
                 "created_at": iso(self.created_at), "paid_at": iso(self.paid_at),
                 "refunded_at": iso(self.refunded_at)}
+
+
+PAYMENT_STATES = ("new", "paid", "refunded", "failed", "abandoned")
 
 
 class Entitlement(Base):

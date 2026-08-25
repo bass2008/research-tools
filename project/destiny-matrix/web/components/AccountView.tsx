@@ -252,8 +252,7 @@ export default function AccountView() {
           {session.admin ? <Link href="/admin">Админка</Link> : null}
         </div>
         <p className="hint" style={{ textAlign: "left" }}>
-          Доступ к разделам приходит с сервера при каждом открытии страницы: в браузере он не хранится,
-          поэтому работает с любого устройства и не открывается правкой localStorage.
+          Доступ живёт в аккаунте, поэтому разбор открывается с любого устройства.
         </p>
       </div>
 
@@ -383,7 +382,15 @@ function PaymentsPanel() {
                 <span className="pa">
                   {money(p.amount)} ₽
                   <span className="small">
-                    {p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}
+                    {p.state === "refunded"
+                        ? "возвращён"
+                        : p.state === "paid"
+                          ? "оплачен"
+                          : p.state === "abandoned"
+                            ? "брошен"
+                            : p.state === "failed"
+                              ? "не прошёл"
+                              : "не оплачен"}
                   </span>
                 </span>
               </li>

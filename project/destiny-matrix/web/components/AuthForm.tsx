@@ -111,10 +111,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           </>
         )}
       </p>
-      <p className="hint">
-        Дата рождения в аккаунте не хранится, пока вы сами не сохраните матрицу. Вход держится на
-        серверной куке — токена в localStorage нет.
-      </p>
     </form>
   );
 }

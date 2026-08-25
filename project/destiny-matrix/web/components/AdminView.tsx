@@ -63,7 +63,11 @@ export default function AdminView() {
       setPayments((rows) =>
         (rows ?? []).map((row) =>
           row.id === p.id
-            ? { ...row, refunded_at: answer.refunded_at ?? new Date().toISOString() }
+            ? {
+                ...row,
+                state: "refunded" as const,
+                refunded_at: answer.refunded_at ?? new Date().toISOString(),
+              }
             : row,
         ),
       );
@@ -106,7 +110,7 @@ export default function AdminView() {
     );
   }
 
-  const settled = (payments ?? []).filter((p) => p.paid_at && !p.refunded_at);
+  const settled = (payments ?? []).filter((p) => p.state === "paid");
   const paidTotal = settled.reduce((sum, p) => sum + p.amount, 0);
 
   const build = buildInfo();
@@ -229,13 +233,21 @@ export default function AdminView() {
                     <td className="num">{money(p.amount)} ₽</td>
                     {/* состояние ещё и атрибутом: по тексту проверять ненадёжно — «не оплачен»
                         содержит «оплачен» как подстроку */}
-                    <td data-paid={p.paid_at && !p.refunded_at ? "1" : "0"}>
-                      {p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}
+                    <td data-paid={p.state === "paid" ? "1" : "0"}>
+                      {p.state === "refunded"
+                        ? "возвращён"
+                        : p.state === "paid"
+                          ? "оплачен"
+                          : p.state === "abandoned"
+                            ? "брошен"
+                            : p.state === "failed"
+                              ? "не прошёл"
+                              : "не оплачен"}
                     </td>
                     <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
                     <td className="act">
-                      {p.paid_at && !p.refunded_at ? (
+                      {p.state === "paid" ? (
                         <button
                           type="button"
                           className="btn ghost sm"

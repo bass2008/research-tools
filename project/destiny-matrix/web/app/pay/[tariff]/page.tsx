@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!t) return NOT_FOUND_META;
   return pageMeta({
     title: `Оплата тарифа «${t.name}» — ${money(t.price)} ₽`,
-    description: `${t.name}: ${money(t.price)} ₽, ${periodLabel(t)}. Тариф можно сменить на самой странице оплаты.`,
+    description: `${t.name}: ${money(t.price)} ₽, ${periodLabel(t)}.`,
     path: `/pay/${t.id}`,
     noindex: true,
   });

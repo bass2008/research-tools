@@ -578,3 +578,23 @@ def test_second_refund_returns_state_instead_of_an_error(client, auth, db, bank,
     second = client.post(f"/api/admin/payments/{payment.id}/refund", headers=admin)
     assert second.status_code == 200, second.text
     assert second.json()["already"] is True and second.json()["refunded_at"]
+
+
+def test_payment_state_is_decided_on_the_server(client, db, bank, monkeypatch):
+    """Состояние платежа считает сервер: экраны собирали его сами из трёх отметок, и порядок
+    проверок решал исход — возвращённый платёж выглядел оплаченным."""
+    from app.models import Payment
+
+    body = paid_once(client, bank, "state@example.ru", "1996-06-06")
+    payment = db.scalars(select(Payment)).one()
+    assert payment.state() == "paid"
+
+    client.post("/api/payments/notify", json=refund_note(body))
+    db.refresh(payment)
+    assert payment.state() == "refunded", "после возврата платёж всё ещё выглядит оплаченным"
+    assert payment.paid_at is not None, "отметка об оплате — факт истории, её не стираем"
+
+    headers = {"Authorization": f"Bearer {body['token']}"}
+    answer = client.post("/api/payments/sync", json={"order_id": body["order_id"]},
+                         headers=headers).json()
+    assert answer["state"] == "refunded" and answer["paid"] is True

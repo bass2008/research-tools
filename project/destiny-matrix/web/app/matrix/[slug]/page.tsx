@@ -75,7 +75,7 @@ function seo(slug: string) {
     `Разбор карты ${slug} (день ${key.day}, месяц ${key.month}, год ${key.year}): центр ` +
     `${m.center} ${arcanumTitle(m.center)}, миссия ${m.mission} ${arcanumTitle(m.mission)}, ` +
     `денежный канал ${m.money[0]}, линия отношений ${m.love[0]}. Два раздела бесплатно; ` +
-    `такую карту дают ${counted(dates.length, "дата", "даты", "дат")} рождения.`;
+    `такую карту ${dates.length === 1 ? "даёт" : "дают"} ${counted(dates.length, "дата", "даты", "дат")} рождения.`;
   return { item, key, m, dates, title, description };
 }
 

@@ -179,7 +179,8 @@ def _body(db: Session, payment: Payment, user: User, matrix: SavedMatrix | None,
     right = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
     body = {"ok": True, "order_id": order, "payment_id": payment.external_id,
             "payment_url": payment.pay_url, "status": payment.status,
-            "paid": payment.paid_at is not None, "provider": payment.provider,
+            "paid": payment.paid_at is not None, "state": payment.state(),
+            "provider": payment.provider,
             "user": user.public(), "autoregistered": autoregistered,
             "tariff": tariff.public(), "entitlement": right.item() if right else None,
             "matrix_id": matrix.id if matrix else None,
@@ -276,7 +277,8 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
             apply(db, payment, provider.state(payment.external_id))
         except payments.PaymentError as exc:
             raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    return {"ok": True, "status": payment.status, "paid": payment.paid_at is not None,
+    return {"ok": True, "status": payment.status, "state": payment.state(),
+            "paid": payment.paid_at is not None,
             "matrix_id": payment.matrix_id, "payment_id": payment.external_id}
 
 

@@ -15,7 +15,7 @@ import type { PayStage as Stage } from "@/lib/payresult";
 const WAIT_STEPS = [0, 2000, 4000, 8000];
 
 export default function PayResult({ order, outcome }: { order: string; outcome: "done" | "fail" }) {
-  const [stage, setStage] = useState<Stage>(outcome === "fail" ? "failed" : "checking");
+  const [stage, setStage] = useState<Stage>("checking");
   const [note, setNote] = useState<string | null>(null);
   const [matrixId, setMatrixId] = useState<number | null>(null);
 
@@ -28,7 +28,10 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
   // Уведомление банка и возврат покупателя идут независимо, поэтому статус переспрашиваем
   // несколько раз: к моменту редиректа платёж мог быть ещё AUTHORIZED.
   useEffect(() => {
-    if (outcome === "fail" || !order) return;
+    if (!order) {
+      setStage("failed");
+      return;
+    }
     let stop = false;
     (async () => {
       for (const pause of WAIT_STEPS) {
@@ -38,7 +41,16 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
           const res = await api.paySync(order);
           // Возврат проверяем раньше оплаты: у возвращённого платежа отметка об оплате остаётся,
           // и страница поздравляла с покупкой при каждой перезагрузке, хотя деньги уже вернулись.
-          if (["REFUNDED", "PARTIAL_REFUNDED"].includes(res.status)) {
+          if (res.state === "abandoned") {
+            setStage("failed");
+            setNote("Счёт больше не действует — оплату можно начать заново.");
+            return;
+          }
+          if (res.state === "refunded") {
+            // Цель обязательна: без неё «Оплатить снова» уводило на общую оплату, а та берёт
+            // верхнюю дату кабинета — деньги уходили за другую дату, возвращённая оставалась
+            // закрытой. Проверено живыми деньгами на тестовом терминале.
+            setMatrixId(res.matrix_id);
             setStage("refunded");
             return;
           }
@@ -48,14 +60,14 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
             setStage("paid");
             return;
           }
-          if (["REJECTED", "CANCELED", "DEADLINE_EXPIRED", "REVERSED"].includes(res.status)) {
+          if (res.state === "failed") {
             setStage("failed");
             return;
           }
         } catch (err) {
           if (err instanceof ApiError && err.status === 401) {
             setStage("pending");
-            setNote("Войдите в аккаунт, на который оформляли платёж, — доступ уже привязан к нему.");
+            setNote("Войдите в аккаунт, на который оформляли платёж, — состояние платежа видно только владельцу.");
             return;
           }
           setStage("error");
@@ -93,7 +105,7 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
           Деньги вернулись тем же способом, которым платили. Разбор закрыт, сохранённая дата осталась
           в кабинете — при желании можно оплатить снова.
         </p>
-        <Link className="btn wide" href="/pay">
+        <Link className="btn wide" href={matrixId ? `/pay?m=${matrixId}` : "/pay"}>
           Оплатить снова
         </Link>
         <Link className="btn ghost wide" href="/account" style={{ marginTop: 8 }}>

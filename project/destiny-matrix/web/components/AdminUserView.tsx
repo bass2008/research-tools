@@ -141,7 +141,15 @@ export default function AdminUserView({ id }: { id: number }) {
                     <td className="small">{when(p.paid_at ?? p.created_at)}</td>
                     <td>{p.tariff.name ?? "—"}</td>
                     <td className="num">{money(p.amount)} ₽</td>
-                    <td>{p.refunded_at ? "возвращён" : p.paid_at ? "оплачен" : "не оплачен"}</td>
+                    <td>{p.state === "refunded"
+                        ? "возвращён"
+                        : p.state === "paid"
+                          ? "оплачен"
+                          : p.state === "abandoned"
+                            ? "брошен"
+                            : p.state === "failed"
+                              ? "не прошёл"
+                              : "не оплачен"}</td>
                     <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
                   </tr>

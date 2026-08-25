@@ -20,8 +20,7 @@ export default function PayScreen({
     <main className="page">
       <div className="wrap">
         <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <Link href="/#plans">Тарифы</Link> <span>/</span>{" "}
-          <span>Оплата</span>
+          <Link href="/">Главная</Link> <span>/</span> <span>Оплата</span>
         </p>
         <h1>Оплата</h1>
         <p className="dim">

@@ -121,10 +121,12 @@ def test_documents_do_not_contradict_each_other(page):
 def test_pages_promise_only_what_they_give(page):
     """Описания страниц обещали больше, чем страница даёт: шесть открытых разделов вместо двух,
     выбор тарифа, которого нет, и число страниц справочника, не сходившееся с перечислением."""
+    # Числа, по которым человек не принимает решение, из текста убраны совсем: синхронизировать
+    # нечего, значит и расходиться нечему. Здесь проверяется именно их отсутствие.
     page.goto(f"{BASE}/report", wait_until="domcontentloaded")
     described = page.locator('meta[name=description]').get_attribute("content") or ""
-    assert "шесть" not in described, described
-    assert "два открытых раздела" in described, described
+    assert "шесть" not in described and "два открытых" not in described, described
+    assert "часть разделов" in described, described
 
     page.goto(f"{BASE}/pay", wait_until="domcontentloaded")
     assert "выбор тарифа" not in (page.title() or "").lower(), page.title()
@@ -132,5 +134,6 @@ def test_pages_promise_only_what_they_give(page):
     page.goto(f"{BASE}/encyclopedia", wait_until="domcontentloaded")
     page.wait_for_timeout(300)
     body = page.inner_text("main")
-    assert "297" in body and "298 страниц" not in body, \
-        "число страниц справочника снова не сходится с перечислением"
+    assert "298 страниц" not in body and "297 страниц" not in body, \
+        "итоговое число страниц вернулось в текст — его нечему держать в согласии с данными"
+    assert "231 сочетание" in body, "перечисление, показывающее масштаб, должно остаться"
