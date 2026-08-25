@@ -348,6 +348,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
         {tariffs.map((t) => (
           <label className={t.id === tariff.id ? "topt on" : "topt"} key={t.id}>
             <input
+        disabled={!hydrated}
               type="radio"
               name="tariff"
               value={t.id}
@@ -422,6 +423,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
             Почта для доступа
           </label>
           <input
+        disabled={!hydrated}
             id="payemail"
             data-testid="pay-email"
             name="email"
@@ -441,6 +443,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
             <div>
               <label htmlFor="payemail">Почта для доступа</label>
               <input
+        disabled={!hydrated}
                 id="payemail"
                 data-testid="pay-email"
                 name="email"
@@ -454,6 +457,7 @@ export default function PayForm({ tariffs, initial }: { tariffs: Tariff[]; initi
             <div>
               <label htmlFor="paypass">{known ? "Пароль этого аккаунта" : "Пароль для входа"}</label>
               <input
+        disabled={!hydrated}
                 id="paypass"
                 data-testid="pay-password"
                 name="password"

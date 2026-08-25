@@ -16,10 +16,34 @@ from playwright.sync_api import Page, sync_playwright
 BASE = os.environ.get("E2E_URL", "http://127.0.0.1:3000")
 ADMIN = (os.environ.get("E2E_ADMIN", "snborodaenko@mail.ru"), os.environ.get("E2E_ADMIN_PASSWORD", "123"))
 
+# Тестовый контур закрыт паролем на уровне nginx: боты и посторонние получают 401 вместо страниц.
+# Прогоны про пароль знать не должны — читаем его сами из того же файла, где живут ключи банка.
+# На локальном стенде пароля нет, файла может не быть: тогда ходим без него.
+CREDENTIALS_FILE = pathlib.Path.home() / ".config" / "arcana" / "test-auth.env"
+
+
+def _gate() -> tuple[str, str] | None:
+    user = os.environ.get("E2E_BASIC_USER")
+    if user:
+        return user, os.environ.get("E2E_BASIC_PASSWORD", "")
+    if "127.0.0.1" in BASE or "localhost" in BASE or not CREDENTIALS_FILE.exists():
+        return None
+    values: dict[str, str] = {}
+    for line in CREDENTIALS_FILE.read_text().splitlines():
+        name, _, value = line.partition("=")
+        values[name.strip()] = value.strip().strip("'\"")
+    if values.get("TEST_BASIC_USER"):
+        return values["TEST_BASIC_USER"], values.get("TEST_BASIC_PASSWORD", "")
+    return None
+
+
+GATE = _gate()
+
 
 def pytest_configure(config):
     import urllib.request
     try:
+        # health открыт без пароля намеренно: снаружи должно быть видно, что контур жив
         urllib.request.urlopen(f"{BASE}/api/health", timeout=5)
     except OSError as exc:
         raise pytest.UsageError(f"стенд не отвечает на {BASE}: {exc}. Поднимите compose/scripts/run.sh")
@@ -32,6 +56,10 @@ def pytest_configure(config):
 COUNTERS = "MAP mc.yandex.ru 0.0.0.0, MAP mc.yandex.com 0.0.0.0, MAP mc.webvisor.org 0.0.0.0"
 
 
+def _credentials() -> dict | None:
+    return None if GATE is None else {"username": GATE[0], "password": GATE[1]}
+
+
 @pytest.fixture(scope="session")
 def browser():
     with sync_playwright() as pw:
@@ -42,7 +70,8 @@ def browser():
 
 @pytest.fixture
 def page(browser) -> Page:
-    context = browser.new_context(viewport={"width": 1360, "height": 950}, locale="ru-RU")
+    context = browser.new_context(viewport={"width": 1360, "height": 950}, locale="ru-RU",
+                                  http_credentials=_credentials())
     page = context.new_page()
     page.set_default_timeout(15_000)
     yield page

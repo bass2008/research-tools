@@ -18,7 +18,12 @@ export const dynamic = "force-static";
 // Раньше матрицы жили в отдельном /matrix/sitemap.xml, и его никто не указывал в robots.txt —
 // длинный хвост в индекс не попадал. Приватные адреса (/report, /account, /matrices, /pay)
 // в карту не входят: они закрыты в robots.txt и печатаются на запрос.
+// Боевой адрес: с любого другого контура карта сайта не отдаётся вовсе. Иначе тест, закрытый и
+// robots.txt, и паролем, сам сдавал бы поиску полный список своих адресов.
+const PRODUCTION = "https://arcana-sense.ru";
+
 export default function sitemap(): MetadataRoute.Sitemap {
+  if (SITE.url !== PRODUCTION) return [];
   const abs = (path: string) => new URL(path, SITE.url).toString();
   const now = new Date();
 

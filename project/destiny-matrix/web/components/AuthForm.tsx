@@ -51,6 +51,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       <label htmlFor="email">Почта</label>
       <input
+        disabled={!hydrated}
         id="email"
         data-testid="auth-email"
         name="email"
@@ -65,6 +66,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         Пароль
       </label>
       <input
+        disabled={!hydrated}
         id="password"
         data-testid="auth-password"
         name="password"

@@ -64,6 +64,7 @@ export default function LeadForm({ source = "landing" }: { source?: string }) {
       <div className="cap">Письма редкие, только о разборе; отписка одной ссылкой</div>
       <label htmlFor="leademail">Почта</label>
       <input
+        disabled={!hydrated}
         id="leademail"
         data-testid="lead-email"
         name="email"

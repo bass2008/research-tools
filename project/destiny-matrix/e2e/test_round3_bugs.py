@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import pathlib
 import re
 
 import pytest
@@ -117,11 +118,11 @@ def test_d6_month_names_fit_in_the_encyclopedia_calculator(page, width):
 
 def test_d7_matrix_pages_agree_the_number_of_dates(page):
     """D7. На страницах матриц «1 дат», «2 дат», «3 дат» вместо «1 дата», «2 даты»."""
-    slugs = re.findall(r"/matrix/([0-9-]+)</loc>", page.request.get(f"{BASE}/sitemap.xml").text())
-    assert slugs, "в карте сайта нет страниц матриц"
+    slugs = flows.matrix_slugs(page)
+    assert slugs, "на странице списка нет ссылок на матрицы"
 
     bad = []
-    for slug in slugs[:60]:
+    for slug in slugs:
         page.goto(f"{BASE}/matrix/{slug}", wait_until="domcontentloaded")
         page.wait_for_timeout(120)
         text = page.inner_text("body")
@@ -137,8 +138,11 @@ def test_d8_matrix_pages_do_not_name_dates_that_do_not_exist(page):
     """D8. Пояснение под списком дат называет «30 февраля» и другие несуществующие числа."""
     days = {"января": 31, "февраля": 28, "марта": 31, "апреля": 30, "мая": 31, "июня": 30,
             "июля": 31, "августа": 31, "сентября": 30, "октября": 31, "ноября": 30, "декабря": 31}
-    all_slugs = re.findall(r"/matrix/([0-9-]+)</loc>",
-                           page.request.get(f"{BASE}/sitemap.xml").text())
+    # все номера — из данных сайта: карта сайта публикуется только на боевом адресе, а нужны
+    # именно редкие карты, которых на первой странице списка нет
+    data = json.loads((pathlib.Path(__file__).resolve().parents[1] / "web" / "content"
+                       / "matrices.json").read_text(encoding="utf-8"))
+    all_slugs = [row["slug"] for row in data["items"]]
     # берём именно те карты, где «день + 22» вылезает за конец месяца: 30 февраля, 31 апреля и т.п.
     short = {2: 28, 4: 30, 6: 30, 9: 30, 11: 30}
     slugs = [s for s in all_slugs

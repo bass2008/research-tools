@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import sitemap from "./sitemap";
 
@@ -17,5 +17,16 @@ describe("карта сайта", () => {
     for (const hidden of ["/report", "/account", "/pay", "/matrices", "/admin"]) {
       expect(paths).not.toContain(hidden);
     }
+  });
+});
+
+describe("карта сайта вне боевого контура", () => {
+  it("на тесте не отдаётся вовсе", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://test.arcana-sense.ru");
+    vi.resetModules();
+    const { default: onTest } = await import("./sitemap");
+    expect(onTest()).toEqual([]);
+    vi.unstubAllEnvs();
+    vi.resetModules();
   });
 });

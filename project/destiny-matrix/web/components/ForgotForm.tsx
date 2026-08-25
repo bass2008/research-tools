@@ -50,6 +50,7 @@ export default function ForgotForm() {
       <p className="dim">Пришлём ссылку для смены пароля на почту, указанную при оплате.</p>
       <label htmlFor="fmail">Почта</label>
       <input
+        disabled={!hydrated}
         id="fmail"
         data-testid="forgot-email"
         type="email"

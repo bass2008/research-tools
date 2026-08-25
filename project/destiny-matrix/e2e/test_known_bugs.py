@@ -72,17 +72,27 @@ def test_date_picked_before_hydration_is_the_one_that_gets_paid(page, mail):
 
 
 def test_forms_never_put_the_password_in_the_address(page, mail):
-    """Пока React не подключился, браузер отправляет форму сам — и уносит пароль в строку адреса,
-    откуда он попадает в логи сервера и в историю браузера. Проверяем и вход, и регистрацию."""
+    """Пока React не подключился, обработчик отправки не привязан, и браузер отправляет форму сам:
+    почта с паролем уходили в строку адреса, а оттуда в логи сервера и в историю браузера.
+
+    Защита двойная, и проверяем обе половины на странице с отключённым кодом: поля недоступны,
+    пока форма не готова, а сама форма объявлена методом POST — значит даже при нативной отправке
+    значения уйдут в теле запроса, а не в адресе.
+    """
     flows.no_scripts(page)
     for path in ("/register", "/login"):
         page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
-        page.fill("#email", mail)
-        page.fill("#password", "secret-1234")
+        page.wait_for_timeout(400)
+
+        assert page.locator("#email").is_disabled(), f"{path}: поле почты открыто до готовности"
+        assert page.locator("#password").is_disabled(), f"{path}: поле пароля открыто до готовности"
+        assert page.locator("form").first.get_attribute("method") == "post", \
+            f"{path}: форма отправляется методом GET — значения уйдут в адрес"
+
         page.keyboard.press("Enter")
-        page.wait_for_timeout(1500)
-        assert "password=" not in page.url and "secret-1234" not in page.url, \
-            f"пароль ушёл в адрес на {path}: {page.url}"
+        page.wait_for_timeout(800)
+        assert "password=" not in page.url and "@" not in page.url, \
+            f"после отправки без кода в адресе оказались данные: {page.url}"
 
 
 def test_a3_second_tab_forgets_the_previous_person(page, mail):
@@ -233,11 +243,17 @@ def test_a13_consent_links_open_in_a_new_tab(page, mail):
         f"ссылки в согласии открываются в этой же вкладке: {targets}"
 
 
-def test_a17_contacts_is_in_the_sitemap(page):
-    """A17. Страница контактов должна быть в карте сайта."""
+def test_sitemap_is_published_only_on_the_live_site(page):
+    """A17 — состав карты сайта проверяет юнит (app/sitemap.test.ts), здесь важно другое: карта
+    публикуется только на боевом адресе. Закрытый контур не должен сдавать поиску список своих
+    страниц — он и так закрыт паролем и robots.txt."""
     body = page.request.get(f"{BASE}/sitemap.xml").text()
-    assert "/contacts" in body, "в sitemap.xml нет /contacts"
 
+    if BASE.rstrip("/") == "https://arcana-sense.ru":
+        assert "/contacts" in body, "в карте сайта нет /contacts"
+        assert "/matrix/" in body, "в карте сайта нет страниц матриц"
+    else:
+        assert "<loc>" not in body, f"закрытый контур публикует свои адреса: {body[:200]}"
 
 def test_a14_admin_summary_counts_paid_payments_only(page, mail):
     """A14. «Оплачено X ₽ за N платежей»: сумма считается по оплаченным, а N — по всем строкам."""

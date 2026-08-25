@@ -51,6 +51,7 @@ export default function ResetForm() {
       <p className="dim">После смены вы сразу войдёте в кабинет.</p>
       <label htmlFor="rpass">Пароль</label>
       <input
+        disabled={!hydrated}
         id="rpass"
         data-testid="reset-password"
         type="password"

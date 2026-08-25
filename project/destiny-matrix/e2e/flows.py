@@ -41,6 +41,16 @@ def calculate(page: Page, day: int, month: int, year: int, sex: str = "m") -> No
     page.wait_for_timeout(900)
 
 
+def matrix_slugs(page: Page, limit: int = 60) -> list[str]:
+    """Номера матриц — со страницы списка. Из карты сайта их брать нельзя: она публикуется только
+    на боевом адресе, а на закрытом контуре пуста намеренно."""
+    page.goto(f"{BASE}/matrix", wait_until="domcontentloaded")
+    hrefs = page.locator('a[href^="/matrix/"]').evaluate_all(
+        "list => list.map(a => a.getAttribute('href'))")
+    slugs = [h.rsplit("/", 1)[-1] for h in hrefs if h and re.fullmatch(r"[0-9-]+", h.rsplit("/", 1)[-1])]
+    return list(dict.fromkeys(slugs))[:limit]
+
+
 def open_pay(page: Page) -> None:
     page.get_by_test_id("buy-top").click()
     expect(page.get_by_test_id("pay-submit")).to_be_visible()

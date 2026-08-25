@@ -11,7 +11,7 @@ import uuid
 from playwright.sync_api import expect
 
 import flows
-from conftest import ADMIN, BASE
+from conftest import ADMIN, BASE, _credentials
 
 
 def test_pdf_is_generated_and_downloads(page, mail):
@@ -63,6 +63,7 @@ def test_admin_sees_what_happens_right_now(page, browser, mail):
     """
     human = browser.new_context(
         locale="ru-RU",
+        http_credentials=_credentials(),
         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                    "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36")
     guest = human.new_page()
