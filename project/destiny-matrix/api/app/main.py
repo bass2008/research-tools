@@ -46,7 +46,7 @@ def create_app() -> FastAPI:
     def pulse(body: PulseIn, request: Request) -> dict:
         """Отметка «я здесь» раз в 45 секунд. Ничего не сохраняет в базу: только счётчик в памяти,
         по которому админка показывает, сколько человек на сайте сейчас."""
-        presence.touch(body.visitor, body.path, request.headers.get("user-agent", ""))
+        presence.touch(body.visitor, body.path, request.headers.get("user-agent", ""), tab=body.tab)
         return {"ok": True}
 
     @app.exception_handler(ValueError)

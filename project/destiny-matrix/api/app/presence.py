@@ -17,26 +17,29 @@ ROBOT = re.compile(r"bot|crawler|spider|headless|phantom|curl|wget|python-reques
                    re.I)
 
 _lock = threading.Lock()
-_seen: dict[str, tuple[float, str, bool]] = {}
+_seen: dict[tuple[str, str], tuple[float, str, bool, str]] = {}
 
 
-def touch(visitor: str, path: str, agent: str = "", now: float | None = None) -> None:
+def touch(visitor: str, path: str, agent: str = "", now: float | None = None,
+          tab: str | None = None) -> None:
     stamp = time.time() if now is None else now
     robot = bool(ROBOT.search(agent))
+    # Старый клиент не присылает tab: его visitor раньше был уникален как раз для вкладки.
+    key = (visitor, tab or visitor)
     with _lock:
-        if len(_seen) >= LIMIT and visitor not in _seen:
+        if len(_seen) >= LIMIT and key not in _seen:
             _drop_stale(stamp)
             if len(_seen) >= LIMIT:
                 return
-        _seen[visitor] = (stamp, path[:200], robot)
+        _seen[key] = (stamp, path[:200], robot, visitor)
 
 
 def _drop_stale(now: float) -> None:
-    for key in [k for k, (seen, _, _) in _seen.items() if now - seen > WINDOW]:
+    for key in [k for k, (seen, _, _, _) in _seen.items() if now - seen > WINDOW]:
         _seen.pop(key, None)
 
 
-def _fresh(now: float | None = None) -> list[tuple[float, str, bool]]:
+def _fresh(now: float | None = None) -> list[tuple[float, str, bool, str]]:
     stamp = time.time() if now is None else now
     with _lock:
         _drop_stale(stamp)
@@ -44,20 +47,29 @@ def _fresh(now: float | None = None) -> list[tuple[float, str, bool]]:
 
 
 def online(now: float | None = None) -> int:
-    return sum(1 for _, _, robot in _fresh(now) if not robot)
+    return len({visitor for _, _, robot, visitor in _fresh(now) if not robot})
+
+
+def tabs(now: float | None = None) -> int:
+    return sum(1 for _, _, robot, _ in _fresh(now) if not robot)
 
 
 def robots(now: float | None = None) -> int:
-    return sum(1 for _, _, robot in _fresh(now) if robot)
+    return len({visitor for _, _, robot, visitor in _fresh(now) if robot})
 
 
 def pages(now: float | None = None, top: int = 5) -> list[dict]:
-    counts: dict[str, int] = {}
-    for _, path, robot in _fresh(now):
+    counts: dict[str, tuple[set[str], int]] = {}
+    for _, path, robot, visitor in _fresh(now):
         if not robot:
-            counts[path] = counts.get(path, 0) + 1
-    best = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:top]
-    return [{"path": path, "people": count} for path, count in best]
+            people, opened = counts.setdefault(path, (set(), 0))
+            people.add(visitor)
+            counts[path] = (people, opened + 1)
+    best = sorted(counts.items(), key=lambda kv: (-kv[1][1], kv[0]))[:top]
+    return [
+        {"path": path, "people": len(people), "tabs": opened}
+        for path, (people, opened) in best
+    ]
 
 
 def forget() -> None:

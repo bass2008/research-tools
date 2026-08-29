@@ -186,13 +186,13 @@ def test_two_tabs_do_not_create_two_payments_for_one_date(page, mail):
 
 
 def test_paid_date_cannot_be_bought_again_on_the_bank(page, mail):
-    """Уже открытую дату форма не даёт оплатить второй раз — до всякого обращения в банк."""
+    """Уже открытую дату калькулятор сразу ведёт в её разбор, не на повторную оплату."""
     flows.buy_on_bank(page, mail, 12, 12, 1992)
+    matrix_id = flows.matrix_ids(page)[0]
     flows.calculate(page, 12, 12, 1992)
-    flows.open_pay(page)
-    page.wait_for_timeout(1200)
-    assert page.get_by_test_id("pay-submit").is_disabled(), "открытую дату дают оплатить снова"
-    assert page.get_by_test_id("pay-open-note").count() == 1, "нет объяснения, почему платить нечего"
+    page.wait_for_url(f"{BASE}/?m={matrix_id}#result", timeout=20_000)
+    assert flows.locked_sections(page) == 0
+    assert page.get_by_test_id("unlock-cta").count() == 0, "открытую дату предлагают купить снова"
 
 
 def test_result_page_does_not_flicker_or_reload_itself(page, mail):

@@ -210,7 +210,12 @@ export interface Pulse {
   cpu: { load1: number; load5: number; load15: number; cores: number; percent: number };
   disk: { path: string; total_gb: number; free_gb: number; used_gb: number; percent: number };
   data_disk: { path: string; total_gb: number; free_gb: number; used_gb: number; percent: number };
-  online: { people: number; robots: number; pages: { path: string; people: number }[] };
+  online: {
+    people: number;
+    tabs: number;
+    robots: number;
+    pages: { path: string; people: number; tabs: number }[];
+  };
   print: { active: number; waiting: number; failures_hour: number };
   payments: { stuck: number };
   errors: { last10min: number; hour: number };

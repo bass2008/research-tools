@@ -108,7 +108,8 @@ export default function AdminPulse() {
 
       <div className="pnums">
         <span data-testid="pulse-online">
-          {counted(pulse.online.people, "человек", "человека", "человек")} сейчас
+          {counted(pulse.online.people, "человек", "человека", "человек")} ·{" "}
+          {counted(pulse.online.tabs, "вкладка", "вкладки", "вкладок")} сейчас
         </span>
         <span><b>{pulse.online.robots}</b> роботов</span>
         <span><b>{pulse.print.active}</b> печатается, {pulse.print.waiting} в очереди</span>
@@ -119,7 +120,14 @@ export default function AdminPulse() {
 
       {pulse.online.pages.length ? (
         <p className="small dim">
-          Смотрят: {pulse.online.pages.map((p) => `${p.path} (${p.people})`).join(" · ")}
+          Смотрят:{" "}
+          {pulse.online.pages
+            .map(
+              (p) =>
+                `${p.path} (${counted(p.people, "человек", "человека", "человек")} · ` +
+                `${counted(p.tabs, "вкладка", "вкладки", "вкладок")})`,
+            )
+            .join(" · ")}
         </p>
       ) : null}
 

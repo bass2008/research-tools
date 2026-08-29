@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
+import { pickMatrix, readAccess, readSavedMatrices } from "./_lib/access";
+import { SavedReport } from "./_lib/report";
+import CalculationProvider from "@/components/matrix/CalculationProvider";
 import CalcHero from "@/components/matrix/CalcHero";
 import HashScroll from "@/components/ui/HashScroll";
 import LeadForm from "@/components/pay/LeadForm";
@@ -15,6 +19,8 @@ import { getTariffs, lead, money, periodLabel, type Tariff } from "@/lib/tariffs
 // Цена — предмет договора, поэтому первый экран, разметка Offer и описание в поиске печатаются
 // по запросу и берут прайс из базы. Пересборка для смены цены не нужна.
 export const dynamic = "force-dynamic";
+
+type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateMetadata(): Promise<Metadata> {
   // цену в описание страницы ставим, только если она известна: зашитая могла разойтись с базой
@@ -49,10 +55,31 @@ function productJsonLd(tariffs: Tariff[]) {
   };
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Search }) {
+  const wanted = (await searchParams).m;
   const tariffs = await getTariffs();
   // пустой список — API молчит: цену не называем, но страница открывается и считает карту
   const main = tariffs.length ? lead(tariffs) : null;
+  let paidResult: ReactNode = null;
+
+  // В URL только внутренний id, не дата рождения. Сам id ничего не открывает: список содержит
+  // лишь записи владельца куки, а SavedReport ещё раз проверяет право именно на выбранную запись.
+  if (wanted !== undefined) {
+    const access = await readAccess();
+    if (access.authenticated) {
+      const saved = await readSavedMatrices();
+      const chosen = pickMatrix(saved, wanted);
+      if (chosen?.unlocked) {
+        paidResult = (
+          <div id="result">
+            <section id="plans" className="wrap section-gap" style={{ padding: 0 }}>
+              <SavedReport chosen={chosen} saved={saved} access={access} embedded />
+            </section>
+          </div>
+        );
+      }
+    }
+  }
 
   return (
     <>
@@ -69,13 +96,16 @@ export default async function HomePage() {
       {/* цена уже прочитана на сервере: без этого клиентские кнопки шли за ней второй раз и
           при недоступном BFF писали «уточняется» рядом с напечатанным числом */}
       <TariffsProvider server={tariffs}>
+      <CalculationProvider>
       <CalcHero
         slides={LANDING_SLIDES}
         place="landing"
-        below={<MatrixReport texts={freePositionTexts()} />}
+        fullReport={paidResult !== null}
+        below={paidResult ?? <MatrixReport texts={freePositionTexts()} />}
       >
         <MatrixForm />
       </CalcHero>
+      </CalculationProvider>
 
       {/* Цена и состав отчёта ушли из первого экрана под карусель: слева теперь композиция из
           колоды, и длинный список чипов её перегружал. */}

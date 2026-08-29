@@ -1,6 +1,8 @@
 // BFF: единственный путь браузера к api. Адрес апстрима — серверная переменная
 // API_INTERNAL_URL (в бандл не попадает, префикса NEXT_PUBLIC_ у неё нет намеренно), токен
 // живёт в httpOnly-куке и в JS недоступен.
+import { isIP } from "node:net";
+
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -76,12 +78,27 @@ interface ForwardOptions {
   /** забрать token из ответа в куку и убрать его из тела */
   capture?: boolean;
   agent?: string | null;
+  /** Исходный запрос к BFF: из него переносим только авторитетный IP, записанный nginx. */
+  source?: Request;
+}
+
+/**
+ * nginx перезаписывает X-Real-IP своим $remote_addr, поэтому этому единственному заголовку
+ * можно доверять. X-Forwarded-For намеренно не читаем: клиент может прислать свой первый
+ * элемент, а $proxy_add_x_forwarded_for лишь допишет реальный адрес справа.
+ */
+export function trustedClientIp(req: Request): string | null {
+  const value = req.headers.get("x-real-ip")?.trim() ?? "";
+  return isIP(value) ? value : null;
 }
 
 /** Проксировать запрос в api. Тело всегда JSON, ошибки — в форме контракта `{detail}`. */
 export async function forward(path: string, opts: ForwardOptions = {}): Promise<NextResponse> {
   const method = opts.method ?? "GET";
   const headers: Record<string, string> = { Accept: "application/json" };
+
+  const clientIp = opts.source ? trustedClientIp(opts.source) : null;
+  if (clientIp) headers["X-Real-IP"] = clientIp;
 
   if (opts.auth) {
     const token = await sessionToken();

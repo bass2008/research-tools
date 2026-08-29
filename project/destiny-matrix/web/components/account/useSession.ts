@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
-import { needsReload, ownerChanged } from "@/lib/session";
+import { needsReload, ownerChanged, sessionAppeared } from "@/lib/session";
 import { cachePaid, cachedPaid, clearBirth, forgetSession } from "@/lib/storage";
 
 export type SessionStatus = "loading" | "guest" | "user" | "offline";
@@ -147,6 +147,7 @@ function watchTabs(): void {
     if (now - checkedAt < RECHECK_AFTER_MS) return;
     checkedAt = now;
     const shown = snapshot.email;
+    const shownStatus = snapshot.status;
     void refreshSession().then((next) => {
       // «сервер не ответил» — не «пришёл другой человек»: секундный отказ /auth/me при возврате
       // во вкладку стирал дату рождения и перезагружал страницу
@@ -160,7 +161,11 @@ function watchTabs(): void {
       // серверная часть страницы осталась гостевой, и оплаченный разбор показывался закрытым.
       // На странице чека не перезагружаемся — там сверка идёт по расписанию и раньше уводила
       // в бесконечный круг.
-      if (!shown && next.status === "user" && !window.location.search.includes("paid=")) {
+      if (
+        sessionAppeared(shownStatus, shown, next.email) &&
+        next.status === "user" &&
+        !window.location.search.includes("paid=")
+      ) {
         window.location.reload();
       }
     });

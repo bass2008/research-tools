@@ -62,7 +62,25 @@ def test_pulse_counts_people_apart_from_robots(client):
 
     assert presence.online() == 2, "робот попал в число людей"
     assert presence.robots() == 1
-    assert {"path": "/", "people": 1} in presence.pages(), presence.pages()
+    assert {"path": "/", "people": 1, "tabs": 1} in presence.pages(), presence.pages()
+
+
+def test_five_tabs_of_one_browser_are_one_person(client):
+    """Один браузер может смотреть несколько страниц: это один человек, но пять вкладок."""
+    for index, path in enumerate(["/", "/", "/", "/account", "/admin"], start=1):
+        answer = client.post(
+            "/api/pulse",
+            json={"visitor": "один-браузер", "tab": f"вкладка-{index}", "path": path},
+        )
+        assert answer.status_code == 200
+
+    assert presence.online() == 1
+    assert presence.tabs() == 5
+    assert presence.pages() == [
+        {"path": "/", "people": 1, "tabs": 3},
+        {"path": "/account", "people": 1, "tabs": 1},
+        {"path": "/admin", "people": 1, "tabs": 1},
+    ]
 
 def test_presence_forgets_those_who_left():
     """Отметка живёт 90 секунд: ушедший из вкладки перестаёт считаться сам."""
@@ -116,7 +134,8 @@ def test_snapshot_shows_everything_the_admin_needs(client, db, auth):
 
     for key in ("memory", "cpu", "disk", "data_disk", "online", "print", "payments", "errors"):
         assert key in body, f"в сводке нет раздела {key}"
-    assert body["online"]["people"] >= 0 and body["print"]["active"] >= 0
+    assert body["online"]["people"] >= 0 and body["online"]["tabs"] >= body["online"]["people"]
+    assert body["print"]["active"] >= 0
     assert client.get("/api/admin/pulse", headers=auth("stranger@example.ru")).status_code == 404
 
 

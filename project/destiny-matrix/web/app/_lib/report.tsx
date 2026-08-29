@@ -30,10 +30,12 @@ export async function SavedReport({
   chosen,
   saved,
   access,
+  embedded = false,
 }: {
   chosen: SavedMatrix;
   saved: SavedMatrix[];
   access: Access;
+  embedded?: boolean;
 }) {
   let matrix;
   try {
@@ -51,6 +53,7 @@ export async function SavedReport({
       unlocked={unlocked}
       saved={saved}
       currentId={chosen.id}
+      embedded={embedded}
     />
   );
 }

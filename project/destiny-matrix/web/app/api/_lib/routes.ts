@@ -20,6 +20,7 @@ export async function credentials(req: Request, action: "login" | "register") {
     method: "POST",
     body: { email: mail, password },
     capture: true,
+    source: req,
   });
 }
 

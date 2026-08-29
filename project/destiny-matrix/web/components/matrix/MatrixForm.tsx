@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -14,11 +13,10 @@ const MIN_YEAR = 1900;
 
 /**
  * Что происходит после расчёта. Дата в любом случае уже в браузере, различается только то,
- * где человек увидит карту: на этой же странице, по ссылке или после перехода.
+ * где человек увидит карту: на этой же странице или сразу после перехода.
  */
 export type Finish =
   | { kind: "here" }
-  | { kind: "link"; href: string }
   | { kind: "go"; href: string };
 
 /**
@@ -54,9 +52,6 @@ export default function MatrixForm({
   const [year, setYear] = useState(now.getFullYear() - 30);
   const [sex, setSex] = useState<Sex>("f");
   const [error, setError] = useState<string | null>(null);
-  // карта посчитана на странице, где разбор не печатается: подтверждаем и зовём смотреть
-  const [done, setDone] = useState(false);
-
   // Поля показывают дату, которую человек уже вводил: иначе «Рассчитать» во второй форме
   // страницы перетирало свежий выбор значением по умолчанию.
   useEffect(() => {
@@ -86,7 +81,6 @@ export default function MatrixForm({
 
   const change = (apply: () => void) => {
     setError(null);
-    setDone(false);
     apply();
   };
 
@@ -102,12 +96,6 @@ export default function MatrixForm({
       setError(null);
       saveBirth({ birth, sex });
       track("calc", { place });
-      if (finish.kind === "link") {
-        // Страница без отчёта — справочник или статья. Уводить человека отсюда нельзя: он
-        // читает раздел. Показываем, что карта готова, и даём ссылку туда, где её печатают.
-        setDone(true);
-        return;
-      }
       if (finish.kind === "go") {
         // карту печатает другая страница: она прочитает дату из браузера, хеш просит прокрутку
         router.push(finish.href);
@@ -221,12 +209,6 @@ export default function MatrixForm({
         </div>
       </noscript>
       {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}
-      {done && finish.kind === "link" ? (
-        <p className="hint" role="status" data-testid="calc-done" style={{ textAlign: "left" }}>
-          Карта построена по этой дате.{" "}
-          <Link href={finish.href}>Смотреть разбор</Link> — расчёт уже сохранён в браузере.
-        </p>
-      ) : null}
     </div>
   );
 }

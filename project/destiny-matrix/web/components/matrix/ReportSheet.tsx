@@ -26,6 +26,7 @@ export default function ReportSheet({
   saved,
   currentId,
   printing = false,
+  embedded = false,
 }: {
   matrix: Matrix;
   sections: SectionOut[];
@@ -36,19 +37,22 @@ export default function ReportSheet({
   currentId: number;
   /** страница печатается в PDF: кнопки и переключатели в файл не нужны */
   printing?: boolean;
+  /** Отчёт стоит внутри главной, где h1 и навигационная цепочка уже есть. */
+  embedded?: boolean;
 }) {
   const open = sections.filter((s) => s.positions.length).length;
   const locked = sections.filter((s) => !s.positions.length);
+  const Heading = embedded ? "h2" : "h1";
 
   return (
     <>
-      {printing ? null : (
+      {printing || embedded ? null : (
         <p className="crumbs">
           <Link href="/">Главная</Link> <span>/</span> <Link href="/account">Кабинет</Link>{" "}
           <span>/</span> <span>Мой разбор</span>
         </p>
       )}
-      <h1>Разбор матрицы судьбы</h1>
+      <Heading>Разбор матрицы судьбы</Heading>
       <div className="rsub">
         <p className="dim">
           {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} · {unlocked

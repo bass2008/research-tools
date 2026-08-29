@@ -124,24 +124,51 @@ def test_refunded_twin_dates_keep_the_exact_payment_target(page: Page):
     assert "женская" in page.get_by_test_id("paid-matrix").inner_text().lower()
 
 
-def test_paid_landing_targets_the_current_date_and_keeps_a_real_anchor(page: Page):
-    """При двух покупках CTA открывает показанную дату, цена не спорит с оплатой, а все hero-CTA
-    по-прежнему имеют существующую цель #plans."""
+def test_recalculating_a_paid_date_opens_it_on_the_landing(page: Page, browser: Browser):
+    """Повторный расчёт купленной даты открывает её полный разбор прямо на главной.
+
+    Раньше главная снова печатала два бесплатных раздела и 18 замков, хотя ниже сама же
+    признавала оплату. Уводить человека на отдельный экран «Мой разбор» тоже не надо. При
+    нескольких покупках нельзя просто открыть первую доступную дату.
+    """
     mail = _mail("paid-landing")
-    flows.buy(page, mail, 3, 3, 1983, sex="f")
+    flows.buy(page, mail, 31, 3, 1993, sex="m")
     first = flows.matrix_ids(page)[0]
-    flows.calculate(page, 9, 9, 1999, sex="m")
+    flows.calculate(page, 9, 9, 1999, sex="f")
     flows.open_pay(page)
     assert not flows.pay(page, mail)
 
-    flows.calculate(page, 3, 3, 1983, sex="f")
-    page.wait_for_timeout(1200)
-    box = page.locator("#plans.allbox")
-    expect(box).to_be_visible()
-    assert "250 ₽ — один платёж" not in box.inner_text()
-    link = box.get_by_role("link", name="Открыть полный разбор")
-    assert link.get_attribute("href") == f"/report?m={first}"
+    page.goto(BASE, wait_until="domcontentloaded")
     assert page.locator('a[href="/#plans"]').count() >= 5
+
+    flows.calculate(page, 31, 3, 1993, sex="m")
+    page.wait_for_url(re.compile(rf"/\?m={first}#result$"), timeout=15_000)
+    expect(page.locator("main")).to_contain_text("31 марта 1993")
+    assert flows.locked_sections(page) == 0
+    expect(page.get_by_role("link", name="Перейти к полному разбору").first).to_have_attribute(
+        "href", "#result"
+    )
+
+    # Один id в адресе не раскрывает ни дату, ни платные тексты без куки владельца.
+    guest_context = browser.new_context(locale="ru-RU", http_credentials=_credentials())
+    guest = guest_context.new_page()
+    try:
+        guest.goto(f"{BASE}/?m={first}", wait_until="networkidle")
+        assert "31 марта 1993" not in guest.inner_text("main")
+        assert guest.get_by_test_id("save-pdf").count() == 0
+    finally:
+        guest_context.close()
+
+    # С главной с открытым отчётом можно посчитать новую неоплаченную дату: старый ?m= обязан
+    # исчезнуть, иначе сервер продолжит печатать предыдущую купленную матрицу.
+    page.select_option("#d", "8")
+    page.select_option("#m", "8")
+    page.select_option("#y", "1978")
+    page.get_by_test_id("sex-f").click()
+    page.get_by_test_id("calc-submit").click()
+    page.wait_for_url(f"{BASE}/#result", timeout=15_000)
+    expect(page.locator("#result")).to_contain_text("8 августа 1978")
+    assert flows.locked_sections(page) == 18
 
 
 def test_refund_refreshes_users_and_payments_from_the_same_moment(page: Page, browser: Browser):

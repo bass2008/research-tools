@@ -10,9 +10,8 @@
  * только собирает дату.
  */
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import { api, type MatrixListItem } from "@/lib/api";
 import { calculate } from "@/lib/matrix";
 import { money } from "@/lib/tariffs";
 import { useBirth } from "@/lib/useBirth";
@@ -26,6 +25,7 @@ import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import UnlockCta from "@/components/pay/UnlockCta";
 import { buildFree, type PositionTexts } from "@/lib/publicSpec";
 import { useSession } from "@/components/account/useSession";
+import { useOwnDates } from "@/components/matrix/CalculationProvider";
 
 export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
   const lead = useLead();
@@ -35,24 +35,7 @@ export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
   const birth = useBirth();
   // «уже оплачено» — про конкретную дату, а не про факт покупки: у человека может быть
   // куплена другая, и обещание на неоплаченной читалось как ошибка
-  const [ownDates, setOwnDates] = useState<MatrixListItem[]>([]);
-
-  useEffect(() => {
-    if (session.status !== "user") {
-      setOwnDates([]);
-      return;
-    }
-    let alive = true;
-    api
-      .matrices()
-      .then((res) => alive && setOwnDates(res.items))
-      .catch(() => {
-        /* список — подсказка: без него блок ведёт себя как для гостя */
-      });
-    return () => {
-      alive = false;
-    };
-  }, [session.status]);
+  const ownDates = useOwnDates();
 
   // Карта-пример до первого расчёта: без пометки человек принимал её за свою и уходил
   // покупать разбор по дате, которую не вводил.

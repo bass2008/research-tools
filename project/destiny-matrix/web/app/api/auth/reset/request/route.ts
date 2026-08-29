@@ -8,5 +8,5 @@ export async function POST(req: Request) {
   const body = await readJson(req);
   const email = String(body.email ?? "").trim().toLowerCase();
   if (!EMAIL.test(email)) return json({ detail: "Проверьте адрес почты" }, 400);
-  return forward("/auth/reset/request", { method: "POST", body: { email } });
+  return forward("/auth/reset/request", { method: "POST", body: { email }, source: req });
 }

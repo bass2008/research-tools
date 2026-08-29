@@ -154,6 +154,7 @@ export default function CalcHero({
   place = "hero",
   children,
   below,
+  fullReport = false,
 }: {
   /** пять надписей: своя на каждую композицию */
   slides?: HeroSlide[];
@@ -165,6 +166,8 @@ export default function CalcHero({
   /** что стоит под первым экраном внутри той же сетки — например, бесплатный разбор.
    *  Слот, а не флаг: страница, которой отчёт не нужен, просто его не передаёт. */
   below?: ReactNode;
+  /** На главной уже напечатан оплаченный отчёт: первая кнопка ведёт к нему, не к покупке. */
+  fullReport?: boolean;
 }) {
   const path = usePathname();
   const total = slides.length;
@@ -196,6 +199,20 @@ export default function CalcHero({
     return { label: "Каталог матриц", href: "/matrix" };
   }
 
+  function primaryAction() {
+    return (
+      <Link
+        className="btn gold"
+        href={fullReport ? "#result" : "/#plans"}
+        onClick={() => {
+          if (!fullReport) track("buy_click", { place: `${place}-hero` });
+        }}
+      >
+        {fullReport ? <>Перейти к полному разбору</> : <>Купить полный разбор — <Price /></>}
+      </Link>
+    );
+  }
+
   function text(s: HeroSlide, k: number) {
     const heading =
       h1 && k === i ? <h1>{s.heading}</h1> : <div className="hero-h">{s.heading}</div>;
@@ -204,13 +221,7 @@ export default function CalcHero({
         <span className="eyebrow">{s.eyebrow}</span>
         {heading}
         <div className="btnrow">
-          <Link
-            className="btn gold"
-            href="/#plans"
-            onClick={() => track("buy_click", { place: `${place}-hero` })}
-          >
-            Купить полный разбор — <Price />
-          </Link>
+          {primaryAction()}
           <Link className="btn ghost" href={secondLink(s).href}>
             {secondLink(s).label}
           </Link>
@@ -297,13 +308,7 @@ export default function CalcHero({
             </div>
             {h1 && k === i ? <h1>{s.heading}</h1> : <div className="hero-h">{s.heading}</div>}
             <div className="btnrow">
-              <Link
-                className="btn gold"
-                href="/#plans"
-                onClick={() => track("buy_click", { place: `${place}-hero` })}
-              >
-                Купить полный разбор — <Price />
-              </Link>
+              {primaryAction()}
               <Link className="btn ghost" href={secondLink(s).href}>
                 {secondLink(s).label}
               </Link>

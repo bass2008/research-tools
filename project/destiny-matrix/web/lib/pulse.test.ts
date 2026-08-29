@@ -9,7 +9,7 @@ const calm: Pulse = {
   cpu: { load1: 0.2, load5: 0.2, load15: 0.2, cores: 2, percent: 10 },
   disk: { path: "/", total_gb: 19, free_gb: 11, used_gb: 8, percent: 44 },
   data_disk: { path: "/srv/api/var", total_gb: 19, free_gb: 11, used_gb: 8, percent: 44 },
-  online: { people: 3, robots: 12, pages: [{ path: "/", people: 2 }] },
+  online: { people: 3, tabs: 5, robots: 12, pages: [{ path: "/", people: 2, tabs: 4 }] },
   print: { active: 0, waiting: 0, failures_hour: 0 },
   payments: { stuck: 0 },
   errors: { last10min: 0, hour: 0 },

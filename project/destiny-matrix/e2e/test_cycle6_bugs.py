@@ -176,10 +176,15 @@ def test_second_form_on_article_follows_the_date_already_calculated(page: Page):
     page.select_option("#y", "1970")
     page.get_by_test_id("sex-m").click()
     page.get_by_test_id("calc-submit").click()
-    page.wait_for_timeout(900)
+    page.wait_for_url(f"{BASE}/#result")
 
     stored = page.evaluate("() => sessionStorage.getItem('destiny.birth')")
     assert stored and "1970-05-05" in stored, f"первая форма не сохранила дату: {stored}"
+
+    # Возвращаемся в статью: обе формы должны прочитать сохранённую дату, а не свои значения
+    # по умолчанию. После расчёта верхняя форма теперь сразу показывает карту на главной.
+    page.go_back(wait_until="domcontentloaded")
+    page.wait_for_selector('[data-testid="promo-submit"]:not([disabled])', timeout=20_000)
 
     promo = page.get_by_test_id("calc-promo")
     values = promo.evaluate("el => [...el.querySelectorAll('select')].map(s => s.value)")

@@ -105,8 +105,9 @@ export default function EncShell({ children }: { children: ReactNode }) {
   return (
     <main id="content" className="page">
       <CalcHero slides={ENCYCLOPEDIA_SLIDES} h1={false} place="encyclopedia">
-        {/* в справочнике отчёта нет вовсе: форма сохраняет дату и уводит на страницу расчёта */}
-        <MatrixForm finish={{ kind: "link", href: "/#result" }} place="encyclopedia" />
+        {/* В справочнике отчёта нет: после расчёта сразу открываем карту на главной. Раньше
+            оставляли человека в статье с малозаметной второй ссылкой, и кнопка казалась сломанной. */}
+        <MatrixForm finish={{ kind: "go", href: "/#result" }} place="encyclopedia" />
       </CalcHero>
 
       <div className="wrap">

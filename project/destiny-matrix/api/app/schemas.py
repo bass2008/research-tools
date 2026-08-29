@@ -82,6 +82,9 @@ class PaymentRef(BaseModel):
 
 
 class PulseIn(BaseModel):
-    """Отметка присутствия. Идентификатор анонимный, живёт во вкладке и ни с чем не связан."""
+    """Отметка присутствия: анонимный браузер и отдельная вкладка, без аккаунта и IP."""
     visitor: str = Field(min_length=6, max_length=64)
+    # Необязателен на время обновления: уже открытые страницы старой версии ещё 45 секунд
+    # присылают только visitor. Для них visitor одновременно служит ключом вкладки.
+    tab: str | None = Field(default=None, min_length=6, max_length=64)
     path: str = Field(default="/", max_length=200)
