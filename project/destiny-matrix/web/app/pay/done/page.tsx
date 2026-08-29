@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import PayResult from "@/components/PayResult";
+import PayResult from "@/components/pay/PayResult";
 import { pageMeta } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export default async function PayDonePage({ searchParams }: { searchParams: Sear
   const params = await searchParams;
   const order = String((Array.isArray(params.order) ? params.order[0] : params.order) ?? "");
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap narrow">
         <PayResult order={order} outcome="done" />
       </div>

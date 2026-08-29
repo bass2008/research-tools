@@ -19,6 +19,26 @@ def test_purchase_sends_letter(client, monkeypatch):
     assert "1990" not in body and "birth" not in body
 
 
+def test_purchase_letter_points_at_the_paid_matrix(client, monkeypatch):
+    """Ссылка «Смотреть разбор» вела на голый /report, а он открывал последнюю запись: покупатель
+    второй даты попадал в разбор первой."""
+    sent = []
+    monkeypatch.setattr(mail, "send", lambda to, subject, body: sent.append((to, subject, body)) or True)
+    first = client.post("/api/payments/mock",
+                        json={"tariff": "single", "email": "two@example.ru", "birth": "1995-06-20"})
+    assert first.status_code == 200
+    token = {"Authorization": f"Bearer {first.json()['token']}"}
+    saved = client.post("/api/matrices", json={"birth": "1990-01-05", "sex": "m"}, headers=token)
+    assert saved.status_code == 200
+    second = client.post("/api/payments/mock",
+                         json={"tariff": "single", "email": "two@example.ru",
+                               "matrix_id": saved.json()["id"]})
+    assert second.status_code == 200, second.text
+
+    _, _, body = sent[-1]
+    assert f"/report?m={saved.json()['id']}" in body, body
+
+
 def test_register_sends_letter(client, monkeypatch):
     sent = []
     monkeypatch.setattr(mail, "send", lambda to, subject, body: sent.append((to, subject, body)) or True)

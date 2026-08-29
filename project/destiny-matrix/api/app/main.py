@@ -54,12 +54,29 @@ def create_app() -> FastAPI:
         # движок валидирует дату сам: будущее и до 1900 года — это 400, а не 500
         return JSONResponse({"detail": str(exc)}, status_code=400)
 
+    # Имена полей приходят из схем и печатались покупателю как есть: «Проверьте поля: password»
+    # не говорит ни что не так, ни что делать.
+    # После «проверьте» нужен винительный падеж. Именительный давал покупателю фразы вроде
+    # «Проверьте почта» ровно в момент отказа формы.
+    FIELD_NAMES = {"email": "почту", "password": "пароль", "title": "название",
+                   "birth": "дату рождения", "sex": "пол", "token": "ссылку",
+                   "tariff": "тариф", "matrix_id": "дату", "source": "источник"}
+    FIELD_LIMITS = {"password": "пароль — от 3 до 200 знаков",
+                    "email": "почта — в виде you@mail.ru, не длиннее 200 знаков",
+                    "title": "название — не длиннее 200 знаков"}
+
     @app.exception_handler(RequestValidationError)
     def schema_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
         # по контракту detail всегда строка; список ошибок уезжает отдельным полем
         fields = [str(part) for err in exc.errors() for part in err["loc"][1:]] or ["тело запроса"]
+        unique = list(dict.fromkeys(fields))
+        named = [FIELD_NAMES.get(f, f) for f in unique]
+        limits = [FIELD_LIMITS[f] for f in unique if f in FIELD_LIMITS]
+        detail = "Проверьте " + ", ".join(named) + "."
+        if limits:
+            detail += " " + "; ".join(limits) + "."
         return JSONResponse(
-            {"detail": "Проверьте поля: " + ", ".join(dict.fromkeys(fields)),
+            {"detail": detail,
              "errors": [{"loc": list(e["loc"]), "type": e["type"]} for e in exc.errors()]},
             status_code=422,
         )

@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 
-import PayForm from "@/components/PayForm";
+import PayForm from "@/components/pay/PayForm";
+import TariffsProvider from "@/components/pay/TariffsProvider";
 import type { Tariff } from "@/lib/tariffs";
 
 // Экран оплаты один на два маршрута: `/pay` (выбор с нуля) и `/pay/<тариф>` (тариф выбран
@@ -17,17 +20,30 @@ export default function PayScreen({
   test: boolean;
 }) {
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
         <p className="crumbs">
           <Link href="/">Главная</Link> <span>/</span> <span>Оплата</span>
         </p>
         <h1>Оплата</h1>
-        <p className="dim">
-          Оставьте почту и пароль — доступ живёт в аккаунте, а не в браузере.
-          {test ? " Приём оплаты сейчас тестовый: списаний не происходит." : ""}
-        </p>
-        <PayForm tariffs={tariffs} initial={initial} test={test} />
+        {/* прайс приходит из базы; если его нет — API недоступен, и платёж всё равно не
+            пройдёт. Называть цену из кода в этот момент нельзя. */}
+        {tariffs.length ? (
+          <TariffsProvider server={tariffs}>
+            <PayForm tariffs={tariffs} initial={initial} test={test} />
+          </TariffsProvider>
+        ) : (
+          <div className="panel paybox">
+            <h3>Цена уточняется</h3>
+            <p className="dim">
+              Справочник цен сейчас недоступен, поэтому оплату открыть не можем. Обновите
+              страницу через минуту — расчёт карты работает и без этого.
+            </p>
+            <button className="btn wide" type="button" onClick={() => window.location.reload()}>
+              Обновить
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );

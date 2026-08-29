@@ -2,15 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import ArcanumCard from "@/components/ArcanumCard";
-import Price from "@/components/Price";
-import Octagram from "@/components/Octagram";
+import ArcanumCard from "@/components/matrix/ArcanumCard";
+import ChakraTable from "@/components/matrix/ChakraTable";
+import Crumbs from "@/components/ui/Crumbs";
+import JsonLd from "@/components/ui/JsonLd";
+import Price from "@/components/pay/Price";
+import Octagram from "@/components/matrix/Octagram";
 import { arcanumShort, arcanumTitle } from "@/lib/arcana";
-import { arcanumInPosition, matrixItem, matrixSlugs } from "@/lib/content";
+import { matrixItem, matrixSlugs } from "@/lib/content";
 import { POSITIONS, arcanumHref, chakraHref, positionHref } from "@/lib/encyclopedia";
 import type { Matrix } from "@/lib/matrix";
 import { build } from "@/lib/sections";
-import { SITE, pageMeta } from "@/lib/site";
+import { pageMeta } from "@/lib/site";
+import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
 import { counted } from "@/lib/plural";
 
@@ -27,9 +31,9 @@ import {
 
 type Params = { slug: string };
 
-// false отдавал 404 ещё на маршрутизации, до generateMetadata, и на неизвестном слаге
-// в заголовке вкладки оставался заголовок главной
-export const dynamicParams = true;
+// Перечень адресов полный: неизвестный отдаётся готовым 404 (_not-found), а не
+// динамическим рендером — у того пустое тело и заголовок главной.
+export const dynamicParams = false;
 
 export function generateStaticParams(): Params[] {
   return matrixSlugs().map((slug) => ({ slug }));
@@ -40,15 +44,6 @@ const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 const DATES_SHOWN = 12;
 
-const CHAKRA_COLORS: Record<string, string> = {
-  sahasrara: "#8e5bc4",
-  ajna: "#3f5ec9",
-  vishuddha: "#1f9ed6",
-  anahata: "#159c69",
-  manipura: "#d9ac1e",
-  svadhisthana: "#dd7b2a",
-  muladhara: "#c9453a",
-};
 
 const POINT_POSITIONS = POSITIONS.filter((p) => p.kind === "point");
 
@@ -88,6 +83,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: data.title,
     description: data.description,
     path: matrixHref(data.item.slug),
+    // страница отдаёт schema.org Article — og:type должен утверждать то же самое
+    article: true,
+    // 5544 страницы одной формы — массив почти-дублей. Страница остаётся как результат расчёта
+    // и как узел перелинковки, поэтому follow, но в индекс не идёт и в карте сайта её нет.
+    noindex: true,
+    follow: true,
   });
 }
 
@@ -102,24 +103,18 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
   const paid = sections.filter((s) => s.access === "paid");
   const monthName = MONTHS_NOM[key.month - 1];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: title,
-    description,
-    inLanguage: "ru",
-    mainEntityOfPage: { "@type": "WebPage", "@id": new URL(matrixHref(slug), SITE.url).toString() },
-  };
-
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <JsonLd data={articleLd({ headline: title, description, path: matrixHref(slug) })} />
 
-        <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <Link href="/matrix">Все матрицы</Link>{" "}
-          <span>/</span> <span>{slug}</span>
-        </p>
+        <Crumbs
+          trail={[
+            { name: "Главная", path: "/" },
+            { name: "Все матрицы", path: "/matrix" },
+            { name: slug },
+          ]}
+        />
 
         <h1>Матрица судьбы {slug}</h1>
         <div className="matrixcards">
@@ -145,7 +140,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
 
         <div className="rgrid section-gap">
           <div className="panel">
-            <h3>Октаграмма этой матрицы</h3>
+            <h2>Октаграмма этой матрицы</h2>
             <div className="cap">
               Восемь внешних позиций, четыре точки комфорта и центр; по кругу — десятилетия
             </div>
@@ -153,45 +148,12 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
           </div>
 
           <div>
-            <div className="panel">
-              <h3>Карта энергий по чакрам</h3>
-              <div className="cap">Семь уровней в трёх колонках: материя, энергия и чувства</div>
-              <table className="chak">
-                <thead>
-                  <tr>
-                    <th>Уровень</th>
-                    <th>Физика</th>
-                    <th>Энергия</th>
-                    <th>Эмоции</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {m.chakras.map((r, i) => (
-                    <tr key={r.key}>
-                      <td style={{ background: CHAKRA_COLORS[r.key] }}>
-                        <Link href={chakraHref(r.key)} style={{ color: "#fff" }}>
-                          {7 - i}. {r.title}
-                        </Link>
-                      </td>
-                      <td>{r.physics}</td>
-                      <td>{r.energy}</td>
-                      <td>{r.emotions}</td>
-                    </tr>
-                  ))}
-                  <tr className="tot">
-                    <td>Итого</td>
-                    <td>{m.chakra_totals.physics}</td>
-                    <td>{m.chakra_totals.energy}</td>
-                    <td>{m.chakra_totals.emotions}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <ChakraTable m={m} heading="h2" />
 
             <div className="mini">
               {LINES.map(([label, hint, triad]) => (
                 <div className="mb" key={label}>
-                  <h4>{label}</h4>
+                  <h3>{label}</h3>
                   <p>{hint}</p>
                   <div className="row">
                     {triad(m).map((v, i) => (
@@ -211,7 +173,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         </div>
 
         <div className="panel section-gap">
-          <h3>Все позиции этой карты</h3>
+          <h2>Все позиции этой карты</h2>
           <div className="cap">Позиция · аркан · как читается</div>
           <div className="tabscroll">
             <table className="postab short">
@@ -263,7 +225,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
                   </Link>
                   <span className="lb">
                     <b>{p.label}</b> · <Link href={p.href}>{arcanumTitle(p.arcanum)}</Link> —{" "}
-                    {arcanumInPosition(p.arcanum, s.key)}
+                    {p.text}
                   </span>
                 </li>
               ))}
@@ -275,7 +237,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         ))}
 
         <div className="panel section-gap">
-          <h3>Что ещё есть в полном разборе</h3>
+          <h2>Что ещё есть в полном разборе</h2>
           <div className="cap">{paid.length} разделов: род, деньги, отношения, программы и годы</div>
           <div className="taglist">
             {paid.map((s) => (
@@ -287,7 +249,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         </div>
 
         <div className="panel section-gap">
-          <h3>Какие даты рождения дают эту матрицу</h3>
+          <h2>Какие даты рождения дают эту матрицу</h2>
           <div className="cap">
             {counted(dates.length, "дата", "даты", "дат")}: аркан дня повторяется каждые 22 числа,
             аркан года — у всех лет с той же суммой цифр
@@ -306,11 +268,11 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         </div>
 
         <div className="panel section-gap">
-          <h3>Соседние матрицы</h3>
+          <h2>Соседние матрицы</h2>
           <div className="cap">Тот же день и месяц, другой аркан года</div>
           <div className="taglist">
             {sameDayMonth(key).map((n) => (
-              <Link key={n.slug} href={matrixHref(n.slug)}>
+              <Link key={n.slug} href={matrixHref(n.slug)} prefetch={false}>
                 {n.label}
               </Link>
             ))}
@@ -341,7 +303,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         </div>
 
         <div className="allbox">
-          <h3>Ваша матрица может быть другой</h3>
+          <h2>Ваша матрица может быть другой</h2>
           <p>
             Эта страница собрана по тройке {slug}. Свою карту постройте по дате рождения: расчёт
             бесплатный и идёт в браузере — дата не уходит на сервер. Карта и два раздела

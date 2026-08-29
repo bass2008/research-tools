@@ -2,31 +2,29 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import ReportSheet from "@/components/ReportSheet";
-import { calculate } from "@/lib/matrix";
-import { build } from "@/lib/sections";
 import { pageMeta } from "@/lib/site";
-import { getTariffs } from "@/lib/tariffs";
 
-import {
-  pickMatrix,
-  planLabel,
-  readAccess,
-  readMatrixUnlocked,
-  readSavedMatrices,
-} from "../../_lib/access";
+import { pickMatrix, readAccess, readSavedMatrices } from "../../_lib/access";
+import { SavedReport, Sheet } from "../../_lib/report";
 
 // Сохранённая матрица: дата рождения и разбор печатаются на запрос и только владельцу куки.
 // Ни предрендера, ни кеша — иначе чужая дата рождения (специальная категория ПД) осела бы в
 // готовом HTML или в кеше прокси.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = pageMeta({
-  title: "Сохранённая матрица",
-  description: "Разбор сохранённой матрицы: октаграмма, позиции карты и разделы вашего тарифа.",
-  path: "/matrices",
-  noindex: true,
-});
+// canonical объявляли на /matrices — маршрута верхнего уровня нет, и все сохранённые матрицы
+// разом канонизировались в 404. Каждая страница канонична сама себе.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  return pageMeta({
+    title: "Сохранённая матрица",
+    description: "Разбор сохранённой матрицы: октаграмма, позиции карты и разделы вашего тарифа.",
+    path: `/matrices/${encodeURIComponent(id)}`,
+    noindex: true,
+  });
+}
+
+const OTHER = <Link href="/report">Мой разбор</Link>;
 
 export default async function SavedMatrixPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,9 +32,10 @@ export default async function SavedMatrixPage({ params }: { params: Promise<{ id
 
   if (!access.authenticated) {
     return (
-      <Sheet>
+      <Sheet other={OTHER}>
         <div className="panel narrow">
-          <h3>Нужен вход</h3>
+          {/* заголовок страницы, а не подзаголовок панели: у гостя это единственный экран */}
+          <h1 className="panel-h1">Нужен вход</h1>
           <p className="dim">
             {access.offline
               ? "Сервер не ответил, поэтому доступ не подтверждён. Обновите страницу."
@@ -57,36 +56,9 @@ export default async function SavedMatrixPage({ params }: { params: Promise<{ id
   const chosen = pickMatrix(saved, id);
   if (!chosen) notFound();
 
-  let matrix;
-  try {
-    matrix = calculate(chosen.birth, chosen.sex);
-  } catch {
-    notFound();
-  }
-
-  const unlocked = await readMatrixUnlocked(chosen.id);
   return (
-    <Sheet>
-      <ReportSheet
-        matrix={matrix}
-        sections={build(matrix, unlocked)}
-        planName={planLabel(access, await getTariffs(), unlocked)}
-        saved={saved}
-        currentId={chosen.id}
-      />
+    <Sheet other={OTHER}>
+      <SavedReport chosen={chosen} saved={saved} access={access} />
     </Sheet>
-  );
-}
-
-function Sheet({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="page">
-      <div className="wrap">
-        {children}
-        <p className="small center" style={{ marginTop: 18 }}>
-          <Link href="/account">Кабинет</Link> · <Link href="/report">Мой разбор</Link>
-        </p>
-      </div>
-    </main>
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import AuthForm from "@/components/AuthForm";
+import AuthForm from "@/components/account/AuthForm";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
@@ -12,7 +12,7 @@ export const metadata: Metadata = pageMeta({
 
 export default function RegisterPage() {
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
         <AuthForm mode="register" />
       </div>

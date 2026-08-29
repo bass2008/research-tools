@@ -128,8 +128,8 @@ describe("валидация", () => {
   });
 
   it("несуществующая дата отклонена", () => {
-    expect(() => calculate("2001-02-29")).toThrow(/не существует/);
-    expect(() => calculate("2001-13-01")).toThrow(/не существует/);
+    expect(() => calculate("2001-02-29")).toThrow(/нет в календаре/);
+    expect(() => calculate("2001-13-01")).toThrow(/нет в календаре/);
   });
 
   it("плохой формат отклонён", () => {
@@ -137,7 +137,7 @@ describe("валидация", () => {
   });
 
   it("плохой пол отклонён", () => {
-    expect(() => calculate("1987-06-14", "x" as Sex)).toThrow(/sex/);
+    expect(() => calculate("1987-06-14", "x" as Sex)).toThrow(/Выберите пол/);
   });
 
   it("строка и части дают одно и то же", () => {
@@ -147,7 +147,7 @@ describe("валидация", () => {
   it("29 февраля существует только в високосный год", () => {
     expect(daysInMonth(2000, 2)).toBe(29);
     expect(daysInMonth(1900, 2)).toBe(28);
-    expect(() => calculate("1900-02-29")).toThrow(/не существует/);
+    expect(() => calculate("1900-02-29")).toThrow(/нет в календаре/);
     expect(calculate("2000-02-29").day).toBe(7);
   });
 });

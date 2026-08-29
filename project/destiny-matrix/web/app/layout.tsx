@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Metrika from "@/components/Metrika";
-import PulseBeacon from "@/components/PulseBeacon";
-import TariffsProvider from "@/components/TariffsProvider";
+import Footer from "@/components/ui/Footer";
+import Header from "@/components/ui/Header";
+import Metrika from "@/components/ui/Metrika";
+import PulseBeacon from "@/components/ui/PulseBeacon";
+import TariffsProvider from "@/components/pay/TariffsProvider";
 import { SITE } from "@/lib/site";
 import { verification } from "@/lib/seo";
 
@@ -56,6 +56,8 @@ export const metadata: Metadata = {
 
   openGraph: {
     type: "website",
+    // без явного значения og:title наследует заголовок главной — и 404 представлялся ею
+    title: SITE.name,
     siteName: SITE.name,
     locale: "ru_RU",
     url: SITE.url,

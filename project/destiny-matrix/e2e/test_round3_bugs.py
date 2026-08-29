@@ -92,13 +92,14 @@ def test_d5_password_reset_works_while_another_session_is_alive(page, mail, api_
 
 @pytest.mark.parametrize("width", (320, 360))
 def test_d6_month_names_fit_in_the_encyclopedia_calculator(page, width):
-    """D6. В мини-калькуляторе энциклопедии на узком экране обрезаны длинные названия месяцев."""
+    """D6. В калькуляторе энциклопедии на узком экране обрезаны длинные названия месяцев.
+    Форма переехала из мини-виджета страницы в общий первый экран каркаса — поле то же."""
     page.set_viewport_size({"width": width, "height": 780})
     page.goto(f"{BASE}/encyclopedia/arcanum/7", wait_until="domcontentloaded")
     page.wait_for_timeout(900)
 
     room = page.evaluate("""() => {
-      const s = document.querySelector('#pm');
+      const s = document.querySelector('#pm') || document.querySelector('#m');
       if (!s) return null;
       const css = getComputedStyle(s);
       const c = document.createElement('canvas').getContext('2d');
@@ -111,7 +112,7 @@ def test_d6_month_names_fit_in_the_encyclopedia_calculator(page, width):
         .filter((x) => x.needed > available);
       return { available, tight };
     }""")
-    assert room, "мини-калькулятора нет на странице аркана"
+    assert room, "калькулятора нет на странице аркана"
     assert not room["tight"], (
         f"на {width}px не влезают: {room['tight']} при доступных {room['available']}px")
 

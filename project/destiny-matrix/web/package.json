@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "check": "node scripts/check-build.cjs"
+    "check": "node scripts/check-build.cjs",
+    "catalog": "PYTHONPATH=.. python scripts/make-catalog.py",
+    "golden": "PYTHONPATH=.. python scripts/make-golden.py"
   },
   "dependencies": {
     "next": "^15.5.0",

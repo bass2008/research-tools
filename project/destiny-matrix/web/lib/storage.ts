@@ -20,32 +20,52 @@ export interface StoredLead {
   at: number;
 }
 
+// Запрет на хранилище (приватный режим, «блокировать данные сайтов») раньше означал, что
+// дату негде удержать: /pay не видел её и требовал ввести заново — купить было нельзя.
+// Память модуля живёт столько же, сколько вкладка, и наружу так же не уходит.
+let memory: StoredBirth | null = null;
+
+/** Дата поменялась в одной форме — об этом узнают все формы страницы. */
+export const BIRTH_EVENT = "destiny:birth";
+
+function announce(v: StoredBirth | null): void {
+  try {
+    window.dispatchEvent(new CustomEvent(BIRTH_EVENT, { detail: v }));
+  } catch {
+    /* сервер или старый браузер — синхронизировать нечего */
+  }
+}
+
 export function saveBirth(v: StoredBirth): void {
+  memory = v;
   try {
     sessionStorage.setItem(BIRTH_KEY, JSON.stringify(v));
   } catch {
-    /* приватный режим — работаем без запоминания */
+    /* приватный режим: дата остаётся в памяти вкладки */
   }
+  announce(v);
 }
 
 export function loadBirth(): StoredBirth | null {
   try {
     const raw = sessionStorage.getItem(BIRTH_KEY);
-    if (!raw) return null;
+    if (!raw) return memory;
     const v = JSON.parse(raw) as StoredBirth;
     if (typeof v?.birth !== "string" || (v.sex !== "m" && v.sex !== "f")) return null;
     return v;
   } catch {
-    return null;
+    return memory;
   }
 }
 
 export function clearBirth(): void {
+  memory = null;
   try {
     sessionStorage.removeItem(BIRTH_KEY);
   } catch {
     /* ignore */
   }
+  announce(null);
 }
 
 /** Подсказка «права были» — только чтобы не мигать замками до ответа `/auth/me`.

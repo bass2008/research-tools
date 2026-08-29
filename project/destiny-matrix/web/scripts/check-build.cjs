@@ -311,7 +311,7 @@ const paidTexts = [
 ];
 // подписи, которые есть и в публичной части (например «Денежный канал» в главных точках),
 // секретом не являются — сторож смотрит только на то, что бывает лишь в платном разборе
-const publicSrc = ["components/publicSpec.ts", "components/MatrixResult.tsx"]
+const publicSrc = ["lib/publicSpec.ts", "components/matrix/MatrixResult.tsx"]
   .map((f) => fs.readFileSync(f, "utf8"))
   .join("\n");
 const paidOnly = [...new Set(paidTexts)].filter((t) => !publicSrc.includes(t));
@@ -336,7 +336,7 @@ for (const f of chunks) {
 }
 // Толкования платных разделов («аркан N в этом блоке») — это и есть товар. В клиентский
 // бандл они попасть не должны: браузер получает только тексты двух бесплатных разделов.
-const paidKeys = [...fs.readFileSync("components/publicSpec.ts", "utf8")
+const paidKeys = [...fs.readFileSync("lib/publicSpec.ts", "utf8")
   .matchAll(/key:\s*"([a-z_0-9]+)",\s*title:\s*"[^"]*",\s*access:\s*"paid"/g)].map((m) => m[1]);
 if (paidKeys.length < 15) fail(`сторож толкований ослеп: платных разделов найдено ${paidKeys.length}`);
 const corpus = JSON.parse(fs.readFileSync("content/arcana.json", "utf8")).items ?? [];
@@ -360,7 +360,7 @@ if (fs.existsSync(path.join(ROOT, "report.html"))) {
 }
 
 // счётчик и цели
-const layoutJs = fs.readFileSync("components/Metrika.tsx", "utf8");
+const layoutJs = fs.readFileSync("components/ui/Metrika.tsx", "utf8");
 for (const need of ["notBounce", "NEXT_PUBLIC_METRIKA_ID"]) {
   if (!layoutJs.includes(need) && !fs.readFileSync("lib/analytics.ts", "utf8").includes(need))
     fail(`Метрика: нет ${need}`);

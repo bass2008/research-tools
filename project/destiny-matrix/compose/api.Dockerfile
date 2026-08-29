@@ -1,5 +1,6 @@
 # API: FastAPI + движок расчёта. Контекст сборки — корень продукта (project/destiny-matrix),
-# потому что api импортирует пакет `engine`, а энциклопедию читает из `web/content`.
+# потому что api импортирует пакет `engine`. Контент энциклопедии сюда не кладётся: её печатает
+# фронт из своей папки, сервису она не нужна.
 FROM python:3.12-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
@@ -18,9 +19,7 @@ COPY api/certs/russian-trusted-ca.pem /usr/local/share/ca-certificates/russian-t
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
  && update-ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Порядок слоёв — от редко меняющегося к часто: контент энциклопедии 12,6 МБ переезжал бы при
-# каждой правке кода, если бы стоял после него. Код идёт последним и весит 200 кБ.
-COPY web/content ./web/content
+# Порядок слоёв — от редко меняющегося к часто: движок трогают реже, чем сервис.
 COPY engine ./engine
 COPY api/app ./api/app
 

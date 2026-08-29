@@ -12,11 +12,13 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
   web/                   Next.js 15, App Router, RSC + SSG, TypeScript
   web/content/           сгенерированный контент энциклопедии (JSON, читается на сборке)
   content/               источник контента: генератор и данные (Python)
-  generators/            генерация колоды на FLUX.1-dev
   infra/                 terraform и деплой
   docs/                  контракт, схема базы, планы
   legacy/                рукописный лендинг и страницы выбора сидов
 ```
+
+Генератор колоды (FLUX.1-schnell, 16 ГБ весов) лежит вне продукта — `tools/generators`: он ничего
+не импортирует из продукта и пишет готовые карты прямо в `web/public/img/arcana`.
 
 ## Тарифы
 
@@ -36,21 +38,18 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 
 | метод | путь | тело / параметры | ответ |
 |---|---|---|---|
-| POST | `/matrix/calc` | `{birth: "YYYY-MM-DD", sex: "m"\|"f"}` | `MatrixResponse` |
 | POST | `/auth/register` | `{email, password}` | `{token, user}` |
 | POST | `/auth/login` | `{email, password}` | `{token, user}` |
 | GET | `/auth/me` | — | `{user, access: {scopes, rights}, matrices_used, matrices_limit, can_store, unlimited, until}` |
 | POST | `/payments/mock` | `{tariff: "single"\|"month", email, matrix_id?, birth?, sex?}` | `{ok: true, payment_id, tariff, entitlement, matrix_id, user, autoregistered, token, requires_login?}` |
 | GET | `/matrices` | — | `{items: [{id, birth, sex, created_at, title, access, access_until}]}` |
-| POST | `/matrices` | `{birth, sex, title?}` | `{id, ...MatrixResponse}` |
-| GET | `/matrices/{id}` | — | `MatrixResponse` (в нём `unlocked` — открыт ли платный разбор этой даты) |
+| POST | `/matrices` | `{birth, sex, title?}` | карточка матрицы: `{id, birth, sex, title, created_at, access, access_until, unlocked}` |
+| GET | `/matrices/{id}` | — | та же карточка (`unlocked` — открыт ли платный разбор этой даты) |
 | PATCH | `/matrices/{id}` | `{title}` | строка списка; пустое имя возвращает подпись по умолчанию (дату) |
 | GET | `/payments` | — | `{items: [{id, amount, tariff, matrix_id, external_id, created_at, paid_at, refunded_at}]}` |
 | GET | `/admin/users` | — | `{items: [{id, email, created_at, is_admin, matrices, payments, spent, scopes, owned, until, rights}]}` |
 | GET | `/admin/users/{id}` | — | `{user, matrices, payments, rights}` |
 | GET | `/admin/payments` | — | все платежи с почтой плательщика |
-| GET | `/encyclopedia/arcanum/{n}` | n = 1..22 | `ArcanumEntry` |
-| GET | `/encyclopedia/index` | — | `{arcana: [...], positions: [...], combinations_count}` |
 | POST | `/leads` | `{email, source?}` | `{ok: true}` |
 | GET | `/health` | — | `{ok: true, db: bool}` |
 
@@ -58,43 +57,37 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 Ошибки: `{detail: "текст"}` с кодами 400 (валидация), 401 (нет токена), 402 (слоты хранения
 кончились), 404, 422 (схема).
 
-### MatrixResponse
+### Карточка матрицы
 
 ```json
 {
+  "id": 12,
   "birth": "1987-06-14",
   "sex": "m",
-  "unlocked": false,
-  "matrix": { "day": 14, "month": 6, "year": 7, "mission": 5, "center": 10,
-              "father_line": 20, "mother_line": 13, "descendants": 12, "inheritance": 19,
-              "comfort_west": 2, "comfort_north": 16, "comfort_east": 17, "comfort_south": 15,
-              "sky": [16, 15, 9], "ground": [2, 17, 19],
-              "social_male": [20, 12, 10], "social_female": [13, 19, 10],
-              "harmony": 6, "planetary": 20,
-              "purpose_personal": 21, "purpose_social": 11,
-              "money": [12, 22, 12], "love": [13, 1, 14], "talent": [6, 16, 22],
-              "karmic_tail": [7, 19, 4],
-              "chakras": [{ "key": "sahasrara", "title": "Сахасрара",
-                            "physics": 0, "energy": 0, "emotions": 0 }],
-              "chakra_totals": { "physics": 21, "energy": 17, "emotions": 16 },
-              "age_scale": [{ "from": 0, "to": 10, "arcanum": 14 }] },
-  "sections": [{ "key": "character", "title": "…", "lead": "…", "access": "free",
-                 "positions": [{ "label": "Ядро характера", "arcanum": 14,
-                                 "href": "/encyclopedia/arcanum/14" }] }]
+  "title": "Матрица 14 июня 1987",
+  "created_at": "2026-08-29T14:00:00+03:00",
+  "access": "forever",
+  "access_until": null,
+  "unlocked": true
 }
 ```
 
+Разделов разбора здесь нет намеренно: их считает фронт на портированном движке.
+
 Ключевое правило: **дата рождения не уходит в аналитику и не попадает в URL платежа.**
 На странице обещано «дата не покидает браузер», поэтому расчёт для анонимного посетителя
-идёт в браузере на том же движке, портированном в TypeScript, а серверный `/matrix/calc`
-используется только для сохранённых матриц авторизованного пользователя.
+идёт в браузере на том же движке, портированном в TypeScript. Сервер разбор не собирает
+вовсе — ни для гостя, ни для оплатившего: он хранит даты и права, а разделы печатает фронт
+(в том числе страницу печати, из которой делается PDF). Так состав разделов живёт в одном
+месте, а не в двух.
 
 ## Энциклопедия
 
-Страницы (все статические, SSG):
+Энциклопедия целиком статическая: страницы печатаются на сборке из `web/content/*.json`,
+сервис в этом не участвует и своих эндпоинтов под неё не имеет.
 
 ```
-/encyclopedia                       корень: три раздела и поиск
+/encyclopedia                       корень: три раздела
 /encyclopedia/arcanum/{1..22}       аркан: значение, в позициях, сочетания, ссылки
 /encyclopedia/position/{key}        позиция матрицы (20 ключей разделов + 17 позиций)
 /encyclopedia/combination/{a}-{b}   сочетание двух арканов, a < b — 231 страница
@@ -103,7 +96,7 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 
 Итого статических страниц энциклопедии: 22 + 37 + 231 + 7 + 1 = 298.
 
-`ArcanumEntry`:
+Запись аркана в `web/content/arcana.json`:
 
 ```json
 { "n": 14, "slug": "temperance", "title": "Умеренность", "roman": "XIV",

@@ -2,10 +2,9 @@
 // Перелинковка обязательна в обе стороны: тупиков быть не должно.
 import { ARCANA, arcanum, roman, type ArcanumSource } from "./arcana";
 import { builtInPositionText } from "./positionTexts";
-import { CHAKRAS } from "./matrix";
+import { CHAKRAS, fold } from "./matrix";
 import { SPEC } from "./sections";
 
-export const ENCYCLOPEDIA_ROOT = "/encyclopedia";
 
 export interface CombinationRef {
   with: number;
@@ -542,7 +541,9 @@ export function arcanumEntry(n: number): ArcanumEntry {
     minus: a.minus,
     combinations,
     seo: {
-      title: `${n} аркан «${a.title}» в матрице судьбы — значение и позиции`,
+      // точная форма запроса: «N в матрице судьбы» — 505k показов на категорию, и именно эта
+      // фраза, а не «N аркан», стоит в топе по всем 22 числам
+      title: `${n} в матрице судьбы — значение аркана ${a.title}`,
       description: `${a.title} (${n} аркан): ${a.short}. Значение в характере, деньгах, отношениях и предназначении, плюсы и минусы, все 21 сочетание.`,
       queries: [`${n} аркан`, `${a.title.toLowerCase()} матрица судьбы`, ...a.keywords.slice(0, 3)],
     },
@@ -551,6 +552,80 @@ export function arcanumEntry(n: number): ArcanumEntry {
 
 export function arcanumHref(n: number): string {
   return `/encyclopedia/arcanum/${n}`;
+}
+
+export const KARMIC_TAIL_HUB = "/encyclopedia/karmic-tail";
+export const YEAR_HUB = "/na-god";
+
+export function karmicTailHref(key: string): string {
+  return `${KARMIC_TAIL_HUB}/${key}`;
+}
+
+export function yearHref(key: string | number): string {
+  return `${YEAR_HUB}/${key}`;
+}
+
+// Корневые хабы перечислены явно: адрес первого уровня существует только вместе со своим
+// файлом-роутом, а карта сайта строится из данных. Без этого списка новый ключ в hubs.json
+// давал бы в карте адрес, которого нет, — 404 прямо из sitemap.
+export const ROOT_HUBS = ["programmy", "karmicheskaya-matrica", "energii", "o-metode", "avtor"];
+
+// Короткое имя для крошки: полный заголовок статьи занимал в ней три строки на телефоне и
+// дословно повторял H1, стоящий строкой ниже.
+const HUB_CRUMBS: Record<string, string> = {
+  programmy: "Программы",
+  "karmicheskaya-matrica": "Кармическая матрица",
+  energii: "Энергии",
+  "o-metode": "О методе",
+  avtor: "Об авторе",
+};
+
+export function hubCrumb(key: string): string {
+  return HUB_CRUMBS[key] ?? key;
+}
+
+export function hubHref(key: string): string {
+  return `/${key}`;
+}
+
+export function hasHubRoute(key: string): boolean {
+  return ROOT_HUBS.includes(key);
+}
+
+/** Тройка из ключа хвоста: «18-9-9» → [18, 9, 9]. null, если это не тройка арканов. */
+export function parseTail(key: string): number[] | null {
+  const parts = key.split("-");
+  if (parts.length !== 3) return null;
+  const out: number[] = [];
+  for (const raw of parts) {
+    if (!/^\d{1,2}$/.test(raw)) return null;
+    const n = Number(raw);
+    if (n < 1 || n > 22) return null;
+    out.push(n);
+  }
+  return out;
+}
+
+/** Отсортированная тройка — форма, одинаковая для всех шести перестановок одного хвоста. */
+export function tailShape(arcana: number[]): string {
+  return [...arcana].sort((a, b) => a - b).join("-");
+}
+
+/**
+ * Складывается ли тройка по формуле движка `[год, наследие, свёртка суммы]`. Половина троек,
+ * которые ищут в поиске (`6-6-18` и подобные), формулой не получается вовсе — поэтому обещать
+ * «калькулятор покажет ваш хвост» можно только там, где эта функция вернула раскладку.
+ */
+export function tailByFormula(arcana: number[]): { year: number; inheritance: number } | null {
+  if (arcana.length !== 3) return null;
+  const [a, b, c] = arcana;
+  const orders: Array<[number, number, number]> = [
+    [a, b, c], [b, a, c], [a, c, b], [c, a, b], [b, c, a], [c, b, a],
+  ];
+  for (const [year, inheritance, sum] of orders) {
+    if (fold(year + inheritance) === sum) return { year, inheritance };
+  }
+  return null;
 }
 
 export function encyclopediaIndex() {

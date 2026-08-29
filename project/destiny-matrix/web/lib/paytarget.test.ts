@@ -26,7 +26,9 @@ describe("цель платежа", () => {
   it("уважает ссылку ?m= только на свою закрытую запись", () => {
     const saved = [row(1, "1985-05-05", "f"), row(2, "1986-06-06", "m")];
     expect(pickTarget(saved, null, 2)).toEqual({ kind: "matrix", id: 2 });
-    expect(pickTarget(saved, null, 99)).toEqual({ kind: "matrix", id: 1 });
+    // чужой или несуществующий номер не подменяется своей записью: платёж уходил за дату,
+    // которой человек не просил
+    expect(pickTarget(saved, null, 99)).toBeNull();
   });
 
   it("не выбирает уже открытую запись", () => {
@@ -56,6 +58,18 @@ describe("цель платежа", () => {
     expect(options(twins, null).map((o) => o.label))
       .toEqual(["5 мая 1985 (ж) · кабинет", "5 мая 1985 (м) · кабинет"]);
     expect(targetLabel({ kind: "matrix", id: 2 }, twins, null)).toBe("5 мая 1985 (м)");
+  });
+
+  it("различает две карты на одну дату, даже если сервер прислал им одинаковые названия", () => {
+    const twins = [
+      { ...row(1, "1985-05-05", "f"), title: "Матрица 5 мая 1985" },
+      { ...row(2, "1985-05-05", "m"), title: "Матрица 5 мая 1985" },
+    ];
+    expect(options(twins, null).map((o) => o.label)).toEqual([
+      "Матрица 5 мая 1985 (ж) · кабинет",
+      "Матрица 5 мая 1985 (м) · кабинет",
+    ]);
+    expect(targetLabel({ kind: "matrix", id: 2 }, twins, null)).toBe("Матрица 5 мая 1985 (м)");
   });
 
   it("в админке печатает дату платежа, а не номер записи", () => {

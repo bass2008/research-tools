@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import AdminUserView from "@/components/AdminUserView";
+import AdminUserView from "@/components/admin/AdminUserView";
 import { pageMeta } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   if (!/^\d+$/.test(id)) notFound();
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
         <AdminUserView id={Number(id)} />
       </div>

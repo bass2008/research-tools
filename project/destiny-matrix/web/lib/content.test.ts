@@ -4,11 +4,13 @@ import { ARCANA } from "./arcana";
 import { CHAKRA_PAGES, POSITIONS, allCombinationSlugs } from "./encyclopedia";
 import {
   arcanumContent,
+  arcanumInPosition,
   chakraContent,
   combinationContent,
   contentStats,
   positionContent,
 } from "./content";
+import { builtInPositionText } from "./positionTexts";
 
 // Контент пишет генератор в web/content. Его может не быть вовсе, он может
 // оказаться недописанным — сборка обязана выживать в любом случае.
@@ -51,12 +53,21 @@ describe("загрузчик сгенерированного контента",
     expect(s.arcana).toBeLessThanOrEqual(22);
     expect(s.chakras).toBeLessThanOrEqual(7);
   });
+
+  it("карта энергий в справочнике использует те же позиционные тексты, что отчёт", () => {
+    for (let n = 1; n <= 22; n++) {
+      expect(arcanumInPosition(n, "chakras")).toBe(builtInPositionText(n, "chakras"));
+    }
+  });
 });
 
 describe("гигиена сгенерированного контента", () => {
-  const BANNED = ["лечен", "лечит", "диагноз", "заболеван", "исцел", "целитель", "болезн",
-    "симптом", "терапи", "препарат", "набор веса", "алкогол", "гарантиру",
-    "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник"];
+  // Корень, а не подстрока: «влечение» и «развлечения» — не медицинская лексика, и проверка
+  // по подстроке заставляла выбрасывать нормальные тексты (тот же список в lib/content.ts).
+  const BANNED = ["лечени", "лечить", "лечит", "диагноз", "заболеван", "исцел", "целител",
+    "болезн", "симптом", "терапи", "препарат", "набор веса", "алкогол", "гарантиру",
+    "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник"]
+    .map((root) => new RegExp(`(^|[^а-яёa-z0-9])${root}`, "i"));
 
   function corpus(): string {
     const parts: string[] = [];
@@ -83,7 +94,7 @@ describe("гигиена сгенерированного контента", () 
 
   it("ни одно подхваченное поле не несёт медицинской лексики", () => {
     const text = corpus();
-    for (const w of BANNED) expect(text, w).not.toContain(w);
+    for (const re of BANNED) expect(re.test(text), re.source).toBe(false);
   });
 
   it("отброшенные поля посчитаны", () => {

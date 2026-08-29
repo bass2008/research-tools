@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-import datetime as dt
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+
+from engine.matrix import calculate
 
 from .. import access, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import SavedMatrix, User, default_title, iso
-from ..report import build_report
+from ..models import SavedMatrix, User, default_title
 from ..schemas import MatrixIn, MatrixTitleIn
 
 router = APIRouter(prefix="/matrices", tags=["matrices"])
@@ -63,11 +62,12 @@ def create(payload: MatrixIn, user: User = Depends(current_user),
         if not access.can_save_more(db, user):
             raise _needs_storage_right(db, used)
         try:
-            row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
-                              title=(payload.title or default_title(payload.birth)))
-            build_report(payload.birth, payload.sex, unlocked=False)
+            # движок решает, бывает ли такая дата вообще: будущее и годы до 1900 он не считает
+            calculate(payload.birth, payload.sex)
         except ValueError as exc:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
+                          title=(payload.title or default_title(payload.birth)))
 
         db.add(row)
         db.commit()
@@ -76,19 +76,15 @@ def create(payload: MatrixIn, user: User = Depends(current_user),
     # уже открытую дату вторым правом не занимаем
     if not access.unlocked_matrix(db, user, row.id):
         access.bind_single(db, user, row.id)
-    # разбор считаем ещё раз: право могло быть выдано именно на эту матрицу при оплате
-    report = build_report(row.birth, row.sex,
-                          unlocked=access.unlocked_matrix(db, user, row.id))
-    return {"id": row.id, "title": row.title, "created_at": iso(row.created_at),
-            **access.matrix_state(access.active_rights(db, user), row.id), **report}
+    return one_body(db, user, row)
 
 
 def one_body(db: Session, user: User, row: SavedMatrix) -> dict:
-    """Тело одной матрицы. Тем же составом её отдаёт страница печати, поэтому не в эндпоинте."""
-    report = build_report(row.birth, row.sex,
-                          unlocked=access.unlocked_matrix(db, user, row.id))
-    return {"id": row.id, "title": row.title, "created_at": iso(row.created_at),
-            **access.matrix_state(access.active_rights(db, user), row.id), **report}
+    """Карточка матрицы: дата, пол, подпись и права. Разделы сюда не кладём — разбор считает
+    фронт на том же движке, портированном в TypeScript, и второй его экземпляр здесь означал бы
+    два места, куда обязана доехать каждая правка состава разделов."""
+    return {**row.item(), **access.matrix_state(access.active_rights(db, user), row.id),
+            "unlocked": access.unlocked_matrix(db, user, row.id)}
 
 
 @router.get("/{matrix_id}")

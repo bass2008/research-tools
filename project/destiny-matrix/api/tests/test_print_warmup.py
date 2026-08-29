@@ -28,7 +28,7 @@ def printer(monkeypatch, db_engine, no_warmup):    # no_warmup первым: и�
     monkeypatch.setattr(reports.settings, "s3_reports_bucket", "test-bucket")
     monkeypatch.setattr(reports.settings, "s3_access_key", "key")
     monkeypatch.setattr(reports, "upload", lambda key, pdf: None)
-    monkeypatch.setattr(reports, "link", lambda key: f"https://bucket/{key}")
+    monkeypatch.setattr(reports, "link", lambda key, filename=None: f"https://bucket/{key}")
     monkeypatch.setattr(printing.settings, "print_warmup", True)
     monkeypatch.setattr(printing, "_pool", Inline())
     monkeypatch.setattr(printing, "SessionLocal",

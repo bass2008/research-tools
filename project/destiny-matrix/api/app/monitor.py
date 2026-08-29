@@ -23,7 +23,7 @@ from . import payments as gateway
 from . import printing
 from .config import settings
 from .db import SessionLocal
-from .models import ErrorLog, Payment, ReportJob, as_utc, utcnow
+from .models import ErrorLog, Payment, ReportJob, as_utc, utcnow, iso
 
 log = logging.getLogger("monitor")
 
@@ -171,7 +171,7 @@ def snapshot(db: Session, with_crawlers: bool = True) -> dict:
     from . import presence
 
     return {
-        "at": utcnow().isoformat(),
+        "at": iso(utcnow()),
         "memory": memory(),
         "cpu": cpu(),
         "disk": disk("/"),

@@ -2,14 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import ReportSheet from "@/components/ReportSheet";
-import ReportView from "@/components/ReportView";
-import { calculate } from "@/lib/matrix";
-import { build, freePositionTexts } from "@/lib/sections";
+import ReportView from "@/components/matrix/ReportView";
+import { freePositionTexts } from "@/lib/sections";
 import { pageMeta } from "@/lib/site";
-import { getTariffs } from "@/lib/tariffs";
 
-import { pickMatrix, planLabel, readAccess, readMatrixUnlocked, readSavedMatrices } from "../_lib/access";
+import { pickMatrix, readAccess, readSavedMatrices } from "../_lib/access";
+import { SavedReport, Sheet } from "../_lib/report";
 
 // Страница печатается на запрос: доступ к платным разделам знает только сервер — по
 // httpOnly-куке. Предрендер здесь означал бы, что толкования всех платных разделов лежат в
@@ -27,20 +25,25 @@ export const metadata: Metadata = pageMeta({
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
+const OTHER = <Link href="/encyclopedia">Энциклопедия</Link>;
+
 export default async function ReportPage({ searchParams }: { searchParams: Search }) {
   const wanted = (await searchParams).m;
   const access = await readAccess();
 
   if (!access.paid) {
+    // Дата из браузера и запись в кабинете связываются по id: без списка кнопка под бесплатным
+    // разбором выбирала первую закрытую запись, а не ту, которую человек сейчас читает.
+    const saved = access.authenticated ? await readSavedMatrices() : [];
     return (
-      <Sheet>
+      <Sheet other={OTHER}>
         {access.offline ? (
           <div className="err">
             Сервер не подтвердил доступ, поэтому платные разделы закрыты. Обновите страницу — доступ
             проверяется заново.
           </div>
         ) : null}
-        <ReportView texts={freePositionTexts()} />
+        <ReportView texts={freePositionTexts()} saved={saved} />
       </Sheet>
     );
   }
@@ -51,42 +54,15 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
     // явный `?m=` на чужую или несуществующую матрицу — это 404, а не «покажем свою»
     if (wanted) notFound();
     return (
-      <Sheet>
+      <Sheet other={OTHER}>
         <ReportView granted={access.paid} texts={freePositionTexts()} />
       </Sheet>
     );
   }
 
-  let matrix;
-  try {
-    matrix = calculate(chosen.birth, chosen.sex);
-  } catch {
-    notFound();
-  }
-
-  const unlocked = await readMatrixUnlocked(chosen.id);
   return (
-    <Sheet>
-      <ReportSheet
-        matrix={matrix}
-        sections={build(matrix, unlocked)}
-        planName={planLabel(access, await getTariffs(), unlocked)}
-        saved={saved}
-        currentId={chosen.id}
-      />
+    <Sheet other={OTHER}>
+      <SavedReport chosen={chosen} saved={saved} access={access} />
     </Sheet>
-  );
-}
-
-function Sheet({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="page">
-      <div className="wrap">
-        {children}
-        <p className="small center" style={{ marginTop: 18 }}>
-          <Link href="/account">Кабинет</Link> · <Link href="/encyclopedia">Энциклопедия</Link>
-        </p>
-      </div>
-    </main>
   );
 }

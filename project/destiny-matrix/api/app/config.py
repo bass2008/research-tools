@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from functools import lru_cache
 from pathlib import Path
 
@@ -8,6 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 API_DIR = Path(__file__).resolve().parents[1]
 PRODUCT_ROOT = API_DIR.parent   # project/destiny-matrix
+
+# Движок лежит рядом с сервисом, а не ставится пакетом. Путь добавляется здесь: config
+# импортируют все, поэтому `import engine.*` работает независимо от порядка импортов.
+if str(PRODUCT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PRODUCT_ROOT))
 
 # Ключа по умолчанию нет намеренно: захардкоженный секрет в репозитории означает, что любой
 # читатель кода подделает токен на чужой user_id. Если JWT_SECRET не задан, ключ генерируется
@@ -33,8 +39,6 @@ class Settings(BaseSettings):
     jwt_ttl_days: int = 30
 
     mock_payments: bool = True
-
-    encyclopedia_dir: Path = PRODUCT_ROOT / "web" / "content"
 
     # Пусто = кросс-доменных запросов нет вообще. Браузер обращается только к своему origin:
     # страницы отдаёт node-сервер Next.js, а его BFF ходит в API с сервера, где CORS не

@@ -11,10 +11,12 @@ def test_create_and_read_back(client, auth):
     created = client.post("/api/matrices", json=BIRTH, headers=headers)
     assert created.status_code == 200, created.text
     body = created.json()
-    assert body["birth"] == "1987-06-14" and body["matrix"]["center"] == 10
+    # карточка, а не разбор: разделы считает фронт, сервис хранит дату и права
+    assert body["birth"] == "1987-06-14" and body["sex"] == "m"
+    assert "sections" not in body and "matrix" not in body
 
     again = client.get(f"/api/matrices/{body['id']}", headers=headers).json()
-    assert again["matrix"] == body["matrix"]
+    assert again["id"] == body["id"] and again["birth"] == body["birth"]
     assert client.get("/api/matrices", headers=headers).json()["items"][0]["id"] == body["id"]
 
 
@@ -63,7 +65,7 @@ def test_month_right_unlocks_every_matrix(client, paid):
     headers = paid("month", "unlock@example.ru")
     body = client.post("/api/matrices", json=BIRTH, headers=headers).json()
     assert body["unlocked"] is True
-    assert all(s["positions"] for s in body["sections"] if s["access"] == "paid")
+    assert body["access"] == "subscription"
 
 
 def test_single_right_unlocks_only_its_matrix(client, db):

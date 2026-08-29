@@ -11,6 +11,9 @@ const MONTHS = [
   "июля", "августа", "сентября", "октября", "ноября", "декабря",
 ];
 
+/** Те же месяцы для выпадающего списка формы: «12 Декабря». */
+export const MONTHS_ACC: readonly string[] = MONTHS.map((m) => m[0].toUpperCase() + m.slice(1));
+
 export function birthLabel(birth: string): string {
   const [y, m, d] = birth.split("-").map(Number);
   return `${d} ${MONTHS[m - 1]} ${y}`;
@@ -30,11 +33,6 @@ export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = [
   ["muladhara", "Муладхара", "тело, опора, материя"],
 ];
 
-export const COLUMNS: ReadonlyArray<readonly [string, string]> = [
-  ["physics", "Физика"],
-  ["energy", "Энергия"],
-  ["emotions", "Эмоции"],
-];
 
 export interface ChakraRow {
   key: string;
@@ -209,12 +207,12 @@ function chakras(m: Matrix): { rows: ChakraRow[]; totals: ChakraTotals } {
 /** Полный расчёт по дате рождения. sex влияет только на подписи родовых линий. */
 export function calculate(birth: string | BirthParts, sex: Sex = "f"): Matrix {
   const parts = parseBirth(birth);
-  if (sex !== "m" && sex !== "f") throw new MatrixError("sex должен быть 'm' или 'f'");
+  if (sex !== "m" && sex !== "f") throw new MatrixError("Выберите пол: он меняет подписи родовых линий.");
   if (!Number.isInteger(parts.year) || !Number.isInteger(parts.month) || !Number.isInteger(parts.day))
-    throw new MatrixError("дата должна быть целыми числами");
-  if (!isRealDate(parts)) throw new MatrixError("такой даты не существует");
-  if (isAfter(parts, todayParts())) throw new MatrixError("дата рождения в будущем");
-  if (parts.year < 1900) throw new MatrixError("поддерживаются даты рождения с 1900 года");
+    throw new MatrixError("Проверьте дату: день, месяц и год — числами.");
+  if (!isRealDate(parts)) throw new MatrixError("Такой даты нет в календаре — проверьте число и месяц.");
+  if (isAfter(parts, todayParts())) throw new MatrixError("Дата рождения не может быть в будущем — выберите прошедший день.");
+  if (parts.year < 1900) throw new MatrixError("Считаем даты рождения начиная с 1900 года.");
 
   const m = { birth: toIso(parts), sex } as Matrix;
 

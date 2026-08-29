@@ -46,12 +46,16 @@ def send(to: str, subject: str, body: str) -> bool:
         return False
 
 
-def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = None) -> bool:
+def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = None,
+             matrix_id: int | None = None) -> bool:
+    # Без номера даты ссылка вела на «последнюю сохранённую», а купить могли не её:
+    # человек шёл по письму и попадал в чужой по смыслу разбор.
+    report = f"{settings.site_url}/report" + (f"?m={matrix_id}" if matrix_id else "")
     lines = [
         f"Ваш разбор готов: {tariff_name}.",
         f"Номер платежа: {payment_id}.",
         "",
-        f"Смотреть разбор — {settings.site_url}/report",
+        f"Смотреть разбор — {report}",
         f"Кабинет — {settings.site_url}/account",
     ]
     if password:
@@ -73,11 +77,16 @@ def welcome(to: str) -> bool:
 
 
 def refund(to: str, tariff_name: str, payment_id: str) -> bool:
+    # «Разбор закрыт» звучало так, будто закрыт весь доступ: у покупателя нескольких дат
+    # закрывается ровно одна — та, за которую вернули деньги. Саму дату не называем:
+    # дата рождения в письмах не участвует.
+    closed = "Разбор по этому платежу закрыт; другие оплаченные даты остаются открытыми."
     body = "\n".join([
         f"Платёж возвращён: {tariff_name}.",
         f"Номер платежа: {payment_id}.",
         "",
-        "Разбор закрыт, сохранённые даты остались в кабинете.",
+        closed,
+        "Сохранённые даты остаются в кабинете.",
         "Деньги вернутся тем же способом, которым платили — обычно в течение нескольких дней.",
         "",
         "Если возврат оформляли не вы, ответьте на это письмо.",

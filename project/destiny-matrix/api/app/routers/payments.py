@@ -111,9 +111,19 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
     if outcome is payments.Outcome.PAID:
         right = _grant_once(db, payment, now)
         fresh = right.starts_at == now
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            # право на эту дату уже выдано параллельным платежом: проверка перед записью гонку
+            # не ловит, ловит уникальный индекс. Деньги за второй платёж вернём тем же путём,
+            # что и обычный возврат, а второе право не создаём.
+            db.rollback()
+            db.refresh(payment)
+            raise HTTPException(status.HTTP_409_CONFLICT,
+                                detail="Разбор этой даты уже открыт — платить второй раз не нужно.")
         if fresh:
-            mail.purchase(payment.user.email, payment.body()["name"], payment.external_id)
+            mail.purchase(payment.user.email, payment.body()["name"], payment.external_id,
+                          matrix_id=payment.matrix_id)
             # печать начинается сразу, не дожидаясь нажатия: на слабой машине она идёт десятки
             # секунд, и человеку незачем их ждать. Нажал раньше времени — запрос дождётся этой же
             # печати, второго рендера не будет.
@@ -199,6 +209,13 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     tariff = _tariff(db, payload.tariff)
     user, autoregistered = _buyer(db, payload.email)
     matrix = _target(db, user, payload, tariff)
+
+    # Оплаченное второй раз не продаём. Две открытые формы или двойной клик давали два
+    # прошедших платежа за одну дату: `_reusable` ловит только НЕоплаченные счета, а мок и
+    # быстрый терминал закрывают платёж сразу.
+    if matrix is not None and access.unlocked_matrix(db, user, matrix.id):
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            detail="Разбор этой даты уже открыт — платить второй раз не нужно.")
 
     started_earlier = _reusable(db, user, matrix, provider)
     if started_earlier is not None:

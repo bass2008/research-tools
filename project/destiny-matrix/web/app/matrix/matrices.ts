@@ -64,13 +64,18 @@ export function calendarYears(key: number): number[] {
 export function birthDates(k: MatrixKey): Array<{ iso: string; label: string }> {
   const days = [k.day, k.day + 22].filter((d) => d <= 31);
   const out: Array<{ iso: string; label: string }> = [];
+  // ненаступивший день не бывает датой рождения: калькулятор такие отвергает, а страница
+  // печатала их в списке «дат рождения» текущего года
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
+    today.getDate(),
+  ).padStart(2, "0")}`;
   for (const year of calendarYears(k.year)) {
     for (const day of days) {
       if (!isRealDate({ year, month: k.month, day })) continue;
-      out.push({
-        iso: `${year}-${String(k.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-        label: `${day} ${MONTHS_GEN[k.month - 1]} ${year}`,
-      });
+      const iso = `${year}-${String(k.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      if (iso > todayIso) continue;
+      out.push({ iso, label: `${day} ${MONTHS_GEN[k.month - 1]} ${year}` });
     }
   }
   return out;

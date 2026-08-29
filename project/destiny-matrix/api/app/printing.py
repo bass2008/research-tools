@@ -46,22 +46,36 @@ def ready(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
                       .order_by(ReportJob.id.desc())).first()
 
 
+def expire_stale(db: Session) -> int:
+    """Закрыть брошенные задачи независимо от того, попросят ли ту же матрицу снова.
+
+    Раньше уборка жила только в ``running`` и потому никогда не срабатывала для очереди
+    администратора: старая строка бессрочно считалась работающей рядом с живым счётчиком 0.
+    """
+    cutoff = utcnow().timestamp() - settings.browser_timeout_seconds - 30
+    changed = 0
+    rows = db.scalars(select(ReportJob).where(ReportJob.status == "running")).all()
+    for row in rows:
+        started = as_utc(row.started_at or row.created_at)
+        if started.timestamp() >= cutoff:
+            continue
+        row.status = "failed"
+        row.error = "печать не завершилась: задача брошена"
+        row.finished_at = utcnow()
+        changed += 1
+    if changed:
+        db.commit()
+    return changed
+
+
 def running(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
     """Печать этой же матрицы, уже запущенная кем-то. Задачу старше окна печати считаем брошенной:
     браузер мог умереть, и ждать её бессмысленно."""
+    expire_stale(db)
     row = db.scalars(select(ReportJob)
                      .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
                             ReportJob.status == "running")
                      .order_by(ReportJob.id.desc())).first()
-    if row is None:
-        return None
-    started = as_utc(row.started_at or row.created_at)
-    if (utcnow() - started).total_seconds() > settings.browser_timeout_seconds + 30:
-        row.status = "failed"
-        row.error = "печать не завершилась: задача брошена"
-        row.finished_at = utcnow()
-        db.commit()
-        return None
     return row
 
 

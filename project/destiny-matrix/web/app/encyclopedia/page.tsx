@@ -1,159 +1,285 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import EncyclopediaSearch, { type SearchItem } from "@/components/EncyclopediaSearch";
-import ArcanumCard from "@/components/ArcanumCard";
+import { EncSection } from "@/components/enc/EncFrame";
+import ArcanumCard from "@/components/matrix/ArcanumCard";
+import CrumbsLd from "@/components/ui/CrumbsLd";
+import { articleList } from "@/components/enc/EncShell";
 
-import { ARCANA, roman } from "@/lib/arcana";
+import { ARCANA } from "@/lib/arcana";
 import {
   CHAKRA_PAGES,
-  ENCYCLOPEDIA_PAGE_COUNT,
+  KARMIC_TAIL_HUB,
   POSITIONS,
+  YEAR_HUB,
   allCombinationSlugs,
   arcanumHref,
   chakraHref,
   combination,
-  parseCombinationSlug,
+  hubHref,
+  karmicTailHref,
+  parseTail,
   positionHref,
+  yearHref,
 } from "@/lib/encyclopedia";
+import {
+  chakraContent,
+  hub,
+  hubKeys,
+  karmicTails,
+  yearArcanum,
+  yearKeys,
+} from "@/lib/content";
 import { pageMeta } from "@/lib/site";
-import { counted, plural } from "@/lib/plural";
+import { clip } from "@/lib/text";
 
 export const metadata: Metadata = pageMeta({
-  title: "Энциклопедия матрицы судьбы: 22 аркана, позиции карты, чакры и сочетания",
+  title: "Энциклопедия матрицы судьбы: арканы, позиции, чакры",
   description:
-    "Справочник по матрице судьбы: значения 22 арканов, 37 позиций карты, 7 чакр и 231 сочетание " +
-    "арканов. Все страницы с перекрёстными ссылками.",
+    "Справочник по матрице судьбы: значения 22 арканов, 20 разделов отчёта, 17 позиций карты, " +
+    "7 чакр и 231 сочетание арканов. Все страницы с перекрёстными ссылками.",
   path: "/encyclopedia",
 });
 
+function rows(items: { key: string; title: string; lead: string }[]) {
+  return (
+    <dl className="kv">
+      {items.map((p) => (
+        <div key={p.key} style={{ display: "contents" }}>
+          <dt>
+            <Link href={positionHref(p.key)}>{p.title}</Link>
+          </dt>
+          <dd>{p.lead}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export default function EncyclopediaIndexPage() {
   const combos = allCombinationSlugs();
-  const items: SearchItem[] = [
-    ...ARCANA.map((a) => ({
-      href: arcanumHref(a.n),
-      title: `${a.n} аркан — ${a.title}`,
-      hint: `${a.short} ${a.keywords.join(" ")}`,
-      group: "аркан",
-    })),
-    ...POSITIONS.map((p) => ({
-      href: positionHref(p.key),
-      title: p.title,
-      hint: `${p.lead} ${p.key}`,
-      group: p.kind === "section" ? "раздел отчёта" : "позиция карты",
-    })),
-    ...CHAKRA_PAGES.map((c) => ({
-      href: chakraHref(c.key),
-      title: `Чакра ${c.index} — ${c.title}`,
-      hint: c.hint,
-      group: "чакра",
-    })),
-    ...combos.map((slug) => {
-      const [a, b] = parseCombinationSlug(slug)!;
-      const c = combination(a, b);
-      return {
-        href: `/encyclopedia/combination/${slug}`,
-        title: `${a} и ${b} — ${c.title}`,
-        hint: c.short,
-        group: "сочетание",
-      };
-    }),
+  const sections = POSITIONS.filter((p) => p.kind === "section");
+  const points = POSITIONS.filter((p) => p.kind === "point");
+  // тройки — числа, а не строки: иначе 11-11-4 стоит после 11-11-22
+  const tails = karmicTails()
+    .slice()
+    .sort((a, b) => {
+      const x = a.key.split("-").map(Number);
+      const y = b.key.split("-").map(Number);
+      for (let i = 0; i < 3; i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0);
+      return 0;
+    });
+  // ключи года — строки: без числовой сортировки список шёл 1, 10, 11, …, 2, 20, 2026, 21
+  const years = yearKeys()
+    .slice()
+    .sort((a, b) => (Number(a) || 1e6) - (Number(b) || 1e6) || a.localeCompare(b));
+
+  const tabs = [
+    {
+      key: "arc",
+      title: "22 аркана",
+      count: ARCANA.length,
+      hint: "значение каждого числа",
+      body: (
+        <div className="enc-deck">
+          {ARCANA.map((a) => (
+            <Link className="enc-card" key={a.n} href={arcanumHref(a.n)} prefetch={false}>
+              <ArcanumCard n={a.n} size="grid" decorative />
+              <span className="dn">
+                {a.n} · {a.title}
+              </span>
+            </Link>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "sec",
+      title: "Разделы отчёта",
+      count: sections.length,
+      hint: "что показывает полный разбор",
+      body: rows(sections),
+    },
+    {
+      key: "pts",
+      title: "Позиции карты",
+      count: points.length,
+      hint: "точки октаграммы и линии рода",
+      body: rows(points),
+    },
+    {
+      key: "chk",
+      title: "Семь чакр",
+      count: CHAKRA_PAGES.length,
+      hint: "карта энергий по уровням",
+      body: (
+        <div className="chcol">
+          {CHAKRA_PAGES.map((c) => {
+            const cols = chakraContent(c.key)?.columns ?? [];
+            return (
+              <Link className={`chrow k${c.index}`} key={c.key} href={chakraHref(c.key)}>
+                <span className="chn">{c.index}</span>
+                <span className="chb">
+                  <span className="cht">{c.title}</span>
+                  <span className="chh">{c.hint}</span>
+                </span>
+                {cols.map((col) => (
+                  <span className="chc" key={col.title}>
+                    <i>{col.title}</i>
+                    {clip(col.text, 62)}
+                  </span>
+                ))}
+              </Link>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      key: "tls",
+      title: "Кармические хвосты",
+      count: tails.length,
+      hint: "тройки нижнего угла карты",
+      body: (
+        <div className="enc-tails">
+          {tails.map((t) => {
+            const arcana = parseTail(t.key) ?? [];
+            return (
+              <Link className="enc-tail" key={t.key} href={karmicTailHref(t.key)} prefetch={false}>
+                <span className="trio">
+                  {arcana.map((n, k) => (
+                    <ArcanumCard key={`${t.key}-${k}`} n={n} size="mini" half decorative />
+                  ))}
+                </span>
+                <span className="tb">
+                  <span className="tk">{t.key}</span>
+                  <span className="td">{clip(t.short, 96)}</span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      key: "yer",
+      title: "Матрица судьбы на год",
+      count: years.length,
+      hint: "аркан в рамке персонального года",
+      body: (
+        <div className="enc-years">
+          {years.map((key) => {
+            const item = yearArcanum(key);
+            const n = Number(key);
+            return (
+              <Link className="enc-year" key={key} href={yearHref(key)} prefetch={false}>
+                {Number.isFinite(n) && n >= 1 && n <= 22 ? (
+                  <ArcanumCard n={n} size="grid" decorative />
+                ) : null}
+                <span className="yb">
+                  <span className="yn">{item?.title ?? `${key} на год`}</span>
+                  <span className="yd">{clip(item?.short ?? "", 88)}</span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      key: "cmb",
+      title: "Сочетания арканов",
+      count: combos.length,
+      hint: "пары арканов рядом",
+      body: (
+        <div className="enc-matrix">
+          <table className="mx">
+            <thead>
+              <tr>
+                <th />
+                {ARCANA.map((b) => (
+                  <th key={b.n}>{b.n}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {ARCANA.map((a) => (
+                <tr key={a.n}>
+                  <th scope="row">{a.n}</th>
+                  {ARCANA.map((b) => {
+                    if (a.n === b.n) return <td className="self" key={b.n} />;
+                    const [lo, hi] = a.n < b.n ? [a.n, b.n] : [b.n, a.n];
+                    return (
+                      <td key={b.n}>
+                        <Link
+                          href={`/encyclopedia/combination/${lo}-${hi}`}
+                          title={`${a.n} и ${b.n}`}
+                          // 462 ячейки таблицы: префетч каждой пары стоил бы мегабайты трафика
+                          prefetch={false}
+                        >
+                          {b.n}
+                        </Link>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ),
+    },
+    {
+      key: "art",
+      title: "Статьи",
+      count: articleList().length,
+      hint: "разборы понятий целиком",
+      body: (
+        <div className="enc-articles">
+          {articleList().map((a) => (
+            <Link className="enc-article" key={a.href} href={a.href}>
+              <span className="an">{a.title}</span>
+              <span className="ad">{clip(a.short, 150)}</span>
+            </Link>
+          ))}
+        </div>
+      ),
+    },
   ];
 
   return (
-    <main className="page">
-      <div className="wrap">
-        <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Энциклопедия</span>
-        </p>
-        <h1>Энциклопедия матрицы судьбы</h1>
-        <p className="dim prose">
-          Справочник, на который ссылается каждая позиция отчёта:{" "}
-          {counted(ARCANA.length, "аркан", "аркана", "арканов")},{" "}
-          {counted(POSITIONS.length, "позиция", "позиции", "позиций")} карты,{" "}
-          {counted(CHAKRA_PAGES.length, "чакра", "чакры", "чакр")} и{" "}
-          {counted(combos.length, "сочетание", "сочетания", "сочетаний")}. Разборы всех 5544 карт — в{" "}
-          <Link href="/matrix">каталоге матриц</Link>, расчёт по своей дате —{" "}
-          <Link href="/#calc">на главной</Link>.
-        </p>
+    <>
+      <CrumbsLd
+        trail={[
+          { name: "Главная", path: "/" },
+          { name: "Энциклопедия" },
+        ]}
+      />
 
-        <div className="section-gap">
-          <EncyclopediaSearch items={items} />
-        </div>
+      {tabs.map((t) => (
+        <EncSection key={t.key} sectionKey={t.key}>
+          {t.body}
+        </EncSection>
+      ))}
 
-        <h2 className="section-gap">22 аркана</h2>
-        <div className="cardgrid deck">
-          {ARCANA.map((a) => (
-            <Link className="ecard withcard" key={a.n} href={arcanumHref(a.n)}>
-              <ArcanumCard n={a.n} size="grid" decorative />
-              <div>
-                <div className="num">
-                  {a.n} · {roman(a.n)}
-                </div>
-                <div className="nm">{a.title}</div>
-                <div className="ds">{a.short}</div>
-              </div>
+      <div className="panel section-gap">
+        <h2>Разделы справочника</h2>
+        <div className="cap">Категории, которые собраны отдельными ветками</div>
+        <div className="taglist">
+          <Link href={KARMIC_TAIL_HUB}>
+            Кармический хвост{tails.length ? ` · ${tails.length}` : ""}
+          </Link>
+          <Link href={YEAR_HUB}>Матрица судьбы на год{years.length ? ` · ${years.length}` : ""}</Link>
+          {/* концепт-хабы появляются здесь вместе со статьёй: иначе страница попадала бы в
+              карту сайта, не имея ни одной входящей ссылки */}
+          {hubKeys().map((key) => (
+            <Link key={key} href={hubHref(key)}>
+              {hub(key)?.title ?? key}
             </Link>
           ))}
-        </div>
-
-        <h2 className="section-gap">Разделы отчёта</h2>
-        <div className="cardgrid">
-          {POSITIONS.filter((p) => p.kind === "section").map((p) => (
-            <Link className="ecard" key={p.key} href={positionHref(p.key)}>
-              <div className="num">раздел</div>
-              <div className="nm">{p.title}</div>
-              <div className="ds">{p.lead}</div>
-            </Link>
-          ))}
-        </div>
-
-        <h2 className="section-gap">Позиции карты</h2>
-        <div className="cardgrid">
-          {POSITIONS.filter((p) => p.kind === "point").map((p) => (
-            <Link className="ecard" key={p.key} href={positionHref(p.key)}>
-              <div className="num">позиция</div>
-              <div className="nm">{p.title}</div>
-              <div className="ds">{p.lead}</div>
-            </Link>
-          ))}
-        </div>
-
-        <h2 className="section-gap">Семь чакр</h2>
-        <div className="cardgrid">
-          {CHAKRA_PAGES.map((c) => (
-            <Link className="ecard" key={c.key} href={chakraHref(c.key)}>
-              <div className="num">чакра {c.index}</div>
-              <div className="nm">{c.title}</div>
-              <div className="ds">{c.hint}</div>
-            </Link>
-          ))}
-        </div>
-
-        <h2 className="section-gap">Сочетания арканов</h2>
-        <p className="dim">
-          {counted(combos.length, "страница", "страницы", "страниц")}: каждая пара арканов от 1–2
-          до 21–22. Ниже — вход по первому аркану.
-        </p>
-        <div className="cardgrid">
-          {ARCANA.map((a) => (
-            <div className="ecard" key={`c${a.n}`}>
-              <div className="num">{a.n} аркан</div>
-              <div className="nm">{a.title}</div>
-              <div className="taglist" style={{ marginTop: 8 }}>
-                {ARCANA.filter((b) => b.n !== a.n).map((b) => {
-                  const [lo, hi] = a.n < b.n ? [a.n, b.n] : [b.n, a.n];
-                  return (
-                    <Link key={`${a.n}-${b.n}`} href={`/encyclopedia/combination/${lo}-${hi}`}>
-                      {b.n}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+          <Link href="/matrix">Каталог матриц</Link>
         </div>
       </div>
-    </main>
+    </>
   );
 }

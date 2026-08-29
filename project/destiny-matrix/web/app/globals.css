@@ -72,6 +72,10 @@ li { margin-bottom: 0.35em; }
 }
 
 /* header */
+/* ссылка «к содержимому»: видна только под фокусом, но снимает 35 нажатий Tab до текста */
+.skip { position: absolute; left: -9999px; top: 0; z-index: 60; padding: 10px 16px; border-radius: 0 0 10px 0;
+  background: var(--card); border: 1px solid var(--line2); font: 600 13px var(--sans); }
+.skip:focus { left: 0; }
 .site-header {
   position: sticky;
   top: 0;
@@ -103,7 +107,13 @@ li { margin-bottom: 0.35em; }
 .hnav a { padding: 7px 12px; border-radius: 9px; font: 600 13px var(--sans); color: var(--dim); white-space: nowrap; }
 .hnav a:hover { color: var(--text); text-decoration: none; }
 .hspacer { margin-left: auto; min-width: 0; }
-@media (max-width: 980px) { .hnav { display: none; } }
+/* Раньше на узком экране навигация просто исчезала, и замены ей не было: ни меню, ни списка
+   разделов — со страницы разбора нельзя было уйти в справочник. Теперь она переносится
+   второй строкой и прокручивается вбок. */
+@media (max-width: 980px) {
+  .hrow { flex-wrap: wrap; row-gap: 6px; }
+  .hnav { order: 10; width: 100%; padding-bottom: 2px; }
+}
 
 /* buttons */
 .btn {
@@ -152,8 +162,11 @@ li { margin-bottom: 0.35em; }
    Без растяжки результат печатался в колонке 1fr и был вдвое уже страницы. */
 .hgrid > #result { grid-column: 1 / -1; }
 /* прокрутка к результату и к любому якорю останавливается под липкой шапкой, а не под ней */
-#result, [id] { scroll-margin-top: 76px; }
+#result, [id] { scroll-margin-top: 78px; }
+@media (max-width: 980px) { #result, [id] { scroll-margin-top: 118px; } }
+@media (max-width: 620px) { #result, [id] { scroll-margin-top: 106px; } }
 .offer h1 { margin-bottom: 10px; }
+.slide h1 { font-size: clamp(24px, 2.6vw, 33px); }
 .offer .lede { font-size: 16.5px; color: var(--dim); max-width: 56ch; }
 .pricelead {
   display: flex;
@@ -181,15 +194,15 @@ li { margin-bottom: 0.35em; }
 .chip b { color: var(--text); }
 
 /* form */
-.form { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: var(--sh2); }
-.form h2 { font-size: clamp(20px, 2vw, 24px); margin-bottom: 4px; }
-.form .sub { font-size: 13.2px; color: var(--dim2); margin-bottom: 15px; }
+.form { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px; box-shadow: var(--sh2); }
+.form h2 { font-size: clamp(20px, 2vw, 24px); margin-bottom: 6px; }
+.form .sub { font-size: 13.4px; color: var(--dim2); margin-bottom: 20px; }
 .fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 8px; }
 label { display: block; font: 700 10.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); margin-bottom: 6px; }
 select, input {
   width: 100%;
   min-width: 0;
-  padding: 12px 10px;
+  padding: 14px 10px;
   border-radius: 11px;
   border: 1px solid var(--line2);
   background: #fbfdfd;
@@ -200,10 +213,10 @@ select, input {
 }
 input[type="email"], input[type="password"], input[type="text"] { text-align: left; }
 select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline-offset: 1px; border-color: var(--gold); }
-.sexrow { display: flex; gap: 8px; margin-top: 11px; }
+.sexrow { display: flex; gap: 8px; margin-top: 14px; }
 .sexrow button {
   flex: 1;
-  padding: 11px;
+  padding: 13px;
   border-radius: 11px;
   border: 1px solid var(--line2);
   background: #fbfdfd;
@@ -215,6 +228,9 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .sexrow button.on { border-color: var(--gold); background: #e6f2f1; color: var(--gold2); }
 .hint { font-size: 12px; color: var(--dim2); margin-top: 10px; text-align: center; }
 .err { margin-top: 10px; font-size: 13px; color: var(--warn); }
+.err.inline { display: block; margin-top: 6px; width: 100%; }
+/* заголовок-заглушка внутри панели: размер подзаголовка, роль первого заголовка страницы */
+.panel-h1 { margin: 0 0 6px; font-size: 20px; line-height: 1.25; }
 .okmsg { margin-top: 10px; font-size: 13px; color: var(--ok); }
 .consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; font-size: 12.4px; color: var(--dim); line-height: 1.7; cursor: pointer; text-transform: none; letter-spacing: 0; }
 /* Общее правило `select, input` выше гасит appearance, и штатная галочка не рисуется вовсе:
@@ -254,7 +270,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 /* В сетке отступ соседа не нужен: он сдвигал вторую колонку на 14 px вниз и на столько же
    укорачивал её — блоки в паре переставали быть одного размера. Расстояние держит gap. */
 .twocol > .panel + .panel, .rgrid > .panel + .panel { margin-top: 0; }
-.panel h3 { font-family: var(--ser); font-size: 21px; margin-bottom: 2px; }
+.panel h3, .panel h2 { font-family: var(--ser); font-size: 21px; margin-bottom: 2px; }
 .panel .cap { font-size: 12.6px; color: var(--dim2); margin-bottom: 12px; }
 /* Левая панель с октаграммой и правая колонка (чакры + четыре плашки) тянутся до общей
    нижней кромки: align-items: start оставлял ступеньку в 150–200 px. Октаграмма при этом
@@ -300,7 +316,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .mini { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
 @media (max-width: 560px) { .mini { grid-template-columns: minmax(0, 1fr); } }
 .mb { border: 1px solid var(--line); border-radius: 13px; padding: 15px; background: var(--card); box-shadow: var(--sh); }
-.mb h4 { font-size: 13.4px; margin-bottom: 4px; color: var(--gold2); }
+.mb h3 { font-size: 13.4px; margin-bottom: 4px; color: var(--gold2); }
 .mb p { font-size: 11.8px; color: var(--dim2); margin: 0 0 8px; line-height: 1.45; }
 .mb .row { display: flex; align-items: center; gap: 7px; font-size: 12.4px; color: var(--dim); margin-top: 6px; }
 .bub {
@@ -343,6 +359,16 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .postab tr:last-child td { border-bottom: 0; }
 .postab .pn { font-weight: 600; color: var(--text); }
 .postab .ar { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+@media (max-width: 400px) {
+  /* на 320 и 360 px таблице нужно больше места, чем есть: без переноса имена арканов обрубались */
+  .postab .ar { white-space: normal; }
+  .postab td, .postab th { padding-left: 6px; padding-right: 6px; }
+}
+@media (max-width: 340px) {
+  /* У «11 · Справедливость» самый широкий min-content: ещё 6 px с каждой ячейки оставляли
+     таблицу на 10 px шире рамки. Шрифт не уменьшаем — на 320 px достаточно убрать поля. */
+  .postab.short td, .postab.short th { padding-left: 3px; padding-right: 3px; }
+}
 .postab .vl { color: var(--dim); font-size: 13.2px; }
 .tabscroll { overflow-x: auto; }
 /* На узком экране третья колонка прячется — но только там, где она пояснение к очевидному.
@@ -438,7 +464,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 
 /* врезка «открыть всё» */
 .allbox { margin-top: 16px; border: 1px solid var(--gold); border-radius: 16px; background: linear-gradient(180deg, #eaf6f5, var(--card)); padding: clamp(20px, 2.6vw, 30px); text-align: center; }
-.allbox h3 { font-family: var(--ser); font-size: clamp(21px, 2.4vw, 27px); margin-bottom: 8px; }
+.allbox h3, .allbox h2 { font-family: var(--ser); font-size: clamp(21px, 2.4vw, 27px); margin-bottom: 8px; }
 .allbox p { font-size: 14.4px; color: var(--dim); max-width: 64ch; margin: 0 auto 16px; }
 .alllist { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 18px; }
 .alllist span { font-size: 12.6px; color: var(--dim); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
@@ -488,7 +514,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 20px; }
 @media (max-width: 900px) { .pillars { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .pillars { grid-template-columns: minmax(0, 1fr); } }
-.pil h4 { font-family: var(--ser); font-size: 19px; color: var(--gold2); margin-bottom: 6px; }
+.pil h3 { font-family: var(--ser); font-size: 19px; color: var(--gold2); margin-bottom: 6px; }
 .pil p { font-size: 13.4px; color: var(--dim); margin: 0; }
 .quote { margin: clamp(28px, 3.6vw, 46px) auto 0; max-width: 62ch; text-align: center; }
 .quote .qm { font-family: var(--ser); font-size: 40px; color: var(--line2); line-height: 0.6; }
@@ -517,11 +543,36 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .ecard { border: 1px solid var(--line); border-radius: 13px; background: var(--card); padding: 14px 16px; box-shadow: var(--sh); display: block; color: var(--text); }
 .ecard:hover { border-color: var(--gold); text-decoration: none; }
 .ecard .num { font: 700 12px var(--sans); color: var(--gold); letter-spacing: 0.08em; }
-.ecard .nm { font-family: var(--ser); font-size: 20px; margin: 2px 0 4px; }
+/* overflow-wrap: узкая колонка карточки «карта + текст» рубила «Отшельник» и «Справедливость» */
+.ecard .nm { font-family: var(--ser); font-size: 20px; margin: 2px 0 4px; overflow-wrap: anywhere; }
 .ecard .ds { font-size: 13px; color: var(--dim); }
 .taglist { display: flex; flex-wrap: wrap; gap: 7px; }
 .taglist a, .taglist span { font-size: 12.8px; color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--card); }
 .taglist a:hover { border-color: var(--gold); color: var(--gold2); text-decoration: none; }
+/* сочетания: плашка с парой карт, две колонки */
+.combos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.combo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--card2);
+  color: var(--text);
+}
+.combo:hover { border-color: var(--gold); background: var(--card); text-decoration: none; }
+.combo .duo { display: inline-flex; gap: 3px; flex: 0 0 auto; }
+.combo .duo .arccard { width: 46px; height: auto; border-radius: 4px; }
+.combo .cbd { display: grid; gap: 2px; min-width: 0; }
+.combo .cnm { font: 600 15.4px var(--sans); }
+.combo .ctl { font-size: 13.6px; color: var(--dim); }
+@media (max-width: 760px) { .combos { grid-template-columns: minmax(0, 1fr); } }
+
+.faq { display: grid; gap: 14px; margin: 0; }
+.faq dt { font-family: var(--ser); font-size: 17px; color: var(--text); margin-bottom: 4px; }
+.faq dd { margin: 0; font-size: 14.4px; color: var(--dim); }
 .kv { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 8px 18px; font-size: 14.4px; }
 .kv dt { font: 700 10.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); padding-top: 4px; }
 .kv dd { margin: 0; color: var(--dim); }
@@ -533,12 +584,113 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .pmlist.minus li::before { content: "－"; position: absolute; left: 0; color: var(--warn); }
 .arcnum { font: 700 46px var(--sans); color: var(--gold); line-height: 1; }
 .arcroman { font-family: var(--ser); font-size: 20px; color: var(--dim2); }
+/* Страница справочника: первый экран во всю ширину, остальное — колонка чтения. Раньше проза
+   стояла в 72ch, а панели во всю ширину, и текст выглядел сдвинутым влево. */
+.page.read .wrap { max-width: 1000px; }
+/* Первый экран стоит на той же сетке, что панели ниже (1fr 1fr, gap 14): иначе левый край формы
+   не совпадал с краем второй панели, а верхние края расходились из-за выравнивания по центру. */
+/* карта-герой: фиксированная колонка под карту, всё остальное — рядом */
+.page.read .hero-arc {
+  display: grid;
+  grid-template-columns: 274px minmax(0, 1fr);
+}
+.page.read .hero-arc:has(.hero-pair) {
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 24px;
+  /* stretch, а не center: правая колонка тянется на высоту карты, и нижние края совпадают */
+  align-items: stretch;
+}
+.page.read .hero-arc-card { margin: 0; }
+/* две карты рядом: колонка под них шире, каждая ужимается до половины */
+.page.read .hero-pair { display: flex; gap: 8px; }
+.page.read .hero-arc .arccard.big { width: 100%; }
+.page.read .hero-arc .hero-pair .arccard.big { width: calc(50% - 4px); }
+.page.read .hero-arc-body { min-width: 0; display: flex; flex-direction: column; }
+.page.read .hero-arc-body h1 { font-size: clamp(26px, 3vw, 34px); margin: 0; line-height: 1.15; }
+.page.read .hero-lead { margin: 10px 0 14px; color: var(--dim); }
+/* Форма прижата к низу колонки, чтобы её нижний край сходился с картой. Ширина карты подобрана
+   так, что остатка почти нет: иначе воздух собирался в одном месте — под ключевыми словами. */
+.page.read .hero-arc-form { margin-top: auto; padding-top: 22px; display: flex; }
+.page.read .hero-arc-form .promo { flex: 1; }
+/* у формы своя внешняя рамка с градиентом, а внутри ещё панель — в первом экране это давало
+   двойную обводку: внешнюю снимаем, панель остаётся одна */
+.page.read .hero-arc-form .promo { border: 0; background: none; box-shadow: none; padding: 0; grid-template-columns: minmax(0, 1fr); }
+.page.read .hero-arc-form .form { box-shadow: var(--sh); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; background: var(--card); }
+/* лид приходит из данных со строчной буквы — она первая на экране, поэтому поднимаем регистр */
+.page.read .hero-lead::first-letter { text-transform: uppercase; }
+/* поля в один ряд, а пол и кнопка — второй строкой: у формы своя вертикальная раскладка,
+   здесь она перестраивается в две колонки, чтобы не перевешивать карту */
+.page.read .hero-arc-form .form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: end;
+}
+.page.read .hero-arc-form .form > h2,
+.page.read .hero-arc-form .form > .sub,
+.page.read .hero-arc-form .form > .fields,
+.page.read .hero-arc-form .form > .err,
+.page.read .hero-arc-form .form > .hint { grid-column: 1 / -1; }
+.page.read .hero-arc-form .form > .sexrow { grid-column: 1; margin-top: 12px; }
+.page.read .hero-arc-form .form > .btn { grid-column: 2; margin-top: 12px; }
+/* пол — переключатель-пилюля: обойма с фоном, активная половина всплывает белым. Так две кнопки
+   читаются как один элемент и не спорят по весу с кнопкой расчёта рядом. */
+.promo .sexrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card2);
+}
+.promo .sexrow button {
+  padding: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dim);
+}
+/* выбранная половина залита акцентом: прежний светлый оттенок на светлом фоне почти не читался,
+   и человек не понимал, применился ли выбор */
+.promo .sexrow button.on {
+  background: var(--gold);
+  color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(14, 143, 136, 0.9);
+}
+@media (max-width: 820px) {
+  .page.read .hero-arc,
+  .page.read .hero-arc:has(.hero-pair) { grid-template-columns: minmax(0, 1fr); gap: 20px; justify-items: center; }
+  .page.read .hero-pair { max-width: 320px; }
+  .page.read .hero-arc-card { max-width: 260px; }
+  .page.read .hero-arc-body { width: 100%; }
+}
+@media (max-width: 620px) {
+  /* на телефоне форма возвращается к своей обычной раскладке: кнопка на всю ширину */
+  .page.read .hero-arc-form .form { grid-template-columns: minmax(0, 1fr); }
+  .page.read .hero-arc-form .form > .sexrow,
+  .page.read .hero-arc-form .form > .btn { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .page.read .hero-arc .arccard.big { max-width: 250px; }
+}
+.page.read .prose { max-width: none; }
+.page.read .prose p, .page.read .prose li { font-size: 16.2px; line-height: 1.72; }
+
 .hero-arc { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
-.hero-arc-text { flex: 1 1 320px; }
+.hero-arc-text { flex: 1 1 260px; }
+/* форма в первом экране: рамку и фон рисует сам .hero-arc, второй раз они не нужны */
+.hero-arc-calc { flex: 1 1 330px; }
+.hero-arc-calc .promo { border: 0; background: none; box-shadow: none; padding: 0; grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 900px) { .hero-arc-calc { flex-basis: 100%; } }
 
 /* Колода: карты 520×780, отдаём готовыми webp. Соотношение задано в разметке (width/height),
    поэтому место под карту занято до загрузки и текст под ней не прыгает. */
-.arccard { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); }
+/* Нижняя полоса карты — сгенерированная английская подпись, часто нечитаемая
+   («The Magicsian», «GÓTÈR ÒQADE»). Имя аркана и так стоит подписью рядом, поэтому
+   полосу не показываем: кадр обрезается снизу, файлы остаются исходными. */
+.arccard { display: block; max-width: 100%; aspect-ratio: 520 / 700; height: auto;
+  object-fit: cover; object-position: top center; border-radius: 8px; border: 1px solid var(--line); }
 .arccard.big { width: 260px; box-shadow: 0 18px 40px -26px rgba(18, 40, 60, 0.65); }
 .arccard.grid { width: 132px; border-radius: 6px; }
 .arccard.mini { width: 46px; border-radius: 4px; }
@@ -582,6 +734,8 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   background: radial-gradient(80% 90% at 12% 0%, #e4f1f0, transparent 70%), var(--card);
   box-shadow: var(--sh);
 }
+/* без карты аркана форма оставалась в колонке 260px и обрезала названия месяцев */
+.promo.solo { grid-template-columns: minmax(0, 460px); }
 .promocard { margin: 0; text-align: center; }
 .promocard figcaption { margin-top: 10px; font-size: 13.4px; color: var(--dim); }
 .promo .form { box-shadow: none; }
@@ -724,10 +878,21 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .rsub > .pdfslot { flex: none; margin-left: auto; display: flex; flex-direction: column;
   align-items: flex-end; gap: 6px; }
 .pdfslot .err { margin: 0; text-align: right; }
+/* На телефоне отказ печати длиннее строки: при flex:none и выравнивании по правому краю
+   сообщение и сама кнопка уезжали за правый край экрана. */
+@media (max-width: 640px) {
+  .rsub > .pdfslot { flex: 1 1 100%; min-width: 0; align-items: stretch; margin-left: 0; }
+  .pdfslot .err { text-align: left; }
+  .pdfslot .pdfbtn { justify-content: center; }
+}
 .pdfbtn { gap: 7px; }
 .pdfbtn svg { flex: none; }
 .pdfbtn:hover { color: var(--gold); border-color: var(--gold); }
 .matact { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+/* Подпись матрицы человек придумывает сам: почта или ссылка без пробелов растягивала
+   карточку и давала горизонтальную прокрутку всей странице. */
+.matname { min-width: 0; overflow-wrap: anywhere; }
+.matname > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 /* Строка даты на телефоне: с открытым полем подписи содержимое не влезало в одну линию и
    выносило кабинет за край экрана. */
 @media (max-width: 620px) {
@@ -741,10 +906,19 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   select,
   .paytarget select { font-size: 12.6px; padding-left: 10px; padding-right: 26px; }
   /* Трём полям даты на 320 px тесно: месяцу оставалось 93 px, и «Сентября» превращалось в
-     «Сентябр». Месяц уходит на всю ширину, число и год делят строку под ним. */
+     «Сентябр». Месяц уходит на всю ширину — но остаётся вторым: `order` ставил его первым
+     на экране, а клавиатура и скринридер шли прежним порядком «число → месяц → год». */
   .fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .fields > div:nth-child(2) { grid-column: 1 / -1; order: -1; }
+  .fields > div:nth-child(2) { grid-column: 1 / -1; }
+  .fields > div:nth-child(3) { grid-column: 1 / -1; }
 }
+/* заголовок только для структуры документа: на экране его роль играет активная вкладка */
+.vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0; }
+.linkbtn { display: inline; padding: 0; border: 0; background: none; font: inherit; color: inherit;
+  text-align: left; cursor: pointer; text-decoration: underline dotted; }
+.linkbtn:hover { color: var(--gold2); }
+.price-wait { color: var(--dim2); font-style: italic; }
 .skeleton { color: var(--dim2); font-size: 14px; }
 
 /* первый экран на 390 px: оффер, цена и кнопка обязаны быть выше сгиба */
@@ -879,3 +1053,394 @@ body:has(.printmode) { background: #fff; }
 /* Служебная надпись в шапке не должна заезжать под кнопку: на узком экране прячем её вовсе —
    сверка доступа идёт доли секунды, и её отсутствие человеку ничего не ломает. */
 @media (max-width: 400px) { .site-header .checking { display: none; } }
+
+/* ── Первый экран: карусель композиций из колоды плюс виджет расчёта (CalcHero) ──
+   Композиции листаются, виджет стоит вне карусели. Кадр тянется по высоте виджета,
+   поэтому слайд центрируется, а не растягивается. */
+.hgrid { align-items: stretch; }
+/* Высоту первого экрана задаёт виджет расчёта — он одинаков на всех страницах. Кадр карусели
+   вынут из потока, поэтому длинный заголовок слайда больше не растягивает строку сетки, и
+   первый экран главной и справочника совпадает по размеру. */
+.car { position: relative; min-width: 0; }
+/* hidden, а не clip: clip не создаёт контейнер прокрутки, и трек шириной в пять слайдов
+   расширял scrollWidth всей страницы на узком экране. Фокус в скрытые слайды не уходит —
+   они помечены inert. */
+.cview { position: absolute; inset: 0; overflow: hidden; min-width: 0; border-radius: 18px; }
+.ctrack { display: flex; width: 500%; height: 100%; align-items: stretch; transition: transform .5s cubic-bezier(.4, 0, .2, 1); }
+.slide { flex: 0 0 20%; min-width: 0; padding: 0 48px 34px; display: flex; overflow: clip; }
+/* композиция занимает всю высоту кадра: иначе блок карусели выглядел мельче виджета рядом */
+/* safe center: при нехватке высоты обычное центрирование выносит верх содержимого за кадр —
+   так срезался ромб в шапке триптиха */
+.slide > .offer { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; justify-content: safe center; min-width: 0; }
+.slide > .offer.v-ring { display: grid; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.btnrow.center { justify-content: center; }
+
+.cui { position: absolute; inset: 0; pointer-events: none; }
+.pips { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; display: flex; gap: 15px; padding: 7px 10px; border-radius: 999px; background: rgba(255, 255, 255, .78); backdrop-filter: blur(3px); pointer-events: auto; }
+/* Кружок остаётся 9 px, но нажимается по площади 24×24: соседние центры стоят в 16 px,
+   и палец попадал в соседний слайд. Поле нажатия даёт box-shadow-фон, а не размер точки. */
+.pip { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--line2); background: var(--card); cursor: pointer; position: relative; }
+.pip::after { content: ""; position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; transform: translate(-50%, -50%); }
+.pip:hover { border-color: var(--gold); }
+.pip.on { background: var(--gold); border-color: var(--gold); }
+.cui .pair { position: absolute; left: 2px; right: 2px; top: 50%; transform: translateY(-50%); display: flex; justify-content: space-between; align-items: center; }
+.arw { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; pointer-events: auto; font: 400 22px/1 var(--sans); color: var(--dim); background: rgba(255, 255, 255, .86); border: 1px solid var(--line2); box-shadow: var(--sh); cursor: pointer; user-select: none; backdrop-filter: blur(3px); }
+.arw:hover { color: var(--gold2); border-color: var(--gold); background: #fff; }
+
+.hgrid > .form { display: flex; flex-direction: column; justify-content: center; }
+.hero-h { font-family: var(--ser); font-size: clamp(24px, 2.6vw, 33px); font-weight: 600; line-height: 1.16; letter-spacing: -0.01em; margin-bottom: 10px; }
+.emb { display: block; width: 100%; height: 100%; }
+.markline { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.markemb { display: block; width: 36px; height: 36px; color: var(--gold); flex: 0 0 auto; }
+.markline .eyebrow { margin: 0; }
+.slide .eyebrow { display: inline-block; }
+/* карты внутри композиций: обёртка задаёт размер, картинка тянется по ней */
+.fanc, .ringc, .tric, .tapec, .mos { display: block; }
+.fanc .arccard, .ringc .arccard, .tric .arccard, .tapec .arccard, .mos .arccard { width: 100%; height: auto; border: 0; }
+
+/* 1 — веер-дуга */
+.fanwrap { position: relative; height: 152px; margin: 0 0 10px; }
+.fanc { position: absolute; top: 0; width: 82px; transform-origin: 50% 100%; box-shadow: 0 20px 40px -24px rgba(18, 40, 60, .7); border-radius: 8px; }
+
+/* Первый слайд — только карты и подпись под ними: заголовок с кнопкой покупки на нём лишний. */
+.v-fan { text-align: center; }
+/* подпись под картами и заголовок стоят в столбик по центру и не спорят друг с другом */
+.v-fan .markline { justify-content: center; margin: 0 0 6px; }
+.v-fan h1, .v-fan .hero-h { margin-bottom: 12px; }
+.v-fan .btnrow { justify-content: center; }
+
+/* 2 — печать в кольце карт */
+.v-ring { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 22px; align-items: center; }
+.ringwrap { position: relative; width: 248px; height: 248px; --r: 82px; }
+.ringc { position: absolute; width: 54px; border-radius: 8px; box-shadow: 0 14px 30px -18px rgba(18, 40, 60, .6); }
+.ringcore { position: absolute; left: 50%; top: 50%; width: 118px; height: 118px; transform: translate(-50%, -50%); color: var(--gold); display: grid; place-items: center; }
+.ringcore .emb { position: absolute; inset: 0; }
+.rc-t { position: relative; font: 600 20px/1.02 var(--ser); text-align: center; color: var(--text); }
+.v-ring .btn { padding: 13px 17px; font-size: 14.2px; }
+
+/* 3 — триптих */
+.v-tri { text-align: center; }
+.trihead { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 6px 0 6px;  margin: 6px 0 6px; }
+.trihead .rule { flex: 1; max-width: 150px; height: 1px; background: linear-gradient(90deg, transparent, var(--line2)); }
+.trihead .rule:last-child { background: linear-gradient(90deg, var(--line2), transparent); }
+.triemb { display: block; width: 28px; height: 28px; color: var(--accent); }
+.triwrap { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 4px; }
+.tric { width: 86px; border-radius: 8px; box-shadow: 0 22px 44px -26px rgba(18, 40, 60, .75); }
+.tric:first-child { transform: rotate(-7deg) translateX(16px); }
+.tric:last-child { transform: rotate(7deg) translateX(-16px); }
+.tric.mid { width: 104px; position: relative; z-index: 5; }
+.v-tri .btnrow { justify-content: center; }
+
+/* 4 — лента с медальоном */
+.tapewrap { position: relative; margin: 0 0 14px; padding: 8px 0; }
+.tape { display: flex; justify-content: center; mask-image: linear-gradient(90deg, transparent, #000 26%, #000 74%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 26%, #000 74%, transparent); }
+.tapec { width: 78px; border-radius: 8px; box-shadow: 0 16px 34px -22px rgba(18, 40, 60, .65); }
+.tapec + .tapec { margin-left: -32px; }
+.tapemed { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; transform: translate(-50%, -50%); color: var(--accent); z-index: 9; filter: drop-shadow(0 10px 26px rgba(18, 40, 60, .35)); }
+
+/* 5 — мозаика колоды под светлой вуалью */
+.v-light { position: relative; border-radius: 20px; overflow: hidden; background: #fff; border: 1px solid var(--line); display: grid; align-items: center; box-shadow: var(--sh); height: 100%; }
+.mosaic { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); }
+.mos { width: 100%; }
+.mos .arccard { border-radius: 0; }
+.v-light::after { content: ""; position: absolute; inset: 0; background: linear-gradient(96deg, rgba(255, 255, 255, .99) 0%, rgba(255, 255, 255, .97) 54%, rgba(252, 254, 254, .72) 68%, rgba(250, 253, 253, .42) 86%, rgba(248, 252, 252, .3) 100%), radial-gradient(46% 70% at 92% 6%, rgba(14, 143, 136, .14), transparent 72%); }
+.lightbody { position: relative; z-index: 2; padding: 22px 28px; max-width: 680px; }
+.lightbody h1, .lightbody .hero-h { font-size: clamp(24px, 2.9vw, 34px); }
+.demb { display: block; width: 62px; height: 62px; margin-bottom: 10px; color: var(--gold); }
+.lightbody .btn.ghost { background: rgba(255, 255, 255, .92); backdrop-filter: blur(2px); }
+
+@media (max-width: 1200px) {
+  /* колонка уже — заголовок занимает больше строк, кадру нужен запас */
+  /* кольцо сжимается вместе с радиусом, а не ломается на две строки: иначе этот слайд
+     становился на 80 px выше остальных и не влезал в кадр */
+  .v-ring { grid-template-columns: 228px minmax(0, 1fr); gap: 18px; }
+  .ringwrap { width: 228px; height: 228px; --r: 76px; }
+  .ringc { width: 52px; }
+  .ringcore { width: 112px; height: 112px; }
+  .rc-t { font-size: 19px; }
+}
+@media (max-width: 940px) {
+  /* одна колонка: кадр возвращается в поток, иначе у него нет высоты */
+  .cview { position: static; }
+  .v-ring { grid-template-columns: minmax(0, 1fr); }
+  .ringwrap { margin: 0 auto; }
+  .lightbody { padding: 16px 18px; }
+}
+@media (max-width: 620px) {
+  .fanwrap { transform: scale(.8); transform-origin: 50% 0; height: 104px; margin-bottom: 14px; }
+  .tapewrap { transform: scale(.8); }
+}
+@media (max-width: 560px) {
+  .fanwrap { transform: scale(.62); height: 92px; margin-bottom: 16px; }
+  .ringwrap { width: 262px; height: 262px; }
+  .ringc { width: 56px; }
+  .mosaic { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ── Энциклопедия: меню разделов слева, раскладка справа ──
+   Раздел выбирается радиокнопкой, поэтому страница остаётся статикой без клиентского кода. */
+.enc { position: relative; margin-top: 22px; }
+/* показом раздела управляет каркас (EncFrame): в рабочей области рендерится только активный */
+.enc-layout { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 26px; align-items: start;
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--sh); margin-top: 4px; }
+.enc-nav { display: grid; gap: 2px; position: sticky; top: 84px; align-content: start; }
+.enc-navi { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-radius: 10px; padding: 10px 13px; font: 600 13.8px var(--sans); color: var(--dim); cursor: pointer; text-transform: none; letter-spacing: 0; margin: 0; text-align: left; }
+.enc-navi:hover { background: var(--card2); }
+.enc-navi i { font-style: normal; font-size: 12px; font-weight: 700; color: var(--dim2); }
+.enc-navi:hover { text-decoration: none; }
+.enc-pane h2 { font: 600 21px var(--ser); margin-bottom: 2px; }
+.enc-pane .cap { font-size: 13.2px; margin-bottom: 14px; }
+.enc-panes { min-width: 0; }
+
+/* колода: карты крупные, четыре в строке */
+.enc-deck { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.enc-card { display: grid; gap: 8px; text-align: center; }
+.enc-card .arccard { width: 100%; border-radius: 8px; }
+.enc-card .dn { font: 600 15px var(--ser); color: var(--text); }
+.enc-card:hover .arccard { border-color: var(--gold); box-shadow: 0 14px 34px -18px rgba(14, 143, 136, .55); }
+.enc-card:hover { text-decoration: none; }
+
+/* семь чакр: столб уровней, цвет — из палитры карты энергий */
+/* --lv-ink: цвет надписи на плашке уровня. Белым по жёлтому и голубому выходило 2,1–3,0 : 1 */
+.k1 { --lv: var(--c1); --lv-ink: #fff; } .k2 { --lv: var(--c2); --lv-ink: #14181c; }
+.k3 { --lv: var(--c3); --lv-ink: #14181c; } .k4 { --lv: var(--c4); --lv-ink: #14181c; }
+.k5 { --lv: var(--c5); --lv-ink: #14181c; } .k6 { --lv: var(--c6); --lv-ink: #fff; }
+.k7 { --lv: var(--c7); --lv-ink: #fff; }
+.chcol { display: grid; gap: 8px; }
+.chrow { display: grid; grid-template-columns: 44px minmax(0, 190px) repeat(3, minmax(0, 1fr)); gap: 14px; align-items: center; border: 1px solid var(--line); border-left: 4px solid var(--lv); border-radius: 12px; padding: 11px 14px; background: var(--card); }
+.chrow:hover { border-color: var(--lv); text-decoration: none; }
+.chn { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--lv-ink, #fff); background: var(--lv); font: 700 15px var(--sans); }
+.cht { display: block; font: 600 16px var(--ser); color: var(--text); }
+.chh { display: block; font-size: 12.6px; color: var(--dim2); }
+.chc { font-size: 12.4px; color: var(--dim); line-height: 1.5; }
+.chc i { display: block; font: 700 9.6px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--lv); font-style: normal; margin-bottom: 2px; }
+
+/* кармические хвосты: тройка карт плюс подпись */
+.enc-tails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.enc-tail { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); }
+.enc-tail:hover { border-color: var(--gold); text-decoration: none; }
+.enc-tail .trio { display: flex; gap: 3px; }
+.enc-tail .trio .arccard { width: 34px; border-radius: 4px; }
+.enc-tail .tk { display: block; font: 600 15px var(--sans); color: var(--text); }
+.enc-tail .td { display: block; font-size: 12.6px; color: var(--dim); line-height: 1.5; }
+
+/* матрица судьбы на год: карта плюс заголовок статьи */
+.enc-years { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+/* у ключа-года карты нет: без правила ниже текст сжимался в колонку шириной в слово */
+.enc-year:not(:has(.arccard)) { grid-template-columns: minmax(0, 1fr) !important; }
+.enc-year { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); }
+.enc-year:hover { border-color: var(--gold); text-decoration: none; }
+.enc-year .arccard { width: 54px; border-radius: 5px; }
+.enc-year .yn { display: block; font: 600 14.6px var(--sans); color: var(--text); }
+.enc-year .yd { display: block; font-size: 12.4px; color: var(--dim); line-height: 1.45; }
+
+/* сочетания: матрица 22 × 22, прокрутка внутри своего контейнера */
+.enc-matrix { overflow-x: auto; max-width: 100%; }
+table.mx { border-collapse: collapse; font-size: 11.4px; }
+table.mx th { color: var(--dim2); font: 700 10.5px var(--sans); padding: 3px 5px; }
+table.mx tbody th { position: sticky; left: 0; background: var(--card); z-index: 1; }
+table.mx td { padding: 0; border: 1px solid var(--line); }
+table.mx td a { display: block; width: 26px; height: 24px; line-height: 24px; text-align: center; color: var(--dim); }
+table.mx td a:hover { background: #e6f2f1; color: var(--gold2); text-decoration: none; }
+table.mx td.self { background: var(--card2); }
+
+@media (max-width: 1100px) {
+  .enc-deck { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .chrow { grid-template-columns: 40px minmax(0, 1fr); row-gap: 6px; }
+  .chrow .chc { grid-column: 2; }
+  .enc-years { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .enc-layout { grid-template-columns: minmax(0, 1fr); }
+  .enc-nav { position: static; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 6px; }
+  .enc-navi { border: 1px solid var(--line2); border-radius: 999px; white-space: nowrap; }
+}
+@media (max-width: 640px) {
+  .enc-deck { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .enc-tails, .enc-years { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Цена и состав отчёта под первым экраном: раньше стояли в оффере, но карусель заняла его место. */
+.offerbar { margin-top: 18px; }
+.offerbar .pricelead { margin: 0; }
+.offerbar .small { margin-top: 10px; }
+
+/* Крошки и заголовок справочника стоят под каруселью: первый экран одинаков с главной,
+   поэтому карусель прижата к шапке — верхний отступ страницы её больше не отодвигает. */
+.enc-head { margin-top: 20px; }
+.enc-head h1 { text-align: center; margin-bottom: 0; }
+.enc-head .crumbs { margin-bottom: 2px; }
+.page > .hero:first-child { margin-top: calc(-1 * clamp(20px, 3vw, 40px)); }
+
+/* Каркас справочника: пункт меню — кнопка на самой /encyclopedia и ссылка на детальных страницах */
+.enc-navi { border: 0; background: none; width: 100%; font-family: var(--sans); }
+.enc-navi.on { background: #e6f2f1; color: var(--gold2); }
+.enc-crumbs { margin: 0 0 2px; }
+.enc-crumbs .crumb { display: inline-flex; align-items: center; gap: 6px; }
+.enc-title { text-align: center; font-size: clamp(24px, 2.8vw, 34px); margin: 0 0 14px; }
+
+/* Страница аркана внутри каркаса: карта того же размера, что в колоде раздела */
+.arc-top { display: grid; grid-template-columns: calc((100% - 32px) / 3) minmax(0, 1fr); gap: 26px; align-items: start; margin-bottom: 20px; }
+.arc-side { display: grid; gap: 14px; }
+.arc-side .arccard { width: 100%; }
+.arc-quick { border-top: 1px dashed var(--line); padding-top: 12px; }
+.arc-quick .qh { display: block; font: 700 10.5px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--dim2); margin-bottom: 8px; }
+.taglist.col { flex-direction: column; align-items: stretch; }
+.taglist.col a { text-align: center; }
+.arc-body { min-width: 0; }
+.arc-body h1 { font-size: clamp(23px, 2.5vw, 31px); margin: 6px 0 8px; }
+.arc-body .hero-lead { color: var(--dim); font-size: 15.4px; margin-bottom: 12px; }
+.arc-pm { margin-top: 16px; }
+.arc-pm .panel { padding: 16px 18px; }
+.arc-pm h3 { font-size: 17px; }
+.arc-pm .cap { font-size: 13px; }
+.arc-pm .pmlist { font-size: 14.8px; line-height: 1.6; }
+
+/* вкладки рабочей области */
+.tabbar { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 16px; }
+.tab { border: 1px solid var(--line2); border-radius: 999px; padding: 8px 15px; font: 600 13.4px var(--sans); color: var(--dim); background: var(--card); cursor: pointer; }
+.tab:hover { border-color: var(--gold); color: var(--gold2); }
+.tab.on { background: var(--gold); border-color: var(--gold); color: #fff; }
+.tabbody { min-width: 0; }
+.tabbody.off { display: none; }
+
+@media (max-width: 1100px) {
+  .arc-top { grid-template-columns: calc((100% - 16px) / 2.4) minmax(0, 1fr); }
+  .arc-pm { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .arc-top { grid-template-columns: minmax(0, 1fr); }
+  .arc-side { max-width: calc((100% - 32px) / 3); }
+}
+@media (max-width: 640px) {
+  .arc-side { max-width: calc((100% - 16px) / 2); }
+}
+/* На детальных страницах надпись справочника — не заголовок, а подпись каркаса */
+.enc-title-sub { font-family: var(--ser); color: var(--dim); font-size: clamp(20px, 2.2vw, 27px); }
+
+/* Раздел «Статьи»: разборы понятий целиком */
+.enc-articles { display: grid; gap: 10px; }
+.enc-article { display: grid; gap: 3px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--card); }
+.enc-article:hover { border-color: var(--gold); text-decoration: none; }
+.enc-article .an { font: 600 15.6px var(--ser); color: var(--text); }
+.enc-article .ad { font-size: 13.2px; color: var(--dim); line-height: 1.55; }
+/* раздел выбирается якорем: работает до гидратации и в истории браузера */
+.enc-pane { display: none; }
+/* показ решает класс от React: якорь давал автоскролл и расходился со ссылками на ?sec= */
+.enc-pane.on { display: block; }
+.enc-panes:not(:has(.enc-pane.on)) .enc-pane:first-child { display: block; }
+/* Подпись под картой заменила строку «аркан N · римская цифра» над заголовком */
+.arc-side { margin: 0; display: grid; gap: 8px; }
+.arc-cap { text-align: center; font: 600 15px var(--ser); color: var(--text); }
+
+/* Страница пары: слева две карты той же ширины, что в колоде раздела */
+.arc-top.pair { grid-template-columns: calc((100% - 32px) / 1.7) minmax(0, 1fr); }
+.arc-side.pair { grid-template-columns: 1fr 1fr; gap: 8px; }
+.arc-side.pair .arc-cap { grid-column: 1 / -1; }
+@media (max-width: 1100px) {
+  .arc-top.pair { grid-template-columns: calc((100% - 32px) / 2) minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .arc-top.pair { grid-template-columns: minmax(0, 1fr); }
+  .arc-side.pair { max-width: calc((100% - 32px) / 2); }
+}
+
+/* Проза в рабочей области каркаса: во всю ширину окна, с воздухом между абзацами.
+   Ограничение в 72 знака осталось на страницах вне справочника. */
+.tabbody .prose, .enc-panes .prose { max-width: none; }
+.tabbody .prose p, .enc-panes .prose p, .tabbody .prose li, .enc-panes .prose li { font-size: 15.8px; line-height: 1.78; }
+.tabbody .prose p, .enc-panes .prose p { margin: 0 0 1.05em; text-wrap: pretty; }
+.tabbody .prose h2, .enc-panes .prose h2 { margin-top: 1.5em; }
+/* Абзац начинается с отступа, правый край ровный: переносы включены, иначе выключка
+   по формату разрывает строки пробелами. */
+.tabbody .prose p, .enc-panes .prose p { text-indent: 1.4em; text-align: justify; hyphens: auto; }
+
+
+/* ── Правки вёрстки по циклу 6 ── */
+/* на узком экране выключка по формату оставляла в строках дыры в восемь пробелов */
+@media (max-width: 620px) {
+  .tabbody .prose p, .enc-panes .prose p { text-align: left; }
+}
+/* пара карт на телефоне была вдвое мельче такой же карты на соседних страницах */
+@media (max-width: 640px) {
+  .arc-side.pair { max-width: none; }
+  .arc-top.pair { grid-template-columns: minmax(0, 1fr); }
+}
+/* крошки: разделитель не отрывается от своего шага, длинный последний шаг усекается */
+.crumbs .crumb { white-space: nowrap; }
+@media (max-width: 640px) {
+  .crumbs .crumb:last-child span { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+}
+.enc-nav .enc-navi { scroll-margin-inline: 12px; }
+
+/* заголовок формы: тот же вид, но не заголовок документа — он стоял в разметке до h1 */
+.promo .fh2, .form .fh2 { font-family: var(--ser); font-size: clamp(20px, 2vw, 24px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.16; margin-bottom: 6px; }
+
+/* заголовок формы входа: h1 нужен странице, но кегль остаётся прежним */
+.auth h1, .authbox h1, form h1 { font-size: clamp(22px, 2.4vw, 27px); }
+
+/* на 320 px поля слайда съедали всю ширину, и трек вылезал за окно */
+@media (max-width: 480px) {
+  .slide { padding: 0 12px 30px; }
+  /* кольцо 262 px не влезало в слайд шириной 256 и тянуло за собой прокрутку всей страницы */
+  .ringwrap { width: 220px; height: 220px; --r: 68px; }
+  .ringc { width: 46px; }
+  .ringcore { width: 96px; height: 96px; }
+  .rc-t { font-size: 16px; }
+  /* Стрелки накрывали начало и конец строки заголовка: на узком экране они уходят вниз,
+     в одну линию с точками переключения. */
+  .cui .pair { left: 0; right: 0; top: auto; bottom: 0; transform: none; height: 34px; }
+  .arw { width: 32px; height: 32px; font-size: 19px; }
+  .pips { bottom: 0; }
+}
+
+
+/* ── Правки вёрстки по раунду 2 ── */
+/* 941–1100 px: кадр карусели ниже, чем содержимое слайда — карты наезжали на подпись,
+   а кнопка пятого слайда обрезалась нижним краем */
+@media (min-width: 941px) and (max-width: 1100px) {
+  .fanwrap { height: 132px; margin-bottom: 8px; }
+  .fanc { width: 66px; }
+  .tric { width: 66px; }
+  .tric.mid { width: 80px; }
+  .tapec { width: 62px; }
+  .tapec + .tapec { margin-left: -26px; }
+  .tapemed { width: 80px; height: 80px; }
+  .lightbody { padding: 12px 16px; }
+  .demb { width: 38px; height: 38px; margin-bottom: 6px; }
+  .ringwrap { width: 210px; height: 210px; --r: 66px; }
+  .ringc { width: 44px; }
+  .ringcore { width: 92px; height: 92px; }
+  .rc-t { font-size: 15px; }
+  .v-ring { grid-template-columns: 210px minmax(0, 1fr); gap: 16px; }
+}
+/* длинная почта не сжималась и наезжала на кнопки шапки */
+.hspacer { min-width: 0; }
+.user-email { display: inline-block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+@media (max-width: 1100px) { .user-email { max-width: 120px; } }
+/* подписи октаграммы заданы в единицах viewBox и на телефоне сжимались до 3,4 px */
+@media (max-width: 640px) {
+  .oct .lbl { font-size: 16px; }
+  .oct .age { font-size: 14px; }
+  .oct .n { font-size: 15px; }
+}
+
+/* Обёртки композиций — флекс-элементы кадра: при нехватке высоты они сжимались, а карты внутри
+   позиционированы абсолютно и оставались прежними — и наезжали на подпись под ними. */
+.fanwrap, .tapewrap, .ringwrap { flex: 0 0 auto; /* карты внутри абсолютные, сжимать нельзя */ }
+
+/* на 320 px карта ещё мельче: подписи внутри viewBox нужно поднять сильнее */
+@media (max-width: 360px) {
+  .oct .lbl { font-size: 18px; }
+  .oct .age { font-size: 16px; }
+  .oct .n { font-size: 18px; }
+  /* На 320 px «Купить полный разбор — 250 ₽» ломалось так, что тире висело отдельной
+     строкой, а цена уезжала вторым столбцом: кнопка держит строку целиком. */
+  .btnrow .btn { padding-left: 14px; padding-right: 14px; font-size: 13.6px; }
+  .btnrow .btn.gold { display: block; text-align: center; line-height: 1.35; }
+  .btnrow .btn.gold .nowrap { white-space: nowrap; }
+}
+
+/* заголовок на служебных экранах остаётся прежнего кегля, но становится h1 страницы */
+.paybox h1, .payresult h1, .panel h1 { font-size: clamp(19px, 2vw, 23px); margin-bottom: 8px; }

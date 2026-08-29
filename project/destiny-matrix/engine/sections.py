@@ -120,7 +120,8 @@ SPEC: list[tuple[str, str, str, Access, Callable[[Matrix], list[Position]]]] = [
      lambda m: [_p("Опора тела", m.chakras[6].physics),
                 _p("Энергия опоры", m.chakras[6].energy),
                 _p("Итог опоры тела", m.chakras[6].emotions)]),
-    ("chakras", "Карта энергий по чакрам",
+    # числа карты энергий видны и в бесплатном расчёте: платное здесь — толкование уровней
+    ("chakras", "Карта энергий: толкование семи уровней",
      "Семь уровней в трёх колонках: материя, энергия и чувства.", "paid",
      lambda m: [_p(f"{r.title} · физика", r.physics) for r in m.chakras]
                + [_p("Итог физики", m.chakra_totals["physics"]),
@@ -134,7 +135,8 @@ SPEC: list[tuple[str, str, str, Access, Callable[[Matrix], list[Position]]]] = [
      "Сюжеты, которые возвращаются, пока не пройдены.", "paid",
      lambda m: [_p("Итог хвоста", m.karmic_tail[2]), _p("Центр карты", m.center),
                 _p("Духовная гармония", m.harmony)]),
-    ("years", "Разбор по годам до 80 лет",
+    # шкала идёт десятилетиями, а не по годам
+    ("years", "Разбор по десятилетиям до 80 лет",
      "Какая энергия ведёт вас в каждом десятилетии.", "paid",
      lambda m: [_p(f"{p['from']}–{p['to']} лет", p["arcanum"]) for p in m.age_scale]),
 ]

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import AdminView from "@/components/AdminView";
+import AdminView from "@/components/admin/AdminView";
 import { pageMeta } from "@/lib/site";
 
 // Данные приходят в браузер по куке, поэтому страница печатается на запрос и в индекс не идёт.
@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMeta({
 
 export default function AdminPage() {
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
         <p className="crumbs">
           <Link href="/account">Кабинет</Link> <span>/</span> <span>Админка</span>

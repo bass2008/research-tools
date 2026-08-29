@@ -28,6 +28,43 @@ def test_single_purchase_binds_matrix(client, db):
     assert row.birth.isoformat() == "1987-06-14" and row.sex == "m"
 
 
+def test_second_payment_for_the_same_date_is_refused(client, db):
+    """Две открытые формы или двойной клик проводили два платежа за одну дату: списывалось
+    вдвое, и выдавалось два права на один и тот же разбор."""
+    first = client.post("/api/payments/mock", json={"tariff": "single", "email": "dbl@example.ru",
+                                                   "birth": "1991-04-09", "sex": "f"})
+    assert first.status_code == 200, first.text
+    matrix_id = first.json()["matrix_id"]
+
+    again = client.post("/api/payments/mock", json={"tariff": "single", "email": "dbl@example.ru",
+                                                   "matrix_id": matrix_id})
+    assert again.status_code == 409, again.text
+    assert "уже открыт" in again.json()["detail"]
+
+    rights = db.scalars(select(Entitlement).where(Entitlement.matrix_id == matrix_id)).all()
+    assert len(rights) == 1, f"прав на одну дату: {len(rights)}"
+
+
+def test_two_active_rights_for_one_date_are_impossible(client, db):
+    """Проверка перед записью гонку не ловит: два параллельных платежа читали «дата закрыта»
+    оба. Уникальный индекс переводит гонку в ошибку записи."""
+    from sqlalchemy.exc import IntegrityError
+
+    paid = client.post("/api/payments/mock", json={"tariff": "single", "email": "race@example.ru",
+                                                   "birth": "1993-07-07", "sex": "f"})
+    assert paid.status_code == 200, paid.text
+    right = db.scalar(select(Entitlement).where(Entitlement.matrix_id == paid.json()["matrix_id"]))
+
+    twin = Entitlement(user_id=right.user_id, scope=right.scope, matrix_id=right.matrix_id,
+                       starts_at=right.starts_at)
+    db.add(twin)
+    try:
+        db.commit()
+        raise AssertionError("второе право на ту же дату записалось")
+    except IntegrityError:
+        db.rollback()
+
+
 def test_payment_keeps_snapshot_of_tariff(client, db):
     r = client.post("/api/payments/mock", json={"tariff": "single", "email": "sn@example.ru",
                                                "birth": "1990-01-01"})
@@ -73,8 +110,7 @@ def test_single_creates_and_opens_the_date_from_payment(client, db):
     assert paid["matrix"]["birth"] == "1990-02-03" and paid["entitlement"]["matrix_id"] == paid["matrix_id"]
     headers = {"Authorization": f"Bearer {paid['token']}"}
     saved = client.get(f"/api/matrices/{paid['matrix_id']}", headers=headers).json()
-    assert saved["unlocked"] is True
-    assert all(s["positions"] for s in saved["sections"] if s["access"] == "paid")
+    assert saved["unlocked"] is True and saved["access"] == "forever"
 
 
 def test_single_without_date_binds_to_existing_matrix(client, auth, db):

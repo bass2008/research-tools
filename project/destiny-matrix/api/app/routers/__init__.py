@@ -1,8 +1,6 @@
-from . import (admin, auth, encyclopedia, health, leads, matrices, matrix, payments,
-               reports)
+from . import admin, auth, health, leads, matrices, payments, reports
 
-ROUTERS = (health.router, matrix.router, auth.router, payments.router, matrices.router,
-           encyclopedia.router, leads.router, admin.router, reports.router)
+ROUTERS = (health.router, auth.router, payments.router, matrices.router,
+           leads.router, admin.router, reports.router)
 
-__all__ = ["ROUTERS", "admin", "auth", "encyclopedia", "health", "leads", "matrices", "matrix",
-           "payments", "reports"]
+__all__ = ["ROUTERS", "admin", "auth", "health", "leads", "matrices", "payments", "reports"]

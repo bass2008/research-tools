@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import Price from "@/components/Price";
+import Crumbs from "@/components/ui/Crumbs";
+
+import Price from "@/components/pay/Price";
 import { LEGAL, pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
@@ -18,11 +20,9 @@ function P({ children }: { children: React.ReactNode }) {
 
 export default function RefundPage() {
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap prose">
-        <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Условия возврата</span>
-        </p>
+        <Crumbs trail={[{ name: "Главная", path: "/" }, { name: "Условия возврата" }]} />
         <h1>Условия возврата</h1>
         <p className="updated">
           Редакция от <P>{LEGAL.updated}</P>. Документ дополняет{" "}

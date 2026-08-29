@@ -42,9 +42,9 @@ export function label(birth: string, sex: Sex, title?: string | null): string {
 /** Имя цели: дата, а пол — только когда на одну дату есть две записи. Иначе различать нечего, а
  * строка перестаёт влезать в поле на узком телефоне. */
 function nameOf(birth: string, sex: Sex, title: string | null, rows: TargetRow[]): string {
-  if (title) return title;
   const twins = rows.filter((r) => r.birth === birth).length > 1;
-  return birthLabel(birth) + (twins ? ` (${sex === "f" ? "ж" : "м"})` : "");
+  const base = title || birthLabel(birth);
+  return base + (twins ? ` (${sex === "f" ? "ж" : "м"})` : "");
 }
 
 function withBirth(rows: TargetRow[], birth: LocalBirth | null): TargetRow[] {
@@ -84,10 +84,18 @@ export function pickTarget(
 ): Target {
   const list = options(rows, birth);
   if (wanted !== null) {
-    const asked = list.find((o) => o.value === String(wanted));
-    if (asked) return asked.target;
+    // Ссылка назвала дату — либо она, либо ничего. Подстановка «первой закрытой» проводила
+    // платёж за дату, которой человек не просил.
+    return list.find((o) => o.value === String(wanted))?.target ?? null;
   }
   return list.length ? list[0].target : null;
+}
+
+/** Ссылка `?m=` ведёт на запись, которая уже открыта: список целей её не содержит, и цель
+ *  молча падала на первую закрытую дату — платёж уходил не за ту дату, что обещала ссылка. */
+export function askedOpen(rows: TargetRow[], wanted: number | null): TargetRow | null {
+  if (wanted === null) return null;
+  return rows.find((row) => row.id === wanted && row.access !== "locked") ?? null;
 }
 
 /** Дата из браузера уже открыта: платить второй раз нечего, и об этом надо сказать прямо. */
@@ -108,12 +116,6 @@ export function targetValue(target: Target): string {
   return target.kind === "local" ? "local" : String(target.id);
 }
 
-export function fromValue(value: string): Target {
-  if (value === "local") return { kind: "local" };
-  if (value === "none") return null;
-  const id = Number(value);
-  return Number.isFinite(id) ? { kind: "matrix", id } : null;
-}
 
 /** Подпись цели: одна и та же строка в списке, на кнопке и в подсказке. */
 export function targetLabel(
@@ -134,7 +136,13 @@ export function paymentTargetLabel(payment: {
   matrix_id: number | null;
 }): string {
   if (payment.matrix) {
-    return label(payment.matrix.birth, payment.matrix.sex, payment.matrix.title);
+    // Подпись придумывает покупатель: «Котик Барсик» вместо даты не даёт админу ничего, а
+    // длинная подпись раздувала строку таблицы вчетверо. Дата первая, подпись — коротким хвостом.
+    const base = `${birthLabel(payment.matrix.birth)}, ${sexLabel(payment.matrix.sex)}`;
+    const title = payment.matrix.title?.trim();
+    if (!title) return base;
+    const short = title.length > 40 ? `${title.slice(0, 39)}…` : title;
+    return `${base} · ${short}`;
   }
   return payment.matrix_id === null ? "—" : `запись ${payment.matrix_id} удалена`;
 }

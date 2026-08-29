@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from .config import settings
@@ -46,9 +47,17 @@ def upload(key: str, pdf: bytes) -> None:
                          ContentType="application/pdf")
 
 
-def link(key: str) -> str:
+def link(key: str, filename: str | None = None) -> str:
+    """Ссылка на готовый файл. Имя задаём явно: ключ в хранилище — «<юзер>/<матрица>/<джоб>.pdf»,
+    и в загрузках у покупателя лежал файл с номером задачи вместо даты разбора."""
+    params: dict = {"Bucket": settings.s3_reports_bucket, "Key": key}
+    if filename:
+        safe = filename.replace('"', "").replace("\n", " ")
+        ascii_name = "".join(c if c.isascii() and c.isprintable() else "_" for c in safe)
+        quoted = urllib.parse.quote(safe)
+        params["ResponseContentDisposition"] = (
+            f'attachment; filename="{ascii_name}"; filename*=UTF-8\'\'{quoted}'
+        )
     return _client().generate_presigned_url(
-        "get_object",
-        Params={"Bucket": settings.s3_reports_bucket, "Key": key},
-        ExpiresIn=settings.report_link_ttl_seconds,
+        "get_object", Params=params, ExpiresIn=settings.report_link_ttl_seconds,
     )

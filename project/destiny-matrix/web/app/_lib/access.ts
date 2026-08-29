@@ -13,6 +13,8 @@ export interface SavedMatrix {
   sex: "m" | "f";
   title: string | null;
   created_at?: string;
+  /** запись уже открыта покупкой или подпиской: страница разбора выбирает такую первой */
+  unlocked?: boolean;
 }
 
 export interface Access {
@@ -170,16 +172,21 @@ export async function readSavedMatrices(): Promise<SavedMatrix[]> {
       sex,
       title: typeof row.title === "string" ? row.title : null,
       created_at: typeof row.created_at === "string" ? row.created_at : undefined,
+      unlocked: row.access !== "locked",
     });
   }
-  // самая свежая первой: страница разбора без параметра открывает именно её
+  // самая свежая первой: этот порядок видит кабинет и списки выбора даты
   return out.sort((a, b) => b.id - a.id);
 }
 
 export function pickMatrix(saved: SavedMatrix[], wanted?: string | string[]): SavedMatrix | null {
   const raw = Array.isArray(wanted) ? wanted[0] : wanted;
-  if (raw && /^\d+$/.test(raw)) {
-    return saved.find((m) => m.id === Number(raw)) ?? null;
+  // адрес назвал запись — показываем только её. Нечисловое значение раньше проваливалось
+  // в «самую свежую», и страница молча показывала не то, что стоит в адресе.
+  if (raw !== undefined && raw !== "") {
+    return /^\d+$/.test(raw) ? saved.find((m) => m.id === Number(raw)) ?? null : null;
   }
-  return saved[0] ?? null;
+  // без параметра открываем оплаченную: человек заплатил за одну дату, а список отсортирован
+  // по свежести, и «Мой разбор» показывал последнюю сохранённую
+  return saved.find((m) => m.unlocked) ?? saved[0] ?? null;
 }

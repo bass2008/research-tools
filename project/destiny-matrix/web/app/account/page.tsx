@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import AccountView from "@/components/AccountView";
+import AccountView from "@/components/account/AccountView";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMeta({
 
 export default function AccountPage() {
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
         <p className="crumbs">
           <Link href="/">Главная</Link> <span>/</span> <span>Кабинет</span>

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .. import access
+from .. import access, audit
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
@@ -19,9 +19,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register")
-def register(payload: Credentials, db: Session = Depends(get_db)) -> dict:
+def register(payload: Credentials, request: Request, db: Session = Depends(get_db)) -> dict:
+    ip = audit.client_ip(request)
     exists = db.scalar(select(User).where(User.email == payload.email))
     if exists:
+        audit.record("register", "failed", email=payload.email, ip=ip)
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Эта почта уже зарегистрирована")
     user = User(email=payload.email, password_hash=hash_password(payload.password))
     db.add(user)
@@ -29,17 +31,22 @@ def register(payload: Credentials, db: Session = Depends(get_db)) -> dict:
         db.commit()
     except IntegrityError:
         db.rollback()
+        audit.record("register", "failed", email=payload.email, ip=ip)
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
                             detail="Эта почта уже зарегистрирована") from None
     db.refresh(user)
     mail.welcome(user.email)
+    audit.record("register", "success", email=user.email, ip=ip)
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}
 
 
 @router.post("/login")
-def login(payload: Credentials, db: Session = Depends(get_db)) -> dict:
+def login(payload: Credentials, request: Request, db: Session = Depends(get_db)) -> dict:
     user = db.scalar(select(User).where(User.email == payload.email))
-    if user is None or not verify_password(payload.password, user.password_hash):
+    ok = user is not None and verify_password(payload.password, user.password_hash)
+    audit.record("login", "success" if ok else "failed", email=payload.email,
+                 ip=audit.client_ip(request))
+    if not ok:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Неверная почта или пароль")
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}
 
@@ -67,13 +74,16 @@ def me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dic
 
 
 @router.post("/reset/request")
-def reset_request(payload: ResetRequest, db: Session = Depends(get_db)) -> dict:
+def reset_request(payload: ResetRequest, request: Request, db: Session = Depends(get_db)) -> dict:
     """Просьба о сбросе. Ответ одинаков и для существующей почты, и для чужой: иначе форма
     превращается в проверку, зарегистрирован ли адрес."""
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is not None:
         token = create_reset_token(user.id, user.password_hash)
         mail.reset(user.email, f"{settings.site_url}/reset?token={token}", settings.reset_ttl_hours)
+    # исход журналируется внутренне; наружу ответ по-прежнему одинаков (без утечки перечисления)
+    audit.record("reset", "success" if user is not None else "failed", email=payload.email,
+                 ip=audit.client_ip(request))
     return {"ok": True, "sent": True}
 
 

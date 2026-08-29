@@ -66,7 +66,7 @@ def test_a10_second_print_waits_for_the_running_one(client, db, monkeypatch):
     monkeypatch.setattr(reports.settings, "s3_reports_bucket", "test-bucket")
     monkeypatch.setattr(reports.settings, "s3_access_key", "key")
     monkeypatch.setattr(reports, "upload", lambda key, pdf: None)
-    monkeypatch.setattr(reports, "link", lambda key: f"https://bucket/{key}")
+    monkeypatch.setattr(reports, "link", lambda key, filename=None: f"https://bucket/{key}")
 
     renders = []
 

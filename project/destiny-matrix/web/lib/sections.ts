@@ -3,20 +3,22 @@
 //
 // Модуль серверный. Здесь лежит то, за что платят: толкования и подписи позиций восемнадцати
 // платных разделов. Клиентские компоненты берут публичную половину из
-// components/publicSpec.ts; импорт этого модуля из кода с "use client" положил бы платные
+// lib/publicSpec.ts; импорт этого модуля из кода с "use client" положил бы платные
 // тексты в чанк, а чанк видно в исходнике страницы (сторож — scripts/check-build.cjs).
 import {
   CATALOG,
   FREE_DETAIL,
+  POINT_KEY,
   arcanumHref,
   type Access,
   type PositionOut,
   type SectionDetail,
   type PositionTexts,
   type SectionOut,
-} from "../components/publicSpec";
+} from "./publicSpec";
 import { arcanumInPosition } from "./content";
-import type { Matrix } from "./matrix";
+import { builtInPositionText } from "./positionTexts";
+import { calculate, type Matrix } from "./matrix";
 
 export type { Access, PositionOut, PositionTexts, SectionOut };
 export { arcanumHref };
@@ -188,17 +190,34 @@ export const SECTION_KEYS: string[] = SPEC.map((s) => s.key);
 // Разбор открыт целиком или не открыт вовсе: тарифов, открывающих часть разделов, больше нет.
 // Решает это апстрим по правам на конкретную матрицу, здесь только печать.
 
+
 /** Собрать разделы. При unlocked=false платные приходят без позиций — только анонс. */
 export function build(m: Matrix, unlocked = false): SectionOut[] {
   return SPEC.map((spec) => {
-    const positions = spec.positions(m).map(([label, arcanum]) => ({
-      label,
-      arcanum,
-      href: arcanumHref(arcanum),
-      // толкование именно этого аркана в этом разделе: универсальное описание аркана
-      // человек и так прочитает в энциклопедии, платит он за разбор своего случая
-      text: arcanumInPosition(arcanum, spec.key),
-    }));
+    // Один аркан может встать в разделе дважды (итоги мужской и женской ветви часто совпадают).
+    // Второй раз печатать тот же абзац дословно незачем — вместо него отсылка к первому.
+    const seen = new Map<string, string>();
+    const positions = spec.positions(m).map(([label, arcanum]) => {
+      const key = POINT_KEY[label] ?? spec.key;
+      const mark = `${key}:${arcanum}`;
+      const first = seen.get(mark);
+      if (!first) seen.set(mark, label);
+      return {
+        label,
+        arcanum,
+        href: arcanumHref(arcanum),
+        // толкование именно этого аркана в этой позиции: универсальное описание аркана
+        // человек и так прочитает в энциклопедии, платит он за разбор своего случая
+        text: first
+          ? `Тот же аркан, что и в позиции «${first}»: толкование выше.`
+          // Пул раздела «чакры» написан как вердикт обо всей карте («верх наполнен, низ пуст»),
+          // и под каждым из восьми уровней стояли восемь взаимоисключающих вердиктов. Здесь
+          // нужен текст про один уровень, поэтому берём рамку, а не корпус.
+          : key === "chakras"
+            ? builtInPositionText(arcanum, key)
+            : arcanumInPosition(arcanum, key),
+      };
+    });
     const out: SectionOut = {
       key: spec.key,
       title: spec.title,
@@ -214,14 +233,22 @@ export function build(m: Matrix, unlocked = false): SectionOut[] {
   });
 }
 
+// подписи позиций от даты не зависят — карта нужна только чтобы получить их список
+const SAMPLE = calculate("2000-01-01", "f");
+
 /** Толкования бесплатных разделов для браузера: платные сюда не попадают намеренно. */
 export function freePositionTexts(): PositionTexts {
   const out: PositionTexts = {};
   for (const spec of SPEC) {
     if (spec.access !== "free") continue;
-    const byArcanum: Record<number, string> = {};
-    for (let n = 1; n <= 22; n++) byArcanum[n] = arcanumInPosition(n, spec.key);
-    out[spec.key] = byArcanum;
+    // Ключ пула — позиция, а не раздел: пул раздела «комфорт» на 18 арканах из 22 говорит
+    // «такой центр», и эта фраза печаталась под «Комфортом в деле» и «в отношениях».
+    const keys = new Set(spec.positions(SAMPLE).map(([label]) => POINT_KEY[label] ?? spec.key));
+    for (const key of keys) {
+      const byArcanum: Record<number, string> = {};
+      for (let n = 1; n <= 22; n++) byArcanum[n] = arcanumInPosition(n, key);
+      out[key] = byArcanum;
+    }
   }
   return out;
 }

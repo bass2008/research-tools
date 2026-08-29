@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime as dt
 import json
 
-from sqlalchemy import (Boolean, Date, DateTime, ForeignKey, Integer, String, Text, event, func,
-                        text)
+from sqlalchemy import (Boolean, Date, DateTime, ForeignKey, Index, Integer, String, Text, event,
+                        func, text)
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -171,6 +171,12 @@ class Entitlement(Base):
     а платёж бывает без доступа (возврат, неоплаченная попытка)."""
 
     __tablename__ = "entitlements"
+    # Два одновременных платежа за одну дату читали «доступа ещё нет» оба и оба его выдавали:
+    # списывалось вдвое. Проверка перед записью гонку не ловит — ловит индекс.
+    __table_args__ = (
+        Index("ux_entitlement_active_matrix", "user_id", "matrix_id", unique=True,
+              sqlite_where=text("matrix_id IS NOT NULL AND revoked_at IS NULL")),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
@@ -294,3 +300,26 @@ class ErrorLog(Base):
     def item(self) -> dict:
         return {"id": self.id, "at": iso(self.at), "method": self.method, "path": self.path,
                 "status": self.status, "message": self.message, "trace": self.trace}
+
+
+class SecurityAudit(Base):
+    """Журнал попыток входа, регистрации и сброса пароля: успех, отказ или отсечение лимитом.
+    Виден только админу. Почта тут хранится намеренно (в отличие от error_log): смысл журнала —
+    видеть, какой аккаунт и с какого адреса перебирают."""
+    __tablename__ = "security_audit"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                            default=utcnow, server_default=func.now(), index=True)
+    action: Mapped[str] = mapped_column(String(16), nullable=False)          # login | register | reset
+    outcome: Mapped[str] = mapped_column(String(16), nullable=False, index=True)  # success | failed | throttled
+    email: Mapped[str | None] = mapped_column(String(320), index=True)
+    ip: Mapped[str | None] = mapped_column(String(64))
+
+    def item(self) -> dict:
+        return {"id": self.id, "at": iso(self.at), "action": self.action,
+                "outcome": self.outcome, "email": self.email, "ip": self.ip}
+
+
+AUDIT_ACTIONS = ("login", "register", "reset")
+AUDIT_OUTCOMES = ("success", "failed", "throttled")

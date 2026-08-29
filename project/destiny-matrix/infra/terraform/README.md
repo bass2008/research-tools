@@ -245,10 +245,10 @@ DNS, бакетом и ключом; артефакт сборки кладёт 
 - `assetPrefix` не задан и задавать его не требуется. Если понадобится, адрес бакета —
   `terraform -chdir=infra/terraform/site output asset_base_url`.
 
-**`api` — три вещи из unit-файла**: строка подключения (peer через unix-сокет, пароля нет
-намеренно), `ENCYCLOPEDIA_DIR=/srv/matritsa/api/current/web/content` (там лежит `arcana.json`,
-который читает `app/encyclopedia.py`) и `CORS_ORIGINS=` пустым — браузер говорит только со своим
-origin, дальше идёт BFF.
+**`api` — две вещи из unit-файла**: строка подключения (peer через unix-сокет, пароля нет
+намеренно) и `CORS_ORIGINS=` пустым — браузер говорит только со своим origin, дальше идёт BFF.
+`ENCYCLOPEDIA_DIR` в старых unit-файлах остался от эндпоинтов энциклопедии; сервис его больше
+не читает, при следующей правке unit-файла строку можно убрать.
 
 ```
 DATABASE_URL=postgresql+psycopg2://matritsa@/matritsa?host=/var/run/postgresql

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import Crumbs from "@/components/ui/Crumbs";
+
 import { LEGAL, pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
   title: "Контакты и реквизиты",
   description:
-    "Как связаться с исполнителем: почта для обращений, реквизиты индивидуального предпринимателя, " +
-    "сроки ответа и ссылки на оферту, политику обработки данных и условия возврата.",
+    "Как связаться с исполнителем: почта для обращений, реквизиты предпринимателя, сроки ответа " +
+    "и ссылки на оферту и возврат.",
   path: "/contacts",
 });
 
@@ -15,11 +17,9 @@ export const metadata: Metadata = pageMeta({
 // исполнителя и при обращении. В юридических страницах они остаются: там это обязательная часть.
 export default function ContactsPage() {
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap prose">
-        <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Контакты</span>
-        </p>
+        <Crumbs trail={[{ name: "Главная", path: "/" }, { name: "Контакты" }]} />
         <h1>Контакты и реквизиты</h1>
 
         <h2>Связаться</h2>

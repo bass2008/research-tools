@@ -157,9 +157,13 @@ def test_a4_target_list_button_and_request_agree(page, mail):
     page.get_by_test_id("pay-submit").click(force=True)
     page.wait_for_timeout(1500)
 
+    # Ссылка называет запись, которой у человека нет: подставлять вместо неё другую дату
+    # нельзя — платёж уходил бы не за то, что обещано. Цель остаётся пустой.
     date = re.search(DATE, chosen or "")
-    assert date and date.group(0) in button, \
-        f"список зовёт «{chosen}», кнопка «{button}»"
+    if date:
+        assert date.group(0) in button, f"список зовёт «{chosen}», кнопка «{button}»"
+    else:
+        assert not sent, f"цель не выбрана, а запрос ушёл: {sent}"
     assert sent.get("matrix_id") in (None, *known), \
         f"кнопка обещает «{button}», а запрос уходит за {sent}"
 
@@ -266,7 +270,9 @@ def test_sitemap_is_published_only_on_the_live_site(page):
 
     if BASE.rstrip("/") == "https://arcana-sense.ru":
         assert "/contacts" in body, "в карте сайта нет /contacts"
-        assert "/matrix/" in body, "в карте сайта нет страниц матриц"
+        # страницы матриц из карты убраны намеренно (noindex, follow): 5544 почти-дубля тянули
+        # домен вниз. Раньше здесь стояло обратное требование — оно и было бы красным на проде.
+        assert "/matrix/1-1-" not in body, "страницы матриц вернулись в карту сайта"
     else:
         assert "<loc>" not in body, f"закрытый контур публикует свои адреса: {body[:200]}"
 

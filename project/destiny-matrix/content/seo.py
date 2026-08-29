@@ -10,20 +10,65 @@ from __future__ import annotations
 import re
 
 TITLE_LIMIT = 70
-DESC_LIMIT = 180
+# 165 знаков: сниппет длиннее выдача обрезает сама, и обрыв делает не она, а мы
+DESC_LIMIT = 165
+# короче этого описание отбрасывает приёмка контента (web/lib/content.ts)
+MIN_DESC = 60
+# служебные слова: описание, оканчивающееся на них, читается как обрубок
+STOP_TAIL = {
+    "и", "а", "но", "или", "что", "чтобы", "как", "когда", "если", "потому", "поэтому", "то",
+    "же", "ли", "бы", "в", "во", "на", "за", "по", "под", "над", "от", "до", "из", "к", "ко",
+    "с", "со", "у", "о", "об", "про", "для", "без", "при", "через", "не", "ни", "это", "этот",
+    "эта", "тот", "та", "то", "те", "их", "его", "её", "свой", "своя", "своё", "там", "тут",
+    "уже", "ещё", "весь", "вся", "всё",
+}
 
 
-def first_sentence(text: str, limit: int = 160) -> str:
+def clamp(text: str, limit: int = DESC_LIMIT) -> str:
+    """Описание кончается законченной мыслью, а не многоточием посреди слова.
+
+    Раньше строку резали по лимиту и дописывали «…»: 86 описаний сочетаний обрывались
+    на полуслове («…быстрый старт и сразу же структура…»), и это видел человек в выдаче.
+    """
+    text = " ".join(text.split()).strip()
+    if len(text) <= limit:
+        return text
+    head = text[:limit]
+    # Обрыв по последней точке иногда оставлял огрызок: у пары 5-15 второе предложение
+    # кончалось за лимитом, и описание сжималось до 41 знака — приёмка такое отбрасывает,
+    # и на странице вставал шаблон. Берём самый длинный вариант, который влезает.
+    variants = []
+    for sep in (". ", "! ", "? "):
+        if sep in head:
+            variants.append(head[: head.rfind(sep) + 1].strip())
+    for sep in (", ", "; ", " — "):
+        idx = head.rfind(sep)
+        if idx > limit * 0.5:
+            variants.append(head[:idx].rstrip(" ,;:—-") + ".")
+    # Обрыв по последнему пробелу оставлял описание на служебном слове: «…что мы друг другу
+    # обещаем и что.» Такой вариант годится только когда других нет вовсе.
+    variants.append(head.rsplit(" ", 1)[0].rstrip(" ,;:—-") + ".")
+    good = [v for v in variants if len(v) >= MIN_DESC and _ends_well(v)]
+    if good:
+        return max(good, key=len)
+    # ни один разрез не кончается значимым словом: отрезаем служебные слова с конца
+    return _trim_tail(max(variants or [head], key=len))
+
+
+def _ends_well(text: str) -> bool:
+    """Последнее слово не служебное: обрыв на нём читается как огрызок фразы."""
+    words = text.rstrip(".!?").split()
+    return bool(words) and words[-1].strip('.,;:—-«»"').lower() not in STOP_TAIL
+
+
+def first_sentence(text: str, limit: int = DESC_LIMIT) -> str:
     parts = re.split(r"(?<=[.!?])\s+", text.strip())
     out = parts[0].strip()
     for nxt in parts[1:]:
         if len(out) >= 110:
             break
         out = f"{out} {nxt.strip()}"
-    if len(out) > limit:
-        cut = out[:limit].rsplit(" ", 1)[0]
-        out = cut.rstrip(",;:—-") + "…"
-    return out
+    return clamp(out, limit)
 
 
 def _dedup(items: list[str]) -> list[str]:
@@ -53,7 +98,7 @@ def arcanum(entry: dict) -> dict:
     ] + list(entry.get("queries", ()))
     return {
         "title": f"{n} аркан — {title}: значение в матрице судьбы",
-        "description": entry["seo_description"],
+        "description": clamp(entry["seo_description"]),
         "queries": _dedup(queries),
     }
 
@@ -71,7 +116,9 @@ def combination(a: dict, b: dict, pair: dict) -> dict:
     ]
     return {
         "title": f"Сочетание {na} и {nb} аркана — {a['title']} и {b['title']}",
-        "description": first_sentence(pair["paragraphs"][0], DESC_LIMIT),
+        # первый абзац бывает одним коротким предложением: описание короче 60 знаков
+        # приёмка отбрасывает, и на странице встаёт шаблон вместо написанного текста
+        "description": first_sentence(" ".join(pair["paragraphs"]), DESC_LIMIT),
         "queries": _dedup(queries),
     }
 
@@ -84,7 +131,7 @@ def position(entry: dict, kind: str) -> dict:
         base += [f"{entry['title'].lower()} матрица судьбы"]
     return {
         "title": entry["seo_title"],
-        "description": entry["seo_description"],
+        "description": clamp(entry["seo_description"]),
         "queries": _dedup(base),
     }
 
@@ -99,6 +146,14 @@ def chakra(entry: dict) -> dict:
     ] + list(entry.get("queries", ()))
     return {
         "title": f"{entry['title']} в матрице судьбы — {entry['hint']}",
-        "description": entry["seo_description"],
+        "description": clamp(entry["seo_description"]),
         "queries": _dedup(queries),
     }
+
+
+def _trim_tail(text: str) -> str:
+    """Отрезать служебные слова с конца: «…потому что видят то.» → «…потому что видят»."""
+    words = text.rstrip(".!?").split()
+    while len(words) > 6 and words[-1].strip('.,;:—-«»"').lower() in STOP_TAIL:
+        words.pop()
+    return " ".join(words).rstrip(" ,;:—-") + "."

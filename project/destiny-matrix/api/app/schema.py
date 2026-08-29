@@ -60,7 +60,33 @@ def add_missing_columns() -> list[str]:
     return added
 
 
+def revoke_duplicate_rights() -> int:
+    """Дубли, оставшиеся от гонки двух платежей: лишнее право не удаляем, а гасим — деньги за
+    него уже прошли, и след покупки должен остаться в истории. Без этого уникальный индекс
+    (см. Entitlement.__table_args__) не создастся на старой базе."""
+    from sqlalchemy import bindparam, inspect, text
+    if "entitlements" not in inspect(engine).get_table_names():
+        return 0
+    with engine.begin() as conn:
+        stale = conn.execute(text(
+            "SELECT id FROM entitlements WHERE revoked_at IS NULL AND matrix_id IS NOT NULL "
+            "AND id NOT IN (SELECT MIN(id) FROM entitlements WHERE revoked_at IS NULL "
+            "AND matrix_id IS NOT NULL GROUP BY user_id, matrix_id)"
+        )).scalars().all()
+        if not stale:
+            return 0
+        conn.execute(text(
+            "UPDATE entitlements SET revoked_at = CURRENT_TIMESTAMP, "
+            "note = COALESCE(note, 'дубль оплаты') WHERE id IN :ids"
+        ).bindparams(bindparam("ids", expanding=True)), {"ids": list(stale)})
+    return len(stale)
+
+
 def ensure() -> None:
+    # порядок важен: индекс уникальности не встанет, пока в таблице лежат дубли
+    revoked = revoke_duplicate_rights()
+    if revoked:
+        print(f"погашено дублей прав: {revoked}")
     Base.metadata.create_all(engine)
     new_columns = add_missing_columns()
     if new_columns:

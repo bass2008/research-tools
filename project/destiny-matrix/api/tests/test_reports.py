@@ -2,11 +2,13 @@
 подменяется, потому что проверяем не браузер, а контракт вокруг него."""
 from __future__ import annotations
 
+import datetime as dt
+
 import pytest
 from sqlalchemy import select
 
 from app import reports
-from app.models import ReportJob
+from app.models import ReportJob, utcnow
 from app.security import create_print_token
 
 
@@ -19,7 +21,9 @@ def printing(monkeypatch):
     monkeypatch.setattr(reports.settings, "s3_access_key", "key")
     monkeypatch.setattr(reports, "render", lambda url: calls["render"].append(url) or b"%PDF-1.4 test")
     monkeypatch.setattr(reports, "upload", lambda key, pdf: calls["upload"].append((key, len(pdf))))
-    monkeypatch.setattr(reports, "link", lambda key: f"https://bucket.example/{key}?sig=1")
+    monkeypatch.setattr(reports, "link",
+                        lambda key, filename=None: f"https://bucket.example/{key}?sig=1"
+                        + (f"&name={filename}" if filename else ""))
     return calls
 
 
@@ -108,3 +112,23 @@ def test_admin_sees_the_queue(client, auth, db, printing):
     body = client.get("/api/admin/reports", headers=admin).json()
     assert body["running"] == 0 and body["failed"] == 0
     assert [row["email"] for row in body["items"]] == ["queue@example.ru"]
+
+
+def test_admin_queue_expires_an_abandoned_running_job(client, auth, db, printing):
+    from app.config import settings
+
+    headers, mid = buy(client, "stale-queue@example.ru")
+    uid = client.get("/api/auth/me", headers=headers).json()["user"]["id"]
+    stale = ReportJob(
+        user_id=uid,
+        matrix_id=mid,
+        status="running",
+        started_at=utcnow() - dt.timedelta(seconds=settings.browser_timeout_seconds + 31),
+    )
+    db.add(stale)
+    db.commit()
+
+    body = client.get("/api/admin/reports", headers=auth(settings.admins[0])).json()
+    assert body["running"] == 0 and body["failed"] == 1
+    assert body["items"][0]["status"] == "failed"
+    assert "брошена" in body["items"][0]["error"]

@@ -148,6 +148,8 @@ def summary(db: Session, user: User | None, now: dt.datetime | None = None) -> d
         "owned": sum(1 for r in singles if r.expires_at is None),
         # дата окончания срочного доступа. Наличие бессрочных покупок её не отменяет: подписка
         # кончится, а купленные даты останутся
-        "until": max(ends).isoformat() if ends else None,
+        # только через iso(): голый isoformat() терял смещение, и браузер читал время как
+        # местное — срок подписки показывался на три часа раньше, а у полуночи на сутки
+        "until": iso(max(ends)) if ends else None,
         "rights": [r.item() for r in rights],
     }

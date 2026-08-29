@@ -367,9 +367,11 @@ def test_download_takes_the_report_you_are_looking_at(page, mail):
     first, second = flows.matrix_ids(page)[0], flows.matrix_ids(page)[-1]
     assert first != second
 
-    page.goto(f"{BASE}/report?m={second}", wait_until="networkidle")
+    # смотрим купленную дату: на закрытом разборе кнопки PDF нет вовсе — она всё равно
+    # отвечала бы «не оплачен» (цикл 7)
+    page.goto(f"{BASE}/report?m={first}", wait_until="networkidle")
     page.wait_for_timeout(1500)
-    assert "21 ноября 1965" in page.inner_text("main"), "открылась не та дата"
+    assert "7 марта 1990" in page.inner_text("main"), "открылась не та дата"
 
     sent: dict = {}
     page.route("**/api/reports/pdf", lambda route: (
@@ -379,9 +381,9 @@ def test_download_takes_the_report_you_are_looking_at(page, mail):
     button.click()
     page.wait_for_timeout(1200)
 
-    assert sent.get("matrix_id") == second, (
-        f"скачивается разбор {sent.get('matrix_id')}, а на экране {second}")
-    assert "21 ноября 1965" in (button.get_attribute("title") or ""), \
+    assert sent.get("matrix_id") == first, (
+        f"скачивается разбор {sent.get('matrix_id')}, а на экране {first}")
+    assert "7 марта 1990" in (button.get_attribute("title") or ""), \
         f"подсказка кнопки не называет открытую дату: {button.get_attribute('title')}"
     assert page.locator("[data-testid=matrix-switch]").count() == 0, \
         "переключатель дат вернулся на страницу разбора"

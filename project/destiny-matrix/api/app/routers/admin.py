@@ -15,7 +15,7 @@ from ..routers.payments import apply as apply_payment
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Payment, PaymentSweep, ReportJob, SavedMatrix, User, iso
+from ..models import Payment, PaymentSweep, ReportJob, SavedMatrix, SecurityAudit, User, iso
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -98,6 +98,7 @@ def refund(payment_id: int, _: User = Depends(admin_user), db: Session = Depends
 def reports(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     """Очередь печати: что печатали, сколько это заняло и что упало. Клиенту она не видна —
     для него запрос синхронный."""
+    printing.expire_stale(db)
     rows = db.execute(
         select(ReportJob, User.email).join(User, User.id == ReportJob.user_id)
         .order_by(ReportJob.id.desc())
@@ -160,3 +161,23 @@ def pulse(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
 @router.get("/errors")
 def errors(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     return {"items": monitor.last_errors(db), "hour": monitor.errors(db, 60)}
+
+
+AUDIT_CATEGORIES = ("success", "failed", "throttled")
+
+
+@router.get("/security-audit")
+def security_audit(category: str = "all", page: int = 1, page_size: int = 50,
+                   _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Журнал безопасности с фильтром по исходу и постраничной выдачей: таблица растёт на каждую
+    попытку входа, поэтому целиком её не отдаём. `category` вне трёх известных = «все»."""
+    page = max(1, page)
+    page_size = min(max(page_size, 1), 200)
+    where = [SecurityAudit.outcome == category] if category in AUDIT_CATEGORIES else []
+    total = db.scalar(select(func.count(SecurityAudit.id)).where(*where)) or 0
+    rows = db.scalars(
+        select(SecurityAudit).where(*where).order_by(SecurityAudit.id.desc())
+        .offset((page - 1) * page_size).limit(page_size)
+    ).all()
+    return {"items": [r.item() for r in rows], "total": int(total),
+            "page": page, "page_size": page_size}

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import Crumbs from "@/components/ui/Crumbs";
+
 import { DISCLAIMER, LEGAL, pageMeta } from "@/lib/site";
 import { type Tariff, getTariffs, money, periodLabel } from "@/lib/tariffs";
 
@@ -9,7 +11,8 @@ import { type Tariff, getTariffs, money, periodLabel } from "@/lib/tariffs";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const prices = (await getTariffs()).map((t) => `${money(t.price)} ₽`).join(" / ");
+  const list = (await getTariffs()).map((t) => `${money(t.price)} ₽`).join(" / ");
+  const prices = list || "по действующему прайсу";
   return pageMeta({
     title: "Публичная оферта",
     description:
@@ -40,11 +43,9 @@ export default async function OfertaPage() {
   const tariffs = await getTariffs();
 
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap prose">
-        <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Публичная оферта</span>
-        </p>
+        <Crumbs trail={[{ name: "Главная", path: "/" }, { name: "Публичная оферта" }]} />
         <h1>Публичная оферта на выполнение работ по адаптации web-страниц</h1>
         <p className="updated">
           Редакция от <P>{LEGAL.updated}</P>. Адрес сайта: <P>{LEGAL.site}</P>.

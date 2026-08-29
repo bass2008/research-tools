@@ -10,7 +10,7 @@ from .. import access, printing, reports, tariffs
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import ReportJob, SavedMatrix, User, utcnow
+from ..models import ReportJob, SavedMatrix, User, default_title, utcnow
 from ..schemas import ReportRequest
 from ..security import create_print_token, read_print_token
 
@@ -22,6 +22,11 @@ def _own_matrix(db: Session, user: User, matrix_id: int) -> SavedMatrix:
     if row is None or row.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
     return row
+
+
+def _filename(row: SavedMatrix) -> str:
+    """Имя файла в загрузках: дата разбора, а не номер задачи печати."""
+    return f"{default_title(row.birth)}.pdf".replace("/", "-")
 
 
 def _wait_for(db: Session, job: ReportJob) -> ReportJob | None:
@@ -53,7 +58,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
     if done is not None and done.object_key:
         # тот же файл, а не новая печать: повторное нажатие не должно ни ждать, ни платить CPU
         return {"job_id": done.id, "status": "done", "cached": True,
-                "url": reports.link(done.object_key), "size_bytes": done.size_bytes,
+                "url": reports.link(done.object_key, _filename(row)), "size_bytes": done.size_bytes,
                 "seconds": done.seconds()}
 
     if not settings.pdf_enabled:
@@ -65,7 +70,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
         waited = _wait_for(db, busy)
         if waited is not None:
             return {"job_id": waited.id, "status": "done", "cached": True,
-                    "url": reports.link(waited.object_key), "size_bytes": waited.size_bytes,
+                    "url": reports.link(waited.object_key, _filename(row)), "size_bytes": waited.size_bytes,
                     "seconds": waited.seconds()}
         if busy.status == "running":
             raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT,
@@ -82,7 +87,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
         raise HTTPException(status.HTTP_502_BAD_GATEWAY,
                             detail="Не удалось напечатать PDF") from exc
     return {"job_id": job.id, "status": "done", "cached": False,
-            "url": reports.link(job.object_key), "size_bytes": job.size_bytes,
+            "url": reports.link(job.object_key, _filename(row)), "size_bytes": job.size_bytes,
             "seconds": job.seconds()}
 
 

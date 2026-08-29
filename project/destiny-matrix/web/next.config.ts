@@ -6,6 +6,9 @@ import type { NextConfig } from "next";
 // попадают в предрендеренный HTML и видны, не заплатив.
 const config: NextConfig = {
   reactStrictMode: true,
+  // 404 несовпавшего адреса: без этого Next рендерит его динамически с пустым телом и
+  // заголовком главной — страница живёт только в RSC-пейлоаде.
+  experimental: { globalNotFound: true },
   poweredByHeader: false,
   // Адрес, с которого браузер берёт `_next/static`. Пусто — раздаёт тот же сервер; на проде сюда
   // ставится бакет Object Storage или CDN поверх него (infra/terraform/site). Значение

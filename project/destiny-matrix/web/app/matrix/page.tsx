@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import Crumbs from "@/components/ui/Crumbs";
+
 import { matrixCount } from "@/lib/content";
-import Price from "@/components/Price";
+import Price from "@/components/pay/Price";
 import { pageMeta } from "@/lib/site";
 import { counted, plural } from "@/lib/plural";
 import { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } from "./matrices";
@@ -10,8 +12,8 @@ import { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } from "./matric
 export const metadata: Metadata = pageMeta({
   title: "Все матрицы судьбы: 5544 карты по свёрнутым числам даты",
   description:
-    "Каталог всех матриц судьбы: 22 аркана дня, 12 месяцев и 21 аркан года дают 5544 разные карты. " +
-    "На каждой странице — октаграмма, все позиции карты и два бесплатных раздела разбора.",
+    "Каталог матриц судьбы: 5544 карты по свёрнутым числам даты. На каждой — октаграмма, " +
+    "позиции карты и два бесплатных раздела разбора.",
   path: "/matrix",
 });
 
@@ -23,11 +25,9 @@ export default function MatrixIndexPage() {
   const ready = years.length > 0;
 
   return (
-    <main className="page">
+    <main id="content" className="page">
       <div className="wrap">
-        <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Все матрицы</span>
-        </p>
+        <Crumbs trail={[{ name: "Главная", path: "/" }, { name: "Все матрицы" }]} />
 
         <h1>Все матрицы судьбы</h1>
         <p className="dim prose">
@@ -39,7 +39,7 @@ export default function MatrixIndexPage() {
         </p>
 
         <div className="panel section-gap">
-          <h3>Как устроен адрес</h3>
+          <h2>Как устроен адрес</h2>
           <div className="cap">Слаг матрицы — три числа через дефис</div>
           <p style={{ margin: 0 }}>
             <code>/matrix/14-6-7</code> — день сведён к 14, месяц к 6, год к 7. Так читается матрица
@@ -64,7 +64,9 @@ export default function MatrixIndexPage() {
                   <div className="nm">Аркан дня {day}</div>
                   <div className="taglist" style={{ marginTop: 8 }}>
                     {MONTH_KEYS.map((month) => (
-                      <Link key={month} href={matrixHref(`${day}-${month}-${entry}`)}>
+                      // 264 ссылки сетки: с префетчем каждый просмотр каталога тянул RSC-пейлоад
+                      // каждой страницы матрицы — мегабайты на список ссылок
+                      <Link key={month} href={matrixHref(`${day}-${month}-${entry}`)} prefetch={false}>
                         {MONTHS_NOM[month - 1]}
                       </Link>
                     ))}
@@ -75,7 +77,7 @@ export default function MatrixIndexPage() {
           </>
         ) : (
           <div className="panel section-gap">
-            <h3>Каталог ещё не собран</h3>
+            <h2>Каталог ещё не собран</h2>
             <div className="cap">Нет content/matrices.json — список троек считает engine/precompute.py</div>
             <p style={{ margin: 0 }}>
               Расчёт по своей дате работает и без каталога: он идёт в браузере на том же движке.
@@ -84,7 +86,7 @@ export default function MatrixIndexPage() {
         )}
 
         <div className="panel section-gap">
-          <h3>Куда дальше</h3>
+          <h2>Куда дальше</h2>
           <div className="cap">Справочник, на который ссылается каждая позиция карты</div>
           <div className="taglist">
             <Link href="/encyclopedia">Энциклопедия матрицы судьбы</Link>
@@ -96,7 +98,7 @@ export default function MatrixIndexPage() {
         </div>
 
         <div className="allbox">
-          <h3>Найти свою матрицу</h3>
+          <h2>Найти свою матрицу</h2>
           <p>
             Вводить слаг руками не нужно: расчёт по дате рождения сам приведёт к нужной карте и покажет
             карту и два раздела сразу.

@@ -1,8 +1,7 @@
 // Клиент к BFF (`web/app/api/**`), а не к api напрямую. Адрес всегда свой origin:
 // токен лежит в httpOnly-куке, поэтому кросс-доменный базовый адрес её бы не отправил, а
 // адрес апстрима в браузер не попадает вовсе.
-import type { Matrix, Sex } from "./matrix";
-import type { SectionOut } from "./sections";
+import type { Sex } from "./matrix";
 
 export const API_BASE = "/api";
 
@@ -34,14 +33,6 @@ export interface MeResponse {
   is_admin: boolean;
 }
 
-export interface MatrixResponse {
-  birth: string;
-  sex: Sex;
-  unlocked: boolean;
-  matrix: Matrix;
-  sections: SectionOut[];
-}
-
 /** Как открыта матрица: куплена бессрочно, открыта подпиской или закрыта. */
 export type MatrixAccess = "forever" | "subscription" | "locked";
 
@@ -54,6 +45,11 @@ export interface MatrixListItem {
   access: MatrixAccess;
   /** до какого числа открыта по подписке; null — бессрочно или закрыта */
   access_until: string | null;
+}
+
+/** Карточка сохранённой матрицы. Разделов здесь нет: разбор считает фронт. */
+export interface MatrixCard extends MatrixListItem {
+  unlocked: boolean;
 }
 
 /** Строка истории платежей. `tariff` — снимок на момент покупки, поэтому цена в истории не «плывёт». */
@@ -232,6 +228,24 @@ export interface ErrorRow {
   trace: string | null;
 }
 
+export type AuditCategory = "all" | "success" | "failed" | "throttled";
+
+export interface SecurityAuditRow {
+  id: number;
+  at: string;
+  action: "login" | "register" | "reset";
+  outcome: "success" | "failed" | "throttled";
+  email: string | null;
+  ip: string | null;
+}
+
+export interface SecurityAuditPage {
+  items: SecurityAuditRow[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 export const api = {
   register: (email: string, password: string) =>
     request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
@@ -293,17 +307,24 @@ export const api = {
         { method: "POST" },
       ),
     errors: () => request<{ items: ErrorRow[]; hour: number }>("/admin/errors"),
+
+    securityAudit: (category: AuditCategory, page: number, pageSize: number) => {
+      const q = new URLSearchParams({
+        category,
+        page: String(page),
+        page_size: String(pageSize),
+      });
+      return request<SecurityAuditPage>(`/admin/security-audit?${q.toString()}`);
+    },
   },
 
   // Дата уходит на сервер только по явному действию авторизованного пользователя:
   // «сохранить матрицу в кабинет». Анонимный расчёт остаётся в браузере.
   saveMatrix: (birth: string, sex: Sex, title?: string) =>
-    request<MatrixResponse & { id: number }>("/matrices", {
+    request<MatrixCard>("/matrices", {
       method: "POST",
       body: JSON.stringify({ birth, sex, title }),
     }),
-
-  matrix: (id: number) => request<MatrixResponse>(`/matrices/${id}`),
 
   /** Подписать матрицу. Пустое имя возвращает подпись по умолчанию — дату. */
   renameMatrix: (id: number, title: string) =>
