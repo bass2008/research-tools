@@ -15,28 +15,22 @@ import { YEAR_HUB, arcanumHref, yearHref } from "@/lib/encyclopedia";
 import { articleLd, itemListLd } from "@/lib/schema";
 import { clip } from "@/lib/text";
 import { pageMeta } from "@/lib/site";
+import { encyclopediaSection, encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 const KEY = "na-god";
 
-const FALLBACK = {
-  title: "Матрица судьбы на год",
-  short:
-    "Персональный год — это отдельный аркан, который считается от даты рождения и текущей даты. " +
-    "Он не отменяет карту рождения, а показывает, какая её часть выходит на первый план в этом году.",
-  description:
-    "Что такое матрица судьбы на год: как считается аркан персонального года, чем он отличается от " +
-    "карты рождения и как читать значение каждого из 22 арканов в рамке года.",
-};
+const HUB = categoryHub(KEY);
+if (!HUB) throw new Error(`нет канонического материала хаба ${KEY}`);
 
 export const metadata: Metadata = pageMeta({
-  title: categoryHub(KEY)?.seo.title ?? `${FALLBACK.title} — как считается аркан года`,
-  description: categoryHub(KEY)?.seo.description ?? FALLBACK.description,
+  title: HUB.seo.title,
+  description: HUB.seo.description,
   path: YEAR_HUB,
   article: true,
 });
 
 export default function YearHubPage() {
-  const hub = categoryHub(KEY);
+  const hub = HUB!;
   const keys = yearKeys();
   const arcana = keys
     .map((key) => ({ key, n: /^\d{1,2}$/.test(key) ? Number(key) : null }))
@@ -48,8 +42,8 @@ export default function YearHubPage() {
     <>
         <JsonLd
           data={articleLd({
-            headline: hub?.seo.title ?? FALLBACK.title,
-            description: hub?.seo.description ?? FALLBACK.description,
+            headline: hub.seo.title,
+            description: hub.seo.description,
             path: YEAR_HUB,
           })}
         />
@@ -69,30 +63,15 @@ export default function YearHubPage() {
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          { name: "Статьи", path: "/encyclopedia?sec=art" },
-          { name: "Матрица судьбы на год" },
+          encyclopediaSectionCrumb("art"),
+          { name: encyclopediaSection("yer").title },
         ]}
       />
 
-        <h1>{hub?.title ?? FALLBACK.title}</h1>
-        <p className="dim prose">{hub?.short ?? FALLBACK.short}</p>
+        <h1>{hub.title}</h1>
+        <p className="dim prose">{hub.short}</p>
 
-        {hub ? (
-          <Sections items={hub.sections} />
-        ) : (
-          <div className="prose section-gap">
-            <h2>Как считается аркан года</h2>
-            <p>
-              К числу и месяцу рождения прибавляют текущий год, сумму сворачивают до диапазона от 1 до
-              22 — получается аркан, который держит рамку этого года. Каждый год число другое, и в
-              этом смысл: карта рождения не меняется, а годовая рамка меняется всегда.
-            </p>
-            <p>
-              Читают его вместе с картой: аркан года подсвечивает ту позицию рождения, которая с ним
-              совпала. Поэтому один и тот же год у двух людей проходит по-разному.
-            </p>
-          </div>
-        )}
+        <Sections items={hub.sections} />
 
         <div className="section-gap">
           <CalcPromo
@@ -134,9 +113,9 @@ export default function YearHubPage() {
           </div>
         ) : null}
 
-        {hub ? <Faq items={hub.faq} /> : null}
+        <Faq items={hub.faq} />
 
-        {hub ? <Related path={YEAR_HUB} refs={hub.related} /> : null}
+        <Related path={YEAR_HUB} refs={hub.related} />
 
         <div className="panel section-gap">
           <h3>Арканы вне рамки года</h3>

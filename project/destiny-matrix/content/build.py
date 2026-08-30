@@ -16,15 +16,13 @@ from engine.matrix import CHAKRAS as CHAKRA_ROWS, COLUMNS
 from engine.sections import SPEC
 
 from . import seo
-from .data.arcana import ARCANA
-from .data.chakras import CHAKRAS_TEXT
-from .data.in_positions import IN_POSITIONS
-from .data.pairs import PAIRS
-from .data.positions import POINTS, SECTIONS_META
+from .source import ARCANA, CHAKRAS_TEXT, IN_POSITIONS, PAIRS, POINTS, SECTIONS_META, TEXT_POLICY
 
 OUT_DIR = Path(__file__).resolve().parents[1] / "web" / "content"
 
 SECTION_KEYS = [key for key, *_ in SPEC]
+POINT_KEYS = [point["key"] for point in POINTS]
+IN_POSITION_KEYS = SECTION_KEYS + POINT_KEYS
 SECTION_TITLE = {key: title for key, title, *_ in SPEC}
 SECTION_META_BY_KEY = {m["key"]: m for m in SECTIONS_META}
 POINT_BY_KEY = {p["key"]: p for p in POINTS}
@@ -94,7 +92,7 @@ def build_arcana() -> list[dict]:
             "short": a["short"],
             "keywords": list(a["keywords"]),
             "meaning": list(a["meaning"]),
-            "in_positions": {k: texts[k] for k in SECTION_KEYS if k in texts},
+            "in_positions": {k: texts[k] for k in IN_POSITION_KEYS if k in texts},
             "position_links": [
                 {"key": k, "title": SECTION_TITLE[k], "href": position_href(k)}
                 for k in SECTION_KEYS if k in texts
@@ -152,6 +150,7 @@ def build_positions() -> list[dict]:
             "title": title,
             "lead": lead,
             "access": access,
+            "formula": meta["formula"],
             "meaning": list(meta["meaning"]),
             "reading": meta["reading"],
             "points": [{"key": p, "title": POINT_BY_KEY[p]["title"], "href": position_href(p)}
@@ -222,6 +221,26 @@ def write(name: str, items: list[dict]) -> Path:
     return path
 
 
+def build_arcana_catalog(items: list[dict]) -> list[dict]:
+    """Small client-safe catalog: no article bodies or paid position interpretations."""
+    return [
+        {"n": item["n"], "slug": item["slug"], "title": item["title"], "short": item["short"]}
+        for item in items
+    ]
+
+
+def build_point_catalog() -> list[dict]:
+    """Small client-safe point catalog generated from the canonical point metadata."""
+    return [{"key": point["key"], "report_label": point["report_label"]} for point in POINTS]
+
+
+def write_raw(name: str, payload: dict) -> Path:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = OUT_DIR / name
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return path
+
+
 def main() -> None:
     parts = {
         "arcana.json": build_arcana(),
@@ -232,6 +251,14 @@ def main() -> None:
     for name, items in parts.items():
         path = write(name, items)
         print(f"{name}: {len(items)} записей, {path.stat().st_size / 1024:.0f} КБ")
+    catalog = build_arcana_catalog(parts["arcana.json"])
+    path = write("arcana-catalog.json", catalog)
+    print(f"arcana-catalog.json: {len(catalog)} записей, {path.stat().st_size / 1024:.0f} КБ")
+    point_catalog = build_point_catalog()
+    path = write("points-catalog.json", point_catalog)
+    print(f"points-catalog.json: {len(point_catalog)} записей, {path.stat().st_size / 1024:.0f} КБ")
+    path = write_raw("text-policy.json", TEXT_POLICY)
+    print(f"text-policy.json: {path.stat().st_size / 1024:.0f} КБ")
     pages = len(parts["arcana.json"]) + len(parts["combinations.json"]) \
         + len(parts["positions.json"]) + len(parts["chakras.json"]) + 1
     print(f"страниц энциклопедии: {pages}")

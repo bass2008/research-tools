@@ -74,7 +74,7 @@ async function serve() {
 const norm = (html) => html.replace(/\u00a0/g, " ").replace(/&nbsp;/g, " ").replace(/<!--\s*-->/g, "");
 const money = (kopecks) => Math.round(kopecks / 100).toLocaleString("ru-RU").replace(/\u00a0/g, " ");
 
-/** Прайс, который сервер напечатал бы сам: из api через BFF, иначе из запасного набора. */
+/** Прайс, который сервер получил из API через BFF. При недоступном API цены нет. */
 async function priceList() {
   try {
     const res = await fetch(`http://127.0.0.1:${PORT}/api/tariffs`);
@@ -86,12 +86,9 @@ async function priceList() {
       }
     }
   } catch {
-    /* api не поднят — сверяем с запасным набором, его же покажет и страница */
+    /* api не поднят — цена неизвестна, и страница не должна её показывать */
   }
-  const all = [...fs.readFileSync("lib/tariffs.ts", "utf8").matchAll(/price: ([\d_]+)/g)].map((m) =>
-    Number(m[1].replace(/_/g, "")),
-  );
-  return all.length ? { lead: all[0], all } : null;
+  return null;
 }
 
 async function loadOnDemand() {
@@ -113,17 +110,22 @@ async function loadOnDemand() {
   return price;
 }
 
-// Границы слов существенны: проверка подстрок считала «влечение» лечением, а «развлечения» —
-// медицинским обещанием. Набор синхронизирован с content/validate.py.
-const BANNED_MED = [
-  /\bздоровь\p{L}*/u, /\bболезн\p{L}*/u, /\bзаболеван\p{L}*/u, /\bдиагноз\p{L}*/u,
-  /\bлечени\p{L}*/u, /\bлечить\p{L}*/u, /\bисцел\p{L}*/u, /\bцелител\p{L}*/u,
-  /\bсимптом\p{L}*/u, /\bтерапи\p{L}*/u, /\bпрепарат\p{L}*/u, /\bиммунит\p{L}*/u,
-  /\bпохуден\p{L}*/u, /\bнабор веса\b/u, /\bалкогол\p{L}*/u, /\bвыздоравл\p{L}*/u,
-  /\bврач\p{L}*/u, /\bклиник\p{L}*/u, /\bнедуг\p{L}*/u, /\bхроническ\p{L}*/u,
-  /\bуязвимые зоны\b/u, /\bкарта здоровья\b/u,
-];
-const GUARANTEE = ["гарантируем", "гарантия результата", "гарантированно", "точно сбудется", "100% результат"];
+// Единственный список запретных выражений собирается из content/data/text-policy.json в
+// web/content/text-policy.json. Здесь остаётся только JS-адаптер для проверки готового HTML.
+const textPolicy = JSON.parse(fs.readFileSync("content/text-policy.json", "utf8"));
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const TEXT_RULES = textPolicy.blocked.filter((group) => group.scopes.includes("html")).flatMap((group) => [
+  ...group.prefixes.map((prefix) => ({
+    category: group.id,
+    rule: prefix,
+    pattern: new RegExp(`(^|[^а-яёa-z0-9])${escapeRegExp(prefix)}[а-яёa-z]*`, "iu"),
+  })),
+  ...group.phrases.map((phrase) => ({
+    category: group.id,
+    rule: phrase,
+    pattern: new RegExp(escapeRegExp(phrase), "iu"),
+  })),
+]);
 
 let linkChecks = 0;
 let imgChecks = 0;
@@ -145,10 +147,12 @@ const NEEDS_CARD = [
 ];
 function checkPages() {
 for (const [r, html] of pages) {
-  const low = html.toLowerCase();
-
-  for (const w of BANNED_MED) if (w.test(low)) fail(`${r}: медицинская формулировка ${w}`);
-  for (const w of GUARANTEE) if (low.includes(w)) fail(`${r}: обещание гарантии «${w}»`);
+  for (const rule of TEXT_RULES) {
+    // Политика конфиденциальности обязана назвать специальные категории ПДн. Это юридическое
+    // перечисление, а не рекламное обещание или толкование матрицы.
+    if (r === "/privacy" && rule.category === "medical") continue;
+    if (rule.pattern.test(html)) fail(`${r}: запрещённая формулировка (${rule.category}) «${rule.rule}»`);
+  }
 
   if (!/<title>[^<]{10,}<\/title>/.test(html)) fail(`${r}: нет содержательного <title>`);
   if (!/<meta name="description" content="[^"]{40,}"/.test(html)) fail(`${r}: нет description`);
@@ -238,7 +242,7 @@ if (!home) {
   return;
 }
 if (prices === null) {
-  fail("не удалось узнать прайс ни из api, ни из запасного набора");
+  fail("не удалось узнать прайс из API");
   return;
 }
 const leadPrice = prices.lead;
@@ -350,21 +354,25 @@ if (states.size > 1) fail(`юридические страницы в разно
 console.log(`реквизиты: ${[...states].join(", ")} (заглушки допустимы до передачи реквизитов владельцем; с ними не запускать)`);
 
 // ── пейволл: платные тексты не должны уезжать в браузер ────────────────────────────────
-// Толкования и подписи позиций 14 платных разделов живут в lib/sections.ts, и её импортирует
-// только серверный код. Один импорт из компонента с "use client" — и всё это лежит в чанке,
-// который видно в исходнике страницы. Здесь это ловится грепом по собранным чанкам.
-const paidSrc = fs.readFileSync("lib/sections.ts", "utf8");
-const paidBlock = paidSrc.slice(paidSrc.indexOf("const PAID_DETAIL"), paidSrc.indexOf("export const SPEC"));
-const paidTexts = [
-  ...[...paidBlock.matchAll(/lead: "([^"]+)"/g)].map((m) => m[1]),
-  ...[...paidBlock.matchAll(/\["([^"]+)",/g)].map((m) => m[1]),
-];
+// Вводки и подписи 18 платных разделов лежат в полном снимке канонической спецификации,
+// который импортирует только серверный код. Один импорт из компонента с "use client" — и всё
+// это окажется в видимом чанке. Здесь это ловится по собранным файлам.
+const privateSections = JSON.parse(fs.readFileSync("lib/__fixtures__/sections.json", "utf8")).sections ?? [];
+const paidRows = privateSections.filter((section) => section.access === "paid");
+const paidTexts = paidRows.flatMap((section) => [
+  section.lead,
+  ...section.positions.map((position) => position.label).filter(Boolean),
+]);
 // подписи, которые есть и в публичной части (например «Денежный канал» в главных точках),
 // секретом не являются — сторож смотрит только на то, что бывает лишь в платном разборе
 const publicSrc = ["lib/publicSpec.ts", "components/matrix/MatrixResult.tsx"]
   .map((f) => fs.readFileSync(f, "utf8"))
   .join("\n");
-const paidOnly = [...new Set(paidTexts)].filter((t) => !publicSrc.includes(t));
+const publicPointLabels = (JSON.parse(fs.readFileSync("content/points-catalog.json", "utf8")).items ?? [])
+  .map((point) => point.report_label)
+  .filter((label) => typeof label === "string");
+const paidOnly = [...new Set(paidTexts)].filter((t) =>
+  !publicSrc.includes(t) && !publicPointLabels.some((label) => label.includes(t)));
 if (paidOnly.length < 30) {
   fail(`сторож пейволла ослеп: платных текстов для проверки всего ${paidOnly.length} (ждём ≥30)`);
 }

@@ -60,14 +60,18 @@ export function resolveRef(ref: string): RelatedLink | null {
   if (kind === "tail") return tailLink(rest);
   if (kind === "na-god") {
     if (!rest) {
-      return { href: YEAR_HUB, title: categoryHub("na-god")?.title ?? "Матрица судьбы на год" };
+      const item = categoryHub("na-god");
+      if (!item) throw new Error("нет канонического материала хаба na-god");
+      return { href: YEAR_HUB, title: item.title };
     }
     return yearLink(rest);
   }
   if (kind === "karmic-tail") {
+    const item = categoryHub("karmic-tail");
+    if (!item) throw new Error("нет канонического материала хаба karmic-tail");
     return {
       href: KARMIC_TAIL_HUB,
-      title: categoryHub("karmic-tail")?.title ?? "Кармический хвост в матрице судьбы",
+      title: item.title,
     };
   }
   if (TRIPLE.test(value)) return tailLink(value);

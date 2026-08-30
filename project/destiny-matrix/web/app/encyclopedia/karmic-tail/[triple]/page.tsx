@@ -23,6 +23,7 @@ import {
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
 import { pageMeta } from "@/lib/site";
+import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { triple: string };
 
@@ -66,7 +67,7 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
           { name: "Энциклопедия", path: "/encyclopedia" },
           // цепочка обязана совпадать с видимой крошкой: разное имя и разный адрес в разметке
           // означали бы, что поисковику показывают не тот путь, что человеку
-          { name: "Кармические хвосты", path: "/encyclopedia?sec=tls" },
+          encyclopediaSectionCrumb("tls"),
           { name: item.key },
         ]}
       />
@@ -82,17 +83,19 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
         <h1>{item.title}</h1>
         <p className="dim prose">{item.short}</p>
 
-        <div className="cardgrid section-gap">
+        <div className="tail-deck section-gap">
           {displayArcana.map((n, i) => (
-            <Link className="ecard withcard" key={`${n}-${i}`} href={arcanumHref(n)}>
-              <ArcanumCard n={n} size="grid" eager={i === 0} decorative />
-              <div>
+            <Link className="ecard tail-card" key={`${n}-${i}`} href={arcanumHref(n)}>
+              <ArcanumCard n={n} size="big" eager={i === 0} decorative />
+              <div className="tail-card-label">
                 <div className="num">{n} аркан</div>
                 <div className="nm">{arcanumTitle(n)}</div>
               </div>
             </Link>
           ))}
         </div>
+
+        <Sections items={item.sections} />
 
         <div className="panel section-gap">
           <h2>Как считается хвост</h2>
@@ -112,8 +115,6 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
             </p>
           )}
         </div>
-
-        <Sections items={item.sections} />
 
         <div className="section-gap">
           <CalcPromo

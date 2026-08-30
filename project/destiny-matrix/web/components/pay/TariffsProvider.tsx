@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { FALLBACK, type Tariff, lead } from "@/lib/tariffs";
+import { type Tariff, lead } from "@/lib/tariffs";
 
 /**
  * Прайс для браузера.
@@ -18,7 +18,7 @@ interface Prices {
   known: boolean;
 }
 
-const EMPTY: Prices = { items: FALLBACK, known: false };
+const EMPTY: Prices = { items: [], known: false };
 const Ctx = createContext<Prices>(EMPTY);
 
 export default function TariffsProvider({
@@ -64,6 +64,6 @@ export function usePriceKnown(): boolean {
   return useContext(Ctx).known;
 }
 
-export function useLead(): Tariff {
+export function useLead(): Tariff | null {
   return lead(useContext(Ctx).items);
 }

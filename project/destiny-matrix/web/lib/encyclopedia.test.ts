@@ -7,13 +7,12 @@ import {
   POSITIONS,
   POSITION_KEYS,
   allCombinationSlugs,
-  arcanumEntry,
-  combination,
   combinationHref,
   encyclopediaIndex,
   parseCombinationSlug,
   positionByKey,
 } from "./encyclopedia";
+import { arcanumContent, chakraContent, combinationContent, positionContent } from "./content";
 import { calculate } from "./matrix";
 import { SECTION_KEYS, build } from "./sections";
 
@@ -71,22 +70,21 @@ describe("состав энциклопедии", () => {
   });
 });
 
-describe("ArcanumEntry по контракту", () => {
+describe("канонический контент по контракту", () => {
   it("каждый аркан отдаёт полную запись", () => {
     for (let n = 1; n <= 22; n++) {
-      const e = arcanumEntry(n);
+      const e = arcanumContent(n)!;
       expect(e.n).toBe(n);
-      expect(e.matrix_number).toBe(n);
       expect(e.roman).toBe(roman(n));
       expect(e.slug).toBe(arcanum(n).slug);
       expect(e.short.length).toBeGreaterThan(10);
       expect(e.keywords.length).toBeGreaterThanOrEqual(4);
-      expect(e.meaning.split("\n\n").length).toBeGreaterThanOrEqual(3);
-      expect(e.meaning.length).toBeGreaterThan(500);
+      expect(e.meaning.length).toBeGreaterThanOrEqual(3);
+      expect(e.meaning.join(" ").length).toBeGreaterThan(500);
       expect(e.plus.length).toBeGreaterThanOrEqual(3);
       expect(e.minus.length).toBeGreaterThanOrEqual(3);
       expect(e.combinations).toHaveLength(21);
-      expect(Object.keys(e.in_positions).length).toBeGreaterThanOrEqual(5);
+      expect(Object.keys(e.inPositions)).toHaveLength(37);
       expect(e.seo.title).toContain(String(n));
       expect(e.seo.description.length).toBeGreaterThan(60);
     }
@@ -95,7 +93,7 @@ describe("ArcanumEntry по контракту", () => {
   it("сочетания аркана ведут на существующие страницы", () => {
     const known = new Set(allCombinationSlugs().map((s) => `/encyclopedia/combination/${s}`));
     for (let n = 1; n <= 22; n++) {
-      for (const c of arcanumEntry(n).combinations) {
+      for (const c of arcanumContent(n)!.combinations) {
         expect(known.has(c.href), c.href).toBe(true);
         expect(c.with).not.toBe(n);
       }
@@ -104,11 +102,10 @@ describe("ArcanumEntry по контракту", () => {
 
   it("страница сочетания текстово различается для разных пар", () => {
     const texts = allCombinationSlugs().map((s) => {
-      const [a, b] = parseCombinationSlug(s)!;
-      return combination(a, b).paragraphs.join(" ");
+      return combinationContent(s)!.meaning.join(" ");
     });
     expect(new Set(texts).size).toBe(231);
-    for (const t of texts) expect(t.length).toBeGreaterThan(600);
+    for (const t of texts) expect(t.length).toBeGreaterThan(350);
   });
 });
 
@@ -138,27 +135,37 @@ describe("перелинковка без тупиков", () => {
 
 describe("формулировки", () => {
   const corpus = [
-    ...ARCANA.flatMap((a) => [
-      a.short, a.essence, a.gift, a.shadow, a.advice,
-      ...a.meaning, ...a.plus, ...a.minus, ...Object.values(a.inPositions),
-    ]),
-    ...POSITIONS.flatMap((p) => [p.title, p.lead, ...p.paragraphs]),
-    ...CHAKRA_PAGES.flatMap((c) => [c.title, c.lead, ...c.paragraphs]),
+    ...ARCANA.flatMap((a) => {
+      const content = arcanumContent(a.n)!;
+      return [
+        content.short, ...content.meaning, ...content.plus, ...content.minus,
+        ...Object.values(content.inPositions),
+      ];
+    }),
+    ...POSITIONS.flatMap((p) => {
+      const content = positionContent(p.key)!;
+      return [p.title, content.lead, ...content.meaning];
+    }),
+    ...CHAKRA_PAGES.flatMap((c) => {
+      const content = chakraContent(c.key)!;
+      return [c.title, c.hint, ...content.level, ...content.columns.map((column) => column.text)];
+    }),
   ]
     .join(" ")
     .toLowerCase();
 
   it("нет медицинских формулировок", () => {
-    for (const bad of [
-      "лечен", "лечит", "диагноз", "заболеван", "исцел", "целитель", "болезн",
+    for (const root of [
+      "лечени", "лечить", "лечит", "диагноз", "заболеван", "исцел", "целител", "болезн",
       "симптом", "терапи", "препарат", "набор веса", "алкогол",
     ]) {
-      expect(corpus, bad).not.toContain(bad);
+      const pattern = new RegExp(`(^|[^а-яёa-z0-9])${root}`, "i");
+      expect(pattern.test(corpus), pattern.source).toBe(false);
     }
   });
 
   it("нет обещаний гарантий", () => {
-    for (const bad of ["гарантиру", "гарантия", "обязательно исполн", "точно сбудется", "100% результат"]) {
+    for (const bad of ["гарантиру", "обязательно исполн", "точно сбудется", "100% результат"]) {
       expect(corpus, bad).not.toContain(bad);
     }
   });

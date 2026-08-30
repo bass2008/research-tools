@@ -6,6 +6,7 @@ import { hub, hubKeys } from "@/lib/content";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
 import { pageMeta } from "@/lib/site";
+import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
@@ -50,7 +51,7 @@ export default function HubArticle({ item }: { item: ArticleContent }) {
       trail={[
         { name: "Главная", path: "/" },
         { name: "Энциклопедия", path: "/encyclopedia" },
-        { name: "Статьи", path: "/encyclopedia?sec=art" },
+        encyclopediaSectionCrumb("art"),
         { name: hubCrumb(item.key) },
       ]}
       />
@@ -83,7 +84,7 @@ export default function HubArticle({ item }: { item: ArticleContent }) {
             .filter((key) => key !== item.key)
             .map((key) => (
               <Link key={key} href={hubHref(key)}>
-                {hub(key)?.title ?? key}
+                {hub(key)!.title}
               </Link>
             ))}
         </div>

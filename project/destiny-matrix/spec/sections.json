@@ -1,0 +1,462 @@
+{
+  "sections": [
+    {
+      "key": "character",
+      "title": "Характер и личные качества",
+      "lead": "Как вы устроены и что в вас видят люди с первого взгляда.",
+      "access": "free",
+      "positions": [
+        {
+          "label": "Портрет личности",
+          "selector": "A",
+          "position_key": "day"
+        },
+        {
+          "label": "Духовная задача",
+          "selector": "B",
+          "position_key": "month"
+        },
+        {
+          "label": "Материальная задача",
+          "selector": "C",
+          "position_key": "year"
+        }
+      ]
+    },
+    {
+      "key": "comfort",
+      "title": "Центр и внутренние точки",
+      "lead": "Центр E и две внутренние точки каналов на вертикальной оси.",
+      "access": "free",
+      "positions": [
+        {
+          "label": "Центр карты",
+          "selector": "E",
+          "position_key": "center"
+        },
+        {
+          "label": "Вход линии отношений и хвоста",
+          "selector": "M",
+          "position_key": "comfort_south"
+        },
+        {
+          "label": "Внутренняя точка таланта",
+          "selector": "K",
+          "position_key": "comfort_north"
+        }
+      ]
+    },
+    {
+      "key": "profession",
+      "title": "Профессия и дело по душе",
+      "lead": "Через какое дело ваша энергия превращается в результат.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Духовная задача",
+          "selector": "B",
+          "position_key": "month"
+        },
+        {
+          "label": "Средняя точка таланта",
+          "selector": "P",
+          "position_key": "profession"
+        },
+        {
+          "label": "Внутренняя точка таланта",
+          "selector": "K",
+          "position_key": "comfort_north"
+        }
+      ]
+    },
+    {
+      "key": "realisation",
+      "title": "Путь самореализации",
+      "lead": "Куда ведёт ваша линия, если не сопротивляться.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Кармическая задача",
+          "selector": "D",
+          "position_key": "mission"
+        },
+        {
+          "label": "Личное предназначение",
+          "selector": "purpose_personal",
+          "position_key": "purpose_personal"
+        },
+        {
+          "label": "Социальное предназначение",
+          "selector": "purpose_social",
+          "position_key": "purpose_social"
+        }
+      ]
+    },
+    {
+      "key": "karma40",
+      "title": "Кармическая задача до 40 лет",
+      "lead": "Возрастной ракурс точек I и J без автоматического переключения формулы.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Материальная женская линия рода",
+          "selector": "I",
+          "position_key": "inheritance"
+        },
+        {
+          "label": "Внутренняя левая точка",
+          "selector": "J",
+          "position_key": "comfort_west"
+        }
+      ]
+    },
+    {
+      "key": "resources",
+      "title": "Что открывает вам блага и ресурс",
+      "lead": "Канал, по которому в жизнь приходит достаток.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Вход денежной линии",
+          "selector": "L",
+          "position_key": "comfort_east"
+        },
+        {
+          "label": "Денежное направление",
+          "selector": "R2",
+          "position_key": "resources"
+        }
+      ]
+    },
+    {
+      "key": "family_gifts",
+      "title": "Поддержка и дары вашего рода",
+      "lead": "Что род передал вам как силу.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Духовная мужская линия рода",
+          "selector": "F",
+          "position_key": "father_line"
+        },
+        {
+          "label": "Духовная женская линия рода",
+          "selector": "G",
+          "position_key": "mother_line"
+        },
+        {
+          "label": "Итог мужской ветви",
+          "selector": "social_male.total",
+          "position_key": "family_gifts"
+        },
+        {
+          "label": "Итог женской ветви",
+          "selector": "social_female.total",
+          "position_key": "family_gifts"
+        }
+      ]
+    },
+    {
+      "key": "soul_tasks",
+      "title": "Духовные задачи и уроки души",
+      "lead": "Работа, которую видно только изнутри.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Итог неба",
+          "selector": "sky.total",
+          "position_key": "soul_tasks"
+        },
+        {
+          "label": "Первая задача неба",
+          "selector": "B",
+          "position_key": "month"
+        },
+        {
+          "label": "Вторая задача неба",
+          "selector": "D",
+          "position_key": "mission"
+        }
+      ]
+    },
+    {
+      "key": "past_lives",
+      "title": "Задачи прошлых воплощений",
+      "lead": "Кармический хвост: то, что пришло с вами.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Вход линии отношений и хвоста",
+          "selector": "M",
+          "position_key": "comfort_south"
+        },
+        {
+          "label": "Средняя точка хвоста",
+          "selector": "N",
+          "position_key": "past_lives"
+        },
+        {
+          "label": "Кармическая задача",
+          "selector": "D",
+          "position_key": "mission"
+        }
+      ]
+    },
+    {
+      "key": "purpose",
+      "title": "Ваше предназначение",
+      "lead": "Четыре уровня: личный, социальный, духовный и планетарный.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Личное предназначение",
+          "selector": "purpose_personal",
+          "position_key": "purpose_personal"
+        },
+        {
+          "label": "Социальное предназначение",
+          "selector": "purpose_social",
+          "position_key": "purpose_social"
+        },
+        {
+          "label": "Духовное предназначение",
+          "selector": "harmony",
+          "position_key": "harmony"
+        },
+        {
+          "label": "Планетарное предназначение",
+          "selector": "planetary",
+          "position_key": "planetary"
+        }
+      ]
+    },
+    {
+      "key": "money",
+      "title": "Деньги в матрице судьбы",
+      "lead": "Где деньги приходят легко, а где перекрыт канал.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Вход денежной линии",
+          "selector": "L",
+          "position_key": "comfort_east"
+        },
+        {
+          "label": "Денежное направление",
+          "selector": "R2",
+          "position_key": "money"
+        },
+        {
+          "label": "Пересечение денег и отношений",
+          "selector": "R",
+          "position_key": "money"
+        },
+        {
+          "label": "Итог земли",
+          "selector": "ground.total",
+          "position_key": "money"
+        }
+      ]
+    },
+    {
+      "key": "money40",
+      "title": "Как меняются деньги после 40 лет",
+      "lead": "Как перечитать R2 и L через накопленный опыт, не ожидая смены арканов по возрасту.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Денежное направление",
+          "selector": "R2",
+          "position_key": "money40"
+        },
+        {
+          "label": "Вход денежной линии",
+          "selector": "L",
+          "position_key": "comfort_east"
+        }
+      ]
+    },
+    {
+      "key": "relations",
+      "title": "Отношения в матрице судьбы",
+      "lead": "Что вы приносите в пару и что ищете в другом.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Вход линии отношений и хвоста",
+          "selector": "M",
+          "position_key": "comfort_south"
+        },
+        {
+          "label": "Партнёрская точка",
+          "selector": "R1",
+          "position_key": "relations"
+        },
+        {
+          "label": "Пересечение денег и отношений",
+          "selector": "R",
+          "position_key": "relations"
+        },
+        {
+          "label": "Внутренняя точка таланта",
+          "selector": "K",
+          "position_key": "comfort_north"
+        }
+      ]
+    },
+    {
+      "key": "parents_children",
+      "title": "Карма отношений с родителями и детьми",
+      "lead": "Какие семейные принципы вы получили и какие привычки передаёте дальше.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Духовная мужская линия рода",
+          "selector": "F",
+          "position_key": "father_line"
+        },
+        {
+          "label": "Духовная женская линия рода",
+          "selector": "G",
+          "position_key": "mother_line"
+        },
+        {
+          "label": "Материальная мужская линия рода",
+          "selector": "H",
+          "position_key": "descendants"
+        }
+      ]
+    },
+    {
+      "key": "ancestry",
+      "title": "Родовые задачи до седьмого колена",
+      "lead": "Широкий родовой ракурс без буквального расчёта семи поколений.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Материальная женская линия рода",
+          "selector": "I",
+          "position_key": "inheritance"
+        },
+        {
+          "label": "Итог мужской ветви",
+          "selector": "social_male.total",
+          "position_key": "ancestry"
+        },
+        {
+          "label": "Итог женской ветви",
+          "selector": "social_female.total",
+          "position_key": "ancestry"
+        },
+        {
+          "label": "Планетарное предназначение",
+          "selector": "planetary",
+          "position_key": "planetary"
+        }
+      ]
+    },
+    {
+      "key": "body_resource",
+      "title": "Ресурс тела и восстановление",
+      "lead": "Как вы наполняетесь и где теряете силы. Это не медицинская рекомендация.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Опора тела",
+          "selector": "C",
+          "position_key": "year"
+        },
+        {
+          "label": "Энергия опоры",
+          "selector": "D",
+          "position_key": "mission"
+        },
+        {
+          "label": "Итог опоры тела",
+          "selector": "reduce(C+D)",
+          "position_key": "body_resource"
+        }
+      ]
+    },
+    {
+      "key": "chakras",
+      "title": "Карта энергий: толкование семи уровней",
+      "lead": "Семь уровней в трёх колонках: материя, энергия и чувства.",
+      "access": "paid",
+      "positions": [
+        {
+          "expand": "chakra_physics",
+          "position_key": "chakras"
+        },
+        {
+          "label": "Итог физики",
+          "selector": "chakra_totals.physics",
+          "position_key": "chakras"
+        },
+        {
+          "label": "Итог энергии",
+          "selector": "chakra_totals.energy",
+          "position_key": "chakras"
+        },
+        {
+          "label": "Итог эмоций",
+          "selector": "chakra_totals.emotions",
+          "position_key": "chakras"
+        }
+      ]
+    },
+    {
+      "key": "rest",
+      "title": "Ваш идеальный формат отдыха",
+      "lead": "Чем вы восстанавливаетесь по-настоящему.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Радость и творчество",
+          "selector": "reduce(L+M)",
+          "position_key": "rest"
+        },
+        {
+          "label": "Центр карты",
+          "selector": "E",
+          "position_key": "center"
+        }
+      ]
+    },
+    {
+      "key": "loops",
+      "title": "Программы: что повторяется по кругу",
+      "lead": "Сюжеты, которые возвращаются, пока не пройдены.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Кармическая задача",
+          "selector": "D",
+          "position_key": "mission"
+        },
+        {
+          "label": "Центр карты",
+          "selector": "E",
+          "position_key": "center"
+        },
+        {
+          "label": "Духовное предназначение",
+          "selector": "harmony",
+          "position_key": "harmony"
+        }
+      ]
+    },
+    {
+      "key": "years",
+      "title": "Разбор по десятилетиям до 80 лет",
+      "lead": "Какая энергия ведёт вас в каждом десятилетии.",
+      "access": "paid",
+      "positions": [
+        {
+          "expand": "age_scale",
+          "position_key": "years"
+        }
+      ]
+    }
+  ]
+}

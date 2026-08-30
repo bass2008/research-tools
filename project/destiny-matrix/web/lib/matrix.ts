@@ -2,6 +2,8 @@
 // Любая правка формул обязана повторять правку в engine/matrix.py — сверка эталоном
 // в lib/matrix.test.ts (golden.json снят запуском Python-движка).
 
+import method from "./__fixtures__/method.json";
+
 export const ARCANA_MAX = 22;
 
 export type Sex = "m" | "f";
@@ -23,15 +25,9 @@ export function sexLabel(sex: Sex): string {
   return sex === "f" ? "женская" : "мужская";
 }
 
-export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = [
-  ["sahasrara", "Сахасрара", "связь с большим замыслом"],
-  ["ajna", "Аджна", "видение и интуиция"],
-  ["vishuddha", "Вишудха", "слово, честность, судьба"],
-  ["anahata", "Анахата", "любовь и отношения"],
-  ["manipura", "Манипура", "статус, воля, деньги"],
-  ["svadhisthana", "Свадхистана", "радость, дети, творчество"],
-  ["muladhara", "Муладхара", "тело, опора, материя"],
-];
+export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = method.chakras.map(
+  ({ key, title, hint }) => [key, title, hint] as const,
+);
 
 
 export interface ChakraRow {

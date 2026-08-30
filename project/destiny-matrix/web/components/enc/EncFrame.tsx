@@ -5,26 +5,23 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 
 import { useUrlParam } from "@/lib/useUrlParam";
+import {
+  encyclopediaSectionFromPath,
+  encyclopediaSectionHref,
+  type EncyclopediaSectionKey,
+  type EncyclopediaSectionMeta,
+  type PositionSectionKey,
+} from "@/lib/encyclopediaNavigation";
 
 // Каркас справочника: карусель и меню разделов стоят на месте, меняется только рабочая область.
 // Раздел на самой /encyclopedia переключается здесь же, на детальных страницах он выводится
 // из адреса — меню всегда показывает, где мы находимся.
-export interface EncSectionMeta {
-  key: string;
-  title: string;
+export interface EncSectionMeta extends EncyclopediaSectionMeta {
   count: number;
-  hint: string;
 }
 
-const SEG_TO_SECTION: Record<string, string> = {
-  arcanum: "arc",
-  chakra: "chk",
-  combination: "cmb",
-  "karmic-tail": "tls",
-};
-
 interface Ctx {
-  active: string;
+  active: EncyclopediaSectionKey;
   sections: EncSectionMeta[];
   /** на детальной странице списка нет: раздел показывает только меню */
   standalone: boolean;
@@ -46,25 +43,21 @@ export default function EncFrame({
 }: {
   sections: EncSectionMeta[];
   /** ключ позиции → раздел: «Разделы отчёта» и «Позиции карты» лежат в одном роуте */
-  positionKinds: Record<string, "sec" | "pts">;
+  positionKinds: Record<string, PositionSectionKey>;
   /** адреса статей-хабов: они вне /encyclopedia, но принадлежат разделу «Статьи» */
   articlePaths?: string[];
   children: ReactNode;
 }) {
   const path = usePathname();
-  const parts = path.split("/").filter(Boolean);
-  const fromPath = useMemo(() => {
-    if (articlePaths.includes(path)) return "art";
-    if (parts[0] === "na-god") return "yer";
-    if (parts[1] === "karmic-tail" && parts[2]) return "tls";
-    if (parts[0] !== "encyclopedia") return null;
-    if (parts.length === 1) return null;
-    if (parts[1] === "position") return positionKinds[parts[2] ?? ""] ?? "sec";
-    return SEG_TO_SECTION[parts[1]] ?? null;
-  }, [parts, path, positionKinds, articlePaths]);
+  const fromPath = useMemo(
+    () => encyclopediaSectionFromPath(path, positionKinds, articlePaths),
+    [path, positionKinds, articlePaths],
+  );
 
   const wanted = useUrlParam("sec");
-  const chosen = wanted && sections.some((x) => x.key === wanted) ? wanted : null;
+  const chosen = wanted && sections.some((x) => x.key === wanted)
+    ? wanted as EncyclopediaSectionKey
+    : null;
   const active = fromPath ?? chosen ?? sections[0]?.key ?? "arc";
   const standalone = fromPath !== null;
 
@@ -98,7 +91,7 @@ export default function EncFrame({
               <Link
                 key={s.key}
                 className={s.key === active ? "enc-navi on" : "enc-navi"}
-                href={`/encyclopedia?sec=${s.key}`}
+                href={encyclopediaSectionHref(s.key)}
               >
                 {s.title}
                 <i>{s.count}</i>
@@ -108,7 +101,7 @@ export default function EncFrame({
                 key={s.key}
                 className={s.key === active ? "enc-navi on" : "enc-navi"}
                 aria-current={s.key === active}
-                href={`/encyclopedia?sec=${s.key}`}
+                href={encyclopediaSectionHref(s.key)}
               >
                 {s.title}
                 <i>{s.count}</i>
@@ -126,7 +119,7 @@ export default function EncFrame({
 /** Рабочая область на самой /encyclopedia: показывает список выбранного раздела.
  *  Остальные разделы остаются в разметке скрытыми — иначе со страницы пропадают ссылки на
  *  пары, хвосты и год, а это вся внутренняя перелинковка справочника. */
-export function EncSection({ sectionKey, children }: { sectionKey: string; children: ReactNode }) {
+export function EncSection({ sectionKey, children }: { sectionKey: EncyclopediaSectionKey; children: ReactNode }) {
   const { active, sections } = useEncFrame();
   const meta = sections.find((s) => s.key === sectionKey);
   return (

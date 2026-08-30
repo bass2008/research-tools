@@ -16,7 +16,9 @@ import { arcanumInPosition, positionContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
 import { sectionByKey } from "@/lib/sections";
+import { FREE_POSITION_KEYS } from "@/lib/publicSpec";
 import { NOT_FOUND_META } from "@/lib/seo";
+import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { key: string };
 
@@ -33,13 +35,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
   // несуществующая страница выглядела как главная.
   if (!p) return NOT_FOUND_META;
-  const kind = p.kind === "section" ? "раздел разбора" : "позиция матрицы";
   const extra = positionContent(p.key);
+  if (!extra) throw new Error(`нет канонического материала позиции ${p.key}`);
   return pageMeta({
-    title: extra?.seo?.title ?? `${p.title} — ${kind} матрицы судьбы`,
-    description:
-      extra?.seo?.description ??
-      `${p.lead} Как считается: ${p.formula}. Значение всех 22 арканов в этой позиции.`,
+    title: extra.seo.title,
+    description: extra.seo.description,
     path: positionHref(p.key),
     article: true,
   });
@@ -50,15 +50,14 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   if (!p) notFound();
 
   const extra = positionContent(p.key);
-  const paragraphs = extra?.meaning ?? p.paragraphs;
+  if (!extra) throw new Error(`нет канонического материала позиции ${p.key}`);
+  const lead = extra.lead;
+  const paragraphs = extra.meaning;
   const section = p.kind === "section" ? sectionByKey(p.key) : undefined;
   const siblings = POSITIONS.filter((x) => x.kind === p.kind && x.key !== p.key).slice(0, 8);
   // Точки бесплатных разделов уже показывает бесплатный расчёт: шесть страниц обещали за них
   // деньги. Список — тот же, по которому собирается публичный разбор.
-  const FREE_POINTS = ["day", "month", "year", "center", "comfort_south", "comfort_north"];
-  const isFree = section?.access === "free" || FREE_POINTS.includes(p.key);
-
-  const kind = p.kind === "section" ? "раздел разбора" : "позиция матрицы";
+  const isFree = section?.access === "free" || FREE_POSITION_KEYS.includes(p.key);
 
   return (
     <>
@@ -67,27 +66,25 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          p.kind === "section"
-            ? { name: "Разделы отчёта", path: "/encyclopedia?sec=sec" }
-            : { name: "Позиции карты", path: "/encyclopedia?sec=pts" },
+          encyclopediaSectionCrumb(p.kind === "section" ? "sec" : "pts"),
           { name: p.title },
         ]}
       />
         <JsonLd
           data={articleLd({
-            headline: extra?.seo?.title ?? `${p.title} — ${kind} матрицы судьбы`,
-            description: extra?.seo?.description ?? p.lead,
+            headline: extra.seo.title,
+            description: extra.seo.description,
             path: positionHref(p.key),
           })}
         />
 
         <h1>{p.title}</h1>
-        <p className="dim prose">{p.lead}</p>
+        <p className="dim prose">{lead}</p>
 
         <div className="panel section-gap">
           <h2>Как считается</h2>
           <div className="cap">Формула позиции в методике</div>
-          <p style={{ margin: 0 }}>{p.formula}</p>
+          <p style={{ margin: 0 }}>{extra.formula}</p>
           {section ? (
             <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
               Раздел в отчёте{" "}
@@ -109,9 +106,9 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           ))}
         </div>
 
-        <Sections items={extra?.sections ?? []} />
+        <Sections items={extra.sections} />
 
-        {extra?.reading ? (
+        {extra.reading ? (
           <div className="panel">
             <h3>Как читать позицию</h3>
             <div className="cap">Порядок, в котором смотрят на арканы</div>
@@ -133,21 +130,37 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           />
         </div>
 
-        <Faq items={extra?.faq ?? []} />
+        <Faq items={extra.faq} />
 
-        <div className="panel section-gap">
-          <h2>Все 22 аркана в этой позиции</h2>
-          <div className="cap">Откройте аркан, который стоит у вас в этой точке карты</div>
-          <div className="cardgrid">
-            {ARCANA.map((a) => (
-              <Link className="ecard" key={a.n} href={arcanumHref(a.n)}>
-                <div className="num">{a.n} аркан</div>
-                <div className="nm">{a.title}</div>
-                <div className="ds">{arcanumInPosition(a.n, p.key)}</div>
-              </Link>
-            ))}
+        {p.kind === "section" ? (
+          extra.points.length ? (
+            <div className="panel section-gap">
+              <h2>Позиции этого раздела</h2>
+              <div className="cap">У каждой точки — своё значение аркана</div>
+              <div className="taglist">
+                {extra.points.map((point) => (
+                  <Link key={point.key} href={positionHref(point.key)}>
+                    {point.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null
+        ) : (
+          <div className="panel section-gap">
+            <h2>Все 22 аркана в этой позиции</h2>
+            <div className="cap">Откройте аркан, который стоит у вас в этой точке карты</div>
+            <div className="cardgrid">
+              {ARCANA.map((a) => (
+                <Link className="ecard" key={a.n} href={arcanumHref(a.n)}>
+                  <div className="num">{a.n} аркан</div>
+                  <div className="nm">{a.title}</div>
+                  <div className="ds">{arcanumInPosition(a.n, p.key)}</div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <Related
           path={positionHref(p.key)}

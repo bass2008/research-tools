@@ -6,6 +6,7 @@
 // исходнике страницы, поэтому один импорт lib/sections.ts из компонента с "use client"
 // выкладывает наружу то, за что платят (сторож — scripts/check-build.cjs).
 import type { Matrix } from "./matrix";
+import { resolveSectionPositions, type SectionPositionDefinition } from "./sectionResolver";
 
 export type Access = "free" | "paid";
 
@@ -39,7 +40,7 @@ export interface SectionMeta {
 /** Содержимое раздела: толкование и подписи позиций. Для платных живёт на сервере. */
 export interface SectionDetail {
   lead: string;
-  positions: (m: Matrix) => Array<[string, number]>;
+  positions: (m: Matrix) => Array<[string, number, string]>;
 }
 
 export function arcanumHref(arcanum: number): string {
@@ -91,59 +92,51 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
  * тестов. Теперь источник один: правится в движке, снимок пересобирается вместе с контентом.
  */
 import catalog from "@/content/sections.json";
+import pointCatalog from "@/content/points-catalog.json";
 
-export const CATALOG: SectionMeta[] = (catalog.items as SectionMeta[]).map((s) => ({
+interface PublicSectionRow extends SectionMeta {
+  lead?: string;
+  positions?: SectionPositionDefinition[];
+}
+
+const ROWS = catalog.items as PublicSectionRow[];
+
+if (ROWS.length !== 20 || new Set(ROWS.map((row) => row.key)).size !== 20) {
+  throw new Error(`sections.json: ожидалось 20 уникальных разделов, получено ${ROWS.length}`);
+}
+
+export const CATALOG: SectionMeta[] = ROWS.map((s) => ({
   key: s.key,
   title: s.title,
   access: s.access,
 }));
 
-export const FREE_DETAIL: Record<string, SectionDetail> = {
-  character: {
-    lead: "Как вы устроены и что в вас видят люди с первого взгляда.",
-    positions: (m) => [
-      ["Портрет личности", m.day],
-      ["Духовная задача", m.month],
-      ["Материальная задача", m.year],
-    ],
-  },
-  comfort: {
-    lead: "Центр E и две внутренние точки каналов на вертикальной оси.",
-    positions: (m) => [
-      ["Центр карты", m.center],
-      ["Вход линии отношений и хвоста", m.comfort_south],
-      ["Внутренняя точка таланта", m.comfort_north],
-    ],
-  },
-};
+export const FREE_DETAIL: Record<string, SectionDetail> = Object.fromEntries(
+  ROWS.filter((row) => row.access === "free").map((row) => {
+    if (!row.lead || !row.positions?.length) {
+      throw new Error(`sections.json: у бесплатного раздела ${row.key} нет содержимого`);
+    }
+    return [
+      row.key,
+      { lead: row.lead, positions: (matrix: Matrix) => resolveSectionPositions(row.positions!, matrix) },
+    ];
+  }),
+);
+
+/** Точки, значения которых уже видны в двух бесплатных разделах. */
+export const FREE_POSITION_KEYS: string[] = [
+  ...new Set(
+    ROWS.filter((row) => row.access === "free").flatMap((row) =>
+      (row.positions ?? []).map((position) => position.position_key),
+    ),
+  ),
+];
 
 /**
  * Разбор для браузера: два бесплатных раздела посчитаны, восемнадцать платных — только именем.
  * Толкования и позиции платных приходят с сервера отрисованной страницей, здесь их нет и быть
  * не может.
  */
-// Позиции, у которых есть собственное толкование. Без этой карты весь раздел печатался пулом
-// ведущей позиции: под «Комфортом в отношениях» стоял текст про центр карты.
-export const POINT_KEY: Record<string, string> = {
-  "Портрет личности": "day",
-  "Духовная задача": "month",
-  "Материальная задача": "year",
-  "Центр карты": "center",
-  "Вход линии отношений и хвоста": "comfort_south",
-  "Внутренняя точка таланта": "comfort_north",
-  "Внутренняя левая точка": "comfort_west",
-  "Вход денежной линии": "comfort_east",
-  "Кармическая задача": "mission",
-  "Личное предназначение": "purpose_personal",
-  "Социальное предназначение": "purpose_social",
-  "Духовное предназначение": "harmony",
-  "Планетарное предназначение": "planetary",
-  "Материальная женская линия рода": "inheritance",
-  "Духовная мужская линия рода": "father_line",
-  "Духовная женская линия рода": "mother_line",
-  "Материальная мужская линия рода": "descendants",
-};
-
 export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
   return CATALOG.map((meta) => {
     const detail = meta.access === "free" ? FREE_DETAIL[meta.key] : undefined;
@@ -156,8 +149,7 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
         // текст ключуется позицией, а не разделом; повтор аркана внутри раздела печатался
         // дословно дважды — вместо второго абзаца отсылка к первому
         const seen = new Map<string, string>();
-        return (detail?.positions(m) ?? []).map(([label, arcanum]) => {
-          const key = POINT_KEY[label] ?? meta.key;
+        return (detail?.positions(m) ?? []).map(([label, arcanum, key]) => {
           const mark = `${key}:${arcanum}`;
           const first = seen.get(mark);
           if (!first) seen.set(mark, label);
@@ -175,28 +167,22 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
   });
 }
 
-// Точки карты: ключи считает тип, поэтому новое числовое поле матрицы не проскочит без
-// подписи, а исчезнувшее уронит сборку.
+// Подписи точек приходят из content/data/points.json через компактный клиентский каталог.
+// Полный positions.json сюда импортировать нельзя: вместе с подписями он положил бы в браузер
+// весь корпус энциклопедии.
 type ScalarKey = { [K in keyof Matrix]-?: Matrix[K] extends number ? K : never }[keyof Matrix];
 
-export const POINT_LABELS: Record<ScalarKey, string> = {
-  day: "Портрет личности — точка A",
-  month: "Духовная задача — точка B",
-  year: "Материальная задача — точка C",
-  mission: "Кармическая задача — точка D",
-  center: "Центр карты — зона комфорта",
-  father_line: "Духовная мужская линия рода — точка F",
-  mother_line: "Духовная женская линия рода — точка G",
-  descendants: "Материальная мужская линия рода — точка H",
-  inheritance: "Материальная женская линия рода — точка I",
-  comfort_west: "Внутренняя левая точка — J",
-  comfort_north: "Внутренняя точка таланта — K",
-  comfort_east: "Вход денежной линии — L",
-  comfort_south: "Вход линии отношений и хвоста — M",
-  harmony: "Духовное предназначение",
-  planetary: "Планетарное предназначение",
-  purpose_personal: "Личное предназначение",
-  purpose_social: "Социальное предназначение",
-};
+const POINT_ROWS = pointCatalog.items as Array<{ key: ScalarKey; report_label: string }>;
+if (
+  POINT_ROWS.length !== 17
+  || new Set(POINT_ROWS.map((row) => row.key)).size !== POINT_ROWS.length
+  || POINT_ROWS.some((row) => !row.key || !row.report_label)
+) {
+  throw new Error("points-catalog.json: ожидалось 17 уникальных подписанных точек");
+}
 
-export const POINT_KEYS = Object.keys(POINT_LABELS) as ScalarKey[];
+export const POINT_LABELS = Object.fromEntries(
+  POINT_ROWS.map((row) => [row.key, row.report_label]),
+) as Record<ScalarKey, string>;
+
+export const POINT_KEYS = POINT_ROWS.map((row) => row.key);

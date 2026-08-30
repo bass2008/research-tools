@@ -17,6 +17,7 @@ import { YEAR_HUB, arcanumHref, yearHref } from "@/lib/encyclopedia";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
 import { pageMeta } from "@/lib/site";
+import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { key: string };
 
@@ -72,7 +73,7 @@ export default async function YearPage({ params }: { params: Promise<Params> }) 
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          { name: "Матрица судьбы на год", path: "/encyclopedia?sec=yer" },
+          encyclopediaSectionCrumb("yer"),
           { name: /^\d{4}$/.test(key) ? `Матрица судьбы на ${key} год` : `${key} на год` },
         ]}
       />

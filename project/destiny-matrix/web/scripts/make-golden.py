@@ -30,6 +30,8 @@ WEB_GOLDEN_FILE = WEB / "lib" / "__fixtures__" / "golden.json"
 PARITY_FILE = SPEC / "parity-digests.json"
 WEB_PARITY_FILE = WEB / "lib" / "__fixtures__" / "parity-digests.json"
 WEB_METHOD_FILE = WEB / "lib" / "__fixtures__" / "method.json"
+SECTIONS_FILE = SPEC / "sections.json"
+WEB_SECTIONS_FILE = WEB / "lib" / "__fixtures__" / "sections.json"
 
 
 def canonical(value: object) -> bytes:
@@ -120,6 +122,7 @@ def main() -> None:
     write_json(PARITY_FILE, digests)
     shutil.copyfile(PARITY_FILE, WEB_PARITY_FILE)
     shutil.copyfile(METHOD_FILE, WEB_METHOD_FILE)
+    shutil.copyfile(SECTIONS_FILE, WEB_SECTIONS_FILE)
 
     free = sum(1 for section in cases[0]["sections_locked"] if section["access"] == "free")
     print(

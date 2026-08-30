@@ -13,6 +13,7 @@ import { chakraContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
+import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { key: string };
 
@@ -30,11 +31,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   // несуществующая страница выглядела как главная.
   if (!c) return NOT_FOUND_META;
   const extra = chakraContent(c.key);
+  if (!extra) throw new Error(`нет канонического материала чакры ${c.key}`);
   return pageMeta({
-    title: extra?.seo?.title ?? `${c.title} — чакра ${c.index} в матрице судьбы`,
-    description:
-      extra?.seo?.description ??
-      `${c.title}: ${c.hint}. Как уровень читается в трёх колонках карты энергий — физика, энергия и эмоции.`,
+    title: extra.seo.title,
+    description: extra.seo.description,
     path: chakraHref(c.key),
     article: true,
   });
@@ -44,17 +44,9 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
   const c = chakraByKey((await params).key);
   if (!c) notFound();
   const extra = chakraContent(c.key);
-  const paragraphs = extra?.level ?? c.paragraphs;
-  const title = extra?.seo?.title ?? `${c.title} — чакра ${c.index} в матрице судьбы`;
-  const axis: Record<string, string> = {
-    sahasrara: "A и B",
-    ajna: "O и P",
-    vishuddha: "J и K",
-    anahata: "S и T",
-    manipura: "E и E",
-    svadhisthana: "L и M",
-    muladhara: "C и D",
-  };
+  if (!extra) throw new Error(`нет канонического материала чакры ${c.key}`);
+  const paragraphs = extra.level;
+  const title = extra.seo.title;
 
   return (
     <>
@@ -63,14 +55,14 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          { name: "Семь чакр", path: "/encyclopedia?sec=chk" },
+          encyclopediaSectionCrumb("chk"),
           { name: c.title },
         ]}
       />
         <JsonLd
           data={articleLd({
             headline: title,
-            description: extra?.seo?.description ?? c.hint,
+            description: extra.seo.description,
             path: chakraHref(c.key),
           })}
         />
@@ -86,7 +78,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           ))}
           <h2>Как считается уровень</h2>
           <p>
-            В карте энергий уровень {c.title} использует классическую пару точек {axis[c.key]}.
+            В карте энергий уровень {c.title} использует классическую пару точек {c.physics} и {c.energy}.
             Первое число записывается в колонку физики, второе — энергии, эмоции равны их
             редуцированной сумме. Искусственного смещения по номеру строки в методике нет.
           </p>
@@ -98,7 +90,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           </p>
         </div>
 
-        {extra?.columns ? (
+        {extra.columns.length ? (
           <div className="panel section-gap">
             <h3>Три колонки уровня</h3>
             <div className="cap">Материя, энергия и чувства на этом уровне</div>

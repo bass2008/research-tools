@@ -17,6 +17,8 @@ from pathlib import Path
 
 from engine.matrix import CHAKRAS as CHAKRA_ROWS, COLUMNS
 from engine.sections import SPEC
+from .source import POINTS
+from .text_policy import STYLE_PATTERNS, blocked_match
 
 CONTENT_DIR = Path(os.environ.get(
     "ENCYCLOPEDIA_CONTENT_DIR",
@@ -24,10 +26,7 @@ CONTENT_DIR = Path(os.environ.get(
 FILES = ("arcana.json", "combinations.json", "positions.json", "chakras.json")
 
 SECTION_KEYS = [key for key, *_ in SPEC]
-POINT_KEYS = ["day", "month", "year", "mission", "center",
-              "father_line", "mother_line", "descendants", "inheritance",
-              "comfort_west", "comfort_north", "comfort_east", "comfort_south",
-              "harmony", "planetary", "purpose_personal", "purpose_social"]
+POINT_KEYS = [point["key"] for point in POINTS]
 
 MIN_MEANING = 180
 MIN_POSITION_TEXT = 140
@@ -38,26 +37,6 @@ SHORT_LIMIT = 90
 OPENING_LIMIT_PAIRS = 4
 OPENING_LIMIT_SECTION = 3
 HEAD_LEN = 30
-
-BANNED = tuple(re.compile(p) for p in (
-    r"\bявляет(ся|ются)\b", r"\bданн(ый|ая|ое|ого|ые|ых)\b", r"\bосуществля\w*",
-    r"\bв рамках\b", r"\bследует отметить\b", r"\bнеобходимо отметить\b",
-    r"\bтаким образом\b", r"\bв связи с этим\b", r"\bвышеуказан\w*", r"\bвышеупомян\w*",
-    r"\bв целях\b", r"\bимеет место\b", r"\bнапрямую зависит\b",
-    r"\bиграет важную роль\b", r"\bне стоит забывать\b", r"\bпринимая во внимание\b",
-))
-
-# Юридический фильтр, отдельный от стилевого. Реклама гадания в Директе разрешена без
-# документов, а «народная медицина и целительство» требует разрешения органа власти субъекта РФ.
-# Границы слов обязательны: без них «влечение» и «развлечения» ловятся как «лечение», и
-# правится не то, что нужно.
-MEDICAL = tuple(re.compile(p) for p in (
-    r"\bздоровь\w*", r"\bболезн\w*", r"\bзаболеван\w*", r"\bдиагноз\w*",
-    r"\bлечени\w*", r"\bлечить\w*", r"\bисцел\w*", r"\bцелител\w*",
-    r"\bсимптом\w*", r"\bтерапи\w*", r"\bпрепарат\w*", r"\bиммунит\w*",
-    r"\bпохуден\w*", r"\bнабор веса\b", r"\bалкогол\w*", r"\bвыздоравл\w*",
-    r"\bврач\w*", r"\bклиник\w*", r"\bгарантиру\w*",
-))
 
 WORD_RE = re.compile(r"[а-яёa-z0-9]+", re.IGNORECASE)
 
@@ -124,9 +103,10 @@ def check_arcana(rep: Report, items: list[dict], prose: list[tuple[str, str]]) -
             prose.append((f"{who} · значение, абзац {i}", para))
         rep.check(len(a["plus"]) >= 3, f"{who}: плюсов {len(a['plus'])}, нужно 3+")
         rep.check(len(a["minus"]) >= 3, f"{who}: минусов {len(a['minus'])}, нужно 3+")
-        missing = [k for k in SECTION_KEYS if not a["in_positions"].get(k)]
+        expected_position_keys = SECTION_KEYS + POINT_KEYS
+        missing = [k for k in expected_position_keys if not a["in_positions"].get(k)]
         rep.check(not missing, f"{who}: нет текста в позициях {missing}")
-        extra = [k for k in a["in_positions"] if k not in SECTION_KEYS]
+        extra = [k for k in a["in_positions"] if k not in expected_position_keys]
         rep.check(not extra, f"{who}: лишние позиции {extra}")
         for key, text in a["in_positions"].items():
             rep.check(len(text) >= MIN_POSITION_TEXT,
@@ -309,16 +289,13 @@ def check_texts(rep: Report, prose: list[tuple[str, str]]) -> None:
             rep.fail(f"одинаковое начало текста: «{where}» и «{heads[head]}» — «{text[:40]}…»")
         else:
             heads.setdefault(head, where)
-        low = text.lower()
-        for pattern in BANNED:
-            found = pattern.search(low)
+        for pattern in STYLE_PATTERNS:
+            found = pattern.search(text)
             if found:
                 rep.fail(f"канцелярит «{found.group()}» в {where}")
-        for pattern in MEDICAL:
-            found = pattern.search(low)
-            if found:
-                rep.fail(f"медицинская лексика «{found.group()}» в {where}: "
-                         f"переводит рекламу в категорию, где нужно разрешение Минздрава")
+        blocked = blocked_match(text)
+        if blocked:
+            rep.fail(f"запрещённая лексика ({blocked.category}) «{blocked.matched}» в {where}")
 
 
 def check_openings(rep: Report, data: dict[str, dict]) -> None:
@@ -334,7 +311,8 @@ def check_openings(rep: Report, data: dict[str, dict]) -> None:
     per_section: dict[str, Counter[str]] = {k: Counter() for k in SECTION_KEYS}
     for a in data["arcana.json"]["items"]:
         for key, text in a["in_positions"].items():
-            per_section[key][opening(text)] += 1
+            if key in per_section:
+                per_section[key][opening(text)] += 1
     for key, counter in per_section.items():
         for start, count in counter.most_common():
             if count > OPENING_LIMIT_SECTION:

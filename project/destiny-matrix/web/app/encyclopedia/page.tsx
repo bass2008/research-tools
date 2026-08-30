@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { EncSection } from "@/components/enc/EncFrame";
@@ -15,7 +16,6 @@ import {
   allCombinationSlugs,
   arcanumHref,
   chakraHref,
-  combination,
   hubHref,
   karmicTailHref,
   parseTail,
@@ -29,9 +29,11 @@ import {
   karmicTails,
   yearArcanum,
   yearKeys,
+  positionContent,
 } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
 import { clip } from "@/lib/text";
+import { encyclopediaSection, type EncyclopediaSectionKey } from "@/lib/encyclopediaNavigation";
 
 export const metadata: Metadata = pageMeta({
   title: "Энциклопедия матрицы судьбы: арканы, позиции, чакры",
@@ -56,10 +58,19 @@ function rows(items: { key: string; title: string; lead: string }[]) {
   );
 }
 
+function tab(key: EncyclopediaSectionKey, count: number, body: ReactNode) {
+  return { ...encyclopediaSection(key), count, body };
+}
+
 export default function EncyclopediaIndexPage() {
   const combos = allCombinationSlugs();
-  const sections = POSITIONS.filter((p) => p.kind === "section");
-  const points = POSITIONS.filter((p) => p.kind === "point");
+  const withLead = (position: (typeof POSITIONS)[number]) => {
+    const content = positionContent(position.key);
+    if (!content) throw new Error(`нет канонического материала позиции ${position.key}`);
+    return { ...position, lead: content.lead };
+  };
+  const sections = POSITIONS.filter((p) => p.kind === "section").map(withLead);
+  const points = POSITIONS.filter((p) => p.kind === "point").map(withLead);
   // тройки — числа, а не строки: иначе 11-11-4 стоит после 11-11-22
   const tails = karmicTails()
     .slice()
@@ -75,12 +86,10 @@ export default function EncyclopediaIndexPage() {
     .sort((a, b) => (Number(a) || 1e6) - (Number(b) || 1e6) || a.localeCompare(b));
 
   const tabs = [
-    {
-      key: "arc",
-      title: "22 аркана",
-      count: ARCANA.length,
-      hint: "значение каждого числа",
-      body: (
+    tab(
+      "arc",
+      ARCANA.length,
+      (
         <div className="enc-deck">
           {ARCANA.map((a) => (
             <Link className="enc-card" key={a.n} href={arcanumHref(a.n)} prefetch={false}>
@@ -92,30 +101,18 @@ export default function EncyclopediaIndexPage() {
           ))}
         </div>
       ),
-    },
-    {
-      key: "sec",
-      title: "Разделы отчёта",
-      count: sections.length,
-      hint: "что показывает полный разбор",
-      body: rows(sections),
-    },
-    {
-      key: "pts",
-      title: "Позиции карты",
-      count: points.length,
-      hint: "точки октаграммы и линии рода",
-      body: rows(points),
-    },
-    {
-      key: "chk",
-      title: "Семь чакр",
-      count: CHAKRA_PAGES.length,
-      hint: "карта энергий по уровням",
-      body: (
+    ),
+    tab("sec", sections.length, rows(sections)),
+    tab("pts", points.length, rows(points)),
+    tab(
+      "chk",
+      CHAKRA_PAGES.length,
+      (
         <div className="chcol">
           {CHAKRA_PAGES.map((c) => {
-            const cols = chakraContent(c.key)?.columns ?? [];
+            const content = chakraContent(c.key);
+            if (!content) throw new Error(`нет канонического материала чакры ${c.key}`);
+            const cols = content.columns;
             return (
               <Link className={`chrow k${c.index}`} key={c.key} href={chakraHref(c.key)}>
                 <span className="chn">{c.index}</span>
@@ -134,13 +131,11 @@ export default function EncyclopediaIndexPage() {
           })}
         </div>
       ),
-    },
-    {
-      key: "tls",
-      title: "Кармические хвосты",
-      count: tails.length,
-      hint: "тройки нижнего угла карты",
-      body: (
+    ),
+    tab(
+      "tls",
+      tails.length,
+      (
         <div className="enc-tails">
           {tails.map((t) => {
             const arcana = parseTail(t.key) ?? [];
@@ -160,13 +155,11 @@ export default function EncyclopediaIndexPage() {
           })}
         </div>
       ),
-    },
-    {
-      key: "yer",
-      title: "Матрица судьбы на год",
-      count: years.length,
-      hint: "аркан в рамке персонального года",
-      body: (
+    ),
+    tab(
+      "yer",
+      years.length,
+      (
         <div className="enc-years">
           {years.map((key) => {
             const item = yearArcanum(key);
@@ -185,13 +178,11 @@ export default function EncyclopediaIndexPage() {
           })}
         </div>
       ),
-    },
-    {
-      key: "cmb",
-      title: "Сочетания арканов",
-      count: combos.length,
-      hint: "пары арканов рядом",
-      body: (
+    ),
+    tab(
+      "cmb",
+      combos.length,
+      (
         <div className="enc-matrix">
           <table className="mx">
             <thead>
@@ -228,13 +219,11 @@ export default function EncyclopediaIndexPage() {
           </table>
         </div>
       ),
-    },
-    {
-      key: "art",
-      title: "Статьи",
-      count: articleList().length,
-      hint: "разборы понятий целиком",
-      body: (
+    ),
+    tab(
+      "art",
+      articleList().length,
+      (
         <div className="enc-articles">
           {articleList().map((a) => (
             <Link className="enc-article" key={a.href} href={a.href}>
@@ -244,7 +233,7 @@ export default function EncyclopediaIndexPage() {
           ))}
         </div>
       ),
-    },
+    ),
   ];
 
   return (
@@ -269,12 +258,14 @@ export default function EncyclopediaIndexPage() {
           <Link href={KARMIC_TAIL_HUB}>
             Кармический хвост{tails.length ? ` · ${tails.length}` : ""}
           </Link>
-          <Link href={YEAR_HUB}>Матрица судьбы на год{years.length ? ` · ${years.length}` : ""}</Link>
+          <Link href={YEAR_HUB}>
+            {encyclopediaSection("yer").title}{years.length ? ` · ${years.length}` : ""}
+          </Link>
           {/* концепт-хабы появляются здесь вместе со статьёй: иначе страница попадала бы в
               карту сайта, не имея ни одной входящей ссылки */}
           {hubKeys().map((key) => (
             <Link key={key} href={hubHref(key)}>
-              {hub(key)?.title ?? key}
+              {hub(key)!.title}
             </Link>
           ))}
           <Link href="/matrix">Каталог матриц</Link>

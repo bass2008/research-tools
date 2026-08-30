@@ -79,7 +79,7 @@ export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
             десятилетиям до 80 лет.{" "}
             {thisDatePaid || anyDate
               ? null
-              : priceKnown
+              : priceKnown && lead
                 ? `${money(lead.price)} ₽ — один платёж, без подписки.`
                 : "Цена уточняется."}
           </p>

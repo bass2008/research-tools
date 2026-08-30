@@ -18,50 +18,22 @@ import {
 } from "@/lib/encyclopedia";
 import { categoryHub, hub, hubKeys, karmicTails, yearKeys } from "@/lib/content";
 import { ENCYCLOPEDIA_SLIDES } from "@/lib/heroSlides";
+import { ENCYCLOPEDIA_SECTIONS, type EncyclopediaSectionKey } from "@/lib/encyclopediaNavigation";
 
 // Каркас справочника: первый экран, путь и меню разделов одни на все страницы энциклопедии
 // и на статьи-хабы, которые живут по своим адресам вне /encyclopedia.
 export function encSections() {
-  return [
-    { key: "arc", title: "22 аркана", count: ARCANA.length, hint: "значение каждого числа" },
-    {
-      key: "sec",
-      title: "Разделы отчёта",
-      count: POSITIONS.filter((p) => p.kind === "section").length,
-      hint: "что показывает полный разбор",
-    },
-    {
-      key: "pts",
-      title: "Позиции карты",
-      count: POSITIONS.filter((p) => p.kind !== "section").length,
-      hint: "точки октаграммы и линии рода",
-    },
-    { key: "chk", title: "Семь чакр", count: CHAKRA_PAGES.length, hint: "карта энергий по уровням" },
-    {
-      key: "tls",
-      title: "Кармические хвосты",
-      count: karmicTails().length,
-      hint: "тройки нижнего угла карты",
-    },
-    {
-      key: "yer",
-      title: "Матрица судьбы на год",
-      count: yearKeys().length,
-      hint: "аркан в рамке персонального года",
-    },
-    {
-      key: "cmb",
-      title: "Сочетания арканов",
-      count: allCombinationSlugs().length,
-      hint: "пары арканов рядом",
-    },
-    {
-      key: "art",
-      title: "Статьи",
-      count: articlePaths().length,
-      hint: "разборы понятий целиком",
-    },
-  ];
+  const counts: Record<EncyclopediaSectionKey, number> = {
+    arc: ARCANA.length,
+    sec: POSITIONS.filter((p) => p.kind === "section").length,
+    pts: POSITIONS.filter((p) => p.kind !== "section").length,
+    chk: CHAKRA_PAGES.length,
+    tls: karmicTails().length,
+    yer: yearKeys().length,
+    cmb: allCombinationSlugs().length,
+    art: articlePaths().length,
+  };
+  return ENCYCLOPEDIA_SECTIONS.map((section) => ({ ...section, count: counts[section.key] }));
 }
 
 // Статья-шапка категории («Кармический хвост», «Матрица судьбы на год») — такой же разбор
@@ -69,11 +41,12 @@ export function encSections() {
 export function articleList(): { href: string; title: string; crumb: string; short: string }[] {
   const hubs = hubKeys().map((key) => {
     const item = hub(key);
+    if (!item) throw new Error(`нет канонического материала хаба ${key}`);
     return {
       href: hubHref(key),
-      title: item?.title ?? key,
+      title: item.title,
       crumb: hubCrumb(key),
-      short: item?.short ?? "",
+      short: item.short,
     };
   });
   const cats = [
@@ -81,8 +54,8 @@ export function articleList(): { href: string; title: string; crumb: string; sho
     { key: "na-god", href: YEAR_HUB },
   ].map(({ key, href }) => {
     const item = categoryHub(key);
-    const crumb = key === "karmic-tail" ? "Кармический хвост" : "Матрица судьбы на год";
-    return { href, title: item?.title ?? key, crumb, short: item?.short ?? "" };
+    if (!item?.crumb) throw new Error(`нет канонического материала или crumb хаба ${key}`);
+    return { href, title: item.title, crumb: item.crumb, short: item.short };
   });
   // «Об авторе» замыкает список, поэтому шапки категорий встают перед ней
   const last = hubs.pop();

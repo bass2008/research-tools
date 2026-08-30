@@ -12,9 +12,9 @@ import { useLead, usePriceKnown, useTariffs } from "@/components/pay/TariffsProv
  */
 export default function Price({ id }: { id?: string }) {
   const items = useTariffs();
-  const fallback = useLead();
+  const main = useLead();
   const known = usePriceKnown();
-  const t = (id ? byId(items, id) : undefined) ?? fallback;
-  if (!known) return <span className="nowrap price-wait">уточняется</span>;
+  const t = id ? byId(items, id) : main;
+  if (!known || !t) return <span className="nowrap price-wait">уточняется</span>;
   return <span className="nowrap">{money(t.price)} ₽</span>;
 }

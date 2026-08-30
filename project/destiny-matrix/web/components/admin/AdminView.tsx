@@ -153,8 +153,6 @@ export default function AdminView() {
         </dl>
       </div>
 
-      <AdminSettings />
-
       <div className="panel section-gap">
         <h3>Пользователи</h3>
         <div className="cap">
@@ -403,6 +401,8 @@ export default function AdminView() {
           </table>
         </div>
       </div>
+
+      <AdminSettings />
     </>
   );
 }

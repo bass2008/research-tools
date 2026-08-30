@@ -1,40 +1,19 @@
-// Чтение сгенерированного контента энциклопедии из web/content на сборке.
-// Файлы пишет генератор (content/encyclopedia), и он может быть не готов или писать
-// прямо во время сборки — поэтому загрузка терпимая: любая проблема означает
-// «берём встроенный корпус», а не падение сборки.
+// Strict server-side reader for generated encyclopedia content. Missing or malformed canonical
+// data is a failed build, never a reason to publish a second embedded version of an article.
 import fs from "node:fs";
 import path from "node:path";
 
-import { builtInPositionText } from "./positionTexts";
 import type { Matrix } from "./matrix";
+import { isBlockedText } from "./textPolicy";
 
 const DIR = path.join(process.cwd(), "content");
 
 type Bag = Record<string, unknown>;
 
-// Гигиена текста. Реклама гадания разрешена без документов, а народная медицина и
-// целительство требуют разрешения органа власти субъекта РФ — получить его невозможно.
-// Поэтому любое поле с медицинской лексикой отбрасывается целиком, даже если оно
-// пришло из генератора и даже если слово стоит в отрицании: приёмка ловит грепом,
-// а не смыслом. Отброшенное поле заменяется встроенным корпусом.
-// Границы корня обязательны: без них «влечение» и «развлечения» ловились как «лечение», и
-// вместе с ними отбрасывались целые статьи — на страницу вставала встроенная заглушка.
-// `\b` в JS кириллицу не знает, поэтому граница задана явно. Тот же список, что в
-// content/validate.py: расхождение означало бы, что приёмка и показ проверяют разное.
-const BANNED = [
-  "лечени", "лечить", "лечит", "лечен(ие|ия|ию|ием)", "диагноз", "заболеван", "исцел",
-  "целител", "болезн", "симптом", "терапи", "препарат", "набор веса", "алкогол", "похуден",
-  "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник", "гарантиру",
-  "уязвимые зоны",
-].map((root) => new RegExp(`(^|[^а-яёa-z0-9])${root}`, "i"));
-
 let rejected = 0;
-// статьи, отброшенные целиком: без счётчика сданная статья просто не появлялась на сайте, и
-// причину приходилось искать глазами
-let dropped = 0;
 
 function safe(text: string): boolean {
-  if (BANNED.some((re) => re.test(text))) {
+  if (isBlockedText(text)) {
     rejected++;
     return false;
   }
@@ -46,24 +25,32 @@ function readItems(file: string): Bag[] {
     const raw = fs.readFileSync(path.join(DIR, file), "utf8");
     const parsed = JSON.parse(raw) as unknown;
     const items = (parsed as { items?: unknown })?.items ?? parsed;
-    return Array.isArray(items) ? (items as Bag[]) : [];
-  } catch {
-    return [];
+    if (!Array.isArray(items)) throw new Error("корень должен содержать массив items");
+    const count = (parsed as { count?: unknown })?.count;
+    if (typeof count === "number" && count !== items.length) {
+      throw new Error(`count=${count}, фактически ${items.length}`);
+    }
+    return items as Bag[];
+  } catch (error) {
+    throw new Error(`[content] не удалось загрузить ${file}: ${String(error)}`, { cause: error });
   }
 }
 
 function strings(v: unknown, min = 1): string[] | null {
-  if (!Array.isArray(v)) return null;
-  const out = v.filter((x): x is string => typeof x === "string" && x.trim().length > 20);
-  if (out.length < min) return null;
-  return out.every(safe) ? out : null;
+  if (!Array.isArray(v) || v.length < min) return null;
+  if (!v.every((value) => typeof value === "string" && value.trim().length > 20 && safe(value))) {
+    return null;
+  }
+  return v as string[];
 }
 
 function stringMap(v: unknown): Record<string, string> | null {
   if (!v || typeof v !== "object" || Array.isArray(v)) return null;
   const out: Record<string, string> = {};
   for (const [k, val] of Object.entries(v as Bag)) {
-    if (typeof val === "string" && val.trim() && safe(val)) out[k] = val;
+    if (typeof val !== "string") continue;
+    if (!val.trim() || !safe(val)) return null;
+    out[k] = val;
   }
   return Object.keys(out).length ? out : null;
 }
@@ -137,6 +124,8 @@ export interface ArticleContent {
   related: string[];
   arcana: number[];
   entityType?: string;
+  crumb?: string;
+  order?: number;
   publication: {
     index: boolean;
     follow: boolean;
@@ -148,7 +137,7 @@ export interface ArticleContent {
 
 // Статья попадает на сайт целиком или не попадает вовсе: половина полей — это страница без
 // первого экрана или без текста, а такую лучше не публиковать, чем публиковать пустой шаблон.
-function articleOf(raw: Bag, keyField: string): ArticleContent | null {
+function articleOf(raw: Bag, keyField: string): ArticleContent {
   const key = raw[keyField];
   const id = typeof key === "number" ? String(key) : typeof key === "string" ? key.trim() : "";
   const title = typeof raw.title === "string" ? raw.title.trim() : "";
@@ -156,12 +145,10 @@ function articleOf(raw: Bag, keyField: string): ArticleContent | null {
   const short = typeof raw.short === "string" ? raw.short.trim() : "";
   const sections = sectionsOf(raw.sections);
   if (!id || !title || !seo || short.length < 60 || !sections) {
-    dropped++;
-    return null;
+    throw new Error(`[content] статья ${id || "без ключа"} не прошла обязательную схему`);
   }
   if (!safe(title) || !safe(short)) {
-    dropped++;
-    return null;
+    throw new Error(`[content] статья ${id} содержит запрещённую лексику`);
   }
   // queries уходят в keywords разметки, то есть публикуются: гигиена им нужна такая же, как
   // прозе, иначе медицинская формулировка обходит фильтр через поле «поисковые запросы»
@@ -184,6 +171,8 @@ function articleOf(raw: Bag, keyField: string): ArticleContent | null {
     related: keys(raw.related) ?? [],
     arcana: numbers(raw.arcana) ?? [],
     entityType: typeof raw.entity_type === "string" ? raw.entity_type : undefined,
+    crumb: typeof raw.crumb === "string" && raw.crumb.trim() ? raw.crumb.trim() : undefined,
+    order: typeof raw.order === "number" ? raw.order : undefined,
     publication: {
       // Старые категории до переезда на publication-registry остаются индексируемыми. Для
       // хвостов поле обязательно проверяет build-content.py, поэтому fallback здесь их не
@@ -206,7 +195,8 @@ function articles(file: string, keyField = "key"): Map<string, ArticleContent> {
   const m = new Map<string, ArticleContent>();
   for (const raw of readItems(file)) {
     const item = articleOf(raw, keyField);
-    if (item) m.set(item.key, item);
+    if (m.has(item.key)) throw new Error(`[content] ${file}: повтор ключа ${item.key}`);
+    m.set(item.key, item);
   }
   return m;
 }
@@ -215,7 +205,11 @@ function index<K extends string | number>(items: Bag[], key: string): Map<K, Bag
   const m = new Map<K, Bag>();
   for (const it of items) {
     const k = it[key];
-    if (typeof k === "string" || typeof k === "number") m.set(k as K, it);
+    if (typeof k !== "string" && typeof k !== "number") {
+      throw new Error(`[content] запись без ключа ${key}`);
+    }
+    if (m.has(k as K)) throw new Error(`[content] повтор ключа ${String(k)}`);
+    m.set(k as K, it);
   }
   return m;
 }
@@ -246,6 +240,19 @@ const KARMIC_TAILS = articles("karmic-tails.json");
 const CATEGORY_HUBS = articles("category-hubs.json");
 const YEAR_ARCANA = articles("year-arcana.json", "n");
 const HUBS = articles("hubs.json");
+
+for (const [name, actual, expected] of [
+  ["arcana.json", ARCANA_JSON.size, 22],
+  ["positions.json", POSITIONS_JSON.size, 37],
+  ["chakras.json", CHAKRAS_JSON.size, 7],
+  ["combinations.json", COMBINATIONS_JSON.size, 231],
+  ["karmic-tails.json", KARMIC_TAILS.size, 26],
+  ["year-arcana.json", YEAR_ARCANA.size, 23],
+  ["category-hubs.json", CATEGORY_HUBS.size, 2],
+  ["hubs.json", HUBS.size, 5],
+] as const) {
+  if (actual !== expected) throw new Error(`[content] ${name}: ожидалось ${expected}, получено ${actual}`);
+}
 
 export function karmicTail(key: string): ArticleContent | null {
   return KARMIC_TAILS.get(key) ?? null;
@@ -281,140 +288,251 @@ export function hub(key: string): ArticleContent | null {
   return HUBS.get(key) ?? null;
 }
 
-// Порядок статей задан смыслом, а не алфавитом ключей: сначала как считается матрица, потом
-// понятия, «Об авторе» — последней.
-const HUB_ORDER = ["o-metode", "energii", "programmy", "karmicheskaya-matrica", "avtor"];
-
 export function hubKeys(): string[] {
-  const keys = [...HUBS.keys()];
-  return keys.sort((a, b) => {
-    const ia = HUB_ORDER.indexOf(a);
-    const ib = HUB_ORDER.indexOf(b);
-    return (ia < 0 ? HUB_ORDER.length : ia) - (ib < 0 ? HUB_ORDER.length : ib);
-  });
-}
-
-if (dropped > 0) {
-  console.warn(
-    `[content] ${dropped} статей отброшено валидацией: нужны key, title, seo.title, ` +
-      "seo.description, short от 60 знаков и хотя бы одна секция с абзацем",
-  );
+  return [...HUBS.values()]
+    .sort((a, b) => {
+      if (a.order === undefined || b.order === undefined) {
+        throw new Error(`[content] у хаба ${a.order === undefined ? a.key : b.key} нет order`);
+      }
+      return a.order - b.order;
+    })
+    .map((item) => item.key);
 }
 
 export interface ArcanumContent {
-  short?: string;
-  keywords?: string[];
-  meaning?: string[];
-  inPositions?: Record<string, string>;
-  plus?: string[];
-  minus?: string[];
-  seo?: { title: string; description: string };
-  sections?: Section[];
-  faq?: QA[];
+  n: number;
+  slug: string;
+  title: string;
+  roman: string;
+  short: string;
+  keywords: string[];
+  meaning: string[];
+  inPositions: Record<string, string>;
+  plus: string[];
+  minus: string[];
+  combinations: Array<{ with: number; title: string; href: string; short: string }>;
+  seo: { title: string; description: string };
+  sections: Section[];
+  faq: QA[];
 }
 
 export function arcanumContent(n: number): ArcanumContent | null {
   const raw = ARCANA_JSON.get(n);
   if (!raw) return null;
-  const out: ArcanumContent = {};
-  if (typeof raw.short === "string" && raw.short.length > 10 && safe(raw.short)) out.short = raw.short;
-  const kw = Array.isArray(raw.keywords)
-    ? raw.keywords.filter((x): x is string => typeof x === "string" && x.length > 1)
-    : null;
-  if (kw && kw.length >= 3 && kw.every(safe)) out.keywords = kw;
+  const title = typeof raw.title === "string" && safe(raw.title) ? raw.title : null;
+  const slug = typeof raw.slug === "string" ? raw.slug : null;
+  const roman = typeof raw.roman === "string" ? raw.roman : null;
+  const short = typeof raw.short === "string" && raw.short.length > 10 && safe(raw.short) ? raw.short : null;
+  const keywords = Array.isArray(raw.keywords)
+    ? raw.keywords.filter((value): value is string => typeof value === "string" && value.length > 1)
+    : [];
   const meaning = strings(raw.meaning, 3);
-  if (meaning) out.meaning = meaning;
-  const pos = stringMap(raw.in_positions);
-  if (pos) out.inPositions = pos;
-  const plus = Array.isArray(raw.plus) ? raw.plus.filter((x): x is string => typeof x === "string") : null;
-  if (plus && plus.length >= 3 && plus.every(safe)) out.plus = plus;
-  const minus = Array.isArray(raw.minus) ? raw.minus.filter((x): x is string => typeof x === "string") : null;
-  if (minus && minus.length >= 3 && minus.every(safe)) out.minus = minus;
+  const inPositions = stringMap(raw.in_positions);
+  const plus = Array.isArray(raw.plus) ? raw.plus.filter((value): value is string => typeof value === "string") : [];
+  const minus = Array.isArray(raw.minus) ? raw.minus.filter((value): value is string => typeof value === "string") : [];
   const seo = seoOf(raw.seo);
-  if (seo) out.seo = seo;
-  const sections = sectionsOf(raw.sections);
-  if (sections) out.sections = sections;
-  const faq = faqOf(raw.faq);
-  if (faq) out.faq = faq;
-  return Object.keys(out).length ? out : null;
+  const combinations = Array.isArray(raw.combinations)
+    ? (raw.combinations as Bag[]).map((item) => ({
+        with: item.with,
+        title: item.title,
+        href: item.href,
+        short: item.short,
+      }))
+    : [];
+  const validCombinations = combinations.every(
+    (item) =>
+      typeof item.with === "number" &&
+      typeof item.title === "string" &&
+      typeof item.href === "string" &&
+      typeof item.short === "string" &&
+      safe(item.title) &&
+      safe(item.short),
+  );
+  if (
+    raw.n !== n ||
+    !title ||
+    !slug ||
+    !roman ||
+    !short ||
+    keywords.length < 3 ||
+    !keywords.every(safe) ||
+    !meaning ||
+    !inPositions ||
+    Object.keys(inPositions).length !== 37 ||
+    plus.length < 3 ||
+    !plus.every(safe) ||
+    minus.length < 3 ||
+    !minus.every(safe) ||
+    combinations.length !== 21 ||
+    !validCombinations ||
+    !seo
+  ) {
+    throw new Error(`[content] аркан ${n} не прошёл обязательную схему`);
+  }
+  return {
+    n,
+    slug,
+    title,
+    roman,
+    short,
+    keywords,
+    meaning,
+    inPositions,
+    plus,
+    minus,
+    combinations: combinations as ArcanumContent["combinations"],
+    seo,
+    sections: sectionsOf(raw.sections) ?? [],
+    faq: faqOf(raw.faq) ?? [],
+  };
 }
 
 export interface PositionContent {
-  meaning?: string[];
-  reading?: string;
-  seo?: { title: string; description: string };
-  sections?: Section[];
-  faq?: QA[];
+  key: string;
+  kind: "section" | "point";
+  title: string;
+  lead: string;
+  formula: string;
+  meaning: string[];
+  reading: string;
+  seo: { title: string; description: string };
+  sections: Section[];
+  faq: QA[];
+  points: Array<{ key: string; title: string }>;
 }
 
 export function positionContent(key: string): PositionContent | null {
   const raw = POSITIONS_JSON.get(key);
   if (!raw) return null;
-  const out: PositionContent = {};
+  const kind = raw.kind === "section" || raw.kind === "point" ? raw.kind : null;
+  const title = typeof raw.title === "string" && safe(raw.title) ? raw.title : null;
+  const lead = typeof raw.lead === "string" && raw.lead.length > 20 && safe(raw.lead) ? raw.lead : null;
+  const formula = typeof raw.formula === "string" && raw.formula.length > 5 && safe(raw.formula) ? raw.formula : null;
   const meaning = strings(raw.meaning, 2);
-  if (meaning) out.meaning = meaning;
-  if (typeof raw.reading === "string" && raw.reading.length > 40 && safe(raw.reading)) out.reading = raw.reading;
+  const reading = typeof raw.reading === "string" && raw.reading.length > 40 && safe(raw.reading) ? raw.reading : null;
   const seo = seoOf(raw.seo);
-  if (seo) out.seo = seo;
-  const sections = sectionsOf(raw.sections);
-  if (sections) out.sections = sections;
-  const faq = faqOf(raw.faq);
-  if (faq) out.faq = faq;
-  return Object.keys(out).length ? out : null;
+  const points = Array.isArray(raw.points)
+    ? (raw.points as Bag[]).map((point) => ({
+        key: typeof point.key === "string" ? point.key : "",
+        title: typeof point.title === "string" ? point.title.trim() : "",
+        href: typeof point.href === "string" ? point.href : "",
+      }))
+    : [];
+  const validPoints = points.every(
+    (point) =>
+      point.key &&
+      point.title &&
+      safe(point.title) &&
+      point.href === `/encyclopedia/position/${point.key}` &&
+      POSITIONS_JSON.get(point.key)?.kind === "point",
+  );
+  if (
+    raw.key !== key ||
+    !kind ||
+    !title ||
+    !lead ||
+    !formula ||
+    !meaning ||
+    !reading ||
+    !seo ||
+    !validPoints ||
+    (kind === "point" && points.length !== 0)
+  ) {
+    throw new Error(`[content] позиция ${key} не прошла обязательную схему`);
+  }
+  return {
+    key,
+    kind,
+    title,
+    lead,
+    formula,
+    meaning,
+    reading,
+    seo,
+    sections: sectionsOf(raw.article_sections) ?? [],
+    faq: faqOf(raw.faq) ?? [],
+    points: points.map(({ key: pointKey, title: pointTitle }) => ({
+      key: pointKey,
+      title: pointTitle,
+    })),
+  };
 }
 
 export interface ChakraContent {
-  level?: string[];
-  columns?: Array<{ title: string; text: string }>;
-  seo?: { title: string; description: string };
+  key: string;
+  title: string;
+  hint: string;
+  level: string[];
+  columns: Array<{ key: string; title: string; text: string }>;
+  seo: { title: string; description: string };
 }
 
 export function chakraContent(key: string): ChakraContent | null {
   const raw = CHAKRAS_JSON.get(key);
   if (!raw) return null;
-  const out: ChakraContent = {};
   const level = strings(raw.level, 1);
-  if (level) out.level = level;
-  if (Array.isArray(raw.columns)) {
-    const cols = (raw.columns as Bag[])
-      .map((c) => ({ title: String(c.title ?? ""), text: String(c.text ?? "") }))
-      .filter((c) => c.title && c.text.length > 40 && safe(c.text) && safe(c.title));
-    if (cols.length) out.columns = cols;
-  }
+  const columns = Array.isArray(raw.columns)
+    ? (raw.columns as Bag[]).map((column) => ({
+        key: String(column.key ?? ""),
+        title: String(column.title ?? ""),
+        text: String(column.text ?? ""),
+      }))
+    : [];
   const seo = seoOf(raw.seo);
-  if (seo) out.seo = seo;
-  return Object.keys(out).length ? out : null;
+  const title = typeof raw.title === "string" && safe(raw.title) ? raw.title : null;
+  const hint = typeof raw.hint === "string" && safe(raw.hint) ? raw.hint : null;
+  if (
+    raw.key !== key ||
+    !title ||
+    !hint ||
+    !level ||
+    columns.length !== 3 ||
+    !columns.every((column) => column.key && column.title && column.text.length > 40 && safe(column.title) && safe(column.text)) ||
+    !seo
+  ) {
+    throw new Error(`[content] чакра ${key} не прошла обязательную схему`);
+  }
+  return { key, title, hint, level, columns, seo };
 }
 
 export interface CombinationContent {
-  title?: string;
-  short?: string;
-  meaning?: string[];
-  seo?: { title: string; description: string };
+  a: number;
+  b: number;
+  key: string;
+  title: string;
+  short: string;
+  meaning: string[];
+  seo: { title: string; description: string };
 }
 
 export function combinationContent(slug: string): CombinationContent | null {
   const raw = COMBINATIONS_JSON.get(slug);
   if (!raw) return null;
-  const out: CombinationContent = {};
-  if (typeof raw.title === "string" && raw.title.length > 4 && safe(raw.title)) out.title = raw.title;
-  if (typeof raw.short === "string" && raw.short.length > 10 && safe(raw.short)) out.short = raw.short;
-  // генератор пишет абзацы в paragraphs; meaning оставлен как совместимость со старым форматом
-  const meaning = strings(raw.paragraphs, 2) ?? strings(raw.meaning, 2);
-  if (meaning) out.meaning = meaning;
+  const title = typeof raw.title === "string" && raw.title.length > 4 && safe(raw.title) ? raw.title : null;
+  const short = typeof raw.short === "string" && raw.short.length > 10 && safe(raw.short) ? raw.short : null;
+  const meaning = strings(raw.paragraphs, 2);
   const seo = seoOf(raw.seo);
-  if (seo) out.seo = seo;
-  return Object.keys(out).length ? out : null;
+  if (
+    typeof raw.a !== "number" ||
+    typeof raw.b !== "number" ||
+    raw.key !== slug ||
+    !title ||
+    !short ||
+    !meaning ||
+    !seo
+  ) {
+    throw new Error(`[content] сочетание ${slug} не прошло обязательную схему`);
+  }
+  return { a: raw.a, b: raw.b, key: slug, title, short, meaning, seo };
 }
 
-/** Текст «аркан n в позиции key»: сгенерированный, если он прошёл гигиену, иначе встроенный. */
+/** Текст «аркан n в позиции key» существует только в каноническом собранном корпусе. */
 export function arcanumInPosition(n: number, key: string): string {
-  // Сгенерированный пул chakras описывает карту целиком («верх наполнен, низ пуст»), поэтому
-  // не годится как толкование одного аркана в одной строке. Отчёт уже использует позиционную
-  // рамку; справочник обязан показывать тот же текст.
-  if (key === "chakras") return builtInPositionText(n, key);
-  const generated = arcanumContent(n)?.inPositions?.[key];
-  return generated && generated.length > 40 ? generated : builtInPositionText(n, key);
+  const generated = arcanumContent(n)?.inPositions[key];
+  if (!generated || generated.length <= 40) {
+    throw new Error(`[content] нет трактовки аркана ${n} в позиции ${key}`);
+  }
+  return generated;
 }
 
 /* ── матрицы: 5544 тройки (день, месяц, год) из engine/precompute.py ── */
@@ -469,6 +587,5 @@ export function contentStats() {
     categoryHubs: CATEGORY_HUBS.size,
     hubs: HUBS.size,
     rejected,
-    dropped,
   };
 }

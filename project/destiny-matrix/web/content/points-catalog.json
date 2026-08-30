@@ -1,0 +1,73 @@
+{
+ "count": 17,
+ "items": [
+  {
+   "key": "day",
+   "report_label": "Портрет личности — точка A"
+  },
+  {
+   "key": "month",
+   "report_label": "Духовная задача — точка B"
+  },
+  {
+   "key": "year",
+   "report_label": "Материальная задача — точка C"
+  },
+  {
+   "key": "mission",
+   "report_label": "Кармическая задача — точка D"
+  },
+  {
+   "key": "center",
+   "report_label": "Центр карты — зона комфорта"
+  },
+  {
+   "key": "father_line",
+   "report_label": "Духовная мужская линия рода — точка F"
+  },
+  {
+   "key": "mother_line",
+   "report_label": "Духовная женская линия рода — точка G"
+  },
+  {
+   "key": "descendants",
+   "report_label": "Материальная мужская линия рода — точка H"
+  },
+  {
+   "key": "inheritance",
+   "report_label": "Материальная женская линия рода — точка I"
+  },
+  {
+   "key": "comfort_west",
+   "report_label": "Внутренняя левая точка — J"
+  },
+  {
+   "key": "comfort_north",
+   "report_label": "Внутренняя точка таланта — K"
+  },
+  {
+   "key": "comfort_east",
+   "report_label": "Вход денежной линии — L"
+  },
+  {
+   "key": "comfort_south",
+   "report_label": "Вход линии отношений и хвоста — M"
+  },
+  {
+   "key": "harmony",
+   "report_label": "Духовное предназначение"
+  },
+  {
+   "key": "planetary",
+   "report_label": "Планетарное предназначение"
+  },
+  {
+   "key": "purpose_personal",
+   "report_label": "Личное предназначение"
+  },
+  {
+   "key": "purpose_social",
+   "report_label": "Социальное предназначение"
+  }
+ ]
+}

@@ -2,16 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  encyclopediaSection,
+  encyclopediaSectionFromExternalRoot,
+  encyclopediaSectionFromSegment,
+  encyclopediaSectionHref,
+} from "@/lib/encyclopediaNavigation";
 
 // Путь показывается один раз, над каркасом: последний шаг выводится из адреса, поэтому
 // детальные страницы не рисуют своих крошек.
-const SECTION: Record<string, { title: string; sec: string }> = {
-  arcanum: { title: "22 аркана", sec: "arc" },
-  chakra: { title: "Семь чакр", sec: "chk" },
-  combination: { title: "Сочетания арканов", sec: "cmb" },
-  "karmic-tail": { title: "Кармические хвосты", sec: "tls" },
-};
-
 export default function EncCrumbs({
   arcana,
   positions,
@@ -32,21 +31,23 @@ export default function EncCrumbs({
   ];
 
   if (articles[path]) {
-    trail.push({ name: "Статьи", href: "/encyclopedia?sec=art" });
+    const section = encyclopediaSection("art");
+    trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     trail.push({ name: articles[path] });
-  } else if (parts[0] === "na-god") {
-    trail.push({ name: "Матрица судьбы на год", href: "/encyclopedia?sec=yer" });
+  } else if (encyclopediaSectionFromExternalRoot(parts[0])) {
+    const section = encyclopediaSection(encyclopediaSectionFromExternalRoot(parts[0])!);
+    trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     trail.push({
       name: /^\d{4}$/.test(parts[1]) ? `Матрица судьбы на ${parts[1]} год` : `${parts[1]} на год`,
     });
   } else if (parts[1] === "position") {
     const pos = positions[parts[2] ?? ""];
-    const sec = pos?.kind === "pts" ? "Позиции карты" : "Разделы отчёта";
-    trail.push({ name: sec, href: `/encyclopedia?sec=${pos?.kind ?? "sec"}` });
+    const section = encyclopediaSection(pos?.kind ?? "sec");
+    trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     if (pos) trail.push({ name: pos.title });
-  } else if (parts[1] && SECTION[parts[1]]) {
-    const { title, sec } = SECTION[parts[1]];
-    trail.push({ name: title, href: `/encyclopedia?sec=${sec}` });
+  } else if (parts[1] && encyclopediaSectionFromSegment(parts[1])) {
+    const section = encyclopediaSection(encyclopediaSectionFromSegment(parts[1])!);
+    trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     const slug = parts[2];
     if (slug) {
       if (parts[1] === "arcanum") {

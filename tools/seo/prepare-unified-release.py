@@ -90,115 +90,49 @@ def exact_tail_stats(nodes: list[dict], ordered_keys: set[str]) -> dict[str, dic
     return out
 
 
-def tail_article(key: str, sample: str, arcana: dict[int, dict], stats: dict[str, int]) -> dict:
-    first, middle, root = map(int, key.split("-"))
-    a, b, c = arcana[first], arcana[middle], arcana[root]
-    indexed = stats["exact_frequency"] >= 800
-    names = f"{first} · {a['title']} → {middle} · {b['title']} → {root} · {c['title']}"
-    related_pool = []
-    method = read_json(METHOD)
-    for item in method["reachable_karmic_tails"]:
-        other = item["triple"]
-        if other == key:
-            continue
-        overlap = len(set(map(int, other.split("-"))) & {first, middle, root})
-        if overlap:
-            related_pool.append((-overlap, other))
-    related = [item[1] for item in sorted(related_pool)[:4]]
-    exact = stats["exact_frequency"]
-    queries = [
-        f"кармический хвост {key.replace('-', ' ')}",
-        f"{key.replace('-', ' ')} в матрице судьбы",
-        f"{key.replace('-', ' ')} расшифровка",
-    ]
-    return {
-        "key": key,
-        "entity_type": "karmic_tail",
-        "publication": {
-            "index": indexed,
-            "follow": True,
-            "primary_query": queries[0] if indexed else None,
-            "exact_frequency": exact,
-            "reviewed_at": TODAY,
-        },
-        "title": f"Кармический хвост {key}: порядок и значение трёх позиций",
-        "arcana": [first, middle, root],
-        "seo": {
-            "title": f"Кармический хвост {key}: расшифровка M–N–D",
-            "description": (
-                f"Хвост {key} в матрице судьбы: роли {a['title']}, {b['title']} и "
-                f"{c['title']} в строгом порядке M–N–D, формула и практическое чтение."
+def tail_sources(reachable: list[dict], stats: dict[str, dict[str, int]]) -> list[dict]:
+    """Load hand-edited tail articles and verify their calculation-facing metadata.
+
+    Editorial copy is source content, not a generated release artifact. Keeping this boundary
+    prevents a technical SEO rebuild from replacing reviewed prose with a generic template.
+    """
+    expected_keys = {item["triple"] for item in reachable}
+    source_paths = {path.stem: path for path in TAIL_SOURCE.glob("*.json")}
+    actual_keys = set(source_paths)
+    if actual_keys != expected_keys:
+        missing = sorted(expected_keys - actual_keys)
+        extra = sorted(actual_keys - expected_keys)
+        raise ValueError(f"karmic-tail sources mismatch: missing={missing}, extra={extra}")
+
+    tails: list[dict] = []
+    for key in sorted(expected_keys, key=lambda value: tuple(map(int, value.split("-")))):
+        item = read_json(source_paths[key])
+        expected_arcana = list(map(int, key.split("-")))
+        expected_index = stats[key]["exact_frequency"] >= 800
+        expected_primary = f"кармический хвост {key.replace('-', ' ')}" if expected_index else None
+        checks = {
+            "key": (item.get("key"), key),
+            "entity_type": (item.get("entity_type"), "karmic_tail"),
+            "arcana": (item.get("arcana"), expected_arcana),
+            "publication.index": (item.get("publication", {}).get("index"), expected_index),
+            "publication.follow": (item.get("publication", {}).get("follow"), True),
+            "publication.primary_query": (
+                item.get("publication", {}).get("primary_query"), expected_primary
             ),
-            "queries": queries if indexed else [],
-        },
-        "short": (
-            f"{names}. Это не неупорядоченный набор чисел, а три разные роли нижнего луча: "
-            "первая показывает вход в повторяющийся сценарий, вторая — механизм его закрепления, "
-            "третья — корневую задачу. Перестановка чисел меняет результат."
-        ),
-        "sections": [
-            {
-                "h2": "Как получилась последовательность",
-                "paragraphs": [
-                    f"Для контрольной даты {'.'.join(reversed(sample.split('-')))} формула даёт "
-                    f"ровно {key}. M — внутренняя нижняя точка D+E, N — свёртка D+M, D — "
-                    "кармическая задача из A+B+C. Каждая сумма сразу сворачивается сложением "
-                    "цифр, пока значение не станет не больше 22.",
-                    f"Порядок записи — {first} → {middle} → {root}. Он фиксирован символами "
-                    "M–N–D и не зависит от того, как похожий запрос набрали в поиске. Обратная "
-                    "или иная перестановка является отдельной сущностью только тогда, когда сама "
-                    "достижима по той же формуле.",
-                ],
-            },
-            {
-                "h2": "Первая позиция M — как сценарий включается",
-                "paragraphs": [
-                    f"Здесь стоит {first} аркан — {a['title']}. {a['in_positions']['past_lives']} "
-                    "В первой позиции этот смысл читается именно как вход: по какой привычной "
-                    "реакции человек замечает начало повторяющегося сюжета.",
-                ],
-            },
-            {
-                "h2": "Средняя позиция N — что удерживает повтор",
-                "paragraphs": [
-                    f"Среднюю роль занимает {middle} аркан — {b['title']}. "
-                    f"{b['in_positions']['past_lives']} Здесь важен механизм: что связывает "
-                    "первичную реакцию с корневой задачей и почему одного намерения бывает мало, "
-                    "чтобы изменить привычный ход.",
-                ],
-            },
-            {
-                "h2": "Корневая позиция D — чему учит связка",
-                "paragraphs": [
-                    f"Третья позиция — {root} аркан, {c['title']}. "
-                    f"{c['in_positions']['past_lives']} В хвосте это не финальный приговор, а "
-                    "направление наблюдения: какую реакцию полезно перестать выполнять на автомате.",
-                    f"Связку {key} читают слева направо: сначала заметить проявление "
-                    f"{a['title']}, затем проверить удерживающий механизм {b['title']}, после чего "
-                    f"работать с задачей {c['title']}. Текст описывает эзотерическую модель для "
-                    "саморефлексии, а не научный факт, доказанный прогноз или обещание события.",
-                ],
-            },
-        ],
-        "faq": [
-            {
-                "q": f"Можно ли переставить числа в хвосте {key}?",
-                "a": "Нет. В Arcana Sense первое, второе и третье число соответствуют M, N и D. "
-                     "Перестановка меняет роли и не перенаправляется на эту страницу автоматически.",
-            },
-            {
-                "q": "Почему в другом источнике эта тройка может быть записана иначе?",
-                "a": "Источники используют разные направления чтения и разные формулы. На этой "
-                     "странице показан только порядок M–N–D из опубликованного контракта Arcana Sense.",
-            },
-            {
-                "q": "Одинаковы ли числа для мужской и женской карты?",
-                "a": "Да, пол не меняет арифметику точек. Он остаётся частью выбранной карты и "
-                     "покупки, но для одной даты последовательность M–N–D будет одинаковой.",
-            },
-        ],
-        "related": related + [f"arcanum/{first}", f"arcanum/{middle}", f"arcanum/{root}"],
-    }
+            "publication.exact_frequency": (
+                item.get("publication", {}).get("exact_frequency"),
+                stats[key]["exact_frequency"],
+            ),
+        }
+        mismatches = [
+            f"{field}: {actual!r} != {expected!r}"
+            for field, (actual, expected) in checks.items()
+            if actual != expected
+        ]
+        if mismatches:
+            raise ValueError(f"{source_paths[key]}: " + "; ".join(mismatches))
+        tails.append(item)
+    return tails
 
 
 def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
@@ -418,12 +352,8 @@ def expected_outputs() -> dict[Path, str]:
     method = read_json(METHOD)
     reachable = method["reachable_karmic_tails"]
     valid = {item["triple"] for item in reachable}
-    arcana = {item["n"]: item for item in item_list("arcana.json")}
     stats = exact_tail_stats(raw["nodes"], valid)
-    tails = [tail_article(item["triple"], item["sample_birth"], arcana,
-                          stats[item["triple"]])
-             for item in reachable]
-    tails.sort(key=lambda item: tuple(map(int, item["key"].split("-"))))
+    tails = tail_sources(reachable, stats)
     indexed = {item["key"] for item in tails if item["publication"]["index"]}
     entities = {
         "generated_at": TODAY,
@@ -459,8 +389,6 @@ def expected_outputs() -> dict[Path, str]:
         AUDIT / "public-url-map.json": dump({"items": urls}),
         AUDIT / "content-review.json": dump({"items": cards}),
     }
-    for item in tails:
-        outputs[TAIL_SOURCE / f"{item['key']}.json"] = dump(item)
     return outputs
 
 

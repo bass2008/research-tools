@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
 
 from conftest import BASE
 
@@ -45,3 +45,16 @@ def test_matrix_page_prints_the_text_of_the_position(page: Page, label: str, key
     assert text in reference, (
         f"толкование «{label}» на /matrix/{SLUG} не совпадает с позицией {key}: «{text}»"
     )
+
+
+def test_section_article_links_to_its_exact_points_instead_of_generic_arcana_cards(page: Page):
+    """Раздел из нескольких точек не должен выдавать общий текст раздела за трактовку точки."""
+    page.goto(f"{BASE}/encyclopedia/position/character", wait_until="domcontentloaded")
+
+    expect(page.get_by_role("heading", name="Позиции этого раздела")).to_be_visible()
+    for key in ("day", "month", "year"):
+        expect(page.locator(f'a[href="/encyclopedia/position/{key}"]')).to_be_visible()
+    expect(page.get_by_role("heading", name="Все 22 аркана в этой позиции")).to_have_count(0)
+
+    page.goto(f"{BASE}/encyclopedia/position/day", wait_until="domcontentloaded")
+    expect(page.get_by_role("heading", name="Все 22 аркана в этой позиции")).to_be_visible()

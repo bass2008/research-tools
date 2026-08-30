@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from content import build
-from engine.sections import SPEC
+from engine.sections import DEFINITIONS
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,9 +42,26 @@ def test_core_content_artifacts_have_no_generation_drift():
         assert actual == items, f"{name}: выполните content.build, затем tools/seo/build-content.py"
 
 
+def test_client_arcana_catalog_contains_no_article_or_paid_text():
+    expected = build.build_arcana_catalog(build.build_arcana())
+    actual = _items("arcana-catalog.json")
+    assert actual == expected
+    assert all(set(row) == {"n", "slug", "title", "short"} for row in actual)
+
+
+def test_client_point_catalog_is_generated_from_canonical_labels():
+    expected = build.build_point_catalog()
+    actual = _items("points-catalog.json")
+    assert actual == expected
+    assert all(set(row) == {"key", "report_label"} for row in actual)
+
+
 def test_public_section_catalog_is_the_safe_exact_snapshot():
-    expected = [
-        {"key": key, "title": title, "access": access}
-        for key, title, _lead, access, _positions in SPEC
-    ]
+    expected = []
+    for definition in DEFINITIONS:
+        item = {key: definition[key] for key in ("key", "title", "access")}
+        if definition["access"] == "free":
+            item["lead"] = definition["lead"]
+            item["positions"] = definition["positions"]
+        expected.append(item)
     assert _items("sections.json") == expected

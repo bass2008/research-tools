@@ -546,6 +546,33 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 /* overflow-wrap: узкая колонка карточки «карта + текст» рубила «Отшельник» и «Справедливость» */
 .ecard .nm { font-family: var(--ser); font-size: 20px; margin: 2px 0 4px; overflow-wrap: anywhere; }
 .ecard .ds { font-size: 13px; color: var(--dim); }
+/* Хвост — ровно три карты. Здесь важнее сама колода, поэтому карта занимает всю ширину
+   карточки, а номер и имя стоят отдельной подписью снизу, а не узкой колонкой справа. */
+.tail-deck {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2.2vw, 22px);
+  align-items: start;
+}
+.ecard.tail-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(12px, 1.8vw, 18px);
+}
+.tail-card .arccard.big {
+  width: 100%;
+  box-shadow: 0 18px 36px -24px rgba(18, 40, 60, 0.7);
+}
+.tail-card-label {
+  width: 100%;
+  margin-top: 12px;
+  text-align: center;
+}
+.tail-card .nm { margin-bottom: 0; font-size: clamp(20px, 2.2vw, 25px); }
+@media (max-width: 820px) {
+  .tail-deck { grid-template-columns: minmax(0, 340px); justify-content: center; }
+}
 .taglist { display: flex; flex-wrap: wrap; gap: 7px; }
 .taglist a, .taglist span { font-size: 12.8px; color: var(--dim); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; background: var(--card); }
 .taglist a:hover { border-color: var(--gold); color: var(--gold2); text-decoration: none; }

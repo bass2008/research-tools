@@ -14,7 +14,6 @@ import Related from "@/components/enc/Related";
 import { ARCANA } from "@/lib/arcana";
 import {
   KARMIC_TAIL_HUB,
-  arcanumEntry,
   arcanumHref,
   positionByKey,
   karmicTailHref,
@@ -23,7 +22,6 @@ import {
 } from "@/lib/encyclopedia";
 import {
   arcanumContent,
-  arcanumInPosition,
   combinationContent,
   karmicTails,
   yearArcanum,
@@ -32,6 +30,11 @@ import { pageMeta } from "@/lib/site";
 import { sentence } from "@/lib/text";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
+import {
+  encyclopediaSection,
+  encyclopediaSectionCrumb,
+  encyclopediaSectionHref,
+} from "@/lib/encyclopediaNavigation";
 
 type Params = { n: string };
 
@@ -43,29 +46,10 @@ export function generateStaticParams(): Params[] {
   return ARCANA.map((a) => ({ n: String(a.n) }));
 }
 
-// Сгенерированный контент перекрывает встроенный корпус по полям, которые прошли проверку.
 function entry(n: number) {
-  const base = arcanumEntry(n);
-  const extra = arcanumContent(n);
-  // Позиции добираются пополю: отбракованный гигиеной ключ не должен пропадать со страницы.
-  const in_positions = Object.fromEntries(
-    Object.keys(base.in_positions).map((key) => [key, arcanumInPosition(n, key)]),
-  );
-  if (!extra) return { ...base, in_positions, sections: [], faq: [] };
-  return {
-    ...base,
-    short: extra.short ?? base.short,
-    keywords: extra.keywords ?? base.keywords,
-    meaning: extra.meaning ? extra.meaning.join("\n\n") : base.meaning,
-    in_positions,
-    plus: extra.plus ?? base.plus,
-    minus: extra.minus ?? base.minus,
-    // title остаётся за кодом: точная форма запроса «N в матрице судьбы» — решение SEO, а не
-    // контента, и все 22 значения в JSON написаны по другому шаблону
-    seo: { ...base.seo, description: extra.seo?.description ?? base.seo.description },
-    sections: extra.sections ?? [],
-    faq: extra.faq ?? [],
-  };
+  const value = arcanumContent(n);
+  if (!value) throw new Error(`нет канонического материала для аркана ${n}`);
+  return value;
 }
 
 function num(raw: string): number | null {
@@ -105,13 +89,14 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
   const pairs = e.combinations.map((c) => {
     const [lo, hi] = n < c.with ? [n, c.with] : [c.with, n];
     const written = combinationContent(`${lo}-${hi}`);
-    return { ...c, short: written?.short ?? c.short, name: written?.title ?? null };
+    if (!written) throw new Error(`нет канонического материала сочетания ${lo}-${hi}`);
+    return { ...c, short: written.short, name: written.title };
   });
 
   const meaning = (
     <>
       <div className="prose">
-        {e.meaning.split("\n\n").map((t, i) => (
+        {e.meaning.map((t, i) => (
           <p key={i}>{t}</p>
         ))}
       </div>
@@ -127,10 +112,10 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
       <div className="cap">
         Один и тот же аркан в разных позициях говорит о разном.{" "}
         {/* 17 точек октаграммы разбираются отдельным разделом: со страницы аркана к ним не было хода */}
-        <Link href="/encyclopedia?sec=pts">Все позиции карты</Link>
+        <Link href={encyclopediaSectionHref("pts")}>Все позиции карты</Link>
       </div>
       <dl className="kv">
-        {Object.entries(e.in_positions).map(([key, text]) => {
+        {Object.entries(e.inPositions).map(([key, text]) => {
           const pos = positionByKey(key);
           return (
             <div key={key} style={{ display: "contents" }}>
@@ -203,7 +188,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          { name: "22 аркана", path: "/encyclopedia?sec=arc" },
+          encyclopediaSectionCrumb("arc"),
           { name: `${n} · ${e.title}` },
         ]}
       />
@@ -268,7 +253,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
       <Tabs
         items={[
           { key: "meaning", title: "Значение", body: meaning },
-          { key: "positions", title: "Разделы отчёта", body: positions },
+          { key: "positions", title: encyclopediaSection("sec").title, body: positions },
           { key: "combos", title: "Сочетания с другими арканами", body: combos },
           { key: "year", title: "На год", body: yearTab },
         ]}

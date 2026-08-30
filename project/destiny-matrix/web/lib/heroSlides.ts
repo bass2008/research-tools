@@ -18,7 +18,7 @@ export const LANDING_SLIDES: HeroSlide[] = [
     link: { label: "Позиции карты", href: "/encyclopedia?sec=pts" },
   },
   {
-    eyebrow: "визитка · центр · опора рода",
+    eyebrow: "портрет · центр · материальная задача",
     heading: "Три аркана, с которых читают вашу карту",
     link: { label: "22 аркана", href: "/encyclopedia?sec=arc" },
   },
@@ -46,7 +46,7 @@ export const ENCYCLOPEDIA_SLIDES: HeroSlide[] = [
     link: { label: "Позиции карты", href: "/encyclopedia?sec=pts" },
   },
   {
-    eyebrow: "визитка · центр · опора рода",
+    eyebrow: "портрет · центр · материальная задача",
     heading: "Ваши три главных аркана — за минуту",
     link: { label: "22 аркана", href: "/encyclopedia?sec=arc" },
   },

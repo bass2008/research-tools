@@ -53,7 +53,7 @@ const LINES: Array<[string, string, (m: Matrix) => number[]]> = [
   ["Отношения", "Линия близости от материнской ветви.", (m) => m.love],
   ["Таланты", "Что дано, при каком условии раскрывается и что выходит.", (m) => m.talent],
   ["Небо и земля", "Духовная и материальная задачи.", (m) => [m.sky[2], m.ground[2], m.harmony]],
-  ["Род", "Мужская и женская ветви и планетарная задача.", (m) => [m.social_male[2], m.social_female[2], m.planetary]],
+  ["Род", "Мужская и женская ветви и планетарное предназначение.", (m) => [m.social_male[2], m.social_female[2], m.planetary]],
   ["Кармический хвост", "То, что пришло с вами и повторяется.", (m) => m.karmic_tail],
 ];
 
@@ -68,7 +68,7 @@ function seo(slug: string) {
   const title = `Матрица ${slug}: центр ${m.center} «${arcanumTitle(m.center)}»`;
   const description =
     `Разбор карты ${slug} (день ${key.day}, месяц ${key.month}, год ${key.year}): центр ` +
-    `${m.center} ${arcanumTitle(m.center)}, миссия ${m.mission} ${arcanumTitle(m.mission)}, ` +
+    `${m.center} ${arcanumTitle(m.center)}, кармическая задача ${m.mission} ${arcanumTitle(m.mission)}, ` +
     `денежный канал ${m.money[0]}, линия отношений ${m.love[0]}. Два раздела бесплатно; ` +
     `такую карту ${dates.length === 1 ? "даёт" : "дают"} ${counted(dates.length, "дата", "даты", "дат")} рождения.`;
   return { item, key, m, dates, title, description };
@@ -127,13 +127,13 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
           <Link className="cardlink" href={arcanumHref(m.mission)}>
             <ArcanumCard n={m.mission} size="grid" eager decorative />
             <span>
-              миссия · {m.mission} «{arcanumTitle(m.mission)}»
+              кармическая задача · {m.mission} «{arcanumTitle(m.mission)}»
             </span>
           </Link>
         </div>
         <p className="dim prose">
           Карта, в которой день сводится к аркану {key.day}, месяц — к {key.month} ({monthName}), а год — к{" "}
-          {key.year}. Центр карты — {m.center} «{arcanumTitle(m.center)}», миссия — {m.mission} «
+          {key.year}. Центр карты — {m.center} «{arcanumTitle(m.center)}», кармическая задача — {m.mission} «
           {arcanumTitle(m.mission)}». Ниже все позиции карты и два бесплатных раздела; чтобы
           посмотреть свою карту, <Link href="/#calc">введите дату рождения</Link> — расчёт идёт в браузере.
         </p>

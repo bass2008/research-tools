@@ -15,22 +15,16 @@ import { KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail } from "@/lib/e
 import { articleLd, itemListLd } from "@/lib/schema";
 import { clip } from "@/lib/text";
 import { pageMeta } from "@/lib/site";
+import { encyclopediaSection, encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 const KEY = "karmic-tail";
 
-const FALLBACK = {
-  title: "Кармический хвост в матрице судьбы",
-  short:
-    "Кармический хвост — три числа на нижнем луче карты в порядке M–N–D: внутренняя нижняя " +
-    "точка, её сумма с D и корневая кармическая задача.",
-  description:
-    "Что такое кармический хвост в матрице судьбы, из каких трёх арканов он складывается, как " +
-    "считается по дате рождения и как читать тройку целиком, а не по отдельным числам.",
-};
+const HUB = categoryHub(KEY);
+if (!HUB) throw new Error(`нет канонического материала хаба ${KEY}`);
 
 export const metadata: Metadata = pageMeta({
-  title: categoryHub(KEY)?.seo.title ?? `${FALLBACK.title} — расшифровка тройки`,
-  description: categoryHub(KEY)?.seo.description ?? FALLBACK.description,
+  title: HUB.seo.title,
+  description: HUB.seo.description,
   path: KARMIC_TAIL_HUB,
   article: true,
 });
@@ -44,7 +38,7 @@ function byTriple(a: string, b: string): number {
 }
 
 export default function KarmicTailHubPage() {
-  const hub = categoryHub(KEY);
+  const hub = HUB!;
   const items = karmicTails().slice().sort((a, b) => byTriple(a.key, b.key));
 
   return (
@@ -54,46 +48,30 @@ export default function KarmicTailHubPage() {
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          { name: "Статьи", path: "/encyclopedia?sec=art" },
+          encyclopediaSectionCrumb("art"),
           { name: "Кармический хвост" },
         ]}
       />
         <JsonLd
           data={articleLd({
-            headline: hub?.seo.title ?? FALLBACK.title,
-            description: hub?.seo.description ?? FALLBACK.description,
+            headline: hub.seo.title,
+            description: hub.seo.description,
             path: KARMIC_TAIL_HUB,
           })}
         />
         {items.length ? (
           <JsonLd
             data={itemListLd({
-              name: "Кармические хвосты",
+              name: encyclopediaSection("tls").title,
               items: items.map((t) => ({ name: t.key, path: karmicTailHref(t.key) })),
             })}
           />
         ) : null}
 
-        <h1>{hub?.title ?? FALLBACK.title}</h1>
-        <p className="dim prose">{hub?.short ?? FALLBACK.short}</p>
+        <h1>{hub.title}</h1>
+        <p className="dim prose">{hub.short}</p>
 
-        {hub ? (
-          <Sections items={hub.sections} />
-        ) : (
-          <div className="prose section-gap">
-            <h2>Как складывается тройка</h2>
-            <p>
-              Сначала считается D как сумма дня, месяца и года, затем центр E и внутренняя точка
-              M=D+E. Средняя точка N равна свёртке D+M. В продукте хвост записывается M–N–D,
-              и этот порядок не сортируется.
-            </p>
-            <p>
-              Читают тройку целиком и с учётом позиции. Перестановка меняет расположение арканов,
-              поэтому поисковая форма может не совпадать с порядком калькулятора. Из всех наборов
-              трёх чисел по этой формуле достижимы ровно 26 упорядоченных хвостов.
-            </p>
-          </div>
-        )}
+        <Sections items={hub.sections} />
 
         <div className="section-gap">
           <CalcPromo
@@ -125,9 +103,9 @@ export default function KarmicTailHubPage() {
           </div>
         ) : null}
 
-        {hub ? <Faq items={hub.faq} /> : null}
+        <Faq items={hub.faq} />
 
-        {hub ? <Related path={KARMIC_TAIL_HUB} refs={hub.related} /> : null}
+        <Related path={KARMIC_TAIL_HUB} refs={hub.related} />
 
         <div className="panel section-gap">
           <h3>Арканы тройки</h3>

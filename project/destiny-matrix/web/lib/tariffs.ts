@@ -1,6 +1,6 @@
 // Прайс живёт в базе: цену меняем часто, для этого пересборка не нужна. Здесь только тип,
-// перевод копеек в рубли и запасной набор — он используется, когда API недоступен, чтобы
-// страница не оказалась без цен вовсе.
+// перевод копеек в рубли. Значений цены в коде нет: при недоступной базе оплату нельзя
+// корректно открыть, поэтому интерфейс показывает «уточняется».
 
 export type TariffId = "single" | "month";
 
@@ -14,11 +14,6 @@ export interface Tariff {
   /** null — бессрочно */
   period_days: number | null;
 }
-
-/** Запасные значения, совпадающие с витриной в api/app/tariffs.py (PUBLIC_IDS). */
-export const FALLBACK: Tariff[] = [
-  { id: "single", name: "Полный разбор одной даты", price: 25_000, scope: ["single"], period_days: null },
-];
 
 /** Тариф, который рекламируем и показываем в первом экране. */
 export const LEAD_ID: TariffId = "single";
@@ -52,6 +47,6 @@ export function byId(list: Tariff[], id: string): Tariff | undefined {
   return list.find((t) => t.id === id);
 }
 
-export function lead(list: Tariff[]): Tariff {
-  return byId(list, LEAD_ID) ?? list[0] ?? FALLBACK[0];
+export function lead(list: Tariff[]): Tariff | null {
+  return byId(list, LEAD_ID) ?? list[0] ?? null;
 }

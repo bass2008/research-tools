@@ -17,5 +17,5 @@ export const metadata: Metadata = pageMeta({
 
 export default async function PayChoicePage() {
   const tariffs = await getTariffs();
-  return <PayScreen tariffs={tariffs} initial={lead(tariffs).id} test={await testPayments()} />;
+  return <PayScreen tariffs={tariffs} initial={lead(tariffs)?.id ?? ""} test={await testPayments()} />;
 }

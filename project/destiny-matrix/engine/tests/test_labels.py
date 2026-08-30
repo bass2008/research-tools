@@ -1,50 +1,24 @@
-"""Одно число — одно имя.
-
-Подписи позиций растут из трёх источников (карта, разбор, энциклопедия), и раньше одно и то же
-поле матрицы называлось в них по-разному: день рождения был и «Личностью», и «Характером», и
-«Ядром характера». Читателю это выглядело как три разных вывода, а поиску — как три ключа.
-"""
-import re
-from pathlib import Path
-
-SRC = (Path(__file__).resolve().parent.parent / "sections.py").read_text()
-
-# составные позиции: итоги линий, шаги внутри линии, чакры и десятилетия — своей страницы
-# в энциклопедии у них нет, поэтому канон на них не распространяется
-COMPOSITE = {
-    "Средняя точка таланта", "Денежное направление", "Пересечение денег и отношений",
-    "Партнёрская точка", "Средняя точка хвоста", "Итог земли", "Итог мужской ветви",
-    "Итог женской ветви", "Итог неба", "Первая задача неба", "Вторая задача неба",
-    "Опора тела", "Энергия опоры", "Итог опоры тела", "Радость и творчество",
-    "Итог физики", "Итог энергии", "Итог эмоций",
-}
-
-# короткая форма канонических имён из web/lib/encyclopedia.ts (title до « — »)
-CANON = {
-    "Портрет личности", "Духовная задача", "Материальная задача", "Кармическая задача",
-    "Центр карты", "Духовная мужская линия рода", "Духовная женская линия рода",
-    "Материальная мужская линия рода", "Материальная женская линия рода",
-    "Внутренняя левая точка", "Внутренняя точка таланта", "Вход денежной линии",
-    "Вход линии отношений и хвоста", "Духовное предназначение", "Планетарное предназначение",
-    "Личное предназначение", "Социальное предназначение",
-}
+"""Report position labels and interpretation keys are validated as data, not source text."""
+from content.source import POINTS, SECTIONS_META
+from engine.sections import DEFINITIONS
 
 
-def labelled_positions() -> list[tuple[str, str]]:
-    """Пары «подпись → выражение» прямо из исходника SPEC."""
-    return re.findall(r'_p\(\s*"([^"]+)",\s*([^)]+?)\)', SRC)
+def test_every_report_position_has_an_existing_interpretation_key():
+    expected = {row["key"] for row in POINTS} | {row["key"] for row in SECTIONS_META}
+    actual: set[str] = set()
+    for section in DEFINITIONS:
+        for position in section["positions"]:
+            key = position["position_key"]
+            assert key in expected, f"{section['key']}: неизвестный position_key {key}"
+            actual.add(key)
+            if "selector" in position:
+                assert position.get("label"), f"{section['key']}: позиция {key} без подписи"
+    assert actual <= expected
 
 
-def test_one_field_one_label():
-    by_expr: dict[str, set[str]] = {}
-    for label, expr in labelled_positions():
-        by_expr.setdefault(expr.strip(), set()).add(label)
-    clashes = {e: sorted(v) for e, v in by_expr.items() if len(v) > 1}
-    assert not clashes, f"одно поле названо по-разному: {clashes}"
-
-
-def test_labels_come_from_canon():
-    unknown = sorted({label for label, _ in labelled_positions()
-                      if label not in CANON and label not in COMPOSITE
-                      and "лет" not in label and "физика" not in label})
-    assert not unknown, f"имена вне канона и вне списка составных: {unknown}"
+def test_free_report_rows_keep_labels_and_interpretation_keys_together():
+    free = [section for section in DEFINITIONS if section["access"] == "free"]
+    assert [section["key"] for section in free] == ["character", "comfort"]
+    for section in free:
+        for position in section["positions"]:
+            assert set(position) >= {"label", "selector", "position_key"}

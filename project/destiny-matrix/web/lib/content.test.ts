@@ -10,10 +10,9 @@ import {
   contentStats,
   positionContent,
 } from "./content";
-import { builtInPositionText } from "./positionTexts";
-
-// Контент пишет генератор в web/content. Его может не быть вовсе, он может
-// оказаться недописанным — сборка обязана выживать в любом случае.
+import { isBlockedText } from "./textPolicy";
+// Канонический корпус обязателен: недописанный JSON должен ронять сборку, а не включать
+// незаметно вторую версию текста из TypeScript.
 describe("загрузчик сгенерированного контента", () => {
   it("не бросает исключений ни на одном ключе", () => {
     for (const a of ARCANA) expect(() => arcanumContent(a.n)).not.toThrow();
@@ -32,7 +31,8 @@ describe("загрузчик сгенерированного контента",
   it("подхваченные абзацы проходят порог длины", () => {
     for (const a of ARCANA) {
       const c = arcanumContent(a.n);
-      if (!c?.meaning) continue;
+      expect(c).not.toBeNull();
+      if (!c) continue;
       expect(c.meaning.length).toBeGreaterThanOrEqual(3);
       for (const p of c.meaning) expect(p.length).toBeGreaterThan(20);
     }
@@ -40,8 +40,7 @@ describe("загрузчик сгенерированного контента",
 
   it("seo подхватывается только целиком", () => {
     for (const a of ARCANA) {
-      const seo = arcanumContent(a.n)?.seo;
-      if (!seo) continue;
+      const seo = arcanumContent(a.n)!.seo;
       expect(seo.title.length).toBeGreaterThanOrEqual(10);
       expect(seo.description.length).toBeGreaterThanOrEqual(60);
     }
@@ -49,52 +48,46 @@ describe("загрузчик сгенерированного контента",
 
   it("статистика показывает, сколько записей нашлось", () => {
     const s = contentStats();
+    expect(s).toMatchObject({ arcana: 22, positions: 37, chakras: 7, combinations: 231 });
     for (const v of Object.values(s)) expect(v).toBeGreaterThanOrEqual(0);
-    expect(s.arcana).toBeLessThanOrEqual(22);
-    expect(s.chakras).toBeLessThanOrEqual(7);
   });
 
-  it("карта энергий в справочнике использует те же позиционные тексты, что отчёт", () => {
+  it("каждый аркан имеет полный корпус 37 позиционных трактовок", () => {
+    const expected = new Set(POSITIONS.map((position) => position.key));
     for (let n = 1; n <= 22; n++) {
-      expect(arcanumInPosition(n, "chakras")).toBe(builtInPositionText(n, "chakras"));
+      const content = arcanumContent(n)!;
+      expect(new Set(Object.keys(content.inPositions))).toEqual(expected);
+      for (const key of expected) expect(arcanumInPosition(n, key)).toBe(content.inPositions[key]);
     }
   });
 });
 
 describe("гигиена сгенерированного контента", () => {
-  // Корень, а не подстрока: «влечение» и «развлечения» — не медицинская лексика, и проверка
-  // по подстроке заставляла выбрасывать нормальные тексты (тот же список в lib/content.ts).
-  const BANNED = ["лечени", "лечить", "лечит", "диагноз", "заболеван", "исцел", "целител",
-    "болезн", "симптом", "терапи", "препарат", "набор веса", "алкогол", "гарантиру",
-    "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник"]
-    .map((root) => new RegExp(`(^|[^а-яёa-z0-9])${root}`, "i"));
-
   function corpus(): string {
     const parts: string[] = [];
     for (const a of ARCANA) {
       const c = arcanumContent(a.n);
       if (!c) continue;
-      parts.push(c.short ?? "", ...(c.keywords ?? []), ...(c.meaning ?? []),
-        ...Object.values(c.inPositions ?? {}), ...(c.plus ?? []), ...(c.minus ?? []),
-        c.seo?.title ?? "", c.seo?.description ?? "");
+      parts.push(c.short, ...c.keywords, ...c.meaning,
+        ...Object.values(c.inPositions), ...c.plus, ...c.minus,
+        c.seo.title, c.seo.description);
     }
     for (const p of POSITIONS) {
       const c = positionContent(p.key);
       if (!c) continue;
-      parts.push(...(c.meaning ?? []), c.reading ?? "", c.seo?.title ?? "", c.seo?.description ?? "");
+      parts.push(...c.meaning, c.reading, c.seo.title, c.seo.description);
     }
     for (const ch of CHAKRA_PAGES) {
       const c = chakraContent(ch.key);
       if (!c) continue;
-      parts.push(...(c.level ?? []), ...(c.columns ?? []).flatMap((x) => [x.title, x.text]),
-        c.seo?.title ?? "", c.seo?.description ?? "");
+      parts.push(...c.level, ...c.columns.flatMap((x) => [x.title, x.text]),
+        c.seo.title, c.seo.description);
     }
     return parts.join(" ").toLowerCase();
   }
 
-  it("ни одно подхваченное поле не несёт медицинской лексики", () => {
-    const text = corpus();
-    for (const re of BANNED) expect(re.test(text), re.source).toBe(false);
+  it("ни одно подхваченное поле не нарушает каноническую политику", () => {
+    expect(isBlockedText(corpus())).toBe(false);
   });
 
   it("отброшенные поля посчитаны", () => {

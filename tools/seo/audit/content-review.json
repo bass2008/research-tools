@@ -5358,7 +5358,7 @@
     {
       "entity": "position:descendants",
       "source": "web/content/positions.json",
-      "primary_query": "дети в матрице судьбы",
+      "primary_query": "материальная мужская линия матрица судьбы",
       "search_intent": "position",
       "formula_verified": true,
       "position_context_verified": true,
@@ -5426,7 +5426,7 @@
     {
       "entity": "position:inheritance",
       "source": "web/content/positions.json",
-      "primary_query": "наследие рода матрица судьбы",
+      "primary_query": "женская линия рода матрица судьбы",
       "search_intent": "position",
       "formula_verified": true,
       "position_context_verified": true,
@@ -5545,7 +5545,7 @@
     {
       "entity": "position:mother_line",
       "source": "web/content/positions.json",
-      "primary_query": "женская линия рода матрица судьбы",
+      "primary_query": "духовная женская линия матрица судьбы",
       "search_intent": "position",
       "formula_verified": true,
       "position_context_verified": true,

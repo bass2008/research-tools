@@ -7,13 +7,14 @@ import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import Price from "@/components/pay/Price";
 
-import { arcanum, roman } from "@/lib/arcana";
-import { allCombinationSlugs, arcanumHref, combination, combinationHref, parseCombinationSlug } from "@/lib/encyclopedia";
-import { combinationContent } from "@/lib/content";
+import { arcanum } from "@/lib/arcana";
+import { allCombinationSlugs, arcanumHref, combinationHref, parseCombinationSlug } from "@/lib/encyclopedia";
+import { arcanumContent, combinationContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
 import { sentence } from "@/lib/text";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
+import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { pair: string };
 
@@ -31,13 +32,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   // несуществующая страница выглядела как главная.
   if (!pair) return NOT_FOUND_META;
   const [a, b] = pair;
-  const c = combination(a, b);
-  const extra = combinationContent(c.slug);
+  const extra = combinationContent(`${a}-${b}`);
+  if (!extra) throw new Error(`нет канонического материала сочетания ${a}-${b}`);
   return pageMeta({
-    title: extra?.seo?.title ?? `Сочетание ${a} и ${b} аркана — ${extra?.title ?? c.title}`,
-    description:
-      extra?.seo?.description ??
-      `${c.title} в матрице судьбы: как читается пара ${a} и ${b}, сильная сторона сочетания и наложение теней.`,
+    title: extra.seo.title,
+    description: extra.seo.description,
     path: combinationHref(a, b),
     article: true,
   });
@@ -47,16 +46,13 @@ export default async function CombinationPage({ params }: { params: Promise<Para
   const pair = parseCombinationSlug((await params).pair);
   if (!pair) notFound();
   const [a, b] = pair;
-  const base = combination(a, b);
-  const extra = combinationContent(base.slug);
-  const c = {
-    ...base,
-    title: extra?.title ?? base.title,
-    short: extra?.short ?? base.short,
-    paragraphs: extra?.meaning ?? base.paragraphs,
-  };
+  const c = combinationContent(`${a}-${b}`);
+  if (!c) throw new Error(`нет канонического материала сочетания ${a}-${b}`);
   const x = arcanum(a);
   const y = arcanum(b);
+  const xContent = arcanumContent(a);
+  const yContent = arcanumContent(b);
+  if (!xContent || !yContent) throw new Error(`нет канонических материалов арканов ${a} и ${b}`);
 
   const neighbours = [
     a > 1 ? combinationHref(a - 1, b) : null,
@@ -72,14 +68,14 @@ export default async function CombinationPage({ params }: { params: Promise<Para
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          { name: "Сочетания арканов", path: "/encyclopedia?sec=cmb" },
+          encyclopediaSectionCrumb("cmb"),
           { name: `${a} и ${b}` },
         ]}
       />
         <JsonLd
           data={articleLd({
-            headline: extra?.seo?.title ?? `Сочетание ${a} и ${b} аркана — ${c.title}`,
-            description: extra?.seo?.description ?? c.short,
+            headline: c.seo.title,
+            description: c.seo.description,
             path: combinationHref(a, b),
             keywords: [`${a} и ${b} в матрице судьбы`, `сочетание ${a} и ${b} аркана`],
           })}
@@ -113,7 +109,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
       </div>
 
         <div className="prose section-gap">
-          {c.paragraphs.map((text, i) => (
+          {c.meaning.map((text, i) => (
             <p key={i}>{text}</p>
           ))}
         </div>
@@ -124,7 +120,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
             <h3>Что даёт пара</h3>
             <div className="cap">Сильные стороны обоих арканов</div>
             <ul className="pmlist plus">
-              {[...x.plus.slice(0, 3), ...y.plus.slice(0, 3)].map((p, i) => (
+              {[...xContent.plus.slice(0, 3), ...yContent.plus.slice(0, 3)].map((p, i) => (
                 <li key={`${p}-${i}`}>{p}</li>
               ))}
             </ul>
@@ -133,7 +129,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
             <h3>Где спотыкается</h3>
             <div className="cap">Тени, которые усиливают друг друга</div>
             <ul className="pmlist minus">
-              {[...x.minus.slice(0, 3), ...y.minus.slice(0, 3)].map((p, i) => (
+              {[...xContent.minus.slice(0, 3), ...yContent.minus.slice(0, 3)].map((p, i) => (
                 <li key={`${p}-${i}`}>{p}</li>
               ))}
             </ul>

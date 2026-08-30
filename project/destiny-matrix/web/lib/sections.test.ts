@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { POINT_KEY, POINT_LABELS, sectionEntityLink } from "@/lib/publicSpec";
+import { sectionEntityLink } from "@/lib/publicSpec";
 
 import { arcanumInPosition } from "./content";
 import { calculate } from "./matrix";
@@ -54,17 +54,14 @@ describe("разделы разбора", () => {
     }
   });
 
-  it("подпись, которая называет точку карты, обязана иметь свой ключ толкования", () => {
-    // POINT_KEY ставится руками, и промах в нём не ломает сборку: раздел молча печатает
-    // пул раздела, из-за чего под «Комфортом в деле» стоял текст про центр карты
-    const points = new Set(Object.values(POINT_LABELS).map((l) => l.split(" — ")[0]));
-    const orphans: string[] = [];
+  it("каждая строка получает ключ трактовки прямо из канонической спецификации", () => {
     for (const spec of SPEC) {
-      for (const [label] of spec.positions(m)) {
-        if (points.has(label) && !POINT_KEY[label]) orphans.push(`${spec.key}: ${label}`);
+      for (const [label, arcanum, positionKey] of spec.positions(m)) {
+        expect(label.length).toBeGreaterThan(2);
+        expect(positionKey.length).toBeGreaterThan(2);
+        expect(arcanumInPosition(arcanum, positionKey).length).toBeGreaterThan(20);
       }
     }
-    expect(orphans).toEqual([]);
   });
 
   it("закрытый разбор не отдаёт платные позиции", () => {

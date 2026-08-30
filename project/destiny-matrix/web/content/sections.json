@@ -4,12 +4,48 @@
   {
    "key": "character",
    "title": "Характер и личные качества",
-   "access": "free"
+   "access": "free",
+   "lead": "Как вы устроены и что в вас видят люди с первого взгляда.",
+   "positions": [
+    {
+     "label": "Портрет личности",
+     "selector": "A",
+     "position_key": "day"
+    },
+    {
+     "label": "Духовная задача",
+     "selector": "B",
+     "position_key": "month"
+    },
+    {
+     "label": "Материальная задача",
+     "selector": "C",
+     "position_key": "year"
+    }
+   ]
   },
   {
    "key": "comfort",
    "title": "Центр и внутренние точки",
-   "access": "free"
+   "access": "free",
+   "lead": "Центр E и две внутренние точки каналов на вертикальной оси.",
+   "positions": [
+    {
+     "label": "Центр карты",
+     "selector": "E",
+     "position_key": "center"
+    },
+    {
+     "label": "Вход линии отношений и хвоста",
+     "selector": "M",
+     "position_key": "comfort_south"
+    },
+    {
+     "label": "Внутренняя точка таланта",
+     "selector": "K",
+     "position_key": "comfort_north"
+    }
+   ]
   },
   {
    "key": "profession",

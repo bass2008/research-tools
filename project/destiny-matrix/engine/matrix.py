@@ -10,19 +10,12 @@ import datetime as _dt
 from dataclasses import dataclass, field, asdict
 from typing import Iterable
 
+from .spec import METHOD
+
 ARCANA_MAX = 22
 
-CHAKRAS = (
-    ("sahasrara", "Сахасрара", "связь с большим замыслом"),
-    ("ajna", "Аджна", "видение и интуиция"),
-    ("vishuddha", "Вишудха", "слово, честность, судьба"),
-    ("anahata", "Анахата", "любовь и отношения"),
-    ("manipura", "Манипура", "статус, воля, деньги"),
-    ("svadhisthana", "Свадхистана", "радость, дети, творчество"),
-    ("muladhara", "Муладхара", "тело, опора, материя"),
-)
-
-COLUMNS = (("physics", "Физика"), ("energy", "Энергия"), ("emotions", "Эмоции"))
+CHAKRAS = tuple((row["key"], row["title"], row["hint"]) for row in METHOD["chakras"])
+COLUMNS = tuple((row["key"], row["title"]) for row in METHOD["chakra_columns"])
 
 
 def fold(n: int) -> int:

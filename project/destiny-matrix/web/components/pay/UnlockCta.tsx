@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { track } from "@/lib/analytics";
 
-import { useLead } from "@/components/pay/TariffsProvider";
+import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 
 /**
  * Кнопка покупки. Отдельным клиентским компонентом, чтобы вокруг неё жила серверная разметка:
@@ -29,6 +29,14 @@ export default function UnlockCta({
   matrixId?: number | null;
 }) {
   const lead = useLead();
+  const known = usePriceKnown();
+  if (!known || !lead) {
+    return (
+      <button className={className} data-testid={testId} type="button" disabled>
+        {children ?? "Купить"}
+      </button>
+    );
+  }
   return (
     <Link
       className={className}

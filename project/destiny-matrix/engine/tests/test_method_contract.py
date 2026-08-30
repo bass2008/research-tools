@@ -28,7 +28,7 @@ def test_reduction_contract_examples():
 def test_browser_contract_fixtures_are_exact_copies():
     """Docker web-context не видит ../spec, поэтому копии обязательны, но расходиться не могут."""
     fixture = ROOT / "web" / "lib" / "__fixtures__"
-    for name in ("method.json", "golden.json", "parity-digests.json"):
+    for name in ("method.json", "sections.json", "golden.json", "parity-digests.json"):
         assert (ROOT / "spec" / name).read_bytes() == (fixture / name).read_bytes(), name
 
 
