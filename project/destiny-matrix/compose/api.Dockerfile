@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 # Порядок слоёв — от редко меняющегося к часто: движок трогают реже, чем сервис.
 COPY engine ./engine
+COPY spec ./spec
 COPY api/app ./api/app
 
 WORKDIR /srv/api
