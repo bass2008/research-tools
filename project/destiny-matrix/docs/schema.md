@@ -1,6 +1,7 @@
 # Схема базы
 
-SQLite. Миграций на этапе разработки нет намеренно: таблицы можно ронять и создавать заново.
+SQLite. Формального фреймворка миграций пока нет; `ensure` создаёт таблицы и добавляет известные
+новые колонки через идемпотентный `ALTER TABLE`, не удаляя существующие строки.
 
 ```
 python -m app.schema ensure   # создать недостающее и наполнить справочник тарифов
@@ -29,9 +30,15 @@ CREATE TABLE users (
     id             INTEGER      NOT NULL PRIMARY KEY,
     email          VARCHAR(320) NOT NULL UNIQUE,
     password_hash  VARCHAR(255) NOT NULL,
-    created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at   DATETIME                              -- последний часовой flush pulse
 );
 CREATE UNIQUE INDEX ix_users_email ON users (email);
+
+Авторизованный `pulse` приходит раз в 45 секунд, но `last_seen_at` не пишется на каждый запрос:
+API хранит последнее время по `user_id` в памяти и раз в час обновляет весь накопленный пакет одним
+коммитом. Поэтому значение в админке может отставать от фактического присутствия не более чем на
+час. Во всех контурах по умолчанию используется `PRESENCE_FLUSH_SECONDS=3600`.
 
 CREATE TABLE matrices (
     id          INTEGER      NOT NULL PRIMARY KEY,

@@ -20,8 +20,10 @@ OUT = pathlib.Path(__file__).resolve().parents[1] / "content" / "sections.json"
 
 
 def main() -> None:
-    items = [{"key": key, "title": title, "lead": lead, "access": access}
-             for key, title, lead, access, _ in SPEC]
+    # В браузер уезжают только названия и уровни доступа. Lead платного отчёта — часть товара:
+    # даже если publicSpec после импорта отбрасывает поле, webpack встраивает JSON целиком.
+    items = [{"key": key, "title": title, "access": access}
+             for key, title, _lead, access, _ in SPEC]
     OUT.write_text(json.dumps({"count": len(items), "items": items}, ensure_ascii=False, indent=1) + "\n",
                    encoding="utf-8")
     free = sum(1 for x in items if x["access"] == "free")

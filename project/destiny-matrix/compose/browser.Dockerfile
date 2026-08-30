@@ -11,7 +11,7 @@ WORKDIR /srv/browser
 COPY browser/package.json ./
 RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 
-COPY browser/server.mjs ./
+COPY browser/server.mjs browser/settings.mjs ./
 
 ENV NODE_ENV=production CHROME_PATH=/usr/bin/chromium-browser
 EXPOSE 3001

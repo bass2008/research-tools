@@ -75,6 +75,7 @@ export interface AdminUser {
   id: number;
   email: string;
   created_at: string;
+  last_seen_at: string | null;
   is_admin: boolean;
   matrices: number;
   payments: number;
@@ -120,6 +121,20 @@ export interface SweepRun {
 export interface AdminPayment extends PaymentItem {
   user_id: number;
   email: string;
+}
+
+export interface ApplicationSetting {
+  component: "api" | "browser" | "web-public" | "web-server";
+  name: string;
+  value: string;
+  source: "environment" | "default" | "generated";
+  sensitive: boolean;
+  configured: boolean;
+}
+
+export interface ApplicationSettings {
+  frontend: { group: "frontend"; items: ApplicationSetting[] };
+  backend: { group: "backend"; items: ApplicationSetting[]; warnings?: string[] };
 }
 
 export interface AdminUserCard {
@@ -305,6 +320,7 @@ export const api = {
                             avg_seconds: number | null }>("/admin/reports"),
     sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
     pulse: () => request<Pulse>("/admin/pulse"),
+    settings: () => request<ApplicationSettings>("/admin/settings"),
     /** Вернуть платёж: снимает право, закрывает разбор и пишет покупателю письмо. */
     refund: (id: number) =>
       request<{ ok: true; status: string; refunded_at: string | null }>(

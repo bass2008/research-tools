@@ -4,7 +4,8 @@ import Link from "next/link";
 import Crumbs from "@/components/ui/Crumbs";
 
 import { DISCLAIMER, LEGAL, pageMeta } from "@/lib/site";
-import { type Tariff, getTariffs, money, periodLabel } from "@/lib/tariffs";
+import { getTariffs } from "@/lib/tariffs.server";
+import { type Tariff, money, periodLabel } from "@/lib/tariffs";
 
 // Оферта — договор: цены в ней обязаны совпадать с теми, что спишет касса, поэтому страница
 // печатается по запросу и читает прайс из базы.

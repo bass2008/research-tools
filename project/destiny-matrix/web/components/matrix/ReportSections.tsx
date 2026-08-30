@@ -9,7 +9,7 @@ import { counted, plural } from "@/lib/plural";
 
 import type { SectionOut } from "@/lib/publicSpec";
 import { publicHref } from "@/lib/site";
-import { positionHref } from "@/lib/publicSpec";
+import { sectionEntityLink } from "@/lib/publicSpec";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import LockIcon from "@/components/ui/LockIcon";
 import UnlockCta from "@/components/pay/UnlockCta";
@@ -57,8 +57,9 @@ export default function ReportSections({
         ) : null}
       </div>
 
-      {sections.map((s, i) =>
-        s.positions.length ? (
+      {sections.map((s, i) => {
+        const encyclopedia = sectionEntityLink(s);
+        return s.positions.length ? (
           <details
             className="acc"
             key={s.key}
@@ -74,7 +75,11 @@ export default function ReportSections({
               <p className="lead">{s.lead}</p>
               <ul className="poslist" data-cols={gridColumns(s.positions.length)}>
                 {s.positions.map((p, j) => (
-                  <li key={`${p.label}-${j}`}>
+                  <li
+                    key={`${p.label}-${j}`}
+                    data-position={p.label}
+                    data-arcanum={p.arcanum}
+                  >
                     <a className="poscard" href={printing ? publicHref(p.href) : p.href}>
                       <span className="who">{p.label}</span>
                       <ArcanumCard n={p.arcanum} size="grid" decorative half={printing} />
@@ -89,8 +94,13 @@ export default function ReportSections({
                 ))}
               </ul>
               <p className="encref">
-                <Link href={printing ? publicHref(positionHref(s.key)) : positionHref(s.key)}>
-                  Подробнее про раздел «{s.title}» в энциклопедии →
+                <Link
+                  href={printing ? publicHref(encyclopedia.href) : encyclopedia.href}
+                  data-entity-type={encyclopedia.entityType}
+                  data-entity-key={encyclopedia.entityKey}
+                  data-position-key={encyclopedia.positionKey}
+                >
+                  {encyclopedia.label}
                 </Link>
               </p>
             </div>
@@ -113,8 +123,8 @@ export default function ReportSections({
               </UnlockCta>
             )}
           </div>
-        ),
-      )}
+        );
+      })}
     </div>
   );
 }

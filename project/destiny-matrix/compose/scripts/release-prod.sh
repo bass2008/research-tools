@@ -3,11 +3,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+REQUIRE_TEST_EVIDENCE=1 scripts/assert-release-candidate.sh
+
 SITE=https://arcana-sense.ru
 IP=84.201.157.100
 REGISTRY=cr.yandex/crp68mnbmb6e88p35jsq
-# грязное дерево — тег со временем: иначе pull на машине не видит разницы
-TAG="$(git rev-parse --short HEAD)$(git diff --quiet HEAD -- .. || TZ=Europe/Moscow date '+-dirty%H%M')"
+TAG="$(git rev-parse --short HEAD)"
 
 export SITE_URL="$SITE" BUILD_COMMIT="$TAG" BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"
@@ -36,12 +37,20 @@ docker buildx build --push -f web.Dockerfile \
   --build-arg "BUILD_TIME=$BUILD_TIME" \
   --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
 
+echo "== диагностический снимок и проверенная копия БД"
+# Оба действия read-only относительно рабочей базы. Счета, callback и права продолжают
+# обслуживаться текущими контейнерами, пока новые образы уже лежат в registry.
+mkdir -p ../reports/unified
+scripts/release-snapshot.sh | tee "../reports/unified/prod-before-$TAG.json"
+scripts/backup.sh
+
 echo "== запуск на $IP"
 # На машину едет только база: без override там нет ни сборки, ни dev-секретов.
 # Всё, кроме systemctl, делает ubuntu: он в группе docker, а .env принадлежит ему. Через sudo
 # логин и pull расходились — токен писался в ~ubuntu, а читался из /root.
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "ubuntu@$IP:/srv/arcana/docker-compose.yml"
 ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
+  && (grep -E '^(REGISTRY|TAG|BUILD_COMMIT)=' .env > .env.previous.tag 2>/dev/null || true) \
   && sed -i '/^TAG=/d;/^REGISTRY=/d;/^BUILD_COMMIT=/d' .env \
   && printf 'REGISTRY=%s\nTAG=%s\nBUILD_COMMIT=%s\n' '$REGISTRY' '$TAG' '$TAG' >> .env \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
@@ -55,4 +64,5 @@ ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
 echo "== проверка"
 until curl -sf -o /dev/null "$SITE/"; do sleep 3; done
 curl -s "$SITE/version/current.txt"
+scripts/release-snapshot.sh | tee "../reports/unified/prod-after-$TAG.json"
 echo "готово: $SITE"

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { pageMeta } from "@/lib/site";
-import { byId, getTariffs, money, periodLabel, testPayments } from "@/lib/tariffs";
+import { getTariffs, testPayments } from "@/lib/tariffs.server";
+import { byId, money, periodLabel } from "@/lib/tariffs";
 import { NOT_FOUND_META } from "@/lib/seo";
 
 import PayScreen from "../PayScreen";

@@ -6,6 +6,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+scripts/assert-release-candidate.sh
+
 SITE=https://test.arcana-sense.ru
 IP=84.201.157.100
 REGISTRY=cr.yandex/crp68mnbmb6e88p35jsq
@@ -47,4 +49,6 @@ ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
 echo "== проверка"
 until curl -sf -o /dev/null "$SITE/"; do sleep 3; done
 curl -s "$SITE/version/current.txt"
+mkdir -p ../reports/unified
+git rev-parse HEAD > ../reports/unified/tested-commit.txt
 echo "готово: $SITE"

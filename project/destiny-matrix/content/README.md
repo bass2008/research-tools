@@ -1,17 +1,28 @@
 # Энциклопедия: источник контента
 
 Текст живёт здесь, в `data/`. Фронт читает не эти модули, а собранный JSON в
-`apps/web/content/` — он и есть артефакт сборки.
+`web/content/` — он и есть артефакт сборки.
 
 ```bash
-conda run -n research3.12 python -m content.encyclopedia.build      # собрать JSON
-conda run -n research3.12 python -m content.encyclopedia.validate   # проверить целостность
-conda run -n research3.12 python -m content.encyclopedia.selftest    # проверить сам валидатор
+    conda run -n research3.12 python -m content.build      # собрать JSON
+    conda run -n research3.12 python -m content.validate   # проверить целостность
+    conda run -n research3.12 python -m content.selftest   # проверить сам валидатор
 ```
 
 `build` перезаписывает четыре файла: `arcana.json`, `combinations.json`, `positions.json`,
 `chakras.json`. Сборка детерминированная — без дат и случайностей, поэтому повторный прогон
 даёт побайтово тот же результат, а diff показывает только правки текста.
+
+SEO-статьи и реестры сущностей собираются отдельно из корня workspace:
+
+```bash
+python tools/seo/prepare-unified-release.py --check
+python tools/seo/build-content.py --check
+```
+
+Первый gate воспроизводит 26 ordered-хвостов, классификацию 603 запросов, миграцию 81 URL,
+publication registry и карточки аудита. Второй не пропускает хвост вне `spec/method.json`,
+переставленный `arcana[]`, noindex с SEO-запросами и дубли primary query.
 
 ## Что где лежит
 

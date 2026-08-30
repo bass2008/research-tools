@@ -50,6 +50,40 @@ export function positionHref(key: string): string {
   return `/encyclopedia/position/${key}`;
 }
 
+export interface SectionEntityLink {
+  href: string;
+  label: string;
+  entityType: "karmic_tail" | "position";
+  positionKey: string;
+  entityKey: string;
+}
+
+/**
+ * Одна точка принятия решения для ссылок из бесплатного и платного разбора.
+ * Только раздел M–N–D является кармическим хвостом. Любая другая тройка остаётся
+ * occurrence конкретной позиции и не получает ошибочную хвостовую статью лишь из-за
+ * того, что рядом оказались три числа.
+ */
+export function sectionEntityLink(section: SectionOut): SectionEntityLink {
+  if (section.key === "past_lives" && section.positions.length === 3) {
+    const key = section.positions.map((position) => position.arcanum).join("-");
+    return {
+      href: `/encyclopedia/karmic-tail/${key}`,
+      label: `Подробнее про кармический хвост ${key} в энциклопедии →`,
+      entityType: "karmic_tail",
+      positionKey: section.key,
+      entityKey: key,
+    };
+  }
+  return {
+    href: positionHref(section.key),
+    label: `Подробнее про раздел «${section.title}» в энциклопедии →`,
+    entityType: "position",
+    positionKey: section.key,
+    entityKey: section.key,
+  };
+}
+
 /**
  * Каталог разделов — снимок из движка (`web/scripts/make-catalog.py` по `engine/sections.py`).
  *
@@ -68,17 +102,17 @@ export const FREE_DETAIL: Record<string, SectionDetail> = {
   character: {
     lead: "Как вы устроены и что в вас видят люди с первого взгляда.",
     positions: (m) => [
-      ["Личность", m.day],
-      ["Дано от рождения", m.month],
-      ["Опора рода", m.year],
+      ["Портрет личности", m.day],
+      ["Духовная задача", m.month],
+      ["Материальная задача", m.year],
     ],
   },
   comfort: {
-    lead: "Состояние, в котором вы восстанавливаетесь, а не тратитесь.",
+    lead: "Центр E и две внутренние точки каналов на вертикальной оси.",
     positions: (m) => [
       ["Центр карты", m.center],
-      ["Комфорт в деле", m.comfort_south],
-      ["Комфорт в отношениях", m.comfort_north],
+      ["Вход линии отношений и хвоста", m.comfort_south],
+      ["Внутренняя точка таланта", m.comfort_north],
     ],
   },
 };
@@ -91,23 +125,23 @@ export const FREE_DETAIL: Record<string, SectionDetail> = {
 // Позиции, у которых есть собственное толкование. Без этой карты весь раздел печатался пулом
 // ведущей позиции: под «Комфортом в отношениях» стоял текст про центр карты.
 export const POINT_KEY: Record<string, string> = {
-  Личность: "day",
-  "Дано от рождения": "month",
-  "Опора рода": "year",
+  "Портрет личности": "day",
+  "Духовная задача": "month",
+  "Материальная задача": "year",
   "Центр карты": "center",
-  "Комфорт в деле": "comfort_south",
-  "Комфорт в отношениях": "comfort_north",
-  "Комфорт через личность": "comfort_west",
-  "Опора в материальном": "comfort_east",
-  Миссия: "mission",
+  "Вход линии отношений и хвоста": "comfort_south",
+  "Внутренняя точка таланта": "comfort_north",
+  "Внутренняя левая точка": "comfort_west",
+  "Вход денежной линии": "comfort_east",
+  "Кармическая задача": "mission",
   "Личное предназначение": "purpose_personal",
   "Социальное предназначение": "purpose_social",
-  "Духовная гармония": "harmony",
-  "Планетарная задача": "planetary",
-  "Полученное наследие": "inheritance",
-  "Мужская линия рода": "father_line",
-  "Женская линия рода": "mother_line",
-  "Дети и продолжение": "descendants",
+  "Духовное предназначение": "harmony",
+  "Планетарное предназначение": "planetary",
+  "Материальная женская линия рода": "inheritance",
+  "Духовная мужская линия рода": "father_line",
+  "Духовная женская линия рода": "mother_line",
+  "Материальная мужская линия рода": "descendants",
 };
 
 export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
@@ -146,21 +180,21 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
 type ScalarKey = { [K in keyof Matrix]-?: Matrix[K] extends number ? K : never }[keyof Matrix];
 
 export const POINT_LABELS: Record<ScalarKey, string> = {
-  day: "Личность — день рождения",
-  month: "Дано от рождения — месяц",
-  year: "Опора рода — год",
-  mission: "Миссия",
+  day: "Портрет личности — точка A",
+  month: "Духовная задача — точка B",
+  year: "Материальная задача — точка C",
+  mission: "Кармическая задача — точка D",
   center: "Центр карты — зона комфорта",
-  father_line: "Мужская линия рода",
-  mother_line: "Женская линия рода",
-  descendants: "Дети и продолжение",
-  inheritance: "Полученное наследие",
-  comfort_west: "Комфорт через личность",
-  comfort_north: "Комфорт в отношениях",
-  comfort_east: "Опора в материальном",
-  comfort_south: "Комфорт в деле",
-  harmony: "Духовная гармония",
-  planetary: "Планетарная задача",
+  father_line: "Духовная мужская линия рода — точка F",
+  mother_line: "Духовная женская линия рода — точка G",
+  descendants: "Материальная мужская линия рода — точка H",
+  inheritance: "Материальная женская линия рода — точка I",
+  comfort_west: "Внутренняя левая точка — J",
+  comfort_north: "Внутренняя точка таланта — K",
+  comfort_east: "Вход денежной линии — L",
+  comfort_south: "Вход линии отношений и хвоста — M",
+  harmony: "Духовное предназначение",
+  planetary: "Планетарное предназначение",
   purpose_personal: "Личное предназначение",
   purpose_social: "Социальное предназначение",
 };

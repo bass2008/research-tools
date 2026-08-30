@@ -49,7 +49,9 @@ describe("подтверждение владения сайтом", () => {
   });
 
   it("печатает только то, что задано", () => {
-    const only = verification({ NEXT_PUBLIC_YANDEX_VERIFICATION: " abc " } as NodeJS.ProcessEnv);
+    const only = verification({
+      NEXT_PUBLIC_YANDEX_VERIFICATION: " abc ",
+    } as unknown as NodeJS.ProcessEnv);
     expect(only).toEqual({ yandex: "abc" });
   });
 
@@ -57,6 +59,6 @@ describe("подтверждение владения сайтом", () => {
     expect(verification({
       NEXT_PUBLIC_YANDEX_VERIFICATION: "ya",
       NEXT_PUBLIC_GOOGLE_VERIFICATION: "go",
-    } as NodeJS.ProcessEnv)).toEqual({ yandex: "ya", google: "go" });
+    } as unknown as NodeJS.ProcessEnv)).toEqual({ yandex: "ya", google: "go" });
   });
 });

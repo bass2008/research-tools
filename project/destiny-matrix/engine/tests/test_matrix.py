@@ -16,11 +16,14 @@ from engine.matrix import (ARCANA_MAX, CHAKRAS, Matrix, Triad, calculate, digit_
 
 class TestFold:
     def test_range(self):
-        assert [fold(n) for n in (1, 21, 22, 23, 44, 45)] == [1, 21, 22, 1, 22, 1]
+        assert [fold(n) for n in (1, 21, 22, 23, 29, 31, 36, 44, 45)] == \
+               [1, 21, 22, 5, 11, 4, 9, 8, 9]
 
-    def test_no_zero_arcanum(self):
-        """Ноль недопустим: Шут в матрице двадцать второй, а не нулевой."""
-        assert all(fold(22 * k) == 22 for k in range(1, 20))
+    def test_twenty_two_is_not_reduced(self):
+        """22 — самостоятельный аркан; большие кратные сворачиваются по цифрам."""
+        assert fold(22) == 22
+        assert fold(44) == 8
+        assert fold(220) == 4
 
     def test_rejects_nonpositive(self):
         for bad in (0, -1, -22):
@@ -85,24 +88,45 @@ class TestStructure:
         for t in (m.sky, m.ground, m.social_male, m.social_female):
             assert t.total == fold(t.first + t.second)
 
-    def test_purpose_derived_from_triads(self, m):
-        assert m.harmony == fold(m.sky.total + m.ground.total)
-        assert m.planetary == fold(m.social_male.total + m.social_female.total)
-
     def test_chakras_shape(self, m):
         assert len(m.chakras) == len(CHAKRAS) == 7
         assert [r.key for r in m.chakras] == [c[0] for c in CHAKRAS]
         for r in m.chakras:
             assert r.emotions == fold(r.physics + r.energy)
 
-    def test_chakra_rows_differ(self, m):
-        """Сдвиг по номеру чакры обязан разводить строки, иначе таблица бессмысленна."""
-        assert len({(r.physics, r.energy) for r in m.chakras}) == 7
+    def test_chakras_follow_classic_axes(self, m):
+        """Строки чакр берутся из семи горизонтальных пар, а не из номера строки."""
+        assert (m.chakras[0].physics, m.chakras[0].energy) == (m.day, m.month)
+        assert (m.chakras[2].physics, m.chakras[2].energy) == \
+               (m.comfort_west, m.comfort_north)
+        assert (m.chakras[4].physics, m.chakras[4].energy) == (m.center, m.center)
+        assert (m.chakras[5].physics, m.chakras[5].energy) == \
+               (m.comfort_east, m.comfort_south)
+        assert (m.chakras[6].physics, m.chakras[6].energy) == (m.year, m.mission)
 
-    def test_lines_have_three_values(self, m):
+    def test_channels_have_three_values(self, m):
         for line in (m.money, m.love, m.talent, m.karmic_tail):
             assert len(line) == 3
-            assert line[2] == fold(line[0] + line[1])
+            # Канал записан «внутренняя, средняя, внешняя точка»; средняя — сумма краёв.
+            assert line[1] == fold(line[0] + line[2])
+
+    def test_purpose_graph(self, m):
+        assert m.sky == Triad.of(m.month, m.mission)
+        assert m.ground == Triad.of(m.day, m.year)
+        assert m.social_male == Triad.of(m.father_line, m.descendants)
+        assert m.social_female == Triad.of(m.mother_line, m.inheritance)
+        assert m.purpose_personal == fold(m.sky.total + m.ground.total)
+        assert m.purpose_social == fold(m.social_male.total + m.social_female.total)
+        assert m.harmony == fold(m.purpose_personal + m.purpose_social)
+        assert m.planetary == fold(m.purpose_social + m.harmony)
+
+    def test_control_date_31_march_1993(self):
+        m = calculate("1993-03-31", "m")
+        assert (m.day, m.month, m.year, m.mission, m.center) == (4, 3, 22, 11, 4)
+        assert m.karmic_tail == [15, 8, 11]
+        assert m.money == [8, 13, 5]
+        assert m.love == [15, 20, 5]
+        assert m.talent == [3, 10, 7]
 
     def test_age_scale_covers_eighty_years(self, m):
         assert len(m.age_scale) == 8
@@ -137,7 +161,7 @@ class TestInvariantsOverAllDates:
 
     def test_february_29_supported(self):
         m = calculate("2000-02-29")
-        assert m.day == fold(29) == 7
+        assert m.day == fold(29) == 11
 
     def test_different_dates_give_different_matrices(self):
         seen = {tuple(calculate(b).values()) for b in self.DATES}
@@ -146,15 +170,15 @@ class TestInvariantsOverAllDates:
     def test_serialisation_round_trip(self):
         d = calculate("1987-06-14", "f").to_dict()
         assert d["birth"] == "1987-06-14" and d["sex"] == "f"
-        assert d["sky"] == [d["comfort_north"], d["comfort_south"],
-                            fold(d["comfort_north"] + d["comfort_south"])]
+        assert d["sky"] == [d["month"], d["mission"],
+                            fold(d["month"] + d["mission"])]
         assert len(d["chakras"]) == 7
 
 
 class TestTriad:
     def test_of_and_as_list(self):
         t = Triad.of(20, 15)
-        assert t.as_list() == [20, 15, fold(35)] == [20, 15, 13]
+        assert t.as_list() == [20, 15, fold(35)] == [20, 15, 8]
 
     def test_frozen(self):
         with pytest.raises(Exception):

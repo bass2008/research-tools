@@ -3,21 +3,22 @@
 // возвращает PDF.
 import http from "node:http";
 import puppeteer from "puppeteer-core";
+import { browserSettings } from "./settings.mjs";
 
-const PORT = Number(process.env.PORT ?? 3001);
-const SECRET = process.env.BROWSER_SECRET ?? "";
-const EXECUTABLE = process.env.CHROME_PATH ?? "/usr/bin/chromium-browser";
-const MAX_JOBS = Number(process.env.MAX_JOBS ?? 50);
-const MAX_RSS_MB = Number(process.env.MAX_RSS_MB ?? 400);
-const PAGE_TIMEOUT = Number(process.env.PAGE_TIMEOUT_MS ?? 150_000);
+const PORT = browserSettings.get("PORT");
+const SECRET = browserSettings.get("BROWSER_SECRET");
+const EXECUTABLE = browserSettings.get("CHROME_PATH");
+const MAX_JOBS = browserSettings.get("MAX_JOBS");
+const MAX_RSS_MB = browserSettings.get("MAX_RSS_MB");
+const PAGE_TIMEOUT = browserSettings.get("PAGE_TIMEOUT_MS");
 // Ждать «все картинки complete» до конца нельзя: React меняет src при гидратации, и у
 // прерванных запросов complete навсегда остаётся false. Поэтому короткое ожидание плюс тишина
 // в сети — этого хватает, карты в файл попадают (проверено: 50 изображений в PDF).
-const WAIT_ASSETS = Number(process.env.WAIT_ASSETS_MS ?? 2_500);
-const WAIT_IDLE = Number(process.env.WAIT_IDLE_MS ?? 6_000);
-const SCALE = Number(process.env.DEVICE_SCALE ?? 1);
+const WAIT_ASSETS = browserSettings.get("WAIT_ASSETS_MS");
+const WAIT_IDLE = browserSettings.get("WAIT_IDLE_MS");
+const SCALE = browserSettings.get("DEVICE_SCALE");
 // одним листом во всю длину, без разбиения на A4
-const SINGLE_PAGE = (process.env.SINGLE_PAGE ?? "1") !== "0";
+const SINGLE_PAGE = browserSettings.get("SINGLE_PAGE");
 
 let browser = null;
 let jobs = 0;
@@ -91,7 +92,7 @@ async function onePage(page, marks) {
 
 // Печатей одновременно не больше, чем мест: каждая держит около 65 МБ, а контейнеру отведено 512.
 // Предел живёт здесь, а не в api: браузер один на машину, а контуров, которые к нему ходят, два.
-const SLOTS = Number(process.env.PRINT_SLOTS ?? 3);
+const SLOTS = browserSettings.get("PRINT_SLOTS");
 let busy = 0;
 const waiting = [];
 
@@ -203,6 +204,15 @@ http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/health") {
     return json(res, 200, { ok: true, connected: Boolean(browser?.connected), jobs,
                             rss_mb: await rssMb() });
+  }
+  if (req.method === "GET" && req.url === "/settings") {
+    // Сервис доступен только во внутренней docker-сети, но снимок дополнительно закрыт тем же
+    // секретом, которым API авторизует печать. Сам секрет в снимке уже обрезан manager-ом.
+    if (!SECRET || req.headers["x-browser-secret"] !== SECRET) {
+      return json(res, 403, { detail: "не тот секрет" });
+    }
+    return json(res, 200, { group: "backend", component: "browser",
+                            items: browserSettings.snapshot() });
   }
   if (req.method !== "POST" || !req.url.startsWith("/pdf")) return json(res, 404, { detail: "нет такого" });
 

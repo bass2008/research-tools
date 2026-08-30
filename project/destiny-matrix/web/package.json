@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "check": "node scripts/check-build.cjs",
     "catalog": "PYTHONPATH=.. python scripts/make-catalog.py",
-    "golden": "PYTHONPATH=.. python scripts/make-golden.py"
+    "golden": "PYTHONPATH=.. python scripts/make-golden.py",
+    "test:parity": "vitest run lib/matrix.parity.test.ts"
   },
   "dependencies": {
     "next": "^15.5.0",

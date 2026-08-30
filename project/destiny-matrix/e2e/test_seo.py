@@ -203,20 +203,37 @@ def test_matrices_are_out_of_the_sitemap():
 
 
 def test_one_tail_is_one_address():
-    """Тройку набирают в любом порядке. Шесть перестановок с одним текстом — шесть дублей,
-    поэтому неканоническая форма уезжает на канонический адрес."""
-    r = requests.get(
-        f"{BASE}/encyclopedia/karmic-tail/9-9-18", timeout=30, allow_redirects=False
-    )
-    assert r.status_code in (301, 308), r.status_code
-    assert r.headers["location"].endswith("/encyclopedia/karmic-tail/18-9-9"), r.headers["location"]
+    """Два порядка одной формы имеют собственные self-canonical, если оба достижимы."""
+    for triple in ("9-9-18", "18-9-9"):
+        r = requests.get(
+            f"{BASE}/encyclopedia/karmic-tail/{triple}", timeout=30, allow_redirects=False
+        )
+        assert r.status_code == 200, (triple, r.status_code)
+        canonical = re.search(r'<link rel="canonical" href="([^"]+)"', r.text)
+        assert canonical and canonical.group(1).endswith(f"/{triple}"), (triple, canonical)
+
+
+def test_unknown_tail_is_a_real_404_not_a_soft_redirect():
+    r = requests.get(f"{BASE}/encyclopedia/karmic-tail/1-2-3", timeout=30,
+                     allow_redirects=False)
+    assert r.status_code == 404
+    assert "location" not in r.headers
+
+
+def test_product_tail_without_demand_is_noindex_and_absent_from_sitemap():
+    path = "/encyclopedia/karmic-tail/9-18-9"
+    html = _html(path)
+    robots = re.search(r'<meta name="robots" content="([^"]+)"', html).group(1)
+    assert "noindex" in robots and "nofollow" not in robots, robots
+    sitemap = requests.get(f"{BASE}/sitemap.xml", timeout=30).text
+    assert path not in sitemap
 
 
 def test_tail_page_does_not_promise_a_triple_the_engine_cannot_give():
-    """Половина троек формулой движка не получается: обещание «калькулятор покажет ваш хвост»
-    там было бы неправдой. У 18-9-9 раскладка есть (9 + 9 = 18) — она и показана."""
+    """Достижимая статья показывает продуктовую формулу M–N–D, а не старую формулу года."""
     html = _html("/encyclopedia/karmic-tail/18-9-9")
-    assert "Хвост складывается из аркана года" in html
+    assert "порядок фиксирован: M–N–D" in html
+    assert "Хвост складывается из аркана года" not in html
 
 
 def test_faq_markup_appears_only_with_visible_questions():

@@ -1,6 +1,5 @@
-// Цели Метрики. Дата рождения в параметры не попадает никогда: разрешены только
+// Цели внешней Метрики. Дата рождения в параметры не попадает никогда: разрешены только
 // код тарифа, раздел и год-десятилетие — ничего, по чему восстанавливается дата.
-
 export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "lead" | "purchase"
   | "pdf_click";
 
@@ -20,6 +19,10 @@ declare global {
 
 const FORBIDDEN = /(birth|date|дата|day|month|year|dob)/i;
 
+// Осознанное исключение из SettingManager: Next.js подставляет публичный id в browser bundle
+// во время сборки. Прямое имя переменной также проверяет production build gate.
+const METRIKA_ID = Number(process.env.NEXT_PUBLIC_METRIKA_ID) || 0;
+
 function clean(params?: GoalParams): Record<string, unknown> | undefined {
   if (!params) return undefined;
   const out: Record<string, unknown> = {};
@@ -33,7 +36,7 @@ function clean(params?: GoalParams): Record<string, unknown> | undefined {
 }
 
 export function metrikaId(): number {
-  return Number(process.env.NEXT_PUBLIC_METRIKA_ID ?? 0);
+  return METRIKA_ID;
 }
 
 export function track(goal: Goal, params?: GoalParams): void {

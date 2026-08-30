@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import ReportSheet from "@/components/matrix/ReportSheet";
 import { calculate } from "@/lib/matrix";
 import { build } from "@/lib/sections";
-import { getTariffs } from "@/lib/tariffs";
+import { getTariffs } from "@/lib/tariffs.server";
 
 import { planLabel, readMatrixUnlocked, type Access, type SavedMatrix } from "./access";
 

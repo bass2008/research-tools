@@ -14,7 +14,6 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
   content/               источник контента: генератор и данные (Python)
   infra/                 terraform и деплой
   docs/                  контракт, схема базы, планы
-  legacy/                рукописный лендинг и страницы выбора сидов
 ```
 
 Генератор колоды (FLUX.1-schnell, 16 ГБ весов) лежит вне продукта — `tools/generators`: он ничего
@@ -47,9 +46,10 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 | GET | `/matrices/{id}` | — | та же карточка (`unlocked` — открыт ли платный разбор этой даты) |
 | PATCH | `/matrices/{id}` | `{title}` | строка списка; пустое имя возвращает подпись по умолчанию (дату) |
 | GET | `/payments` | — | `{items: [{id, amount, tariff, matrix_id, external_id, created_at, paid_at, refunded_at}]}` |
-| GET | `/admin/users` | — | `{items: [{id, email, created_at, is_admin, matrices, payments, spent, scopes, owned, until, rights}]}` |
+| GET | `/admin/users` | — | `{items: [{id, email, created_at, last_seen_at, is_admin, matrices, payments, spent, scopes, owned, until, rights}]}` |
 | GET | `/admin/users/{id}` | — | `{user, matrices, payments, rights}` |
 | GET | `/admin/payments` | — | все платежи с почтой плательщика |
+| GET | `/admin/settings` | — | startup-снимок backend-настроек; чувствительные значения обрезаны |
 | POST | `/leads` | `{email, source?}` | `{ok: true}` |
 | GET | `/health` | — | `{ok: true, db: bool}` |
 
@@ -115,7 +115,7 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 ## Админка
 
 Признак админа — почта из `ADMIN_EMAILS` (по умолчанию `snborodaenko@mail.ru`), а не колонка в
-`users`: схема без миграций, и новое поле заставило бы пересоздавать таблицу вместе с платежами.
+`users`: это оперативная настройка доступа, а не свойство пользовательского профиля.
 `python -m app.schema ensure` создаёт этого пользователя, если его нет, с паролем из
 `ADMIN_PASSWORD` — поэтому после чистки базы админ существует всегда. Ветка `/admin/*` только
 читает; посторонним отвечает 404, а не 403: существование админских адресов знать незачем.

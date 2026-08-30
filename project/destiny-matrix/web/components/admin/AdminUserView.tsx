@@ -54,6 +54,8 @@ export default function AdminUserView({ id }: { id: number }) {
         <dl className="kv">
           <dt>Зарегистрирован</dt>
           <dd>{when(u.created_at)}</dd>
+          <dt>Последнее появление</dt>
+          <dd>{when(u.last_seen_at)}</dd>
           <dt>Куплено навсегда</dt>
           <dd>{u.owned}</dd>
           <dt>Подписка</dt>

@@ -10,7 +10,7 @@ from conftest import BASE
 
 pytestmark = pytest.mark.bug
 
-# центр 8, комфорт в деле 12, комфорт в отношениях 9 — арканы разные, поэтому подмена видна
+# Позиции имеют разные арканы, поэтому подмена общего текста раздела видна.
 SLUG = "1-1-2"
 
 
@@ -29,14 +29,14 @@ def _position_text(page: Page, label: str) -> str:
 @pytest.mark.parametrize(
     "label,key",
     [
-        ("Комфорт в деле", "comfort_south"),
-        ("Комфорт в отношениях", "comfort_north"),
+        ("Вход линии отношений и хвоста", "comfort_south"),
+        ("Внутренняя точка таланта", "comfort_north"),
         ("Центр карты", "center"),
-        ("Опора рода", "year"),
+        ("Материальная задача", "year"),
     ],
 )
 def test_matrix_page_prints_the_text_of_the_position(page: Page, label: str, key: str):
-    """Страница матрицы печатала пул раздела: под «Комфортом в деле» стоял текст про центр."""
+    """Страница матрицы печатала общий пул раздела вместо текста конкретной позиции."""
     page.goto(f"{BASE}/matrix/{SLUG}", wait_until="domcontentloaded")
     text = _position_text(page, label)
 

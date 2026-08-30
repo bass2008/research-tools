@@ -56,7 +56,6 @@ class PaymentIn(BaseModel):
     matrix_id: int | None = None
     birth: dt.date | None = None
     sex: Sex | None = None
-
     @field_validator("email")
     @classmethod
     def _normalize(cls, v: str) -> str:
@@ -82,7 +81,7 @@ class PaymentRef(BaseModel):
 
 
 class PulseIn(BaseModel):
-    """Отметка присутствия: анонимный браузер и отдельная вкладка, без аккаунта и IP."""
+    """Отметка присутствия: идентификаторы анонимны, аккаунт определяется только по JWT."""
     visitor: str = Field(min_length=6, max_length=64)
     # Необязателен на время обновления: уже открытые страницы старой версии ещё 45 секунд
     # присылают только visitor. Для них visitor одновременно служит ключом вкладки.

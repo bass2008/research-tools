@@ -2,6 +2,8 @@
  * Версия сборки. Значения вшиваются на этапе `next build` из аргументов образа: коммит, время
  * сборки и ветка. Пусто — значит собрано вручную, вне релизного скрипта.
  */
+import { publicSettings } from "./settings/public";
+
 export interface BuildInfo {
   commit: string;
   builtAt: string;
@@ -10,9 +12,9 @@ export interface BuildInfo {
 
 export function buildInfo(): BuildInfo {
   return {
-    commit: process.env.NEXT_PUBLIC_BUILD_COMMIT || "—",
-    builtAt: process.env.NEXT_PUBLIC_BUILD_TIME || "—",
-    branch: process.env.NEXT_PUBLIC_BUILD_BRANCH || "—",
+    commit: publicSettings.get("buildCommit"),
+    builtAt: publicSettings.get("buildTime"),
+    branch: publicSettings.get("buildBranch"),
   };
 }
 

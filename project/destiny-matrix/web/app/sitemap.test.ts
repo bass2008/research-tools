@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import sitemap from "./sitemap";
+import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
+import { CONTENT_MODIFIED } from "@/lib/schema";
 
 // Дефект A17: карту сайта пополняли вручную, и юридические страницы попали в неё не все.
 // адреса первого уровня, которые не являются концепт-хабами
@@ -39,6 +41,24 @@ describe("карта сайта", () => {
   it("выдаёт разобранные кармические хвосты", () => {
     expect(paths).toContain("/encyclopedia/karmic-tail");
     expect(paths.some((p) => p.startsWith("/encyclopedia/karmic-tail/"))).toBe(true);
+  });
+
+  it("выдаёт только хвосты, прошедшие demand gate", () => {
+    const published = paths
+      .filter((p) => p.startsWith("/encyclopedia/karmic-tail/"))
+      .map((p) => p.split("/").at(-1)!)
+      .sort();
+    expect(published).toEqual(indexedKarmicTailKeys().sort());
+    expect(published).toHaveLength(22);
+    for (const key of karmicTailKeys().filter((item) => !indexedKarmicTailKeys().includes(item))) {
+      expect(published).not.toContain(key);
+    }
+  });
+
+  it("lastModified отражает смысловую правку, а не время сборки", () => {
+    const expected = new Date(`${CONTENT_MODIFIED}T00:00:00Z`).toISOString();
+    expect(new Set(sitemap().map((entry) => new Date(entry.lastModified!).toISOString())))
+      .toEqual(new Set([expected]));
   });
 
   it("не выдаёт приватные адреса", () => {

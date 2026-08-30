@@ -46,6 +46,15 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
   const extra = chakraContent(c.key);
   const paragraphs = extra?.level ?? c.paragraphs;
   const title = extra?.seo?.title ?? `${c.title} — чакра ${c.index} в матрице судьбы`;
+  const axis: Record<string, string> = {
+    sahasrara: "A и B",
+    ajna: "O и P",
+    vishuddha: "J и K",
+    anahata: "S и T",
+    manipura: "E и E",
+    svadhisthana: "L и M",
+    muladhara: "C и D",
+  };
 
   return (
     <>
@@ -77,10 +86,9 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           ))}
           <h2>Как считается уровень</h2>
           <p>
-            В карте энергий каждый уровень раскладывается на три числа. Физика считается от аркана дня и
-            родовой опоры, энергия — от месяца и миссии, эмоции — сумма первых двух. Строки разводит
-            смещение, и считается оно сверху вниз: к верхнему уровню прибавляется единица, к нижнему —
-            семь, то есть «восемь минус номер уровня». Без этого все семь строк были бы одинаковыми.
+            В карте энергий уровень {c.title} использует классическую пару точек {axis[c.key]}.
+            Первое число записывается в колонку физики, второе — энергии, эмоции равны их
+            редуцированной сумме. Искусственного смещения по номеру строки в методике нет.
           </p>
           <p>
             Итог колонки — тоже аркан: он собирает семь уровней в одно число.{" "}

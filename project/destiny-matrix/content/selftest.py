@@ -1,6 +1,6 @@
 """Проверка самого валидатора: он должен падать на испорченном контенте.
 
-    python -m content.encyclopedia.selftest
+    python -m content.selftest
 
 Без этой проверки «ошибок: 0» ничего не значит — валидатор мог бы молчать всегда.
 Порча делается на копии в /tmp, боевые JSON не трогаются.
@@ -15,15 +15,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-CONTENT = ROOT / "apps" / "web" / "content"
+ROOT = Path(__file__).resolve().parents[1]
+CONTENT = ROOT / "web" / "content"
 
 
 def _run(content_dir: Path) -> tuple[int, str]:
     env = dict(os.environ, ENCYCLOPEDIA_CONTENT_DIR=str(content_dir))
-    done = subprocess.run([sys.executable, "-m", "content.encyclopedia.validate", "--all"],
+    done = subprocess.run([sys.executable, "-m", "content.validate", "--all"],
                           cwd=ROOT, env=env, capture_output=True, text=True)
-    return done.returncode, done.stdout
+    return done.returncode, done.stdout + done.stderr
 
 
 def _patch(content_dir: Path, name: str, fn) -> None:
@@ -75,7 +75,8 @@ CASES = (
 
 def main() -> int:
     code, out = _run(CONTENT)
-    print(f"чистый контент: код {code} — {out.strip().splitlines()[-1]}")
+    last = out.strip().splitlines()[-1] if out.strip() else "валидатор не вывел результат"
+    print(f"чистый контент: код {code} — {last}")
     if code != 0:
         print(out)
         return 1

@@ -38,6 +38,9 @@ def add_missing_columns() -> list[str]:
     иначе пришлось бы ронять таблицу с платежами."""
     from sqlalchemy import inspect, text
     wanted = {
+        "users": {
+            "last_seen_at": "TIMESTAMP WITH TIME ZONE",
+        },
         "payments": {
             "provider": "VARCHAR(16) NOT NULL DEFAULT 'mock'",
             "status": "VARCHAR(24) NOT NULL DEFAULT 'NEW'",

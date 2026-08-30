@@ -18,6 +18,25 @@ class RenderError(RuntimeError):
     pass
 
 
+def browser_settings() -> list[dict]:
+    """Безопасный startup-снимок отдельного browser-процесса для общей админской сводки."""
+    if not settings.browser_url:
+        return []
+    request = urllib.request.Request(
+        f"{settings.browser_url.rstrip('/')}/settings",
+        headers={"X-Browser-Secret": settings.browser_secret},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=3) as response:
+            body = json.loads(response.read())
+    except (OSError, ValueError, urllib.error.HTTPError) as exc:
+        raise RenderError(f"настройки browser-сервиса недоступны: {exc}") from exc
+    if (not isinstance(body, dict) or body.get("group") != "backend"
+            or not isinstance(body.get("items"), list)):
+        raise RenderError("browser-сервис вернул настройки в неожиданном формате")
+    return body["items"]
+
+
 def _client():
     import boto3
     return boto3.client("s3", endpoint_url=settings.s3_endpoint, region_name=settings.s3_region,

@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app import audit
 from app.models import SecurityAudit
+from app.config import settings
 
 
 @pytest.fixture
@@ -48,3 +49,21 @@ def test_auth_audit_ignores_forwarded_for_without_bff_real_ip(client, audit_db):
     assert row is not None
     assert row.ip == "testclient"
     assert row.ip != "203.0.113.77"
+
+
+def test_security_audit_default_page_contains_ten_rows(client, auth, db, audit_db):
+    admin = auth(settings.admins[0])
+    db.add_all([
+        SecurityAudit(action="login", outcome="failed", email=f"attempt-{i}@example.ru",
+                      ip="192.0.2.1")
+        for i in range(12)
+    ])
+    db.commit()
+
+    response = client.get("/api/admin/security-audit", headers=admin)
+    assert response.status_code == 200
+    body = response.json()
+    # Регистрация админа добавляет ещё одну запись; размер страницы от total не зависит.
+    assert body["page_size"] == 10
+    assert len(body["items"]) == 10
+    assert body["total"] == 13

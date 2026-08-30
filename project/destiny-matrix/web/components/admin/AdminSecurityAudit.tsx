@@ -25,14 +25,14 @@ const TABS: { key: AuditCategory; label: string }[] = [
   { key: "throttled", label: "Отсечённые лимитом" },
 ];
 
-const SIZES = [25, 50, 100];
+const SIZES = [10, 25, 50, 100];
 
 export default function AdminSecurityAudit() {
   const [rows, setRows] = useState<SecurityAuditRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [category, setCategory] = useState<AuditCategory>("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(10);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

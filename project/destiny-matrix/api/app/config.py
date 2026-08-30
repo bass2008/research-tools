@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,6 +51,10 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
 
     matrices_hard_cap: int = Field(default=2000, ge=1)
+
+    # Боевой pulse пишет последнее появление пакетно раз в час. Локальный compose переопределяет
+    # интервал на минуту, чтобы поведение можно было проверить без часового ожидания.
+    presence_flush_seconds: int = Field(default=3600, ge=60, le=86_400)
 
     # Почта. Без smtp_user и smtp_password отправка выключена: локально и в тестах письма
     # только пишутся в лог.
@@ -130,9 +135,8 @@ class Settings(BaseSettings):
     # поэтому здесь язык продукта, а вид деятельности остаётся в наименовании позиции чека.
     tbank_order_description: str = "Матрица судьбы — персональный разбор по дате рождения"
 
-    # Админ — это конфиг, а не колонка в users: схема без миграций, и новая колонка заставила бы
-    # пересоздавать таблицу. Список почт через запятую; сид создаёт первую из них, чтобы после
-    # чистки базы админ существовал всегда.
+    # Админ — оперативный список доступа, а не свойство профиля в users. Список почт через
+    # запятую; сид создаёт первую из них, чтобы после чистки базы админ существовал всегда.
     admin_emails: str = "snborodaenko@mail.ru"
     admin_password: str = "123"
 
@@ -175,8 +179,7 @@ class Settings(BaseSettings):
     def check(self) -> None:
         if not self.is_prod:
             return
-        import os
-        if not os.environ.get("JWT_SECRET"):
+        if "jwt_secret" not in self.model_fields_set or not self.jwt_secret:
             raise RuntimeError("JWT_SECRET не задан: в проде ключ обязателен явно")
         if len(self.jwt_secret.encode()) < 32:
             raise RuntimeError("JWT_SECRET короче 32 байт: для HS256 этого мало")
@@ -186,9 +189,131 @@ class Settings(BaseSettings):
             raise RuntimeError("BROWSER_SECRET не задан: печать в проде без него открыта всем")
 
 
+SENSITIVE_SETTINGS = frozenset({
+    "database_url",
+    "jwt_secret",
+    "smtp_user",
+    "smtp_password",
+    "browser_secret",
+    "s3_access_key",
+    "s3_secret_key",
+    "tbank_terminal_key",
+    "tbank_password",
+    "admin_password",
+    "monitoring_folder",
+})
+
+
+def _setting_text(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return ""
+    return str(value)
+
+
+def _masked_setting(value: Any) -> str:
+    """Админ видит, какой секрет загружен, но не получает секрет целиком.
+
+    У длинных значений оставляем шесть первых символов — этого хватает, чтобы отличить два
+    ключа при настройке стенда. Короткий секрет скрываем целиком: иначе «обрезка» раскрыла бы
+    его полностью (в частности, старый локальный ADMIN_PASSWORD=123).
+    """
+    text = _setting_text(value)
+    if not text:
+        return "не задано"
+    return f"{text[:6]}…" if len(text) > 6 else "••••••"
+
+
+class SettingManager:
+    """Единственная runtime-точка чтения backend-настроек.
+
+    Pydantic один раз загружает и валидирует окружение при старте процесса. Дальше приложение
+    читает неизменяемый снимок из памяти через этот объект, а не обращается к ``os.environ``.
+    """
+
+    def __init__(self, loaded: Settings):
+        self._values = loaded.model_dump()
+        self._provided = frozenset(loaded.model_fields_set)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        # pytest подменяет настройки через monkeypatch. Даже такой override должен менять
+        # хранилище manager-а, а не создавать рядом теневой атрибут в обход get()/snapshot().
+        values = self.__dict__.get("_values")
+        if values is not None and name in values:
+            values[name] = value
+            return
+        object.__setattr__(self, name, value)
+
+    def get(self, name: str) -> Any:
+        if name not in self._values:
+            raise KeyError(f"Неизвестная backend-настройка: {name}")
+        return self._values[name]
+
+    def __getattr__(self, name: str) -> Any:
+        # Старый читаемый интерфейс settings.foo сохраняется, но фактически тоже проходит через
+        # manager. Методы ниже объявлены явно и не попадают в эту ветку.
+        if name in self._values:
+            return self.get(name)
+        raise AttributeError(name)
+
+    @property
+    def admins(self) -> list[str]:
+        return [e.strip().lower() for e in self.get("admin_emails").split(",") if e.strip()]
+
+    @property
+    def tbank_enabled(self) -> bool:
+        return bool(self.get("tbank_terminal_key") and self.get("tbank_password"))
+
+    @property
+    def pdf_enabled(self) -> bool:
+        return bool(self.get("browser_url") and self.get("s3_reports_bucket")
+                    and self.get("s3_access_key"))
+
+    def is_admin(self, email: str | None) -> bool:
+        return bool(email) and email.strip().lower() in self.admins
+
+    @property
+    def origins(self) -> list[str]:
+        return [o.strip() for o in self.get("cors_origins").split(",") if o.strip()]
+
+    @property
+    def is_prod(self) -> bool:
+        return self.get("app_env").lower() in ("prod", "production")
+
+    def check(self) -> None:
+        if not self.is_prod:
+            return
+        if "jwt_secret" not in self._provided or not self.get("jwt_secret"):
+            raise RuntimeError("JWT_SECRET не задан: в проде ключ обязателен явно")
+        if len(self.get("jwt_secret").encode()) < 32:
+            raise RuntimeError("JWT_SECRET короче 32 байт: для HS256 этого мало")
+        if self.get("browser_url") and self.get("browser_secret") in ("", "dev-browser-secret"):
+            raise RuntimeError("BROWSER_SECRET не задан: печать в проде без него открыта всем")
+
+    def snapshot(self) -> list[dict[str, Any]]:
+        """Безопасное представление всех известных backend-переменных для админки."""
+        rows: list[dict[str, Any]] = []
+        for name, value in self._values.items():
+            sensitive = (name in SENSITIVE_SETTINGS or "password" in name or "secret" in name
+                         or name.endswith("_token") or name.endswith("_key")
+                         or "access_key" in name)
+            source = ("environment" if name in self._provided else
+                      "generated" if name == "jwt_secret" else "default")
+            rows.append({
+                "component": "api",
+                "name": name.upper(),
+                "value": _masked_setting(value) if sensitive else _setting_text(value),
+                "source": source,
+                "sensitive": sensitive,
+                "configured": bool(_setting_text(value)),
+            })
+        return rows
+
+
 @lru_cache
-def get_settings() -> Settings:
-    return Settings()
+def get_settings() -> SettingManager:
+    return SettingManager(Settings())
 
 
 settings = get_settings()

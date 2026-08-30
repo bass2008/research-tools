@@ -8,8 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import errors, monitor, payments, presence, tariffs
-from .db import get_db
 from .config import settings
+from .db import get_db
+from .deps import optional_user
+from .models import User
 from .routers import ROUTERS
 from .schemas import PulseIn
 
@@ -43,10 +45,13 @@ def create_app() -> FastAPI:
         return await errors.watch(request, call_next)
 
     @app.post(f"{settings.api_prefix}/pulse", tags=["service"])
-    def pulse(body: PulseIn, request: Request) -> dict:
-        """Отметка «я здесь» раз в 45 секунд. Ничего не сохраняет в базу: только счётчик в памяти,
-        по которому админка показывает, сколько человек на сайте сейчас."""
+    def pulse(body: PulseIn, request: Request,
+              user: User | None = Depends(optional_user)) -> dict:
+        """Отметка «я здесь» раз в 45 секунд. Онлайн остаётся в памяти; для вошедшего пользователя
+        последнее появление копится там же и записывается в БД только почасовым пакетом."""
         presence.touch(body.visitor, body.path, request.headers.get("user-agent", ""), tab=body.tab)
+        if user is not None:
+            presence.touch_user(user.id)
         return {"ok": True}
 
     @app.exception_handler(ValueError)
@@ -82,6 +87,7 @@ def create_app() -> FastAPI:
         )
 
     monitor.start()
+    presence.start()
     return app
 
 

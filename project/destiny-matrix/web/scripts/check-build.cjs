@@ -69,7 +69,9 @@ async function serve() {
 }
 
 // в разметке разряды разделены неразрывным пробелом — сравнивать по нему нельзя
-const norm = (html) => html.replace(/\u00a0/g, " ").replace(/&nbsp;/g, " ");
+// React разделяет соседние текстовые узлы пустым HTML-комментарием (`250<!-- --> ₽`). Для
+// человека это одна строка, поэтому и приёмка должна сравнивать её как одну строку.
+const norm = (html) => html.replace(/\u00a0/g, " ").replace(/&nbsp;/g, " ").replace(/<!--\s*-->/g, "");
 const money = (kopecks) => Math.round(kopecks / 100).toLocaleString("ru-RU").replace(/\u00a0/g, " ");
 
 /** Прайс, который сервер напечатал бы сам: из api через BFF, иначе из запасного набора. */
@@ -111,13 +113,21 @@ async function loadOnDemand() {
   return price;
 }
 
-const BANNED_MED = ["лечен", "лечит", "диагноз", "заболеван", "исцел", "целитель", "болезн", "симптом",
-  "терапи", "препарат", "набор веса", "алкогол", "уязвимые зоны", "карта здоровья",
-  "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник"];
+// Границы слов существенны: проверка подстрок считала «влечение» лечением, а «развлечения» —
+// медицинским обещанием. Набор синхронизирован с content/validate.py.
+const BANNED_MED = [
+  /\bздоровь\p{L}*/u, /\bболезн\p{L}*/u, /\bзаболеван\p{L}*/u, /\bдиагноз\p{L}*/u,
+  /\bлечени\p{L}*/u, /\bлечить\p{L}*/u, /\bисцел\p{L}*/u, /\bцелител\p{L}*/u,
+  /\bсимптом\p{L}*/u, /\bтерапи\p{L}*/u, /\bпрепарат\p{L}*/u, /\bиммунит\p{L}*/u,
+  /\bпохуден\p{L}*/u, /\bнабор веса\b/u, /\bалкогол\p{L}*/u, /\bвыздоравл\p{L}*/u,
+  /\bврач\p{L}*/u, /\bклиник\p{L}*/u, /\bнедуг\p{L}*/u, /\bхроническ\p{L}*/u,
+  /\bуязвимые зоны\b/u, /\bкарта здоровья\b/u,
+];
 const GUARANTEE = ["гарантируем", "гарантия результата", "гарантированно", "точно сбудется", "100% результат"];
 
 let linkChecks = 0;
 let imgChecks = 0;
+let sitemapChecks = 0;
 
 /** Файл на сайте бывает и в public, и маршрутом в app (icon.svg, og-картинка). */
 function hasAsset(url) {
@@ -137,7 +147,7 @@ function checkPages() {
 for (const [r, html] of pages) {
   const low = html.toLowerCase();
 
-  for (const w of BANNED_MED) if (low.includes(w)) fail(`${r}: медицинская формулировка «${w}»`);
+  for (const w of BANNED_MED) if (w.test(low)) fail(`${r}: медицинская формулировка ${w}`);
   for (const w of GUARANTEE) if (low.includes(w)) fail(`${r}: обещание гарантии «${w}»`);
 
   if (!/<title>[^<]{10,}<\/title>/.test(html)) fail(`${r}: нет содержательного <title>`);
@@ -178,6 +188,46 @@ for (const [r, html] of pages) {
     fail(`${r}: битая внутренняя ссылка ${target}`);
   }
 }
+}
+
+function checkSitemap() {
+  const file = path.join(ROOT, "sitemap.xml.body");
+  if (!fs.existsSync(file)) {
+    fail("sitemap.xml не собран");
+    return;
+  }
+  const xml = fs.readFileSync(file, "utf8");
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  // На test origin sitemap намеренно пуст. Production release обязан собираться с боевым SITE.
+  if (!locs.length) {
+    if ((process.env.NEXT_PUBLIC_SITE_URL ?? "https://arcana-sense.ru") === "https://arcana-sense.ru") {
+      fail("боевой sitemap пуст");
+    }
+    return;
+  }
+  if (new Set(locs).size !== locs.length) fail("sitemap содержит дубли URL");
+  const modified = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((match) => match[1]);
+  if (new Set(modified).size !== 1) fail("sitemap сообщает разные/плавающие даты одного корпуса");
+  for (const raw of locs) {
+    const target = new URL(raw);
+    const pathname = target.pathname.replace(/\/$/, "") || "/";
+    sitemapChecks++;
+    if (!known.has(pathname)) {
+      fail(`sitemap: ${pathname} отсутствует среди собранных маршрутов`);
+      continue;
+    }
+    const html = pages.get(pathname);
+    if (!html) {
+      fail(`sitemap: ${pathname} не имеет собранного HTML`);
+      continue;
+    }
+    const robots = html.match(/<meta name="robots" content="([^"]+)"/)?.[1] ?? "index, follow";
+    if (/noindex/i.test(robots)) fail(`sitemap: ${pathname} закрыт noindex`);
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    if (!canonical || new URL(canonical).pathname.replace(/\/$/, "") !== pathname.replace(/\/$/, "")) {
+      fail(`sitemap: ${pathname} не имеет self-canonical`);
+    }
+  }
 }
 
 // прайс
@@ -336,8 +386,11 @@ for (const f of chunks) {
 }
 // Толкования платных разделов («аркан N в этом блоке») — это и есть товар. В клиентский
 // бандл они попасть не должны: браузер получает только тексты двух бесплатных разделов.
-const paidKeys = [...fs.readFileSync("lib/publicSpec.ts", "utf8")
-  .matchAll(/key:\s*"([a-z_0-9]+)",\s*title:\s*"[^"]*",\s*access:\s*"paid"/g)].map((m) => m[1]);
+// Каталог генерируется из канонического engine/sections.py. Парсить формат TypeScript здесь
+// нельзя: после перехода publicSpec на JSON сторож молча увидел ноль разделов.
+const paidKeys = (JSON.parse(fs.readFileSync("content/sections.json", "utf8")).items ?? [])
+  .filter((s) => s.access === "paid")
+  .map((s) => s.key);
 if (paidKeys.length < 15) fail(`сторож толкований ослеп: платных разделов найдено ${paidKeys.length}`);
 const corpus = JSON.parse(fs.readFileSync("content/arcana.json", "utf8")).items ?? [];
 const paidReadings = [];
@@ -366,7 +419,7 @@ for (const need of ["notBounce", "NEXT_PUBLIC_METRIKA_ID"]) {
     fail(`Метрика: нет ${need}`);
 }
 
-console.log(`страниц: ${pages.size} (по запросу: ${ON_DEMAND.length}), ссылок: ${linkChecks}, картинок: ${imgChecks}`);
+console.log(`страниц: ${pages.size} (по запросу: ${ON_DEMAND.length}), sitemap: ${sitemapChecks}, ссылок: ${linkChecks}, картинок: ${imgChecks}`);
 if (fails.length) {
   console.log(`ПРОВАЛОВ: ${fails.length}`);
   const seen = new Set();
@@ -384,6 +437,7 @@ console.log("ВСЁ ЧИСТО");
 (async () => {
   const price = await loadOnDemand();
   checkPages();
+  checkSitemap();
   checkPrice(price);
   checkLegal();
   finish();

@@ -136,6 +136,14 @@ export interface ArticleContent {
   faq: QA[];
   related: string[];
   arcana: number[];
+  entityType?: string;
+  publication: {
+    index: boolean;
+    follow: boolean;
+    primaryQuery: string | null;
+    exactFrequency: number | null;
+    reviewedAt: string | null;
+  };
 }
 
 // Статья попадает на сайт целиком или не попадает вовсе: половина полей — это страница без
@@ -162,6 +170,10 @@ function articleOf(raw: Bag, keyField: string): ArticleContent | null {
         (x): x is string => typeof x === "string" && safe(x),
       )
     : [];
+  const publicationRaw =
+    raw.publication && typeof raw.publication === "object" && !Array.isArray(raw.publication)
+      ? (raw.publication as Bag)
+      : null;
   return {
     key: id,
     title,
@@ -171,6 +183,22 @@ function articleOf(raw: Bag, keyField: string): ArticleContent | null {
     faq: faqOf(raw.faq) ?? [],
     related: keys(raw.related) ?? [],
     arcana: numbers(raw.arcana) ?? [],
+    entityType: typeof raw.entity_type === "string" ? raw.entity_type : undefined,
+    publication: {
+      // Старые категории до переезда на publication-registry остаются индексируемыми. Для
+      // хвостов поле обязательно проверяет build-content.py, поэтому fallback здесь их не
+      // маскирует.
+      index: typeof publicationRaw?.index === "boolean" ? publicationRaw.index : true,
+      follow: typeof publicationRaw?.follow === "boolean" ? publicationRaw.follow : true,
+      primaryQuery:
+        typeof publicationRaw?.primary_query === "string" ? publicationRaw.primary_query : null,
+      exactFrequency:
+        typeof publicationRaw?.exact_frequency === "number"
+          ? publicationRaw.exact_frequency
+          : null,
+      reviewedAt:
+        typeof publicationRaw?.reviewed_at === "string" ? publicationRaw.reviewed_at : null,
+    },
   };
 }
 
@@ -225,6 +253,10 @@ export function karmicTail(key: string): ArticleContent | null {
 
 export function karmicTailKeys(): string[] {
   return [...KARMIC_TAILS.keys()];
+}
+
+export function indexedKarmicTailKeys(): string[] {
+  return [...KARMIC_TAILS.values()].filter((item) => item.publication.index).map((item) => item.key);
 }
 
 export function karmicTails(): ArticleContent[] {

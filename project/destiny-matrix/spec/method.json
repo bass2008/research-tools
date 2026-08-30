@@ -1,0 +1,146 @@
+{
+  "method": "Классическая матрица судьбы Наталии Ладини, схема A–T",
+  "status": {
+    "engineering_validated_on": "2026-08-30",
+    "product_owner_approved": false,
+    "independent_methodologist_approved": false,
+    "note": "Автоматические проверки не заменяют человеческое предметное утверждение перед релизом."
+  },
+  "scope": {
+    "minimum_birth_date": "1900-01-01",
+    "maximum_birth_date": "today",
+    "arcanum_range": [1, 22],
+    "sex_changes_numbers": false
+  },
+  "sources": [
+    {
+      "kind": "primary_calculator",
+      "url": "https://matricaladini.ru/calculator/"
+    },
+    {
+      "kind": "primary_executable_formula",
+      "url": "https://matricaladini.ru/wp-content/plugins/matritsa/matritsa.js?ver=7.1"
+    },
+    {
+      "kind": "secondary_cross_check",
+      "url": "https://gadalkindom.ru/matritsa-sudby/metodika-raschyota.html"
+    }
+  ],
+  "reduction": {
+    "operation": "sum_decimal_digits_while_greater_than_22",
+    "apply_after_every_sum": true,
+    "preserve_22": true,
+    "reject_non_positive": true,
+    "examples": {
+      "1": 1,
+      "21": 21,
+      "22": 22,
+      "23": 5,
+      "29": 11,
+      "31": 4,
+      "36": 9,
+      "44": 8,
+      "45": 9,
+      "220": 4
+    }
+  },
+  "points": [
+    {"symbol": "A", "key": "day", "title": "Портрет личности", "formula": "reduce(day_of_month)", "depends_on": []},
+    {"symbol": "B", "key": "month", "title": "Духовная задача", "formula": "reduce(month)", "depends_on": []},
+    {"symbol": "C", "key": "year", "title": "Материальная задача", "formula": "reduce(digit_sum(year))", "depends_on": []},
+    {"symbol": "D", "key": "mission", "title": "Кармическая задача", "formula": "reduce(A+B+C)", "depends_on": ["A", "B", "C"]},
+    {"symbol": "E", "key": "center", "title": "Центр и зона комфорта", "formula": "reduce(A+B+C+D)", "depends_on": ["A", "B", "C", "D"]},
+    {"symbol": "F", "key": "father_line", "title": "Духовная мужская линия рода", "formula": "reduce(A+B)", "depends_on": ["A", "B"]},
+    {"symbol": "G", "key": "mother_line", "title": "Духовная женская линия рода", "formula": "reduce(B+C)", "depends_on": ["B", "C"]},
+    {"symbol": "H", "key": "descendants", "title": "Материальная мужская линия рода", "formula": "reduce(C+D)", "depends_on": ["C", "D"]},
+    {"symbol": "I", "key": "inheritance", "title": "Материальная женская линия рода", "formula": "reduce(D+A)", "depends_on": ["D", "A"]},
+    {"symbol": "J", "key": "comfort_west", "title": "Внутренняя левая точка", "formula": "reduce(A+E)", "depends_on": ["A", "E"]},
+    {"symbol": "K", "key": "comfort_north", "title": "Внутренняя верхняя точка", "formula": "reduce(B+E)", "depends_on": ["B", "E"]},
+    {"symbol": "L", "key": "comfort_east", "title": "Внутренняя правая точка", "formula": "reduce(C+E)", "depends_on": ["C", "E"]},
+    {"symbol": "M", "key": "comfort_south", "title": "Внутренняя нижняя точка", "formula": "reduce(D+E)", "depends_on": ["D", "E"]},
+    {"symbol": "O", "key": "ajna_physics", "title": "Вторая левая точка", "formula": "reduce(A+J)", "depends_on": ["A", "J"]},
+    {"symbol": "P", "key": "ajna_energy", "title": "Вторая верхняя точка", "formula": "reduce(B+K)", "depends_on": ["B", "K"]},
+    {"symbol": "S", "key": "anahata_physics", "title": "Третья левая точка", "formula": "reduce(J+E)", "depends_on": ["J", "E"]},
+    {"symbol": "T", "key": "anahata_energy", "title": "Третья верхняя точка", "formula": "reduce(K+E)", "depends_on": ["K", "E"]},
+    {"symbol": "N", "key": "karmic_tail_middle", "title": "Средняя точка кармического хвоста", "formula": "reduce(D+M)", "depends_on": ["D", "M"]},
+    {"symbol": "R", "key": "money_love_crossing", "title": "Пересечение денег и отношений", "formula": "reduce(L+M)", "depends_on": ["L", "M"]},
+    {"symbol": "R1", "key": "love_middle", "title": "Средняя точка отношений", "formula": "reduce(M+R)", "depends_on": ["M", "R"]},
+    {"symbol": "R2", "key": "money_middle", "title": "Средняя точка денег", "formula": "reduce(L+R)", "depends_on": ["L", "R"]}
+  ],
+  "ordered_results": {
+    "karmic_tail": {"symbols": ["M", "N", "D"], "keys": ["comfort_south", "karmic_tail_middle", "mission"]},
+    "money": {"symbols": ["L", "R2", "R"], "keys": ["comfort_east", "money_middle", "money_love_crossing"]},
+    "love": {"symbols": ["M", "R1", "R"], "keys": ["comfort_south", "love_middle", "money_love_crossing"]},
+    "talent": {"symbols": ["B", "P", "K"], "keys": ["month", "ajna_energy", "comfort_north"]},
+    "sky": {"symbols": ["B", "D", "reduce(B+D)"]},
+    "ground": {"symbols": ["A", "C", "reduce(A+C)"]},
+    "social_male": {"symbols": ["F", "H", "reduce(F+H)"]},
+    "social_female": {"symbols": ["G", "I", "reduce(G+I)"]}
+  },
+  "purposes": {
+    "purpose_personal": "reduce(sky.total+ground.total)",
+    "purpose_social": "reduce(social_male.total+social_female.total)",
+    "harmony": "reduce(purpose_personal+purpose_social)",
+    "planetary": "reduce(purpose_social+harmony)"
+  },
+  "chakras": [
+    {"key": "sahasrara", "physics": "A", "energy": "B"},
+    {"key": "ajna", "physics": "O", "energy": "P"},
+    {"key": "vishuddha", "physics": "J", "energy": "K"},
+    {"key": "anahata", "physics": "S", "energy": "T"},
+    {"key": "manipura", "physics": "E", "energy": "E"},
+    {"key": "svadhisthana", "physics": "L", "energy": "M"},
+    {"key": "muladhara", "physics": "C", "energy": "D"}
+  ],
+  "age_scale": ["A", "F", "B", "G", "C", "H", "D", "I"],
+  "sections": {
+    "character": ["A", "B", "C"],
+    "comfort": ["E", "M", "K"],
+    "profession": ["B", "P", "K"],
+    "realisation": ["D", "purpose_personal", "purpose_social"],
+    "karma40": ["I", "J"],
+    "resources": ["L", "R2"],
+    "family_gifts": ["F", "G", "social_male.total", "social_female.total"],
+    "soul_tasks": ["sky.total", "B", "D"],
+    "past_lives": ["M", "N", "D"],
+    "purpose": ["purpose_personal", "purpose_social", "harmony", "planetary"],
+    "money": ["L", "R2", "R", "ground.total"],
+    "money40": ["R2", "L"],
+    "relations": ["M", "R1", "R", "K"],
+    "parents_children": ["F", "G", "H"],
+    "ancestry": ["I", "social_male.total", "social_female.total", "planetary"],
+    "body_resource": ["C", "D", "reduce(C+D)"],
+    "chakras": ["chakra_rows", "chakra_totals"],
+    "rest": ["reduce(L+M)", "E"],
+    "loops": ["D", "E", "harmony"],
+    "years": ["A", "F", "B", "G", "C", "H", "D", "I"]
+  },
+  "reachable_karmic_tails": [
+    {"triple": "3-7-22", "sample_birth": "1900-01-11"},
+    {"triple": "3-13-10", "sample_birth": "1949-01-04"},
+    {"triple": "3-22-19", "sample_birth": "1900-01-08"},
+    {"triple": "6-5-17", "sample_birth": "1900-01-06"},
+    {"triple": "6-8-20", "sample_birth": "1900-01-09"},
+    {"triple": "6-14-8", "sample_birth": "1949-01-02"},
+    {"triple": "6-17-11", "sample_birth": "1900-06-22"},
+    {"triple": "6-20-14", "sample_birth": "1900-01-03"},
+    {"triple": "9-3-21", "sample_birth": "1900-01-10"},
+    {"triple": "9-9-18", "sample_birth": "1900-01-07"},
+    {"triple": "9-12-3", "sample_birth": "1900-01-19"},
+    {"triple": "9-15-6", "sample_birth": "1900-01-13"},
+    {"triple": "9-18-9", "sample_birth": "1949-01-03"},
+    {"triple": "12-16-4", "sample_birth": "1900-01-20"},
+    {"triple": "12-19-7", "sample_birth": "1900-01-14"},
+    {"triple": "15-5-8", "sample_birth": "1900-01-15"},
+    {"triple": "15-8-11", "sample_birth": "1900-01-18"},
+    {"triple": "15-20-5", "sample_birth": "1900-01-12"},
+    {"triple": "18-3-12", "sample_birth": "1900-01-01"},
+    {"triple": "18-6-6", "sample_birth": "1900-01-22"},
+    {"triple": "18-6-15", "sample_birth": "1900-01-04"},
+    {"triple": "18-9-9", "sample_birth": "1900-01-16"},
+    {"triple": "21-4-10", "sample_birth": "1900-01-17"},
+    {"triple": "21-7-13", "sample_birth": "1900-01-02"},
+    {"triple": "21-10-7", "sample_birth": "1908-12-22"},
+    {"triple": "21-10-16", "sample_birth": "1900-01-05"}
+  ]
+}

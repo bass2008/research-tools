@@ -23,21 +23,21 @@ function fmt(n: number): string {
 
 export default function Octagram({ m, linked = true }: { m: Matrix; linked?: boolean }) {
   const outer: NodeSpec[] = [
-    { angle: 180, value: m.day, label: "Личность · день", color: CHAKRA_COLORS[2], big: true },
-    { angle: 225, value: m.father_line, label: "Мужская линия рода", color: CHAKRA_COLORS[5] },
-    { angle: -90, value: m.month, label: "Дано от рождения · месяц", color: CHAKRA_COLORS[6], big: true },
-    { angle: -45, value: m.mother_line, label: "Женская линия рода", color: CHAKRA_COLORS[5] },
-    { angle: 0, value: m.year, label: "Опора рода · год", color: CHAKRA_COLORS[4], big: true },
-    { angle: 45, value: m.descendants, label: "Дети и продолжение", color: CHAKRA_COLORS[3] },
-    { angle: 90, value: m.mission, label: "Миссия", color: CHAKRA_COLORS[0], big: true },
-    { angle: 135, value: m.inheritance, label: "Полученное наследие", color: CHAKRA_COLORS[1] },
+    { angle: 180, value: m.day, label: "Портрет личности · A", color: CHAKRA_COLORS[2], big: true },
+    { angle: 225, value: m.father_line, label: "Духовная мужская линия · F", color: CHAKRA_COLORS[5] },
+    { angle: -90, value: m.month, label: "Духовная задача · B", color: CHAKRA_COLORS[6], big: true },
+    { angle: -45, value: m.mother_line, label: "Духовная женская линия · G", color: CHAKRA_COLORS[5] },
+    { angle: 0, value: m.year, label: "Материальная задача · C", color: CHAKRA_COLORS[4], big: true },
+    { angle: 45, value: m.descendants, label: "Материальная мужская линия · H", color: CHAKRA_COLORS[3] },
+    { angle: 90, value: m.mission, label: "Кармическая задача · D", color: CHAKRA_COLORS[0], big: true },
+    { angle: 135, value: m.inheritance, label: "Материальная женская линия · I", color: CHAKRA_COLORS[1] },
   ];
 
   const inner: NodeSpec[] = [
-    { angle: 180, value: m.comfort_west, label: "Комфорт через личность", color: "#7d92a1" },
-    { angle: -90, value: m.comfort_north, label: "Комфорт в отношениях", color: "#7d92a1" },
-    { angle: 0, value: m.comfort_east, label: "Опора в материальном", color: "#7d92a1" },
-    { angle: 90, value: m.comfort_south, label: "Комфорт в деле", color: "#7d92a1" },
+    { angle: 180, value: m.comfort_west, label: "Внутренняя левая · J", color: "#7d92a1" },
+    { angle: -90, value: m.comfort_north, label: "Точка таланта · K", color: "#7d92a1" },
+    { angle: 0, value: m.comfort_east, label: "Вход денег · L", color: "#7d92a1" },
+    { angle: 90, value: m.comfort_south, label: "Вход отношений и хвоста · M", color: "#7d92a1" },
   ];
 
   const ticks = [];

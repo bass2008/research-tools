@@ -14,7 +14,8 @@ import TariffsProvider from "@/components/pay/TariffsProvider";
 import { LANDING_SLIDES } from "@/lib/heroSlides";
 import { freePositionTexts } from "@/lib/sections";
 import { SITE, pageMeta } from "@/lib/site";
-import { getTariffs, lead, money, periodLabel, type Tariff } from "@/lib/tariffs";
+import { getTariffs } from "@/lib/tariffs.server";
+import { lead, money, periodLabel, type Tariff } from "@/lib/tariffs";
 
 // Цена — предмет договора, поэтому первый экран, разметка Offer и описание в поиске печатаются
 // по запросу и берут прайс из базы. Пересборка для смены цены не нужна.
@@ -159,7 +160,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
               </p>
             </div>
             <div className="pil">
-              <h3>Личность</h3>
+              <h3>Портрет личности</h3>
               <p>
                 Как вас считывают люди в первые минуты и какую роль вы занимаете в группе — часто не ту,
                 которую выбрали бы сами.

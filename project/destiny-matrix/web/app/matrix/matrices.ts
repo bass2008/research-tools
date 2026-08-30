@@ -1,8 +1,8 @@
-// Матрица зависит не от даты, а от тройки (день, месяц, год) после свёртки: 46 021 реальная
-// дата рождения даёт 5544 разные карты — 22 x 12 x 21. Список троек считает engine/precompute.py
+// Матрица зависит не от даты, а от тройки (день, месяц, год) после свёртки: десятки тысяч
+// реальных дат рождения дают 5544 разные карты — 22 x 12 x 21. Список троек считает engine/precompute.py
 // и кладёт в content/matrices.json; здесь только разбор слага и соседи для перелинковки.
 import { matrixSlugs } from "@/lib/content";
-import { foldYear, isRealDate } from "@/lib/matrix";
+import { fold, foldYear, isRealDate } from "@/lib/matrix";
 
 export const DAY_KEYS: number[] = Array.from({ length: 22 }, (_, i) => i + 1);
 export const MONTH_KEYS: number[] = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -60,9 +60,11 @@ export function calendarYears(key: number): number[] {
   return out;
 }
 
-/** Реальные даты рождения с такой матрицей: 22-е и 44-е числа месяца дают один и тот же аркан. */
+/** Реальные даты рождения с таким арканом дня после повторного сложения цифр. */
 export function birthDates(k: MatrixKey): Array<{ iso: string; label: string }> {
-  const days = [k.day, k.day + 22].filter((d) => d <= 31);
+  const days = Array.from({ length: 31 }, (_, index) => index + 1).filter(
+    (day) => fold(day) === k.day,
+  );
   const out: Array<{ iso: string; label: string }> = [];
   // ненаступивший день не бывает датой рождения: калькулятор такие отвергает, а страница
   // печатала их в списке «дат рождения» текущего года

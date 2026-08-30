@@ -98,12 +98,12 @@ export interface Matrix {
 
 export class MatrixError extends Error {}
 
-/** Свести число к 1..22. Кратные 22 дают 22: нулевого аркана в матрице нет. */
+/** Свести положительное целое к 1..22 повторным сложением цифр. */
 export function fold(n: number): number {
   if (!Number.isInteger(n)) throw new MatrixError(`ожидалось целое число, получено ${n}`);
   if (n <= 0) throw new MatrixError(`ожидалось положительное число, получено ${n}`);
-  const r = n % ARCANA_MAX;
-  return r ? r : ARCANA_MAX;
+  while (n > ARCANA_MAX) n = digitSum(n);
+  return n;
 }
 
 export function digitSum(n: number): number {
@@ -114,9 +114,7 @@ export function digitSum(n: number): number {
 
 /** Год сворачивается по цифрам, пока не станет не больше 22: 1987 → 25 → 7. */
 export function foldYear(year: number): number {
-  let n = digitSum(year);
-  while (n > ARCANA_MAX) n = digitSum(n);
-  return n;
+  return fold(digitSum(year));
 }
 
 function triad(a: number, b: number): Triad {
@@ -181,16 +179,18 @@ function ageScale(m: Matrix): AgeSector[] {
   return ring.map((arc, i) => ({ from: i * 10, to: i * 10 + 10, arcanum: arc }));
 }
 
-function chain(a: number, center: number): number[] {
-  const b = fold(a + center);
-  return [a, b, fold(a + b)];
-}
-
 function chakras(m: Matrix): { rows: ChakraRow[]; totals: ChakraTotals } {
+  const pairs: ReadonlyArray<readonly [number, number]> = [
+    [m.day, m.month],
+    [fold(m.day + m.comfort_west), fold(m.month + m.comfort_north)],
+    [m.comfort_west, m.comfort_north],
+    [fold(m.comfort_west + m.center), fold(m.comfort_north + m.center)],
+    [m.center, m.center],
+    [m.comfort_east, m.comfort_south],
+    [m.year, m.mission],
+  ];
   const rows: ChakraRow[] = CHAKRAS.map(([key, title, hint], idx) => {
-    const i = idx + 1;
-    const physics = fold(m.day + m.year + i);
-    const energy = fold(m.month + m.mission + i);
+    const [physics, energy] = pairs[idx];
     return { key, title, hint, physics, energy, emotions: fold(physics + energy) };
   });
   const sum = (pick: (r: ChakraRow) => number) => fold(rows.reduce((s, r) => s + pick(r), 0));
@@ -204,10 +204,10 @@ function chakras(m: Matrix): { rows: ChakraRow[]; totals: ChakraTotals } {
   };
 }
 
-/** Полный расчёт по дате рождения. sex влияет только на подписи родовых линий. */
+/** Полный расчёт. sex хранит идентичность карты, но не влияет ни на одно число. */
 export function calculate(birth: string | BirthParts, sex: Sex = "f"): Matrix {
   const parts = parseBirth(birth);
-  if (sex !== "m" && sex !== "f") throw new MatrixError("Выберите пол: он меняет подписи родовых линий.");
+  if (sex !== "m" && sex !== "f") throw new MatrixError("Выберите пол для однозначного названия карты.");
   if (!Number.isInteger(parts.year) || !Number.isInteger(parts.month) || !Number.isInteger(parts.day))
     throw new MatrixError("Проверьте дату: день, месяц и год — числами.");
   if (!isRealDate(parts)) throw new MatrixError("Такой даты нет в календаре — проверьте число и месяц.");
@@ -232,20 +232,20 @@ export function calculate(birth: string | BirthParts, sex: Sex = "f"): Matrix {
   m.comfort_east = fold(m.year + m.center);
   m.comfort_south = fold(m.mission + m.center);
 
-  m.sky = triad(m.comfort_north, m.comfort_south);
-  m.ground = triad(m.comfort_west, m.comfort_east);
+  m.sky = triad(m.month, m.mission);
+  m.ground = triad(m.day, m.year);
   m.social_male = triad(m.father_line, m.descendants);
   m.social_female = triad(m.mother_line, m.inheritance);
-  m.harmony = fold(m.sky[2] + m.ground[2]);
-  m.planetary = fold(m.social_male[2] + m.social_female[2]);
+  m.purpose_personal = fold(m.sky[2] + m.ground[2]);
+  m.purpose_social = fold(m.social_male[2] + m.social_female[2]);
+  m.harmony = fold(m.purpose_personal + m.purpose_social);
+  m.planetary = fold(m.purpose_social + m.harmony);
 
-  m.purpose_personal = fold(m.day + m.year);
-  m.purpose_social = fold(m.month + m.mission);
-
-  m.money = chain(m.descendants, m.center);
-  m.love = chain(m.mother_line, m.center);
-  m.talent = chain(m.month, m.center);
-  m.karmic_tail = [m.year, m.inheritance, fold(m.year + m.inheritance)];
+  const crossing = fold(m.comfort_east + m.comfort_south);
+  m.money = [m.comfort_east, fold(m.comfort_east + crossing), crossing];
+  m.love = [m.comfort_south, fold(m.comfort_south + crossing), crossing];
+  m.talent = [m.month, fold(m.month + m.comfort_north), m.comfort_north];
+  m.karmic_tail = [m.comfort_south, fold(m.mission + m.comfort_south), m.mission];
 
   const ch = chakras(m);
   m.chakras = ch.rows;

@@ -48,19 +48,15 @@ def test_calculator_without_scripts_explains_itself(page: Page):
         context.close()
 
 
-def test_tail_permutation_redirects_to_the_canonical_address(page: Page):
-    """Перестановка тройки уезжает на канонический адрес постоянным редиректом.
-
-    Метки перехода (utm, yclid) при этом не переносятся: чтобы их прочитать, страница должна
-    принимать searchParams, а от этого маршрут перестаёт быть статическим — и неизвестная
-    тройка начинает отдавать 404 с пустым телом и заголовком главной. Выбран корректный 404.
-    """
-    res = page.request.get(
-        f"{BASE}/encyclopedia/karmic-tail/9-9-18?utm_source=test",
-        max_redirects=0,
-    )
-    assert res.status in (301, 308), f"код {res.status}"
-    assert "/encyclopedia/karmic-tail/" in res.headers.get("location", "")
+def test_reachable_tail_permutation_is_a_distinct_address(page: Page):
+    """9-9-18 и 18-9-9 — два достижимых ordered-хвоста, а не SEO-дубли."""
+    for triple, sample in (("9-9-18", "07.01.1900"), ("18-9-9", "16.01.1900")):
+        res = page.request.get(
+            f"{BASE}/encyclopedia/karmic-tail/{triple}?utm_source=test",
+            max_redirects=0,
+        )
+        assert res.status == 200, f"{triple}: код {res.status}"
+        assert sample in res.text(), f"{triple}: нет контрольной даты {sample}"
 
 
 def test_unknown_tail_gives_a_readable_404(page: Page):

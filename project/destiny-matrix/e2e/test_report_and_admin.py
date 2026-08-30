@@ -162,8 +162,16 @@ def test_admin_sees_lists_and_stranger_does_not(page, mail):
     page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
     page.wait_for_timeout(1500)
     expect(page.get_by_test_id("admin-users")).to_be_visible()
+    expect(page.get_by_test_id("admin-users")).to_contain_text("Последнее появление")
     expect(page.get_by_test_id("admin-payments")).to_contain_text(mail)
     expect(page.get_by_test_id("admin-reports")).to_be_visible()
+    # BFF объединяет startup-снимки двух процессов, но API возвращает секреты только обрезанными.
+    settings = page.get_by_test_id("admin-settings")
+    expect(settings).to_be_visible(timeout=20_000)
+    expect(page.get_by_test_id("admin-settings-frontend")).to_contain_text("NEXT_PUBLIC_SITE_URL")
+    backend = page.get_by_test_id("admin-settings-backend")
+    expect(backend).to_contain_text("JWT_SECRET")
+    expect(backend).to_contain_text("секрет обрезан")
 
     page.get_by_test_id("logout").click()
     page.wait_for_timeout(600)
@@ -171,6 +179,15 @@ def test_admin_sees_lists_and_stranger_does_not(page, mail):
     page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
     page.wait_for_timeout(1200)
     assert page.get_by_test_id("admin-users").count() == 0, "посторонний увидел админку"
+
+
+def test_security_audit_uses_ten_rows_by_default(page):
+    flows.login(page, *ADMIN)
+    page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
+    size = page.get_by_test_id("audit-size")
+    expect(size).to_have_value("10", timeout=20_000)
+    expect(page.get_by_test_id("admin-security-audit")).to_be_visible()
+    assert page.get_by_test_id("audit-row").count() <= 10
 
 
 def test_second_click_returns_the_same_file(page, mail):

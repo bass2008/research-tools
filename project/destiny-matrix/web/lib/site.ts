@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 
+import { publicSettings } from "./settings/public";
+
 export const SITE = {
   // Бренд — Arcana Sense; «матрица судьбы» остаётся товарным словом в заголовках и текстах:
   // это поисковый запрос, ради которого страницы и написаны, из SEO его убирать нельзя.
   name: "Arcana Sense",
   short: "Arcana Sense",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://arcana-sense.ru",
+  url: publicSettings.get("siteUrl"),
   ogImage: "/og.png",
   ogWidth: 1200,
   ogHeight: 630,

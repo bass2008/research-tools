@@ -1,0 +1,521 @@
+{
+  "from": "1900-01-01",
+  "through": "2026-08-30",
+  "sex_order": [
+    "f",
+    "m"
+  ],
+  "serialization": "UTF-8 JSON sorted recursively, compact separators, LF after each case",
+  "cases": 92526,
+  "sha256": "cb821ed126ebc302724b4da04259ba9a88684c241b8d106d4a286cb6dbbbd53c",
+  "years": {
+    "1900": {
+      "cases": 730,
+      "sha256": "51e628beb9814191c6ee873343cc614754abb5371f36140aed2453baf46b7428"
+    },
+    "1901": {
+      "cases": 730,
+      "sha256": "adbb28cdc51f0bb9d202ebdce0a33856838c52fd445caa391bf0a98259ae091a"
+    },
+    "1902": {
+      "cases": 730,
+      "sha256": "58465afd829fe438a3b84f504b0eb2adb37f6f982e01bed1b30b3276a1c55d68"
+    },
+    "1903": {
+      "cases": 730,
+      "sha256": "1566f8a338dbacbdb5c887e9c1c5b1c4eda451d3926f4cfc046613f669e961f7"
+    },
+    "1904": {
+      "cases": 732,
+      "sha256": "b78f1cc2475f85d7fb9717d416b1de476e4da8cf7f00165735431584d2e7de98"
+    },
+    "1905": {
+      "cases": 730,
+      "sha256": "015563584ed00134df1324df0e9d362415064e4834d9158afaaaf0afdcafda53"
+    },
+    "1906": {
+      "cases": 730,
+      "sha256": "349f006f2a4f16b6a5ce36331061cfd7292a5d063707b054d13d5339ba3838b0"
+    },
+    "1907": {
+      "cases": 730,
+      "sha256": "b223648f30ee72e00711a4c8642e679166762f5c054b4128dae5786c1a55ec81"
+    },
+    "1908": {
+      "cases": 732,
+      "sha256": "c27d9a0d34668ab406cca68c8e9f38aca0c227f2b2a7df63026e5dc77bfb750b"
+    },
+    "1909": {
+      "cases": 730,
+      "sha256": "bcd6fe9e3cadb2027abf59b7e8fcf3c16d497b5b9df8996c7683c3e3cb7f8389"
+    },
+    "1910": {
+      "cases": 730,
+      "sha256": "2349180b442dacc0536d6824e5b6dff5a62774afe3548951689d6b90e41371f0"
+    },
+    "1911": {
+      "cases": 730,
+      "sha256": "e323b29d4a04bb1dd8a0d95a805670b38e39c5585d514c1c035c6bc076a2cbeb"
+    },
+    "1912": {
+      "cases": 732,
+      "sha256": "a83d1543a06455ac17441bff9339bf5e894c6efe310811dac3a57b4fbbd1898b"
+    },
+    "1913": {
+      "cases": 730,
+      "sha256": "5033118f7fec7233403bb563e2731907f495e8f3b5bfc8124aae5dbf0ab97098"
+    },
+    "1914": {
+      "cases": 730,
+      "sha256": "2882450c8028de528aec017c15fb0bcd8e34cc98ad94d29600ba5d2a0d61fab4"
+    },
+    "1915": {
+      "cases": 730,
+      "sha256": "024b541ec40528d49b5f85919c8e4822fffa8c0f7e716f2dd8704141ee6116e0"
+    },
+    "1916": {
+      "cases": 732,
+      "sha256": "ec9258d145626dda6f96ad651ca2db36545e3293e4516da30d61e171ad3e3584"
+    },
+    "1917": {
+      "cases": 730,
+      "sha256": "2a8f88290fe3b03b8470a2db3aa3cb4837178337b1cfc0db248df0ca52ee0535"
+    },
+    "1918": {
+      "cases": 730,
+      "sha256": "776b97f6332915a27a929a0a398179dfb91c6c04bffeadd6a33a8aca8bee8875"
+    },
+    "1919": {
+      "cases": 730,
+      "sha256": "ca9c9cef62443334966296250ce6b8dc2d7b589d0dfa0529e628cdf6e00025ef"
+    },
+    "1920": {
+      "cases": 732,
+      "sha256": "e2db7e29a256df79473c7c00128e55d331c554738650d57fbd48af0090d5096a"
+    },
+    "1921": {
+      "cases": 730,
+      "sha256": "ec0af84d4e4c8639e262a12b900a14f7f57315d8ae07969071bba1b834ef4f8d"
+    },
+    "1922": {
+      "cases": 730,
+      "sha256": "f7ddae7d3961c4707db74035c430dcc0cc97a27c0f3adb1147f887463021b968"
+    },
+    "1923": {
+      "cases": 730,
+      "sha256": "73ac059bfd1ef244a03f53edd63e5674c05abc94228f9036e1d675f649153b40"
+    },
+    "1924": {
+      "cases": 732,
+      "sha256": "d4a44e113f84ff50dccc01f68e4eef986438e241ca84815f992524075fc58831"
+    },
+    "1925": {
+      "cases": 730,
+      "sha256": "39e1d140f3dfc6ef07f18943be39eade96c64a29bc13854d8fad0d6a03f4e1aa"
+    },
+    "1926": {
+      "cases": 730,
+      "sha256": "a83ded925f28542d77d0bda43e55fc10e38e7df04131bb5ce92639c88f23cbb1"
+    },
+    "1927": {
+      "cases": 730,
+      "sha256": "87cf95f67edaf1666e7443825fd4a1fe0e67b04db1fc02f22dbda8d8a710abf0"
+    },
+    "1928": {
+      "cases": 732,
+      "sha256": "28283c55fbed00ca8ead4652885e1ebadd9a9cb1471fe999bf0119499016ad4d"
+    },
+    "1929": {
+      "cases": 730,
+      "sha256": "261dd66d00539e533ac5a02dab0ce12006360fe6b3201ae0178ab8ec8faef583"
+    },
+    "1930": {
+      "cases": 730,
+      "sha256": "a2a911b166d0b12637e366c8e9038b14ce410db40b31af550fdc1ba42527ab43"
+    },
+    "1931": {
+      "cases": 730,
+      "sha256": "8e9b8767e74d5d20832559c9812405955f1488b3bc7bee85e8782e2270b9a56e"
+    },
+    "1932": {
+      "cases": 732,
+      "sha256": "3da8e2ae34441f331db5cc929961d57a05ef1871a31fc61ecf26bb463223788c"
+    },
+    "1933": {
+      "cases": 730,
+      "sha256": "6c37068afe13210447d164d129da2ec4dfa25b9653ef8fb9ec53f78501e19df5"
+    },
+    "1934": {
+      "cases": 730,
+      "sha256": "fa7f4abb15738a9614693cdf184e1f73e200b817f5294723e6e8d5ce7bcbc581"
+    },
+    "1935": {
+      "cases": 730,
+      "sha256": "2eb3e1c4b0b971d6caa8b04c584bd5c3f1ebcdbf7c333971bee86685172243af"
+    },
+    "1936": {
+      "cases": 732,
+      "sha256": "51b50825d4b39d76395597912025abaf70c36822b765faa4347b33b8054d9172"
+    },
+    "1937": {
+      "cases": 730,
+      "sha256": "16d40d8160e5d33d66140f8201dc60a6c64f75d1d86866365e7f1c9b909809ca"
+    },
+    "1938": {
+      "cases": 730,
+      "sha256": "3cca8f0c62c9d5e3462147a474dbf43cb28af0e576a74e868662e0b85f045cac"
+    },
+    "1939": {
+      "cases": 730,
+      "sha256": "093312d71b33d556223ea8cca2e6aeac221984f533b84864da17b050a5746483"
+    },
+    "1940": {
+      "cases": 732,
+      "sha256": "2c93173926538ef1e4c1aee293f3180348cfec4f80b8c0ba0e08f09f403a5bfe"
+    },
+    "1941": {
+      "cases": 730,
+      "sha256": "06cb9617d6b735a53748ab7fca89dbfe3785578e0138cd9db8581e1418aec50b"
+    },
+    "1942": {
+      "cases": 730,
+      "sha256": "5e5f58957e981b5b942bd8470f514492ce81be61ec61591077b7f2f361e0b98d"
+    },
+    "1943": {
+      "cases": 730,
+      "sha256": "9afb440511cd4990660c7b7e724725e90f6eb6a0252eae0a487453376ccaab55"
+    },
+    "1944": {
+      "cases": 732,
+      "sha256": "2bc91fb9847ce4feafb30cb5e58adbfa7575e2bcbbc7410a11630649f1121d8b"
+    },
+    "1945": {
+      "cases": 730,
+      "sha256": "3b363861639e719f2ee0e889f40f97ef8d14f288b32b1ee8fab7b9f3a80fde73"
+    },
+    "1946": {
+      "cases": 730,
+      "sha256": "6c9274e4e5941e7c8d1603e982b159e42f585a0550d979a926671524486d18a0"
+    },
+    "1947": {
+      "cases": 730,
+      "sha256": "a7c7d38bf50e3270b7857ab0efe8bc08f8b7f4e6b7eb40cd61c22b96f860ee6f"
+    },
+    "1948": {
+      "cases": 732,
+      "sha256": "5f23cdba45b47a1d393007624d7912383fa621d99ae9a01e9f2041839fd3f2bb"
+    },
+    "1949": {
+      "cases": 730,
+      "sha256": "20dc64352608fa972443ff56252e6225d6d7fbdf3c6cab712fdf53f69737687f"
+    },
+    "1950": {
+      "cases": 730,
+      "sha256": "6dbbac0f6e88a5c760001b4fb290af8ba34f8ac8948af1f26343a9d3d59e0205"
+    },
+    "1951": {
+      "cases": 730,
+      "sha256": "812dce10a313e79f32aef2805d84936ce57c19df882676bacd5a62397abf5948"
+    },
+    "1952": {
+      "cases": 732,
+      "sha256": "6fcf3cdb1c91c663a988e60e3c3818cddd8d611d97bc6d884991d570ebdf1ce8"
+    },
+    "1953": {
+      "cases": 730,
+      "sha256": "eb4348ea71c60484fae5ea26907bf6a03d751afb613be611e5fda102560038c7"
+    },
+    "1954": {
+      "cases": 730,
+      "sha256": "40963f6961d70dfeca5b97ac8a54bf5c86f2758134a91ce147ede619d5746f16"
+    },
+    "1955": {
+      "cases": 730,
+      "sha256": "efde9bb817e6da91891d5b34090a2358db45da01f1846a4c17acf0e06fdecf21"
+    },
+    "1956": {
+      "cases": 732,
+      "sha256": "83c5add7e9e64bbe17c1eda57d85674b4924e247f6b325d7bfbd9393ecb49c48"
+    },
+    "1957": {
+      "cases": 730,
+      "sha256": "f84c473d3b08d416e5e7605f7652626ebfe8ad4dcde9ecf0383002ede7f74479"
+    },
+    "1958": {
+      "cases": 730,
+      "sha256": "b31d91c00a6791f30a05868eabeeadaa1f92b4498c864738e0221c9584d03c13"
+    },
+    "1959": {
+      "cases": 730,
+      "sha256": "ba26fcb69981d9744c281ac343aca63400d162df4e7e7aa31543c55a7490611f"
+    },
+    "1960": {
+      "cases": 732,
+      "sha256": "da73c56d8a8f3fd7d9ed7a6beb483046fc35d33d742f31db741cd91e820ae5e0"
+    },
+    "1961": {
+      "cases": 730,
+      "sha256": "1c79dcf7d43ce6c673fac3e7f86fcf5c0cfc186cd5caa9522128dc4bbe9b3cf0"
+    },
+    "1962": {
+      "cases": 730,
+      "sha256": "0fef17cf3dc5151a10a209a34bc4b16e45a86b92a40383b749efd2ad356611de"
+    },
+    "1963": {
+      "cases": 730,
+      "sha256": "6ef6fd330080ea59e3b7b0adec6aab8d63e0791fe336008cbdd173874bfc1951"
+    },
+    "1964": {
+      "cases": 732,
+      "sha256": "1d9c0fb9a9022455f17e39b736135d5c9c7bfcb8fa05f809ab1c07e38cffdef1"
+    },
+    "1965": {
+      "cases": 730,
+      "sha256": "f85cc08984769970278415caed4a054afb0dd58f86e5b93115754cd69df60abb"
+    },
+    "1966": {
+      "cases": 730,
+      "sha256": "c02944de04695c9790bfb4db20273347677a4da72aa19ca54c68eaa1b79edf90"
+    },
+    "1967": {
+      "cases": 730,
+      "sha256": "e6acdc3e70d7955ca94f2a1dec6f190a13cca9a95ce3d467ffef3714b28e6297"
+    },
+    "1968": {
+      "cases": 732,
+      "sha256": "cfa31dfd5e4c2a3bc221acb36d971e08fdb43ac91b2a0b1a1e0713556ce448a8"
+    },
+    "1969": {
+      "cases": 730,
+      "sha256": "2a1b5135b3b6e689ccf97efec8042dbfa3975263a1b0475096243fdd0046291f"
+    },
+    "1970": {
+      "cases": 730,
+      "sha256": "39814bfd3458f48bbf203d6d732a3f570b689fb2921ec7e11ebd5f03ec776023"
+    },
+    "1971": {
+      "cases": 730,
+      "sha256": "110abc3b832a0bcdc91444167cb9be6bd3c45024af71f50e124f7a02d07049ac"
+    },
+    "1972": {
+      "cases": 732,
+      "sha256": "b4661d1c330d097fcffc0789b9ddf2879abbf5adcaa533c7dc6db69f6bbad533"
+    },
+    "1973": {
+      "cases": 730,
+      "sha256": "ab07d4656fbc9606b9419c3f63eedc1f0013a2b74094849b0571d736fecf9342"
+    },
+    "1974": {
+      "cases": 730,
+      "sha256": "c9e27cb7a065457176ec2001259239ae6138f1e773cc5f8d0a4545f11e6f92a7"
+    },
+    "1975": {
+      "cases": 730,
+      "sha256": "649d69a6033bd8f3ec0d1bba33f8fed2af2b9fe85de5dc3481c8595fc2e9fcf6"
+    },
+    "1976": {
+      "cases": 732,
+      "sha256": "37ca60ef25dd4d1ae39abbe3bd9f9d1dff4754c92beec6a22c5afece3692526a"
+    },
+    "1977": {
+      "cases": 730,
+      "sha256": "ed8222efb81755b6f63f70e6881f58e26365f953420271e6040140f318c4e812"
+    },
+    "1978": {
+      "cases": 730,
+      "sha256": "8d06d6d1829942e639a054fd04eacb19ea4e7d6d500a17afc10a1b43c5ea8c3d"
+    },
+    "1979": {
+      "cases": 730,
+      "sha256": "67187bfa2bb2fb7eb797661dc6652de6b580ff4a5e73f23c69d93e67016e7d50"
+    },
+    "1980": {
+      "cases": 732,
+      "sha256": "8bed4154a07d86f00769da038b7f59e1bb7008b60575e3e657c75de52d32b0bd"
+    },
+    "1981": {
+      "cases": 730,
+      "sha256": "7ac48ed6067d555c0135f92842cb39c3c315ba2825a4893d4b9290ca13ba8f13"
+    },
+    "1982": {
+      "cases": 730,
+      "sha256": "1a59fc0295d05cd4193929b05a6822c1cb4aff30be7d353d7b92e3de015fc895"
+    },
+    "1983": {
+      "cases": 730,
+      "sha256": "a24e65e70d496591c46d0c3561a77df4b87178844b773984ff53b724c1639899"
+    },
+    "1984": {
+      "cases": 732,
+      "sha256": "992a9e95db424448a4c5d85153de6059a798170cff2b3ee497aeafe273e433e4"
+    },
+    "1985": {
+      "cases": 730,
+      "sha256": "c5f69703d9b450135b1c5bfc337ef0f0e27735eefbd396b89cc220b09af7c248"
+    },
+    "1986": {
+      "cases": 730,
+      "sha256": "5d4d0e3892c141741da9d54c0474f62205f9124885266796729d46de9ec81db4"
+    },
+    "1987": {
+      "cases": 730,
+      "sha256": "78d96ebcb205ac96b7c7c8ebc963c7ee1293cba83ac6b428c919d9ceda1744ea"
+    },
+    "1988": {
+      "cases": 732,
+      "sha256": "b184a3de9ff5210a5106c3da3018a3110d7df5daf1ba54608f95f25b0010fd44"
+    },
+    "1989": {
+      "cases": 730,
+      "sha256": "60d87dcfce97da076bb7b9bff7a60865f9ceda8b2a4cfdf5da035b3361cd5f65"
+    },
+    "1990": {
+      "cases": 730,
+      "sha256": "cf2f65f0fd799bf8074449cd96c040da28f0d351e3a7f7eb94159fa320bbc9d8"
+    },
+    "1991": {
+      "cases": 730,
+      "sha256": "10cf6ef30ec43281c9cd5f636b35a64683c636d19702ba06acc12de25d6ca734"
+    },
+    "1992": {
+      "cases": 732,
+      "sha256": "db1f5f3bc346d484b46c0321b15ec55268327d381d862558517c22239968eb99"
+    },
+    "1993": {
+      "cases": 730,
+      "sha256": "56bc021341d6b3749077721358e8a6c06a51296d0d5f85058193693bd8fc8c18"
+    },
+    "1994": {
+      "cases": 730,
+      "sha256": "31992ec012420ef5685217141910942868137dc8ab39615a0296aa8e6c24cb38"
+    },
+    "1995": {
+      "cases": 730,
+      "sha256": "9eaeabb8cefe6a06fcdd3245b0f5a105cb44f19832ededb5b3cb1073cfb8569d"
+    },
+    "1996": {
+      "cases": 732,
+      "sha256": "ea4e6018887e271e5959ae2aa0070833b78e589ebd349721a4fdda0362ff6433"
+    },
+    "1997": {
+      "cases": 730,
+      "sha256": "acaf9417f9094c1842da211f0bde658d7dc7d9d1993b0a4b6484ab9c25187883"
+    },
+    "1998": {
+      "cases": 730,
+      "sha256": "da8c6641ed5c70f66e3b3e68f669f80141feb5a9e13a30dc4aa04325a691a5cd"
+    },
+    "1999": {
+      "cases": 730,
+      "sha256": "463ee0d9acb5ccfe0484f4f77b935c6ebdf88b2cfcda5038e673ce1c919aa063"
+    },
+    "2000": {
+      "cases": 732,
+      "sha256": "6d8f17dac065d1b35f6e3c5bd96c42bb070c5c11fb8217ceb5a5cdcfbb911363"
+    },
+    "2001": {
+      "cases": 730,
+      "sha256": "c32076efa2002b7fd9043cd9818f10c673d198d323a35420ccc73f569443c359"
+    },
+    "2002": {
+      "cases": 730,
+      "sha256": "06961929ee81d7373f412679b642631253e8cca238ce6c5675fe6a2cb7f72606"
+    },
+    "2003": {
+      "cases": 730,
+      "sha256": "bf17a85f646d40f6b86f2db3d3b55999029de71aaa5dbe94a617ea295ec495ee"
+    },
+    "2004": {
+      "cases": 732,
+      "sha256": "003cb4a55702a56fc7e822bf00dc133d65065d0e73a5a3e7a9ec1b2d9b266b7b"
+    },
+    "2005": {
+      "cases": 730,
+      "sha256": "1e50beced2cd563fbe684510d2232ece58ec8f0f71443063601ce635df100ab8"
+    },
+    "2006": {
+      "cases": 730,
+      "sha256": "1fdaca882a2665ca374fbcc8b1b94eea9d61551ec8672797f70b154c9e2a4b5a"
+    },
+    "2007": {
+      "cases": 730,
+      "sha256": "42309472aa277a98a087efc3a3bd36c4233503dc74fd72f79e2776676538ebd1"
+    },
+    "2008": {
+      "cases": 732,
+      "sha256": "2b85c44d8ddc91084958eceeac0a1715192e595cc99322ba17084826f76ece06"
+    },
+    "2009": {
+      "cases": 730,
+      "sha256": "05c1a308f30d820c62bd9dd4b6155d53b46ef1f651191e0c659b093076f2dc1c"
+    },
+    "2010": {
+      "cases": 730,
+      "sha256": "67f09adac22f12f81ad9d8faf38c818df1a77daa0c1855f534ed8090986368f3"
+    },
+    "2011": {
+      "cases": 730,
+      "sha256": "ca5266834a9b69921a5539ef84878097a0aa96b0fc16269fc4bb32acd31b6c13"
+    },
+    "2012": {
+      "cases": 732,
+      "sha256": "a6b5f161810600708f084ccacd3ca2e1d16c4c61c10a4989817db33ae783f074"
+    },
+    "2013": {
+      "cases": 730,
+      "sha256": "4daf421573deb4bce7089e9b4b93ea779595f9cffe0a5b98ce68dd76c84c85b4"
+    },
+    "2014": {
+      "cases": 730,
+      "sha256": "2ae5073254da6b90beb2b00e2e66d20bcd0839f5a4a6d97bdf8e66204bc61852"
+    },
+    "2015": {
+      "cases": 730,
+      "sha256": "9b4c672aac661ce752334c33336095c145225661ad053a8b4a3836f140a361b1"
+    },
+    "2016": {
+      "cases": 732,
+      "sha256": "4c5fe4fa1e6ff6bd030ca1ae219f44d44a7d6acaa6eca893bf8fe60b0a62802e"
+    },
+    "2017": {
+      "cases": 730,
+      "sha256": "e27086ddc8dc774b2abc42af7d8f90df997dc3ab577521cd3c9e87e0baef97ec"
+    },
+    "2018": {
+      "cases": 730,
+      "sha256": "d28acf215198bb038d225e689fa7548dc6cc02f2b9ea38dea3987bedfcf7a9d4"
+    },
+    "2019": {
+      "cases": 730,
+      "sha256": "ea6525b8e2c236fad287e5f5d87df6de903cb7ab77857d58ea0a410207a0ab4c"
+    },
+    "2020": {
+      "cases": 732,
+      "sha256": "debb50a36a60822adb766e947345aadf061828be1a3b81ef2db192a5d49f485f"
+    },
+    "2021": {
+      "cases": 730,
+      "sha256": "be703800cbfbf7298b334f44654ae4418cf91affb03c86a73199997ea9cbec51"
+    },
+    "2022": {
+      "cases": 730,
+      "sha256": "29684d7e36d3e7642ed6d7f41dcfbd2d6549b58d301720f996ccb4a71063a990"
+    },
+    "2023": {
+      "cases": 730,
+      "sha256": "b8f14f6ace9feafa78fed9cbbce09c67f3e2665a8106b53b2284a026120a0ec9"
+    },
+    "2024": {
+      "cases": 732,
+      "sha256": "cdb3615fa99107263d232835ef315b8e3fed0da8c74862391dcb0d2ea01b934e"
+    },
+    "2025": {
+      "cases": 730,
+      "sha256": "48eb22b018bb09f1ddbf8402d6639d7b174b949a7e7182a7b57c96c48e5f0250"
+    },
+    "2026": {
+      "cases": 484,
+      "sha256": "a170bd3215cd1e69f62740dc02377738e8e53d386f405252a9d489a78e27c87c"
+    }
+  }
+}

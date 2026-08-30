@@ -20,8 +20,11 @@ scripts/run.sh            # собрать изменившееся и подн�
 | `scripts/release-prod.sh` | задеплоить последнюю версию на прод |
 | `scripts/release-test.sh` | задеплоить текущее дерево на `test.arcana-sense.ru` |
 | `scripts/backup.sh` | копия боевой базы в Object Storage |
+| `scripts/release-snapshot.sh` | read-only агрегаты prod-БД до/после релиза |
+| `scripts/rollback-prod.sh` | dry-run/откат на tag перед последним prod-релизом |
 | `scripts/cleanup-local-db.sh` | снести локальную базу и засеять заново |
 | `scripts/run-tests.sh` | все тесты подряд: api, компонентные, браузерные, приёмка |
+| `scripts/assert-release-candidate.sh` | запрещает deploy dirty/непроверенного commit |
 
 | адрес | что |
 |---|---|
@@ -102,8 +105,13 @@ Storage не выполняет код: он не поставит httpOnly-ку
 scripts/release-prod.sh
 ```
 
-Скрипт делает четыре вещи: собирает образы, помечает их коротким хешем коммита, отправляет в
-Yandex Container Registry и на машине выполняет `docker compose pull` с перезапуском службы.
+До команды обязателен единый локальный `scripts/run-tests.sh`, clean commit и успешная выкладка
+этого же commit через `release-test.sh`. Guard сверяет commit с
+`reports/unified/release-manifest.json` и `tested-commit.txt`; dirty tree не релизится.
+
+Скрипт собирает и отправляет образы, снимает read-only диагностический снимок и проверенный backup
+prod-БД, сохраняет прежний tag в `/srv/arcana/.env.previous.tag`, затем выполняет `docker compose
+pull` с перезапуском службы и снимает второй диагностический снимок.
 Сборки на машине нет вовсе — 2 vCPU с гарантией 5 % печатали бы 5 854 страницы десятки минут.
 
 Адрес машины и реестр скрипт спрашивает у `yc`, а не у terraform: ключи к state ему не нужны.
@@ -226,6 +234,8 @@ compose/
     run-python.sh       запуск без докера (uvicorn + node)
     cleanup-local-db.sh снести локальную базу и завести заново (админ + тарифы)
     run-tests.sh        все тесты: api, фронт, браузерные сценарии, приёмка
+    release-manifest.py hashes метода/контента/SEO, commit и число sitemap URL
+    assert-release-candidate.sh clean-tree и same-commit gate test/prod
     release-prod.sh     релиз на прод: сборка, реестр, перезапуск на машине
     release-test.sh     то же для test.arcana-sense.ru: свои образы, своя база, тестовый банк
     backup.sh           копия боевой базы в бакет db-backups-hjb4rfs

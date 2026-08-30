@@ -38,11 +38,11 @@ export default function MatrixResult({
   // пояснение — оно объясняет, а не называет.
   const main: Array<[string, number, string]> = [
     ["Центр карты", m.center, "Ядро карты: к нему сходятся все линии"],
-    ["Личность", m.day, "То, как вас считывают в первые минуты"],
-    ["Опора рода", m.year, "Фундамент, полученный до старта"],
-    ["Миссия", m.mission, "Куда ведёт линия, если не мешать"],
-    ["Денежный канал", m.money[0], "Через что приходит достаток"],
-    ["Линия отношений", m.love[0], "Что вы приносите в пару"],
+    ["Портрет личности", m.day, "Внешняя точка A — аркан дня рождения"],
+    ["Материальная задача", m.year, "Внешняя точка C — свёртка года рождения"],
+    ["Кармическая задача", m.mission, "Внешняя точка D — сумма A, B и C"],
+    ["Вход денежной линии", m.money[0], "Точка L — начало канала L–R2–R"],
+    ["Вход линии отношений", m.love[0], "Точка M — начало канала M–R1–R"],
   ];
 
   return (
@@ -82,14 +82,14 @@ export default function MatrixResult({
               </div>
             </div>
             <div className="mb">
-              <h3>Духовная гармония</h3>
+              <h3>Духовное предназначение</h3>
               <p>Состояние, из которого получается всё остальное.</p>
               <div className="row">
                 <Bub v={m.harmony} gold absolute={printing} /> {arcanumTitle(m.harmony)}
               </div>
             </div>
             <div className="mb">
-              <h3>Планетарная задача</h3>
+              <h3>Планетарное предназначение</h3>
               <p>То, что выходит за рамки личной истории.</p>
               <div className="row">
                 <Bub v={m.planetary} gold absolute={printing} /> {arcanumTitle(m.planetary)}
@@ -104,7 +104,13 @@ export default function MatrixResult({
         <div className="cap">Шесть позиций, которые задают всё остальное</div>
         <div className="mp">
           {main.map(([who, v, hint]) => (
-            <a className="mpc" key={who} href={link(`/encyclopedia/arcanum/${v}`)}>
+            <a
+              className="mpc"
+              key={who}
+              href={link(`/encyclopedia/arcanum/${v}`)}
+              data-position={who}
+              data-arcanum={v}
+            >
               <ArcanumCard n={v} size="grid" decorative half={printing} />
               <span className="mpcap">
                 <span className="who">{who}</span>

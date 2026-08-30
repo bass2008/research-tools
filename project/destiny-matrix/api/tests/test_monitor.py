@@ -14,7 +14,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app import monitor, presence
 from app.config import settings
-from app.models import ErrorLog, Payment
+from app.models import ErrorLog, Payment, User, as_utc, utcnow
 
 
 @pytest.fixture(autouse=True)
@@ -81,6 +81,58 @@ def test_five_tabs_of_one_browser_are_one_person(client):
         {"path": "/account", "people": 1, "tabs": 1},
         {"path": "/admin", "people": 1, "tabs": 1},
     ]
+
+
+def test_authenticated_pulse_is_buffered_until_hourly_flush(client, auth, db, db_engine):
+    """45-секундный pulse не пишет users немедленно: за час остаётся один пакетный UPDATE."""
+    headers = auth("seen@example.ru")
+    user = db.scalar(select(User).where(User.email == "seen@example.ru"))
+    assert user is not None and user.last_seen_at is None
+
+    before = utcnow()
+    answer = client.post(
+        "/api/pulse",
+        json={"visitor": "видел-пользователя", "tab": "вкладка-пользователя", "path": "/account"},
+        headers=headers,
+    )
+    assert answer.status_code == 200
+    db.refresh(user)
+    assert user.last_seen_at is None, "pulse записал БД немедленно вместо часового буфера"
+
+    maker = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)
+    assert presence.FLUSH_INTERVAL_SECONDS == 3600
+    assert presence.flush(maker) == 1
+    db.refresh(user)
+    assert user.last_seen_at is not None and as_utc(user.last_seen_at) >= before
+    assert presence.flush(maker) == 0, "сброшенный пакет остался в памяти"
+
+
+def test_last_seen_flush_keeps_latest_value_across_workers(auth, db, db_engine):
+    """Старый пакет другого воркера не должен откатить уже записанное новое появление."""
+    auth("latest@example.ru")
+    user = db.scalar(select(User).where(User.email == "latest@example.ru"))
+    assert user is not None
+    old = dt.datetime(2026, 8, 30, 8, 0, tzinfo=dt.timezone.utc)
+    latest = old + dt.timedelta(minutes=50)
+    maker = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)
+
+    presence.touch_user(user.id, latest)
+    presence.touch_user(user.id, old)
+    assert presence.flush(maker) == 1
+    db.refresh(user)
+    assert as_utc(user.last_seen_at) == latest
+
+    presence.touch_user(user.id, old)
+    assert presence.flush(maker) == 0
+    db.refresh(user)
+    assert as_utc(user.last_seen_at) == latest
+
+
+def test_anonymous_pulse_does_not_create_user_update(client, db_engine):
+    answer = client.post("/api/pulse", json={"visitor": "гость-без-сессии", "path": "/"})
+    assert answer.status_code == 200
+    maker = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)
+    assert presence.flush(maker) == 0
 
 def test_presence_forgets_those_who_left():
     """Отметка живёт 90 секунд: ушедший из вкладки перестаёт считаться сам."""

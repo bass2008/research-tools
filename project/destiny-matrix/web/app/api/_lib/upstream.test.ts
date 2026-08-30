@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const { cookieGet } = vi.hoisted(() => ({ cookieGet: vi.fn() }));
+
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: cookieGet }),
+}));
+
 import { forward, trustedClientIp } from "./upstream";
 
 function stubUpstream() {
@@ -16,6 +22,7 @@ function stubUpstream() {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  cookieGet.mockReset();
 });
 
 describe("доверенный IP в цепочке nginx → BFF → API", () => {
@@ -51,5 +58,28 @@ describe("доверенный IP в цепочке nginx → BFF → API", () =
 
     const [, init] = spy.mock.calls[0];
     expect(new Headers(init?.headers).get("x-real-ip")).toBeNull();
+  });
+});
+
+describe("необязательная сессия BFF", () => {
+  it("передаёт JWT авторизованного pulse", async () => {
+    const spy = stubUpstream();
+    cookieGet.mockReturnValue({ value: "signed-session" });
+
+    await forward("/pulse", { method: "POST", body: {}, optionalAuth: true });
+
+    const [, init] = spy.mock.calls[0];
+    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer signed-session");
+  });
+
+  it("не отклоняет pulse гостя", async () => {
+    const spy = stubUpstream();
+    cookieGet.mockReturnValue(undefined);
+
+    const answer = await forward("/pulse", { method: "POST", body: {}, optionalAuth: true });
+
+    expect(answer.status).toBe(200);
+    const [, init] = spy.mock.calls[0];
+    expect(new Headers(init?.headers).get("authorization")).toBeNull();
   });
 });

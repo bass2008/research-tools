@@ -40,8 +40,10 @@ RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
+ARG NEXT_ASSET_PREFIX=""
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
+    NEXT_ASSET_PREFIX=${NEXT_ASSET_PREFIX} \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 

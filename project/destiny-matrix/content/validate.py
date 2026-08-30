@@ -1,6 +1,6 @@
 """Проверка целостности собранной энциклопедии.
 
-    python -m content.encyclopedia.validate
+    python -m content.validate
 
 Ненулевой код возврата при любом нарушении. Проверяется не только структура, но и стиль:
 одинаковые зачины и канцелярит — признак того, что текст досыпали шаблоном, а такие страницы
@@ -91,7 +91,7 @@ def load(rep: Report) -> dict[str, dict]:
     for name in FILES:
         path = CONTENT_DIR / name
         if not path.exists():
-            rep.fail(f"нет файла {path} — сначала python -m content.encyclopedia.build")
+            rep.fail(f"нет файла {path} — сначала python -m content.build")
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         rep.check(payload.get("count") == len(payload.get("items", [])),

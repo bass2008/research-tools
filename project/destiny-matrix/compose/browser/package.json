@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "version": "1.0.0",
+  "scripts": { "test": "node --test settings.test.mjs" },
   "dependencies": {
     "puppeteer-core": "^24.10.0"
   }

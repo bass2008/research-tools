@@ -1,8 +1,4 @@
-"""Админка: кто зарегистрирован, что купил, какие даты сохранил.
-
-Только чтение. Признак админа — почта из `settings.admins`, а не колонка в users: схема без
-миграций, и новое поле заставило бы пересоздавать таблицу вместе с платежами.
-"""
+"""Админка: кто зарегистрирован, когда заходил, что купил и какие даты сохранил."""
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -10,6 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .. import access, monitor, printing
+from .. import reports as report_store
 from .. import payments as gateway
 from ..routers.payments import apply as apply_payment
 from ..config import settings
@@ -39,6 +36,7 @@ def _row(db: Session, user: User) -> dict:
         "id": user.id,
         "email": user.email,
         "created_at": iso(user.created_at),
+        "last_seen_at": iso(user.last_seen_at),
         "is_admin": settings.is_admin(user.email),
         "matrices": access.saved_count(db, user),
         "payments": int(paid[0]),
@@ -163,11 +161,23 @@ def errors(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict
     return {"items": monitor.last_errors(db), "hour": monitor.errors(db, 60)}
 
 
+@router.get("/settings")
+def application_settings(_: User = Depends(admin_user)) -> dict:
+    """Эффективный startup-снимок backend-конфигурации; секреты уже обезличены manager-ом."""
+    items = settings.snapshot()
+    warnings: list[str] = []
+    try:
+        items.extend(report_store.browser_settings())
+    except report_store.RenderError as exc:
+        warnings.append(str(exc))
+    return {"group": "backend", "items": items, "warnings": warnings}
+
+
 AUDIT_CATEGORIES = ("success", "failed", "throttled")
 
 
 @router.get("/security-audit")
-def security_audit(category: str = "all", page: int = 1, page_size: int = 50,
+def security_audit(category: str = "all", page: int = 1, page_size: int = 10,
                    _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     """Журнал безопасности с фильтром по исходу и постраничной выдачей: таблица растёт на каждую
     попытку входа, поэтому целиком её не отдаём. `category` вне трёх известных = «все»."""

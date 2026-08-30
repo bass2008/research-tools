@@ -17,12 +17,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "tools/seo/content"
 DST = ROOT / "project/destiny-matrix/web/content"
+METHOD = ROOT / "project/destiny-matrix/spec/method.json"
 
 BRAND = len(" — Arcana Sense")
 TITLE_LIMIT = 70
@@ -131,6 +133,28 @@ def check_article(item: dict, where: str, problems: list[str]) -> None:
     check_seo(item.get("seo"), where, problems)
 
 
+def check_tail(item: dict, where: str, allowed: set[str], problems: list[str]) -> None:
+    key = str(item.get("key") or "")
+    if key not in allowed:
+        fail(problems, where, f"{key!r} не входит в ordered-реестр метода")
+    expected = [int(part) for part in key.split("-")] if re.fullmatch(r"\d+-\d+-\d+", key) else []
+    if item.get("arcana") != expected:
+        fail(problems, where, f"arcana {item.get('arcana')!r} не совпадает с порядком ключа {expected}")
+    if item.get("entity_type") != "karmic_tail":
+        fail(problems, where, "entity_type должен быть karmic_tail")
+    publication = item.get("publication")
+    if not isinstance(publication, dict) or not isinstance(publication.get("index"), bool):
+        fail(problems, where, "нет явного publication.index")
+    elif publication["index"]:
+        query = str(publication.get("primary_query") or "").strip().lower()
+        if not query:
+            fail(problems, where, "индексируемой странице нужен primary_query")
+        elif query not in {str(q).strip().lower() for q in item.get("seo", {}).get("queries", [])}:
+            fail(problems, where, "primary_query отсутствует в seo.queries")
+    elif item.get("seo", {}).get("queries"):
+        fail(problems, where, "noindex-хвост не должен публиковать SEO queries")
+
+
 def check_enrichment(item: dict, where: str, base_keys: set, key: str, problems: list[str]) -> None:
     if key not in base_keys:
         fail(problems, where, f"ключа {key!r} нет в корпусе — обогащать нечего")
@@ -162,6 +186,9 @@ def main() -> int:
     problems: list[str] = []
     losses: list[str] = []
     written: list[str] = []
+    method = json.loads(METHOD.read_text())
+    allowed_tails = {item["triple"] for item in method["reachable_karmic_tails"]}
+    tail_primary: dict[str, str] = {}
 
     for category in ARTICLE:
         folder = SRC / category
@@ -185,13 +212,32 @@ def main() -> int:
             if path.stem != key and category != "karmic-tails":
                 print(f"  ~ {where}: имя файла не совпадает с ключом {key!r}")
             check_article(item, where, problems)
+            if category == "karmic-tails":
+                check_tail(item, where, allowed_tails, problems)
+                publication = item.get("publication") or {}
+                primary = str(publication.get("primary_query") or "").strip().lower()
+                if primary:
+                    if primary in tail_primary:
+                        fail(problems, where,
+                             f"primary_query уже занят {tail_primary[primary]}")
+                    tail_primary[primary] = where
             hygiene(item, where, "", losses)
             trim_description(item, where)
             items.append(item)
         target = DST / f"{category}.json"
-        if not args.check:
-            target.write_text(json.dumps({"items": items}, ensure_ascii=False, indent=1) + "\n")
+        expected_payload = {"items": items}
+        if args.check:
+            if not target.exists() or load(target, problems) != expected_payload:
+                fail(problems, target.name,
+                     "собранный артефакт устарел — выполните tools/seo/build-content.py")
+        else:
+            target.write_text(json.dumps(expected_payload, ensure_ascii=False, indent=1) + "\n")
         written.append(f"{target.name}: {len(items)}")
+
+        if category == "karmic-tails" and set(seen) != allowed_tails:
+            fail(problems, category,
+                 f"набор хвостов не равен реестру: нет {sorted(allowed_tails - set(seen))}, "
+                 f"лишние {sorted(set(seen) - allowed_tails)}")
 
     for category, (base_name, key_field) in ENRICH.items():
         folder = SRC / category
@@ -221,9 +267,14 @@ def main() -> int:
             if isinstance(item.get("seo"), dict):
                 entry["seo"] = {**entry.get("seo", {}), **item["seo"]}
             touched += 1
-        if not args.check:
+        expected_payload = {"count": len(base), "items": base}
+        if args.check:
+            if not (DST / base_name).exists() or load(DST / base_name, problems) != expected_payload:
+                fail(problems, base_name,
+                     "собранный артефакт устарел — выполните tools/seo/build-content.py")
+        else:
             (DST / base_name).write_text(
-                json.dumps({"items": base}, ensure_ascii=False, indent=1) + "\n"
+                json.dumps(expected_payload, ensure_ascii=False, indent=1) + "\n"
             )
         written.append(f"{base_name}: обогащено {touched} из {len(base)}")
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 
 import pytest
 from sqlalchemy import select
@@ -10,6 +11,38 @@ from sqlalchemy import select
 from app import reports
 from app.models import ReportJob, utcnow
 from app.security import create_print_token
+
+
+def test_browser_settings_are_read_with_secret_and_stay_masked(monkeypatch):
+    class Answer:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return json.dumps({"group": "backend", "items": [{
+                "component": "browser", "name": "BROWSER_SECRET", "value": "abcdef…",
+                "source": "environment", "sensitive": True, "configured": True,
+            }]}).encode()
+
+    seen = {}
+
+    def open_browser(request, timeout):
+        seen["url"] = request.full_url
+        seen["secret"] = request.get_header("X-browser-secret")
+        seen["timeout"] = timeout
+        return Answer()
+
+    monkeypatch.setattr(reports.settings, "browser_url", "http://browser:3001")
+    monkeypatch.setattr(reports.settings, "browser_secret", "full-secret-never-returned")
+    monkeypatch.setattr(reports.urllib.request, "urlopen", open_browser)
+
+    rows = reports.browser_settings()
+    assert rows[0]["value"] == "abcdef…"
+    assert seen == {"url": "http://browser:3001/settings",
+                    "secret": "full-secret-never-returned", "timeout": 3}
 
 
 @pytest.fixture

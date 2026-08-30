@@ -31,7 +31,7 @@ export default function ForgotForm() {
   if (sent) {
     return (
       <div className="panel narrow" data-testid="forgot-sent">
-        <h3>Письмо отправлено</h3>
+        <h1 className="panel-h1">Письмо отправлено</h1>
         <p className="dim">
           Если на {email.trim().toLowerCase()} есть аккаунт, ссылка для смены пароля уже там.
           Ссылка действует 4 часа.

@@ -70,6 +70,9 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                     default=utcnow, server_default=func.now())
+    # Пульс приходит каждые 45 секунд, но это поле обновляется пакетно раз в час: иначе одна
+    # открытая вкладка превращала бы SQLite WAL в непрерывный журнал служебных записей.
+    last_seen_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
 
     matrices: Mapped[list["SavedMatrix"]] = relationship(back_populates="user",
                                                         cascade="all, delete-orphan")
@@ -133,7 +136,6 @@ class Payment(Base):
     # номер заказа у провайдера: нужен, чтобы вернуть человека к уже начатому платежу, а не
     # выставлять второй счёт за ту же дату
     order_id: Mapped[str | None] = mapped_column(String(64), index=True)
-
     user: Mapped[User] = relationship(back_populates="payments")
 
     def body(self) -> dict:

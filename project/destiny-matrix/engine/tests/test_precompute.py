@@ -1,5 +1,6 @@
 """Тесты предвычисления: все матрицы должны быть достижимы и уникальны."""
 import datetime as dt
+import json
 import sys
 from pathlib import Path
 
@@ -53,3 +54,14 @@ def test_content_units_cover_all_matrices():
 def test_leap_day_maps_into_keys():
     d = dt.date(2000, 2, 29)
     assert (fold(d.day), fold(d.month), fold_year(d.year)) in set(KEYS)
+
+
+def test_checked_in_artifact_contains_exactly_the_new_engine_results():
+    artifact = Path(__file__).resolve().parents[2] / "web" / "content" / "matrices.json"
+    payload = json.loads(artifact.read_text())
+    assert payload["count"] == len(payload["items"]) == 5544
+    assert {item["slug"] for item in payload["items"]} == {slug(key) for key in KEYS}
+    for item in payload["items"]:
+        matrix = calculate(item["matrix"]["birth"], item["matrix"]["sex"])
+        assert matrix.to_dict() == item["matrix"], item["slug"]
+        assert item["slug"] == slug((matrix.day, matrix.month, matrix.year))

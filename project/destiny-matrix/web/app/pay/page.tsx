@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
 import { pageMeta } from "@/lib/site";
-import { getTariffs, lead , testPayments } from "@/lib/tariffs";
+import { getTariffs, testPayments } from "@/lib/tariffs.server";
+import { lead } from "@/lib/tariffs";
 
 import PayScreen from "./PayScreen";
 

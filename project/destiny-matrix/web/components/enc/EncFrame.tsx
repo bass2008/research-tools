@@ -79,7 +79,14 @@ export default function EncFrame({
     // двигаем саму полосу, а не страницу: scrollIntoView прокручивал документ на 270 px вниз
     // и срезал первый экран на телефоне
     const el = on as HTMLElement;
-    bar.scrollLeft = el.offsetLeft - (bar.clientWidth - el.offsetWidth) / 2;
+    const barRect = bar.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    // offsetLeft относится к внешнему enc-layout и включает левый отступ всей полосы. Из-за
+    // этого длинный активный пункт уезжал влево на 18–30 px. Считаем координату внутри nav.
+    const relativeLeft = bar.scrollLeft + elRect.left - barRect.left;
+    const wanted = relativeLeft - (bar.clientWidth - elRect.width) / 2;
+    const max = Math.max(0, bar.scrollWidth - bar.clientWidth);
+    bar.scrollLeft = Math.min(max, Math.max(0, wanted));
   }, [active]);
 
   return (

@@ -6,6 +6,8 @@ import { isIP } from "node:net";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { apiUpstream, serverSettings } from "@/lib/settings/server";
+
 export const SESSION_COOKIE = "destiny_session";
 
 // срок как у JWT в api (jwt_ttl_days = 30)
@@ -16,14 +18,11 @@ const DEFAULT_UPSTREAM = "http://127.0.0.1:8010";
 // Кука сессии с флагом secure по http не ставится вовсе — в проде это правильно, но в
 // контейнере, который слушают на http://localhost, вход просто перестаёт работать. Поэтому
 // флаг отделён от NODE_ENV: SESSION_COOKIE_SECURE=0 разрешает http, на домене с TLS не трогать.
-const SESSION_SECURE =
-  process.env.SESSION_COOKIE_SECURE !== undefined
-    ? process.env.SESSION_COOKIE_SECURE === "1" || process.env.SESSION_COOKIE_SECURE === "true"
-    : process.env.NODE_ENV === "production";
+const SESSION_SECURE = serverSettings.get("sessionCookieSecure");
 
 /** Адрес апстрима без хвостового `/api`: он дописывается сам. */
 export function upstreamBase(): string {
-  const raw = process.env.API_INTERNAL_URL ?? process.env.API_ORIGIN ?? DEFAULT_UPSTREAM;
+  const raw = apiUpstream(DEFAULT_UPSTREAM);
   return raw.replace(/\/+$/, "").replace(/\/api$/, "");
 }
 
@@ -74,6 +73,8 @@ interface ForwardOptions {
   method?: "GET" | "POST" | "PATCH";
   /** подставить Authorization из куки; без куки — 401 без обращения к апстриму */
   auth?: boolean;
+  /** подставить Authorization, если кука есть; без неё всё равно обратиться к апстриму */
+  optionalAuth?: boolean;
   body?: unknown;
   /** забрать token из ответа в куку и убрать его из тела */
   capture?: boolean;
@@ -100,10 +101,10 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
   const clientIp = opts.source ? trustedClientIp(opts.source) : null;
   if (clientIp) headers["X-Real-IP"] = clientIp;
 
-  if (opts.auth) {
+  if (opts.auth || opts.optionalAuth) {
     const token = await sessionToken();
-    if (!token) return json({ detail: "Нужен вход: сессии нет" }, 401);
-    headers.Authorization = `Bearer ${token}`;
+    if (!token && opts.auth) return json({ detail: "Нужен вход: сессии нет" }, 401);
+    if (token) headers.Authorization = `Bearer ${token}`;
   }
   // User-Agent пробрасываем только там, где он нужен: по нему api отличает роботов от людей
   // в счётчике присутствия. Собственный агент node-сервера сделал бы роботами всех.

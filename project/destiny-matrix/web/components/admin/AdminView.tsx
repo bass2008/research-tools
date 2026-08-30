@@ -14,6 +14,7 @@ import { paymentTargetLabel } from "@/lib/paytarget";
 import { counted, plural } from "@/lib/plural";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
+import AdminSettings from "@/components/admin/AdminSettings";
 
 const day = (iso: string) => new Date(iso).toLocaleDateString("ru-RU");
 
@@ -152,6 +153,8 @@ export default function AdminView() {
         </dl>
       </div>
 
+      <AdminSettings />
+
       <div className="panel section-gap">
         <h3>Пользователи</h3>
         <div className="cap">
@@ -171,6 +174,7 @@ export default function AdminView() {
                 <th>Платежей</th>
                 <th>Уплачено</th>
                 <th>Доступ</th>
+                <th>Последнее появление</th>
                 <th>Зарегистрирован</th>
               </tr>
             </thead>
@@ -192,6 +196,7 @@ export default function AdminView() {
                     <td>{u.payments}</td>
                     <td className="num">{money(u.spent)} ₽</td>
                     <td>{accessLine(u)}</td>
+                    <td className="small">{when(u.last_seen_at)}</td>
                     <td className="small">{when(u.created_at)}</td>
                   </tr>
                 ))

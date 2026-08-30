@@ -73,11 +73,15 @@ describe("эталон из engine/matrix.py", () => {
 
 describe("fold", () => {
   it("сводит к 1..22", () => {
-    expect([1, 21, 22, 23, 44, 45].map(fold)).toEqual([1, 21, 22, 1, 22, 1]);
+    expect([1, 21, 22, 23, 29, 31, 36, 44, 45].map(fold)).toEqual([
+      1, 21, 22, 5, 11, 4, 9, 8, 9,
+    ]);
   });
 
-  it("кратные 22 дают 22, а не ноль", () => {
-    for (let k = 1; k < 20; k++) expect(fold(22 * k)).toBe(22);
+  it("22 не сворачивает, большие кратные складывает по цифрам", () => {
+    expect(fold(22)).toBe(22);
+    expect(fold(44)).toBe(8);
+    expect(fold(220)).toBe(4);
   });
 
   it("не принимает ноль и отрицательные", () => {
@@ -148,7 +152,7 @@ describe("валидация", () => {
     expect(daysInMonth(2000, 2)).toBe(29);
     expect(daysInMonth(1900, 2)).toBe(28);
     expect(() => calculate("1900-02-29")).toThrow(/нет в календаре/);
-    expect(calculate("2000-02-29").day).toBe(7);
+    expect(calculate("2000-02-29").day).toBe(11);
   });
 });
 
@@ -172,22 +176,47 @@ describe("структура", () => {
     for (const t of [m.sky, m.ground, m.social_male, m.social_female]) {
       expect(t[2]).toBe(fold(t[0] + t[1]));
     }
-    expect(m.harmony).toBe(fold(m.sky[2] + m.ground[2]));
-    expect(m.planetary).toBe(fold(m.social_male[2] + m.social_female[2]));
+    expect(m.sky).toEqual([m.month, m.mission, fold(m.month + m.mission)]);
+    expect(m.ground).toEqual([m.day, m.year, fold(m.day + m.year)]);
+    expect(m.purpose_personal).toBe(fold(m.sky[2] + m.ground[2]));
+    expect(m.purpose_social).toBe(fold(m.social_male[2] + m.social_female[2]));
+    expect(m.harmony).toBe(fold(m.purpose_personal + m.purpose_social));
+    expect(m.planetary).toBe(fold(m.purpose_social + m.harmony));
   });
 
-  it("семь чакр, строки различаются", () => {
+  it("семь чакр следуют классическим осям", () => {
     expect(m.chakras).toHaveLength(CHAKRAS.length);
     expect(m.chakras.map((r) => r.key)).toEqual(CHAKRAS.map((c) => c[0]));
     for (const r of m.chakras) expect(r.emotions).toBe(fold(r.physics + r.energy));
-    expect(new Set(m.chakras.map((r) => `${r.physics}:${r.energy}`)).size).toBe(7);
+    expect([m.chakras[0].physics, m.chakras[0].energy]).toEqual([m.day, m.month]);
+    expect([m.chakras[2].physics, m.chakras[2].energy]).toEqual([
+      m.comfort_west,
+      m.comfort_north,
+    ]);
+    expect([m.chakras[4].physics, m.chakras[4].energy]).toEqual([m.center, m.center]);
+    expect([m.chakras[5].physics, m.chakras[5].energy]).toEqual([
+      m.comfort_east,
+      m.comfort_south,
+    ]);
+    expect([m.chakras[6].physics, m.chakras[6].energy]).toEqual([m.year, m.mission]);
   });
 
   it("линии по три значения", () => {
     for (const line of [m.money, m.love, m.talent, m.karmic_tail]) {
       expect(line).toHaveLength(3);
-      expect(line[2]).toBe(fold(line[0] + line[1]));
+      expect(line[1]).toBe(fold(line[0] + line[2]));
     }
+  });
+
+  it("контрольная дата 31.03.1993", () => {
+    const control = calculate("1993-03-31", "m");
+    expect([control.day, control.month, control.year, control.mission, control.center]).toEqual([
+      4, 3, 22, 11, 4,
+    ]);
+    expect(control.karmic_tail).toEqual([15, 8, 11]);
+    expect(control.money).toEqual([8, 13, 5]);
+    expect(control.love).toEqual([15, 20, 5]);
+    expect(control.talent).toEqual([3, 10, 7]);
   });
 
   it("шкала закрывает 80 лет без разрывов", () => {

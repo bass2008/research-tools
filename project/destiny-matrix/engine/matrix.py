@@ -1,11 +1,8 @@
-"""Расчёт матрицы судьбы: 22 энергии, октаграмма, чакры, линии, возрастная шкала.
+"""Классическая матрица судьбы 22 энергий по буквенной схеме A–T.
 
-Все значения приводятся к диапазону 1..22 функцией `fold`: в методике нет нулевого аркана,
-Шут стоит двадцать вторым, поэтому кратные 22 сводятся к 22, а не к нулю.
-
-Формулы собраны здесь намеренно: методика существует в нескольких пересказах, и когда
-понадобится сверить её с источником, править нужно одно место, а не весь код. Каждая
-формула названа так же, как позиция в отчёте.
+Человекочитаемый контракт, обозначения и источники находятся в ``docs/methodology.md``,
+машинный граф — в ``spec/method.json``. Этот модуль является каноническим исполняемым
+движком; браузерный порт обязан проходить те же golden-векторы и полный parity-прогон.
 """
 from __future__ import annotations
 
@@ -29,11 +26,16 @@ COLUMNS = (("physics", "Физика"), ("energy", "Энергия"), ("emotions
 
 
 def fold(n: int) -> int:
-    """Свести число к 1..22. Кратные 22 дают 22: нулевого аркана в матрице нет."""
-    if n <= 0:
+    """Свести положительное целое к 1..22 повторным сложением цифр.
+
+    В отличие от остатка по модулю, 23 → 5, 31 → 4 и 44 → 8. Числа 1..22,
+    включая самостоятельный 22-й аркан, остаются без изменения.
+    """
+    if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
         raise ValueError(f"ожидалось положительное число, получено {n}")
-    r = n % ARCANA_MAX
-    return r if r else ARCANA_MAX
+    while n > ARCANA_MAX:
+        n = digit_sum(n)
+    return n
 
 
 def digit_sum(n: int) -> int:
@@ -42,10 +44,7 @@ def digit_sum(n: int) -> int:
 
 def fold_year(year: int) -> int:
     """Год сворачивается по цифрам, пока не станет не больше 22: 1987 → 25 → 7."""
-    n = digit_sum(year)
-    while n > ARCANA_MAX:
-        n = digit_sum(n)
-    return n
+    return fold(digit_sum(year))
 
 
 @dataclass(frozen=True)
@@ -85,14 +84,14 @@ class Matrix:
     mission: int = 0
     center: int = 0
 
-    # духовный квадрат — диагонали, по часовой от северо-запада
-    father_line: int = 0        # СЗ: мужская линия рода
-    mother_line: int = 0        # СВ: женская линия рода
-    descendants: int = 0        # ЮВ: то, что уходит дальше по роду
-    inheritance: int = 0        # ЮЗ: то, что получено родом
+    # духовный квадрат — исторические машинные ключи F–I сохранены для совместимости
+    father_line: int = 0        # F, СЗ: духовная мужская линия рода
+    mother_line: int = 0        # G, СВ: духовная женская линия рода
+    descendants: int = 0        # H, ЮВ: материальная мужская линия рода
+    inheritance: int = 0        # I, ЮЗ: материальная женская линия рода
     karmic_tail: list[int] = field(default_factory=list)
 
-    # точки между углами и центром — «зоны комфорта»
+    # внутренние точки между внешними углами и центром J–M
     comfort_west: int = 0
     comfort_north: int = 0
     comfort_east: int = 0
@@ -103,8 +102,8 @@ class Matrix:
     ground: Triad | None = None         # земля: материальная задача
     social_male: Triad | None = None
     social_female: Triad | None = None
-    harmony: int = 0                    # духовная гармония
-    planetary: int = 0                  # планетарная задача
+    harmony: int = 0                    # духовное предназначение
+    planetary: int = 0                  # планетарное предназначение
 
     # линии
     money: list[int] = field(default_factory=list)
@@ -156,42 +155,55 @@ def _age_scale(m: Matrix) -> list[dict]:
 
 
 def _money_line(m: Matrix) -> list[int]:
-    """Денежный канал: юго-восточная диагональ, её связь с центром и итог."""
-    a = m.descendants
-    b = fold(a + m.center)
-    return [a, b, fold(a + b)]
+    """Денежная программа L–R2–R: вход, направление и пересечение каналов."""
+    crossing = fold(m.comfort_east + m.comfort_south)       # R = L + M
+    direction = fold(m.comfort_east + crossing)             # R2 = L + R
+    return [m.comfort_east, direction, crossing]             # L, R2, R
 
 
 def _love_line(m: Matrix) -> list[int]:
-    """Линия отношений: северо-восток (женская линия), связь с центром и итог."""
-    a = m.mother_line
-    b = fold(a + m.center)
-    return [a, b, fold(a + b)]
+    """Программа отношений M–R1–R: вход, партнёрская точка и пересечение."""
+    crossing = fold(m.comfort_south + m.comfort_east)       # R = M + L
+    partner = fold(m.comfort_south + crossing)               # R1 = M + R
+    return [m.comfort_south, partner, crossing]               # M, R1, R
 
 
 def _talent_line(m: Matrix) -> list[int]:
-    """Таланты: север (что дано) в связке с центром."""
-    a = m.month
-    b = fold(a + m.center)
-    return [a, b, fold(a + b)]
+    """Личный талант по северному лучу B–P–K."""
+    inner = m.comfort_north                                # K = B + E
+    middle = fold(m.month + inner)                         # P = B + K
+    return [m.month, middle, inner]                        # B, P, K
 
 
 def _karmic_tail(m: Matrix) -> list[int]:
-    """Кармический хвост: род, полученное наследие и их сумма."""
-    return [m.year, m.inheritance, fold(m.year + m.inheritance)]
+    """Кармический хвост M–N–D, в принятом продуктовом порядке от центра вниз."""
+    inner = m.comfort_south                                # M = D + E
+    middle = fold(m.mission + inner)                       # N = D + M
+    return [inner, middle, m.mission]                      # M, N, D
 
 
 def _chakras(m: Matrix) -> tuple[list[ChakraRow], dict[str, int]]:
-    """Семь чакр в трёх колонках.
+    """Классическая чакровая таблица: семь горизонтальных пар схемы.
 
-    Физика идёт от линии запад-восток (что есть в материи), энергия — от линии
-    север-юг (что дано и куда идём), эмоции — сумма первых двух, как в таблице методики.
-    Сдвиг по номеру чакры разводит строки: без него все семь были бы одинаковыми.
+    Физика — точка слева/на материальной оси, энергия — парная точка сверху или
+    справа; эмоции — их свёрнутая сумма. Никаких искусственных смещений по номеру
+    строки в методике нет.
     """
+    west_inner_2 = fold(m.day + m.comfort_west)             # O = A + J
+    north_inner_2 = fold(m.month + m.comfort_north)         # P = B + K
+    west_inner_3 = fold(m.comfort_west + m.center)           # S = J + E
+    north_inner_3 = fold(m.comfort_north + m.center)         # T = K + E
+    pairs = (
+        (m.day, m.month),                                    # Сахасрара: A, B
+        (west_inner_2, north_inner_2),                       # Аджна: O, P
+        (m.comfort_west, m.comfort_north),                   # Вишудха: J, K
+        (west_inner_3, north_inner_3),                       # Анахата: S, T
+        (m.center, m.center),                                # Манипура: E, E
+        (m.comfort_east, m.comfort_south),                   # Свадхистана: L, M
+        (m.year, m.mission),                                 # Муладхара: C, D
+    )
     rows: list[ChakraRow] = []
-    for i, (key, title, hint) in enumerate(CHAKRAS, start=1):
-        physics = fold(m.day + m.year + i)
-        energy = fold(m.month + m.mission + i)
+    for (key, title, hint), (physics, energy) in zip(CHAKRAS, pairs, strict=True):
         rows.append(ChakraRow(key, title, hint, physics, energy, fold(physics + energy)))
     totals = {
         "physics": fold(sum(r.physics for r in rows)),
@@ -202,7 +214,7 @@ def _chakras(m: Matrix) -> tuple[list[ChakraRow], dict[str, int]]:
 
 
 def calculate(birth: _dt.date | str, sex: str = "f") -> Matrix:
-    """Полный расчёт по дате рождения. sex влияет только на подписи родовых линий."""
+    """Полный расчёт. sex хранит идентичность карты, но не влияет ни на одно число."""
     if isinstance(birth, str):
         birth = _dt.date.fromisoformat(birth)
     if sex not in ("m", "f"):
@@ -230,15 +242,15 @@ def calculate(birth: _dt.date | str, sex: str = "f") -> Matrix:
     m.comfort_east = fold(m.year + m.center)
     m.comfort_south = fold(m.mission + m.center)
 
-    m.sky = Triad.of(m.comfort_north, m.comfort_south)
-    m.ground = Triad.of(m.comfort_west, m.comfort_east)
+    # Предназначения считаются по диагоналям двух квадратов, а не по внутренним точкам.
+    m.sky = Triad.of(m.month, m.mission)                      # B + D
+    m.ground = Triad.of(m.day, m.year)                        # A + C
     m.social_male = Triad.of(m.father_line, m.descendants)
     m.social_female = Triad.of(m.mother_line, m.inheritance)
-    m.harmony = fold(m.sky.total + m.ground.total)
-    m.planetary = fold(m.social_male.total + m.social_female.total)
-
-    m.purpose_personal = fold(m.day + m.year)
-    m.purpose_social = fold(m.month + m.mission)
+    m.purpose_personal = fold(m.sky.total + m.ground.total)
+    m.purpose_social = fold(m.social_male.total + m.social_female.total)
+    m.harmony = fold(m.purpose_personal + m.purpose_social)
+    m.planetary = fold(m.purpose_social + m.harmony)
 
     m.money = _money_line(m)
     m.love = _love_line(m)
