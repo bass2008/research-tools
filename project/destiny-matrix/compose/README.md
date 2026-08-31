@@ -23,6 +23,7 @@ scripts/run.sh            # собрать изменившееся и подн�
 | `scripts/release-snapshot.sh` | read-only агрегаты prod-БД до/после релиза |
 | `scripts/rollback-prod.sh` | dry-run/откат на tag перед последним prod-релизом |
 | `scripts/cleanup-local-db.sh` | снести локальную базу и засеять заново |
+| `scripts/prepare-content.sh` | собрать базовый контент, SEO-обогащение, аудит и parity, затем проверить итог |
 | `scripts/run-tests.sh` | все тесты подряд: api, компонентные, браузерные, приёмка |
 | `scripts/assert-release-candidate.sh` | запрещает deploy dirty/непроверенного commit |
 
@@ -233,6 +234,7 @@ compose/
     down.sh             погасить
     run-python.sh       запуск без докера (uvicorn + node)
     cleanup-local-db.sh снести локальную базу и завести заново (админ + тарифы)
+    prepare-content.sh  полностью подготовить и проверить контент и производные артефакты
     run-tests.sh        все тесты: api, фронт, браузерные сценарии, приёмка
     release-manifest.py hashes метода/контента/SEO, commit и число sitemap URL
     assert-release-candidate.sh clean-tree и same-commit gate test/prod

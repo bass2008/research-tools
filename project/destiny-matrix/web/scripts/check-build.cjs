@@ -31,7 +31,8 @@ const pages = new Map(diskFiles.map((f) => [route(f), fs.readFileSync(f, "utf8")
 const known = new Set([...pages.keys(), ...ON_DEMAND]);
 const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/,
   /^\/forgot$/, /^\/reset$/,
-  /^\/matrices(\/\d+)?$/, /^\/admin(\/users\/\d+)?$/];
+  /^\/matrices(\/\d+)?$/, /^\/admin(\/users\/\d+)?$/,
+  /^\/encyclopedia\/character\/\d+-\d+-\d+$/];
 
 let fails = [];
 const fail = (msg) => fails.push(msg);
@@ -144,6 +145,7 @@ const NEEDS_CARD = [
   /^\/encyclopedia\/arcanum\/\d+$/,
   /^\/encyclopedia\/combination\/\d+-\d+$/,
   /^\/matrix\/\d+-\d+-\d+$/,
+  /^\/encyclopedia\/character\/\d+-\d+-\d+$/,
 ];
 function checkPages() {
 for (const [r, html] of pages) {

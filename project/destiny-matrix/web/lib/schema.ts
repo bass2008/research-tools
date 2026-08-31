@@ -4,7 +4,7 @@ import { LEGAL, SITE } from "./site";
 // отбраковывает целиком, поэтому даты стоят константами: они относятся к контенту, а не к
 // сборке, и от прогона к прогону меняться не должны.
 export const CONTENT_PUBLISHED = "2026-04-01";
-export const CONTENT_MODIFIED = "2026-08-30";
+export const CONTENT_MODIFIED = "2026-08-31";
 
 const abs = (path: string) => new URL(path, SITE.url).toString();
 

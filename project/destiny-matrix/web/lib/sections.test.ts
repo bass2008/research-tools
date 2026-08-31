@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { sectionEntityLink } from "@/lib/publicSpec";
+import { buildFree, sectionEntityLink } from "@/lib/publicSpec";
 
 import { arcanumInPosition } from "./content";
 import { calculate } from "./matrix";
-import { SPEC, build } from "./sections";
+import { SPEC, build, freePositionTexts } from "./sections";
 
 const m = calculate("1990-05-17", "f");
 
@@ -68,6 +68,39 @@ describe("разделы разбора", () => {
     for (const s of build(m, false)) {
       if (s.access === "paid") expect(s.positions).toEqual([]);
     }
+  });
+
+  it("раздел характера ведёт на полный персональный разбор этой тройки", () => {
+    const character = section("character");
+    expect(character.personalHref).toBe(
+      `/encyclopedia/character/${m.day}-${m.month}-${m.year}`,
+    );
+    expect(character.longform).toMatchObject({
+      slug: `${m.day}-${m.month}-${m.year}`,
+      roles: [
+        { key: "A", arcanum: m.day },
+        { key: "B", arcanum: m.month },
+        { key: "C", arcanum: m.year },
+      ],
+    });
+    expect(sectionEntityLink(character)).toMatchObject({
+      href: `/encyclopedia/character/${m.day}-${m.month}-${m.year}`,
+      entityType: "character",
+      entityKey: `${m.day}-${m.month}-${m.year}`,
+      positionKey: "character",
+    });
+  });
+
+  it("бесплатный отчёт получает те же четыре ролевых кубика и итог, что PDF", () => {
+    const full = section("character");
+    const free = buildFree(m, freePositionTexts()).find((item) => item.key === "character")!;
+    expect(free.positions.map((position) => position.characterRole)).toEqual(full.longform!.roles);
+    expect(free.characterConclusion).toEqual({
+      summary: full.longform!.summary,
+      strength: full.longform!.strength,
+      tension: full.longform!.tension,
+      practice: full.longform!.practice,
+    });
   });
 
   it("только M–N–D ведёт на точный ordered-хвост", () => {

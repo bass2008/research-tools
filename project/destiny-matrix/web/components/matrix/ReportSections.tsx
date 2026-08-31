@@ -2,15 +2,16 @@
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
 // пропсами и в браузерный чанк не попадают) и клиентский разбор в браузере, где платных
 // разделов нет вовсе.
-import Link from "next/link";
-
 import { arcanumTitle } from "@/lib/arcana";
 import { counted, plural } from "@/lib/plural";
 
 import type { SectionOut } from "@/lib/publicSpec";
 import { publicHref } from "@/lib/site";
-import { sectionEntityLink } from "@/lib/publicSpec";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
+import CharacterConclusionView from "@/components/matrix/CharacterConclusionView";
+import CharacterReadingView from "@/components/matrix/CharacterReadingView";
+import CharacterRoleParts from "@/components/matrix/CharacterRoleParts";
+import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
 import LockIcon from "@/components/ui/LockIcon";
 import UnlockCta from "@/components/pay/UnlockCta";
 
@@ -58,7 +59,6 @@ export default function ReportSections({
       </div>
 
       {sections.map((s, i) => {
-        const encyclopedia = sectionEntityLink(s);
         return s.positions.length ? (
           <details
             className="acc"
@@ -74,35 +74,38 @@ export default function ReportSections({
             <div className="body">
               <p className="lead">{s.lead}</p>
               <ul className="poslist" data-cols={gridColumns(s.positions.length)}>
-                {s.positions.map((p, j) => (
-                  <li
-                    key={`${p.label}-${j}`}
-                    data-position={p.label}
-                    data-arcanum={p.arcanum}
-                  >
-                    <a className="poscard" href={printing ? publicHref(p.href) : p.href}>
-                      <span className="who">{p.label}</span>
-                      <ArcanumCard n={p.arcanum} size="grid" decorative half={printing} />
-                      <span className="lb">
-                        <span className="nm">
-                          <span className="rn">{p.arcanum}</span> {arcanumTitle(p.arcanum)}
+                {s.positions.map((p, j) => {
+                  const characterRole = p.characterRole ?? s.longform?.roles[j];
+                  return (
+                    <li
+                      key={`${p.label}-${j}`}
+                      data-position={p.label}
+                      data-arcanum={p.arcanum}
+                    >
+                      <a className="poscard" href={printing ? publicHref(p.href) : p.href}>
+                        <span className="who">{p.label}</span>
+                        <ArcanumCard n={p.arcanum} size="grid" decorative half={printing} />
+                        <span className="lb">
+                          <span className="nm">
+                            <span className="rn">{p.arcanum}</span> {arcanumTitle(p.arcanum)}
+                          </span>
                         </span>
-                      </span>
-                    </a>
-                    {p.text ? <p className="postext">{p.text}</p> : null}
-                  </li>
-                ))}
+                      </a>
+                      {characterRole ? (
+                        <CharacterRoleParts role={characterRole} />
+                      ) : p.text ? (
+                        <p className="postext">{p.text}</p>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
-              <p className="encref">
-                <Link
-                  href={printing ? publicHref(encyclopedia.href) : encyclopedia.href}
-                  data-entity-type={encyclopedia.entityType}
-                  data-entity-key={encyclopedia.entityKey}
-                  data-position-key={encyclopedia.positionKey}
-                >
-                  {encyclopedia.label}
-                </Link>
-              </p>
+              {printing && s.longform ? (
+                <CharacterReadingView reading={s.longform} printing showRoles={false} />
+              ) : s.characterConclusion || s.longform ? (
+                <CharacterConclusionView reading={s.characterConclusion ?? s.longform!} />
+              ) : null}
+              <SectionEncyclopediaLinks section={s} printing={printing} />
             </div>
           </details>
         ) : (

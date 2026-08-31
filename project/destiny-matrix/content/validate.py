@@ -171,6 +171,32 @@ def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]
             rep.check(len(para) >= MIN_MEANING,
                       f"{who}: абзац {i} короче {MIN_MEANING} знаков ({len(para)})")
             prose.append((f"{who}, абзац {i}", para))
+        for section_index, section in enumerate(item.get("article_sections", ()), 1):
+            rep.check(len(section.get("h2", "")) >= 10,
+                      f"{who}: у главы {section_index} нет содержательного h2")
+            prose.append((f"{who} · глава {section_index} · h2", section.get("h2", "")))
+            rep.check(bool(section.get("paragraphs")),
+                      f"{who}: у главы {section_index} нет абзацев")
+            for paragraph_index, paragraph in enumerate(section.get("paragraphs", ()), 1):
+                rep.check(len(paragraph) >= MIN_MEANING,
+                          f"{who}: глава {section_index}, абзац {paragraph_index} короче "
+                          f"{MIN_MEANING} знаков ({len(paragraph)})")
+                prose.append((f"{who} · глава {section_index}, абзац {paragraph_index}", paragraph))
+        for faq_index, faq in enumerate(item.get("faq", ()), 1):
+            rep.check(len(faq.get("q", "")) >= 9, f"{who}: вопрос FAQ {faq_index} слишком короткий")
+            rep.check(len(faq.get("a", "")) >= 40, f"{who}: ответ FAQ {faq_index} слишком короткий")
+            prose.append((f"{who} · FAQ {faq_index} · вопрос", faq.get("q", "")))
+            prose.append((f"{who} · FAQ {faq_index} · ответ", faq.get("a", "")))
+        if item["key"] == "character":
+            rep.check(len(item.get("article_sections", ())) >= 8,
+                      f"{who}: нужна полная статья минимум из 8 глав")
+            rep.check(len(item.get("faq", ())) >= 5,
+                      f"{who}: нужно минимум 5 ответов FAQ")
+        if item["key"] == "day":
+            rep.check(len(item.get("article_sections", ())) >= 7,
+                      f"{who}: нужна полная статья о визитке минимум из 7 глав")
+            rep.check(len(item.get("faq", ())) >= 5,
+                      f"{who}: нужно минимум 5 ответов FAQ о визитке")
         rep.check(len(item.get("reading", "")) >= 80, f"{who}: нет пояснения «как читать»")
         prose.append((f"{who} · как читать", item["reading"]))
         rep.check(len(item.get("arcana", [])) == 22, f"{who}: список арканов не полный")

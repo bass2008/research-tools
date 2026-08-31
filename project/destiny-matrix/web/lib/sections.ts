@@ -1,6 +1,8 @@
 // Серверная половина спецификации отчёта. Платные подписи и ключи позиций не попадают
 // в клиентский чанк; сам корпус трактовок читается строго из web/content/arcana.json.
 import sectionSpec from "./__fixtures__/sections.json";
+import { buildCharacterReading, characterRoleTemplate } from "./character";
+import { characterHref, type CharacterPositionKey } from "./characterTypes";
 import { arcanumInPosition } from "./content";
 import type { Matrix } from "./matrix";
 import {
@@ -8,6 +10,7 @@ import {
   arcanumHref,
   type Access,
   type PositionOut,
+  type PositionTextValue,
   type PositionTexts,
   type SectionOut,
 } from "./publicSpec";
@@ -84,6 +87,12 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
       lead: spec.lead,
       access: spec.access,
       positions,
+      ...(spec.key === "character"
+        ? {
+            personalHref: characterHref(matrix),
+            longform: buildCharacterReading(matrix),
+          }
+        : {}),
     };
     if (spec.access === "paid" && !unlocked) {
       out.teaser = `${positions.length} позиций в полном разборе`;
@@ -96,12 +105,19 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
 /** Толкования бесплатных разделов для браузера: платные сюда не попадают намеренно. */
 export function freePositionTexts(): PositionTexts {
   const out: PositionTexts = {};
+  const isCharacterPosition = (key: string): key is CharacterPositionKey =>
+    key === "day" || key === "month" || key === "year";
   for (const spec of SPEC) {
     if (spec.access !== "free") continue;
     const definition = PRIVATE_BY_KEY.get(spec.key)!;
     for (const key of positionKeys(definition.positions)) {
-      const byArcanum: Record<number, string> = {};
-      for (let n = 1; n <= 22; n++) byArcanum[n] = arcanumInPosition(n, key);
+      const byArcanum: Record<number, PositionTextValue> = {};
+      for (let n = 1; n <= 22; n++) {
+        const text = arcanumInPosition(n, key);
+        byArcanum[n] = isCharacterPosition(key)
+          ? { characterRole: characterRoleTemplate(n, key) }
+          : text;
+      }
       out[key] = byArcanum;
     }
   }

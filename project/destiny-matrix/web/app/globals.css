@@ -434,6 +434,26 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 }
 .encref a { font-weight: 600; color: var(--gold); }
 .encref a:hover { text-decoration: underline; }
+.character-encrefs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+  gap: 18px;
+}
+.character-encref-group { min-width: 0; }
+.character-encref-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--dim2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.character-encref-separator { background: var(--line); }
+@media (max-width: 680px) {
+  .character-encrefs { grid-template-columns: 1fr; gap: 10px; }
+  .character-encref-separator { width: 100%; height: 1px; }
+}
 
 /* Толкование под картой: за него платят, поэтому оно и стоит рядом с картой,
    а не спрятано за ссылкой в энциклопедию. */
@@ -447,10 +467,66 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   line-height: 1.55;
   color: var(--dim);
 }
+.character-role-parts {
+  display: grid;
+  gap: 7px;
+  margin: 10px auto 0;
+  max-width: min(100%, 46ch);
+  text-align: left;
+  font-size: 13.4px;
+  line-height: 1.5;
+  color: var(--dim);
+}
+.character-role-parts p { margin: 0; }
+.character-role-parts strong { color: var(--text); }
+.character-role .character-role-parts { margin-top: 0; font-size: 14px; }
 .poslist .rn { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 700 12.5px var(--sans); color: #fff; background: var(--gold); vertical-align: 1px; }
 .rhead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
 .rhead .cnt { font-size: 13.4px; color: var(--dim2); }
 .rhead .cnt b { color: var(--gold2); }
+
+/* Полный разбор характера: три исходные роли остаются видимыми, а длинные связи читаются
+   вертикально как статья. Персональная страница не пытается уместиться внутри аккордеона. */
+.character-reading { margin-top: 22px; }
+.character-compact { margin-top: 22px; }
+.character-summary { border-left: 4px solid var(--gold); }
+.character-summary > :last-child { margin-bottom: 0; }
+.character-roles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+  align-items: stretch;
+}
+.character-role { min-width: 0; }
+/* Общее `.panel + .panel` добавляет соседним панелям верхний отступ. В grid это сдвигало
+   вторую и третью карточки вниз относительно первой. */
+.character-roles > .panel + .panel { margin-top: 0; }
+.character-role .poscard .arccard { width: min(100%, 230px); margin: 0 auto; }
+.character-role .character-question {
+  margin: 18px 0 8px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+  font-weight: 700;
+  color: var(--text);
+}
+.character-role > p:last-child,
+.character-interactions .panel > p:last-child,
+.character-conclusion .panel > p:last-child { margin-bottom: 0; }
+.character-interactions { max-width: 82ch; }
+.character-interactions .panel,
+.character-conclusion .panel { margin-top: 12px; }
+.character-interactions h3,
+.character-conclusion h3 { margin-bottom: 8px; }
+.character-conclusion {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.character-conclusion > h2 { grid-column: 1 / -1; margin-bottom: 0; }
+@media (max-width: 760px) {
+  .character-roles,
+  .character-conclusion { grid-template-columns: 1fr; }
+}
 
 /* Замок в строке закрытого раздела: скоба поднимается и отъезжает при наведении —
    объясняет, что раздел открывается, без слова «купить» и без цены. */
@@ -1020,6 +1096,8 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .printmode .panel,
 .printmode .acc,
 .printmode .poscard { box-shadow: none; }
+.printmode .character-interactions,
+.printmode .character-conclusion { max-width: none; }
 .printmode .postab tr,
 .printmode .chak .row { break-inside: avoid; }
 /* страница печати: шапку и подвал рисует общий layout, в PDF им места нет */

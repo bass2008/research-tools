@@ -108,6 +108,30 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
         <Sections items={extra.sections} />
 
+        {p.key === "day" ? (
+          <p className="encref">
+            <Link href={positionHref("character")}>
+              Подробнее о полном разделе «Характер и личные качества» →
+            </Link>
+          </p>
+        ) : null}
+
+        {p.key === "character" ? (
+          <div className="panel section-gap">
+            <h2>Пример полного персонального разбора</h2>
+            <div className="cap">Тройка 4–3–22: три роли, три связи и общий вывод</div>
+            <p>
+              В статье выше показан метод. На персональной странице видно, как те же правила
+              собирают отдельные значения Императора, Императрицы и Шута в один связный текст.
+            </p>
+            <p className="encref">
+              <Link href="/encyclopedia/character/4-3-22">
+                Посмотреть разбор 4–3–22 в энциклопедии →
+              </Link>
+            </p>
+          </div>
+        ) : null}
+
         {extra.reading ? (
           <div className="panel">
             <h3>Как читать позицию</h3>

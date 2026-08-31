@@ -52,6 +52,23 @@ describe("загрузчик сгенерированного контента",
     for (const v of Object.values(s)) expect(v).toBeGreaterThanOrEqual(0);
   });
 
+  it("раздел характера опубликован как полноценная статья, а не короткая справка", () => {
+    const character = positionContent("character")!;
+    expect(character.sections).toHaveLength(8);
+    expect(character.faq).toHaveLength(5);
+    expect(character.sections.some((section) => section.h2.includes("Точка A"))).toBe(true);
+    expect(character.sections.some((section) => section.h2.includes("4–3–22"))).toBe(true);
+  });
+
+  it("страница визитки закрывает значение, расположение и расчёт точки A", () => {
+    const day = positionContent("day")!;
+    expect(day.sections.length).toBeGreaterThanOrEqual(7);
+    expect(day.faq).toHaveLength(5);
+    expect(day.sections.some((section) => section.h2.includes("Где находится визитка"))).toBe(true);
+    expect(day.sections.some((section) => section.h2.includes("Как рассчитать"))).toBe(true);
+    expect(day.sections.some((section) => section.h2.includes("полного характера"))).toBe(true);
+  });
+
   it("каждый аркан имеет полный корпус 37 позиционных трактовок", () => {
     const expected = new Set(POSITIONS.map((position) => position.key));
     for (let n = 1; n <= 22; n++) {
@@ -75,7 +92,14 @@ describe("гигиена сгенерированного контента", () 
     for (const p of POSITIONS) {
       const c = positionContent(p.key);
       if (!c) continue;
-      parts.push(...c.meaning, c.reading, c.seo.title, c.seo.description);
+      parts.push(
+        ...c.meaning,
+        c.reading,
+        ...c.sections.flatMap((section) => [section.h2, ...section.paragraphs]),
+        ...c.faq.flatMap((item) => [item.q, item.a]),
+        c.seo.title,
+        c.seo.description,
+      );
     }
     for (const ch of CHAKRA_PAGES) {
       const c = chakraContent(ch.key);

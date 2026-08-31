@@ -62,5 +62,6 @@ export function encyclopediaSectionFromPath(
   if (external) return external;
   if (parts[0] !== "encyclopedia" || parts.length === 1) return null;
   if (parts[1] === "position") return positionKinds[parts[2] ?? ""] ?? "sec";
+  if (parts[1] === "character") return "sec";
   return encyclopediaSectionFromSegment(parts[1]);
 }

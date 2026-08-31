@@ -160,10 +160,16 @@ def build_positions() -> list[dict]:
                      + chakras_by_section[key],
             "seo": seo.position({**meta, "title": title}, "section"),
         }
+        # Полноценные статьи нужны не каждому служебному разделу. Не подставляем пустой
+        # шаблон: дополнительные главы и FAQ публикуются только когда написаны в источнике.
+        if meta.get("article_sections"):
+            item["article_sections"] = list(meta["article_sections"])
+        if meta.get("faq"):
+            item["faq"] = list(meta["faq"])
         out.append(item)
 
     for point in POINTS:
-        out.append({
+        item = {
             "key": point["key"],
             "kind": "point",
             "title": point["title"],
@@ -176,7 +182,12 @@ def build_positions() -> list[dict]:
                           "href": position_href(k)} for k in point["sections"]],
             "arcana": _arcanum_refs(),
             "seo": seo.position(point, "point"),
-        })
+        }
+        if point.get("article_sections"):
+            item["article_sections"] = list(point["article_sections"])
+        if point.get("faq"):
+            item["faq"] = list(point["faq"])
+        out.append(item)
     return out
 
 

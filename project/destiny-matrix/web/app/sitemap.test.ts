@@ -26,6 +26,10 @@ describe("карта сайта", () => {
     expect(paths).toContain("/matrix");
   });
 
+  it("не содержит персональных статей характера", () => {
+    expect(paths.filter((p) => p.startsWith("/encyclopedia/character/"))).toEqual([]);
+  });
+
   // Ключ в hubs.json без файла-роута дал бы в карте адрес, которого нет, — 404 из sitemap.
   it("не выдаёт корневой хаб, для которого нет роута", async () => {
     const { ROOT_HUBS } = await import("@/lib/encyclopedia");

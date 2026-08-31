@@ -6,6 +6,16 @@
 // исходнике страницы, поэтому один импорт lib/sections.ts из компонента с "use client"
 // выкладывает наружу то, за что платят (сторож — scripts/check-build.cjs).
 import type { Matrix } from "./matrix";
+import {
+  CHARACTER_ROLE_META,
+  buildCharacterConclusion,
+  characterHref,
+  type CharacterConclusionReading,
+  type CharacterPositionKey,
+  type CharacterReading,
+  type CharacterRoleReading,
+  type CharacterRoleTemplate,
+} from "./characterTypes";
 import { resolveSectionPositions, type SectionPositionDefinition } from "./sectionResolver";
 
 export type Access = "free" | "paid";
@@ -16,10 +26,15 @@ export interface PositionOut {
   href: string;
   /** толкование этого аркана именно в этой позиции — за него и платят */
   text?: string;
+  /** В бесплатном характере один абзац разложен на четыре переиспользуемых кубика. */
+  characterRole?: CharacterRoleReading;
 }
 
 /** Толкования «аркан → текст» по ключу раздела. Клиенту сервер отдаёт только бесплатные. */
-export type PositionTexts = Record<string, Record<number, string>>;
+export type PositionTextValue =
+  | string
+  | { characterRole: CharacterRoleTemplate };
+export type PositionTexts = Record<string, Record<number, PositionTextValue>>;
 
 export interface SectionOut {
   key: string;
@@ -28,6 +43,12 @@ export interface SectionOut {
   access: Access;
   positions: PositionOut[];
   teaser?: string;
+  /** Полноэкранный персональный материал для разделов, где нужен связный разбор сочетания. */
+  personalHref?: string;
+  /** Компактный итог бесплатного раздела без длинных связей персональной статьи. */
+  characterConclusion?: CharacterConclusionReading;
+  /** Сервер вкладывает полный текст в оплаченный/PDF-отчёт; браузер бесплатного расчёта — нет. */
+  longform?: CharacterReading;
 }
 
 /** Имя раздела — публичное: оно и в энциклопедии, и в списке «под замком». */
@@ -54,7 +75,7 @@ export function positionHref(key: string): string {
 export interface SectionEntityLink {
   href: string;
   label: string;
-  entityType: "karmic_tail" | "position";
+  entityType: "character" | "karmic_tail" | "position";
   positionKey: string;
   entityKey: string;
 }
@@ -66,6 +87,16 @@ export interface SectionEntityLink {
  * того, что рядом оказались три числа.
  */
 export function sectionEntityLink(section: SectionOut): SectionEntityLink {
+  if (section.key === "character" && section.personalHref && section.positions.length === 3) {
+    const key = section.positions.map((position) => position.arcanum).join("-");
+    return {
+      href: section.personalHref,
+      label: `Подробнее про характер ${key} в энциклопедии →`,
+      entityType: "character",
+      positionKey: section.key,
+      entityKey: key,
+    };
+  }
   if (section.key === "past_lives" && section.positions.length === 3) {
     const key = section.positions.map((position) => position.arcanum).join("-");
     return {
@@ -140,29 +171,48 @@ export const FREE_POSITION_KEYS: string[] = [
 export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
   return CATALOG.map((meta) => {
     const detail = meta.access === "free" ? FREE_DETAIL[meta.key] : undefined;
+    const positions = (() => {
+      // текст ключуется позицией, а не разделом; повтор аркана внутри раздела печатался
+      // дословно дважды — вместо второго абзаца отсылка к первому
+      const seen = new Map<string, string>();
+      return (detail?.positions(m) ?? []).map(([label, arcanum, key]) => {
+        const mark = `${key}:${arcanum}`;
+        const first = seen.get(mark);
+        if (!first) seen.set(mark, label);
+        const source = texts?.[key]?.[arcanum];
+        const text = typeof source === "string" ? source : undefined;
+        const template = typeof source === "object" ? source.characterRole : undefined;
+        const roleMeta = CHARACTER_ROLE_META[key as CharacterPositionKey];
+        return {
+          label,
+          arcanum,
+          href: arcanumHref(arcanum),
+          text: first ? `Тот же аркан, что и в позиции «${first}»: толкование выше.` : text,
+          ...(template && roleMeta
+            ? {
+                characterRole: {
+                  ...roleMeta,
+                  arcanum,
+                  ...template,
+                },
+              }
+            : {}),
+        };
+      });
+    })();
+    const characterRoles = positions.flatMap((position) =>
+      position.characterRole ? [position.characterRole] : [],
+    );
     return {
       key: meta.key,
       title: meta.title,
       lead: detail?.lead ?? "",
       access: meta.access,
-      positions: (() => {
-        // текст ключуется позицией, а не разделом; повтор аркана внутри раздела печатался
-        // дословно дважды — вместо второго абзаца отсылка к первому
-        const seen = new Map<string, string>();
-        return (detail?.positions(m) ?? []).map(([label, arcanum, key]) => {
-          const mark = `${key}:${arcanum}`;
-          const first = seen.get(mark);
-          if (!first) seen.set(mark, label);
-          return {
-            label,
-            arcanum,
-            href: arcanumHref(arcanum),
-            text: first
-              ? `Тот же аркан, что и в позиции «${first}»: толкование выше.`
-              : texts?.[key]?.[arcanum],
-          };
-        });
-      })(),
+      ...(meta.key === "character" ? { personalHref: characterHref(m) } : {}),
+      ...(characterRoles.length === 3
+        ? { characterConclusion: buildCharacterConclusion(characterRoles) }
+        : {}),
+      positions,
     };
   });
 }

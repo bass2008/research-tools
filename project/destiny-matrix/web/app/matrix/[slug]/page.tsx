@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraTable from "@/components/matrix/ChakraTable";
+import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
 import Crumbs from "@/components/ui/Crumbs";
 import JsonLd from "@/components/ui/JsonLd";
 import Price from "@/components/pay/Price";
@@ -230,9 +231,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
                 </li>
               ))}
             </ul>
-            <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
-              <Link href={positionHref(s.key)}>Как читается раздел «{s.title}»</Link>
-            </p>
+            <SectionEncyclopediaLinks section={s} />
           </div>
         ))}
 
