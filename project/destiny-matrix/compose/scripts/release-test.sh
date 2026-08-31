@@ -13,6 +13,15 @@ IP=84.201.157.100
 REGISTRY=cr.yandex/crp68mnbmb6e88p35jsq
 TAG="test-$(git rev-parse --short HEAD)$(git diff --quiet HEAD -- .. || TZ=Europe/Moscow date '+-%H%M')"
 
+# Тестовый домен закрыт Basic Auth. Берём те же локальные реквизиты, которыми bootstrap
+# создаёт /etc/nginx/.htpasswd-test на сервере; пароль в репозиторий и вывод не попадает.
+AUTH_ENV="${ARCANA_TEST_AUTH_ENV:-$HOME/.config/arcana/test-auth.env}"
+test -r "$AUTH_ENV" || { echo "нет реквизитов Basic Auth: $AUTH_ENV" >&2; exit 1; }
+. "$AUTH_ENV"
+: "${TEST_BASIC_USER:?в $AUTH_ENV не задан TEST_BASIC_USER}"
+: "${TEST_BASIC_PASSWORD:?в $AUTH_ENV не задан TEST_BASIC_PASSWORD}"
+TEST_CURL=(curl --fail --silent --show-error --user "$TEST_BASIC_USER:$TEST_BASIC_PASSWORD")
+
 export SITE_URL="$SITE" BUILD_COMMIT="$TAG" BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"
 
@@ -47,8 +56,8 @@ ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
   && docker image prune -a -f >/dev/null"
 
 echo "== проверка"
-until curl -sf -o /dev/null "$SITE/"; do sleep 3; done
-curl -s "$SITE/version/current.txt"
+until "${TEST_CURL[@]}" -o /dev/null "$SITE/"; do sleep 3; done
+"${TEST_CURL[@]}" "$SITE/version/current.txt"
 mkdir -p ../reports/unified
 git rev-parse HEAD > ../reports/unified/tested-commit.txt
 echo "готово: $SITE"
