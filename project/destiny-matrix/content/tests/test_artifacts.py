@@ -28,15 +28,20 @@ def test_core_content_artifacts_have_no_generation_drift():
     for name, items in expected.items():
         actual = _items(name)
         if name in {"arcana.json", "positions.json"}:
-            # SEO-сборщик поверх канонического core намеренно заменяет только длинное meaning и
-            # metadata. Ни одно расчётное/структурное поле при обогащении меняться не может.
+            # SEO-сборщик поверх канонического core намеренно заменяет длинное meaning и
+            # metadata, а для статей разделов добавляет article_sections и faq. Ни одно
+            # расчётное/структурное поле при обогащении меняться не может.
             by_key = {str(row.get("n", row.get("key"))): row for row in items}
             normalized = []
             for row in actual:
                 key = str(row.get("n", row.get("key")))
                 copy = dict(row)
-                copy["meaning"] = by_key[key]["meaning"]
-                copy["seo"] = by_key[key]["seo"]
+                core = by_key[key]
+                for field in ("meaning", "seo", "article_sections", "faq"):
+                    if field in core:
+                        copy[field] = core[field]
+                    else:
+                        copy.pop(field, None)
                 normalized.append(copy)
             actual = normalized
         assert actual == items, f"{name}: выполните content.build, затем tools/seo/build-content.py"
@@ -65,3 +70,23 @@ def test_public_section_catalog_is_the_safe_exact_snapshot():
             item["positions"] = definition["positions"]
         expected.append(item)
     assert _items("sections.json") == expected
+
+
+def test_content_validator_runs_inside_pytest():
+    """Валидатор корпуса запускался только из compose/scripts/run-tests.sh.
+
+    Из-за этого «зелёный pytest» ничего не говорил о контенте: сломанный шаблон канцелярита,
+    неверный пример в статье и шаблонные вводные жили ровно в той проверке, которую быстрый цикл
+    не выполнял. Гоняем её здесь же, чтобы разрыв не открылся снова.
+    """
+    from content import validate
+
+    report = validate.Report()
+    data = validate.load(report)
+    prose: list[tuple[str, str]] = []
+    validate.check_arcana(report, data["arcana.json"]["items"], prose)
+    validate.check_positions(report, data["positions.json"]["items"], prose)
+    validate.check_examples(report, data["positions.json"]["items"])
+    validate.check_section_openings(report, data["positions.json"]["items"])
+    validate.check_texts(report, prose)
+    assert report.errors == [], report.errors[:10]

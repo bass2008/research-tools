@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import sitemap from "./sitemap";
 import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
 import { CONTENT_MODIFIED } from "@/lib/schema";
+import { SPEC } from "@/lib/sections";
 
 // Дефект A17: карту сайта пополняли вручную, и юридические страницы попали в неё не все.
 // адреса первого уровня, которые не являются концепт-хабами
@@ -26,8 +27,25 @@ describe("карта сайта", () => {
     expect(paths).toContain("/matrix");
   });
 
-  it("не содержит персональных статей характера", () => {
-    expect(paths.filter((p) => p.startsWith("/encyclopedia/character/"))).toEqual([]);
+  // Тест утверждал только отсутствие персональных разборов. Потеря раздела из positions.json
+  // делала карту тихо короче, и он оставался зелёным — а общая статья и есть то единственное,
+  // что этот релиз отдаёт в индекс.
+  it("содержит общую статью каждого из 20 разделов отчёта", () => {
+    expect(SPEC).toHaveLength(20);
+    const missing = SPEC.map((section) => section.key)
+      .filter((key) => !paths.includes(`/encyclopedia/position/${key}`));
+    expect(missing, "разделов нет в карте сайта").toEqual([]);
+  });
+
+  it("не содержит персональных статей разделов отчёта", () => {
+    const personalSections = [
+      "character", "comfort", "profession", "realisation", "karma40", "resources",
+      "family_gifts", "soul_tasks", "purpose", "money", "money40", "relations",
+      "parents_children", "ancestry", "body_resource", "chakras", "rest", "loops", "years",
+    ];
+    for (const section of personalSections) {
+      expect(paths.filter((p) => p.startsWith(`/encyclopedia/${section}/`)), section).toEqual([]);
+    }
   });
 
   // Ключ в hubs.json без файла-роута дал бы в карте адрес, которого нет, — 404 из sitemap.

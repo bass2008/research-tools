@@ -17,7 +17,7 @@ export default function SectionEncyclopediaLinks({
   const entity = sectionEntityLink(section);
   const href = (path: string) => (printing ? publicHref(path) : path);
 
-  if (section.key !== "character") {
+  if (!section.personalHref) {
     return (
       <p className="encref">
         <Link
@@ -33,7 +33,7 @@ export default function SectionEncyclopediaLinks({
   }
 
   return (
-    <div className="encref character-encrefs" data-testid="character-encyclopedia-links">
+    <div className="encref character-encrefs" data-testid={`${section.key}-encyclopedia-links`}>
       <div className="character-encref-group">
         <span className="character-encref-label">По вашей матрице</span>
         <Link
@@ -41,7 +41,7 @@ export default function SectionEncyclopediaLinks({
           data-entity-type={entity.entityType}
           data-entity-key={entity.entityKey}
           data-position-key={entity.positionKey}
-          data-testid="character-full-link"
+          data-testid={`${section.key}-full-link`}
         >
           {entity.label}
         </Link>
@@ -49,8 +49,8 @@ export default function SectionEncyclopediaLinks({
       <span className="character-encref-separator" aria-hidden="true" />
       <div className="character-encref-group">
         <span className="character-encref-label">О методе</span>
-        <Link href={href(positionHref("character"))}>
-          Как читать раздел «Характер и личные качества» →
+        <Link href={href(positionHref(section.key))}>
+          Как читать раздел «{section.title}» →
         </Link>
       </div>
     </div>

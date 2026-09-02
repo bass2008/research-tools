@@ -103,6 +103,9 @@ def check_arcana(rep: Report, items: list[dict], prose: list[tuple[str, str]]) -
             prose.append((f"{who} · значение, абзац {i}", para))
         rep.check(len(a["plus"]) >= 3, f"{who}: плюсов {len(a['plus'])}, нужно 3+")
         rep.check(len(a["minus"]) >= 3, f"{who}: минусов {len(a['minus'])}, нужно 3+")
+        rep.check(len(a.get("repeat", "")) >= 200,
+                  f"{who}: текст повтора {len(a.get('repeat', ''))} знаков, нужно 200+")
+        prose.append((f"{who} · повтор аркана", a.get("repeat", "")))
         expected_position_keys = SECTION_KEYS + POINT_KEYS
         missing = [k for k in expected_position_keys if not a["in_positions"].get(k)]
         rep.check(not missing, f"{who}: нет текста в позициях {missing}")
@@ -187,16 +190,16 @@ def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]
             rep.check(len(faq.get("a", "")) >= 40, f"{who}: ответ FAQ {faq_index} слишком короткий")
             prose.append((f"{who} · FAQ {faq_index} · вопрос", faq.get("q", "")))
             prose.append((f"{who} · FAQ {faq_index} · ответ", faq.get("a", "")))
-        if item["key"] == "character":
+        if item["kind"] == "section":
             rep.check(len(item.get("article_sections", ())) >= 8,
                       f"{who}: нужна полная статья минимум из 8 глав")
             rep.check(len(item.get("faq", ())) >= 5,
                       f"{who}: нужно минимум 5 ответов FAQ")
-        if item["key"] == "day":
-            rep.check(len(item.get("article_sections", ())) >= 7,
-                      f"{who}: нужна полная статья о визитке минимум из 7 глав")
+        if item["kind"] != "section" and item.get("article_sections"):
+            rep.check(len(item["article_sections"]) >= 8,
+                      f"{who}: у страницы точки со статьёй тоже нужно минимум 8 глав")
             rep.check(len(item.get("faq", ())) >= 5,
-                      f"{who}: нужно минимум 5 ответов FAQ о визитке")
+                      f"{who}: нужно минимум 5 ответов FAQ")
         rep.check(len(item.get("reading", "")) >= 80, f"{who}: нет пояснения «как читать»")
         prose.append((f"{who} · как читать", item["reading"]))
         rep.check(len(item.get("arcana", [])) == 22, f"{who}: список арканов не полный")
@@ -210,6 +213,75 @@ def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]
             rep.check(bool(item.get("formula")), f"{who}: нет формулы")
             rep.check(bool(item["sections"]), f"{who}: точка не привязана ни к одному разделу")
         check_seo(rep, who, item["seo"], min_queries=4)
+
+
+SECTION_OPENING_WORDS = 8
+
+
+def check_section_openings(rep: Report, items: list[dict]) -> None:
+    """Первые фразы глав не должны совпадать между разделами после подстановки названия.
+
+    Прежний сторож шаблонных вводных — чёрный список из восьми слов в `web/lib/content.test.ts`
+    и совпадение первых 30 знаков здесь же. Мутация «Раздел «‹название›» в матрице судьбы читается
+    по своим ролям и связям…», разложенная по трём разделам, проходила обе проверки: название
+    стоит на восьмом знаке, и первые 30 знаков расходятся. Сравниваем зачин с замаскированным
+    названием — тогда подстановка перестаёт делать текст «уникальным».
+    """
+    seen: dict[str, str] = {}
+    for item in items:
+        if item.get("kind") != "section":
+            continue
+        for index, chapter in enumerate(item.get("article_sections", ()), 1):
+            paragraphs = chapter.get("paragraphs") or []
+            if not paragraphs:
+                continue
+            masked = paragraphs[0].replace(item["title"], "РАЗДЕЛ")
+            first = re.split(r"(?<=[.!?…])\s", masked)[0]
+            key = " ".join(WORD_RE.findall(first.lower())[:SECTION_OPENING_WORDS])
+            where = f"{item['key']} · глава {index}"
+            if not key:
+                continue
+            if key in seen:
+                rep.fail(f"шаблонная вводная: «{where}» повторяет «{seen[key]}» — «{key}…»")
+            else:
+                seen[key] = where
+
+
+CONTROL_SLUG = "4-3-22"
+NUMBER_SEQUENCE = re.compile(r"\d{1,2}(?:[–—-]\d{1,2}){1,7}")
+
+
+def check_examples(rep: Report, items: list[dict]) -> None:
+    """Числа в разобранном примере статьи обязаны совпадать с тем, что даёт движок.
+
+    Статья `realisation` полгода утверждала, что контрольная матрица 4–3–22 даёт путь 16–11–3,
+    хотя движок даёт 11–22–8, а сам адрес 16-11-3 отдавал 404: ни одна проверка примеры с
+    расчётом не сверяла. Возрастные рамки `years` («0–10 лет») под правило не попадают —
+    у них другое количество чисел, чем ролей в разделе.
+    """
+    from engine.matrix import calculate
+    from engine.sections import SPEC
+
+    matrices = json.loads((CONTENT_DIR / "matrices.json").read_text(encoding="utf-8"))
+    birth = next(m["matrix"]["birth"] for m in matrices["items"] if m["slug"] == CONTROL_SLUG)
+    control = calculate(birth, "f")
+    by_key = {spec[0]: spec for spec in SPEC}
+
+    for item in items:
+        if item.get("kind") != "section" or item["key"] not in by_key:
+            continue
+        expected = [position.arcanum for position in by_key[item["key"]][4](control)]
+        for index, chapter in enumerate(item.get("article_sections", ()), 1):
+            for found in NUMBER_SEQUENCE.findall(chapter.get("h2", "")):
+                numbers = [int(part) for part in re.split(r"[–—-]", found)]
+                if len(numbers) != len(expected):
+                    continue
+                rep.check(
+                    numbers == expected,
+                    f"позиция {item['key']}: пример в главе {index} назван {found}, "
+                    f"а движок для матрицы {CONTROL_SLUG} даёт "
+                    f"{'–'.join(str(n) for n in expected)}",
+                )
 
 
 def check_chakras(rep: Report, items: list[dict], prose: list[tuple[str, str]]) -> None:
@@ -355,6 +427,8 @@ def main() -> int:
         check_combinations(rep, data["combinations.json"]["items"],
                            data["arcana.json"]["items"], prose)
         check_positions(rep, data["positions.json"]["items"], prose)
+        check_examples(rep, data["positions.json"]["items"])
+        check_section_openings(rep, data["positions.json"]["items"])
         check_chakras(rep, data["chakras.json"]["items"], prose)
         check_queries(rep, data)
         check_links(rep, data)

@@ -163,11 +163,6 @@
       "access": "paid",
       "positions": [
         {
-          "label": "Итог неба",
-          "selector": "sky.total",
-          "position_key": "soul_tasks"
-        },
-        {
           "label": "Первая задача неба",
           "selector": "B",
           "position_key": "month"
@@ -176,6 +171,11 @@
           "label": "Вторая задача неба",
           "selector": "D",
           "position_key": "mission"
+        },
+        {
+          "label": "Итог неба",
+          "selector": "sky.total",
+          "position_key": "soul_tasks"
         }
       ]
     },

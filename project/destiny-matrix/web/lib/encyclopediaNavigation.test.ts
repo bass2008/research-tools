@@ -33,6 +33,8 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionFromPath("/encyclopedia/arcanum/15", positions, articles)).toBe("arc");
     expect(encyclopediaSectionFromPath("/encyclopedia/position/character", positions, articles)).toBe("sec");
     expect(encyclopediaSectionFromPath("/encyclopedia/character/4-3-22", positions, articles)).toBe("sec");
+    expect(encyclopediaSectionFromPath("/encyclopedia/comfort/4-15-7", positions, articles)).toBe("sec");
+    expect(encyclopediaSectionFromPath("/encyclopedia/profession/3-10-7", positions, articles)).toBe("sec");
     expect(encyclopediaSectionFromPath("/encyclopedia/position/day", positions, articles)).toBe("pts");
     expect(encyclopediaSectionFromPath("/encyclopedia/karmic-tail/15-8-11", positions, articles)).toBe("tls");
     expect(encyclopediaSectionFromPath("/encyclopedia/karmic-tail", positions, articles)).toBe("art");

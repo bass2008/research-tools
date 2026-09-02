@@ -1,4 +1,4 @@
-import type { CharacterRoleParts as RoleParts } from "@/lib/characterTypes";
+import type { ReadingRoleParts as RoleParts } from "@/lib/readingTypes";
 import { sentence } from "@/lib/text";
 
 /** Четыре канонических кубика роли — одинаково в отчёте, PDF и персональной статье. */

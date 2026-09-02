@@ -94,8 +94,8 @@ describe("разделы разбора", () => {
   it("бесплатный отчёт получает те же четыре ролевых кубика и итог, что PDF", () => {
     const full = section("character");
     const free = buildFree(m, freePositionTexts()).find((item) => item.key === "character")!;
-    expect(free.positions.map((position) => position.characterRole)).toEqual(full.longform!.roles);
-    expect(free.characterConclusion).toEqual({
+    expect(free.positions.map((position) => position.role)).toEqual(full.longform!.roles);
+    expect(free.conclusion).toEqual({
       summary: full.longform!.summary,
       strength: full.longform!.strength,
       tension: full.longform!.tension,
@@ -114,14 +114,64 @@ describe("разделы разбора", () => {
     });
   });
 
-  it("тройка в комфорте остаётся occurrence позиции, а не хвостом", () => {
+  it("центр ведёт на персональную статью, а не на ошибочный кармический хвост", () => {
     const comfort = section("comfort");
     expect(comfort.positions).toHaveLength(3);
     expect(sectionEntityLink(comfort)).toMatchObject({
-      href: "/encyclopedia/position/comfort",
-      entityType: "position",
-      entityKey: "comfort",
+      href: `/encyclopedia/comfort/${m.center}-${m.comfort_south}-${m.comfort_north}`,
+      entityType: "comfort",
+      entityKey: `${m.center}-${m.comfort_south}-${m.comfort_north}`,
       positionKey: "comfort",
     });
+  });
+
+  it("бесплатный центр получает те же кубики и итог, что серверный PDF", () => {
+    const full = section("comfort");
+    const free = buildFree(m, freePositionTexts()).find((item) => item.key === "comfort")!;
+    expect(free.personalHref).toBe(full.personalHref);
+    expect(free.positions.map((position) => position.role)).toEqual(full.longform!.roles);
+    expect(free.conclusion).toEqual({
+      summary: full.longform!.summary,
+      strength: full.longform!.strength,
+      tension: full.longform!.tension,
+      practice: full.longform!.practice,
+    });
+  });
+
+  it("оплаченный раздел профессии получает линию B–P–K и персональную статью", () => {
+    const profession = section("profession");
+    const slug = m.talent.join("-");
+    expect(profession.personalHref).toBe(`/encyclopedia/profession/${slug}`);
+    expect(profession.longform?.roles.map((role) => [role.key, role.arcanum])).toEqual([
+      ["B", m.talent[0]],
+      ["P", m.talent[1]],
+      ["K", m.talent[2]],
+    ]);
+    expect(sectionEntityLink(profession)).toMatchObject({
+      href: `/encyclopedia/profession/${slug}`,
+      entityType: "profession",
+      entityKey: slug,
+    });
+    expect(build(m, false).find((item) => item.key === "profession")?.longform).toBeUndefined();
+  });
+
+  it("каждый формульный раздел получает персональную статью и тот же PDF-источник", () => {
+    const excluded = new Set(["character", "past_lives"]);
+    for (const item of build(m, true)) {
+      if (excluded.has(item.key)) continue;
+      expect(item.personalHref, item.key).toMatch(/^\/encyclopedia\//);
+      expect(item.longform?.roles.length, item.key).toBe(item.positions.length);
+      expect(item.longform?.summary.length, item.key).toBeGreaterThan(100);
+      expect(sectionEntityLink(item).href, item.key).toBe(item.personalHref);
+    }
+  });
+
+  it("кармический хвост берёт полный ordered-текст готовой статьи", () => {
+    const tail = section("past_lives");
+    expect(tail.personalHref).toBe(`/encyclopedia/karmic-tail/${m.karmic_tail.join("-")}`);
+    expect(tail.fullArticle?.short.length).toBeGreaterThan(60);
+    expect(tail.fullArticle?.sections.length).toBeGreaterThan(3);
+    expect(tail.fullArticle?.faq.length).toBeGreaterThan(2);
+    expect(tail.longform).toBeUndefined();
   });
 });

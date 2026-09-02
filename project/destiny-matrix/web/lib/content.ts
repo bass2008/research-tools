@@ -310,6 +310,8 @@ export interface ArcanumContent {
   inPositions: Record<string, string>;
   plus: string[];
   minus: string[];
+  /** Что даёт удвоение темы, когда один аркан стоит сразу в двух ролях раздела. */
+  repeat: string;
   combinations: Array<{ with: number; title: string; href: string; short: string }>;
   seo: { title: string; description: string };
   sections: Section[];
@@ -330,6 +332,7 @@ export function arcanumContent(n: number): ArcanumContent | null {
   const inPositions = stringMap(raw.in_positions);
   const plus = Array.isArray(raw.plus) ? raw.plus.filter((value): value is string => typeof value === "string") : [];
   const minus = Array.isArray(raw.minus) ? raw.minus.filter((value): value is string => typeof value === "string") : [];
+  const repeat = typeof raw.repeat === "string" ? raw.repeat : "";
   const seo = seoOf(raw.seo);
   const combinations = Array.isArray(raw.combinations)
     ? (raw.combinations as Bag[]).map((item) => ({
@@ -363,6 +366,7 @@ export function arcanumContent(n: number): ArcanumContent | null {
     !plus.every(safe) ||
     minus.length < 3 ||
     !minus.every(safe) ||
+    repeat.length < 200 ||
     combinations.length !== 21 ||
     !validCombinations ||
     !seo
@@ -380,6 +384,7 @@ export function arcanumContent(n: number): ArcanumContent | null {
     inPositions,
     plus,
     minus,
+    repeat,
     combinations: combinations as ArcanumContent["combinations"],
     seo,
     sections: sectionsOf(raw.sections) ?? [],
@@ -399,6 +404,8 @@ export interface PositionContent {
   sections: Section[];
   faq: QA[];
   points: Array<{ key: string; title: string }>;
+  /** Связанные материалы раздела: у «Карты энергий» это семь статей уровней. */
+  links: Array<{ label: string; href: string }>;
 }
 
 export function positionContent(key: string): PositionContent | null {
@@ -455,6 +462,15 @@ export function positionContent(key: string): PositionContent | null {
       key: pointKey,
       title: pointTitle,
     })),
+    links: Array.isArray(raw.links)
+      ? (raw.links as Bag[]).flatMap((link) => {
+          const label = typeof link.label === "string" ? link.label.trim() : "";
+          const href = typeof link.href === "string" ? link.href : "";
+          return label && safe(label) && href.startsWith("/encyclopedia/")
+            ? [{ label, href }]
+            : [];
+        })
+      : [],
   };
 }
 

@@ -45,7 +45,7 @@ describe("эталон из engine/matrix.py", () => {
   // живёт только во фронте: корпус написан для сайта, в Python-движке его нет, поэтому
   // поле text из сравнения убирается.
   const withoutText = (rows: ReturnType<typeof build>) =>
-    rows.map(({ personalHref: _personalHref, longform: _longform, ...s }) => ({
+    rows.map(({ personalHref: _personalHref, longform: _longform, fullArticle: _fullArticle, ...s }) => ({
       ...s,
       positions: s.positions.map(({ text, ...p }) => p),
     }));

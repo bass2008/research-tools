@@ -1,15 +1,18 @@
-import type { CharacterConclusionReading } from "@/lib/characterTypes";
+import type { ReadingConclusion } from "@/lib/readingTypes";
 
 /** Компактный персональный итог; длинные связи остаются в статье энциклопедии. */
 export default function CharacterConclusionView({
   reading,
   label = "Как складывается тройка",
   showSummary = true,
+  idPrefix = "character-reading",
 }: {
-  reading: CharacterConclusionReading;
+  reading: ReadingConclusion;
   label?: string;
   showSummary?: boolean;
+  idPrefix?: string;
 }) {
+  const resultTitleId = `${idPrefix}-result-title`;
   return (
     <div className="character-compact" data-testid="character-conclusion">
       {showSummary ? (
@@ -18,8 +21,8 @@ export default function CharacterConclusionView({
           <p>{reading.summary}</p>
         </div>
       ) : null}
-      <section className="character-conclusion section-gap" aria-labelledby="character-result-title">
-        <h2 id="character-result-title">Итог разбора</h2>
+      <section className="character-conclusion section-gap" aria-labelledby={resultTitleId}>
+        <h2 id={resultTitleId}>Итог разбора</h2>
         <div className="panel">
           <h3>Главная сила</h3>
           <p>{reading.strength}</p>

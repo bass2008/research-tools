@@ -65,3 +65,26 @@ def test_point_interpretations_are_individual_editorial_texts():
         if sentence
     ]
     assert len(sentences) == len(set(sentences))
+
+
+def test_section_interpretations_preserve_individual_editorial_voice():
+    section_keys = [row["key"] for row in SECTIONS_META]
+    texts = [IN_POSITIONS[number][key] for number in range(1, 23) for key in section_keys]
+
+    assert len(texts) == len(set(texts)) == 22 * 20
+    assert all("Конструктивная сторона заметна" not in text for text in texts)
+
+    sentences = [
+        sentence
+        for text in texts
+        for sentence in re.split(r"(?<=[.!?])\s+", text)
+        if sentence
+    ]
+    # Название аркана не делает общий редакционный шаблон самостоятельным текстом.
+    # Сравниваем предложения ещё раз без него, чтобы 22 одинаковых инструкции вида
+    # «Для аркана „…“ сделайте …» не проходили проверку как формально уникальные.
+    editorial_sentences = [
+        re.sub(r"Аркан «[^»]+»", "Аркан «…»", sentence, flags=re.IGNORECASE)
+        for sentence in sentences
+    ]
+    assert len(editorial_sentences) == len(set(editorial_sentences))

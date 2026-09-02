@@ -209,6 +209,9 @@ export default function AccountView() {
   }
 
   const list = items ?? [];
+  // «Мой разбор» ведёт на купленную дату, а не на первую в списке: список отсортирован по
+  // сохранению, и после нового расчёта пункт уводил на закрытую матрицу с предложением купить.
+  const paidFirst = list.find((row) => row.access !== "locked") ?? null;
   // Доступ описывают права, а не поле тарифа: разовое привязано к своей дате, месячное
   // открывает любые. Имя и цена — из справочника в базе, чтобы не расходились с витриной.
   const unlimitedPlan = tariffs.find((t) => t.scope.includes("all"));
@@ -273,6 +276,8 @@ export default function AccountView() {
               открываем по её серверному id, поэтому ссылка работает на любом устройстве. */}
           {items === null ? (
             <span className="dim" aria-disabled="true">Мой разбор загружается…</span>
+          ) : paidFirst ? (
+            <Link data-testid="account-report" href={`/matrices/${paidFirst.id}`}>Мой разбор</Link>
           ) : list.length ? (
             <Link data-testid="account-report" href={`/matrices/${list[0].id}`}>Мой разбор</Link>
           ) : (

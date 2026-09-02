@@ -55,12 +55,16 @@ export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
   const sections = buildFree(matrix, texts);
   const locked = sections.filter((s) => !s.positions.length);
   const anyDate = session.status === "user" && session.unlimited;
+  // Право ищем по дате, а не по паре «дата + пол». Пол не меняет в карте ни одного числа
+  // (`engine/tests/test_method_contract.py`: разборы обоих полов совпадают дословно), а оферта и
+  // экран оплаты обещают «все 20 разделов по одной дате рождения». Пока сравнивался и пол,
+  // переключатель после покупки возвращал оплаченную дату под 18 замков.
   const thisDate = ownDates.find(
-    (row) => row.birth === matrix.birth && row.sex === matrix.sex && row.access !== "locked",
+    (row) => row.birth === matrix.birth && row.access !== "locked",
   );
   const thisDateSaved = ownDates.find(
     (row) => row.birth === matrix.birth && row.sex === matrix.sex,
-  );
+  ) ?? ownDates.find((row) => row.birth === matrix.birth);
   const thisDatePaid = Boolean(thisDate);
 
   return (

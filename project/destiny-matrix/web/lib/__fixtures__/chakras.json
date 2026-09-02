@@ -1,0 +1,51 @@
+[
+  {
+    "key": "sahasrara",
+    "physics": "A",
+    "energy": "B",
+    "title": "Сахасрара",
+    "hint": "связь с большим замыслом"
+  },
+  {
+    "key": "ajna",
+    "physics": "O",
+    "energy": "P",
+    "title": "Аджна",
+    "hint": "видение и интуиция"
+  },
+  {
+    "key": "vishuddha",
+    "physics": "J",
+    "energy": "K",
+    "title": "Вишудха",
+    "hint": "слово, честность, судьба"
+  },
+  {
+    "key": "anahata",
+    "physics": "S",
+    "energy": "T",
+    "title": "Анахата",
+    "hint": "любовь и отношения"
+  },
+  {
+    "key": "manipura",
+    "physics": "E",
+    "energy": "E",
+    "title": "Манипура",
+    "hint": "статус, воля, деньги"
+  },
+  {
+    "key": "svadhisthana",
+    "physics": "L",
+    "energy": "M",
+    "title": "Свадхистана",
+    "hint": "радость, дети, творчество"
+  },
+  {
+    "key": "muladhara",
+    "physics": "C",
+    "energy": "D",
+    "title": "Муладхара",
+    "hint": "тело, опора, материя"
+  }
+]

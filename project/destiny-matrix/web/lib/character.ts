@@ -20,6 +20,7 @@ import {
   type CharacterRoleReading,
   type CharacterRoleTemplate,
 } from "./characterTypes";
+import { positionRoleTemplate } from "./roleContent";
 
 interface RoleDefinition {
   position: CharacterPositionKey;
@@ -94,22 +95,7 @@ export function characterRoleTemplate(
   number: number,
   position: CharacterPositionKey,
 ): CharacterRoleTemplate {
-  const content = arcana(number);
-  const text = content.inPositions[position];
-  if (!text) throw new Error(`[character] нет текста ${position}:${number}`);
-  const sentences = text.trim().split(/(?<=[.!?…])\s+/).filter(Boolean);
-  if (sentences.length < 3) {
-    throw new Error(`[character] текст ${position}:${number} не делится на суть, проявления и действие`);
-  }
-  const essence = sentences[0].replace(/^Аркан «[^»]+» · [ABC] ·\s*/, "");
-  const action = sentences.at(-1)!;
-  return {
-    title: content.title,
-    essence,
-    strength: content.plus[0],
-    risk: content.minus[0],
-    action,
-  };
+  return positionRoleTemplate(number, position);
 }
 
 function pair(a: number, b: number): CombinationContent {
@@ -173,8 +159,7 @@ function interactionGroups(items: CharacterRoleReading[]): CharacterInteractionR
           allThree
             ? `Один и тот же ${left.arcanum} аркан задаёт внешний образ, внутреннюю и материальную задачи. Характер получается собранным вокруг одной темы: разные части личности не спорят о направлении, но усиливают цену любого перекоса.`
             : `Один и тот же ${left.arcanum} аркан стоит в позициях ${where}. Повтор не добавляет второй независимый сюжет: он делает одну тему заметнее и переносит её сразу между несколькими слоями характера.`,
-          `${contexts.join(" ")} В сильном проявлении человек ${content.plus[0]} и ${content.plus[1]}.`,
-          `Цена усиления тоже двойная: в теневом проявлении человек ${content.minus[0]} или ${content.minus[1]}. Поэтому задача повтора — не делать одного и того же ещё больше, а вовремя менять способ действия.`,
+          `${contexts.join(" ")} ${content.repeat}`,
         ],
       };
     }
@@ -213,6 +198,13 @@ export function buildCharacterReading(matrix: Matrix): CharacterReading {
     slug,
     title: `Характер ${slug}: ${a.title}, ${b.title} и ${c.title}`,
     lead: `Персональный разбор трёх исходных точек матрицы: A отвечает за портрет личности, B — за духовную задачу, C — за материальное проявление характера.`,
+    rolesTitle: "Три слоя характера",
+    rolesLead:
+      "Каждая точка отвечает на свой вопрос. Поэтому один аркан нельзя назначить «главным», а остальные считать дополнениями: внешний образ, внутренний мотив и действие работают одновременно.",
+    interactionsTitle: "Как арканы работают вместе",
+    interactionsLead:
+      "Сначала читаются три роли, затем связи между ними. Если числовая пара повторяется, её смысл не дублируется: один сюжет рассматривается сразу в нескольких переходах.",
+    testId: "character-reading",
     roles: roleItems,
     interactions: interactionGroups(roleItems),
     ...buildCharacterConclusion(roleItems),

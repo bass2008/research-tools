@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { ARCANA } from "./arcana";
@@ -10,10 +13,33 @@ import {
   contentStats,
   positionContent,
 } from "./content";
+import { SPEC } from "./sections";
 import { isBlockedText } from "./textPolicy";
 // Канонический корпус обязателен: недописанный JSON должен ронять сборку, а не включать
 // незаметно вторую версию текста из TypeScript.
 describe("загрузчик сгенерированного контента", () => {
+  it("у всех 20 разделов отчёта есть полноценная SEO-статья", () => {
+    const templateOpening = /^(Смысл|Формула|Порядок|Связи|Пример|Практика|Границы|Соседние темы) (для )?[«"]/;
+    for (const position of POSITIONS.filter((item) => item.kind === "section")) {
+      const article = positionContent(position.key)!;
+      // Правило 7 задаёт восемь глав как минимум: у части разделов к ним добавилась
+      // отдельная глава с разобранным примером. Валидатор корпуса тоже проверяет `>= 8`.
+      expect(article.sections.length, position.key).toBeGreaterThanOrEqual(8);
+      expect(article.faq.length, position.key).toBe(5);
+      expect(new Set(article.sections.map((section) => section.h2)).size, position.key)
+        .toBe(article.sections.length);
+      expect(new Set(article.faq.map((item) => item.q)).size, position.key).toBe(5);
+
+      const paragraphs = article.sections.flatMap((section) => section.paragraphs);
+      const words = paragraphs.join(" ").match(/[А-Яа-яЁёA-Za-z0-9–-]+/g) ?? [];
+      expect(words.length, `${position.key}: статья слишком короткая`).toBeGreaterThanOrEqual(320);
+      for (const paragraph of paragraphs) {
+        expect(paragraph.length, position.key).toBeGreaterThanOrEqual(180);
+        expect(templateOpening.test(paragraph), `${position.key}: шаблонный абзац`).toBe(false);
+      }
+    }
+  });
+
   it("не бросает исключений ни на одном ключе", () => {
     for (const a of ARCANA) expect(() => arcanumContent(a.n)).not.toThrow();
     for (const p of POSITIONS) expect(() => positionContent(p.key)).not.toThrow();
@@ -60,9 +86,37 @@ describe("загрузчик сгенерированного контента",
     expect(character.sections.some((section) => section.h2.includes("4–3–22"))).toBe(true);
   });
 
+  it("разделы центра и профессии опубликованы как полные непротиворечивые статьи", () => {
+    for (const key of ["comfort", "profession"]) {
+      const content = positionContent(key)!;
+      expect(content.sections).toHaveLength(8);
+      expect(content.faq).toHaveLength(5);
+    }
+    const profession = positionContent("profession")!;
+    const text = [
+      ...profession.meaning,
+      ...profession.sections.flatMap((section) => section.paragraphs),
+      ...profession.faq.map((item) => item.a),
+    ].join(" ");
+    expect(text).not.toContain("деньги приходят как естественное следствие");
+    expect(text).not.toContain("дело не в человеке и не в усилиях");
+    expect(text).toContain("доход зависит от навыков, спроса, качества результата и условий работы");
+  });
+
+  // Оферта называла бесплатным раздел «Что даёт вам внутренний комфорт», а он ещё в прошлой
+  // итерации стал «Центром и внутренними точками»: публичный документ обещал то, чего на сайте нет.
+  it("оферта называет бесплатные разделы их нынешними именами", () => {
+    const page = readFileSync(path.join(__dirname, "..", "app", "oferta", "page.tsx"), "utf8");
+    const free = SPEC.filter((section) => section.access === "free");
+    expect(free).toHaveLength(2);
+    for (const section of free) {
+      expect(page, `в оферте нет раздела «${section.title}»`).toContain(section.title);
+    }
+  });
+
   it("страница визитки закрывает значение, расположение и расчёт точки A", () => {
     const day = positionContent("day")!;
-    expect(day.sections.length).toBeGreaterThanOrEqual(7);
+    expect(day.sections.length).toBeGreaterThanOrEqual(8);
     expect(day.faq).toHaveLength(5);
     expect(day.sections.some((section) => section.h2.includes("Где находится визитка"))).toBe(true);
     expect(day.sections.some((section) => section.h2.includes("Как рассчитать"))).toBe(true);
@@ -75,6 +129,20 @@ describe("загрузчик сгенерированного контента",
       const content = arcanumContent(n)!;
       expect(new Set(Object.keys(content.inPositions))).toEqual(expected);
       for (const key of expected) expect(arcanumInPosition(n, key)).toBe(content.inPositions[key]);
+    }
+  });
+
+  it("позиционные кубики не обещают события, деньги и медицинский результат", () => {
+    const predictive = /деньги приходят|денежный канал|канал (?:открывается|закрывается|перекрывается)|этому человеку положено|почти наверняка|партн[её]ру прид[её]тся|долгие отношения держатся|реб[её]нок получает|обязательно произойд/i;
+    const medical = /витамин|биодобавк|добавк[аи]|кофеин|диагноз|заболеван|лечени[ея]|назначени[ея] врача|спит по \d|сон по \d/i;
+    for (let number = 1; number <= 22; number++) {
+      const content = arcanumContent(number)!;
+      for (const [position, text] of Object.entries(content.inPositions)) {
+        expect(predictive.test(text), `${number}:${position}: буквальный прогноз`).toBe(false);
+        if (position === "body_resource" || position === "years") {
+          expect(medical.test(text), `${number}:${position}: медицинское обещание`).toBe(false);
+        }
+      }
     }
   });
 });

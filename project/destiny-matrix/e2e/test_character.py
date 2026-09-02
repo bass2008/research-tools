@@ -1,6 +1,8 @@
 """Полный разбор характера открывается из расчёта и остаётся отдельной noindex-страницей."""
 from __future__ import annotations
 
+import re
+
 from playwright.sync_api import Page, expect
 
 from conftest import BASE
@@ -58,9 +60,15 @@ def test_calculator_opens_full_character_reading(page: Page) -> None:
     expect(page.locator(".enc-crumbs")).to_contain_text("Энциклопедия")
     expect(page.locator(".enc-crumbs")).to_contain_text("Разделы отчёта")
 
-    role_cards = reading.locator(".character-role")
-    tops = [role_cards.nth(index).bounding_box()["y"] for index in range(3)]
-    assert max(tops) - min(tops) < 1
+    # Три верхних края снимаем одним вызовом: после клиентского перехода Next 16 доводит
+    # прокрутку плавно, и три отдельных `bounding_box()` попадали на разные кадры движения —
+    # тест краснел на 13 px при идеально выровненных карточках.
+    tops = page.evaluate(
+        "() => [...document.querySelectorAll('.character-role')]"
+        ".map((card) => card.getBoundingClientRect().top)"
+    )
+    assert len(tops) == 3, f"карточек ролей {len(tops)}, ожидалось три"
+    assert max(tops) - min(tops) < 1, f"карточки ролей не выровнены: {tops}"
 
 
 def test_matrix_and_encyclopedia_link_to_personal_example(page: Page) -> None:
@@ -92,12 +100,29 @@ def test_day_position_is_full_vizitka_article(page: Page) -> None:
     ).to_have_attribute("href", "/encyclopedia/position/character")
 
 
-def test_combination_page_contains_all_character_contexts(page: Page) -> None:
-    page.goto(f"{BASE}/encyclopedia/combination/3-4", wait_until="domcontentloaded")
-    expect(page.get_by_role("heading", name="Как 3 и 4 работают в характере")).to_be_visible()
-    expect(page.get_by_role("heading", name="Внешний образ и внутренняя задача")).to_be_visible()
-    expect(page.get_by_role("heading", name="3 Императрица в A, 4 Император в B")).to_be_visible()
-    expect(page.get_by_role("heading", name="4 Император в A, 3 Императрица в B")).to_be_visible()
-    expect(page.get_by_role("heading", name="От внутреннего качества к поступку")).to_be_visible()
-    expect(page.get_by_role("heading", name="Первое впечатление и реальное поведение")).to_be_visible()
+def test_combination_page_contains_all_section_contexts(page: Page) -> None:
+    # Пара 3 и 11 выбрана не случайно: это одна из семи пар, у которых достижимы все девять
+    # контекстов. На 3 и 4 тест ждал связей E↔M и B↔P, которых у этой пары не бывает ни в одной
+    # из 5 544 матриц, — страница была права, а тест красный.
+    page.goto(f"{BASE}/encyclopedia/combination/3-11", wait_until="domcontentloaded")
+    for group in (
+        "Как пара работает в характере: 3 и 11",
+        "Как пара работает в центре и внутренних точках: 3 и 11",
+        "Как пара работает в линии таланта: 3 и 11",
+    ):
+        expect(page.get_by_role("heading", name=group)).to_be_visible()
+    for context in (
+        "Внешний образ и внутренняя задача",
+        "От внутреннего качества к поступку",
+        "Первое впечатление и реальное поведение",
+        "Внутренняя опора и автоматическая реакция",
+        "Внутренний центр и форма таланта",
+        "От реакции к возвращению в центр",
+        "Исходный дар и форма работы",
+        "Форма работы и внутренний результат",
+        "Дар и результат его реализации",
+    ):
+        expect(page.get_by_role("heading", name=context)).to_be_visible()
+    # Хотя бы один допустимый порядок пары должен быть напечатан: печатаются только достижимые.
+    expect(page.get_by_role("heading", name=re.compile(r"(3 Императрица|11 Справедливость) в ")).first).to_be_visible()
     expect(page.get_by_role("heading", name="Как проверить сочетание на практике")).to_be_visible()

@@ -33,7 +33,13 @@ describe("полный паритет TypeScript с Python", () => {
   it(
     "совпадает для каждой валидной даты с 1900 года и обоих полов",
     () => {
-      expect(parity.through).toBe(localToday());
+      // Снимок датируется днём сборки: точное равенство краснело каждую полночь, поэтому
+      // проверяется покрытие — снимок не из будущего и не старше 31 дня.
+      const days = Math.round(
+        (Date.parse(`${localToday()}T00:00:00Z`) - Date.parse(`${parity.through}T00:00:00Z`)) / 86_400_000,
+      );
+      expect(days, `снимок паритета датирован ${parity.through}`).toBeGreaterThanOrEqual(0);
+      expect(days, `снимок паритета датирован ${parity.through}`).toBeLessThanOrEqual(31);
       const overall = createHash("sha256");
       let total = 0;
 

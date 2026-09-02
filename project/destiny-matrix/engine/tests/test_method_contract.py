@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 METHOD = json.loads((ROOT / "spec" / "method.json").read_text())
 GOLDEN = json.loads((ROOT / "spec" / "golden.json").read_text())
 PARITY = json.loads((ROOT / "spec" / "parity-digests.json").read_text())
+# Снимок датируется днём сборки, а проверка на точное равенство краснела каждую полночь.
+PARITY_GRACE_DAYS = 31
 
 
 def _canonical(value: object) -> bytes:
@@ -90,13 +92,17 @@ def test_control_date_and_sex_contract():
 
 
 def test_python_full_range_matches_locked_parity_snapshot():
-    assert PARITY["through"] == dt.date.today().isoformat(), "пересоберите npm run golden"
+    through = dt.date.fromisoformat(PARITY["through"])
+    today = dt.date.today()
+    assert through <= today, f"снимок датирован будущим ({through}) — пересоберите npm run golden"
+    assert (today - through).days <= PARITY_GRACE_DAYS, (
+        f"снимок покрывает даты до {through}, сегодня {today} — пересоберите npm run golden"
+    )
     overall = hashlib.sha256()
     total = 0
     for year, expected in PARITY["years"].items():
         year_number = int(year)
-        end = dt.date.fromisoformat(PARITY["through"]) if year_number == dt.date.today().year \
-            else dt.date(year_number, 12, 31)
+        end = through if year_number == through.year else dt.date(year_number, 12, 31)
         cursor = dt.date(year_number, 1, 1)
         digest = hashlib.sha256()
         count = 0

@@ -108,7 +108,9 @@ def test_refunded_twin_dates_keep_the_exact_payment_target(page: Page):
     page.goto(f"{BASE}/report", wait_until="domcontentloaded")
     buy = page.get_by_test_id("unlock-cta")
     expect(buy).to_be_visible()
-    assert buy.get_attribute("href") == f"/pay?m={female_id}"
+    # Пока не приехал прайс, кнопка живёт как `button` без адреса: чтение атрибута сразу после
+    # появления давало плавающее падение под нагрузкой полного прогона.
+    expect(buy).to_have_attribute("href", f"/pay?m={female_id}", timeout=15_000)
 
     buy.click()
     page.wait_for_url(re.compile(rf"/pay\?m={female_id}$"))

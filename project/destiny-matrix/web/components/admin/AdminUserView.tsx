@@ -109,7 +109,10 @@ export default function AdminUserView({ id }: { id: number }) {
       </div>
 
       <div className="panel section-gap">
-        <h3>Платежи ({card.payments.length})</h3>
+        {/* Заголовок называет все записи, включая возвращённые и незавершённые: в сводке
+            выше стоит «Уплачено 0 ₽ за 0 платежей», и без уточнения два числа на одном
+            экране читались как противоречие. */}
+        <h3>Платежи и возвраты ({card.payments.length})</h3>
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-user-payments">
             <thead>

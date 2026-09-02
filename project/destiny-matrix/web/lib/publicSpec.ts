@@ -10,12 +10,16 @@ import {
   CHARACTER_ROLE_META,
   buildCharacterConclusion,
   characterHref,
-  type CharacterConclusionReading,
   type CharacterPositionKey,
-  type CharacterReading,
   type CharacterRoleReading,
-  type CharacterRoleTemplate,
 } from "./characterTypes";
+import type {
+  LongformReading,
+  ReadingConclusion,
+  ReadingRole,
+  ReadingRoleTemplate,
+} from "./readingTypes";
+import { buildComfortConclusion, comfortHref, comfortRoleMeta } from "./comfortReading";
 import { resolveSectionPositions, type SectionPositionDefinition } from "./sectionResolver";
 
 export type Access = "free" | "paid";
@@ -26,14 +30,14 @@ export interface PositionOut {
   href: string;
   /** толкование этого аркана именно в этой позиции — за него и платят */
   text?: string;
-  /** В бесплатном характере один абзац разложен на четыре переиспользуемых кубика. */
-  characterRole?: CharacterRoleReading;
+  /** Позиционный абзац разложен на четыре переиспользуемых кубика роли. */
+  role?: ReadingRole;
 }
 
 /** Толкования «аркан → текст» по ключу раздела. Клиенту сервер отдаёт только бесплатные. */
 export type PositionTextValue =
   | string
-  | { characterRole: CharacterRoleTemplate };
+  | { role: ReadingRoleTemplate };
 export type PositionTexts = Record<string, Record<number, PositionTextValue>>;
 
 export interface SectionOut {
@@ -45,10 +49,16 @@ export interface SectionOut {
   teaser?: string;
   /** Полноэкранный персональный материал для разделов, где нужен связный разбор сочетания. */
   personalHref?: string;
-  /** Компактный итог бесплатного раздела без длинных связей персональной статьи. */
-  characterConclusion?: CharacterConclusionReading;
+  /** Компактный итог раздела без длинных связей персональной статьи. */
+  conclusion?: ReadingConclusion;
   /** Сервер вкладывает полный текст в оплаченный/PDF-отчёт; браузер бесплатного расчёта — нет. */
-  longform?: CharacterReading;
+  longform?: LongformReading;
+  /** Для ordered-хвоста отчёт печатает готовую статью дословно, без сборки из трёх арканов. */
+  fullArticle?: {
+    short: string;
+    sections: Array<{ h2: string; paragraphs: string[] }>;
+    faq: Array<{ q: string; a: string }>;
+  };
 }
 
 /** Имя раздела — публичное: оно и в энциклопедии, и в списке «под замком». */
@@ -75,7 +85,7 @@ export function positionHref(key: string): string {
 export interface SectionEntityLink {
   href: string;
   label: string;
-  entityType: "character" | "karmic_tail" | "position";
+  entityType: "character" | "comfort" | "profession" | "section_reading" | "karmic_tail" | "position";
   positionKey: string;
   entityKey: string;
 }
@@ -87,12 +97,21 @@ export interface SectionEntityLink {
  * того, что рядом оказались три числа.
  */
 export function sectionEntityLink(section: SectionOut): SectionEntityLink {
-  if (section.key === "character" && section.personalHref && section.positions.length === 3) {
+  if (
+    (section.key === "character" || section.key === "comfort" || section.key === "profession")
+    && section.personalHref
+    && section.positions.length === 3
+  ) {
     const key = section.positions.map((position) => position.arcanum).join("-");
+    const labels = {
+      character: `Подробнее про характер ${key} в энциклопедии →`,
+      comfort: `Подробнее про центр и внутренние точки ${key} в энциклопедии →`,
+      profession: `Подробнее про профессию и дело по душе ${key} в энциклопедии →`,
+    } as const;
     return {
       href: section.personalHref,
-      label: `Подробнее про характер ${key} в энциклопедии →`,
-      entityType: "character",
+      label: labels[section.key],
+      entityType: section.key,
       positionKey: section.key,
       entityKey: key,
     };
@@ -103,6 +122,16 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
       href: `/encyclopedia/karmic-tail/${key}`,
       label: `Подробнее про кармический хвост ${key} в энциклопедии →`,
       entityType: "karmic_tail",
+      positionKey: section.key,
+      entityKey: key,
+    };
+  }
+  if (section.personalHref) {
+    const key = section.personalHref.split("/").at(-1)?.split("?")[0] ?? section.key;
+    return {
+      href: section.personalHref,
+      label: `Подробнее про ваш раздел «${section.title}» в энциклопедии →`,
+      entityType: "section_reading",
       positionKey: section.key,
       entityKey: key,
     };
@@ -181,8 +210,12 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
         if (!first) seen.set(mark, label);
         const source = texts?.[key]?.[arcanum];
         const text = typeof source === "string" ? source : undefined;
-        const template = typeof source === "object" ? source.characterRole : undefined;
-        const roleMeta = CHARACTER_ROLE_META[key as CharacterPositionKey];
+        const template = typeof source === "object" ? source.role : undefined;
+        const roleMeta = meta.key === "character"
+          ? CHARACTER_ROLE_META[key as CharacterPositionKey]
+          : meta.key === "comfort"
+            ? comfortRoleMeta(key)
+            : null;
         return {
           label,
           arcanum,
@@ -190,7 +223,7 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
           text: first ? `Тот же аркан, что и в позиции «${first}»: толкование выше.` : text,
           ...(template && roleMeta
             ? {
-                characterRole: {
+                role: {
                   ...roleMeta,
                   arcanum,
                   ...template,
@@ -200,17 +233,25 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
         };
       });
     })();
-    const characterRoles = positions.flatMap((position) =>
-      position.characterRole ? [position.characterRole] : [],
+    const readingRoles = positions.flatMap((position) =>
+      position.role ? [position.role] : [],
     );
     return {
       key: meta.key,
       title: meta.title,
       lead: detail?.lead ?? "",
       access: meta.access,
-      ...(meta.key === "character" ? { personalHref: characterHref(m) } : {}),
-      ...(characterRoles.length === 3
-        ? { characterConclusion: buildCharacterConclusion(characterRoles) }
+      ...(meta.key === "character"
+        ? { personalHref: characterHref(m) }
+        : meta.key === "comfort"
+          ? { personalHref: comfortHref(m) }
+          : {}),
+      ...(readingRoles.length === 3
+        ? {
+            conclusion: meta.key === "character"
+              ? buildCharacterConclusion(readingRoles as CharacterRoleReading[])
+              : buildComfortConclusion(readingRoles),
+          }
         : {}),
       positions,
     };

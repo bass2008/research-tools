@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { positionHref } from "@/lib/publicSpec";
+
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
@@ -116,6 +118,19 @@ export default function YearHubPage() {
         <Faq items={hub.faq} />
 
         <Related path={YEAR_HUB} refs={hub.related} />
+
+        {/* Год и десятилетие отвечают на разные вопросы, и перелинковка между ними была
+            односторонней: статья десятилетий сюда не вела, а отсюда — тем более. */}
+        <div className="panel section-gap">
+          <h3>Фон десятилетия под расчётом года</h3>
+          <div className="cap">Год читается внутри десятилетия, а не вместо него</div>
+          <p className="prose">
+            Расчёт на год отвечает на вопрос «что в фокусе сейчас», а возрастная шкала задаёт фон,
+            который держится десять лет.{" "}
+            <Link href={positionHref("years")}>Разбор по десятилетиям до 80 лет</Link> объясняет,
+            как читать их вместе.
+          </p>
+        </div>
 
         <div className="panel section-gap">
           <h3>Арканы вне рамки года</h3>

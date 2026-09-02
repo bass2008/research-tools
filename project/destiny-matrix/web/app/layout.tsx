@@ -1,45 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
 
 import Footer from "@/components/ui/Footer";
 import Header from "@/components/ui/Header";
 import Metrika from "@/components/ui/Metrika";
 import PulseBeacon from "@/components/ui/PulseBeacon";
 import TariffsProvider from "@/components/pay/TariffsProvider";
+import { FONT_CLASS, FONT_VARS } from "./fonts";
 import { SITE } from "@/lib/site";
 import { verification } from "@/lib/seo";
 
 import "./globals.css";
-
-// Шрифты лежат в public/fonts (подмножества latin + cyrillic + ₽, см. public/fonts/OFL.txt).
-// Запросов к fonts.googleapis.com и fonts.gstatic.com нет намеренно: обе площадки — Google LLC,
-// США, а политика сайта обещает, что трансграничной передачи не происходит.
-// Имя семейства next/font берёт из имени константы, поэтому они названы по шрифтам.
-const cormorantGaramond = localFont({
-  src: [{ path: "../public/fonts/cormorant-garamond-600.woff2", weight: "600", style: "normal" }],
-  variable: "--font-ser",
-  display: "swap",
-  fallback: ["Georgia", "serif"],
-  preload: true,
-});
-
-const manrope = localFont({
-  src: [
-    { path: "../public/fonts/manrope-400.woff2", weight: "400", style: "normal" },
-    { path: "../public/fonts/manrope-600.woff2", weight: "600", style: "normal" },
-    { path: "../public/fonts/manrope-700.woff2", weight: "700", style: "normal" },
-  ],
-  variable: "--font-sans",
-  display: "swap",
-  fallback: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-  preload: true,
-});
-
-// globals.css задаёт --ser/--sans именами семейств, а next/font выдаёт своё, с хешем.
-// Селектор `html:root` специфичнее `:root` из globals.css, поэтому порядок подключения стилей
-// значения не имеет.
-const FONT_VARS =
-  `html:root{--ser:${cormorantGaramond.style.fontFamily};--sans:${manrope.style.fontFamily};}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -77,7 +47,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${cormorantGaramond.variable} ${manrope.variable}`}>
+    <html lang="ru" className={FONT_CLASS}>
       <head>
         <style dangerouslySetInnerHTML={{ __html: FONT_VARS }} />
       </head>

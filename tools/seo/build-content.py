@@ -10,7 +10,7 @@
     python tools/seo/build-content.py --check    # только проверить
 
 Две категории не заводят новых страниц, а обогащают существующие (`arcana`, `positions`): их
-статьи вливаются в готовый корпус пополю — приходят `meaning` и `seo`, всё остальное
+статьи вливаются в готовый корпус пополю — приходят `meaning`, `seo`, `article_sections` и `faq`, всё остальное
 (`short`, `keywords`, `plus`, `minus`, `in_positions`, `points`) остаётся на месте.
 """
 from __future__ import annotations
@@ -162,6 +162,29 @@ def check_enrichment(item: dict, where: str, base_keys: set, key: str, problems:
     least = 3 if where.startswith("arcana") else 2
     if not isinstance(meaning, list) or len([p for p in meaning if isinstance(p, str) and len(p) > 20]) < least:
         fail(problems, where, f"meaning: нужно минимум {least} абзаца длиннее 20 знаков")
+    if "article_sections" in item:
+        sections = item["article_sections"]
+        if not isinstance(sections, list) or not sections:
+            fail(problems, where, "article_sections должен быть непустым списком")
+        elif any(
+            not isinstance(section, dict)
+            or len(str(section.get("h2") or "")) < 10
+            or not isinstance(section.get("paragraphs"), list)
+            or not section["paragraphs"]
+            for section in sections
+        ):
+            fail(problems, where, "article_sections: у каждой главы нужны h2 и абзацы")
+    if "faq" in item:
+        faq = item["faq"]
+        if not isinstance(faq, list) or not faq:
+            fail(problems, where, "faq должен быть непустым списком")
+        elif any(
+            not isinstance(entry, dict)
+            or len(str(entry.get("q") or "")) < 9
+            or len(str(entry.get("a") or "")) < 40
+            for entry in faq
+        ):
+            fail(problems, where, "faq: у каждого пункта нужны содержательные q и a")
     check_seo(item.get("seo"), where, problems)
 
 
@@ -266,6 +289,9 @@ def main() -> int:
             entry["meaning"] = item["meaning"]
             if isinstance(item.get("seo"), dict):
                 entry["seo"] = {**entry.get("seo", {}), **item["seo"]}
+            for field in ("article_sections", "faq"):
+                if field in item:
+                    entry[field] = item[field]
             touched += 1
         expected_payload = {"count": len(base), "items": base}
         if args.check:

@@ -5579,7 +5579,7 @@
     {
       "entity": "position:past_lives",
       "source": "web/content/positions.json",
-      "primary_query": "кармический хвост в матрице судьбы",
+      "primary_query": "задачи прошлых воплощений матрица судьбы",
       "search_intent": "position",
       "formula_verified": true,
       "position_context_verified": true,

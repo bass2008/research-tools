@@ -371,6 +371,19 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 }
 .postab .vl { color: var(--dim); font-size: 13.2px; }
 .tabscroll { overflow-x: auto; }
+.personal-chakras { min-width: 1120px; table-layout: fixed; }
+/* При `table-layout: fixed` ширины колонок берутся из первой строки, то есть из thead: правило
+   ширины на `tbody th` не действовало, и все четыре колонки выходили по 280 px. */
+.personal-chakras thead th:first-child { width: 190px; }
+.personal-chakras tbody th {
+  padding: 12px;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+}
+.personal-chakras tbody th .small { display: block; margin-top: 7px; text-transform: none; letter-spacing: 0; }
+.personal-chakras tbody td { padding: 12px; text-align: left; vertical-align: top; font-weight: 400; }
+.personal-chakras tbody td p { margin: 8px 0 0; }
 /* На узком экране третья колонка прячется — но только там, где она пояснение к очевидному.
    В таблице договора это состав того, за что человек платит: скрывать его нельзя, поэтому
    правило действует по метке, а не на все таблицы разом. */
@@ -493,9 +506,21 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .character-summary > :last-child { margin-bottom: 0; }
 .character-roles {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Жёсткие три колонки давали у разделов с четырьмя ролями ряд 3+1. В отчёте это уже решено
+     через gridColumns(4) → 2; здесь тот же принцип, но раскладкой: колонка подбирается по числу
+     карточек, а не задаётся числом. */
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: clamp(14px, 2vw, 22px);
   align-items: stretch;
+}
+/* Четыре роли ложатся 2×2, а не 3+1: половина разделов итерации 3 четырёхрольные. Правило
+   живёт только на широком экране: `:has` специфичнее одноколоночного правила из медиазапроса
+   ниже, и на 320 px четыре роли оставались в двух колонках по 110 px — текст выезжал за
+   карточку на 28–49 px и налезал на соседнюю. */
+@media (min-width: 761px) {
+  .character-roles:has(> :nth-child(4)):not(:has(> :nth-child(5))) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .character-role { min-width: 0; }
 /* Общее `.panel + .panel` добавляет соседним панелям верхний отступ. В grid это сдвигало
@@ -1475,7 +1500,17 @@ table.mx td.self { background: var(--card2); }
 /* крошки: разделитель не отрывается от своего шага, длинный последний шаг усекается */
 .crumbs .crumb { white-space: nowrap; }
 @media (max-width: 640px) {
-  .crumbs .crumb:last-child span { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+  /* Последний шаг персональной статьи — её слаг: у карты чакр это 24 числа, 357 px в одну строку.
+     Прежнее правило не срабатывало: `.crumb` — флекс-элемент, он не сжимается ниже содержимого,
+     пока у него `min-width: auto`, и `max-width: 100%` у внутреннего span считался от уже
+     раздутой ширины. Отсюда 57 px горизонтальной прокрутки всей страницы на 320 px. */
+  .crumbs .crumb:last-child { min-width: 0; }
+  .crumbs .crumb:last-child span:not(.csep) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 .enc-nav .enc-navi { scroll-margin-inline: 12px; }
 

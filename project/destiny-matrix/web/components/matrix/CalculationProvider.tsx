@@ -85,9 +85,9 @@ export default function CalculationProvider({ children }: { children: ReactNode 
 
   useEffect(() => {
     if (!requested || !datesReady) return;
+    // Пол в поиске права не участвует: см. комментарий в `MatrixReport.tsx`.
     const paid = ownDates.find(
-      (row) =>
-        row.birth === requested.birth && row.sex === requested.sex && row.access !== "locked",
+      (row) => row.birth === requested.birth && row.access !== "locked",
     );
 
     if (paid) {

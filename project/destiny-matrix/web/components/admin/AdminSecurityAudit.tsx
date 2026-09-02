@@ -18,11 +18,12 @@ function when(iso: string): string {
 const ACTION: Record<string, string> = { login: "вход", register: "регистрация", reset: "сброс" };
 const OUTCOME: Record<string, string> = { success: "успех", failed: "отказ", throttled: "лимит" };
 
+// Отбора «Отсечённые лимитом» здесь нет: такой исход продукт не записывает, и отбор всегда
+// показывал «Событий нет». Как только он появится в журнале, вернуть строку сюда.
 const TABS: { key: AuditCategory; label: string }[] = [
   { key: "all", label: "Все" },
   { key: "success", label: "Успешные" },
   { key: "failed", label: "Неуспешные" },
-  { key: "throttled", label: "Отсечённые лимитом" },
 ];
 
 const SIZES = [10, 25, 50, 100];
@@ -68,7 +69,7 @@ export default function AdminSecurityAudit() {
     <div className="panel section-gap">
       <h3>Журнал безопасности</h3>
       <div className="cap">
-        Попытки входа, регистрации и сброса пароля: успех, отказ или отсечение лимитом
+        Попытки входа, регистрации и сброса пароля: успешные и неуспешные
         {/* сервер считает total уже по фильтру: «всего» читалось как размер всего журнала */}
         {rows ? `${category === "all" ? " · всего " : " · в этом отборе "}${total}` : ""}
       </div>

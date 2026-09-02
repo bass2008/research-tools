@@ -1,46 +1,31 @@
 import type { Matrix } from "./matrix";
+import type {
+  LongformReading,
+  ReadingConclusion,
+  ReadingInteraction,
+  ReadingRole,
+  ReadingRoleParts,
+  ReadingRoleTemplate,
+} from "./readingTypes";
 
 export type CharacterRoleKey = "A" | "B" | "C";
 export type CharacterPositionKey = "day" | "month" | "year";
 
-export interface CharacterRoleParts {
-  essence: string;
-  strength: string;
-  risk: string;
-  action: string;
-}
+export interface CharacterRoleParts extends ReadingRoleParts {}
 
-export interface CharacterRoleTemplate extends CharacterRoleParts {
-  title: string;
-}
+export interface CharacterRoleTemplate extends ReadingRoleTemplate {}
 
-export interface CharacterRoleReading extends CharacterRoleTemplate {
+export interface CharacterRoleReading extends ReadingRole {
   key: CharacterRoleKey;
-  label: string;
-  question: string;
-  arcanum: number;
 }
 
-export interface CharacterInteractionReading {
-  key: string;
-  title: string;
+export interface CharacterInteractionReading extends ReadingInteraction {
   roles: CharacterRoleKey[];
-  paragraphs: string[];
-  href?: string;
-  linkLabel?: string;
 }
 
-export interface CharacterConclusionReading {
-  summary: string;
-  strength: string;
-  tension: string;
-  practice: string;
-}
+export interface CharacterConclusionReading extends ReadingConclusion {}
 
-export interface CharacterReading extends CharacterConclusionReading {
-  slug: string;
-  title: string;
-  lead: string;
+export interface CharacterReading extends LongformReading {
   roles: CharacterRoleReading[];
   interactions: CharacterInteractionReading[];
 }

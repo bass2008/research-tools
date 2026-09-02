@@ -6,6 +6,7 @@ import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import Faq from "@/components/ui/Faq";
 import CrumbsLd from "@/components/ui/CrumbsLd";
+import { positionHref } from "@/lib/publicSpec";
 import JsonLd from "@/components/ui/JsonLd";
 import Price from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
@@ -144,6 +145,9 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
               </Link>
             ))}
             <Link href={KARMIC_TAIL_HUB}>Все кармические хвосты</Link>
+            {/* Перелинковка трёх разведённых интентов была односторонней: хаб и статья раздела
+                вели сюда, а обратно на разбор метода — нет. */}
+            <Link href={positionHref("past_lives")}>Как читается раздел «Задачи прошлых воплощений»</Link>
           </div>
         </div>
 

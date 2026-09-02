@@ -14,7 +14,6 @@ import {
   arcanumHref,
   combinationHref,
   parseCombinationSlug,
-  positionHref,
 } from "@/lib/encyclopedia";
 import { arcanumContent, combinationContent } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
@@ -144,30 +143,32 @@ export default async function CombinationPage({ params }: { params: Promise<Para
           </div>
         </div>
 
-        <div className="section-gap">
-          <h2>Как {a} и {b} работают в характере</h2>
-          <p className="dim prose">
-            Одна пара читается по-разному в зависимости от порядка точек. Ниже показаны оба
-            варианта для трёх связей раздела «Характер и личные качества».
-          </p>
-          {article.contexts.map((context) => (
-            <section className="section-gap" key={context.key}>
-              <h3>{context.title}</h3>
-              <p className="dim prose">{context.question}.</p>
-              <div className="twocol">
-                {context.variants.map((variant) => (
-                  <div className="panel" key={`${context.key}-${variant.order}`}>
-                    <h3>{variant.heading}</h3>
-                    <div className="cap">Порядок точек {variant.order}</div>
-                    {variant.paragraphs.map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+        {article.groups.map((group) => (
+          <div className="section-gap" key={group.key}>
+            <h2>{group.title}: {a} и {b}</h2>
+            <p className="dim prose">{group.lead}</p>
+            {group.contexts.map((context) => (
+              <section className="section-gap" key={context.key}>
+                <h3>{context.title}</h3>
+                <p className="dim prose">{context.question}.</p>
+                <div className="twocol">
+                  {context.variants.map((variant) => (
+                    <div className="panel" key={`${context.key}-${variant.order}`}>
+                      <h3>{variant.heading}</h3>
+                      <div className="cap">Порядок точек {variant.order}</div>
+                      {variant.paragraphs.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+            <p className="encref">
+              <Link href={group.href}>{group.linkLabel}</Link>
+            </p>
+          </div>
+        ))}
 
         <div className="panel section-gap">
           <h2>Как проверить сочетание на практике</h2>
@@ -175,11 +176,6 @@ export default async function CombinationPage({ params }: { params: Promise<Para
           {article.practice.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
-          <p className="encref">
-            <Link href={positionHref("character")}>
-              Как читается раздел «Характер и личные качества» →
-            </Link>
-          </p>
         </div>
 
         <div className="panel section-gap">

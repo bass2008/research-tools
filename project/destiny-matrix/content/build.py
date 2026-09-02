@@ -99,6 +99,7 @@ def build_arcana() -> list[dict]:
             ],
             "plus": list(a["plus"]),
             "minus": list(a["minus"]),
+            "repeat": a["repeat"],
             "combinations": combos,
             "seo": seo.arcanum(a),
         })

@@ -32,7 +32,8 @@ const known = new Set([...pages.keys(), ...ON_DEMAND]);
 const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/,
   /^\/forgot$/, /^\/reset$/,
   /^\/matrices(\/\d+)?$/, /^\/admin(\/users\/\d+)?$/,
-  /^\/encyclopedia\/character\/\d+-\d+-\d+$/];
+  /^\/encyclopedia\/character\/\d+-\d+-\d+$/,
+  /^\/encyclopedia\/(?:realisation|karma40|resources|family_gifts|soul_tasks|purpose|money|money40|relations|parents_children|ancestry|body_resource|chakras|rest|loops|years)\/\d+(?:-\d+)+$/];
 
 let fails = [];
 const fail = (msg) => fails.push(msg);
@@ -149,6 +150,13 @@ const NEEDS_CARD = [
 ];
 function checkPages() {
 for (const [r, html] of pages) {
+  // Next 16 предрендеривает свою границу ошибок как `/_global-error`. Это не адрес сайта: на него
+  // не ведёт ни одна ссылка, он не в sitemap и открыть его нельзя. Требовать от него description,
+  // canonical, og:image и favicon незачем — проверяем только то, что он не пустой.
+  if (r === "/_global-error") {
+    if (!/<title>[^<]{10,}<\/title>/.test(html)) fail(`${r}: нет содержательного <title>`);
+    continue;
+  }
   for (const rule of TEXT_RULES) {
     // Политика конфиденциальности обязана назвать специальные категории ПДн. Это юридическое
     // перечисление, а не рекламное обещание или толкование матрицы.

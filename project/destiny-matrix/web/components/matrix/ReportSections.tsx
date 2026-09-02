@@ -11,6 +11,8 @@ import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CharacterConclusionView from "@/components/matrix/CharacterConclusionView";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CharacterRoleParts from "@/components/matrix/CharacterRoleParts";
+import Sections from "@/components/enc/Sections";
+import Faq from "@/components/ui/Faq";
 import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
 import LockIcon from "@/components/ui/LockIcon";
 import UnlockCta from "@/components/pay/UnlockCta";
@@ -25,6 +27,13 @@ function gridColumns(n: number): 2 | 4 | undefined {
   if (n === 4) return 2;
   if (n % 3 === 1) return 4;
   return undefined;
+}
+
+/** Подпись итога зависит от числа ролей: «тройка» стояла и над парой, и над четырьмя ролями. */
+function conclusionLabel(roles: number | undefined): string {
+  if (roles === 2) return "Как складывается пара";
+  if (roles && roles > 3) return "Как складываются роли раздела";
+  return "Как складывается тройка";
 }
 
 export default function ReportSections({
@@ -75,7 +84,7 @@ export default function ReportSections({
               <p className="lead">{s.lead}</p>
               <ul className="poslist" data-cols={gridColumns(s.positions.length)}>
                 {s.positions.map((p, j) => {
-                  const characterRole = p.characterRole ?? s.longform?.roles[j];
+                  const readingRole = p.role ?? (s.longform?.layout ? undefined : s.longform?.roles[j]);
                   return (
                     <li
                       key={`${p.label}-${j}`}
@@ -91,19 +100,29 @@ export default function ReportSections({
                           </span>
                         </span>
                       </a>
-                      {characterRole ? (
-                        <CharacterRoleParts role={characterRole} />
-                      ) : p.text ? (
+                      {readingRole ? (
+                        <CharacterRoleParts role={readingRole} />
+                      ) : p.text && !s.fullArticle ? (
                         <p className="postext">{p.text}</p>
                       ) : null}
                     </li>
                   );
                 })}
               </ul>
-              {printing && s.longform ? (
+              {s.fullArticle ? (
+                <article className="section-gap" data-testid="past-lives-full-article">
+                  <p className="dim prose">{s.fullArticle.short}</p>
+                  <Sections items={s.fullArticle.sections} />
+                  <Faq items={s.fullArticle.faq} />
+                </article>
+              ) : printing && s.longform ? (
                 <CharacterReadingView reading={s.longform} printing showRoles={false} />
-              ) : s.characterConclusion || s.longform ? (
-                <CharacterConclusionView reading={s.characterConclusion ?? s.longform!} />
+              ) : s.conclusion || s.longform ? (
+                <CharacterConclusionView
+                  reading={s.conclusion ?? s.longform!}
+                  label={conclusionLabel(s.longform?.roles.length)}
+                  idPrefix={`${s.key}-reading`}
+                />
               ) : null}
               <SectionEncyclopediaLinks section={s} printing={printing} />
             </div>

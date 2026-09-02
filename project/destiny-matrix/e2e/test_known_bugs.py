@@ -5,14 +5,17 @@ A5, A12 и A16 живут в test_round2_bugs.py: там те же инвари�
 """
 from __future__ import annotations
 
+import io
+
 import json
 import re
-import subprocess
 import urllib.request
 import uuid
 
 import pytest
 from playwright.sync_api import expect
+
+import pypdf
 
 import flows
 from conftest import ADMIN, BASE
@@ -246,8 +249,10 @@ def test_a11_pdf_keeps_the_footer(page, mail):
     with urllib.request.urlopen(caught.value.json()["url"], timeout=90) as file:
         pdf = file.read()
 
-    words = subprocess.run(["pdftotext", "-", "-"], input=pdf,
-                           capture_output=True).stdout.decode(errors="replace")
+    # Извлекаем pypdf, а не pdftotext: на этих шрифтах у части листа ломается ToUnicode,
+    # и pdftotext не находит подпись, которая в файле есть. Проверяем продукт, а не извлекатель.
+    pages = pypdf.PdfReader(io.BytesIO(pdf)).pages
+    words = "".join(page.extract_text() or "" for page in pages)
     assert "arcana-sense.ru" in words, "подписи «Arcana Sense · arcana-sense.ru» в файле нет"
 
 

@@ -115,7 +115,14 @@ def test_catalogue_does_not_prefetch_every_card(page: Page):
         page.mouse.wheel(0, 900)
         page.wait_for_timeout(400)
     page.wait_for_timeout(3000)
-    assert len(seen) <= 30, f"каталог запросил {len(seen)} RSC-пейлоадов при прокрутке"
+    # Считаем именно карточки, а не все запросы: общий предел был заложником стратегии Next.
+    # В 16 навигация запрашивает каждый адрес шапки и подвала дважды (17 адресов → 37 запросов),
+    # и порог 30 краснел, хотя ни одна из 264 карточек пейлоад не тянула.
+    cards = [u for u in seen if u.startswith(f"{BASE}/matrix/")]
+    assert not cards, f"каталог тянет пейлоады карточек: {len(cards)}, например {cards[:2]}"
+    assert len({u.split("?")[0] for u in seen}) <= 25, (
+        f"каталог запросил пейлоады {len({u.split('?')[0] for u in seen})} разных адресов"
+    )
 
 
 def test_restored_receipt_keeps_the_paid_date(page: Page):

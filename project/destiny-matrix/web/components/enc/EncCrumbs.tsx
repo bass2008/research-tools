@@ -40,10 +40,12 @@ export default function EncCrumbs({
     trail.push({
       name: /^\d{4}$/.test(parts[1]) ? `Матрица судьбы на ${parts[1]} год` : `${parts[1]} на год`,
     });
-  } else if (parts[1] === "character") {
+  } else if (positions[parts[1]]) {
+    const key = parts[1];
+    const pos = positions[key];
     const section = encyclopediaSection("sec");
     trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
-    trail.push({ name: "Характер и личные качества", href: "/encyclopedia/position/character" });
+    if (pos) trail.push({ name: pos.title, href: `/encyclopedia/position/${key}` });
     if (parts[2]) trail.push({ name: parts[2] });
   } else if (parts[1] === "position") {
     const pos = positions[parts[2] ?? ""];

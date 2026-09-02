@@ -13,12 +13,15 @@ import Sections from "@/components/enc/Sections";
 import { ARCANA } from "@/lib/arcana";
 import { POSITIONS, arcanumHref, positionByKey, positionHref } from "@/lib/encyclopedia";
 import { arcanumInPosition, positionContent } from "@/lib/content";
+import { calculate } from "@/lib/matrix";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
 import { sectionByKey } from "@/lib/sections";
 import { FREE_POSITION_KEYS } from "@/lib/publicSpec";
 import { NOT_FOUND_META } from "@/lib/seo";
 import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
+import { PERSONAL_SECTION_KEYS, type PersonalSectionKey } from "@/lib/sectionReadingShared";
+import { sectionExampleNote, sectionReadingHref, sectionReadingSlug } from "@/lib/sectionReadings";
 
 type Params = { key: string };
 
@@ -58,6 +61,25 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   // Точки бесплатных разделов уже показывает бесплатный расчёт: шесть страниц обещали за них
   // деньги. Список — тот же, по которому собирается публичный разбор.
   const isFree = section?.access === "free" || FREE_POSITION_KEYS.includes(p.key);
+  const exampleMatrix = calculate("1993-03-31", "f");
+  const personalKey = (PERSONAL_SECTION_KEYS as readonly string[]).includes(p.key)
+    ? p.key as PersonalSectionKey
+    : null;
+  const exampleHref = p.key === "past_lives"
+      ? `/encyclopedia/karmic-tail/${exampleMatrix.karmic_tail.join("-")}`
+      : personalKey
+        ? sectionReadingHref(personalKey, exampleMatrix)
+        : null;
+  const exampleCode = personalKey
+    ? sectionReadingSlug(personalKey, exampleMatrix)
+    : p.key === "past_lives"
+      ? exampleMatrix.karmic_tail.join("-")
+      : null;
+  // Один и тот же абзац «те же правила к одному достижимому результату» стоял на 17 страницах.
+  // Роли и арканы примера у каждого раздела свои, поэтому подпись собирается из них.
+  const exampleText = personalKey
+    ? sectionExampleNote(personalKey, exampleMatrix)
+    : `Общая статья объясняет порядок и границы метода. Рассчитанный хвост ${exampleCode} показывает, как эти правила читаются на одном результате.`;
 
   return (
     <>
@@ -132,6 +154,57 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           </div>
         ) : null}
 
+        {p.key === "comfort" ? (
+          <div className="panel section-gap">
+            <h2>Пример полного персонального разбора</h2>
+            <div className="cap">Тройка 4–15–7: центр, реакция и возвращающий талант</div>
+            <p>
+              Общая статья объясняет точки E, M и K. В персональном разборе видно, как их
+              отдельные значения и три связи складываются в один внутренний цикл.
+            </p>
+            <p className="encref">
+              <Link href="/encyclopedia/comfort/4-15-7">
+                Посмотреть разбор 4–15–7 в энциклопедии →
+              </Link>
+            </p>
+          </div>
+        ) : null}
+
+        {p.key === "profession" ? (
+          <div className="panel section-gap">
+            <h2>Пример полного персонального разбора</h2>
+            <div className="cap">Линия 3–10–7: дар, форма работы и внутренний результат</div>
+            <p>
+              Общая статья объясняет порядок B→P→K. Персональная страница показывает, как
+              значения трёх арканов образуют связный сценарий профессиональной реализации.
+            </p>
+            <p className="encref">
+              <Link href="/encyclopedia/profession/3-10-7">
+                Посмотреть разбор 3–10–7 в энциклопедии →
+              </Link>
+            </p>
+          </div>
+        ) : null}
+
+        {exampleHref && exampleCode && !["character", "comfort", "profession"].includes(p.key) ? (
+          <div className="panel section-gap">
+            <h2>Пример полного персонального разбора</h2>
+            <div className="cap">
+              {p.key === "chakras"
+                ? "Карта энергий для контрольной матрицы 4–3–22"
+                : p.key === "years"
+                  ? "Возрастная линия для контрольной матрицы 4–3–22"
+                  : `Рассчитанный результат ${exampleCode}`}
+            </div>
+            <p>{exampleText}</p>
+            <p className="encref">
+              <Link href={exampleHref}>
+                Посмотреть персональный пример в энциклопедии →
+              </Link>
+            </p>
+          </div>
+        ) : null}
+
         {extra.reading ? (
           <div className="panel">
             <h3>Как читать позицию</h3>
@@ -155,6 +228,23 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         </div>
 
         <Faq items={extra.faq} />
+
+        {/* У «Карты энергий» связанные материалы — не точки матрицы, а семь статей уровней.
+            Поле `links` было заполнено, но на странице не выводилось: дочерние статьи получали
+            входящие ссылки только с корня энциклопедии и с noindex-карты. */}
+        {p.kind === "section" && extra.links?.length ? (
+          <div className="panel section-gap">
+            <h2>Уровни карты по отдельности</h2>
+            <div className="cap">Каждый уровень разобран своей статьёй</div>
+            <div className="taglist">
+              {extra.links.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {p.kind === "section" ? (
           extra.points.length ? (

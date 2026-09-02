@@ -53,7 +53,7 @@ export default function MatrixResult({
           <div className="cap">
             {example ? "Выберите свою дату выше — карта пересчитается" : `${birthLabel(m.birth)} · все позиции карты`}
           </div>
-          <Octagram m={m} />
+          <Octagram m={m} printing={printing} />
         </div>
 
         <div>

@@ -1,4 +1,5 @@
 import { arcanumTitle } from "@/lib/arcana";
+import { publicHref } from "@/lib/site";
 import type { Matrix } from "@/lib/matrix";
 
 // Геометрия перенесена из рукописного лендинга: viewBox 620×620, центр 310,
@@ -21,7 +22,17 @@ function fmt(n: number): string {
   return n.toFixed(1);
 }
 
-export default function Octagram({ m, linked = true }: { m: Matrix; linked?: boolean }) {
+export default function Octagram({
+  m,
+  linked = true,
+  printing = false,
+}: {
+  m: Matrix;
+  linked?: boolean;
+  /** В PDF относительный адрес указывает на внутренний хост службы печати: 12 кружков карты
+   *  уезжали покупателю ссылками на `http://web:3000`. */
+  printing?: boolean;
+}) {
   const outer: NodeSpec[] = [
     { angle: 180, value: m.day, label: "Портрет личности · A", color: CHAKRA_COLORS[2], big: true },
     { angle: 225, value: m.father_line, label: "Духовная мужская линия · F", color: CHAKRA_COLORS[5] },
@@ -81,7 +92,13 @@ export default function Octagram({ m, linked = true }: { m: Matrix; linked?: boo
       </>
     );
     return linked ? (
-      <a key={key} href={`/encyclopedia/arcanum/${spec.value}`} aria-label={title}>
+      <a
+        key={key}
+        href={printing
+          ? publicHref(`/encyclopedia/arcanum/${spec.value}`)
+          : `/encyclopedia/arcanum/${spec.value}`}
+        aria-label={title}
+      >
         {body}
       </a>
     ) : (

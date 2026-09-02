@@ -3,8 +3,15 @@
 import sectionSpec from "./__fixtures__/sections.json";
 import { buildCharacterReading, characterRoleTemplate } from "./character";
 import { characterHref, type CharacterPositionKey } from "./characterTypes";
-import { arcanumInPosition } from "./content";
+import { arcanumInPosition, karmicTail } from "./content";
 import type { Matrix } from "./matrix";
+import {
+  buildSectionReading,
+  sectionReadingHref,
+  sectionRoleTemplate,
+  type PersonalSectionKey,
+} from "./sectionReadings";
+import { PERSONAL_SECTION_KEYS } from "./sectionReadingShared";
 import {
   CATALOG,
   arcanumHref,
@@ -81,6 +88,10 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
           : arcanumInPosition(arcanum, positionKey),
       };
     });
+    const personalSection = (PERSONAL_SECTION_KEYS as readonly string[]).includes(spec.key)
+      ? spec.key as PersonalSectionKey
+      : null;
+    const hasLongform = spec.access === "free" || unlocked;
     const out: SectionOut = {
       key: spec.key,
       title: spec.title,
@@ -92,6 +103,25 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
             personalHref: characterHref(matrix),
             longform: buildCharacterReading(matrix),
           }
+        : spec.key === "past_lives" && hasLongform
+          ? (() => {
+              const key = matrix.karmic_tail.join("-");
+              const article = karmicTail(key);
+              if (!article) throw new Error(`[sections] нет ordered-хвоста ${key}`);
+              return {
+                personalHref: `/encyclopedia/karmic-tail/${key}`,
+                fullArticle: {
+                  short: article.short,
+                  sections: article.sections,
+                  faq: article.faq,
+                },
+              };
+            })()
+        : personalSection && hasLongform
+          ? {
+              personalHref: sectionReadingHref(personalSection, matrix),
+              longform: buildSectionReading(personalSection, matrix),
+            }
         : {}),
     };
     if (spec.access === "paid" && !unlocked) {
@@ -115,8 +145,10 @@ export function freePositionTexts(): PositionTexts {
       for (let n = 1; n <= 22; n++) {
         const text = arcanumInPosition(n, key);
         byArcanum[n] = isCharacterPosition(key)
-          ? { characterRole: characterRoleTemplate(n, key) }
-          : text;
+          ? { role: characterRoleTemplate(n, key) }
+          : spec.key === "comfort"
+            ? { role: sectionRoleTemplate("comfort", n, key) }
+            : text;
       }
       out[key] = byArcanum;
     }

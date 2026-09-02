@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import BuyButton from "@/components/ui/BuyButton";
 import Logo from "@/components/ui/Logo";
 import SessionBadge from "@/components/account/SessionBadge";
 
@@ -27,9 +28,7 @@ export default function Header() {
           Кабинет
         </Link>
         {/* Цену в кнопку не пишем: тарифов два, и цена выбирается на странице оплаты. */}
-        <Link className="btn sm" data-testid="buy-top" href="/pay">
-          Купить
-        </Link>
+        <BuyButton />
       </div>
     </header>
   );

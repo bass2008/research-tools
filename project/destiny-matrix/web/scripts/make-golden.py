@@ -30,6 +30,10 @@ WEB_GOLDEN_FILE = WEB / "lib" / "__fixtures__" / "golden.json"
 PARITY_FILE = SPEC / "parity-digests.json"
 WEB_PARITY_FILE = WEB / "lib" / "__fixtures__" / "parity-digests.json"
 WEB_METHOD_FILE = WEB / "lib" / "__fixtures__" / "method.json"
+# Отдельный маленький срез для браузерного движка: он берёт из спецификации только семь
+# уровней чакр, а импорт всего снимка тянул в клиентский чанк подписи и формулы всех точек
+# вместе с признаком access. Webpack вырезал лишнее сам, Turbopack — нет.
+WEB_CHAKRAS_FILE = WEB / "lib" / "__fixtures__" / "chakras.json"
 SECTIONS_FILE = SPEC / "sections.json"
 WEB_SECTIONS_FILE = WEB / "lib" / "__fixtures__" / "sections.json"
 
@@ -122,6 +126,7 @@ def main() -> None:
     write_json(PARITY_FILE, digests)
     shutil.copyfile(PARITY_FILE, WEB_PARITY_FILE)
     shutil.copyfile(METHOD_FILE, WEB_METHOD_FILE)
+    write_json(WEB_CHAKRAS_FILE, json.loads(METHOD_FILE.read_text("utf-8"))["chakras"])
     shutil.copyfile(SECTIONS_FILE, WEB_SECTIONS_FILE)
 
     free = sum(1 for section in cases[0]["sections_locked"] if section["access"] == "free")

@@ -2,7 +2,11 @@
 // Любая правка формул обязана повторять правку в engine/matrix.py — сверка эталоном
 // в lib/matrix.test.ts (golden.json снят запуском Python-движка).
 
-import method from "./__fixtures__/method.json";
+// Только семь уровней чакр, а не весь снимок спецификации: движок работает в браузере, и
+// импорт всего файла уносил в клиентский чанк подписи и формулы всех 21 точки вместе с
+// признаком `access` платных разделов. Срез пишет `scripts/make-golden.py` из того же
+// `spec/method.json`, поэтому источник истины один.
+import chakraLevels from "./__fixtures__/chakras.json";
 
 export const ARCANA_MAX = 22;
 
@@ -25,7 +29,7 @@ export function sexLabel(sex: Sex): string {
   return sex === "f" ? "женская" : "мужская";
 }
 
-export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = method.chakras.map(
+export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = chakraLevels.map(
   ({ key, title, hint }) => [key, title, hint] as const,
 );
 
