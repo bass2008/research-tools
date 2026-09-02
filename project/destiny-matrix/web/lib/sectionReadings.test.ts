@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { arcanumContent, matrixItem } from "./content";
+import { arcanumContent, matrixItem, matrixSlugs } from "./content";
 import {
   buildSectionReading,
   chakraColumnModifier,
@@ -509,6 +509,25 @@ describe("персональные разборы остальных разде�
     expect(problems).toEqual([]);
     // Обход всех 26 284 разборов со сборкой видимого текста не укладывается в дефолтные 5 с.
   }, 30_000);
+
+  // Блок «Те же точки в разделе …» вёл на разбор чужой матрицы у 89,8 % дат: слаг «Программ» не
+  // определяет слаг отдыха, а адрес строился из матрицы, восстановленной по слагу. Персональная
+  // ссылка допустима только там, где целевой слаг однозначно выводится из исходного.
+  it("ведёт из блока общих точек только на разбор той же матрицы", () => {
+    const problems: string[] = [];
+    for (const [from, to] of [["loops", "rest"], ["money40", "resources"], ["realisation", "purpose"]] as const) {
+      for (const slug of matrixSlugs().slice(0, 600)) {
+        const matrix = matrixItem(slug)!.matrix;
+        const reading = buildSectionReading(from, sectionReadingMatrix(from, sectionReadingSlug(from, matrix))!);
+        const block = reading.interactions.find((item) => item.key.startsWith("shared:"));
+        if (!block?.href) continue;
+        if (!block.href.startsWith(`/encyclopedia/${to}/`)) continue;
+        const own = `/encyclopedia/${to}/${sectionReadingSlug(to, matrix)}`;
+        if (block.href !== own) problems.push(`${from}/${slug}: ${block.href} вместо ${own}`);
+      }
+    }
+    expect(problems.slice(0, 3)).toEqual([]);
+  });
 
   it("даёт каждому разделу свою подпись к персональному примеру", () => {
     const matrix = calculate("1993-03-31", "f");

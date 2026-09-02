@@ -19,6 +19,7 @@ import type {
   ReadingRoleTemplate,
 } from "./readingTypes";
 import { ageFrameText, positionRoleTemplate, variantRoleTemplate } from "./roleContent";
+import { positionHref } from "./publicSpec";
 import { cubeClause, pairCubes, sentence } from "./text";
 import {
   SECTION_ROLES,
@@ -688,6 +689,34 @@ const SHARED_ROLES: Partial<Record<PersonalSectionKey, { section: PersonalSectio
   loops: { section: "rest", roles: ["E"] },
 };
 
+/**
+ * Ведёт ли слаг раздела к единственному слагу соседа. У `realisation → purpose` и
+ * `money40 → resources` целевые точки выводятся из исходных, поэтому ссылка «для этой матрицы»
+ * попадает точно. У `loops → rest` нет: слаг «Программ» (D–E–духовное) не определяет эмоции
+ * свадхистханы, и ссылка вела на разбор чужой даты у 89,8 % матриц. Считаем один раз по
+ * достижимым результатам, а не гадаем.
+ */
+const STABLE_SHARED = new Map<string, boolean>();
+
+function sharedLinkIsExact(section: PersonalSectionKey, target: PersonalSectionKey): boolean {
+  const key = `${section}->${target}`;
+  const cached = STABLE_SHARED.get(key);
+  if (cached !== undefined) return cached;
+  const seen = new Map<string, string>();
+  let exact = true;
+  for (const slug of matrixSlugs()) {
+    const item = matrixItem(slug);
+    if (!item) continue;
+    const from = sectionReadingSlug(section, item.matrix);
+    const to = sectionReadingSlug(target, item.matrix);
+    const known = seen.get(from);
+    if (known === undefined) seen.set(from, to);
+    else if (known !== to) { exact = false; break; }
+  }
+  STABLE_SHARED.set(key, exact);
+  return exact;
+}
+
 function sharedInteraction(
   section: PersonalSectionKey,
   matrix: Matrix,
@@ -710,8 +739,17 @@ function sharedInteraction(
       `Там ${labels.length > 1 ? "они стоят" : "она стоит"} в другом ряду и отвечает на другой вопрос, но значение аркана то же. ` +
       `Если вы открыли оба разбора, этот текст частично повторится: это не ошибка расчёта, а одна точка в двух рамках.`,
     ],
-    href: sectionReadingHref(shared.section, matrix),
-    linkLabel: `Открыть разбор «${other}» для этой матрицы →`,
+    ...(sharedLinkIsExact(section, shared.section)
+      ? {
+        href: sectionReadingHref(shared.section, matrix),
+        linkLabel: `Открыть разбор «${other}» для этой матрицы →`,
+      }
+      : {
+        // Свой разбор соседнего раздела по этому адресу не найти: одному слагу «Программ»
+        // отвечают разные результаты отдыха. Уводим на общую статью — она верна всегда.
+        href: positionHref(shared.section),
+        linkLabel: `Как читается раздел «${other}» →`,
+      }),
   }];
 }
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import type { Matrix } from "@/lib/matrix";
+import { DISCLAIMER } from "@/lib/site";
 import { counted } from "@/lib/plural";
 import LockIcon from "@/components/ui/LockIcon";
 import SavePdfButton from "@/components/matrix/SavePdfButton";
@@ -97,7 +98,16 @@ export default function ReportSheet({
       ) : null}
 
 
-      {printing ? <p className="small section-gap dim">Arcana Sense · arcana-sense.ru</p> : null}
+      {/* Оговорку печатает подвал сайта, а страница печати подвала не выводит: в скачанном PDF
+          её не было вовсе, хотя на каждой странице сайта она стоит. Файл уходит наружу и живёт
+          отдельно от сайта, поэтому несёт её сам. */}
+      {printing ? (
+        <p className="small section-gap dim">
+          Arcana Sense · arcana-sense.ru
+          <br />
+          {DISCLAIMER}
+        </p>
+      ) : null}
     </>
   );
 }

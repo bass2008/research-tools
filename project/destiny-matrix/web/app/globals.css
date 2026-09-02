@@ -640,7 +640,9 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .crumbs a { color: var(--dim); }
 
 /* энциклопедия */
-.cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+/* min(230px, 100%): ниже 348 px колонка в 230 px была шире панели, и карточка вылезала за её
+   рамку на 12 px. Прокрутки документа при этом не возникало, поэтому замер ширин молчал. */
+.cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap: 12px; }
 .ecard { border: 1px solid var(--line); border-radius: 13px; background: var(--card); padding: 14px 16px; box-shadow: var(--sh); display: block; color: var(--text); }
 .ecard:hover { border-color: var(--gold); text-decoration: none; }
 .ecard .num { font: 700 12px var(--sans); color: var(--gold); letter-spacing: 0.08em; }
@@ -827,7 +829,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 
 .ecard.withcard { display: flex; gap: 14px; align-items: flex-start; }
 .ecard.withcard > div { min-width: 0; }
-.cardgrid.deck { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+.cardgrid.deck { grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr)); }
 
 .matrixcards { display: flex; gap: 18px; flex-wrap: wrap; margin: 14px 0 6px; }
 .matrixcards .cardlink { display: block; color: var(--dim); font-size: 13px; text-align: center; }

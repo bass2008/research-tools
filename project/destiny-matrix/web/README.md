@@ -1,6 +1,6 @@
 # web — фронт «Матрица судьбы»
 
-Next.js 15 (App Router, RSC + SSG), TypeScript. Контракт — `docs/api-contract.md`, он главнее кода.
+Next.js 16 (App Router, RSC + SSG, сборка Turbopack), TypeScript. Контракт — `docs/api-contract.md`, он главнее кода.
 
 ```bash
 npm ci
