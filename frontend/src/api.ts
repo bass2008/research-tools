@@ -22,6 +22,13 @@ export interface Node {
   children?: Node[]
 }
 
+/** SEO-домен: ручной набор входных веток одного сайта. */
+export interface Domain {
+  id: string
+  name: string
+  members: Node[]
+}
+
 export interface LogLine {
   ts: number
   level: string
@@ -88,7 +95,7 @@ export interface Estimate {
 // Сервер -> клиент, конверт {type, data}. Список/одиночка допускаются там, где сервер
 // может прислать пачку (хвост лога, накопленные задачи и отчёты при подписке).
 export type WsEvent =
-  | { type: 'roots'; data: { roots: Node[] } }
+  | { type: 'roots'; data: { roots: Node[]; domains?: Domain[] } }
   // root: null — такой фразы в дереве нет (в `missing` то, что искали)
   | { type: 'snapshot'; data: { root: Node | null; missing?: string; children: Node[] } }
   | { type: 'children'; data: { parent: string; children: Node[] } }

@@ -29,8 +29,7 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
-// Корней в дереве столько, сколько завели, и они независимы: при открытии показываем
-// их все, а не один заранее выбранный.
+// Главный экран — это домены (наборы входных веток) и оставшиеся независимые корни.
 
 export default function App() {
   const [st, dispatch] = useReducer(applyEvent, initialState)
@@ -137,11 +136,32 @@ export default function App() {
   const tree = useMemo(
     () =>
       forest ? (
-        st.roots.length ? (
+        st.domains.length || st.roots.length ? (
           <div data-testid="tree-forest">
-            {st.roots.map((p) => (
-              <TreeNode key={p} phrase={p} />
+            {st.domains.map((domain) => (
+              <section className="domain" data-testid={`domain-${domain.id}`} key={domain.id}>
+                <div className="domain-head">
+                  <div>
+                    <span className="domain-kind">Домен</span>
+                    <h2>{domain.name}</h2>
+                  </div>
+                  <span className="domain-count">{domain.members.length} ключей</span>
+                </div>
+                <div className="domain-members">
+                  {domain.members.map((p) => (
+                    <TreeNode key={p} phrase={p} />
+                  ))}
+                </div>
+              </section>
             ))}
+            {st.roots.length > 0 && (
+              <section className="other-roots" data-testid="other-roots">
+                {st.domains.length > 0 && <h2>Другие корни</h2>}
+                {st.roots.map((p) => (
+                  <TreeNode key={p} phrase={p} />
+                ))}
+              </section>
+            )}
           </div>
         ) : (
           <div className="empty">
@@ -170,7 +190,7 @@ export default function App() {
         </div>
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [forest, st.roots, st.root, st.missing],
+    [forest, st.domains, st.roots, st.root, st.missing],
   )
 
   const pr = st.progress

@@ -116,6 +116,24 @@ describe('лес корней', () => {
     expect(screen.getByTestId('tree-forest')).toBeInTheDocument()
     expect(screen.getByTestId('node-нейросеть')).toBeInTheDocument()
   })
+
+  it('показывает домен одной рамкой и все его ключи', () => {
+    const { emit } = mount()
+    emit({ type: 'roots', data: {
+      domains: [{ id: 'destiny-matrix', name: 'Матрица судьбы', members: [
+        n('матрица судьбы'), n('совместимость по дате рождения'),
+      ] }],
+      roots: [n('нейросеть')],
+    } })
+
+    const domain = screen.getByTestId('domain-destiny-matrix')
+    expect(domain).toHaveTextContent('Домен')
+    expect(domain).toHaveTextContent('Матрица судьбы')
+    expect(domain).toHaveTextContent('2 ключей')
+    expect(within(domain).getByTestId('node-матрица судьбы')).toBeInTheDocument()
+    expect(within(domain).getByTestId('node-совместимость по дате рождения')).toBeInTheDocument()
+    expect(within(screen.getByTestId('other-roots')).getByTestId('node-нейросеть')).toBeInTheDocument()
+  })
 })
 
 describe('новый корень', () => {

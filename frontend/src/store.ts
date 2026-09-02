@@ -12,7 +12,14 @@ export interface LogRow extends LogLine {
   seq: number
 }
 
+export interface DomainState {
+  id: string
+  name: string
+  members: string[]
+}
+
 export interface State {
+  domains: DomainState[] // группы входных веток SEO-проектов
   roots: string[] // корни-кандидаты (отправные фразы)
   root: string | null // корень текущего дерева
   missing: string | null // искали такую фразу, а в дереве её нет
@@ -26,6 +33,7 @@ export interface State {
 }
 
 export const initialState: State = {
+  domains: [],
   roots: [],
   root: null,
   missing: null,
@@ -110,7 +118,12 @@ export function applyEvent(s: State, ev: WsEvent | LocalEvent): State {
     case 'roots': {
       const nodes = { ...s.nodes }
       collect(ev.data.roots, nodes)
-      return { ...s, roots: ev.data.roots.map((n) => n.phrase), nodes }
+      const domains = (ev.data.domains ?? []).map((domain) => {
+        collect(domain.members, nodes)
+        return { id: domain.id, name: domain.name,
+          members: domain.members.map((member) => member.phrase) }
+      })
+      return { ...s, domains, roots: ev.data.roots.map((n) => n.phrase), nodes }
     }
     case 'snapshot': {
       // ЗАМЕНЯЕТ дерево целиком; root === null — такой фразы в дереве нет

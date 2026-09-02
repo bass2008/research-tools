@@ -906,9 +906,13 @@ async def _ws_action(q, req):
     action = (req.get("action") or "").strip()
     phrase = wscore.normalize(req.get("phrase") or "")
     if action == "subscribe":
-        # roots + хвост лога (§6.2), плюс накопленные задачи и отчёты: читать их больше
-        # негде — вкладки Task и «Отчёты» живут только на этом канале
-        q.put_nowait({"type": "roots", "data": {"roots": wscore.root_candidates(CTX.con, ROOTS_LIMIT)}})
+        # Домены и несгруппированные корни приходят одним снимком: UI не должен
+        # на мгновение рисовать члена домена отдельным корнем. Хвост лога, задачи и
+        # статус LLM доезжают тем же каналом следом.
+        q.put_nowait({"type": "roots", "data": {
+            "domains": wscore.domain_groups(CTX.con),
+            "roots": wscore.root_candidates(CTX.con, ROOTS_LIMIT),
+        }})
         tail = log_tail()
         if tail:
             q.put_nowait({"type": "log", "data": tail})

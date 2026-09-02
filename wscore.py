@@ -35,6 +35,30 @@ LIMIT = 2000             # весь пул фразы: потолок самог
 WORKERS = 6              # одновременных фетчей во время краула
 CLASSIFY_CHUNK = 120     # узлов в одном classify-джобе (tech §3)
 
+# Домен — ручная группа входных веток одного SEO-проекта. Это не ребро
+# дерева: каждый член сохраняет своё поддерево, статус и команды загрузки.
+DESTINY_MATRIX_DOMAIN_ID = "destiny-matrix"
+DESTINY_MATRIX_DOMAIN_NAME = "Матрица судьбы"
+DESTINY_MATRIX_DOMAIN_KEYS = (
+    "матрица судьбы",
+    "нумерология рождения",
+    "нумерология по дате",
+    "нумерология по дате рождения",
+    "судьба по дате рождения",
+    "число по дате рождения",
+    "аркан по дате рождения",
+    "пифагора по дате рождения",
+    "психоматрица по дате рождения",
+    "совместимость по дате рождения",
+    "совместимость по нумерологии",
+    "прогноз по дате рождения",
+    "нумерология на год",
+    "нумерология дня",
+    "что меня ждет по дате рождения",
+    "удачные даты по дате рождения",
+    "какая дата подходит по дате рождения",
+)
+
 STATUSES = ("NEW", "LOADED", "FULLY_LOADED", "TRANSACTIONAL", "CATEGORY", "INFORMATIONAL",
             "NAVIGATIONAL", "SEARCHED", "SCORED", "LOW_SCORED", "ANALYZED")
 TERMINALS = ("CATEGORY", "INFORMATIONAL", "NAVIGATIONAL", "LOW_SCORED", "ANALYZED")
@@ -129,6 +153,20 @@ _SQL_NODE = """CREATE TABLE IF NOT EXISTS node (
 _SQL_EDGE = """CREATE TABLE IF NOT EXISTS edge (
     parent TEXT NOT NULL, child TEXT NOT NULL, PRIMARY KEY (parent, child))"""
 
+_SQL_DOMAIN = """CREATE TABLE IF NOT EXISTS domain (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    created_at INTEGER NOT NULL)"""
+
+_SQL_DOMAIN_MEMBER = """CREATE TABLE IF NOT EXISTS domain_member (
+    domain_id TEXT NOT NULL,
+    phrase TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    PRIMARY KEY (domain_id, phrase),
+    UNIQUE (domain_id, position),
+    FOREIGN KEY (domain_id) REFERENCES domain(id),
+    FOREIGN KEY (phrase) REFERENCES node(phrase))"""
+
 _SQL_SERP = """CREATE TABLE IF NOT EXISTS serp (
     phrase TEXT NOT NULL, engine TEXT NOT NULL,      -- 'yandex' | 'google'
     found INTEGER,                                   -- всего найдено (задел)
@@ -151,6 +189,7 @@ _SQL_REPORT = """CREATE TABLE IF NOT EXISTS report (
 _SQL_INDEXES = (
     "CREATE INDEX IF NOT EXISTS idx_edge_parent ON edge(parent)",
     "CREATE INDEX IF NOT EXISTS idx_edge_child ON edge(child)",
+    "CREATE INDEX IF NOT EXISTS idx_domain_member_phrase ON domain_member(phrase)",
     "CREATE INDEX IF NOT EXISTS idx_node_status ON node(status)",
     "CREATE INDEX IF NOT EXISTS idx_node_task ON node(task_id)",
     "CREATE INDEX IF NOT EXISTS idx_task_created ON task(created_at)",
@@ -194,8 +233,8 @@ def connect(db_path=None, backfill=True):
     if cols and _PRE_PIPELINE_MARKER not in cols:
         con.execute("DROP TABLE IF EXISTS edge")   # схема этапа 1-2: пересобираем из cache
         con.execute("DROP TABLE IF EXISTS node")
-    for sql in (_SQL_NODE, _SQL_EDGE, _SQL_SERP, _SQL_TASK, _SQL_REPORT, _SQL_HISTORY,
-                _SQL_PROBE, _SQL_STOPWORD, *_SQL_INDEXES):
+    for sql in (_SQL_NODE, _SQL_EDGE, _SQL_DOMAIN, _SQL_DOMAIN_MEMBER, _SQL_SERP, _SQL_TASK,
+                _SQL_REPORT, _SQL_HISTORY, _SQL_PROBE, _SQL_STOPWORD, *_SQL_INDEXES):
         con.execute(sql)
     _add_missing_cols(con)
     con.commit()
@@ -203,6 +242,7 @@ def connect(db_path=None, backfill=True):
         _mark_orphan_probes(con)
     if backfill:
         _maybe_backfill(con)
+    ensure_default_domains(con)
     return con
 
 
@@ -952,14 +992,82 @@ def clear_stale_locks(con):
     cur = con.execute("UPDATE node SET task_id = NULL WHERE task_id IS NOT NULL")
     con.commit()
     return cur.rowcount
+
+
+# ---------- SEO-домены ----------
+
+def save_domain(con, domain_id, name, phrases):
+    """Создать или заменить домен упорядоченным набором входных веток.
+
+    Фраза домена может уже быть ребёнком другого корня или ещё не иметь
+    своего пула. Домен не меняе edge: он лишь даёт UI набор точек входа. Неизвестную
+    фразу заводим узлом NEW, чтобы её можно было загрузить штатной командой.
+    """
+    did = normalize(domain_id)
+    title = re.sub(r"\s+", " ", (name or "").strip())
+    members = list(dict.fromkeys(normalize(p) for p in phrases if normalize(p)))
+    if not did or not title:
+        raise ValueError("у домена должны быть id и название")
+    if not members:
+        raise ValueError("в домене должен быть хотя бы один ключ")
+    now = int(time.time())
+    con.execute(
+        "INSERT INTO domain(id, name, created_at) VALUES (?, ?, ?) "
+        "ON CONFLICT(id) DO UPDATE SET name = excluded.name",
+        (did, title, now),
+    )
+    for phrase in members:
+        upsert_node(con, phrase)
+    con.execute("DELETE FROM domain_member WHERE domain_id = ?", (did,))
+    con.executemany(
+        "INSERT INTO domain_member(domain_id, phrase, position) VALUES (?, ?, ?)",
+        [(did, phrase, position) for position, phrase in enumerate(members)],
+    )
+    con.commit()
+    return {"id": did, "name": title, "members": members}
+
+
+def ensure_default_domains(con):
+    """Завести штатный домен только в базе проекта «Матрица судьбы».
+
+    Проверка опорного узла не даёт этой предметной конфигурации появиться в чужой
+    или пустой БД. Повторный запуск идемпотентен.
+    """
+    anchor = DESTINY_MATRIX_DOMAIN_KEYS[0]
+    if con.execute("SELECT 1 FROM node WHERE phrase = ?", (anchor,)).fetchone() is None:
+        return False
+    save_domain(con, DESTINY_MATRIX_DOMAIN_ID, DESTINY_MATRIX_DOMAIN_NAME,
+                DESTINY_MATRIX_DOMAIN_KEYS)
+    return True
+
+
+def domain_groups(con):
+    """Все домены с объектами узлов в ручном порядке для WS/UI."""
+    out = []
+    for domain in con.execute("SELECT id, name FROM domain ORDER BY created_at, id"):
+        rows = con.execute(
+            f"SELECT {_NODE_OBJ_COLS} FROM domain_member dm "
+            "JOIN node n ON n.phrase = dm.phrase "
+            "WHERE dm.domain_id = ? ORDER BY dm.position",
+            (domain["id"],),
+        ).fetchall()
+        out.append({"id": domain["id"], "name": domain["name"],
+                    "members": [_node_obj(row) for row in rows]})
+    return out
+
+
 # ---------- корни и проекция детей ----------
 
 def root_candidates(con, limit=50):
-    """Корни-кандидаты (tech §6.2): узлы, ни разу не встречавшиеся как чей-то ребёнок,
-    по убыванию частоты. -> [объект узла] без children."""
+    """Не входящие в домены корни-кандидаты (tech §6.2).
+
+    Члены домена уже показаны в его рамке, поэтому в списке отдельных корней их
+    не дублируем. -> [объект узла] без children.
+    """
     rows = con.execute(
         f"SELECT {_NODE_OBJ_COLS} FROM node n "
         "WHERE NOT EXISTS (SELECT 1 FROM edge WHERE child = n.phrase) "
+        "AND NOT EXISTS (SELECT 1 FROM domain_member dm WHERE dm.phrase = n.phrase) "
         "ORDER BY COALESCE(n.freq, 0) DESC LIMIT ?", (limit,)).fetchall()
     return [_node_obj(r) for r in rows]
 

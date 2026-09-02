@@ -93,10 +93,36 @@ def test_schema_is_idempotent(empty_db):
     """Заведение схемы — идемпотентно (инвариант §10.4)."""
     con = wscore.connect(empty_db)
     tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
-    assert {"cache", "node", "edge", "serp", "task", "report"} <= tables
+    assert {"cache", "node", "edge", "domain", "domain_member",
+            "serp", "task", "report"} <= tables
     con.close()
     con = wscore.connect(empty_db)
     assert counts(con)["node"] == 0
+    con.close()
+
+
+def test_domain_groups_entry_nodes_without_changing_tree(empty_db):
+    """Домен — это набор точек входа, а не новые рёбра между фразами."""
+    con = wscore.connect(empty_db)
+    wscore.save_domain(con, "test-domain", "Тестовый домен",
+                       ["Корень один", "Корень два"])
+
+    groups = wscore.domain_groups(con)
+    assert [(g["id"], g["name"]) for g in groups] == [("test-domain", "Тестовый домен")]
+    assert [n["phrase"] for n in groups[0]["members"]] == ["корень один", "корень два"]
+    assert con.execute("SELECT COUNT(*) FROM edge").fetchone()[0] == 0
+    assert wscore.root_candidates(con) == [], "члены уже показаны в домене и не дублируются"
+    con.close()
+
+
+def test_destiny_matrix_domain_is_seeded_on_its_database(real_db):
+    """Боевая ветка «матрица судьбы» включает домен с утверждённым whitelist."""
+    con = wscore.connect(real_db)
+    group = next(g for g in wscore.domain_groups(con)
+                 if g["id"] == wscore.DESTINY_MATRIX_DOMAIN_ID)
+    assert group["name"] == wscore.DESTINY_MATRIX_DOMAIN_NAME
+    assert tuple(n["phrase"] for n in group["members"]) == wscore.DESTINY_MATRIX_DOMAIN_KEYS
+    assert group["members"][0]["status"] == "FULLY_LOADED"
     con.close()
 
 

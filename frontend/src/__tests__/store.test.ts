@@ -40,6 +40,17 @@ describe('roots', () => {
     ])
     expect(s.roots).toEqual(['c'])
   })
+
+  it('собирает домен как именованный набор входных веток', () => {
+    const s = run([{ type: 'roots', data: {
+      domains: [{ id: 'matrix', name: 'Матрица судьбы',
+        members: [n('матрица судьбы'), n('аркан по дате')] }],
+      roots: [n('другой корень')],
+    } }])
+    expect(s.domains).toEqual([{ id: 'matrix', name: 'Матрица судьбы',
+      members: ['матрица судьбы', 'аркан по дате'] }])
+    expect(s.nodes['аркан по дате']).toBeTruthy()
+  })
 })
 
 describe('snapshot', () => {

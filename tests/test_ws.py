@@ -21,7 +21,9 @@ def test_subscribe_sends_roots_log_tail_tasks_and_llm_status(client, log_file):
 
     kinds = [k for k, _ in events]
     assert kinds[0] == "roots", "первым идёт список корней-кандидатов"
-    roots = only(events, "roots")[0]["roots"]
+    roots_event = only(events, "roots")[0]
+    assert roots_event["domains"] == []
+    roots = roots_event["roots"]
     assert [r["phrase"] for r in roots] == [SNAP["NEW"]], "корень — узел, который никому не ребёнок"
     check_node(roots[0])
     assert "children" not in roots[0], "roots идёт без вложенных детей (tech §6.2)"
@@ -44,6 +46,24 @@ def test_subscribe_sends_roots_log_tail_tasks_and_llm_status(client, log_file):
         "claude": {"online": False, "last_seen_at": None},
         "codex": {"online": False, "last_seen_at": None},
     }
+
+
+def test_subscribe_sends_domains_as_ordered_sets_of_nodes(client, snap_con):
+    wscore.save_domain(snap_con, "tools", "Инструменты",
+                       [SNAP["FULLY_LOADED"], SNAP["NEW"]])
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"action": "subscribe"})
+        events = drain(ws)
+
+    roots = only(events, "roots")[0]
+    assert len(roots["domains"]) == 1
+    domain = roots["domains"][0]
+    assert (domain["id"], domain["name"]) == ("tools", "Инструменты")
+    assert [member["phrase"] for member in domain["members"]] == [SNAP["FULLY_LOADED"], SNAP["NEW"]]
+    for member in domain["members"]:
+        check_node(member)
+    assert SNAP["NEW"] not in [root["phrase"] for root in roots["roots"]], \
+        "член домена не дублируется в обычных корнях"
 
 
 # ---------------------------------------------------------------- root / expand
