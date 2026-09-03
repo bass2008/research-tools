@@ -63,6 +63,20 @@ def add_missing_columns() -> list[str]:
     return added
 
 
+def drop_retired_tables() -> list[str]:
+    """create_all не сносит лишнее: снятая таблица иначе осталась бы на всех живых базах."""
+    from sqlalchemy import inspect, text
+    retired = ["leads"]
+    inspector = inspect(engine)
+    have = set(inspector.get_table_names())
+    dropped = [name for name in retired if name in have]
+    if dropped:
+        with engine.begin() as conn:
+            for name in dropped:
+                conn.execute(text(f"DROP TABLE {name}"))
+    return dropped
+
+
 def revoke_duplicate_rights() -> int:
     """Дубли, оставшиеся от гонки двух платежей: лишнее право не удаляем, а гасим — деньги за
     него уже прошли, и след покупки должен остаться в истории. Без этого уникальный индекс
@@ -91,6 +105,9 @@ def ensure() -> None:
     if revoked:
         print(f"погашено дублей прав: {revoked}")
     Base.metadata.create_all(engine)
+    retired = drop_retired_tables()
+    if retired:
+        print("снятые таблицы удалены: " + ", ".join(retired))
     new_columns = add_missing_columns()
     if new_columns:
         print("добавлены колонки: " + ", ".join(new_columns))

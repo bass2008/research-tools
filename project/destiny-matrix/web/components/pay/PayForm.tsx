@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { ApiError, api, type MatrixListItem } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { needsOwnerPassword, reduce, START, type PayEvent, type Stage } from "@/lib/payStage";
-import { clearLead, loadLead, saveLead } from "@/lib/storage";
 import { useBirth } from "@/lib/useBirth";
 import { byId, capLabel, money, periodLabel, type Tariff } from "@/lib/tariffs";
 
@@ -18,7 +17,6 @@ import PayUnchecked from "./PayUnchecked";
 import { usePayTarget, targetValue } from "./usePayTarget";
 import { refreshSession, useSession } from "@/components/account/useSession";
 
-type LeadState = "none" | "sent" | "kept";
 
 const MIN_PASSWORD = 3;
 
@@ -48,7 +46,6 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
   // экран оплаты — конечный автомат: переходы собраны в lib/payStage, а не разбросаны
   const [stage, setStage] = useState<Stage>(START);
   const send = (event: PayEvent) => setStage((now) => reduce(now, event));
-  const [lead, setLead] = useState<LeadState>("none");
   // дата рождения приходит одним источником: см. lib/useBirth
   const birth = useBirth();
   const [saved, setSaved] = useState<MatrixListItem[] | null>(null);
@@ -116,19 +113,6 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
     track("pay_open", { tariff: initial });
   }, [initial]);
 
-  // Лид, залёгший в браузере из-за отказа сети, уходит при следующем открытии формы —
-  // иначе обещание «отправится сама» было бы ложью.
-  useEffect(() => {
-    const kept = loadLead();
-    if (!kept) return;
-    api
-      .lead(kept.email, kept.tariff ? `pay:${kept.tariff}` : "pay")
-      .then(() => clearLead())
-      .catch(() => {
-        /* сеть всё ещё лежит — почта остаётся в браузере */
-      });
-  }, []);
-
   useEffect(() => {
     if (session.status === "user" && session.email) setEmail((v) => v || session.email!);
   }, [session.status, session.email]);
@@ -158,19 +142,6 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
   const { target, choices, opened, needsLogin, missing } = aimAt;
   const chosenLabel = aimAt.label;
   const targetLoading = saved === null;
-
-  /** Лид уходит до оплаты. Отказ сети не теряет почту и не мешает платить. */
-  const sendLead = async (mail: string): Promise<void> => {
-    track("lead", { tariff: tariff.id, place: "pay" });
-    try {
-      await api.lead(mail, `pay:${tariff.id}`);
-      setLead("sent");
-      clearLead();
-    } catch {
-      saveLead({ email: mail, tariff: tariff.id, at: Date.now() });
-      setLead("kept");
-    }
-  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,7 +177,6 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
         return;
       }
 
-      await sendLead(mail);
 
       // Доступ обязан работать с любого устройства, поэтому аккаунт создаётся до платежа —
       // с тем паролем, который ввели рядом с почтой.
@@ -305,7 +275,6 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
         tariffName={tariff.name}
         test={test}
         signedInto={signedInto}
-        leadKept={lead === "kept"}
       />
     );
   }
@@ -525,17 +494,6 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
           поэтому в кабинете видны прежние матрицы и платежи.
         </p>
       ) : null}
-      {lead === "kept" ? (
-        <p className="hint" data-testid="lead-status">
-          Почту сервер не принял — сохранили её в этом браузере, отправим при следующем открытии формы.
-        </p>
-      ) : null}
-      {lead === "sent" ? (
-        <p className="hint" data-testid="lead-status">
-          Почту приняли.
-        </p>
-      ) : null}
-
       <p className="hint">
         Платёжному провайдеру дата рождения не передаётся: в ссылку оплаты она не попадает. Выбранная
         дата сохраняется в ваш кабинет — по ней сервер печатает платные разделы.

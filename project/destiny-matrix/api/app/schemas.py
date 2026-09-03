@@ -62,16 +62,6 @@ class PaymentIn(BaseModel):
         return v.strip().lower()
 
 
-class LeadIn(BaseModel):
-    email: EmailStr
-    source: str | None = Field(default=None, max_length=64)
-
-    @field_validator("email")
-    @classmethod
-    def _normalize(cls, v: str) -> str:
-        return v.strip().lower()
-
-
 class ReportRequest(BaseModel):
     matrix_id: int
 

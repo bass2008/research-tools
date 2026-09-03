@@ -37,6 +37,10 @@ class Busy(RuntimeError):
 
 
 _active = 0
+# Ждут свободного места. Считается отдельно от `_started`: тот набор — прогревы «в работе», и
+# печатающийся прогрев попадал бы в оба числа сразу, отчего одна печать показывалась админке как
+# «1 печатается, 1 в очереди».
+_waiting = 0
 
 
 def ready(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
@@ -82,8 +86,15 @@ def running(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
 def run(db: Session, user_id: int, matrix_id: int) -> ReportJob:
     """Напечатать и положить файл в хранилище. Задача в очереди нужна админу: видно, что печатали,
     сколько это заняло и что упало."""
-    global _active
-    if not _slots.acquire(timeout=settings.print_wait_seconds):
+    global _active, _waiting
+    with _lock:
+        _waiting += 1
+    try:
+        got = _slots.acquire(timeout=settings.print_wait_seconds)
+    finally:
+        with _lock:
+            _waiting -= 1
+    if not got:
         raise Busy("все места печати заняты")
     with _lock:
         _active += 1
@@ -141,9 +152,18 @@ def _warm(user_id: int, matrix_id: int) -> None:
 
 
 def pending() -> int:
-    """Сколько прогревов ещё в работе. Нужно тестам и админке: печать живёт вне запроса."""
+    """Сколько прогревов ещё в работе. Нужно тестам и админке: печать живёт вне запроса.
+
+    Это не очередь: печатающийся прогрев числится здесь всё время печати. Для очереди — `waiting`.
+    """
     with _lock:
         return len(_started)
+
+
+def waiting() -> int:
+    """Сколько печатей ждёт свободного места — те, что уже пришли, но ещё не начались."""
+    with _lock:
+        return _waiting
 
 
 def active() -> int:

@@ -5,20 +5,13 @@ import type { Sex } from "./matrix";
 const BIRTH_KEY = "destiny.birth";
 const CALCULATION_REQUEST_KEY = "destiny.calculation-request";
 const TARIFF_CACHE_KEY = "destiny.tariff-cache";
-const LEAD_KEY = "destiny.lead";
 
 // старые ключи: доступ открывался строкой в localStorage, теперь их надо забыть
-const LEGACY_KEYS = ["destiny.token", "destiny.unlocked"];
+const LEGACY_KEYS = ["destiny.token", "destiny.unlocked", "destiny.lead"];
 
 export interface StoredBirth {
   birth: string;
   sex: Sex;
-}
-
-export interface StoredLead {
-  email: string;
-  tariff?: string;
-  at: number;
 }
 
 // Запрет на хранилище (приватный режим, «блокировать данные сайтов») раньше означал, что
@@ -126,30 +119,3 @@ export function forgetSession(): void {
   }
 }
 
-/** Почта из формы оплаты при отказе сети: лид не теряется, отправится следующей попыткой. */
-export function saveLead(v: StoredLead): void {
-  try {
-    localStorage.setItem(LEAD_KEY, JSON.stringify(v));
-  } catch {
-    /* ignore */
-  }
-}
-
-export function loadLead(): StoredLead | null {
-  try {
-    const raw = localStorage.getItem(LEAD_KEY);
-    if (!raw) return null;
-    const v = JSON.parse(raw) as StoredLead;
-    return typeof v?.email === "string" ? v : null;
-  } catch {
-    return null;
-  }
-}
-
-export function clearLead(): void {
-  try {
-    localStorage.removeItem(LEAD_KEY);
-  } catch {
-    /* ignore */
-  }
-}

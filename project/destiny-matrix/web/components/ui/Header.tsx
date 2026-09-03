@@ -1,34 +1,33 @@
-import Link from "next/link";
-
 import BuyButton from "@/components/ui/BuyButton";
+import SiteLink from "@/components/ui/SiteLink";
 import Logo from "@/components/ui/Logo";
 import SessionBadge from "@/components/account/SessionBadge";
 
-export default function Header() {
+export default function Header({ plain }: { plain?: boolean }) {
   return (
     <header className="site-header">
       <a className="skip" href="#content">
         Перейти к содержимому
       </a>
       <div className="wrap hrow">
-        <Link className="logo" href="/" aria-label="Arcana Sense — на главную">
+        <SiteLink plain={plain} className="logo" href="/" aria-label="Arcana Sense — на главную">
           <Logo height={54} />
           <Logo compact height={38} />
-        </Link>
+        </SiteLink>
         <nav className="hnav">
-          <Link href="/report">Мой разбор</Link>
-          <Link href="/encyclopedia">Энциклопедия</Link>
+          <SiteLink plain={plain} href="/report">Мой разбор</SiteLink>
+          <SiteLink plain={plain} href="/encyclopedia">Энциклопедия</SiteLink>
         </nav>
         <span className="hspacer">
-          <SessionBadge />
+          <SessionBadge plain={plain} />
         </span>
         {/* Кабинет стоит рядом с «Выйти», а не в общем меню: это личные страницы, и вместе с
             почтой и выходом они читаются как один блок. */}
-        <Link className="btn ghost sm" data-testid="nav-account" href="/account">
+        <SiteLink plain={plain} className="btn ghost sm" data-testid="nav-account" href="/account">
           Кабинет
-        </Link>
+        </SiteLink>
         {/* Цену в кнопку не пишем: тарифов два, и цена выбирается на странице оплаты. */}
-        <BuyButton />
+        <BuyButton plain={plain} />
       </div>
     </header>
   );

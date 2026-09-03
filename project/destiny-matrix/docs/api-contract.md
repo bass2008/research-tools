@@ -50,7 +50,6 @@ project/destiny-matrix/  весь продукт живёт здесь, коре
 | GET | `/admin/users/{id}` | — | `{user, matrices, payments, rights}` |
 | GET | `/admin/payments` | — | все платежи с почтой плательщика |
 | GET | `/admin/settings` | — | startup-снимок backend-настроек; чувствительные значения обрезаны |
-| POST | `/leads` | `{email, source?}` | `{ok: true}` |
 | GET | `/health` | — | `{ok: true, db: bool}` |
 
 Авторизация — заголовок `Authorization: Bearer <token>`, JWT, срок 30 дней.

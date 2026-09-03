@@ -4,6 +4,7 @@ import {
   combinationContent,
   matrixItem,
   matrixSlugs,
+  positionContent,
   type ArcanumContent,
   type MatrixItem,
 } from "./content";
@@ -717,6 +718,53 @@ function sharedLinkIsExact(section: PersonalSectionKey, target: PersonalSectionK
   return exact;
 }
 
+function sourceRole(section: PersonalSectionKey, key: string): SectionRoleDefinition | undefined {
+  return SECTION_ROLES[section].find((role) => role.key === key);
+}
+
+function aliasIn(section: PersonalSectionKey, key: string): string {
+  return SECTION_ROLES[section].find((role) => role.key === key)?.label ?? "";
+}
+
+/**
+ * Обе ветки написаны целыми предложениями, а не собираются из кусков по числу: подстановка
+ * «точка/точки» внутри общей строки уже оставляла несогласованные «которые» и «отвечает».
+ */
+function sharedWording(
+  many: boolean,
+  ctx: { other: string; labels: string[]; places: string[]; named: boolean; aliases: string[] },
+): { title: string; caption: string; paragraphs: string[] } {
+  const { other, labels, named, aliases } = ctx;
+  const places = ctx.places.map((place) => place.charAt(0).toLowerCase() + place.slice(1));
+  if (many) {
+    const lead = named
+      ? `${labels.join(" и ")} — это ${places.join(" и ")}. Те же позиции читает раздел «${other}»: `
+      : `${labels.join(" и ")} — те же позиции, что читает и раздел «${other}»: `;
+    return {
+      title: `Те же позиции в разделе «${other}»`,
+      caption: "Одни и те же позиции карты, два разных вопроса",
+      paragraphs: [
+        `${lead}там они стоят в другом ряду и отвечают на другой вопрос, но значения арканов те же. ` +
+        `Если вы открыли оба разбора, часть текста совпадёт: это не ошибка расчёта, а одни и те же позиции в двух рамках.`,
+      ],
+    };
+  }
+  const alias = aliases[0] && aliases[0].toLowerCase() !== places[0]?.toLowerCase()
+    ? `там она названа «${aliases[0].toLowerCase()}», `
+    : "там она ";
+  const lead = named
+    ? `${labels[0]} — это ${places[0]}. Ту же позицию читает раздел «${other}»: ${alias}`
+    : `${labels[0]} — та же позиция, что читает и раздел «${other}»: ${alias}`;
+  return {
+    title: `Та же позиция в разделе «${other}»`,
+    caption: "Одна позиция карты, два разных вопроса",
+    paragraphs: [
+      `${lead}стоит в другом ряду и отвечает на другой вопрос, но значение аркана то же. ` +
+      `Если вы открыли оба разбора, часть текста совпадёт: это не ошибка расчёта, а одна позиция в двух рамках.`,
+    ],
+  };
+}
+
 function sharedInteraction(
   section: PersonalSectionKey,
   matrix: Matrix,
@@ -724,21 +772,22 @@ function sharedInteraction(
 ): ReadingInteraction[] {
   const shared = SHARED_ROLES[section];
   if (!shared) return [];
-  const labels = items
+  const parts = items
     .filter((role) => shared.roles.includes(role.key))
-    .map((role) => `«${role.label.toLowerCase()}»`);
-  if (!labels.length) return [];
+    .map((role) => ({
+      label: `«${role.label.toLowerCase()}»`,
+      place: positionContent(sourceRole(section, role.key)?.position ?? "")?.title ?? "",
+      alias: aliasIn(shared.section, role.key),
+    }));
+  if (!parts.length) return [];
   const other = DEFINITIONS[shared.section].title;
+  const labels = parts.map((part) => part.label);
+  const places = parts.map((part) => part.place).filter(Boolean);
+  const named = places.length === parts.length;
   return [{
     key: `shared:${shared.section}`,
-    title: `Те же точки в разделе «${other}»`,
+    ...sharedWording(parts.length > 1, { other, labels, places, named, aliases: parts.map((p) => p.alias) }),
     roles: shared.roles,
-    caption: "Одна точка матрицы, два разных вопроса",
-    paragraphs: [
-      `${labels.join(" и ")} — ${labels.length > 1 ? "точки" : "точка"}, которые читает и раздел «${other}». ` +
-      `Там ${labels.length > 1 ? "они стоят" : "она стоит"} в другом ряду и отвечает на другой вопрос, но значение аркана то же. ` +
-      `Если вы открыли оба разбора, этот текст частично повторится: это не ошибка расчёта, а одна точка в двух рамках.`,
-    ],
     ...(sharedLinkIsExact(section, shared.section)
       ? {
         href: sectionReadingHref(shared.section, matrix),

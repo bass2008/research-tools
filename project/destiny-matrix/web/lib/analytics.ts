@@ -1,6 +1,6 @@
 // Цели внешней Метрики. Дата рождения в параметры не попадает никогда: разрешены только
 // код тарифа, раздел и год-десятилетие — ничего, по чему восстанавливается дата.
-export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "lead" | "purchase"
+export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "purchase"
   | "pdf_click";
 
 export interface GoalParams {

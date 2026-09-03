@@ -409,6 +409,4 @@ export const api = {
       body: JSON.stringify({ matrix_id: matrixId }),
     }),
 
-  lead: (email: string, source?: string) =>
-    request<{ ok: true }>("/leads", { method: "POST", body: JSON.stringify({ email, source }) }),
 };

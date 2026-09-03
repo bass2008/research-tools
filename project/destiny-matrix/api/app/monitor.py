@@ -179,7 +179,7 @@ def snapshot(db: Session, with_crawlers: bool = True) -> dict:
         "online": {"people": presence.online(), "tabs": presence.tabs(),
                    "robots": presence.robots(),
                    "pages": presence.pages()},
-        "print": {"active": printing.active(), "waiting": printing.pending(),
+        "print": {"active": printing.active(), "waiting": printing.waiting(),
                   "failures_hour": print_failures(db)},
         "payments": {"stuck": stuck_payments(db)},
         "errors": {"last10min": errors(db, 10), "hour": errors(db, 60)},

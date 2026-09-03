@@ -21,11 +21,11 @@ export default function GlobalNotFound() {
         <style dangerouslySetInnerHTML={{ __html: FONT_VARS }} />
       </head>
       <body>
-        <Header />
+        <Header plain />
         <main id="content" className="page">
           <NotFoundBody />
         </main>
-        <Footer />
+        <Footer plain />
       </body>
     </html>
   );

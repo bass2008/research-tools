@@ -529,6 +529,55 @@ describe("персональные разборы остальных разде�
     expect(problems.slice(0, 3)).toEqual([]);
   });
 
+  // Фраза блока собиралась одной строкой с подстановкой «точка/точки», а «которые» и «отвечает»
+  // оставались зашитыми: на 235 адресах печаталось «точка, которые читает» и «они стоят… и
+  // отвечает». Сверяем обе ветки целым предложением — по кускам рассогласование не видно.
+  it("склоняет блок общих позиций целиком, в единственном и во множественном", () => {
+    const said = (section: PersonalSectionKey, slug: string) => {
+      const matrix = sectionReadingMatrix(section, slug)!;
+      const block = buildSectionReading(section, matrix).interactions
+        .find((item) => item.key.startsWith("shared:"))!;
+      return `${block.title} | ${block.caption} | ${block.paragraphs[0]}`;
+    };
+
+    expect(said("loops", "4-8-6")).toBe(
+      "Та же позиция в разделе «Ваш идеальный формат отдыха» | "
+      + "Одна позиция карты, два разных вопроса | "
+      + "«состояние автопилота» — это центр матрицы. Ту же позицию читает раздел "
+      + "«Ваш идеальный формат отдыха»: там она названа «критерий восстановления», стоит в другом "
+      + "ряду и отвечает на другой вопрос, но значение аркана то же. Если вы открыли оба разбора, "
+      + "часть текста совпадёт: это не ошибка расчёта, а одна позиция в двух рамках.",
+    );
+
+    expect(said("realisation", "4-8-16")).toBe(
+      "Те же позиции в разделе «Ваше предназначение» | "
+      + "Одни и те же позиции карты, два разных вопроса | "
+      + "«личный рост» и «польза для других» — это личное предназначение и социальное "
+      + "предназначение. Те же позиции читает раздел «Ваше предназначение»: там они стоят в другом "
+      + "ряду и отвечают на другой вопрос, но значения арканов те же. Если вы открыли оба разбора, "
+      + "часть текста совпадёт: это не ошибка расчёта, а одни и те же позиции в двух рамках.",
+    );
+  });
+
+  it("нигде не оставляет несогласованных связок в блоке общих позиций", () => {
+    const broken: string[] = [];
+    for (const [section, count] of [["loops", 54], ["money40", 95], ["realisation", 86]] as const) {
+      for (const slug of sectionReadingSlugs(section).slice(0, count)) {
+        const matrix = sectionReadingMatrix(section, slug);
+        if (!matrix) continue;
+        const block = buildSectionReading(section, matrix).interactions
+          .find((item) => item.key.startsWith("shared:"));
+        if (!block) continue;
+        const text = `${block.title} ${block.paragraphs.join(" ")}`;
+        for (const bad of ["точка, которые", "точки, которую", "они стоят в другом ряду и отвечает",
+                           "она стоит в другом ряду и отвечают"]) {
+          if (text.includes(bad)) broken.push(`${section}/${slug}: ${bad}`);
+        }
+      }
+    }
+    expect(broken.slice(0, 3)).toEqual([]);
+  });
+
   it("даёт каждому разделу свою подпись к персональному примеру", () => {
     const matrix = calculate("1993-03-31", "f");
     const notes = (Object.keys(counts) as PersonalSectionKey[]).map((section) => sectionExampleNote(section, matrix));

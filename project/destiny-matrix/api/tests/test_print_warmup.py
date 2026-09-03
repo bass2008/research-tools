@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app import printing, reports
+from app import monitor, printing, reports
 from app.models import ReportJob
 
 
@@ -118,3 +118,23 @@ def test_warmup_waits_for_a_free_slot(monkeypatch):
         printing.run(None, 1, 1)
 
     printing._slots.release()
+
+
+def test_pulse_does_not_count_one_print_twice(client, db, printer, monkeypatch):
+    """Пульс показывал «1 печатается, 1 в очереди» на одну печать: печатающийся прогрев числился и
+    в идущих, и в наборе прогревов «в работе», который админка подписывала как очередь."""
+    seen: list[dict] = []
+    original = reports.render
+    # читаем именно пульс, а не счётчики печати: дефект был в том, какое число админка называет
+    # очередью, а не в самих счётчиках
+    monkeypatch.setattr(reports, "render",
+                        lambda url: (seen.append(monitor.snapshot(db)["print"]), original(url))[1])
+
+    buy(client, "pulse@example.ru", "1993-08-08")
+
+    assert seen, "печать не запускалась — проверять нечего"
+    active, waiting = seen[0]["active"], seen[0]["waiting"]
+    assert active == 1, f"идущих печатей {active}, ожидалась одна"
+    assert waiting == 0, (
+        f"во время единственной печати очередь показывает {waiting}: "
+        "та же печать посчитана дважды")

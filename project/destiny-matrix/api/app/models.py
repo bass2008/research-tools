@@ -211,16 +211,6 @@ class Entitlement(Base):
                 "revoked_at": iso(self.revoked_at), "note": self.note}
 
 
-class Lead(Base):
-    __tablename__ = "leads"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    email: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
-    source: Mapped[str | None] = mapped_column(String(64))
-    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
-                                                    default=utcnow, server_default=func.now())
-
-
 class ReportJob(Base):
     """Задача на печать PDF. Пользователь её не видит: для него запрос синхронный, а таблица
     нужна админу, чтобы видеть, сколько разборов печатали и сколько это заняло."""

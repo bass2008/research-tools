@@ -30,9 +30,3 @@ def test_birth_never_appears_in_paths_or_query(client):
             for param in method.get("parameters", []):
                 assert param["name"] != "birth"
 
-def test_lead_request_has_no_birth(client):
-    schema = _schema(client)
-    body = schema["paths"]["/api/leads"]["post"]["requestBody"]
-    ref = body["content"]["application/json"]["schema"]["$ref"].rsplit("/", 1)[-1]
-    fields = set(schema["components"]["schemas"][ref]["properties"])
-    assert fields == {"email", "source"}

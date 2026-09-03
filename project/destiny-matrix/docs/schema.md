@@ -80,13 +80,6 @@ CREATE TABLE entitlements (
 );
 CREATE INDEX ix_entitlements_user_id ON entitlements (user_id);
 
-CREATE TABLE leads (
-    id          INTEGER      NOT NULL PRIMARY KEY,
-    email       VARCHAR(320) NOT NULL UNIQUE,         -- отсюда идемпотентность
-    source      VARCHAR(64),                          -- 'pay:single', 'landing'
-    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE UNIQUE INDEX ix_leads_email ON leads (email);
 ```
 
 ## Связи
@@ -100,7 +93,6 @@ matrices ─< payments.matrix_id      (SET NULL — платёж пережив�
 matrices ─< entitlements.matrix_id  (CASCADE — право без матрицы бессмысленно)
 payments ─< entitlements.payment_id (SET NULL — право переживает чистку платежей)
 
-leads — ни с чем: почту оставляют до регистрации, привязывать её не к чему.
 ```
 
 ## Тарифы

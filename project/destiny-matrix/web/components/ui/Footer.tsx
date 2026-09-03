@@ -1,10 +1,9 @@
-import Link from "next/link";
-
 import { DISCLAIMER, LEGAL } from "@/lib/site";
 
 import Logo from "@/components/ui/Logo";
+import SiteLink from "@/components/ui/SiteLink";
 
-export default function Footer() {
+export default function Footer({ plain }: { plain?: boolean }) {
   return (
     <footer className="site-footer">
       <div className="wrap frow">
@@ -18,28 +17,28 @@ export default function Footer() {
           {/* в подвале — только кто исполнитель и куда писать; номера на странице контактов */}
           <p>{LEGAL.entity}</p>
           <p>
-            <Link href="/o-metode">О методе</Link>
+            <SiteLink plain={plain} href="/o-metode">О методе</SiteLink>
           </p>
           <p>
-            <Link href="/avtor">Об авторе</Link>
+            <SiteLink plain={plain} href="/avtor">Об авторе</SiteLink>
           </p>
           <p>
-            <Link href="/contacts">Контакты и реквизиты</Link>
+            <SiteLink plain={plain} href="/contacts">Контакты и реквизиты</SiteLink>
           </p>
           <p><a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a></p>
         </div>
         <div>
           <p>
-            <Link href="/oferta">Публичная оферта</Link>
+            <SiteLink plain={plain} href="/oferta">Публичная оферта</SiteLink>
           </p>
           <p>
-            <Link href="/privacy">Политика обработки персональных данных</Link>
+            <SiteLink plain={plain} href="/privacy">Политика обработки персональных данных</SiteLink>
           </p>
           <p>
-            <Link href="/refund">Условия возврата</Link>
+            <SiteLink plain={plain} href="/refund">Условия возврата</SiteLink>
           </p>
           <p>
-            <Link href="/encyclopedia">Энциклопедия арканов</Link>
+            <SiteLink plain={plain} href="/encyclopedia">Энциклопедия арканов</SiteLink>
           </p>
           <p style={{ marginTop: 8 }}>© 2026</p>
         </div>

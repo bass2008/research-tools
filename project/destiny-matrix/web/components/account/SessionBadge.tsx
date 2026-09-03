@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 // Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
-import Link from "next/link";
+import SiteLink from "@/components/ui/SiteLink";
 
 import { personVisible } from "@/lib/session";
 
@@ -28,7 +28,7 @@ const BTN: React.CSSProperties = {
   width: "auto",
 };
 
-export default function SessionBadge() {
+export default function SessionBadge({ plain }: { plain?: boolean }) {
   const session = useSession();
   // сервер не подтвердил выход: кука жива, и человек должен это знать
   const [failed, setFailed] = useState(false);
@@ -47,21 +47,21 @@ export default function SessionBadge() {
     }
     return (
       <span style={ROW}>
-        <Link data-testid="nav-login" href="/login">
+        <SiteLink plain={plain} data-testid="nav-login" href="/login">
           Войти
-        </Link>
-        <Link data-testid="nav-register" href="/register">
+        </SiteLink>
+        <SiteLink plain={plain} data-testid="nav-register" href="/register">
           Регистрация
-        </Link>
+        </SiteLink>
       </span>
     );
   }
 
   return (
     <span style={ROW}>
-      <Link data-testid="account-email" className="user-email" href="/account">
+      <SiteLink plain={plain} data-testid="account-email" className="user-email" href="/account">
         {session.email}
-      </Link>
+      </SiteLink>
       <button
         type="button"
         data-testid="logout"

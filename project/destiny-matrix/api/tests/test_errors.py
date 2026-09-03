@@ -7,7 +7,7 @@ CASES = [
     ("post", "/api/matrices",
      {"birth": (dt.date.today() + dt.timedelta(days=2)).isoformat(), "sex": "f"}, "own", 400),
     ("get", "/api/auth/me", None, None, 401),
-    ("post", "/api/leads", {"email": "nope"}, None, 422),
+    ("post", "/api/auth/register", {"email": "nope", "password": "12345678"}, None, 422),
     ("get", "/api/matrices/999999", None, "own", 404),
 ]
 
@@ -52,6 +52,6 @@ def test_422_explains_the_limit_it_hit(client):
 def test_422_uses_the_accusative_case_for_email(client):
     """Сообщение формы должно быть нормальным русским, даже если адрес принял браузер,
     но отвергла более строгая серверная схема."""
-    r = client.post("/api/leads", json={"email": "ivan.@mail.ru", "source": "pay"})
+    r = client.post("/api/auth/register", json={"email": "ivan.@mail.ru", "password": "12345678"})
     assert r.status_code == 422
     assert r.json()["detail"].startswith("Проверьте почту. почта —"), r.json()["detail"]

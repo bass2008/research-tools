@@ -11,7 +11,6 @@ export default function PayReceipt({
   tariffName,
   test,
   signedInto,
-  leadKept,
 }: {
   stage: Extract<Stage, { kind: "paid" }>;
   tariffName: string;
@@ -20,7 +19,6 @@ export default function PayReceipt({
   /** аккаунт на эту почту уже существовал — мы вошли в него, а не создали новый */
   signedInto: string | null;
   /** почта не ушла на сервер и лежит в браузере */
-  leadKept: boolean;
 }) {
   // В чеке пол печатаем всегда: две карты на одну дату могут называться одинаково, а после
   // оплаты человек должен однозначно видеть, какую из них открыл платёж.
@@ -70,13 +68,6 @@ export default function PayReceipt({
         <p className="small" data-testid="paid-matrix">
           {label} сохранена в кабинете — платные разделы печатает сервер, поэтому разбор
           открывается с любого устройства.
-        </p>
-      ) : null}
-
-      {leadKept ? (
-        <p className="hint" data-testid="lead-status">
-          Почту сервер не принял — она сохранена в этом браузере и уйдёт при следующем открытии
-          формы.
         </p>
       ) : null}
     </div>

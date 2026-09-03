@@ -60,14 +60,6 @@ export async function payment(req: Request, path = "/payments/mock") {
   });
 }
 
-export async function lead(req: Request) {
-  const body = await readJson(req);
-  const mail = email(body);
-  if (!EMAIL_RE.test(mail)) return json({ detail: "Проверьте адрес почты" }, 400);
-  const source = body.source === undefined ? undefined : String(body.source).slice(0, 64);
-  return forward("/leads", { method: "POST", body: { email: mail, source } });
-}
-
 export async function saveMatrix(req: Request) {
   const body = await readJson(req);
   const birth = String(body.birth ?? "");

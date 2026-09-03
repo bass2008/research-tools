@@ -93,10 +93,4 @@ describe("клиент API", () => {
     expect(me.until).toBeNull();
   });
 
-  it("дата рождения уходит только в сохранение матрицы", async () => {
-    const spy = stubFetch(200, JSON.stringify({ ok: true }));
-    await api.lead("a@b.c", "pay");
-    const [, init] = spy.mock.calls[0];
-    expect(JSON.stringify(init ?? {})).not.toMatch(/\d{4}-\d{2}-\d{2}/);
-  });
 });

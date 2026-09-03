@@ -7,7 +7,6 @@ import { SavedReport } from "./_lib/report";
 import CalculationProvider from "@/components/matrix/CalculationProvider";
 import CalcHero from "@/components/matrix/CalcHero";
 import HashScroll from "@/components/ui/HashScroll";
-import LeadForm from "@/components/pay/LeadForm";
 import MatrixForm from "@/components/matrix/MatrixForm";
 import MatrixReport from "@/components/matrix/MatrixReport";
 import TariffsProvider from "@/components/pay/TariffsProvider";
@@ -188,7 +187,6 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
 
           {/* Почта собирается и без оплаты: до этого лид приходил только из формы платежа. */}
           <div className="section-gap" style={{ display: "flex", justifyContent: "center" }}>
-            <LeadForm source="landing" />
           </div>
         </div>
       </section>
