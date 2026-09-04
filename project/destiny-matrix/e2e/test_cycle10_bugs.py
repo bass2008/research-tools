@@ -13,6 +13,24 @@ from conftest import BASE
 pytestmark = pytest.mark.bug
 
 
+# «Какой раздел открыт» читается по подсвеченному пункту меню: он есть на каждой странице
+# справочника, включая шапки разделов. Раньше признаком была видимая панель на /encyclopedia —
+# после переезда разделов на свои адреса панелей там нет, а обещание осталось тем же.
+def _active_section(page: Page) -> str:
+    page.wait_for_selector(".enc-navi")
+    node = page.locator(".enc-navi.on").first
+    return re.sub(r"\s*\d+\s*$", "", node.inner_text()).strip() if node.count() else ""
+
+
+def _wait_active(page: Page, title: str, why: str) -> None:
+    for _ in range(20):
+        if _active_section(page) == title:
+            return
+        page.wait_for_timeout(150)
+    assert _active_section(page) == title, why
+
+
+
 def test_landing_has_a_main_landmark(page: Page):
     """На главной не было <main>: скринридер не мог перейти к содержимому одной командой."""
     page.goto(BASE, wait_until="domcontentloaded")
@@ -73,11 +91,13 @@ def test_header_navigation_survives_narrow_screens(page: Page):
 
 
 @pytest.mark.parametrize(
-    "label,expect",
-    (("Позиции карты", "Позиции карты"), ("22 аркана", "22 аркана")),
+    "label,hub",
+    (("Позиции карты", "/encyclopedia/position"), ("22 аркана", "/encyclopedia/arcanum")),
 )
-def test_hero_buttons_open_what_they_promise(page: Page, label, expect):
-    """Кнопка «22 аркана» открывала страницу одного аркана, «Позиции карты» — список арканов."""
+def test_hero_buttons_open_what_they_promise(page: Page, label, hub):
+    """Кнопка «22 аркана» открывала страницу одного аркана, «Позиции карты» — список арканов.
+    После переезда разделов на свои адреса кнопка обязана вести на шапку своего раздела: адрес
+    в разметке карусели больше не зашит, он берётся из того же реестра, что крошки и меню."""
     page.goto(BASE, wait_until="domcontentloaded")
     page.wait_for_selector(".slide")
     href = page.evaluate(
@@ -88,16 +108,9 @@ def test_hero_buttons_open_what_they_promise(page: Page, label, expect):
         label,
     )
     assert href, f"кнопки «{label}» нет на слайдах"
+    assert href.split("#")[0] == hub, f"«{label}» ведёт на {href}"
     page.goto(BASE + href, wait_until="domcontentloaded")
-    page.wait_for_timeout(900)
-    section = page.evaluate(
-        """() => {
-          const pane = [...document.querySelectorAll('.enc-pane')]
-            .find(e => getComputedStyle(e).display !== 'none');
-          return pane ? pane.querySelector('h2')?.textContent?.trim() : null;
-        }"""
-    )
-    assert section == expect, f"«{label}» открыла раздел «{section}»"
+    _wait_active(page, label, f"«{label}» открыла раздел «{_active_section(page)}»")
 
 
 def test_encyclopedia_slides_do_not_repeat_one_button(page: Page):
@@ -120,7 +133,9 @@ def test_positions_link_opens_positions(page: Page):
           return link ? link.getAttribute('href') : null;
         }"""
     )
-    assert href and "sec=pts" in href, f"ссылка ведёт на {href}"
+    assert href and href.split("#")[0] == "/encyclopedia/position", f"ссылка ведёт на {href}"
+    page.goto(BASE + href, wait_until="domcontentloaded")
+    assert page.locator("#tochki").count(), "на шапке позиций нет половины с точками карты"
 
 
 def test_report_does_not_offer_login_to_a_signed_in_person(page: Page):

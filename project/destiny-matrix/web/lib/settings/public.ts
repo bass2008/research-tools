@@ -6,6 +6,7 @@ interface PublicSettings extends Record<string, string | number | boolean> {
   googleVerification: string;
   buildCommit: string;
   buildTime: string;
+  buildIso: string;
   buildBranch: string;
 }
 
@@ -15,6 +16,9 @@ const definitions: SettingDefinitions<PublicSettings> = {
   googleVerification: { env: "NEXT_PUBLIC_GOOGLE_VERIFICATION", fallback: "" },
   buildCommit: { env: "NEXT_PUBLIC_BUILD_COMMIT", fallback: "—" },
   buildTime: { env: "NEXT_PUBLIC_BUILD_TIME", fallback: "—" },
+  // Та же сборка машинным форматом: `buildTime` печатается человеку («17:38 МСК») и для
+  // сравнения дат не годится. Пусто — значит собирали не скриптом релиза.
+  buildIso: { env: "NEXT_PUBLIC_BUILD_ISO", fallback: "" },
   buildBranch: { env: "NEXT_PUBLIC_BUILD_BRANCH", fallback: "—" },
 };
 
@@ -24,6 +28,7 @@ export interface PublicSettingInput {
   NEXT_PUBLIC_GOOGLE_VERIFICATION?: string;
   NEXT_PUBLIC_BUILD_COMMIT?: string;
   NEXT_PUBLIC_BUILD_TIME?: string;
+  NEXT_PUBLIC_BUILD_ISO?: string;
   NEXT_PUBLIC_BUILD_BRANCH?: string;
 }
 
@@ -40,5 +45,6 @@ export const publicSettings = createPublicSettings({
   NEXT_PUBLIC_GOOGLE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   NEXT_PUBLIC_BUILD_COMMIT: process.env.NEXT_PUBLIC_BUILD_COMMIT,
   NEXT_PUBLIC_BUILD_TIME: process.env.NEXT_PUBLIC_BUILD_TIME,
+  NEXT_PUBLIC_BUILD_ISO: process.env.NEXT_PUBLIC_BUILD_ISO,
   NEXT_PUBLIC_BUILD_BRANCH: process.env.NEXT_PUBLIC_BUILD_BRANCH,
 });

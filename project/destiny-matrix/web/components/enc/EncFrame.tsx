@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 
 import { useUrlParam } from "@/lib/useUrlParam";
 import {
@@ -18,21 +18,6 @@ import {
 // из адреса — меню всегда показывает, где мы находимся.
 export interface EncSectionMeta extends EncyclopediaSectionMeta {
   count: number;
-}
-
-interface Ctx {
-  active: EncyclopediaSectionKey;
-  sections: EncSectionMeta[];
-  /** на детальной странице списка нет: раздел показывает только меню */
-  standalone: boolean;
-}
-
-const FrameCtx = createContext<Ctx | null>(null);
-
-export function useEncFrame(): Ctx {
-  const ctx = useContext(FrameCtx);
-  if (!ctx) throw new Error("useEncFrame вне EncFrame");
-  return ctx;
 }
 
 export default function EncFrame({
@@ -58,7 +43,10 @@ export default function EncFrame({
   const chosen = wanted && sections.some((x) => x.key === wanted)
     ? wanted as EncyclopediaSectionKey
     : null;
-  const active = fromPath ?? chosen ?? sections[0]?.key ?? "arc";
+  // На самой /encyclopedia не подсвечено ничего: это оглавление разделов, а не рабочая область
+  // одного из них. Раньше здесь по умолчанию вставал первый раздел, и меню утверждало, что
+  // открыты «22 аркана», хотя на странице их списка нет.
+  const active = fromPath ?? chosen;
   const standalone = fromPath !== null;
 
   const nav = useRef<HTMLElement | null>(null);
@@ -83,8 +71,7 @@ export default function EncFrame({
   }, [active]);
 
   return (
-    <FrameCtx.Provider value={{ active, sections, standalone }}>
-      <div className="enc-layout">
+    <div className="enc-layout">
         <nav className="enc-nav" ref={nav} aria-label="Разделы справочника">
           {sections.map((s) =>
             standalone ? (
@@ -110,29 +97,7 @@ export default function EncFrame({
           )}
         </nav>
 
-        <div className="enc-panes">{children}</div>
-      </div>
-    </FrameCtx.Provider>
-  );
-}
-
-/** Рабочая область на самой /encyclopedia: показывает список выбранного раздела.
- *  Остальные разделы остаются в разметке скрытыми — иначе со страницы пропадают ссылки на
- *  пары, хвосты и год, а это вся внутренняя перелинковка справочника. */
-export function EncSection({ sectionKey, children }: { sectionKey: EncyclopediaSectionKey; children: ReactNode }) {
-  const { active, sections } = useEncFrame();
-  const meta = sections.find((s) => s.key === sectionKey);
-  return (
-    <section className={sectionKey === active ? "enc-pane on" : "enc-pane"}>
-      {meta ? (
-        <>
-          <h2>{meta.title}</h2>
-          <div className="cap">
-            {meta.hint} · {meta.count}
-          </div>
-        </>
-      ) : null}
-      {children}
-    </section>
+      <div className="enc-panes">{children}</div>
+    </div>
   );
 }

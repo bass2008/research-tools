@@ -3,7 +3,11 @@ import type { MetadataRoute } from "next";
 import { ARCANA } from "@/lib/arcana";
 import { hubKeys, indexedKarmicTailKeys, yearKeys } from "@/lib/content";
 import {
+  ARCANUM_HUB,
+  CHAKRA_HUB,
+  COMBINATION_HUB,
   KARMIC_TAIL_HUB,
+  POSITION_HUB,
   YEAR_HUB,
   CHAKRA_PAGES,
   POSITIONS,
@@ -24,6 +28,9 @@ export const dynamic = "force-static";
 // Одна карта сайта на всё: энциклопедия, категории статей и статика. Страницы матриц
 // (5 544 адреса вида 1-1-1990) в карту не входят и закрыты noindex: это массив почти-дублей
 // одной формы, он тянул домен вниз. Они остаются как результат расчёта и узел перелинковки.
+// Их каталог `/matrix` из карты тоже убран: спроса на список всех матриц нет (ноль показов за
+// первые дни индексации при наличии в карте), а его содержимое — ссылки на адреса, закрытые от
+// обхода. Сама страница живёт и остаётся путём человека к конкретной карте.
 // Приватные адреса (/report, /account, /matrices, /pay) в карту не входят: они закрыты
 // в robots.txt и печатаются на запрос.
 // Боевой адрес: с любого другого контура карта сайта не отдаётся вовсе. Иначе тест, закрытый и
@@ -40,6 +47,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: abs("/"), lastModified: modified, priority: 1 },
     { url: abs("/encyclopedia"), lastModified: modified, priority: 0.9 },
+    // Шапки разделов: у каждой свой текст и свой головной запрос. Приоритет выше листьев —
+    // это цель обхода, с которой раздаётся весь раздел.
+    ...[ARCANUM_HUB, POSITION_HUB, CHAKRA_HUB, COMBINATION_HUB].map((url) => ({
+      url: abs(url),
+      lastModified: modified,
+      priority: 0.85,
+    })),
     ...ARCANA.map((a) => ({ url: abs(arcanumHref(a.n)), lastModified: modified, priority: 0.8 })),
     ...POSITIONS.map((p) => ({ url: abs(positionHref(p.key)), lastModified: modified, priority: 0.7 })),
     ...CHAKRA_PAGES.map((c) => ({ url: abs(chakraHref(c.key)), lastModified: modified, priority: 0.6 })),
@@ -48,7 +62,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: modified,
       priority: 0.5,
     })),
-    { url: abs("/matrix"), lastModified: modified, priority: 0.6 },
     // категории статей: в карту попадает только то, для чего есть написанный контент
     // шапки категорий в карте всегда: у них собственный текст, он не зависит от того, написаны
     // ли статьи внутри. По наличию статей строятся только сами статьи и корневые хабы.

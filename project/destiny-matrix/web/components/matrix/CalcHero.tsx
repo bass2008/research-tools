@@ -189,13 +189,14 @@ export default function CalcHero({
     };
   }, [live, total, i]);
 
-  // Кнопка не должна вести туда, где человек уже стоит. Раньше сравнивался только путь, и на
-  // /encyclopedia все ссылки вида «?sec=…» считались текущей страницей — три слайда подряд
-  // предлагали один и тот же «Каталог матриц».
+  // Кнопка не должна вести туда, где человек уже стоит. Сравнивается только путь: параметр и
+  // якорь снимаются, потому что «/encyclopedia/position#tochki» — та же страница, что и
+  // «/encyclopedia/position», а раньше разделы жили параметрами и три слайда подряд предлагали
+  // один и тот же «Каталог матриц».
   function secondLink(s: HeroSlide) {
-    const [href, query] = s.link.href.split("?");
+    const href = s.link.href.split(/[?#]/)[0] ?? s.link.href;
     const here = href.replace(/\/$/, "") === path.replace(/\/$/, "");
-    if (!here || query) return s.link;
+    if (!here) return s.link;
     return { label: "Каталог матриц", href: "/matrix" };
   }
 

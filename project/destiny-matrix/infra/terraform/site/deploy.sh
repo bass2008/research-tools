@@ -2,8 +2,10 @@
 set -euo pipefail
 
 # Ассеты в Object Storage: только `_next/static` и файлы из `public`. Страницы сюда больше не
-# едут — их отдаёт node на VM (../README.md §1). Сборку этот скрипт не запускает: релизом
-# управляет infra/deploy.sh, который и вызывает этот скрипт последним шагом.
+# едут — их отдаёт node на VM (../README.md §1). Сборку этот скрипт не запускает и в релиз не
+# входит: прод отдаёт `_next/static` с диска, куда её при старте выкладывает web-контейнер, а
+# бакет остаётся холодным резервом и origin для CDN, если он однажды понадобится. Запускать
+# руками, после сборки фронта.
 #
 #   ./deploy.sh                 залить ассеты уже собранного web
 #   ./deploy.sh --dry-run       показать разницу, ничего не менять
@@ -51,7 +53,7 @@ die() {
 command -v terraform >/dev/null || die 'terraform not found'
 command -v rclone >/dev/null || die 'rclone not found: apt install rclone (fallback in ../README.md §2)'
 
-[[ -d "${static_dir}" ]] || die "нет ${static_dir}: сначала соберите фронт (infra/deploy.sh)"
+[[ -d "${static_dir}" ]] || die "нет ${static_dir}: сначала соберите фронт (cd ../../../web && npm run build)"
 [[ -d "${public_dir}" ]] || die "нет ${public_dir}"
 
 # Reading state from Object Storage needs the backend credentials from the bootstrap root.

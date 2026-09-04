@@ -7,24 +7,54 @@ import { SPEC } from "@/lib/sections";
 
 // Дефект A17: карту сайта пополняли вручную, и юридические страницы попали в неё не все.
 // адреса первого уровня, которые не являются концепт-хабами
-const STATIC_PATHS = ["/", "/encyclopedia", "/matrix", "/na-god", "/contacts", "/oferta",
+const STATIC_PATHS = ["/", "/encyclopedia", "/na-god", "/contacts", "/oferta",
   "/privacy", "/refund"];
 
 describe("карта сайта", () => {
   const paths = sitemap().map((entry) => new URL(entry.url).pathname);
 
-  it.each(["/", "/encyclopedia", "/matrix", "/oferta", "/privacy", "/refund", "/contacts"])(
+  it.each(["/", "/encyclopedia", "/oferta", "/privacy", "/refund", "/contacts"])(
     "содержит %s",
     (path) => {
       expect(paths).toContain(path);
     },
   );
 
+  // Шапка раздела — цель обхода, с которой раздаётся весь раздел, и собственный ответ на его
+  // головной запрос. Без записи в карте она осталась бы страницей без входящих ссылок из поиска.
+  it.each([
+    "/encyclopedia/arcanum",
+    "/encyclopedia/position",
+    "/encyclopedia/chakra",
+    "/encyclopedia/combination",
+    "/encyclopedia/karmic-tail",
+    "/na-god",
+  ])("содержит шапку раздела %s", (path) => {
+    expect(paths).toContain(path);
+  });
+
+  // Приоритет шапки выше листа: иначе карта заявляет, что 231 пара важнее страницы, с которой
+  // они раздаются.
+  it("ставит шапкам приоритет выше листьев", () => {
+    const by = new Map(sitemap().map((e) => [new URL(e.url).pathname, e.priority ?? 0]));
+    for (const [hub, leaf] of [
+      ["/encyclopedia/arcanum", "/encyclopedia/arcanum/4"],
+      ["/encyclopedia/chakra", "/encyclopedia/chakra/anahata"],
+      ["/encyclopedia/combination", "/encyclopedia/combination/8-11"],
+      ["/encyclopedia/position", "/encyclopedia/position/center"],
+    ] as const) {
+      expect(by.get(hub)).toBeGreaterThan(by.get(leaf) ?? 0);
+    }
+  });
+
   // 5544 почти-дубля тянули домен вниз: страницы остались как результат расчёта, но закрыты
   // noindex и из карты убраны. Сторож, чтобы они не вернулись вместе с новой категорией.
-  it("не содержит страниц матриц", () => {
-    expect(paths.filter((p) => /^\/matrix\/.+/.test(p))).toEqual([]);
-    expect(paths).toContain("/matrix");
+  //
+  // Каталог `/matrix` убран вместе с ними: спроса на список всех матриц нет, а его содержимое —
+  // ссылки на закрытые от обхода адреса. Страница живёт и закрыта `noindex`, но заявлять её
+  // поиску как цель обхода незачем.
+  it("не содержит ни страниц матриц, ни их каталога", () => {
+    expect(paths.filter((p) => /^\/matrix(\/.*)?$/.test(p))).toEqual([]);
   });
 
   // Тест утверждал только отсутствие персональных разборов. Потеря раздела из positions.json

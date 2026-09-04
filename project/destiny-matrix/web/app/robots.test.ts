@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import robots from "./robots";
+import { PERSONAL_SECTION_KEYS } from "@/lib/sectionReadingShared";
 import { verification } from "@/lib/seo";
 
 // SITE.url читается на импорте, поэтому контур подменяем до него — иначе проверять нечего.
@@ -23,10 +24,29 @@ describe("robots.txt", () => {
     },
   );
 
-  it("оставляет сайт открытым для остальных", () => {
+  // Открытость задана отсутствием запрета, а не строкой `Allow: /`: Next печатает её раньше
+  // `Disallow`, и парсер «первое совпадение» считал бы разрешённым весь сайт целиком.
+  it("оставляет сайт открытым для остальных, не перебивая запреты", () => {
     const common = groupFor("*");
-    expect(common?.allow).toBe("/");
+    expect(common?.allow).toBeUndefined();
     expect([common?.disallow].flat()).toContain("/account");
+  });
+
+  // `noindex` обход не запрещает: робот качает страницу целиком, чтобы прочитать мету. Норму
+  // обхода экономит только `Disallow`, поэтому 5 990 результатов расчёта закрыты префиксами.
+  it("закрывает от обхода результаты расчёта", () => {
+    const disallow = [groupFor("*")?.disallow].flat();
+    expect(disallow).toContain("/matrix/");
+    const missing = [...PERSONAL_SECTION_KEYS, "character"].filter(
+      (section) => !disallow.includes(`/encyclopedia/${section}/`),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  // Хаб `/matrix` — обычная страница корпуса и стоит в карте сайта: закрыть его префиксом
+  // без слеша значило бы выкинуть из поиска и его.
+  it("не закрывает хаб матриц", () => {
+    expect([groupFor("*")?.disallow].flat()).not.toContain("/matrix");
   });
 
   it("на тестовом контуре закрывает сайт целиком", async () => {

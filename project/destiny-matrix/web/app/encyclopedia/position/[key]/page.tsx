@@ -19,7 +19,7 @@ import { articleLd } from "@/lib/schema";
 import { sectionByKey } from "@/lib/sections";
 import { FREE_POSITION_KEYS } from "@/lib/publicSpec";
 import { NOT_FOUND_META } from "@/lib/seo";
-import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
+import { encyclopediaSectionCrumb, encyclopediaSectionHref } from "@/lib/encyclopediaNavigation";
 import { PERSONAL_SECTION_KEYS, type PersonalSectionKey } from "@/lib/sectionReadingShared";
 import { sectionExampleNote, sectionReadingHref, sectionReadingSlug } from "@/lib/sectionReadings";
 
@@ -292,7 +292,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
                 {s.title}
               </Link>
             ))}
-            <Link href={`/encyclopedia?sec=${p.kind === "section" ? "sec" : "pts"}`}>
+            <Link href={encyclopediaSectionHref(p.kind === "section" ? "sec" : "pts")}>
               {p.kind === "section" ? "Все разделы отчёта" : "Все позиции карты"}
             </Link>
           </div>

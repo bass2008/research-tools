@@ -15,54 +15,66 @@ from conftest import BASE
 pytestmark = pytest.mark.bug
 
 
+# «Какой раздел открыт» читается по подсвеченному пункту меню: он есть на каждой странице
+# справочника, включая шапки разделов. Раньше признаком была видимая панель на /encyclopedia —
+# после переезда разделов на свои адреса панелей там нет, а обещание осталось тем же.
 def _section(page: Page) -> str:
-    return page.evaluate(
-        """() => {
-          const pane = [...document.querySelectorAll('.enc-pane')]
-            .find(e => getComputedStyle(e).display !== 'none');
-          return pane ? pane.querySelector('h2').textContent.trim() : null;
-        }"""
-    )
+    page.wait_for_selector(".enc-navi")
+    node = page.locator(".enc-navi.on").first
+    return re.sub(r"\s*\d+\s*$", "", node.inner_text()).strip() if node.count() else ""
+
+
+def _wait_section(page: Page, title: str, why: str) -> None:
+    for _ in range(20):
+        if _section(page) == title:
+            return
+        page.wait_for_timeout(150)
+    assert _section(page) == title, why
 
 
 @pytest.mark.parametrize(
     "path,expected",
     (
-        ("/encyclopedia?sec=cmb", "Сочетания арканов"),
-        ("/encyclopedia?sec=tls", "Кармические хвосты"),
+        ("/encyclopedia/combination", "Сочетания арканов"),
+        ("/encyclopedia/karmic-tail", "Кармические хвосты"),
+        ("/encyclopedia/arcanum", "22 аркана"),
+        ("/encyclopedia/chakra", "Семь чакр"),
+        ("/encyclopedia/position", "Позиции карты"),
+        # Единственный раздел без своей ветки: статьи — это адреса первого уровня, и параметр
+        # у них остаётся законным.
         ("/encyclopedia?sec=art", "Статьи"),
     ),
 )
 def test_section_link_opens_the_section_it_names(page: Page, path, expected):
     """Крошки, кнопки слайдов и шапка вели на ?sec=…, а каркас читал только якорь — открывались
-    всегда «22 аркана»."""
+    всегда «22 аркана». Теперь у раздела свой адрес, и он же стоит в крошке, в меню и в
+    карусели: расходиться нечему."""
     page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
-    page.wait_for_selector(".enc-navi")
-    page.wait_for_timeout(500)
-    assert _section(page) == expected, f"{path}: открыт раздел «{_section(page)}»"
+    _wait_section(page, expected, f"{path}: открыт раздел «{_section(page)}»")
 
 
 def test_crumb_from_detail_page_opens_its_section(page: Page):
-    """Из аркана крошка «22 аркана» обязана открывать список арканов, а не другой раздел."""
+    """Из аркана крошка «22 аркана» обязана открывать список арканов, а не другой раздел. Теперь
+    она ведёт на шапку раздела — страницу, которая открывается, а не на фильтр с параметром,
+    несущий canonical на оглавление."""
     page.goto(f"{BASE}/encyclopedia/arcanum/7", wait_until="domcontentloaded")
     page.wait_for_selector(".enc-crumbs")
     page.get_by_role("link", name="22 аркана").first.click()
-    page.wait_for_url("**/encyclopedia**")
-    page.wait_for_timeout(700)
-    assert _section(page) == "22 аркана", f"крошка открыла «{_section(page)}»"
+    page.wait_for_url("**/encyclopedia/arcanum")
+    _wait_section(page, "22 аркана", f"крошка открыла «{_section(page)}»")
+    assert page.locator(".enc-deck a").count() >= 22, "на шапке арканов нет их списка"
 
 
 def test_back_from_detail_page_shows_the_list_again(page: Page):
     """«Назад» с детальной страницы возвращал адрес раздела, а на экране оставалась статья."""
-    page.goto(f"{BASE}/encyclopedia?sec=chk", wait_until="domcontentloaded")
-    page.wait_for_selector(".enc-navi")
-    page.wait_for_timeout(400)
+    page.goto(f"{BASE}/encyclopedia/chakra", wait_until="domcontentloaded")
+    page.wait_for_selector(".chcol a")
     page.locator(".chcol a").first.click()
     page.wait_for_url("**/encyclopedia/chakra/**")
     page.go_back()
-    page.wait_for_timeout(900)
-    assert page.locator(".enc-panes").count(), "после возврата нет рабочей области справочника"
-    assert _section(page) == "Семь чакр", f"после возврата открыт «{_section(page)}»"
+    page.wait_for_url("**/encyclopedia/chakra")
+    assert page.locator(".chcol a").count(), "после возврата список уровней не восстановился"
+    _wait_section(page, "Семь чакр", f"после возврата открыт «{_section(page)}»")
 
 
 @pytest.mark.parametrize("width", (390, 1440))

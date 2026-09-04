@@ -264,3 +264,152 @@ def test_hub_serves_a_page_or_leads_somewhere_useful(path, target):
     else:
         assert r.status_code in (302, 307), f"{path}: {r.status_code}, ожидался временный редирект"
         assert r.headers["location"].endswith(target), r.headers["location"]
+
+
+# Норма обхода молодого сайта тратится на скачивание того, что робот уже видел. Экономят её два
+# условных заголовка — `ETag` и `Last-Modified`, — и оба живут в отданном ответе, а не в
+# исходниках: `middleware.test.ts` сторожит логику, но не то, что заголовок дошёл до клиента.
+CONDITIONAL_PAGES = (
+    "/encyclopedia",
+    "/encyclopedia/arcanum/7",
+    "/encyclopedia/chakra/anahata",
+    "/encyclopedia/combination/7-18",
+    "/encyclopedia/position/comfort",
+    "/encyclopedia/karmic-tail/18-9-9",
+    "/na-god/13",
+    "/matrix",
+)
+
+def _corpus_date() -> str:
+    """Дата корпуса — из отданного заголовка, а не из константы в тесте: зашитая дата ломала бы
+    набор на каждой правке корпуса, а до того молча проверяла бы неверное число."""
+    stamp = requests.get(f"{BASE}/encyclopedia", timeout=30).headers.get("Last-Modified")
+    assert stamp, "корпус отдаётся без Last-Modified — обход платит за то, что уже видел"
+    return stamp
+
+
+@pytest.mark.parametrize("path", CONDITIONAL_PAGES)
+def test_corpus_answers_conditional_request_by_date(path):
+    """Яндекс сверяет дату. Next ставит только `ETag`, поэтому без `Last-Modified` корпус
+    качался целиком на каждом проходе."""
+    full = requests.get(f"{BASE}{path}", timeout=30)
+    assert full.status_code == 200, (path, full.status_code)
+    stamp = full.headers.get("Last-Modified")
+    assert stamp, f"{path}: нет Last-Modified — обход платит за то, что уже видел"
+
+    same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-Modified-Since": stamp})
+    assert same.status_code == 304, (path, same.status_code)
+    assert not same.content, f"{path}: 304 пришёл с телом {len(same.content)} байт"
+
+    older = requests.get(
+        f"{BASE}{path}", timeout=30, headers={"If-Modified-Since": "Mon, 25 Aug 2026 00:00:00 GMT"}
+    )
+    assert older.status_code == 200, (path, older.status_code)
+
+
+@pytest.mark.parametrize("path", CONDITIONAL_PAGES)
+def test_fingerprint_outranks_the_date(path):
+    """RFC 9110 §13.2.2: при обоих заголовках побеждает `If-None-Match`. Отпечаток знает о правке
+    текста, а дата корпуса — нет, поэтому ответ по дате спрятал бы правку от Googlebot, который
+    присылает оба."""
+    full = requests.get(f"{BASE}{path}", timeout=30)
+    tag = full.headers.get("ETag")
+    if not tag:
+        pytest.skip(f"{path} отдаётся динамически, отпечатка нет")
+
+    both = requests.get(
+        f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag, "If-Modified-Since": _corpus_date()}
+    )
+    assert both.status_code == 304, (path, both.status_code)
+
+    stale = requests.get(
+        f"{BASE}{path}",
+        timeout=30,
+        headers={"If-None-Match": '"stale"', "If-Modified-Since": _corpus_date()},
+    )
+    assert stale.status_code == 200, f"{path}: чужой отпечаток получил 304 — правка спрятана"
+
+
+def test_calculation_results_share_no_corpus_date():
+    """Разбор зависит от `?birth=`, поэтому общий `304` по дате корпуса отдал бы из кэша браузера
+    чужую карту. Эти адреса закрыты и от обхода, и от условного ответа."""
+    for path in ("/matrix/1-1-10", "/encyclopedia/comfort/4-6-13", "/encyclopedia/character/4-9-7"):
+        r = requests.get(f"{BASE}{path}", timeout=30)
+        assert r.headers.get("Last-Modified") is None, f"{path}: получил общую дату корпуса"
+        conditional = requests.get(
+            f"{BASE}{path}", timeout=30, headers={"If-Modified-Since": _corpus_date()}
+        )
+        assert conditional.status_code == 200, (path, conditional.status_code)
+
+
+# Раздел справочника существовал только как фильтр `?sec=`: тот адрес несёт canonical на
+# /encyclopedia, поэтому крошка на каждом листе объявляла родителем страницу, которой в поиске
+# нет, а сама /encyclopedia раздавала 363 ссылки — две трети из них на 231 пару арканов.
+SECTION_HUBS = (
+    ("/encyclopedia/arcanum", "22 аркана"),
+    ("/encyclopedia/position", "Позиции карты"),
+    ("/encyclopedia/chakra", "Семь чакр"),
+    ("/encyclopedia/combination", "Сочетания арканов"),
+    ("/encyclopedia/karmic-tail", "Кармические хвосты"),
+    ("/na-god", "Матрица судьбы на год"),
+)
+
+# Лист → шапка, которую он обязан объявить родителем.
+LEAF_PARENTS = (
+    ("/encyclopedia/arcanum/7", "/encyclopedia/arcanum"),
+    ("/encyclopedia/chakra/anahata", "/encyclopedia/chakra"),
+    ("/encyclopedia/combination/7-18", "/encyclopedia/combination"),
+    ("/encyclopedia/position/center", "/encyclopedia/position"),
+    ("/encyclopedia/position/character", "/encyclopedia/position"),
+    ("/encyclopedia/karmic-tail/18-9-9", "/encyclopedia/karmic-tail"),
+    ("/na-god/13", "/na-god"),
+)
+
+
+@pytest.mark.parametrize("path,crumb", SECTION_HUBS)
+def test_section_hub_is_a_page_with_its_own_text(path, crumb):
+    """Шапка обязана отвечать на головной запрос раздела своими словами. Список ссылок без
+    текста — тот же плоский каталог на уровень ниже, и в выдаче он читается как дорвей."""
+    html = _html(path)
+    assert "BreadcrumbList" in _types(html), path
+    canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+    assert canonical and canonical.group(1).endswith(path), (path, canonical and canonical.group(1))
+    headings = _headings(html)
+    assert headings and headings[0][0] == 1, (path, headings[:2])
+    assert sum(1 for rank, _ in headings if rank == 2) >= 4, (path, headings)
+    prose = re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", re.sub(r"(?is)<script.*?</script>", "", html)))
+    assert len(prose) > 5000, f"{path}: текста {len(prose)} знаков — шапка без разбора понятия"
+
+
+@pytest.mark.parametrize("leaf,hub", LEAF_PARENTS)
+def test_leaf_declares_an_existing_parent(leaf, hub):
+    """Третий уровень крошки — адрес, который открывается, а не фильтр с параметром."""
+    schemas = [s for s in _schemas(_html(leaf)) if s.get("@type") == "BreadcrumbList"]
+    assert schemas, leaf
+    trail = schemas[0]["mainEntity" if "mainEntity" in schemas[0] else "itemListElement"]
+    parent = trail[2]
+    assert parent.get("item", "").endswith(hub), (leaf, parent)
+    assert "?sec=" not in parent.get("item", ""), (leaf, parent)
+    assert requests.get(f"{BASE}{hub}", timeout=30).status_code == 200, hub
+
+
+def test_encyclopedia_is_a_table_of_contents_not_a_flat_list():
+    """Раздача 363 ссылок с одной страницы делила вес между 231 парой арканов и 7 чакрами
+    поровну, а поиск читал справочник как один каталог однотипного."""
+    html = _html("/encyclopedia")
+    body = re.sub(r"(?is)<script.*?</script>", "", html)
+    hrefs = {m.group(1).split("#")[0].rstrip("/") or "/" for m in re.finditer(r'<a\b[^>]*href="(/[^"?]*)"', body)}
+    assert len(hrefs) < 40, f"страница снова раздаёт {len(hrefs)} ссылок"
+    leaves = [h for h in hrefs if re.match(r"^/(encyclopedia/[a-z_-]+/.+|na-god/.+)$", h)]
+    assert leaves == [], f"на оглавлении снова листья: {leaves[:5]}"
+    for hub, _ in SECTION_HUBS:
+        assert hub in hrefs, f"оглавление не ведёт к шапке {hub}"
+
+
+def test_section_address_comes_only_from_the_registry():
+    """Единственный законный `?sec=` — у «Статей»: ветки справочника у них нет. Остальные
+    зашитые адреса раздела после переезда продолжали вести на фильтр."""
+    for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/o-metode"):
+        body = re.sub(r"(?is)<script.*?</script>", "", _html(path))
+        found = set(re.findall(r'href="(/encyclopedia\?sec=[a-z]+)"', body))
+        assert not {x for x in found if not x.endswith("sec=art")}, (path, found)

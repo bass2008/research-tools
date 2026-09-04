@@ -31,9 +31,11 @@ ENV NEXT_ASSET_PREFIX=${NEXT_ASSET_PREFIX}
 ARG BUILD_COMMIT="—"
 ARG BUILD_BRANCH="—"
 ARG BUILD_TIME="—"
+ARG BUILD_ISO=""
 ENV NEXT_PUBLIC_BUILD_COMMIT=${BUILD_COMMIT} \
     NEXT_PUBLIC_BUILD_BRANCH=${BUILD_BRANCH} \
-    NEXT_PUBLIC_BUILD_TIME=${BUILD_TIME}
+    NEXT_PUBLIC_BUILD_TIME=${BUILD_TIME} \
+    NEXT_PUBLIC_BUILD_ISO=${BUILD_ISO}
 # Кеш Next переживает пересборку слоя: правка одного компонента не заставляет печатать
 # 5 544 страницы заново. Кеш живёт в докере, в образ не попадает.
 RUN --mount=type=cache,target=/app/.next/cache npm run build

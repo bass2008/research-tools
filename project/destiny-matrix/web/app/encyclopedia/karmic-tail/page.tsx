@@ -15,7 +15,7 @@ import { KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail } from "@/lib/e
 import { articleLd, itemListLd } from "@/lib/schema";
 import { clip } from "@/lib/text";
 import { pageMeta } from "@/lib/site";
-import { encyclopediaSection, encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
+import { encyclopediaSection } from "@/lib/encyclopediaNavigation";
 
 const KEY = "karmic-tail";
 
@@ -48,8 +48,7 @@ export default function KarmicTailHubPage() {
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          encyclopediaSectionCrumb("art"),
-          { name: "Кармический хвост" },
+          { name: encyclopediaSection("tls").title },
         ]}
       />
         <JsonLd

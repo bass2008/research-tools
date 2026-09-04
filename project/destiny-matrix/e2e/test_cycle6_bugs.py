@@ -86,61 +86,60 @@ def test_buy_button_from_encyclopedia_lands_on_the_price_block(page: Page):
     assert -200 < top < 400, f"после перехода блок тарифов на {top} px от верха экрана — человек его не видит"
 
 
+# «Какой раздел открыт» читается по подсвеченному пункту меню: он есть на каждой странице
+# справочника, включая шапки разделов. Раньше признаком была видимая панель на /encyclopedia —
+# после переезда разделов на свои адреса панелей там нет, а обещание осталось тем же.
 def _section_title(page: Page) -> str:
-    """Видимый раздел: показом управляет CSS по якорю, отдельного класса у него нет."""
-    return page.evaluate(
-        """() => {
-          const pane = [...document.querySelectorAll('.enc-pane')]
-            .find(e => getComputedStyle(e).display !== 'none');
-          return pane ? pane.querySelector('h2').textContent.trim() : null;
-        }"""
-    )
+    page.wait_for_selector(".enc-navi")
+    node = page.locator(".enc-navi.on").first
+    return re.sub(r"\s*\d+\s*$", "", node.inner_text()).strip() if node.count() else ""
 
 
 def _wait_section(page: Page, title: str, why: str) -> None:
-    """Дождаться раздела. Страница статическая: до гидратации на ней всегда первый раздел,
-    поэтому мгновенная проверка ловила «22 аркана» на загруженной машине, а не дефект."""
-    for _ in range(30):
+    for _ in range(20):
         if _section_title(page) == title:
             return
-        page.wait_for_timeout(200)
+        page.wait_for_timeout(150)
     assert _section_title(page) == title, why
 
 
 def test_chosen_section_survives_reload_and_back(page: Page):
-    """Раздел жил только в состоянии React: F5 и «Назад» выбрасывали в «22 аркана»."""
+    """Раздел жил только в состоянии React: F5 и «Назад» выбрасывали в «22 аркана». Теперь
+    раздел — отдельный адрес, и этот класс бага исчез вместе с переключением панелей: выбор
+    хранит история браузера, а не состояние компонента. Проверяем то же обещание на новом
+    механизме."""
     page.goto(f"{BASE}/encyclopedia", wait_until="domcontentloaded")
     page.wait_for_selector(".enc-navi")
     page.get_by_role("link", name=re.compile("Семь чакр")).first.click()
-    page.wait_for_timeout(400)
-    assert _section_title(page) == "Семь чакр"
-    assert "sec=chk" in page.url, f"выбор раздела не попал в адрес: {page.url}"
+    page.wait_for_url("**/encyclopedia/chakra")
+    _wait_section(page, "Семь чакр", "после перехода подсвечен другой раздел")
 
     page.reload(wait_until="domcontentloaded")
-    page.wait_for_selector(".enc-navi")
     _wait_section(page, "Семь чакр", "после обновления страница показывает другой раздел")
+    assert page.locator(".chcol a").count(), "на шапке чакр нет списка уровней"
 
     page.locator(".chcol a").first.click()
     page.wait_for_url("**/encyclopedia/chakra/**")
     page.go_back()
-    page.wait_for_selector(".enc-navi")
+    page.wait_for_url("**/encyclopedia/chakra")
     _wait_section(page, "Семь чакр", "«Назад» вернул не в тот раздел, из которого ушли")
+    assert page.locator(".chcol a").count(), "после возврата список уровней не восстановился"
 
 
 def test_back_shows_the_section_the_address_points_at(page: Page):
-    """Адрес возвращался к ?sec=yer, а на экране оставались «22 аркана»: popstate не читался."""
-    page.goto(f"{BASE}/encyclopedia?sec=yer", wait_until="domcontentloaded")
-    page.wait_for_selector(".enc-navi")
-    _wait_section(page, "Матрица судьбы на год", "адрес просит раздел «на год», а показан другой")
+    """Адрес возвращался к разделу, а на экране оставались «22 аркана»: popstate не читался.
+    Теперь адрес раздела — его собственная страница, поэтому расхождение адреса и содержимого
+    невозможно; обещание то же, механизм другой."""
+    page.goto(f"{BASE}/na-god", wait_until="domcontentloaded")
+    _wait_section(page, "Матрица судьбы на год", "адрес просит раздел «на год», а подсвечен другой")
     page.get_by_role("link", name="Энциклопедия").first.click()
     page.wait_for_url("**/encyclopedia")
-    page.wait_for_timeout(800)
+    # На оглавлении не подсвечен никакой раздел: это перечень ветвей, а не рабочая область одной.
+    assert _section_title(page) == "", f"на оглавлении подсвечен раздел «{_section_title(page)}»"
     page.go_back()
-    page.wait_for_url("**sec=yer**")
-    page.wait_for_timeout(900)
-    assert "sec=yer" in page.url, f"адрес после «Назад»: {page.url}"
+    page.wait_for_url("**/na-god")
     _wait_section(page, "Матрица судьбы на год",
-                  "адрес показывает раздел «на год», а рабочая область — другой раздел")
+                  "адрес показывает раздел «на год», а меню — другой раздел")
 
 
 def test_arcanum_tab_survives_reload_and_back(page: Page):

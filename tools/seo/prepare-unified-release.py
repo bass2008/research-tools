@@ -40,12 +40,23 @@ POSITION_WORDS: tuple[tuple[str, str], ...] = (
 )
 
 STATIC_INDEXED = {
-    "/": "calculate", "/encyclopedia": "catalog", "/matrix": "matrix_catalog",
+    "/": "calculate", "/encyclopedia": "catalog",
+    # Шапка каждой ветки справочника: своя страница с разбором понятия и своим головным
+    # запросом. Раньше ветка существовала только как фильтр `/encyclopedia?sec=…`, и адреса у
+    # неё не было — крошка листа объявляла родителем страницу, которой в поиске нет.
+    "/encyclopedia/arcanum": "arcanum_hub",
+    "/encyclopedia/position": "position_hub",
+    "/encyclopedia/chakra": "chakra_hub",
+    "/encyclopedia/combination": "combination_hub",
     "/encyclopedia/karmic-tail": "tail_hub", "/na-god": "year_hub",
     "/o-metode": "method", "/energii": "concept", "/programmy": "concept",
     "/karmicheskaya-matrica": "concept", "/avtor": "author",
     "/contacts": "legal", "/oferta": "legal", "/privacy": "legal", "/refund": "legal",
 }
+# Публичная страница вне индекса — не то же, что личная. Каталог матриц остаётся путём человека
+# к конкретной карте, но спроса на список всех матриц нет (ноль показов за первые дни индексации
+# при наличии в карте сайта), а его содержимое — ссылки на 5 544 адреса, закрытых от обхода.
+STATIC_PUBLIC_NOINDEX = {"/matrix": "matrix_catalog"}
 STATIC_NOINDEX = {
     "/account", "/admin", "/forgot", "/login", "/register", "/reset", "/report",
     "/matrices", "/pay", "/pay/done", "/pay/fail", "/print/report",
@@ -267,6 +278,8 @@ def url_registry(tails: list[dict]) -> list[dict]:
 
     for url, entity in sorted(STATIC_INDEXED.items()):
         add(url, entity, "keep", True, "каноническая публичная страница")
+    for url, entity in sorted(STATIC_PUBLIC_NOINDEX.items()):
+        add(url, entity, "noindex", False, "публичная страница вне индекса: спроса на список нет")
     for url in sorted(STATIC_NOINDEX):
         add(url, "private_or_transactional", "noindex", False,
             "личный, служебный или транзакционный адрес")

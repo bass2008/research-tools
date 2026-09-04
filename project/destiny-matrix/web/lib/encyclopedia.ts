@@ -102,6 +102,15 @@ export function parseCombinationSlug(slug: string): [number, number] | null {
 export const KARMIC_TAIL_HUB = "/encyclopedia/karmic-tail";
 export const YEAR_HUB = "/na-god";
 
+// Шапка каждого типа страниц справочника. Хаб обязан лежать на префиксе своих листьев:
+// `/encyclopedia/combination` над `/encyclopedia/combination/8-11`. Так адрес совпадает с
+// заявленным в крошке родителем, и уровень «Сочетания арканов» перестаёт быть фильтром
+// `?sec=cmb`, которого как страницы не существует.
+export const ARCANUM_HUB = "/encyclopedia/arcanum";
+export const CHAKRA_HUB = "/encyclopedia/chakra";
+export const COMBINATION_HUB = "/encyclopedia/combination";
+export const POSITION_HUB = "/encyclopedia/position";
+
 export function karmicTailHref(key: string): string {
   return `${KARMIC_TAIL_HUB}/${key}`;
 }

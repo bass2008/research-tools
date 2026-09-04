@@ -1,3 +1,5 @@
+import { encyclopediaSectionHref } from "./encyclopediaNavigation";
+
 export interface HeroSlide {
   eyebrow: string;
   heading: string;
@@ -15,12 +17,12 @@ export const LANDING_SLIDES: HeroSlide[] = [
   {
     eyebrow: "17 позиций карты",
     heading: "Октаграмма: где какой аркан стоит именно у вас",
-    link: { label: "Позиции карты", href: "/encyclopedia?sec=pts" },
+    link: { label: "Позиции карты", href: encyclopediaSectionHref("pts") },
   },
   {
     eyebrow: "портрет · центр · материальная задача",
     heading: "Три аркана, с которых читают вашу карту",
-    link: { label: "22 аркана", href: "/encyclopedia?sec=arc" },
+    link: { label: "22 аркана", href: encyclopediaSectionHref("arc") },
   },
   {
     eyebrow: "разбор по десятилетиям до 80 лет",
@@ -43,12 +45,12 @@ export const ENCYCLOPEDIA_SLIDES: HeroSlide[] = [
   {
     eyebrow: "17 позиций карты",
     heading: "Посмотрите свои арканы в октаграмме",
-    link: { label: "Позиции карты", href: "/encyclopedia?sec=pts" },
+    link: { label: "Позиции карты", href: encyclopediaSectionHref("pts") },
   },
   {
     eyebrow: "портрет · центр · материальная задача",
     heading: "Ваши три главных аркана — за минуту",
-    link: { label: "22 аркана", href: "/encyclopedia?sec=arc" },
+    link: { label: "22 аркана", href: encyclopediaSectionHref("arc") },
   },
   {
     // Надпись раньше называла десятилетия, а заголовок — год: два разных предмета в одном
@@ -61,6 +63,6 @@ export const ENCYCLOPEDIA_SLIDES: HeroSlide[] = [
   {
     eyebrow: "20 разделов отчёта",
     heading: "Весь справочник — на вашей дате рождения",
-    link: { label: "Разделы отчёта", href: "/encyclopedia?sec=sec" },
+    link: { label: "Разделы отчёта", href: encyclopediaSectionHref("sec") },
   },
 ];

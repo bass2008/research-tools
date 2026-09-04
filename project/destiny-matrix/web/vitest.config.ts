@@ -6,6 +6,7 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname) } },
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts", "app/**/*.test.ts"],
+    // `middleware.ts` Next требует в корне проекта, поэтому его тест лежит рядом с ним.
+    include: ["lib/**/*.test.ts", "app/**/*.test.ts", "*.test.ts"],
   },
 });

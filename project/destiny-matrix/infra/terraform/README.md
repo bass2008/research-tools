@@ -34,9 +34,11 @@ infra/terraform/
 
 ## 2. Как доставляется артефакт
 
-**`infra/deploy.sh` + `rsync` по ssh, вне графа Terraform.** Terraform владеет машиной, сетью,
-DNS, бакетом и ключом; артефакт сборки кладёт скрипт. Причина та же, что и раньше, только цифры
-другие: артефакт — это 5 858 файлов HTML и 5 856 `.rsc` на 1,2 ГБ, менять их через state нельзя.
+**Образы через реестр Yandex, вне графа Terraform.** Terraform владеет машиной, сетью, DNS,
+бакетом и ключом; код приносят `compose/scripts/release-test.sh` и `release-prod.sh`: они
+собирают образы, отправляют их в реестр и на машине делают `docker compose pull` и рестарт
+службы. Причина та же, что и раньше, только цифры другие: в образе web лежат 5 858 файлов HTML и
+5 856 `.rsc` на 1,2 ГБ, менять их через state нельзя.
 
 | вариант | цена одного релиза | что не так |
 |---|---|---|
@@ -203,13 +205,7 @@ DNS, бакетом и ключом; артефакт сборки кладёт 
   `/srv/matritsa/venv/bin/python`, которого на рабочей машине и не должно быть);
 - **nginx-конфиги** разобраны `crossplane parse --strict`: статус `ok`, директивы в допустимых
   контекстах. Полноценный `nginx -t` не запускался: nginx на рабочей машине не установлен;
-- `bash -n` на всех скриптах: `infra/deploy.sh`, `infra/check.sh`, `site/deploy.sh`, `site/check.sh`;
-- **удалённые части `deploy.sh` прогнаны в песочнице** (`/var/tmp`, стабы `sudo`/`systemctl`):
-  переключение симлинка `current` через `mv -T`, создание `.next/cache`, прунинг до `--keep 3`
-  из пяти релизов, создание venv и `pip install -r api/requirements.txt` — venv собрался,
-  FastAPI/alembic/psycopg2 встали, health-запрос вернул `{"ok":true,"db":true}`;
-- защитные проверки `deploy.sh`: неизвестный флаг, `--keep 1`, `--host` без значения,
-  недостижимый хост — все дают понятную ошибку и код 1;
+- `bash -n` на всех скриптах: `infra/check.sh`, `site/deploy.sh`, `site/check.sh`;
 - `site/deploy.sh` прогнан целиком против локального S3 (`rclone serve s3`): ключи легли под
   `_next/static/…`, `public` не затёр чанки, повторный запуск не передал ничего;
 - сборка `output: standalone` собрана и запущена: `node server.js` на 127.0.0.1, страницы
@@ -232,10 +228,10 @@ DNS, бакетом и ключом; артефакт сборки кладёт 
 
 ## 7. Что от этого зависит у соседей
 
-**`web` — `output: "standalone"` в `next.config.ts`.** Без него `deploy.sh` останавливается
-и печатает, что именно добавить: артефакт ищется по `web/.next/standalone/server.js`.
-Аварийный обход на один прогон — `NEXT_PRIVATE_STANDALONE=true npm run build` (проверено, работает
-на Next 15.5.23), но это не замена правке конфига. Кроме того:
+**`web` — `output: "standalone"` в `next.config.ts`.** Без него не собирается образ web:
+`compose/web.Dockerfile` копирует `.next/standalone`, а статику и `public` кладёт рядом отдельными
+слоями — standalone их не копирует сам. Аварийный обход на один прогон —
+`NEXT_PRIVATE_STANDALONE=true npm run build`, но это не замена правке конфига. Кроме того:
 
 - `output: "export"` и `SITE_EXPORT` должны уйти: бакет страниц больше не получает;
 - `trailingSlash` не нужен;

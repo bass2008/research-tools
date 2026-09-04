@@ -3,9 +3,14 @@ import {
   KARMIC_TAIL_HUB,
   ROOT_HUBS,
   YEAR_HUB,
+  ARCANUM_HUB,
+  CHAKRA_HUB,
+  COMBINATION_HUB,
+  POSITION_HUB,
   arcanumHref,
   chakraByKey,
   chakraHref,
+  combinationHref,
   karmicTailHref,
   positionByKey,
   positionHref,
@@ -37,12 +42,40 @@ function yearLink(key: string): RelatedLink | null {
   return { href: yearHref(key), title: item.title };
 }
 
+const SECTION_HUBS: Record<string, string> = {
+  arcanum: ARCANUM_HUB,
+  chakra: CHAKRA_HUB,
+  combination: COMBINATION_HUB,
+  position: POSITION_HUB,
+};
+
 /** Указатель → ссылка. null, если цели нет: ссылаться в никуда хуже, чем не ссылаться. */
 export function resolveRef(ref: string): RelatedLink | null {
   const value = ref.trim();
   if (!value) return null;
 
   const [kind, rest] = value.includes("/") ? value.split("/", 2) : [value, ""];
+
+  // Указатель без второй половины — шапка раздела: `arcanum` против `arcanum/7`. Заголовок берём
+  // из её же материала, чтобы имя ссылки не расходилось с h1 страницы.
+  if (!rest) {
+    const hub = SECTION_HUBS[kind];
+    if (hub) {
+      const item = categoryHub(kind);
+      if (!item) throw new Error(`нет канонического материала хаба ${kind}`);
+      return { href: hub, title: item.title };
+    }
+  }
+
+  if (kind === "combination") {
+    const pair = rest.split("-").map(Number);
+    if (pair.length !== 2 || pair.some((n) => !Number.isInteger(n) || n < 1 || n > 22)) return null;
+    const [a, b] = pair as [number, number];
+    return {
+      href: combinationHref(a, b),
+      title: `${a} и ${b}: ${arcanumTitle(a)} и ${arcanumTitle(b)}`,
+    };
+  }
 
   if (kind === "arcanum") {
     const n = Number(rest);

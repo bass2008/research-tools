@@ -49,6 +49,7 @@ services:
         BUILD_COMMIT: ${BUILD_COMMIT:-—}
         BUILD_BRANCH: ${BUILD_BRANCH:-—}
         BUILD_TIME: ${BUILD_TIME:-—}
+        BUILD_ISO: ${BUILD_ISO:-}
     environment:
       NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
       # по http кука с secure не ставится и вход не работает

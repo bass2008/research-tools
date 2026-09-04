@@ -97,6 +97,22 @@
       "release": "unified"
     },
     {
+      "old_url": "/encyclopedia/arcanum",
+      "entity_type": "arcanum_hub",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/arcanum",
+      "sitemap": true,
+      "reason": "каноническая публичная страница",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
       "old_url": "/encyclopedia/arcanum/1",
       "entity_type": "arcanum",
       "index_now": true,
@@ -449,6 +465,22 @@
       "release": "unified"
     },
     {
+      "old_url": "/encyclopedia/chakra",
+      "entity_type": "chakra_hub",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/chakra",
+      "sitemap": true,
+      "reason": "каноническая публичная страница",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
       "old_url": "/encyclopedia/chakra/ajna",
       "entity_type": "chakra",
       "index_now": true,
@@ -557,6 +589,22 @@
       "canonical": "/encyclopedia/chakra/vishuddha",
       "sitemap": true,
       "reason": "канонический уровень карты энергий",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
+      "old_url": "/encyclopedia/combination",
+      "entity_type": "combination_hub",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/combination",
+      "sitemap": true,
+      "reason": "каноническая публичная страница",
       "owner": "seo+product",
       "release": "unified"
     },
@@ -4689,6 +4737,22 @@
       "release": "unified"
     },
     {
+      "old_url": "/encyclopedia/position",
+      "entity_type": "position_hub",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/position",
+      "sitemap": true,
+      "reason": "каноническая публичная страница",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
       "old_url": "/encyclopedia/position/ancestry",
       "entity_type": "section",
       "index_now": true,
@@ -5363,16 +5427,16 @@
     {
       "old_url": "/matrix",
       "entity_type": "matrix_catalog",
-      "index_now": true,
+      "index_now": false,
       "impressions": null,
       "clicks": null,
       "backlinks": null,
-      "decision": "keep",
+      "decision": "noindex",
       "new_url": null,
       "status_code": 200,
       "canonical": "/matrix",
-      "sitemap": true,
-      "reason": "каноническая публичная страница",
+      "sitemap": false,
+      "reason": "публичная страница вне индекса: спроса на список нет",
       "owner": "seo+product",
       "release": "unified"
     },

@@ -12,6 +12,9 @@ TAG="$(git rev-parse --short HEAD)"
 
 export SITE_URL="$SITE" BUILD_COMMIT="$TAG" BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"
+# Та же сборка машинным форматом: из неё берётся HTTP-заголовок `Last-Modified`, а его нельзя
+# занижать — после релиза любая страница могла измениться.
+export BUILD_ISO="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
 # Коды подтверждения владения сайтом для Вебмастера и Search Console. Лежат вне репозитория,
 # как ключи банка; без файла собирается без метатегов.
@@ -35,6 +38,7 @@ docker buildx build --push -f web.Dockerfile \
   --build-arg "BUILD_COMMIT=$BUILD_COMMIT" \
   --build-arg "BUILD_BRANCH=$BUILD_BRANCH" \
   --build-arg "BUILD_TIME=$BUILD_TIME" \
+  --build-arg "BUILD_ISO=$BUILD_ISO" \
   --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
 
 echo "== диагностический снимок и проверенная копия БД"

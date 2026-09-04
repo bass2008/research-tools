@@ -17,7 +17,7 @@ import { YEAR_HUB, arcanumHref, yearHref } from "@/lib/encyclopedia";
 import { articleLd, itemListLd } from "@/lib/schema";
 import { clip } from "@/lib/text";
 import { pageMeta } from "@/lib/site";
-import { encyclopediaSection, encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
+import { encyclopediaSection } from "@/lib/encyclopediaNavigation";
 
 const KEY = "na-god";
 
@@ -65,7 +65,6 @@ export default function YearHubPage() {
         trail={[
           { name: "Главная", path: "/" },
           { name: "Энциклопедия", path: "/encyclopedia" },
-          encyclopediaSectionCrumb("art"),
           { name: encyclopediaSection("yer").title },
         ]}
       />
