@@ -49,8 +49,6 @@ STATIC_INDEXED = {
     "/encyclopedia/chakra": "chakra_hub",
     "/encyclopedia/combination": "combination_hub",
     "/encyclopedia/karmic-tail": "tail_hub", "/na-god": "year_hub",
-    "/o-metode": "method", "/energii": "concept", "/programmy": "concept",
-    "/karmicheskaya-matrica": "concept", "/avtor": "author",
     "/contacts": "legal", "/oferta": "legal", "/privacy": "legal", "/refund": "legal",
 }
 # Публичная страница вне индекса — не то же, что личная. Каталог матриц остаётся путём человека
@@ -278,6 +276,11 @@ def url_registry(tails: list[dict]) -> list[dict]:
 
     for url, entity in sorted(STATIC_INDEXED.items()):
         add(url, entity, "keep", True, "каноническая публичная страница")
+    # Статьи первого уровня берутся из корпуса, а не перечисляются руками: список уже трижды
+    # отставал от hubs.json, и каждый раз это ловила только приёмка корпуса.
+    for item in read_json(WEB_CONTENT / "hubs.json")["items"]:
+        entity = {"avtor": "author", "o-metode": "method"}.get(item["key"], "concept")
+        add(f"/{item['key']}", entity, "keep", True, "статья первого уровня из hubs.json")
     for url, entity in sorted(STATIC_PUBLIC_NOINDEX.items()):
         add(url, entity, "noindex", False, "публичная страница вне индекса: спроса на список нет")
     for url in sorted(STATIC_NOINDEX):

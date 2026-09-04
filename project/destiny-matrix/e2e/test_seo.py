@@ -483,3 +483,49 @@ def test_crossings_are_reachable_without_the_sitemap():
         linked |= set(re.findall(r'href="(/encyclopedia/position/[a-z_]+/\d+)"', body))
     wanted = {f"/encyclopedia/position/{i['position']}/{i['arcanum']}" for i in CROSSINGS}
     assert wanted - linked == set(), sorted(wanted - linked)[:5]
+
+
+# Кластер «расшифровка» — 79 046 показов/мес, из 370 фраз до этой итерации было закрыто 3.
+# Это единственный крупный кластер, где спрос совпадает с тем, что продаётся: человек с картой
+# на руках хочет её прочитанной. Топ-10 по головному запросу до этого держали страницы расчёта,
+# ювелирный магазин и медиа «Столото» — то есть отвечали не на тот вопрос.
+DECODING_PAGES = (
+    "/rasshifrovka",
+    "/rasshifrovka-po-date",
+    "/rasshifrovka-znachenie",
+    "/kak-chitat-matricu",
+    "/polnaya-rasshifrovka",
+)
+
+
+@pytest.mark.parametrize("path", DECODING_PAGES)
+def test_decoding_page_is_an_article(path):
+    """Статья, а не заглушка: свой h1, self-canonical, крошки и разбор в несколько разделов."""
+    html = _html(path)
+    headings = _headings(html)
+    assert headings and headings[0][0] == 1, (path, headings[:2])
+    assert sum(1 for rank, _ in headings if rank == 2) >= 4, (path, headings)
+    canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+    assert canonical and canonical.group(1).endswith(path), (path, canonical)
+    assert "BreadcrumbList" in _types(html), path
+    prose = re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", re.sub(r"(?is)<script.*?</script>", "", html)))
+    assert len(prose) > 5000, f"{path}: текста {len(prose)} знаков"
+
+
+def test_decoding_hub_leads_to_its_variants():
+    """Хаб и варианты связаны: иначе пять страниц конкурируют между собой вместо того, чтобы
+    делить кластер."""
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/rasshifrovka"))
+    linked = set(re.findall(r'href="(/[a-z-]+)"', body))
+    missing = [p for p in DECODING_PAGES if p != "/rasshifrovka" and p not in linked]
+    assert missing == [], missing
+
+
+def test_decoding_pages_are_reachable_and_indexable():
+    """В карте сайта и со ссылками из справочника — иначе поиск о них не узнает."""
+    xml = requests.get(f"{BASE}/sitemap.xml", timeout=30).text
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/encyclopedia"))
+    linked = set(re.findall(r'href="(/[a-z-]+)"', body))
+    for path in DECODING_PAGES:
+        assert requests.get(f"{BASE}{path}", timeout=30).status_code == 200, path
+        assert path in linked, f"{path}: нет ссылки с оглавления справочника"

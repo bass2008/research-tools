@@ -249,7 +249,7 @@ for (const [name, actual, expected] of [
   ["karmic-tails.json", KARMIC_TAILS.size, 26],
   ["year-arcana.json", YEAR_ARCANA.size, 23],
   ["category-hubs.json", CATEGORY_HUBS.size, 6],
-  ["hubs.json", HUBS.size, 5],
+  ["hubs.json", HUBS.size, 10],
 ] as const) {
   if (actual !== expected) throw new Error(`[content] ${name}: ожидалось ${expected}, получено ${actual}`);
 }
