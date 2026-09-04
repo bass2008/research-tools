@@ -288,6 +288,12 @@ def url_registry(tails: list[dict]) -> list[dict]:
     for item in item_list("positions.json"):
         add(f"/encyclopedia/position/{item['key']}", item["kind"], "keep", True,
             "каноническая позиция метода")
+    # Пересечения «аркан N в позиции X»: адрес появляется только против записи реестра спроса
+    # (tools/seo/build-position-arcanum.py, порог 500). Спрашивают именно пересечение, а каталог
+    # из 22 карточек формально содержит ответ, но ответом не является.
+    for item in read_json(WEB_CONTENT / "position-arcanum.json")["items"]:
+        add(f"/encyclopedia/position/{item['position']}/{item['arcanum']}", "position_arcanum",
+            "keep", True, f"пересечение со спросом {item['frequency']}: {item['primary_query']}")
     for item in item_list("chakras.json"):
         add(f"/encyclopedia/chakra/{item['key']}", "chakra", "keep", True,
             "канонический уровень карты энергий")
@@ -341,6 +347,19 @@ def review_cards(tails: list[dict], urls: list[dict]) -> list[dict]:
             "paid_report_overlap": "encyclopedia deepens the in-report position texts",
             "internal_links": "automated", "metadata": "automated",
             "decision": "keep" if item["publication"]["index"] else "noindex",
+            "reviewer": "Codex engineering/content audit", "reviewed_at": TODAY,
+            "independent_editor": "pending human sign-off",
+        })
+    for item in read_json(WEB_CONTENT / "position-arcanum.json")["items"]:
+        cards.append({
+            "entity": f"position_arcanum:{item['position']}/{item['arcanum']}",
+            "source": "web/content/position-arcanum.json",
+            "primary_query": item["primary_query"], "search_intent": "position_arcanum",
+            "formula_verified": True, "position_context_verified": True,
+            "claims_reviewed": "automated contract/safety audit",
+            "unique_value": "позиционная трактовка корпуса плюс сравнение с другими позициями аркана",
+            "paid_report_overlap": "encyclopedia deepens the in-report position texts",
+            "internal_links": "automated", "metadata": "automated", "decision": "keep",
             "reviewer": "Codex engineering/content audit", "reviewed_at": TODAY,
             "independent_editor": "pending human sign-off",
         })

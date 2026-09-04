@@ -126,3 +126,49 @@ def test_every_material_has_review_card_and_all_report_sections_are_covered():
     for section in sections:
         assert f"position:{section['key']}" in covered
     assert all(row["decision"] in {"keep", "noindex"} for row in cards)
+
+
+def test_position_arcanum_registry_matches_the_public_url_map():
+    """Реестр пересечений и карта публичных адресов обязаны совпадать: запись без адреса — это
+    потерянный спрос, адрес без записи — тонкий корпус, которым проект уже обжигался."""
+    registry = load(WEB / "position-arcanum.json")
+    assert registry["threshold"] >= 500, registry["threshold"]
+    assert registry["count"] == len(registry["items"])
+    pages = {f"/encyclopedia/position/{i['position']}/{i['arcanum']}" for i in registry["items"]}
+    assert len(pages) == len(registry["items"]), "повтор пары позиция-аркан"
+
+    urls = {row["old_url"] for row in items(AUDIT / "public-url-map.json")
+            if row["entity_type"] == "position_arcanum"}
+    assert urls == pages, sorted(pages ^ urls)[:5]
+
+    cards = {row["entity"] for row in items(AUDIT / "content-review.json")
+             if row["entity"].startswith("position_arcanum:")}
+    assert cards == {f"position_arcanum:{i['position']}/{i['arcanum']}" for i in registry["items"]}
+
+    below = [i for i in registry["items"] if i["frequency"] < registry["threshold"]]
+    assert below == [], below
+
+
+def test_position_arcanum_primary_queries_are_unique():
+    """Два адреса не могут целиться в один головной запрос: поиск выберет между ними сам и
+    обычно занизит оба."""
+    registry = load(WEB / "position-arcanum.json")["items"]
+    queries = [i["primary_query"].strip().lower() for i in registry]
+    duplicates = {q for q in queries if queries.count(q) > 1}
+    assert duplicates == set(), sorted(duplicates)
+
+
+def test_tail_crossings_exist_in_the_method():
+    """Хвост — тройка: аркан, которого движок туда не ставит, не может иметь страницу «в хвосте»,
+    сколько бы его ни спрашивали. Арканы 1 и 2 как раз такие, и спрос по ним нулевой под обоими
+    именами — это и подтвердило, что «программа N» и «хвост N» одно и то же."""
+    registry = load(WEB / "position-arcanum.json")["items"]
+    reachable = {row["triple"] for row in load(PROJECT / "spec" / "method.json")["reachable_karmic_tails"]}
+    for item in registry:
+        if item["position"] != "past_lives":
+            assert item["tails"] == [], item
+            continue
+        assert item["tails"], item
+        for triple in item["tails"]:
+            assert triple in reachable, (item["arcanum"], triple)
+            assert str(item["arcanum"]) in triple.split("-"), (item["arcanum"], triple)

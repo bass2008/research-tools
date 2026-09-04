@@ -241,14 +241,27 @@ describe("список адресов", () => {
     },
   );
 
-  // Параметр — один сегмент: иначе шаблон утянул бы вложенные адреса, которых у корпуса нет.
+  // Параметр — один сегмент: иначе шаблон утянул бы вложенность, которой у этих типов нет.
   it.each([
     "/encyclopedia/arcanum/4/extra",
-    "/encyclopedia/position/comfort/8",
     "/na-god/13/plus",
     "/encyclopedia/karmic-tail/9-9-18/x",
+    "/encyclopedia/chakra/anahata/8",
+    "/encyclopedia/combination/8-11/8",
   ])("не захватывает вложенный %s", (path) => {
     expect(covers(path)).toBe(false);
+  });
+
+  // У позиций вложенность законна: «аркан N в позиции X» — отдельная страница, и она обязана
+  // получать дату сборки, как весь остальной корпус.
+  it("захватывает пересечения «аркан × позиция»", () => {
+    for (const path of ["/encyclopedia/position/center/6", "/encyclopedia/position/past_lives/9"]) {
+      expect(covers(path)).toBe(true);
+    }
+  });
+
+  it("не идёт глубже пересечения", () => {
+    expect(covers("/encyclopedia/position/center/6/extra")).toBe(false);
   });
 
   it("покрывает хабы и их страницы отдельными шаблонами", () => {

@@ -1,0 +1,976 @@
+{
+ "threshold": 500,
+ "count": 80,
+ "items": [
+  {
+   "position": "past_lives",
+   "arcanum": 3,
+   "frequency": 9220,
+   "primary_query": "матрица судьбы кармический хвост 3",
+   "wording": "tail",
+   "wordings": {
+    "tail": 5028,
+    "program": 4192
+   },
+   "tails": [
+    "18-3-12",
+    "3-13-10",
+    "3-22-19",
+    "3-7-22",
+    "9-12-3",
+    "9-3-21"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 4,
+   "frequency": 5618,
+   "primary_query": "программа 4 матрица судьбы",
+   "wording": "program",
+   "wordings": {
+    "program": 3541,
+    "tail": 2077
+   },
+   "tails": [
+    "12-16-4",
+    "21-4-10"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 5,
+   "frequency": 6503,
+   "primary_query": "5 программа в матрице судьбы",
+   "wording": "program",
+   "wordings": {
+    "tail": 3632,
+    "program": 2871
+   },
+   "tails": [
+    "15-20-5",
+    "15-5-8",
+    "6-5-17"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 6,
+   "frequency": 10198,
+   "primary_query": "программа 6 матрица судьбы",
+   "wording": "program",
+   "wordings": {
+    "program": 7735,
+    "tail": 2463
+   },
+   "tails": [
+    "18-6-15",
+    "18-6-6",
+    "6-14-8",
+    "6-17-11",
+    "6-20-14",
+    "6-5-17",
+    "6-8-20",
+    "9-15-6"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 7,
+   "frequency": 8704,
+   "primary_query": "программа 7 матрица судьбы",
+   "wording": "program",
+   "wordings": {
+    "program": 6644,
+    "tail": 2060
+   },
+   "tails": [
+    "12-19-7",
+    "21-10-7",
+    "21-7-13",
+    "3-7-22"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 8,
+   "frequency": 10637,
+   "primary_query": "программа 8 матрица судьбы",
+   "wording": "program",
+   "wordings": {
+    "program": 6831,
+    "tail": 3806
+   },
+   "tails": [
+    "15-5-8",
+    "15-8-11",
+    "6-14-8",
+    "6-8-20"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 9,
+   "frequency": 15614,
+   "primary_query": "программа 9 матрица судьбы",
+   "wording": "program",
+   "wordings": {
+    "tail": 9231,
+    "program": 6383
+   },
+   "tails": [
+    "18-9-9",
+    "9-12-3",
+    "9-15-6",
+    "9-18-9",
+    "9-3-21",
+    "9-9-18"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 10,
+   "frequency": 6668,
+   "primary_query": "матрица судьбы программа 10",
+   "wording": "program",
+   "wordings": {
+    "program": 3809,
+    "tail": 2859
+   },
+   "tails": [
+    "21-10-16",
+    "21-10-7",
+    "21-4-10",
+    "3-13-10"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 11,
+   "frequency": 738,
+   "primary_query": "кармический хвост в матрице судьбы 11",
+   "wording": "tail",
+   "wordings": {
+    "tail": 738
+   },
+   "tails": [
+    "15-8-11",
+    "6-17-11"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 15,
+   "frequency": 4696,
+   "primary_query": "кармический хвост в матрице судьбы 15",
+   "wording": "tail",
+   "wordings": {
+    "tail": 2471,
+    "program": 2225
+   },
+   "tails": [
+    "15-20-5",
+    "15-5-8",
+    "15-8-11",
+    "18-6-15",
+    "9-15-6"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 16,
+   "frequency": 1564,
+   "primary_query": "16 программа в матрице судьбы",
+   "wording": "program",
+   "wordings": {
+    "program": 1564
+   },
+   "tails": [
+    "12-16-4",
+    "21-10-16"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 18,
+   "frequency": 4819,
+   "primary_query": "18 в хвосте матрицы судьбы",
+   "wording": "tail",
+   "wordings": {
+    "tail": 4819
+   },
+   "tails": [
+    "18-3-12",
+    "18-6-15",
+    "18-6-6",
+    "18-9-9",
+    "9-18-9",
+    "9-9-18"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 19,
+   "frequency": 3024,
+   "primary_query": "матрица судьбы кармический хвост 19",
+   "wording": "tail",
+   "wordings": {
+    "tail": 3024
+   },
+   "tails": [
+    "12-19-7",
+    "3-22-19"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 20,
+   "frequency": 3019,
+   "primary_query": "20 программа в матрице судьбы",
+   "wording": "program",
+   "wordings": {
+    "program": 1778,
+    "tail": 1241
+   },
+   "tails": [
+    "15-20-5",
+    "6-20-14",
+    "6-8-20"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 21,
+   "frequency": 4299,
+   "primary_query": "матрица судьбы 21 кармический хвост",
+   "wording": "tail",
+   "wordings": {
+    "tail": 4299
+   },
+   "tails": [
+    "21-10-16",
+    "21-10-7",
+    "21-4-10",
+    "21-7-13",
+    "9-3-21"
+   ]
+  },
+  {
+   "position": "past_lives",
+   "arcanum": 22,
+   "frequency": 1201,
+   "primary_query": "кармический хвост в матрице судьбы 22",
+   "wording": "tail",
+   "wordings": {
+    "tail": 1201
+   },
+   "tails": [
+    "3-22-19",
+    "3-7-22"
+   ]
+  },
+  {
+   "position": "center",
+   "arcanum": 3,
+   "frequency": 1686,
+   "primary_query": "3 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 1686
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 4,
+   "frequency": 1964,
+   "primary_query": "4 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 1964
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 5,
+   "frequency": 2956,
+   "primary_query": "5 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 2956
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 6,
+   "frequency": 2729,
+   "primary_query": "6 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 2729
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 7,
+   "frequency": 2332,
+   "primary_query": "7 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 2332
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 8,
+   "frequency": 2141,
+   "primary_query": "8 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 2141
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 9,
+   "frequency": 1681,
+   "primary_query": "9 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 1681
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 10,
+   "frequency": 2183,
+   "primary_query": "10 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 2183
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 11,
+   "frequency": 2532,
+   "primary_query": "11 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 2532
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 12,
+   "frequency": 1492,
+   "primary_query": "12 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 1492
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 13,
+   "frequency": 789,
+   "primary_query": "13 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 789
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 15,
+   "frequency": 831,
+   "primary_query": "15 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 831
+   },
+   "tails": []
+  },
+  {
+   "position": "center",
+   "arcanum": 18,
+   "frequency": 580,
+   "primary_query": "18 в центре матрицы судьбы",
+   "wording": "center",
+   "wordings": {
+    "center": 580
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 3,
+   "frequency": 683,
+   "primary_query": "матрица судьбы отношения 3",
+   "wording": "relations",
+   "wordings": {
+    "relations": 683
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 4,
+   "frequency": 616,
+   "primary_query": "матрица судьбы отношения 4",
+   "wording": "relations",
+   "wordings": {
+    "relations": 616
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 5,
+   "frequency": 1136,
+   "primary_query": "матрица судьбы отношения 5",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1136
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 6,
+   "frequency": 1764,
+   "primary_query": "матрица судьбы отношения 6",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1764
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 7,
+   "frequency": 1474,
+   "primary_query": "матрица судьбы отношения 7",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1474
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 8,
+   "frequency": 1053,
+   "primary_query": "8 матрица судьбы отношения",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1053
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 9,
+   "frequency": 1781,
+   "primary_query": "9 матрица судьбы отношения",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1781
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 10,
+   "frequency": 1002,
+   "primary_query": "матрица судьбы отношения 10",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1002
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 11,
+   "frequency": 976,
+   "primary_query": "матрица судьбы отношения 11",
+   "wording": "relations",
+   "wordings": {
+    "relations": 976
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 15,
+   "frequency": 1265,
+   "primary_query": "матрица судьбы отношения 15",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1265
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 17,
+   "frequency": 664,
+   "primary_query": "матрица судьбы отношения 17",
+   "wording": "relations",
+   "wordings": {
+    "relations": 664
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 18,
+   "frequency": 817,
+   "primary_query": "матрица судьбы отношения 18",
+   "wording": "relations",
+   "wordings": {
+    "relations": 817
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 19,
+   "frequency": 744,
+   "primary_query": "матрица судьбы отношения 19",
+   "wording": "relations",
+   "wordings": {
+    "relations": 744
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 20,
+   "frequency": 900,
+   "primary_query": "матрица судьбы отношения 20",
+   "wording": "relations",
+   "wordings": {
+    "relations": 900
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 21,
+   "frequency": 1094,
+   "primary_query": "матрица судьбы отношения 21",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1094
+   },
+   "tails": []
+  },
+  {
+   "position": "relations",
+   "arcanum": 22,
+   "frequency": 1148,
+   "primary_query": "матрица судьбы 22 отношения",
+   "wording": "relations",
+   "wordings": {
+    "relations": 1148
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 5,
+   "frequency": 870,
+   "primary_query": "5 в денежном канале матрицы судьбы",
+   "wording": "money",
+   "wordings": {
+    "money": 870
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 6,
+   "frequency": 853,
+   "primary_query": "матрица судьбы 6 деньги",
+   "wording": "money",
+   "wordings": {
+    "money": 853
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 7,
+   "frequency": 646,
+   "primary_query": "7 в денежном канале матрицы судьбы",
+   "wording": "money",
+   "wordings": {
+    "money": 646
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 8,
+   "frequency": 1077,
+   "primary_query": "матрица судьбы денежный канал 8",
+   "wording": "money",
+   "wordings": {
+    "money": 1077
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 9,
+   "frequency": 942,
+   "primary_query": "матрица судьбы денежный канал 9",
+   "wording": "money",
+   "wordings": {
+    "money": 942
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 10,
+   "frequency": 845,
+   "primary_query": "матрица судьбы денежный канал 10",
+   "wording": "money",
+   "wordings": {
+    "money": 845
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 18,
+   "frequency": 913,
+   "primary_query": "матрица судьбы денежный канал 18",
+   "wording": "money",
+   "wordings": {
+    "money": 913
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 19,
+   "frequency": 654,
+   "primary_query": "матрица судьбы денежный канал 19",
+   "wording": "money",
+   "wordings": {
+    "money": 654
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 20,
+   "frequency": 622,
+   "primary_query": "матрица судьбы денежный канал 20",
+   "wording": "money",
+   "wordings": {
+    "money": 622
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 21,
+   "frequency": 512,
+   "primary_query": "матрица судьбы денежный канал 21",
+   "wording": "money",
+   "wordings": {
+    "money": 512
+   },
+   "tails": []
+  },
+  {
+   "position": "money",
+   "arcanum": 22,
+   "frequency": 799,
+   "primary_query": "матрица судьбы денежный канал 22",
+   "wording": "money",
+   "wordings": {
+    "money": 799
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 5,
+   "frequency": 902,
+   "primary_query": "5 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 902
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 6,
+   "frequency": 850,
+   "primary_query": "6 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 850
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 7,
+   "frequency": 962,
+   "primary_query": "7 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 962
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 8,
+   "frequency": 832,
+   "primary_query": "8 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 832
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 9,
+   "frequency": 557,
+   "primary_query": "9 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 557
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 10,
+   "frequency": 667,
+   "primary_query": "10 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 667
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 11,
+   "frequency": 697,
+   "primary_query": "11 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 697
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 16,
+   "frequency": 505,
+   "primary_query": "16 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 505
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 18,
+   "frequency": 559,
+   "primary_query": "18 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 559
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 19,
+   "frequency": 628,
+   "primary_query": "19 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 628
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 20,
+   "frequency": 882,
+   "primary_query": "20 под сердцем в матрице судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 882
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 21,
+   "frequency": 706,
+   "primary_query": "21 аркан под сердцем матрица судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 706
+   },
+   "tails": []
+  },
+  {
+   "position": "comfort_south",
+   "arcanum": 22,
+   "frequency": 1485,
+   "primary_query": "22 под сердцем матрица судьбы",
+   "wording": "heart",
+   "wordings": {
+    "heart": 1485
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 4,
+   "frequency": 515,
+   "primary_query": "таланты матрица судьбы 4",
+   "wording": "talent",
+   "wordings": {
+    "talent": 515
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 5,
+   "frequency": 682,
+   "primary_query": "матрица судьбы талант 5",
+   "wording": "talent",
+   "wordings": {
+    "talent": 682
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 6,
+   "frequency": 874,
+   "primary_query": "талант 6 матрица судьбы",
+   "wording": "talent",
+   "wordings": {
+    "talent": 874
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 7,
+   "frequency": 544,
+   "primary_query": "7 в талантах в матрице судьбы",
+   "wording": "talent",
+   "wordings": {
+    "talent": 544
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 8,
+   "frequency": 591,
+   "primary_query": "8 в талантах матрица судьбы",
+   "wording": "talent",
+   "wordings": {
+    "talent": 591
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 9,
+   "frequency": 738,
+   "primary_query": "таланта 9 матрица судьбы",
+   "wording": "talent",
+   "wordings": {
+    "talent": 738
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 11,
+   "frequency": 765,
+   "primary_query": "11 талант матрица судьбы",
+   "wording": "talent",
+   "wordings": {
+    "talent": 765
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 12,
+   "frequency": 781,
+   "primary_query": "матрица судьбы талант 12",
+   "wording": "talent",
+   "wordings": {
+    "talent": 781
+   },
+   "tails": []
+  },
+  {
+   "position": "profession",
+   "arcanum": 18,
+   "frequency": 605,
+   "primary_query": "18 талант матрица судьбы",
+   "wording": "talent",
+   "wordings": {
+    "talent": 605
+   },
+   "tails": []
+  },
+  {
+   "position": "day",
+   "arcanum": 10,
+   "frequency": 542,
+   "primary_query": "10 визитка матрица судьбы",
+   "wording": "card",
+   "wordings": {
+    "card": 542
+   },
+   "tails": []
+  },
+  {
+   "position": "day",
+   "arcanum": 11,
+   "frequency": 588,
+   "primary_query": "11 визитка матрица судьбы",
+   "wording": "card",
+   "wordings": {
+    "card": 588
+   },
+   "tails": []
+  }
+ ]
+}

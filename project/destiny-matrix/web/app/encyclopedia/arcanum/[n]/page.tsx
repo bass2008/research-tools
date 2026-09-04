@@ -29,6 +29,7 @@ import {
 import { pageMeta } from "@/lib/site";
 import { sentence } from "@/lib/text";
 import { articleLd } from "@/lib/schema";
+import { positionArcanumHref, positionArcanumLabel, registryItems } from "@/lib/positionArcanum";
 import { NOT_FOUND_META } from "@/lib/seo";
 import {
   encyclopediaSection,
@@ -82,6 +83,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
   const year = yearArcanum(n);
   // обратная ссылка на хвосты: аркан — самая посещаемая страница справочника, и без неё
   // разобранные тройки висели бы только на своём хабе
+  const crossings = registryItems().filter((item) => item.arcanum === n);
   const tails = karmicTails().filter((t) => t.arcana.includes(n));
   // Подпись пары берём из написанного текста сочетания. Генератор склеивал «дар первого» с
   // «глаголом второго» и давал бессмыслицу вида «способность запустить то, чего ещё нет рядом с
@@ -165,6 +167,27 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
       ) : (
         <p className="dim">Статья про этот аркан в рамке года ещё не написана.</p>
       )}
+      {/* Тот же аркан на конкретных позициях: страница аркана отвечает «какая это энергия»,
+          пересечение — «что она делает именно здесь». Спрашивают чаще второе. */}
+      {crossings.length ? (
+        <>
+          <h3 className="section-gap">Этот аркан на конкретных позициях</h3>
+          <div className="cap">
+            {crossings.length} разбора: то же число в разных ролях карты
+          </div>
+          <div className="taglist">
+            {crossings.map((item) => (
+              <Link
+                key={item.position}
+                href={positionArcanumHref(item.position, item.arcanum)}
+                prefetch={false}
+              >
+                {positionArcanumLabel(item)}
+              </Link>
+            ))}
+          </div>
+        </>
+      ) : null}
       {tails.length ? (
         <>
           <h3 className="section-gap">Кармические хвосты с этим арканом</h3>

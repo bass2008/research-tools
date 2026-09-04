@@ -79,6 +79,7 @@ export const config = {
     "/encyclopedia/combination/:pair",
     "/encyclopedia/position",
     "/encyclopedia/position/:key",
+    "/encyclopedia/position/:key/:n",
     "/encyclopedia/karmic-tail",
     "/encyclopedia/karmic-tail/:triple",
     "/na-god",

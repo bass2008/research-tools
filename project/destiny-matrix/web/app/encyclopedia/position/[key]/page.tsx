@@ -12,7 +12,8 @@ import Sections from "@/components/enc/Sections";
 
 import { ARCANA } from "@/lib/arcana";
 import { POSITIONS, arcanumHref, positionByKey, positionHref } from "@/lib/encyclopedia";
-import { arcanumInPosition, positionContent } from "@/lib/content";
+import { arcanumInPosition, positionArcanumRows, positionContent } from "@/lib/content";
+import { positionArcanumHref, positionArcanumLabel } from "@/lib/positionArcanum";
 import { calculate } from "@/lib/matrix";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
@@ -57,6 +58,9 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   const lead = extra.lead;
   const paragraphs = extra.meaning;
   const section = p.kind === "section" ? sectionByKey(p.key) : undefined;
+  const crossings = positionArcanumRows()
+    .filter((item) => item.position === p.key)
+    .sort((a, b) => a.arcanum - b.arcanum);
   const siblings = POSITIONS.filter((x) => x.kind === p.kind && x.key !== p.key).slice(0, 8);
   // Точки бесплатных разделов уже показывает бесплатный расчёт: шесть страниц обещали за них
   // деньги. Список — тот же, по которому собирается публичный разбор.
@@ -226,6 +230,29 @@ export default async function PositionPage({ params }: { params: Promise<Params>
             place="position"
           />
         </div>
+
+        {/* Пересечения этой позиции: спрашивают именно их — «8 аркан профессии», «6 в центре
+            матрицы». Без этих ссылок 80 страниц реестра оставались бы сиротами: в карте сайта
+            есть, а входящих ссылок нет ни одной. */}
+        {crossings.length ? (
+          <div className="panel section-gap">
+            <h2>Отдельные арканы на этой позиции</h2>
+            <div className="cap">
+              {crossings.length} разбора: что означает конкретный аркан именно здесь
+            </div>
+            <div className="taglist">
+              {crossings.map((item) => (
+                <Link
+                  key={item.arcanum}
+                  href={positionArcanumHref(item.position, item.arcanum)}
+                  prefetch={false}
+                >
+                  {positionArcanumLabel(item)}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <Faq items={extra.faq} />
 

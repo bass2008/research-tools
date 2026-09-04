@@ -17,6 +17,7 @@ import {
   yearHref,
 } from "./encyclopedia";
 import { categoryHub, hub, karmicTail, karmicTails, yearArcanum, yearKeys } from "./content";
+import { positionArcanumHref, positionArcanumLabel, registryItem } from "./positionArcanum";
 
 /**
  * Связи между статьями автор ставит односторонне и указателем, а не адресом: `arcanum/7`,
@@ -65,6 +66,17 @@ export function resolveRef(ref: string): RelatedLink | null {
       if (!item) throw new Error(`нет канонического материала хаба ${kind}`);
       return { href: hub, title: item.title };
     }
+  }
+
+  // Пересечение «аркан N в позиции X»: указатель `position/center/6`. Разбирается раньше
+  // `position`, иначе `rest` «center/6» не нашёлся бы как ключ позиции.
+  if (kind === "position" && rest.includes("/")) {
+    const [key, number] = rest.split("/", 2);
+    const arcanum = Number(number);
+    const item = Number.isInteger(arcanum) ? registryItem(key ?? "", arcanum) : null;
+    return item
+      ? { href: positionArcanumHref(item.position, item.arcanum), title: positionArcanumLabel(item) }
+      : null;
   }
 
   if (kind === "combination") {

@@ -413,3 +413,73 @@ def test_section_address_comes_only_from_the_registry():
         body = re.sub(r"(?is)<script.*?</script>", "", _html(path))
         found = set(re.findall(r'href="(/encyclopedia\?sec=[a-z]+)"', body))
         assert not {x for x in found if not x.endswith("sec=art")}, (path, found)
+
+
+# Пересечения «аркан N в позиции X»: 80 адресов из реестра спроса. Спрашивают именно их —
+# «8 аркан профессии», «9 в хвосте матрицы судьбы», — а каталог из 22 карточек формально содержит
+# ответ, но ответом не является: медиана позиции у каталогов 33–42, у раздела, где адрес
+# повторяет запрос, — 5.
+def _registry() -> list[dict]:
+    path = pathlib.Path(__file__).resolve().parents[1] / "web" / "content" / "position-arcanum.json"
+    return json.loads(path.read_text(encoding="utf-8"))["items"]
+
+
+CROSSINGS = _registry()
+CROSSING_SAMPLE = [
+    (item["position"], item["arcanum"])
+    for item in (CROSSINGS[0], CROSSINGS[len(CROSSINGS) // 2], CROSSINGS[-1])
+]
+
+
+def test_every_crossing_of_the_registry_is_a_page():
+    """Реестр и сайт обязаны совпадать: запись без страницы — потерянный спрос, страница без
+    записи — тонкий корпус, которым проект уже обжигался на 76 хвостах и 5 544 матрицах."""
+    missing = []
+    for item in CROSSINGS:
+        url = f"/encyclopedia/position/{item['position']}/{item['arcanum']}"
+        if requests.get(f"{BASE}{url}", timeout=30).status_code != 200:
+            missing.append(url)
+    assert missing == [], missing
+
+
+def test_crossing_outside_the_registry_is_not_invented():
+    """Адрес появляется только против записи реестра, а не под любую пару чисел."""
+    for url in (
+        "/encyclopedia/position/center/99",
+        "/encyclopedia/position/nonsense/6",
+        "/encyclopedia/position/center/6/extra",
+    ):
+        assert requests.get(f"{BASE}{url}", timeout=30).status_code == 404, url
+
+
+@pytest.mark.parametrize("position,arcanum", CROSSING_SAMPLE)
+def test_crossing_page_answers_one_question(position, arcanum):
+    """Страница-ответ, а не карточка в каталоге: свой h1, свои крошки до позиции, свой разбор."""
+    url = f"/encyclopedia/position/{position}/{arcanum}"
+    html = _html(url)
+    headings = _headings(html)
+    assert headings and headings[0][0] == 1, (url, headings[:2])
+    assert str(arcanum) in headings[0][1], (url, headings[0][1])
+    assert sum(1 for rank, _ in headings if rank == 2) >= 3, (url, headings)
+    canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+    assert canonical and canonical.group(1).endswith(url), (url, canonical)
+    prose = re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", re.sub(r"(?is)<script.*?</script>", "", html)))
+    assert len(prose) > 4000, f"{url}: текста {len(prose)} знаков"
+
+    schemas = [s for s in _schemas(html) if s.get("@type") == "BreadcrumbList"]
+    assert schemas, url
+    trail = [item.get("item", "") for item in schemas[0]["itemListElement"]]
+    assert any(t.endswith(f"/encyclopedia/position/{position}") for t in trail), (url, trail)
+
+
+def test_crossings_are_reachable_without_the_sitemap():
+    """Восемьдесят адресов не должны быть сиротами: в карте есть, а входящих ссылок нет — так
+    поиск узнаёт о странице, но не видит её места в справочнике."""
+    linked: set[str] = set()
+    for source in {f"/encyclopedia/position/{item['position']}" for item in CROSSINGS} | {
+        f"/encyclopedia/arcanum/{item['arcanum']}" for item in CROSSINGS
+    }:
+        body = re.sub(r"(?is)<script.*?</script>", "", _html(source))
+        linked |= set(re.findall(r'href="(/encyclopedia/position/[a-z_]+/\d+)"', body))
+    wanted = {f"/encyclopedia/position/{i['position']}/{i['arcanum']}" for i in CROSSINGS}
+    assert wanted - linked == set(), sorted(wanted - linked)[:5]

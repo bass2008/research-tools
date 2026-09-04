@@ -408,6 +408,47 @@ export interface PositionContent {
   links: Array<{ label: string; href: string }>;
 }
 
+export interface PositionArcanumRow {
+  position: string;
+  arcanum: number;
+  frequency: number;
+  primaryQuery: string;
+  wording: string;
+  wordings: Record<string, number>;
+  tails: string[];
+}
+
+// Реестр страниц «аркан N в позиции X»: его строит tools/seo/build-position-arcanum.py из
+// оплаченного Вордстата. Адрес появляется только против записи реестра — плоская генерация
+// 22 × 37 адресов была бы тем самым тонким корпусом, который уже дал 76 страниц хвостов на
+// один показ. `readItems` сверяет `count`, поэтому обрезанный файл упадёт на загрузке.
+const POSITION_ARCANUM: PositionArcanumRow[] = readItems("position-arcanum.json").map((raw) => {
+  const position = typeof raw.position === "string" ? raw.position : "";
+  const arcanum = typeof raw.arcanum === "number" ? raw.arcanum : NaN;
+  const wording = typeof raw.wording === "string" ? raw.wording : "";
+  const query = typeof raw.primary_query === "string" ? raw.primary_query : "";
+  if (!position || !Number.isInteger(arcanum) || !wording || !query) {
+    throw new Error(`[content] негодная запись position-arcanum: ${JSON.stringify(raw)}`);
+  }
+  return {
+    position,
+    arcanum,
+    frequency: typeof raw.frequency === "number" ? raw.frequency : 0,
+    primaryQuery: query,
+    wording,
+    wordings: (raw.wordings ?? {}) as Record<string, number>,
+    tails: numbersOrStrings(raw.tails),
+  };
+});
+
+function numbersOrStrings(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((x): x is string => typeof x === "string") : [];
+}
+
+export function positionArcanumRows(): PositionArcanumRow[] {
+  return POSITION_ARCANUM;
+}
+
 export function positionContent(key: string): PositionContent | null {
   const raw = POSITIONS_JSON.get(key);
   if (!raw) return null;
