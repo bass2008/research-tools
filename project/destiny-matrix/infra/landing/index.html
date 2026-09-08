@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcana Sense — Destiny Matrix reading from your date of birth</title>
+<meta name="description" content="Arcana Sense builds a destiny matrix from a date of birth: 22 arcana across 17 positions of the octagram, with a written reading for every position. The English version is in development; the Russian one is live.">
+<link rel="canonical" href="https://arcana-sense.com/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Arcana Sense">
+<meta property="og:title" content="Arcana Sense — Destiny Matrix reading from your date of birth">
+<meta property="og:description" content="22 arcana across 17 positions of the octagram, with a written reading for every position. English version in development.">
+<meta property="og:url" content="https://arcana-sense.com/">
+<meta property="og:image" content="https://arcana-sense.com/img/gen-21.webp">
+<link rel="preload" href="fonts/manrope-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/cormorant-garamond-600.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: "Manrope"; src: url("fonts/manrope-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Manrope"; src: url("fonts/manrope-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("fonts/cormorant-garamond-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
+:root {
+  --bg: #eef2f4;
+  --card: #ffffff;
+  --paper: #faf7f0;
+  --line: #dee6ea;
+  --text: #16283c;
+  --dim: #5a6d7d;
+  --gold: #0e8f88;
+  --accent: #b8902a;
+  --sh: 0 10px 30px -16px rgba(18, 40, 60, .22);
+  --ser: "Cormorant Garamond", Georgia, serif;
+  --sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: var(--gold); }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 56px; }
+
+.brand { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 34px; }
+.brand svg { width: 30px; height: 30px; color: var(--gold); }
+.brand b { font: 600 21px/1 var(--ser); letter-spacing: .04em; }
+
+.hero { background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--sh); padding: 30px 24px 28px; text-align: center; }
+
+/* Веер повторяет первый слайд главной. Ось вращения лежит далеко под картами: чем больше
+   радиус, тем шире расходится дуга при том же угле — иначе карты складываются в одну. */
+.fanwrap { position: relative; height: 182px; margin: 0 auto 18px; max-width: 380px; }
+.fanc { position: absolute; top: 22px; left: 50%; width: 82px; margin-left: -41px; border-radius: 8px; border: 1px solid var(--line);
+  aspect-ratio: 520 / 700; object-fit: cover; object-position: top center;
+  transform-origin: 50% 330%; box-shadow: 0 20px 40px -24px rgba(18, 40, 60, .7); }
+.fanc:nth-child(1) { transform: rotate(-21deg); z-index: 1; }
+.fanc:nth-child(2) { transform: rotate(-14deg); z-index: 2; }
+.fanc:nth-child(3) { transform: rotate(-7deg); z-index: 3; }
+.fanc:nth-child(4) { transform: rotate(0deg); z-index: 4; }
+.fanc:nth-child(5) { transform: rotate(7deg); z-index: 3; }
+.fanc:nth-child(6) { transform: rotate(14deg); z-index: 2; }
+.fanc:nth-child(7) { transform: rotate(21deg); z-index: 1; }
+
+.eyebrow { color: var(--dim); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 10px; }
+h1 { font: 600 clamp(25px, 5vw, 34px)/1.22 var(--ser); margin: 0 0 14px; }
+.lead { color: var(--dim); margin: 0 auto; max-width: 52ch; }
+
+.hello { margin: 26px 0 0; padding: 18px 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; text-align: left; }
+.hello p { margin: 0 0 10px; }
+.hello p:last-child { margin: 0; }
+.hello b { font-weight: 600; }
+
+.about { margin: 30px 0 0; }
+.about h2 { font: 600 20px/1.3 var(--ser); margin: 0 0 10px; }
+.about p { margin: 0 0 12px; color: var(--dim); }
+.about ul { margin: 0; padding-left: 20px; color: var(--dim); }
+.about li { margin-bottom: 6px; }
+
+.foot { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; }
+
+@media (max-width: 420px) {
+  .fanwrap { height: 150px; max-width: 300px; }
+  .fanc { width: 66px; margin-left: -33px; }
+  .hero { padding: 22px 16px 24px; }
+  .foot { justify-content: center; text-align: center; gap: 6px 14px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-width="3">
+        <circle cx="60" cy="60" r="54" opacity=".35"/>
+        <rect x="24" y="24" width="72" height="72"/>
+        <rect x="24" y="24" width="72" height="72" transform="rotate(45 60 60)"/>
+      </g>
+      <circle cx="60" cy="60" r="6" fill="currentColor"/>
+    </svg>
+    <b>Arcana Sense</b>
+  </div>
+
+  <main class="hero">
+    <div class="fanwrap">
+      <img class="fanc" src="img/gen-02.webp" width="82" height="110" alt="Arcanum 2 — the High Priestess">
+      <img class="fanc" src="img/gen-06.webp" width="82" height="110" alt="Arcanum 6 — the Lovers">
+      <img class="fanc" src="img/gen-10.webp" width="82" height="110" alt="Arcanum 10 — the Wheel">
+      <img class="fanc" src="img/gen-01.webp" width="82" height="110" alt="Arcanum 1 — the Magician">
+      <img class="fanc" src="img/gen-14.webp" width="82" height="110" alt="Arcanum 14 — Temperance">
+      <img class="fanc" src="img/gen-18.webp" width="82" height="110" alt="Arcanum 18 — the Moon">
+      <img class="fanc" src="img/gen-21.webp" width="82" height="110" alt="Arcanum 21 — the World">
+    </div>
+
+    <p class="eyebrow">Arcana Sense · destiny matrix across 22 arcana</p>
+    <h1>Destiny Matrix: a reading from your date of birth</h1>
+    <p class="lead">Twenty-two arcana, seventeen positions of the octagram, and a written
+      interpretation for every one of them.</p>
+
+    <div class="hello">
+      <p><b>Hello.</b> The English version of Arcana Sense is in development.</p>
+      <p>The calculator and the full encyclopedia already work in Russian at
+        <a href="https://arcana-sense.ru/">arcana-sense.ru</a> — the chart is the same one,
+        only the words are not yours yet.</p>
+    </div>
+  </main>
+
+  <section class="about">
+    <h2>What is a destiny matrix</h2>
+    <p>A destiny matrix turns a date of birth into a diagram: the day, the month and the year are
+      reduced to numbers from 1 to 22, and each number is read as one of the major arcana. The
+      numbers are placed on an octagram, where every position answers a different question —
+      character, comfort zone, profession, money, relationships, the tasks inherited from a family
+      line.</p>
+    <p>Nothing here is drawn from a deck. The arcana only lend their names to the twenty-two
+      values; the values themselves come out of arithmetic, and the same date always gives the
+      same chart.</p>
+    <h2>What the English version will hold</h2>
+    <ul>
+      <li>the chart itself, calculated in the browser — the date of birth is never sent anywhere;</li>
+      <li>all 22 arcana, each with its own article;</li>
+      <li>17 positions of the octagram and what an arcanum means in each of them;</li>
+      <li>the seven energy levels of the chart and how they are read together;</li>
+      <li>a personal reading of twenty sections built from the chart.</li>
+    </ul>
+    <p>The reading is written for reflection and entertainment. It is not medical, psychological
+      or financial advice, and it promises no events.</p>
+  </section>
+
+  <footer class="foot">
+    <span>Arcana Sense</span>
+    <span><a href="https://arcana-sense.ru/">Русская версия</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
