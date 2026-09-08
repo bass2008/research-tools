@@ -191,6 +191,12 @@ export interface TreeApi {
   kids: Record<string, Node[]>
   expand(phrase: string): void // чистое чтение: раскрыть уже загруженное
   run(phrase: string, cmd: Cmd): void // команда (full_load — через подтверждение объёма)
+  domains: DomainState[] // куда узел можно принять
+  domainOf: Record<string, string> // фраза -> id домена, если она уже принята
+  addToDomain(phrase: string, domainId: string): void
+  createDomain(phrase: string, name: string): void
+  /** Сборка потребностей по всему домену — одно дерево на все его ключи. */
+  buildDomainNeeds(domainId: string): void
 }
 
 export const TreeCtx = createContext<TreeApi>({
@@ -198,4 +204,16 @@ export const TreeCtx = createContext<TreeApi>({
   kids: {},
   expand: () => {},
   run: () => {},
+  domains: [],
+  domainOf: {},
+  addToDomain: () => {},
+  createDomain: () => {},
+  buildDomainNeeds: () => {},
 })
+
+/** Обратный индекс состава доменов: узел знает своего владельца за одно обращение. */
+export function domainIndex(domains: DomainState[]): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const d of domains) for (const m of d.members) out[m] = d.id
+  return out
+}

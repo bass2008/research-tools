@@ -5,6 +5,7 @@ import type {
   ArtifactKind,
   ModelFamily,
   NeedsAction,
+  NeedsRootMeta,
   NeedsRow,
   NeedsTree,
   NeedsWork,
@@ -749,6 +750,10 @@ function TreeView({
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const favoriteCount = tree.works.filter((work) => work.favorite).length
   const visibleWorks = favoritesOnly ? tree.works.filter((work) => work.favorite) : tree.works
+  // Вход сборки — массив: домен объединяет ветки в одно дерево, «pdf» и «пдф» это одна работа.
+  const roots: NeedsRootMeta[] = tree.roots_meta?.length
+    ? tree.roots_meta
+    : [{ phrase: tree.root as string, freq: tree.root_freq }]
   const byWhy = new Map<string, typeof tree.excluded>()
   for (const e of tree.excluded) {
     const k = e.why ?? 'other'
@@ -757,12 +762,20 @@ function TreeView({
   return (
     <div className="ntree" data-testid="needs-tree">
       <div className="nhead">
-        <div className="nroot">
-          <span className="mut">собрано по узлу дерева запросов</span>
-          <b className="ph" data-testid="needs-root">
-            {tree.root ?? '— (вход не сохранён)'}
-          </b>
-          <span className="fr">{fmt(tree.root_freq)}</span>
+        <div className="nroot" data-testid="needs-roots">
+          <span className="mut">
+            {roots.length > 1
+              ? `собрано по ${roots.length} веткам дерева запросов`
+              : 'собрано по узлу дерева запросов'}
+          </span>
+          {roots.map((r, i) => (
+            <span className="nroot-one" key={r.phrase ?? i}>
+              <b className="ph" data-testid={i ? undefined : 'needs-root'}>
+                {r.phrase ?? '— (вход не сохранён)'}
+              </b>
+              <span className="fr">{fmt(r.freq)}</span>
+            </span>
+          ))}
         </div>
         <div className="ncond" data-testid="needs-condition">
           <span className="mut">условие ветки · не ниша</span>

@@ -88,12 +88,26 @@ def _task_row(ctx, task_id):
     return dict(r) if r else None
 
 
+def task_public(row):
+    """Строка задачи наружу: вход не отдаём, а единицу — да. Имя в `node` у работы и у
+    группы одно и то же, и без `group`/`work` вкладка не знает, чью кнопку гасить."""
+    row = dict(row)
+    try:
+        params = json.loads(row.pop("params", None) or "{}")
+    except (ValueError, TypeError):
+        params = {}
+    if not isinstance(params, dict):
+        params = {}
+    row["group"] = params.get("group")
+    row["work"] = params.get("work")
+    return row
+
+
 def _task_event(ctx, task_id):
     """Событие task (tech §6.2) — вкладка Task."""
     row = _task_row(ctx, task_id)
     if row:
-        row.pop("params", None)
-        ctx.publish("task", row)
+        ctx.publish("task", task_public(row))
 
 
 def create_task(ctx, op, node, params=None):
@@ -139,12 +153,59 @@ def _finish(ctx, task_id, status, result=None, error=None):
 
 # ---------- постановка и исполнение ----------
 
-def enqueue(ctx, op, phrase, params=None):
-    """Команда HTTP: строка task + блокировка узла + постановка в очередь. -> task_id.
-    Синхронна: ручка отвечает ack сразу, выполнение фоновое (tech §2)."""
+# Операции второго слоя: по единице (работа или группа) и по всему дереву.
+NEEDS_UNIT_OPS = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
+                  "needs_analyze_product": "product", "needs_model_test": "test",
+                  "needs_season": "season", "needs_adjacent": "adjacent", "needs_dump": "dump"}
+NEEDS_TREE_OPS = {"needs_refine": "refine", "needs_rank": "rank", "needs_products": "products"}
+MODEL_ACTIONS = frozenset({"analyze", "analyze_adv", "product", "test"})
+# держат блокировку узлов дерева запросов (ставятся через enqueue)
+NODE_OPS = frozenset({"load", "full_load", "needs_build", "stopwords_scan"})
+
+
+def needs_busy_key(op, params):
+    """Ключ занятости второго слоя: (дерево, единица, действие, семейство) или None.
+
+    Формула одна на всех: постановка, повтор и снятие после прогона. Разойдись они — единица
+    осталась бы «занятой» навсегда."""
+    if not isinstance(params, dict) or not params.get("tree_id"):
+        return None
+    act = NEEDS_UNIT_OPS.get(op)
+    if act:
+        family = params.get("model_family") if act in MODEL_ACTIONS else "basic"
+        unit = params.get("group") or needs_layer._norm(params.get("work"))
+        return (params["tree_id"], unit, act, family)
+    act = NEEDS_TREE_OPS.get(op)
+    return (params["tree_id"], "", act, "shared") if act else None
+
+
+def requeue(ctx, task_id, params=None):
+    """Упавшую задачу — снова в очередь ТОЙ ЖЕ строкой.
+
+    Повтор это продолжение попытки, а не новая задача: новая строка плодила в журнале
+    двойников, а вкладка считала единицу свободной и не гасила кнопку."""
+    if params is not None:
+        _save_params(ctx, task_id, params)
+    ctx.con.execute("UPDATE task SET status = 'QUEUED', started_at = NULL, finished_at = NULL, "
+                    "result = NULL, error = NULL WHERE id = ?", (task_id,))
+    ctx.con.commit()
+    _task_event(ctx, task_id)
+    ctx.queue.put_nowait(task_id)
+    return task_id
+
+
+def enqueue(ctx, op, phrase, params=None, lock=None):
+    """Команда HTTP: строка task + блокировка узлов + постановка в очередь. -> task_id.
+    Синхронна: ручка отвечает ack сразу, выполнение фоновое (tech §2).
+
+    `lock` — все узлы операции, если их больше одного (сборка по нескольким веткам). Список
+    едет в `params`, потому что снимает блокировку `execute`, а он видит только строку task."""
     node = wscore.normalize(phrase)
+    nodes = [wscore.normalize(p) for p in (lock or [node]) if wscore.normalize(p)]
+    if len(nodes) > 1:
+        params = {**(params or {}), "lock": nodes}
     task_id = create_task(ctx, op, node, params)
-    ctx.acquire([node], task_id)
+    ctx.acquire(nodes, task_id)
     ctx.queue.put_nowait(task_id)
     ctx.log("INFO", op, node, f"задача {task_id[:8]} поставлена в очередь")
     return task_id
@@ -158,8 +219,9 @@ async def execute(ctx, task_id, lock=None):
         ctx.log("ERROR", "queue", None, f"задача {task_id} исчезла из журнала")
         return False
     op, node = row["type"], row["node"]
-    nodes = [p for p in (lock if lock is not None else [node]) if p]
     params = json.loads(row["params"]) if row["params"] else None
+    nodes = [p for p in (lock if lock is not None else (params or {}).get("lock") or [node])
+             if p]
     ctx.con.execute("UPDATE task SET status = 'RUNNING', started_at = ? WHERE id = ?", (_now(), task_id))
     ctx.con.commit()
     _task_event(ctx, task_id)
@@ -187,22 +249,10 @@ async def execute(ctx, task_id, lock=None):
     finally:
         ctx.release(nodes, task_id)
         # занятость снимаем здесь же: иначе новая операция легко забудет это сделать и
-        # единица останется навсегда «занятой». Ключ — по группе у разборов и по работе у
-        # операций, которые остались на потребностях (сезонность, смежные, выгрузка, тест)
-        act = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
-               "needs_analyze_product": "product", "needs_model_test": "test",
-               "needs_season": "season",
-               "needs_adjacent": "adjacent", "needs_dump": "dump"}.get(op)
-        if act and isinstance(params, dict) and params.get("tree_id"):
-            family = params.get("model_family") \
-                if act in {"analyze", "analyze_adv", "product", "test"} \
-                else "basic"
-            unit = params.get("group") or needs_layer._norm(params.get("work"))
-            ctx.needs_busy.discard((params["tree_id"], unit, act, family))
-        tree_action = {"needs_refine": "refine", "needs_rank": "rank",
-                       "needs_products": "products"}.get(op)
-        if tree_action and isinstance(params, dict) and params.get("tree_id"):
-            ctx.needs_busy.discard((params["tree_id"], "", tree_action, "shared"))
+        # единица останется навсегда «занятой»
+        key = needs_busy_key(op, params)
+        if key:
+            ctx.needs_busy.discard(key)
 
 
 def _brief(result):
@@ -461,18 +511,24 @@ async def _ensure_serp(ctx, qn, stage="needs_analyze"):
 # ---------- второй слой: сборка дерева потребностей и разбор работы ----------
 
 async def needs_build(ctx, task_id, phrase, params):
-    """Собрать дерево потребностей по загруженной ветке (FULLY_LOADED -> файл в needs-lab).
+    """Собрать дерево потребностей по загруженным веткам (FULLY_LOADED -> файл в needs-lab).
 
     Заменяет узловой `classify`: тот ходил пачками по узлам и ветку целиком не видел, а вся
     суть — в сравнении внутри ветки (узкая работа на 589 — шум сама по себе и заметная щель
     рядом с работой на 3 861). Поэтому единица здесь — ВЕТКА, одним джобом.
 
+    Веток может быть несколько: одну работу пишут по-разному («pdf в ворд» и «пдф в ворд»),
+    и порознь ветки дают два дерева-двойника с разделённым пулом. Собранные вместе, они
+    сравнимы — ровно то, ради чего единицей и была взята ветка целиком.
+
     Результат — файлом рядом с деревом, в `node` не пишем ничего: второй слой одноразовый."""
-    root = wscore.normalize(phrase)
-    payload = needs_layer.build_payload(ctx.con, root)
+    roots = needs_layer.as_roots((params or {}).get("roots")) or [wscore.normalize(phrase)]
+    payload = needs_layer.build_payload(ctx.con, roots)
+    root, label = payload["root"], " + ".join(payload["roots"])
     if len(payload["nodes"]) < 2:
-        raise RuntimeError(f"в ветке {root!r} нечего собирать: фраз {len(payload['nodes'])}")
-    _save_params(ctx, task_id, {"root": root, "phrases": len(payload["nodes"]),
+        raise RuntimeError(f"в ветке {label!r} нечего собирать: фраз {len(payload['nodes'])}")
+    _save_params(ctx, task_id, {"root": root, "roots": payload["roots"],
+                                "phrases": len(payload["nodes"]),
                                 "subtree": payload["subtree_total"]})
     res = (await _run_llm(ctx, "needs", root, [_job(task_id, 0, "needs", payload)]))[0]
     problems = needs_layer.validate_tree(payload, res, strict=True)
@@ -482,10 +538,10 @@ async def needs_build(ctx, task_id, phrase, params):
     needs_layer.save_tree(tree_id, payload, res)
     counts = needs_layer.counts(res)
     ctx.log("INFO", "needs_build", root,
-            f"дерево потребностей собрано: {tree_id} — работ {counts['works']}, "
-            f"сегментов {counts['segments']}, "
+            f"дерево потребностей собрано по {len(payload['roots'])} веткам ({label}): "
+            f"{tree_id} — работ {counts['works']}, сегментов {counts['segments']}, "
             f"исключено {counts['excluded']} из {len(payload['nodes'])} фраз")
-    return {"tree_id": tree_id, **counts}
+    return {"tree_id": tree_id, "roots": len(payload["roots"]), **counts}
 
 
 async def needs_refine(ctx, task_id, phrase, params):
@@ -1444,7 +1500,9 @@ async def stopwords_scan(ctx, task_id, phrase, params):
     которое пользователь отклонил, модель предложит снова, потому что «отклонённого» мы не
     храним: список исключений — это то, что человек подтвердил, и ничего больше."""
     root = wscore.normalize(phrase)
-    saved = [w["word"] for w in wscore.stopwords(ctx.con)]
+    # спрашиваем только про то, что здесь ещё не запрещено: слово чужой области на эту
+    # ветку не действует, и молчать о нём было бы враньём
+    saved = wscore.stop_filter(ctx.con).words_for(root)
     words, total = wscore.word_stats(ctx.con, root, exclude=saved, cap=STOP_WORDS_CAP)
     if not words:
         raise RuntimeError(f"в поддереве {root!r} не осталось неразобранных слов")

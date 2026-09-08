@@ -80,6 +80,15 @@ const ARTIFACT_OF: Record<Action, ArtifactKind> = {
 const busyKey = (group: string, action: Action, family?: ModelFamily) =>
   `${group}|${action}|${family ?? 'basic'}`
 
+const GROUP_TASK_ACTION: Record<string, Action> = {
+  needs_analyze: 'analyze',
+  needs_analyze_adv: 'analyze_adv',
+  needs_analyze_product: 'product',
+  needs_dump: 'dump',
+}
+
+const LIVE: string[] = ['QUEUED', 'WAITING', 'RUNNING']
+
 /** Дерево продуктов: продукты одного уровня, внутри — потребности, внутри них — ключи. */
 export function ProductsPane({
   active,
@@ -136,8 +145,17 @@ export function ProductsPane({
   }, [tasks, openId])
 
   const groupBusy = tasks.some(
-    (t) => t.type === 'needs_products' && ['QUEUED', 'WAITING', 'RUNNING'].includes(t.status),
+    (t) => t.type === 'needs_products' && LIVE.includes(t.status),
   )
+
+  // Занятость берём из журнала задач, а не только из своих запусков: прогон могли начать
+  // с другой вкладки, из другого браузера или повтором из списка задач.
+  const running = new Set([
+    ...Object.keys(busy),
+    ...tasks
+      .filter((t) => t.group && GROUP_TASK_ACTION[t.type] && LIVE.includes(t.status))
+      .map((t) => busyKey(t.group!, GROUP_TASK_ACTION[t.type], t.model_family ?? undefined)),
+  ])
 
   async function rebuild(family: ModelFamily) {
     if (!openId) return
@@ -291,7 +309,7 @@ export function ProductsPane({
               <Group
                 key={g.id}
                 g={g}
-                busy={busy}
+                busy={running}
                 favoriteBusy={Boolean(favoriteBusy[g.id])}
                 onFavorite={toggleFavorite}
                 onRun={run}
@@ -345,7 +363,7 @@ function Group({
   onRun,
 }: {
   g: ProductGroup
-  busy: Record<string, string>
+  busy: Set<string>
   favoriteBusy: boolean
   onFavorite: (group: string, favorite: boolean) => void
   onRun: (action: Action, group: string, family?: ModelFamily) => void
@@ -418,7 +436,7 @@ function Group({
               <div className="menu-title">Basic</div>
               {BASIC.map((act) => {
                 const runs = artifacts.filter((x) => x.kind === ARTIFACT_OF[act]).length
-                const wait = Boolean(busy[busyKey(g.id, act)])
+                const wait = busy.has(busyKey(g.id, act))
                 return (
                   <button
                     key={act}
@@ -458,7 +476,7 @@ function Group({
                       const runs = artifacts.filter(
                         (x) => x.kind === ARTIFACT_OF[act] && artifactFamily(x) === family,
                       ).length
-                      const wait = Boolean(busy[busyKey(g.id, act, family)])
+                      const wait = busy.has(busyKey(g.id, act, family))
                       return (
                         <button
                           key={act}

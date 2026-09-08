@@ -4,11 +4,13 @@
 проверяется именно поверхность API, а не работа операций.
 """
 import asyncio
+import json
 
 import pytest
 
 import wscore
-from conftest import SNAP, SNAP_REPORT_ID, node_row, seed_cache, task_done, task_row
+from conftest import (SNAP, SNAP_REPORT_ID, drain, node_row, only, seed_cache, task_done,
+                      task_row)
 
 def make_busy(con, phrase, task_id="busy-0001"):
     """Занять узел «чужой» операцией — источник 409 (tech §6.1)."""
@@ -270,28 +272,30 @@ def test_cancel_refuses_a_task_that_is_already_working(client, snap_con):
     assert client.post("/api/task/нет-такой/cancel").status_code == 404
 
 
-def test_retry_reruns_a_failed_task_through_the_same_command(client, snap_con):
-    """Повтор упавшей задачи идёт через ту же ручку, что и первый запуск.
+def test_retry_reruns_the_same_task_row(client, snap_con):
+    """Повтор — продолжение той же попытки, а не новая задача.
 
-    Иначе повтор обошёл бы проверку статуса узла и занятости: смысл кнопки — «сделай то же
-    самое ещё раз», а не «поставь задачу в обход правил». Старая строка остаётся: у повтора
-    свой task_id, история падений не переписывается."""
+    Новая строка плодила в журнале двойников, а вкладка считала единицу свободной и кнопку
+    не гасила. Проверки при этом те же, что при первом запуске (см. соседние тесты)."""
     snap_con.execute(
-        "INSERT INTO task(id, type, status, node, created_at, error) "
-        "VALUES ('task-failed', 'full_load', 'FAILED', ?, 0, 'таймаут')",
+        "INSERT INTO task(id, type, status, node, created_at, started_at, finished_at, error) "
+        "VALUES ('task-failed', 'full_load', 'FAILED', ?, 0, 1, 2, 'таймаут')",
         (SNAP["LOADED"],),
     )
     snap_con.commit()
+    before = snap_con.execute("SELECT COUNT(*) FROM task").fetchone()[0]
 
     r = client.post("/api/task/task-failed/retry")
 
     assert r.status_code == 200, r.text
-    new_id = r.json()["task_id"]
-    assert new_id != "task-failed"
-    row = snap_con.execute("SELECT type, node, status FROM task WHERE id = ?", (new_id,)).fetchone()
+    assert r.json()["task_id"] == "task-failed", "повтор не заводит вторую строку"
+    assert snap_con.execute("SELECT COUNT(*) FROM task").fetchone()[0] == before
+    row = snap_con.execute(
+        "SELECT type, node, status, started_at, finished_at, error FROM task "
+        "WHERE id = 'task-failed'").fetchone()
     assert (row["type"], row["node"]) == ("full_load", SNAP["LOADED"])
-    assert snap_con.execute("SELECT status FROM task WHERE id = 'task-failed'").fetchone()[0] \
-        == "FAILED", "старая задача остаётся упавшей"
+    assert row["status"] in ("QUEUED", "RUNNING", "DONE", "FAILED")
+    assert row["error"] is None and row["finished_at"] is None, "след прошлого падения стёрт"
 
 
 def test_retry_refuses_a_task_that_did_not_fail(client, snap_con):
@@ -311,3 +315,191 @@ def test_report_is_served_as_static(client, reports_dir):
     r = client.get(f"/reports/{SNAP_REPORT_ID}.html")
     assert r.status_code == 200 and "отчёт" in r.text
     assert client.get("/reports/нет-такого.html").status_code == 404
+
+
+# ---------------------------------------------------------------- области списка и домены
+
+def test_stopwords_api_addresses_a_node_and_leaves_other_branches_alone(client, snap_con):
+    """Список адресуется узлу: чужая ветка тем же словом не задета."""
+    st = client.get("/api/stopwords").json()
+    assert {"saved", "suggestion", "scopes", "kinds"} <= set(st)
+    assert st["scopes"][0]["scope_kind"] == "global"
+
+    r = client.post("/api/stopwords", json={"words": [{"word": "фон", "kind": "unwanted"}],
+                                            "scope_kind": "node", "scope_id": SNAP["LOADED"]})
+    assert r.status_code == 200 and r.json()["added"] == 1
+    saved = r.json()["saved"]
+    assert saved[0]["scope_kind"] == "node" and saved[0]["scope_id"] == SNAP["LOADED"]
+
+    stops = wscore.stop_filter(snap_con)
+    assert wscore.is_stopped(SNAP["FULLY_LOADED"], stops), "внутри своей ветки — запрет"
+    assert not wscore.is_stopped("телеграм фон", stops), "снаружи слово не действует"
+
+    # удаление адресное: тот же вызов без области ничего не находит
+    assert client.request("DELETE", "/api/stopwords",
+                          json={"words": ["фон"]}).json()["removed"] == 0
+    assert client.request("DELETE", "/api/stopwords",
+                          json={"words": ["фон"], "scope_kind": "node",
+                                "scope_id": SNAP["LOADED"]}).json()["removed"] == 1
+
+
+def test_stopwords_api_rejects_unknown_owner(client):
+    """Адресат должен существовать — иначе список повис бы в никуда (И5)."""
+    for scope in ({"scope_kind": "node", "scope_id": "такой фразы нет"},
+                  {"scope_kind": "domain", "scope_id": "нет-домена"},
+                  {"scope_kind": "мусор", "scope_id": "x"}):
+        r = client.post("/api/stopwords",
+                        json={"words": [{"word": "новости", "kind": "unwanted"}], **scope})
+        assert r.status_code == 422, scope
+    assert client.get("/api/stopwords").json()["saved"] == []
+
+
+def test_domain_is_made_from_a_node_and_takes_its_stopwords(client, snap_con):
+    """Домен из узла: узел уходит из отдельных корней, его список переезжает домену (И3)."""
+    client.post("/api/stopwords", json={"words": [{"word": "фон", "kind": "unwanted"}],
+                                        "scope_kind": "node", "scope_id": SNAP["NEW"]})
+
+    r = client.post("/api/domains", json={"phrase": SNAP["NEW"], "name": "Фоны"})
+    assert r.status_code == 200, r.text
+    did = r.json()["id"]
+    assert r.json()["members"] == [SNAP["NEW"]] and r.json()["stopwords_moved"] == 1
+
+    saved = client.get("/api/stopwords").json()["saved"]
+    assert [(w["scope_kind"], w["scope_id"]) for w in saved] == [("domain", did)]
+    assert wscore.domain_of(snap_con, SNAP["NEW"]) == did
+    assert SNAP["NEW"] not in [n["phrase"] for n in wscore.root_candidates(snap_con)], \
+        "член домена не дублируется отдельным корнем"
+
+    # второй раз тот же узел в домен не принять
+    assert client.post("/api/domains", json={"phrase": SNAP["NEW"]}).status_code == 422
+    assert client.post("/api/domains/member",
+                       json={"domain_id": did, "phrase": SNAP["NEW"]}).status_code == 422
+    assert client.post("/api/domains/member",
+                       json={"domain_id": "нет-такого", "phrase": SNAP["HEAD"]}).status_code == 422
+    assert client.post("/api/domains", json={"phrase": "фразы нет в дереве"}).status_code == 404
+
+
+def test_domain_member_join_merges_stoplists_without_duplicates(client, snap_con):
+    """Приём в домен: слова узла переезжают, повтор не создаёт дубля (И2, И3)."""
+    did = client.post("/api/domains", json={"phrase": SNAP["NEW"], "name": "Фоны"}).json()["id"]
+    client.post("/api/stopwords", json={"words": [{"word": "видео", "kind": "unwanted"}],
+                                        "scope_kind": "domain", "scope_id": did})
+    client.post("/api/stopwords", json={"words": [{"word": "видео", "kind": "unwanted"},
+                                                  {"word": "капкут", "kind": "brand"}],
+                                        "scope_kind": "node", "scope_id": SNAP["HEAD"]})
+
+    r = client.post("/api/domains/member", json={"domain_id": did, "phrase": SNAP["HEAD"]})
+    assert r.status_code == 200 and r.json()["stopwords_moved"] == 1, "переехало только новое"
+    assert r.json()["members"] == [SNAP["NEW"], SNAP["HEAD"]]
+
+    saved = client.get("/api/stopwords").json()["saved"]
+    assert {w["word"] for w in saved} == {"видео", "капкут"}
+    assert {(w["scope_kind"], w["scope_id"]) for w in saved} == {("domain", did)}
+    assert wscore.stopword_violations(snap_con) == []
+
+    # члену домена своего списка больше не завести
+    assert client.post("/api/stopwords",
+                       json={"words": [{"word": "фон", "kind": "unwanted"}],
+                             "scope_kind": "node", "scope_id": SNAP["HEAD"]}).status_code == 422
+
+
+def test_domain_change_reaches_open_clients(client, snap_con):
+    """Новый домен приезжает открытым клиентам событием roots: член домена не должен
+    остаться нарисованным отдельным корнем."""
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"action": "subscribe"})
+        drain(ws)
+        client.post("/api/domains", json={"phrase": SNAP["NEW"], "name": "Фоны"})
+        roots = only(drain(ws), "roots")
+
+    assert roots, "события roots не было"
+    data = roots[-1]
+    assert [d["name"] for d in data["domains"]] == ["Фоны"]
+    assert SNAP["NEW"] not in [n["phrase"] for n in data["roots"]]
+
+
+def test_load_of_a_stopped_phrase_is_refused(client, snap_con):
+    """`load` — покупка пула одной фразы, а список исключений именно от неё и отказывается.
+    Раньше проверка стояла только на заведении корня, и узел под запретом покупался."""
+    client.post("/api/stopwords", json={"words": [{"word": "фон", "kind": "unwanted"}],
+                                        "scope_kind": "node", "scope_id": SNAP["LOADED"]})
+    r = client.post("/api/node/load", json={"phrase": SNAP["FULLY_LOADED"]})
+    assert r.status_code == 422 and "стоп-слов" in r.json()["detail"]
+    assert snap_con.execute("SELECT COUNT(*) FROM task WHERE type = 'load' AND node = ?",
+                            (SNAP["FULLY_LOADED"],)).fetchone()[0] == 0, "задачи на покупку нет"
+
+    # вне области слово не мешает: соседняя ветка грузится обычным порядком
+    assert client.post("/api/node/load", json={"phrase": SNAP["NEW"]}).status_code == 200
+
+
+def test_stopwords_reject_a_multiword_entry(client):
+    """Сравнение идёт со словом фразы: пара слов не совпадёт никогда, и принимать её —
+    значит завести заведомо мёртвое исключение."""
+    r = client.post("/api/stopwords",
+                    json={"words": [{"word": "рабочая тетрадь", "kind": "unwanted"}]})
+    assert r.status_code == 422 and "одно слово" in r.json()["detail"]
+    assert client.get("/api/stopwords").json()["saved"] == []
+
+    # по отдельности — принимаются
+    r = client.post("/api/stopwords", json={"words": [{"word": "рабочая", "kind": "unwanted"},
+                                                      {"word": "тетрадь", "kind": "unwanted"}]})
+    assert r.json()["added"] == 2
+
+
+# ---------------------------------------------------------------- сборка по нескольким веткам
+
+def test_needs_build_takes_an_array_of_branches(client, snap_con):
+    """Единица сборки — набор веток: одну работу пишут по-разному, и порознь ветки дают
+    два дерева-двойника с разделённым пулом."""
+    for phrase in (SNAP["LOADED"], SNAP["HEAD"]):
+        snap_con.execute("UPDATE node SET status = 'FULLY_LOADED' WHERE phrase = ?", (phrase,))
+    snap_con.commit()
+
+    r = client.post("/api/needs/build", json={"phrases": [SNAP["HEAD"], SNAP["LOADED"]]})
+    assert r.status_code == 200, r.text
+    assert r.json()["roots"] == [SNAP["HEAD"], SNAP["LOADED"]]
+
+    row = task_row(snap_con, r.json()["task_id"])
+    assert row["type"] == "needs_build" and row["node"] == SNAP["HEAD"]
+    params = json.loads(row["params"])
+    assert params["roots"] == [SNAP["HEAD"], SNAP["LOADED"]]
+    # заняты ОБЕ ветки: вторая сборка не должна залезть в ту же
+    assert params["lock"] == [SNAP["HEAD"], SNAP["LOADED"]]
+    assert client.post("/api/needs/build",
+                       json={"phrases": [SNAP["LOADED"]]}).status_code == 409
+
+
+def test_needs_build_still_takes_a_single_phrase(client, snap_con):
+    """Старый вход остаётся: одна фраза — это набор из одной ветки."""
+    snap_con.execute("UPDATE node SET status = 'FULLY_LOADED' WHERE phrase = ?",
+                     (SNAP["LOADED"],))
+    snap_con.commit()
+    r = client.post("/api/needs/build", json={"phrase": SNAP["LOADED"]})
+    assert r.status_code == 200 and r.json()["roots"] == [SNAP["LOADED"]]
+    # у набора из одной ветки служебного списка блокировок нет — блокируется сам узел
+    assert "lock" not in json.loads(task_row(snap_con, r.json()["task_id"])["params"])
+
+
+def test_needs_build_by_domain_collects_every_key(client, snap_con):
+    """Кнопка над доменом собирает ОДНО дерево по всем его ключам."""
+    did = client.post("/api/domains", json={"phrase": SNAP["LOADED"], "name": "Фоны"}).json()["id"]
+    client.post("/api/domains/member", json={"domain_id": did, "phrase": SNAP["HEAD"]})
+    for phrase in (SNAP["LOADED"], SNAP["HEAD"]):
+        snap_con.execute("UPDATE node SET status = 'FULLY_LOADED' WHERE phrase = ?", (phrase,))
+    snap_con.commit()
+
+    r = client.post("/api/needs/build", json={"domain_id": did})
+    assert r.status_code == 200, r.text
+    assert r.json()["roots"] == [SNAP["LOADED"], SNAP["HEAD"]], "порядок ключей домена"
+    assert client.post("/api/needs/build", json={"domain_id": "нет-домена"}).status_code == 404
+
+
+def test_needs_build_refuses_a_branch_that_is_not_loaded(client, snap_con):
+    """Недогруженная ветка исказила бы сравнение — отбиваем весь набор, называя виновных."""
+    snap_con.execute("UPDATE node SET status = 'FULLY_LOADED' WHERE phrase = ?",
+                     (SNAP["LOADED"],))
+    snap_con.commit()
+    r = client.post("/api/needs/build", json={"phrases": [SNAP["LOADED"], SNAP["NEW"]]})
+    assert r.status_code == 422 and SNAP["NEW"] in r.json()["detail"]
+    assert snap_con.execute("SELECT COUNT(*) FROM task WHERE type = 'needs_build'").fetchone()[0] == 0
+    assert client.post("/api/needs/build", json={"phrases": []}).status_code == 422

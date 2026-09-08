@@ -7,7 +7,7 @@ import { NeedsPane } from './NeedsPane'
 import { ProductsPane } from './ProductsPane'
 import { StopPane } from './StopPane'
 import { TreeNode } from './TreeNode'
-import { TreeCtx, applyEvent, initialState } from './store'
+import { TreeCtx, applyEvent, domainIndex, initialState } from './store'
 import type { Cmd, LogRow, TreeApi } from './store'
 
 type Tab = 'main' | 'needs' | 'products' | 'stop' | 'log' | 'tasks' | 'reports'
@@ -58,7 +58,7 @@ export default function App() {
     try {
       if (cmd === 'load') await api.loadNode(p)
       else if (cmd === 'full_load') await api.fullLoad(p)
-      else await api.needsBuild(p)
+      else await api.needsBuild([p])
       setErr('')
     } catch (e) {
       setErr(errText(e))
@@ -118,9 +118,18 @@ export default function App() {
         if (cmd === 'full_load') void confirmVolume(p, cmd)
         else void post(p, cmd)
       },
+      domains: st.domains,
+      domainOf: domainIndex(st.domains),
+      // Новый состав доменов приходит событием roots — отдельно перечитывать нечего.
+      addToDomain: (p, id) =>
+        void api.domainAddMember(id, p).then(() => setErr('')).catch((e) => setErr(errText(e))),
+      createDomain: (p, name) =>
+        void api.domainCreate(p, name).then(() => setErr('')).catch((e) => setErr(errText(e))),
+      buildDomainNeeds: (id) =>
+        void api.needsBuildDomain(id).then(() => setErr('')).catch((e) => setErr(errText(e))),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [st.nodes, st.kids],
+    [st.nodes, st.kids, st.domains],
   )
 
   /** Назад ко всем корням: дерево запросов — лес, а не одна ветка. */
@@ -138,14 +147,39 @@ export default function App() {
       forest ? (
         st.domains.length || st.roots.length ? (
           <div data-testid="tree-forest">
-            {st.domains.map((domain) => (
+            {st.domains.map((domain) => {
+              // Сборка идёт по домену целиком, поэтому и готовность — по всем его ключам:
+              // недогруженная ветка исказила бы сравнение, ради которого их и собирают вместе.
+              const ready = domain.members.filter(
+                (m) => (st.nodes[m]?.status ?? 'NEW') === 'FULLY_LOADED',
+              )
+              const busy = domain.members.some((m) => !!st.nodes[m]?.task_id)
+              return (
               <section className="domain" data-testid={`domain-${domain.id}`} key={domain.id}>
                 <div className="domain-head">
                   <div>
                     <span className="domain-kind">Домен</span>
                     <h2>{domain.name}</h2>
                   </div>
+                  <span className="domain-tools">
                   <span className="domain-count">{domain.members.length} ключей</span>
+                  <button
+                    className="go"
+                    data-testid={`domain-needs-${domain.id}`}
+                    disabled={busy || ready.length !== domain.members.length}
+                    title={
+                      busy
+                        ? 'по ключу домена идёт операция'
+                        : ready.length === domain.members.length
+                          ? 'собрать одно дерево потребностей по всем ключам домена'
+                          : `готовы ${ready.length} из ${domain.members.length}: сборка возможна ` +
+                            'только из FULLY_LOADED'
+                    }
+                    onClick={() => treeApi.buildDomainNeeds(domain.id)}
+                  >
+                    Собрать потребности
+                  </button>
+                  </span>
                 </div>
                 <div className="domain-members">
                   {domain.members.map((p) => (
@@ -153,7 +187,8 @@ export default function App() {
                   ))}
                 </div>
               </section>
-            ))}
+              )
+            })}
             {st.roots.length > 0 && (
               <section className="other-roots" data-testid="other-roots">
                 {st.domains.length > 0 && <h2>Другие корни</h2>}
@@ -190,7 +225,7 @@ export default function App() {
         </div>
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [forest, st.domains, st.roots, st.root, st.missing],
+    [forest, st.domains, st.roots, st.root, st.missing, st.nodes, treeApi],
   )
 
   const pr = st.progress

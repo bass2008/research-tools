@@ -141,7 +141,14 @@ def _input(params_file):
         p = json.loads(params_file.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {}, {}
+    roots = as_roots(p.get("roots") or p.get("root"))
+    known = {m.get("phrase"): m for m in (p.get("roots_meta") or []) if isinstance(m, dict)}
     meta = {"root": p.get("root"), "root_freq": p.get("root_freq"),
+            "roots": roots,
+            # у сборок до массива веток roots_meta нет — частоту знаем только у главной
+            "roots_meta": [known.get(r) or {"phrase": r, "freq": p.get("root_freq")
+                                            if r == p.get("root") else None}
+                           for r in roots],
             "phrase_count": len(p.get("nodes") or [])}
     return {n["phrase"]: n.get("freq") for n in p.get("nodes") or []}, meta
 
@@ -860,7 +867,7 @@ def backfill_head_nodes(con, max_freq=HEAD_FREQ):
             source = _read(params_file)
         except NeedsError:
             continue
-        root = source.get("root")
+        root = source.get("roots") or source.get("root")
         if not root or source.get("head_nodes") is not None:
             continue
         try:
@@ -990,6 +997,7 @@ def rows():
         products = latest_products(tid)
         out.append({"id": tid, "error": None, "condition": tree.get("condition"),
                     "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+                    "roots": meta.get("roots") or [],
                     "created_at": int(tree_file.stat().st_mtime),
                     "ranked_at": (ranking or {}).get("created_at"),
                     "ranked_by": (ranking or {}).get("model_family"),
@@ -1050,6 +1058,8 @@ def detail(tree_id):
     products = products_view(tree_id)
     return {"id": tree_id, "condition": tree.get("condition"),
             "root": meta.get("root"), "root_freq": meta.get("root_freq"),
+            "roots": meta.get("roots") or [],
+            "roots_meta": meta.get("roots_meta") or [],
             "created_at": int(tree_file.stat().st_mtime),
             "revision": tree_revision(tree),
             "refined_at": tree.get("_refined_at"),
@@ -1063,21 +1073,43 @@ def detail(tree_id):
             "works": out_works, "excluded": excluded}
 
 
-def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
-    """Ветка дерева запросов как вход сборки: {root, root_freq, nodes, head_nodes}.
+def as_roots(value):
+    """Один корень или несколько — всегда список нормализованных фраз без повторов.
 
+    Массив нужен там, где одну и ту же работу пишут по-разному («pdf в ворд» и «пдф в ворд»):
+    порознь ветки дают два дерева-двойника, а вместе — одно, где формулировки сравнимы."""
+    if isinstance(value, str) or value is None:
+        value = [value] if value else []
+    out = [_norm(p) for p in value if _norm(p)]
+    return list(dict.fromkeys(out))
+
+
+def build_payload(con, roots, min_freq=FLOOR, max_freq=HEAD_FREQ):
+    """Ветки дерева запросов как вход сборки: {root, roots, root_freq, nodes, head_nodes}.
+
+    `roots` — все входные ветки; `root` — самая частотная из них, ею дерево и подписано.
     `children` — только те дети, что сами попали в payload: иначе сборка увидит ссылки на
     фразы, которых у неё нет. Голову (> `max_freq`) классификация не разбирает — интент там
     размыт по определению, — но и не теряет: она уходит отдельным списком `head_nodes`.
     Разбору она нужна как контейнер пула: частота родителя уже включает уточнения, и без него
     рынок считается по обрезкам («матрица судьбы рассчитать» 204 741 против собранных руками
     71 717 по её же детям)."""
-    root = _norm(root)
-    row = con.execute("SELECT phrase, COALESCE(freq, 0) f, status FROM node WHERE phrase = ?",
-                      (root,)).fetchone()
-    if row is None:
-        raise NeedsError(f"узла нет в дереве: {root}")
-    subtree = wscore.subtree_phrases(con, root)
+    wanted = as_roots(roots)
+    if not wanted:
+        raise NeedsError("нужна хотя бы одна ветка")
+    rows = {}
+    for phrase in wanted:
+        row = con.execute("SELECT phrase, COALESCE(freq, 0) f, status FROM node "
+                          "WHERE phrase = ?", (phrase,)).fetchone()
+        if row is None:
+            raise NeedsError(f"узла нет в дереве: {phrase}")
+        rows[phrase] = row
+    # главной считаем самую частотную ветку: ею подписано дерево и от неё берётся slug
+    wanted.sort(key=lambda p: (-rows[p][1], p))
+    root = wanted[0]
+    row = rows[root]
+    subtree = list(dict.fromkeys(
+        p for phrase in wanted for p in wscore.subtree_phrases(con, phrase)))
     freq = {}
     for chunk in [subtree[i:i + 400] for i in range(0, len(subtree), 400)]:
         qs = ",".join("?" * len(chunk))
@@ -1085,7 +1117,7 @@ def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
             f"SELECT phrase, COALESCE(freq, 0) FROM node WHERE phrase IN ({qs})", chunk)})
     kept = {p for p, f in freq.items()
             if f >= min_freq and (max_freq is None or f <= max_freq)}
-    kept.add(root)
+    kept.update(wanted)      # входная ветка остаётся во входе, какой бы частоты ни была
     head = {p for p, f in freq.items() if p not in kept and f > (max_freq or 0)}
     edges, head_edges = {}, {}
     for chunk in [subtree[i:i + 400] for i in range(0, len(subtree), 400)]:
@@ -1102,7 +1134,9 @@ def build_payload(con, root, min_freq=FLOOR, max_freq=HEAD_FREQ):
     head_nodes = [{"phrase": p, "freq": freq[p],
                    "children": sorted(head_edges.get(p, []), key=lambda c: (-freq[c], c))}
                   for p in sorted(head, key=lambda p: (-freq[p], p))]
-    return {"root": root, "root_freq": freq[root], "status": row[2],
+    return {"root": root, "roots": wanted, "root_freq": freq[root], "status": row[2],
+            "roots_meta": [{"phrase": p, "freq": rows[p][1], "status": rows[p][2]}
+                           for p in wanted],
             "min_freq": min_freq, "max_freq": max_freq,
             "subtree_total": len(subtree), "nodes": nodes, "head_nodes": head_nodes}
 

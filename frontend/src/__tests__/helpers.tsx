@@ -2,8 +2,8 @@
 import { render } from '@testing-library/react'
 import { vi } from 'vitest'
 import type { Node, Status } from '../api'
-import { TreeCtx, emptyNode } from '../store'
-import type { TreeApi } from '../store'
+import { TreeCtx, domainIndex, emptyNode } from '../store'
+import type { DomainState, TreeApi } from '../store'
 import { TreeNode } from '../TreeNode'
 
 /** Статусы дерева запросов: только загрузка. Выводы живут во втором слое (работы). */
@@ -21,14 +21,21 @@ export function renderTree(opts: {
   root: string
   nodes: Node[]
   kids?: Record<string, Node[]>
+  domains?: DomainState[]
 }) {
   const nodes: Record<string, Node> = {}
   for (const n of opts.nodes) nodes[n.phrase] = n
+  const domains = opts.domains ?? []
   const api: TreeApi = {
     nodes,
     kids: opts.kids ?? {},
     expand: vi.fn(),
     run: vi.fn(),
+    domains,
+    domainOf: domainIndex(domains),
+    addToDomain: vi.fn(),
+    createDomain: vi.fn(),
+    buildDomainNeeds: vi.fn(),
   }
   const r = render(
     <TreeCtx.Provider value={api}>

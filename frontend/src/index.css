@@ -72,6 +72,11 @@ input {
   color: #fff;
   cursor: pointer;
 }
+/* недоступная кнопка обязана выглядеть недоступной: иначе вид расходится с поведением */
+.go:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 .hint {
   color: var(--mut);
   font-size: 14px;

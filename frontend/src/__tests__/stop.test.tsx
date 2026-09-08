@@ -8,7 +8,12 @@ import type { StopState, TaskRow } from '../api'
 
 const state = (over: Partial<StopState> = {}): StopState => ({
   kinds: ['stop', 'brand', 'unwanted'],
-  saved: [{ word: 'проститутки', kind: 'stop', added_at: 1 }],
+  scopes: [
+    { scope_kind: 'global', scope_id: '', name: 'Общий список', count: 1 },
+    { scope_kind: 'domain', scope_id: 'pdf', name: 'PDF', count: 0 },
+    { scope_kind: 'node', scope_id: 'телеграм', name: 'телеграм', count: 0 },
+  ],
+  saved: [{ word: 'проститутки', kind: 'stop', scope_kind: 'global', scope_id: '', added_at: 1 }],
   suggestion: {
     task_id: 't1',
     root: 'телеграм',
@@ -70,11 +75,19 @@ describe('вкладка «Стоп-слова»', () => {
     await userEvent.click(screen.getByTestId('stop-add-brand'))
 
     await waitFor(() => expect(url()).toBe('/api/stopwords'))
-    expect(body()).toEqual({ words: [{ word: 'подоляка', kind: 'brand' }] })
+    expect(body()).toEqual({
+      words: [{ word: 'подоляка', kind: 'brand' }],
+      scope_kind: 'global',
+      scope_id: '',
+    })
 
     fetchMock.mockResolvedValueOnce(res(200, { added: 1, saved: state().saved }))
     await userEvent.click(screen.getByTestId('stop-add-all-unwanted'))
-    expect(body()).toEqual({ words: [{ word: 'новости', kind: 'unwanted' }] })
+    expect(body()).toEqual({
+      words: [{ word: 'новости', kind: 'unwanted' }],
+      scope_kind: 'global',
+      scope_id: '',
+    })
   })
 
   it('«‹» убирает принятое слово из списка', async () => {
@@ -86,7 +99,7 @@ describe('вкладка «Стоп-слова»', () => {
     await userEvent.click(screen.getByTestId('stop-del-stop'))
 
     await waitFor(() => expect(url()).toBe('/api/stopwords'))
-    expect(body()).toEqual({ words: ['проститутки'] })
+    expect(body()).toEqual({ words: ['проститутки'], scope_kind: 'global', scope_id: '' })
     expect(fetchMock.mock.calls.at(-1)![1].method).toBe('DELETE')
   })
 
@@ -118,5 +131,118 @@ describe('вкладка «Стоп-слова»', () => {
     rerender(<StopPane active tasks={[{ ...task, status: 'DONE' }]} />)
     await waitFor(() => expect(fetchMock.mock.calls.length).toBe(before + 1))
     expect(screen.getByTestId('stop-scan')).toBeEnabled()
+  })
+})
+
+// Область списка: у кого исключение живёт. Домен виден отдельно — и текстом, и цветом.
+describe('владелец списка исключений', () => {
+  it('по умолчанию общий; домены отмечены классом и подписью', async () => {
+    render(<StopPane active />)
+    const sel = (await screen.findByTestId('stop-scope')) as HTMLSelectElement
+
+    expect(sel.value).toBe('global:')
+    expect(screen.getByTestId('stop-scope-hint')).toHaveTextContent('на всё дерево')
+
+    const dom = [...sel.options].find((o) => o.textContent?.includes('PDF'))!
+    expect(dom.textContent).toContain('Домен: PDF')
+    expect(dom.className).toBe('opt-domain')
+    expect([...sel.options].find((o) => o.textContent === 'телеграм')!.className).toBe('')
+  })
+
+  it('выбранный узел уходит в запрос вместе со словом', async () => {
+    render(<StopPane active />)
+    const sel = await screen.findByTestId('stop-scope')
+
+    await userEvent.selectOptions(sel, ['node:телеграм'])
+    expect(screen.getByTestId('stop-scope-hint')).toHaveTextContent('внутри ветки «телеграм»')
+    // разбор идёт по узлу — поле ветки подставляется само
+    expect((screen.getByTestId('stop-input') as HTMLInputElement).value).toBe('телеграм')
+
+    await userEvent.selectOptions(screen.getByTestId('stop-offered-brand'), ['подоляка'])
+    fetchMock.mockResolvedValueOnce(res(200, { added: 1, saved: [] }))
+    await userEvent.click(screen.getByTestId('stop-add-brand'))
+
+    await waitFor(() => expect(url()).toBe('/api/stopwords'))
+    expect(body()).toEqual({
+      words: [{ word: 'подоляка', kind: 'brand' }],
+      scope_kind: 'node',
+      scope_id: 'телеграм',
+    })
+  })
+
+  it('показывает только слова выбранного владельца', async () => {
+    fetchMock.mockResolvedValue(
+      res(
+        200,
+        state({
+          saved: [
+            { word: 'проститутки', kind: 'stop', scope_kind: 'global', scope_id: '', added_at: 1 },
+            { word: 'учебник', kind: 'stop', scope_kind: 'domain', scope_id: 'pdf', added_at: 2 },
+          ],
+        }),
+      ),
+    )
+    render(<StopPane active />)
+    await screen.findByTestId('stop-block-stop')
+    expect(screen.getByTestId('stop-saved-count-stop')).toHaveTextContent('1')
+    expect(within(screen.getByTestId('stop-saved-stop')).getByText('проститутки')).toBeTruthy()
+
+    await userEvent.selectOptions(screen.getByTestId('stop-scope'), ['domain:pdf'])
+    expect(screen.getByTestId('stop-scope-hint')).toHaveTextContent('домена «PDF»')
+    expect(within(screen.getByTestId('stop-saved-stop')).getByText('учебник')).toBeTruthy()
+    expect(within(screen.getByTestId('stop-saved-stop')).queryByText('проститутки')).toBeNull()
+  })
+})
+
+// Своё слово: список наполняется руками, а не только приёмом предложенного моделью.
+describe('ручной ввод своего слова', () => {
+  it('вписанное слово уходит в выбранный список с категорией блока', async () => {
+    render(<StopPane active />)
+    await screen.findByTestId('stop-block-unwanted')
+
+    expect(screen.getByTestId('stop-own-add-unwanted')).toBeDisabled()
+    await userEvent.type(screen.getByTestId('stop-own-unwanted'), 'Учебник')
+    fetchMock.mockResolvedValueOnce(res(200, { added: 1, saved: [] }))
+    await userEvent.click(screen.getByTestId('stop-own-add-unwanted'))
+
+    await waitFor(() => expect(url()).toBe('/api/stopwords'))
+    expect(body()).toEqual({
+      words: [{ word: 'учебник', kind: 'unwanted' }],
+      scope_kind: 'global',
+      scope_id: '',
+    })
+    expect((screen.getByTestId('stop-own-unwanted') as HTMLInputElement).value).toBe('')
+  })
+
+  it('список через запятую режется на слова и уходит в выбранную область', async () => {
+    render(<StopPane active />)
+    await screen.findByTestId('stop-block-brand')
+    await userEvent.selectOptions(screen.getByTestId('stop-scope'), ['domain:pdf'])
+
+    // пара слов сравнением никогда не совпадёт — режем на отдельные, дубли убираем
+    await userEvent.type(screen.getByTestId('stop-own-brand'), 'spotlight, рабочая тетрадь spotlight')
+    fetchMock.mockResolvedValueOnce(res(200, { added: 3, saved: [] }))
+    await userEvent.click(screen.getByTestId('stop-own-add-brand'))
+
+    await waitFor(() => expect(url()).toBe('/api/stopwords'))
+    expect(body()).toEqual({
+      words: [
+        { word: 'spotlight', kind: 'brand' },
+        { word: 'рабочая', kind: 'brand' },
+        { word: 'тетрадь', kind: 'brand' },
+      ],
+      scope_kind: 'domain',
+      scope_id: 'pdf',
+    })
+  })
+
+  it('Enter в поле работает как кнопка', async () => {
+    render(<StopPane active />)
+    await screen.findByTestId('stop-block-stop')
+    fetchMock.mockResolvedValueOnce(res(200, { added: 1, saved: [] }))
+    await userEvent.type(screen.getByTestId('stop-own-stop'), 'торрент{Enter}')
+
+    await waitFor(() => expect(url()).toBe('/api/stopwords'))
+    expect(body().words).toEqual([{ word: 'торрент', kind: 'stop' }])
   })
 })

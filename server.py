@@ -493,12 +493,12 @@ def _node_or_404(phrase):
 
 def _not_stopped_or_422(phrase):
     """Фраза под стоп-словом — покупать нечего: и она сама, и все её уточнения в запрете."""
-    hit = wscore.words_of(phrase) & wscore.stop_stems(CTX.con)
+    hit = wscore.stop_filter(CTX.con).hit(phrase)
     if hit:
-        word = next(w["word"] for w in wscore.stopwords(CTX.con)
-                    if wscore.stem(w["word"]) in hit)
-        raise HTTPException(422, f"фраза под стоп-словом {word!r}: загрузка не имеет смысла — "
-                                 f"её уточнения тоже под запретом")
+        where = {"global": "общий список", "node": f"узел {hit['scope_id']!r}",
+                 "domain": f"домен {hit['scope_id']!r}"}[hit["scope_kind"]]
+        raise HTTPException(422, f"фраза под стоп-словом {hit['word']!r} ({where}): загрузка "
+                                 f"не имеет смысла — её уточнения тоже под запретом")
 
 
 def _free_or_409(phrase):
@@ -506,6 +506,17 @@ def _free_or_409(phrase):
     if busy:
         raise HTTPException(409, f"занят операцией узел {busy!r}"
                                  + ("" if busy == phrase else " (предок)"))
+
+
+def _free_unit_or_409(key, unit):
+    """Единица второго слоя свободна? Параллельный прогон той же операции запрещён, а
+    операция по всему дереву запрещает любой прогон внутри него."""
+    tree_id, _, action, family = key
+    if any(k[0] == tree_id and k[1] == "" and k[3] == "shared" for k in CTX.needs_busy):
+        raise HTTPException(409, "по дереву идёт группировка, анализ или второй проход")
+    if key in CTX.needs_busy:
+        suffix = f" ({family})" if family != "basic" else ""
+        raise HTTPException(409, f"«{action}»{suffix} по {unit!r} уже идёт")
 
 
 def _command(op, phrase, params=None):
@@ -539,6 +550,9 @@ async def cmd_add_root(body: PhraseIn, caller: str = Header(None, alias="X-Calle
 
 @app.post("/api/node/load")
 async def cmd_load(body: PhraseIn):
+    """Купить пул одной фразы. Фраза под стоп-словом отбивается: `load` — это ровно та
+    покупка, от которой список исключений и отказывается, а краул её уже пропускает."""
+    _not_stopped_or_422(wscore.normalize(body.phrase))
     return _command("load", body.phrase)
 
 
@@ -606,23 +620,46 @@ class NeedsFavoriteIn(BaseModel):
     favorite: bool
 
 
-class PhraseIn2(BaseModel):
-    phrase: str
+class NeedsBuildIn(BaseModel):
+    """Одна ветка, несколько или целый домен — вход всегда сводится к списку веток."""
+    phrase: str | None = None
+    phrases: list[str] | None = None
+    domain_id: str | None = None
 
 
 @app.post("/api/needs/build")
-async def cmd_needs_build(body: PhraseIn2, caller: str = Header(None, alias="X-Caller")):
-    """Собрать дерево потребностей по загруженной ветке. Заменяет узловой classify."""
-    p = wscore.normalize(body.phrase)
-    row = _node_or_404(p)
-    if row["status"] != "FULLY_LOADED":
-        raise HTTPException(422, f"сборка возможна только из FULLY_LOADED, а узел в {row['status']}")
-    busy = CTX.busy(p)
-    if busy:
-        raise HTTPException(409, f"узел занят операцией: {busy}")
-    task_id = tasks.enqueue(CTX, "needs_build", p)
-    CTX.log("INFO", "needs_build", p, f"сборку заказал {_caller(caller, 'ui')}")
-    return {"task_id": task_id}
+async def cmd_needs_build(body: NeedsBuildIn, caller: str = Header(None, alias="X-Caller")):
+    """Собрать дерево потребностей по загруженным веткам. Заменяет узловой classify.
+
+    Ветки собираются ОДНИМ деревом: одну работу пишут по-разному («pdf в ворд» и «пдф в
+    ворд»), и порознь получаются два дерева-двойника с разделённым пулом."""
+    roots = needs_layer.as_roots(
+        (body.phrases or []) + ([body.phrase] if body.phrase else []))
+    if body.domain_id:
+        did = wscore.normalize(body.domain_id)
+        members = [r[0] for r in CTX.con.execute(
+            "SELECT phrase FROM domain_member WHERE domain_id = ? ORDER BY position", (did,))]
+        if not members:
+            raise HTTPException(404, f"домена нет или он пуст: {did!r}")
+        roots = needs_layer.as_roots(roots + members)
+    if not roots:
+        raise HTTPException(422, "нужна хотя бы одна ветка")
+    not_ready = []
+    for p in roots:
+        row = _node_or_404(p)
+        if row["status"] != "FULLY_LOADED":
+            not_ready.append(f"{p!r} в {row['status']}")
+        busy = CTX.busy(p)
+        if busy:
+            raise HTTPException(409, f"узел занят операцией: {busy}")
+    if not_ready:
+        raise HTTPException(422, "сборка возможна только из FULLY_LOADED, а "
+                                 + ", ".join(not_ready))
+    task_id = tasks.enqueue(CTX, "needs_build", roots[0], {"roots": roots}, lock=roots)
+    CTX.log("INFO", "needs_build", roots[0],
+            f"сборку по {len(roots)} веткам ({' + '.join(roots)}) заказал "
+            f"{_caller(caller, 'ui')}")
+    return {"task_id": task_id, "roots": roots}
 
 
 # ---------- стоп-слова (design §4.10) ----------
@@ -630,10 +667,15 @@ async def cmd_needs_build(body: PhraseIn2, caller: str = Header(None, alias="X-C
 
 class StopWordsIn(BaseModel):
     words: list[dict]
+    # владелец списка: общий, узел или домен (design §4.10). Не указан — общий.
+    scope_kind: str | None = None
+    scope_id: str | None = None
 
 
 class StopRemoveIn(BaseModel):
     words: list[str]
+    scope_kind: str | None = None
+    scope_id: str | None = None
 
 
 def _last_scan():
@@ -655,8 +697,9 @@ def _last_scan():
 
 @app.get("/api/stopwords")
 async def api_stopwords():
-    """Сохранённые исключения и последнее предложение модели."""
+    """Сохранённые исключения (с их владельцами), возможные владельцы и предложение модели."""
     return {"saved": wscore.stopwords(CTX.con), "suggestion": _last_scan(),
+            "scopes": wscore.stop_scope_options(CTX.con),
             "kinds": list(wscore.STOP_KINDS)}
 
 
@@ -678,18 +721,90 @@ async def cmd_stopwords_add(body: StopWordsIn):
         w, k = wscore.normalize(str(it.get("word", ""))), str(it.get("kind", ""))
         if not w:
             raise HTTPException(422, "пустое слово")
+        if len(w.split()) > 1:
+            # Сравнение идёт со СЛОВОМ фразы, поэтому пара слов не совпадёт никогда:
+            # молча принять её значило бы записать заведомо мёртвое исключение.
+            raise HTTPException(422, f"исключение — одно слово, а не сочетание: {w!r}. "
+                                     f"Впишите слова по отдельности")
         if k not in wscore.STOP_KINDS:
             raise HTTPException(422, f"неизвестная категория: {k!r}")
         items.append((w, k))
-    return {"added": wscore.add_stopwords(CTX.con, items),
-            "saved": wscore.stopwords(CTX.con)}
+    try:
+        added = wscore.add_stopwords(CTX.con, items, body.scope_kind, body.scope_id)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    return {"added": added, "saved": wscore.stopwords(CTX.con),
+            "scopes": wscore.stop_scope_options(CTX.con)}
 
 
 @app.delete("/api/stopwords")
 async def cmd_stopwords_remove(body: StopRemoveIn):
     """Убрать слова из списка. Модель предложит их снова — отклонённого мы не помним."""
-    return {"removed": wscore.remove_stopwords(CTX.con, body.words),
-            "saved": wscore.stopwords(CTX.con)}
+    try:
+        removed = wscore.remove_stopwords(CTX.con, body.words, body.scope_kind, body.scope_id)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    return {"removed": removed, "saved": wscore.stopwords(CTX.con),
+            "scopes": wscore.stop_scope_options(CTX.con)}
+
+
+# ---------- домены (ручные группы входных веток, tech §6.1) ----------
+
+
+class DomainCreateIn(BaseModel):
+    phrase: str
+    name: str | None = None
+
+
+class DomainMemberIn(BaseModel):
+    domain_id: str
+    phrase: str
+
+
+def _domains_changed():
+    """Разослать новый состав доменов и корней: член домена не должен остаться
+    нарисованным отдельным корнем ни у одного открытого клиента."""
+    data = {"domains": wscore.domain_groups(CTX.con),
+            "roots": wscore.root_candidates(CTX.con, ROOTS_LIMIT)}
+    CTX.publish("roots", data)
+    return data
+
+
+@app.get("/api/domains")
+async def api_domains():
+    return {"domains": wscore.domain_groups(CTX.con)}
+
+
+@app.post("/api/domains")
+async def cmd_domain_create(body: DomainCreateIn, caller: str = Header(None, alias="X-Caller")):
+    """Сделать домен из узла. Название по умолчанию — сама фраза."""
+    p = wscore.normalize(body.phrase)
+    _node_or_404(p)
+    name = (body.name or "").strip() or p
+    try:
+        out = wscore.create_domain(CTX.con, name, [p])
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    CTX.log("INFO", "domain", p, f"домен «{out['name']}» завёл {_caller(caller, 'ui')}"
+            + (f", стоп-слов переехало {out['stopwords_moved']}" if out["stopwords_moved"] else ""))
+    _domains_changed()
+    return out
+
+
+@app.post("/api/domains/member")
+async def cmd_domain_member_add(body: DomainMemberIn, caller: str = Header(None, alias="X-Caller")):
+    """Принять узел в существующий домен: его стоп-слова переезжают домену."""
+    p = wscore.normalize(body.phrase)
+    _node_or_404(p)
+    try:
+        out = wscore.add_domain_member(CTX.con, body.domain_id, p)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    CTX.log("INFO", "domain", p, f"узел принят в домен «{out['name']}» "
+            f"({_caller(caller, 'ui')})"
+            + (f", стоп-слов переехало {out['stopwords_moved']}" if out["stopwords_moved"] else ""))
+    _domains_changed()
+    return out
 
 
 @app.get("/api/needs/reports")
@@ -855,21 +970,17 @@ async def cmd_needs_work(action: str, body: NeedsAnalyzeIn,
             count = len(needs_layer.work_phrases(needs_layer.find_work(tree, unit)))
     except needs_layer.NeedsError as e:
         raise HTTPException(404, str(e))
-    model_action = action in {"analyze", "analyze_adv", "product", "test"}
+    model_action = action in tasks.MODEL_ACTIONS
     family = body.model_family if model_action else "basic"
-    if any(k[0] == tree_id and k[1] == "" and k[3] == "shared" for k in CTX.needs_busy):
-        raise HTTPException(409, "по дереву идёт группировка, анализ или второй проход")
-    key = (tree_id, unit if by_group else needs_layer._norm(unit), action, family)
-    if key in CTX.needs_busy:
-        suffix = f" ({family})" if model_action else ""
-        raise HTTPException(409, f"«{action}»{suffix} по {unit!r} уже идёт")
+    params = {"tree_id": tree_id, ("group" if by_group else "work"): unit}
+    if model_action:
+        params["model_family"] = family
+    key = tasks.needs_busy_key(ops[action], params)
+    _free_unit_or_409(key, unit)
     if not count:
         raise HTTPException(422, f"в {unit!r} нет фраз")
     CTX.needs_busy.add(key)
     label = group.get("name") or unit if by_group else unit
-    params = {"tree_id": tree_id, ("group" if by_group else "work"): unit}
-    if model_action:
-        params["model_family"] = family
     task_id = tasks.create_task(CTX, ops[action], label, params)
     CTX.queue.put_nowait(task_id)
     CTX.log("INFO", ops[action], label,
@@ -896,9 +1007,9 @@ def _snapshot(phrase):
 def recent_tasks(limit=200):
     """Последние строки журнала задач — вкладка Task при подписке."""
     rows = CTX.con.execute(
-        "SELECT id, type, node, status, model_family, created_at, started_at, finished_at, error "
-        "FROM task ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
-    return [dict(r) for r in rows]
+        "SELECT id, type, node, status, params, model_family, created_at, started_at, "
+        "finished_at, error FROM task ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
+    return [tasks.task_public(r) for r in rows]
 
 
 async def _ws_action(q, req):
@@ -938,12 +1049,6 @@ async def _ws_sender(websocket, q):
 
 
 
-NEEDS_WORK_OPS = {"needs_analyze": "analyze", "needs_analyze_adv": "analyze_adv",
-                  "needs_analyze_product": "product", "needs_model_test": "test",
-                  "needs_season": "season", "needs_adjacent": "adjacent",
-                  "needs_dump": "dump"}
-
-
 @app.post("/api/task/{task_id}/cancel")
 async def cmd_task_cancel(task_id: str, caller: str = Header(None, alias="X-Caller")):
     """Снять задачу, которую никто не взял (`WAITING`).
@@ -972,48 +1077,56 @@ async def cmd_task_cancel(task_id: str, caller: str = Header(None, alias="X-Call
 
 @app.post("/api/task/{task_id}/retry")
 async def cmd_task_retry(task_id: str, caller: str = Header(None, alias="X-Caller")):
-    """Повторить УПАВШУЮ задачу тем же вызовом, что и в первый раз.
+    """Повторить УПАВШУЮ задачу — ТОЙ ЖЕ строкой, а не новой.
 
-    Перезапуск идёт через ту же ручку, а не мимо неё: иначе повтор обойдёт проверки статуса
-    узла и занятости работы и два прогона пойдут параллельно. Старая строка задачи остаётся —
-    у повтора свой task_id, история падений не переписывается."""
+    Повтор это продолжение попытки: новая строка плодила в журнале двойников, а вкладка
+    считала единицу свободной и кнопку не гасила. Проверки занятости те же, что при первом
+    запуске, поэтому параллельный прогон по-прежнему невозможен."""
     row = CTX.con.execute("SELECT type, node, params, status FROM task WHERE id = ?",
                           (task_id,)).fetchone()
     if row is None:
         raise HTTPException(404, f"задачи нет: {task_id}")
     if row["status"] != "FAILED":
         raise HTTPException(409, f"повторяем только упавшую задачу, а эта в {row['status']}")
-    op = row["type"]
+    op, node = row["type"], row["node"]
+    if op not in tasks.OPS:
+        raise HTTPException(422, f"повтор не поддержан для операции {op}")
     try:
         params = json.loads(row["params"]) if row["params"] else {}
     except (ValueError, TypeError):
         params = {}
     if not isinstance(params, dict):
         params = {}
-    family = params.get("model_family")
-    family = family if family in {"claude", "codex"} else "claude"
-    tree_id, work, node = params.get("tree_id"), params.get("work"), row["node"]
-    group = params.get("group")
-    if op in NEEDS_WORK_OPS:
-        if not (tree_id and (work or group)):
-            raise HTTPException(422, "в параметрах задачи нет дерева, работы или группы")
-        return await cmd_needs_work(
-            NEEDS_WORK_OPS[op],
-            NeedsAnalyzeIn(tree_id=tree_id, work=work or "", group=group or "",
-                           model_family=family), caller)
-    if op in {"needs_refine", "needs_rank", "needs_products"}:
-        if not tree_id:
-            raise HTTPException(422, "в параметрах задачи нет дерева")
-        body = NeedsRefineIn(tree_id=tree_id, model_family=family)
-        return await {"needs_refine": cmd_needs_refine, "needs_rank": cmd_needs_rank,
-                      "needs_products": cmd_needs_products}[op](body, caller)
-    if op == "needs_build":
-        return await cmd_needs_build(PhraseIn2(phrase=node or ""), caller)
-    if op == "stopwords_scan":
-        return await cmd_stopwords_scan(PhraseIn(phrase=node or ""), caller)
-    if op in {"load", "full_load"}:
-        return _command(op, node or "")
-    raise HTTPException(422, f"повтор не поддержан для операции {op}")
+
+    key = tasks.needs_busy_key(op, params)
+    if key and key[1] == "":                      # операция по всему дереву
+        if [k for k in CTX.needs_busy if k[0] == key[0]]:
+            raise HTTPException(409, "по этому дереву уже идёт операция")
+    elif key:
+        _free_unit_or_409(key, node)
+    elif op not in tasks.NODE_OPS:
+        raise HTTPException(422, f"в параметрах задачи нет дерева: повтор {op} невозможен")
+
+    nodes = []
+    if op in tasks.NODE_OPS:
+        # сборка переписывает params своими и теряет lock — ветки помнит `roots`
+        nodes = [p for p in (params.get("lock") or params.get("roots") or [node]) if p]
+        for phrase in nodes:
+            st = _node_or_404(phrase)["status"]
+            _free_or_409(phrase)
+            if op in ALLOWED and st not in ALLOWED[op]:
+                raise HTTPException(422, f"операция {op} недопустима из статуса {st}")
+            if op == "needs_build" and st != "FULLY_LOADED":
+                raise HTTPException(422, f"сборка возможна только из FULLY_LOADED, а {phrase!r} в {st}")
+        if len(nodes) > 1:
+            params = {**params, "lock": nodes}
+
+    if key:
+        CTX.needs_busy.add(key)
+    CTX.acquire(nodes, task_id)
+    tasks.requeue(CTX, task_id, params if op in tasks.NODE_OPS else None)
+    CTX.log("INFO", op, node, f"повтор задачи {task_id[:8]} заказал {_caller(caller, 'ui')}")
+    return {"task_id": task_id}
 
 
 @app.websocket("/ws")

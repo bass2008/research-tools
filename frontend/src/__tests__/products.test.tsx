@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ProductsPane } from '../ProductsPane'
-import type { NeedsTree, ProductGroup, ProductLevel } from '../api'
+import type { NeedsTree, ProductGroup, ProductLevel, TaskRow } from '../api'
 
 const group = (id: string, level: ProductLevel, over: Partial<ProductGroup> = {}): ProductGroup => ({
   id,
@@ -234,6 +234,32 @@ describe('вкладка «Дерево продуктов»', () => {
       tree_id: 'local-needs-001',
       group: 'macro-1',
     })
+  })
+
+  it('чужой прогон по группе гасит её кнопку', async () => {
+    // прогон могли начать с другой вкладки или повтором из списка задач — вкладка узнаёт
+    // об этом только из журнала задач, своей памяти запусков тут нет
+    const task = {
+      id: 'an-1',
+      type: 'needs_analyze',
+      node: 'продукт macro-1',
+      group: 'macro-1',
+      status: 'RUNNING',
+      model_family: 'claude',
+      created_at: 1,
+      started_at: 1,
+      finished_at: null,
+      error: null,
+    } as unknown as TaskRow
+    render(<ProductsPane active treeId="local-needs-001" tasks={[task]} />)
+    const first = (await screen.findAllByTestId('product-group'))[0]
+
+    await userEvent.click(within(first).getByTestId('product-menu').querySelector('summary')!)
+    expect(within(first).getByTestId('product-run-claude-analyze')).toBeDisabled()
+    expect(within(first).getByTestId('product-run-claude-analyze')).toHaveTextContent('идёт…')
+    // чужая единица и другое семейство не при чём
+    expect(within(first).getByTestId('product-run-codex-analyze')).toBeEnabled()
+    expect(within(first).getByTestId('product-run-dump')).toBeEnabled()
   })
 
   it('готовый отчёт группы остаётся ссылкой с оценкой', async () => {

@@ -11,7 +11,8 @@ import pytest
 import server
 import tasks
 import wscore
-from conftest import (SNAP, StubCtx, TOKEN, node_row, open_probe, task_done, task_row, wait_for)
+from conftest import (SNAP, StubCtx, TOKEN, node_row, open_probe, seed_cache, task_done,
+                      task_row, wait_for)
 from fake_worker import FakeWorker, canned
 
 PIPE_OPS = ("classify", "search", "score", "analyze")
@@ -243,4 +244,156 @@ def test_crawl_rechecks_frontier_before_declaring_loaded(empty_db, monkeypatch):
         "узел, чья частота пересекла FLOOR после решения, обязан быть догружен"
     assert res["fetched"] == 3
     assert wscore.repair_fully_loaded(con) == 0, "краул оставил нарушение инварианта"
+    con.close()
+
+
+# ------------------------------------- 7. область списка исключений (design §4.10)
+#
+# И1  У записи ровно один владелец: общий список, узел или домен. `scope_id` непуст
+#     тогда и только тогда, когда владелец не общий.
+# И2  У узла, принятого в домен, своего списка не бывает — запреты живут у домена.
+# И3  Создание домена и приём в домен переносят список узла домену; дубликаты
+#     схлопываются, у узла не остаётся ничего.
+# И4  Слово действует только в своей области: общий список — везде, узел — в своей ветке,
+#     домен — в ветках всех своих ключей. Чужую ветку слово не трогает.
+# И5  Ссылочная целостность: владелец-узел существует в дереве, владелец-домен — в доменах.
+
+
+@pytest.fixture
+def stop_db(tmp_path):
+    """Два независимых корня и узел под каждым: минимум, на котором видна область."""
+    con = wscore.connect(tmp_path / "stop-scope.db")
+    for phrase, freq in [("pdf", 2000), ("учебник pdf скачать", 900), ("pdf в ворд", 800),
+                         ("пдф", 1500), ("учебник пдф", 700),
+                         ("телеграм", 1000), ("учебник телеграм", 600)]:
+        wscore.upsert_node(con, phrase, freq=freq)
+    con.executemany("INSERT OR IGNORE INTO edge(parent, child) VALUES (?, ?)",
+                    [("pdf", "учебник pdf скачать"), ("pdf", "pdf в ворд"),
+                     ("пдф", "учебник пдф"), ("телеграм", "учебник телеграм")])
+    con.commit()
+    yield con
+    con.close()
+
+
+def test_stopword_scope_has_exactly_one_owner(stop_db):
+    """И1: владелец один из трёх, адресат есть ровно у неглобального."""
+    con = stop_db
+    wscore.add_stopwords(con, [("проститутки", "stop")])
+    wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "pdf")
+    assert wscore.stopword_violations(con) == []
+
+    owners = {(w["scope_kind"], bool(w["scope_id"])) for w in wscore.stopwords(con)}
+    assert owners == {("global", False), ("node", True)}
+
+    with pytest.raises(ValueError):
+        wscore.add_stopwords(con, [("х", "stop")], "node", "")     # узел без адресата
+    with pytest.raises(ValueError):
+        wscore.add_stopwords(con, [("х", "stop")], "мусор", "pdf")  # владельца такого нет
+
+    # одно и то же слово у разных владельцев — разные записи, а не дубль
+    assert wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "телеграм") == 1
+    assert wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "телеграм") == 0
+    assert len([w for w in wscore.stopwords(con) if w["word"] == "учебник"]) == 2
+
+
+def test_stopword_scope_owner_must_exist(stop_db):
+    """И5: адресат — существующий узел или существующий домен."""
+    con = stop_db
+    with pytest.raises(ValueError):
+        wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "такой фразы нет")
+    with pytest.raises(ValueError):
+        wscore.add_stopwords(con, [("учебник", "unwanted")], "domain", "нет-домена")
+    assert wscore.stopwords(con) == []
+
+    # владелец, исчезнувший помимо API, ловится проверкой инвариантов
+    wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "pdf")
+    con.execute("DELETE FROM node WHERE phrase = 'pdf'")
+    con.commit()
+    assert [rule for rule, _ in wscore.stopword_violations(con)] == ["И5"]
+
+
+def test_stopword_of_a_node_does_not_reach_another_branch(stop_db):
+    """И4: слово узла бьёт только в его ветке, общее — везде."""
+    con = stop_db
+    wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "pdf")
+    stops = wscore.stop_filter(con)
+
+    assert wscore.is_stopped("учебник pdf скачать", stops), "своя ветка — под запретом"
+    assert not wscore.is_stopped("учебник телеграм", stops), "чужая ветка не задета"
+    assert not wscore.is_stopped("учебник пдф", stops), "другой корень — другая область"
+    assert not wscore.is_stopped("pdf в ворд", stops), "остальная ветка цела"
+
+    wscore.add_stopwords(con, [("учебник", "unwanted")])
+    assert wscore.is_stopped("учебник телеграм", wscore.stop_filter(con)), \
+        "общий список действует на всё дерево"
+
+
+def test_domain_takes_over_stopwords_of_its_members(stop_db):
+    """И2 и И3: домен забирает списки своих ключей, дубликаты схлопываются."""
+    con = stop_db
+    wscore.add_stopwords(con, [("учебник", "unwanted"), ("класс", "unwanted")], "node", "pdf")
+    wscore.add_stopwords(con, [("учебник", "unwanted"), ("гдз", "unwanted")], "node", "пдф")
+
+    out = wscore.create_domain(con, "PDF", ["pdf"])
+    assert out["stopwords_moved"] == 2
+    assert wscore.stopwords(con, "node", "pdf") == [], "у члена домена своего списка не остаётся"
+    assert {w["word"] for w in wscore.stopwords(con, "domain", out["id"])} == {"учебник", "класс"}
+
+    # приём второго ключа: «учебник» у домена уже есть — дубля не появляется
+    joined = wscore.add_domain_member(con, out["id"], "пдф")
+    assert joined["stopwords_moved"] == 1
+    assert wscore.stopwords(con, "node", "пдф") == []
+    assert sorted(w["word"] for w in wscore.stopwords(con, "domain", out["id"])) == \
+        ["гдз", "класс", "учебник"]
+    assert wscore.stopword_violations(con) == []
+
+    # И2 закрыт и на запись: своего списка члену домена больше не завести
+    with pytest.raises(ValueError):
+        wscore.add_stopwords(con, [("тетрадь", "unwanted")], "node", "пдф")
+
+
+def test_domain_stopword_covers_every_key_of_the_domain(stop_db):
+    """И4 для домена: область — объединение веток всех его ключей."""
+    con = stop_db
+    did = wscore.create_domain(con, "PDF", ["pdf"])["id"]
+    wscore.add_domain_member(con, did, "пдф")
+    wscore.add_stopwords(con, [("учебник", "unwanted")], "domain", did)
+    stops = wscore.stop_filter(con)
+
+    assert wscore.is_stopped("учебник pdf скачать", stops)
+    assert wscore.is_stopped("учебник пдф", stops), "второй ключ домена — та же область"
+    assert not wscore.is_stopped("учебник телеграм", stops), "вне домена запрета нет"
+    assert not wscore.is_stopped("pdf в ворд", stops)
+
+
+def test_node_in_a_domain_is_not_offered_as_a_list_owner(stop_db):
+    """Выбор владельца в UI не предлагает то, чему список принадлежать не может (И2)."""
+    con = stop_db
+    before = {(s["scope_kind"], s["scope_id"]) for s in wscore.stop_scope_options(con)}
+    assert ("node", "pdf") in before and ("global", "") in before
+
+    did = wscore.create_domain(con, "PDF", ["pdf"])["id"]
+    after = {(s["scope_kind"], s["scope_id"]) for s in wscore.stop_scope_options(con)}
+    assert ("node", "pdf") not in after, "член домена больше не самостоятельный владелец"
+    assert ("domain", did) in after
+
+
+def test_scoped_stopword_stops_the_crawl_only_inside_its_area(tmp_path):
+    """Область — не только вывод в UI: краул под словом узла не покупает пул именно там."""
+    con = wscore.connect(tmp_path / "scope-crawl.db")
+    seed_cache(con, {"pdf": [("pdf", 1000), ("учебник pdf", 400), ("pdf в ворд", 300)],
+                     "телеграм": [("телеграм", 1000), ("учебник телеграм", 400)],
+                     "pdf в ворд": [("pdf в ворд", 300)],
+                     "учебник телеграм": [("учебник телеграм", 400)]})
+    wscore.upsert_node(con, "pdf", freq=1000)
+    wscore.add_stopwords(con, [("учебник", "unwanted")], "node", "pdf")
+
+    res = asyncio.run(wscore.crawl_subtree(con, "pdf"))
+    assert res["skipped"] == 1, "узел под словом своей ветки не покупается"
+    assert node_row(con, "учебник pdf")["queried"] == 0
+    assert node_row(con, "pdf в ворд")["queried"] == 1, "остальная ветка загружена как обычно"
+
+    res = asyncio.run(wscore.crawl_subtree(con, "телеграм"))
+    assert res["skipped"] == 0, "в чужой ветке то же слово не запрещено"
+    assert node_row(con, "учебник телеграм")["queried"] == 1
     con.close()

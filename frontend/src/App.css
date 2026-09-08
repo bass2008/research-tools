@@ -664,6 +664,11 @@
 .nroot {
   padding-bottom: 5px;
 }
+.nroot-one {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
 .small {
   font-size: 13px;
 }
@@ -968,4 +973,102 @@
 .tree-head > .head-actions {
   margin-left: auto;
   flex: none;
+}
+
+/* ---------- домены: зелёный = группа веток, а не отдельный узел ---------- */
+
+:root {
+  --dom: #157f3d;
+  --dom-bg: #e8f6ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dom: #4ade80;
+    --dom-bg: #142a1c;
+  }
+}
+
+.dom-acts {
+  display: flex;
+  flex: none;
+  align-items: center;
+  margin-right: 5px;
+}
+.act-domain {
+  border-color: var(--dom);
+  color: var(--dom);
+}
+.act-domain:hover:not(:disabled),
+.act-domain.on {
+  background: var(--dom);
+  color: #fff;
+}
+.dom-tag {
+  flex: none;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--dom-bg);
+  border: 1px solid var(--dom);
+  color: var(--dom);
+  font-size: 12px;
+  font-weight: 650;
+}
+.dom-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 6px 0 8px 26px;
+  padding: 9px 12px;
+  border: 1px solid var(--dom);
+  border-radius: 8px;
+  background: var(--dom-bg);
+}
+.dom-line {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.dom-line input {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* выбор владельца списка исключений: домен отличается от узла цветом, а не только текстом */
+.stop-scope {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--mut);
+}
+.stop-scope select {
+  min-width: 260px;
+}
+.stop-scope select.scope-domain {
+  border-color: var(--dom);
+  color: var(--dom);
+  font-weight: 650;
+}
+.opt-domain {
+  color: var(--dom);
+  font-weight: 650;
+  background: var(--dom-bg);
+}
+
+/* ручной ввод своего слова — под принятым списком, тем же столбцом */
+.stop-own {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.stop-own input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* шапка домена: счётчик и сборка по всему домену держатся вместе справа */
+.domain-tools {
+  display: flex;
+  flex: none;
+  gap: 10px;
+  align-items: center;
 }

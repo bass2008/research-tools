@@ -783,6 +783,28 @@ def test_analyze_is_not_started_twice(client, seeded, llm_timeout):
     assert r.status_code == 409 and "уже идёт" in r.json()["detail"]
 
 
+def test_retry_of_a_group_analysis_holds_the_unit_busy(client, seeded, snap_con, llm_timeout):
+    """Повтор упавшего разбора занимает ту же группу, что и обычный запуск.
+
+    Занятость вешала только ручка запуска, а повтор шёл мимо неё — группа считалась свободной,
+    и по ней можно было завести второй прогон."""
+    llm_timeout(3.0)
+    snap_con.execute(
+        "INSERT INTO task(id, type, status, node, params, model_family, created_at, error) "
+        "VALUES ('an-1', 'needs_analyze', 'FAILED', ?, ?, 'claude', 0, 'XMLRiver')",
+        (GROUP, json.dumps({"tree_id": TREE_ID, "group": GROUP, "model_family": "claude"})))
+    snap_con.commit()
+
+    with FakeWorker(client, TOKEN, mode="silent"):
+        again = client.post("/api/task/an-1/retry")
+        assert again.status_code == 200 and again.json()["task_id"] == "an-1", "та же строка"
+        r = client.post("/api/needs/analyze",
+                        json={"tree_id": TREE_ID, "group": GROUP, "model_family": "claude"})
+    assert r.status_code == 409 and "уже идёт" in r.json()["detail"]
+    assert snap_con.execute("SELECT COUNT(*) FROM task WHERE type = 'needs_analyze'"
+                            ).fetchone()[0] == 1, "повтор не завёл вторую задачу"
+
+
 def test_same_analysis_can_run_for_claude_and_codex_in_parallel(
         client, seeded, snap_con, llm_timeout):
     llm_timeout(0.3)
@@ -929,3 +951,89 @@ def test_niche_keeps_the_money_answer_next_to_the_verdict(client, seeded, snap_c
     art = next(a for a in needs_layer.group_artifacts(TREE_ID)[GROUP] if a["kind"] == "analyze")
     assert art["money"] and art["who_pays"] and art["why_pay"]
     assert art["summary"] == art["money"]
+
+
+# ---------------------------------------------------------------- вход по нескольким веткам
+
+def test_build_payload_merges_branches_into_one_input(tmp_path):
+    """Несколько веток — один вход: фразы объединяются без повторов, главной становится
+    самая частотная ветка (ею дерево и подписано)."""
+    con = wscore.connect(tmp_path / "multi.db")
+    for phrase, freq in [("pdf", 1000), ("pdf в ворд", 400), ("общая фраза", 300),
+                         ("пдф", 5000), ("пдф в ворд", 900)]:
+        wscore.upsert_node(con, phrase, freq=freq)
+    con.executemany("INSERT OR IGNORE INTO edge(parent, child) VALUES (?, ?)",
+                    [("pdf", "pdf в ворд"), ("pdf", "общая фраза"),
+                     ("пдф", "пдф в ворд"), ("пдф", "общая фраза")])
+    con.commit()
+
+    one = needs_layer.build_payload(con, "pdf")
+    both = needs_layer.build_payload(con, ["pdf", "пдф"])
+
+    assert one["roots"] == ["pdf"] and one["root"] == "pdf"
+    assert both["roots"] == ["пдф", "pdf"], "первой идёт самая частотная ветка"
+    assert both["root"] == "пдф"
+    phrases = [n["phrase"] for n in both["nodes"]]
+    assert len(phrases) == len(set(phrases)), "общая фраза не задвоилась"
+    assert set(phrases) == {"pdf", "pdf в ворд", "пдф", "пдф в ворд", "общая фраза"}
+    assert [m["phrase"] for m in both["roots_meta"]] == ["пдф", "pdf"]
+    # обе ветки остаются во входе как точки входа, даже придя из разных поддеревьев
+    assert {"pdf", "пдф"} <= set(phrases)
+    con.close()
+
+
+def test_build_payload_keeps_a_low_frequency_root(tmp_path):
+    """Входная ветка остаётся во входе, какой бы частоты ни была: это точка входа,
+    а не рядовая фраза, отсекаемая порогом."""
+    con = wscore.connect(tmp_path / "lowroot.db")
+    wscore.upsert_node(con, "частая", freq=900)
+    wscore.upsert_node(con, "частая деталь", freq=500)
+    wscore.upsert_node(con, "редкая", freq=1)          # ниже FLOOR
+    con.execute("INSERT OR IGNORE INTO edge(parent, child) VALUES ('частая', 'частая деталь')")
+    con.commit()
+
+    payload = needs_layer.build_payload(con, ["частая", "редкая"])
+
+    assert "редкая" in [n["phrase"] for n in payload["nodes"]]
+    assert payload["roots"] == ["частая", "редкая"]
+    con.close()
+
+
+def test_tree_view_names_every_input_branch(needs_dir):
+    """Просмотр дерева отдаёт весь вход: иначе объединённая сборка выглядит одиночной.
+
+    Сборки до массива веток `roots_meta` не писали — там частота известна только у главной."""
+    tree = {"condition": "условие", "works": [], "excluded": []}
+    put_tree(needs_dir, "multi", tree,
+             {"root": "пдф", "root_freq": 8281216, "roots": ["пдф", "pdf"],
+              "roots_meta": [{"phrase": "пдф", "freq": 8281216, "status": "FULLY_LOADED"},
+                             {"phrase": "pdf", "freq": 2629788, "status": "FULLY_LOADED"}],
+              "nodes": []})
+    put_tree(needs_dir, "old", tree, {"root": "телеграм", "root_freq": 5475727, "nodes": []})
+
+    multi = needs_layer.detail("multi")
+    assert multi["root"] == "пдф", "подпись дерева — самая частотная ветка"
+    assert multi["roots"] == ["пдф", "pdf"]
+    assert [(m["phrase"], m["freq"]) for m in multi["roots_meta"]] == [
+        ("пдф", 8281216), ("pdf", 2629788)]
+
+    old = needs_layer.detail("old")
+    assert old["roots"] == ["телеграм"]
+    assert old["roots_meta"] == [{"phrase": "телеграм", "freq": 5475727}]
+
+
+def test_as_roots_normalises_and_deduplicates():
+    assert needs_layer.as_roots("  PDF  ") == ["pdf"]
+    assert needs_layer.as_roots(["pdf", "PDF", " пдф ", ""]) == ["pdf", "пдф"]
+    assert needs_layer.as_roots(None) == [] and needs_layer.as_roots([]) == []
+
+
+def test_build_payload_refuses_an_unknown_branch(tmp_path):
+    con = wscore.connect(tmp_path / "nope.db")
+    wscore.upsert_node(con, "есть", freq=100)
+    con.commit()
+    with pytest.raises(needs_layer.NeedsError):
+        needs_layer.build_payload(con, ["есть", "нет такой фразы"])
+    with pytest.raises(needs_layer.NeedsError):
+        needs_layer.build_payload(con, [])
+    con.close()

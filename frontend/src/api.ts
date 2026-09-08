@@ -47,6 +47,9 @@ export interface TaskRow {
   finished_at: number | null
   error: string | null
   model_family?: ModelFamily | null
+  /** Единица операции. Имя в `node` у работы и у группы одно, различает только это. */
+  group?: string | null
+  work?: string | null
 }
 
 // Отчёт принадлежит РАБОТЕ второго слоя, а не узлу дерева запросов.
@@ -229,9 +232,16 @@ export const loadNode = (phrase: string): Promise<{ task_id: string }> =>
 export const fullLoad = (phrase: string): Promise<{ task_id: string }> =>
   post('/api/node/full-load', { phrase })
 
-/** Сборка дерева потребностей по ветке — замена узловым classify/drill. */
-export const needsBuild = (phrase: string): Promise<{ task_id: string }> =>
-  post('/api/needs/build', { phrase })
+/** Сборка дерева потребностей по веткам — замена узловым classify/drill.
+ *  Веток может быть несколько: одну работу пишут по-разному, и порознь ветки дают
+ *  два дерева-двойника с разделённым пулом. */
+export const needsBuild = (phrases: string[]): Promise<{ task_id: string; roots: string[] }> =>
+  post('/api/needs/build', { phrases })
+
+/** То же по целому домену: ветки берёт сервер из состава домена. */
+export const needsBuildDomain = (
+  domain_id: string,
+): Promise<{ task_id: string; roots: string[] }> => post('/api/needs/build', { domain_id })
 
 export const clearLogs = (): Promise<{ ok: boolean }> => post('/api/logs/clear')
 
@@ -249,7 +259,29 @@ export const cancelTask = (id: string): Promise<{ ok: boolean; task_id: string }
 
 export type StopKind = 'stop' | 'brand' | 'unwanted'
 
-export interface StopWord {
+// Владелец списка исключений: общий, узел или домен. У узла свой список бывает, только пока
+// он не принят в домен — иначе один запрет жил бы в двух местах (design §4.10).
+export type StopScopeKind = 'global' | 'node' | 'domain'
+
+export interface StopScope {
+  scope_kind: StopScopeKind
+  scope_id: string
+  name: string
+  count: number
+}
+
+/** Адрес списка. Общий — единственный, у кого нет адресата. */
+export interface StopWhere {
+  scope_kind: StopScopeKind
+  scope_id: string
+}
+
+export const GLOBAL_SCOPE: StopWhere = { scope_kind: 'global', scope_id: '' }
+
+export const sameScope = (a: StopWhere, b: StopWhere): boolean =>
+  a.scope_kind === b.scope_kind && a.scope_id === b.scope_id
+
+export interface StopWord extends StopWhere {
   word: string
   kind: StopKind
   added_at: number
@@ -270,7 +302,14 @@ export interface StopSuggestion {
 export interface StopState {
   saved: StopWord[]
   suggestion: StopSuggestion | null
+  /** Кому можно адресовать список: общий, домены, корни вне доменов. */
+  scopes: StopScope[]
   kinds: StopKind[]
+}
+
+export interface StopReply {
+  saved: StopWord[]
+  scopes?: StopScope[]
 }
 
 export const stopwords = (): Promise<StopState> => req('/api/stopwords')
@@ -278,11 +317,29 @@ export const stopwords = (): Promise<StopState> => req('/api/stopwords')
 export const stopScan = (phrase: string): Promise<{ task_id: string }> =>
   post('/api/stopwords/scan', { phrase })
 
-export const stopAdd = (words: { word: string; kind: StopKind }[]): Promise<{ saved: StopWord[] }> =>
-  post('/api/stopwords', { words })
+export const stopAdd = (
+  words: { word: string; kind: StopKind }[],
+  where: StopWhere = GLOBAL_SCOPE,
+): Promise<StopReply> => post('/api/stopwords', { words, ...where })
 
-export const stopRemove = (words: string[]): Promise<{ saved: StopWord[] }> =>
-  del('/api/stopwords', { words })
+export const stopRemove = (words: string[], where: StopWhere = GLOBAL_SCOPE): Promise<StopReply> =>
+  del('/api/stopwords', { words, ...where })
+
+// ---------- домены ----------
+
+/** Сделать домен из узла: узел уходит из списка отдельных корней, его стоп-слова — домену. */
+export const domainCreate = (
+  phrase: string,
+  name?: string,
+): Promise<{ id: string; name: string; members: string[]; stopwords_moved: number }> =>
+  post('/api/domains', { phrase, ...(name ? { name } : {}) })
+
+/** Принять узел в существующий домен. Его собственные стоп-слова переезжают домену. */
+export const domainAddMember = (
+  domain_id: string,
+  phrase: string,
+): Promise<{ id: string; name: string; members: string[]; stopwords_moved: number }> =>
+  post('/api/domains/member', { domain_id, phrase })
 
 export const estimate = (phrase: string): Promise<Estimate> =>
   req(`/api/estimate?phrase=${encodeURIComponent(phrase)}`)
@@ -442,11 +499,22 @@ export interface NeedsExcluded extends NeedsPhrase {
   note: string | null
 }
 
+/** Ветка входа сборки: их может быть несколько, частота у старых сборок известна не у всех. */
+export interface NeedsRootMeta {
+  phrase: string
+  freq: number | null
+  status?: Status
+}
+
 export interface NeedsTree {
   id: string
   condition: string | null
+  /** Самая частотная из входных веток: ею дерево подписано. */
   root: string | null
   root_freq: number | null
+  /** Весь вход сборки. Одна ветка — обычный разбор, несколько — объединённый (домен). */
+  roots?: string[]
+  roots_meta?: NeedsRootMeta[]
   created_at: number | null
   /** Версия классификации: 0 — исходная сборка, +1 за каждый успешный второй проход. */
   revision?: number

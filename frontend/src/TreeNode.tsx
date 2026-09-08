@@ -48,6 +48,15 @@ export function TreeNode({ phrase, local, parentBusy, isRoot }: Props) {
   const t = useContext(TreeCtx)
   const [open, setOpen] = useState(!!isRoot)
   const [visible, setVisible] = useState(120) // пагинация детей вширь
+  const [domOpen, setDomOpen] = useState(false)
+  const [name, setName] = useState('')
+
+  // Домен у узла либо есть, либо его можно завести — третьего состояния нет, поэтому
+  // одна кнопка переключает панель, а принятый узел показывает имя владельца.
+  const ownerId = t.domainOf[phrase]
+  const inDomain = ownerId ? (t.domains.find((d) => d.id === ownerId) ?? null) : null
+  const [pick, setPick] = useState('')
+  const pickable = t.domains.length ? (t.domains.some((d) => d.id === pick) ? pick : t.domains[0].id) : ''
 
   const n = t.nodes[phrase] ?? emptyNode(phrase)
   const real = t.kids[phrase] // реальные дети (пришли событием children/snapshot)
@@ -116,6 +125,22 @@ export function TreeNode({ phrase, local, parentBusy, isRoot }: Props) {
           </span>
         )}
         {busy && <span className="spin" title="идёт операция" />}
+        <span className="dom-acts">
+          {inDomain ? (
+            <span className="dom-tag" data-testid="node-domain" title="узел входит в домен">
+              {inDomain.name}
+            </span>
+          ) : (
+            <button
+              className={'act act-domain' + (domOpen ? ' on' : '')}
+              data-testid="btn-domain"
+              title="сделать из узла домен или принять его в существующий"
+              onClick={() => setDomOpen((o) => !o)}
+            >
+              Домен
+            </button>
+          )}
+        </span>
         <span className="acts">
           {(BTNS[n.status] ?? []).map((b) => (
             <button
@@ -131,6 +156,58 @@ export function TreeNode({ phrase, local, parentBusy, isRoot }: Props) {
           ))}
         </span>
       </div>
+      {domOpen && !inDomain && (
+        <div className="dom-panel" data-testid="domain-panel">
+          <span className="mut">
+            стоп-слова узла переедут домену: у члена домена своего списка не бывает
+          </span>
+          <div className="dom-line">
+            <select
+              data-testid="domain-pick"
+              value={pickable}
+              disabled={!t.domains.length}
+              onChange={(e) => setPick(e.target.value)}
+            >
+              {!t.domains.length && <option value="">доменов пока нет</option>}
+              {t.domains.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+            <button
+              className="act"
+              data-testid="domain-join"
+              disabled={!pickable}
+              onClick={() => {
+                t.addToDomain(phrase, pickable)
+                setDomOpen(false)
+              }}
+            >
+              В домен
+            </button>
+          </div>
+          <div className="dom-line">
+            <input
+              data-testid="domain-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={'название нового домена — по умолчанию «' + phrase + '»'}
+            />
+            <button
+              className="go"
+              data-testid="domain-create"
+              onClick={() => {
+                t.createDomain(phrase, name.trim() || phrase)
+                setDomOpen(false)
+                setName('')
+              }}
+            >
+              Сделать домен
+            </button>
+          </div>
+        </div>
+      )}
       {n.error && (
         <div className="nerr" data-testid="node-error">
           {n.error}

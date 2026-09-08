@@ -138,6 +138,46 @@ describe('вкладка «Дерево потребностей»', () => {
     expect(screen.queryByTestId('needs-tree')).toBeNull()
   })
 
+  it('вход из одной ветки подписан узлом', async () => {
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+
+    const head = await screen.findByTestId('needs-roots')
+    expect(head).toHaveTextContent('собрано по узлу дерева запросов')
+    expect(within(head).getByTestId('needs-root')).toHaveTextContent(
+      'нейросеть бесплатно без регистрации',
+    )
+    expect(head).toHaveTextContent('86 201')
+  })
+
+  it('вход из нескольких веток показывает их все с частотами', async () => {
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes('/api/needs/tree/')
+        ? res(200, {
+            ...TREE,
+            root: 'пдф',
+            root_freq: 8281216,
+            roots: ['пдф', 'pdf'],
+            roots_meta: [
+              { phrase: 'пдф', freq: 8281216, status: 'FULLY_LOADED' },
+              { phrase: 'pdf', freq: 2629788, status: 'FULLY_LOADED' },
+            ],
+          })
+        : res(200, { trees: [row()] }),
+    )
+    render(<NeedsPane active />)
+    await userEvent.click(await screen.findByTestId('needs-row'))
+
+    const head = await screen.findByTestId('needs-roots')
+    expect(head).toHaveTextContent('собрано по 2 веткам дерева запросов')
+    expect(head).toHaveTextContent('пдф')
+    expect(head).toHaveTextContent('8 281 216')
+    expect(head).toHaveTextContent('pdf')
+    expect(head).toHaveTextContent('2 629 788')
+    // подпись дерева — самая частотная ветка, ею же оно названо в списке
+    expect(within(head).getByTestId('needs-root')).toHaveTextContent('пдф')
+  })
+
   it('работа раскрывается: фразы с частотами и сегмент', async () => {
     render(<NeedsPane active />)
     await userEvent.click(await screen.findByTestId('needs-row'))

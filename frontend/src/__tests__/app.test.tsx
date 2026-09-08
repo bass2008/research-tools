@@ -134,6 +134,51 @@ describe('лес корней', () => {
     expect(within(domain).getByTestId('node-совместимость по дате рождения')).toBeInTheDocument()
     expect(within(screen.getByTestId('other-roots')).getByTestId('node-нейросеть')).toBeInTheDocument()
   })
+
+  it('над доменом есть сборка потребностей по всем его ключам сразу', async () => {
+    const { emit } = mount()
+    emit({ type: 'roots', data: {
+      domains: [{ id: 'pdf', name: 'PDF', members: [
+        n('pdf', { status: 'FULLY_LOADED' }), n('пдф', { status: 'FULLY_LOADED' }),
+      ] }],
+      roots: [],
+    } })
+
+    const btn = screen.getByTestId('domain-needs-pdf')
+    expect(btn).toBeEnabled()
+    fetchMock.mockResolvedValueOnce(res(200, { task_id: 'b1', roots: ['pdf', 'пдф'] }))
+    await userEvent.click(btn)
+
+    await waitFor(() => expect(lastUrl()).toBe('/api/needs/build'))
+    // ветки берёт сервер из состава домена: клиент не должен их пересобирать сам
+    expect(lastBody()).toEqual({ domain_id: 'pdf' })
+  })
+
+  it('сборка по домену недоступна, пока не загружены все его ключи', () => {
+    const { emit } = mount()
+    emit({ type: 'roots', data: {
+      domains: [{ id: 'pdf', name: 'PDF', members: [
+        n('pdf', { status: 'FULLY_LOADED' }), n('пдф', { status: 'LOADED' }),
+      ] }],
+      roots: [],
+    } })
+
+    const btn = screen.getByTestId('domain-needs-pdf')
+    expect(btn).toBeDisabled()
+    expect(btn.getAttribute('title')).toContain('готовы 1 из 2')
+  })
+
+  it('занятый ключ домена блокирует сборку по домену', () => {
+    const { emit } = mount()
+    emit({ type: 'roots', data: {
+      domains: [{ id: 'pdf', name: 'PDF', members: [
+        n('pdf', { status: 'FULLY_LOADED' }),
+        n('пдф', { status: 'FULLY_LOADED', task_id: 't-1' }),
+      ] }],
+      roots: [],
+    } })
+    expect(screen.getByTestId('domain-needs-pdf')).toBeDisabled()
+  })
 })
 
 describe('новый корень', () => {
@@ -362,7 +407,8 @@ describe('ошибки команд показываются пользоват�
     openTree(emit, 'FULLY_LOADED')
     await user.click(screen.getByTestId('btn-needs-build'))
     await waitFor(() => expect(lastUrl()).toBe('/api/needs/build'))
-    expect(lastBody()).toEqual({ phrase: 'a' })
+    // единица сборки — набор веток: у кнопки узла он из одной
+    expect(lastBody()).toEqual({ phrases: ['a'] })
   })
 })
 

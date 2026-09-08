@@ -1,9 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import * as api from './api'
-import type { StopKind, StopState, StopWord, TaskRow } from './api'
+import type { StopKind, StopScope, StopState, StopWhere, StopWord, TaskRow } from './api'
 
 // Стоп-слова — то, что мы сознательно НЕ покупаем. Модель только предлагает; список
 // исключений наполняет человек, поэтому предложенное и принятое стоят рядом двумя списками.
+//
+// У списка есть владелец: общий (действует везде), узел (только его ветка) или домен (все
+// его ключи). «Учебник» бессмыслен в ветке «pdf» и осмыслен в школьной — поэтому запрет и
+// область неразделимы. Узел, принятый в домен, своего списка не имеет: запрет переезжает
+// домену, иначе он расходился бы в двух местах.
+
+// ключ для <option>: вид владельца из закрытого набора, поэтому пара однозначна
+const scopeKey = (w: StopWhere) => w.scope_kind + ':' + w.scope_id
+
+// Ручной ввод: сравнение идёт со СЛОВОМ фразы, поэтому «рабочая тетрадь» никогда не совпадёт.
+// Режем ввод на слова — так и список вписывается одной строкой, и мёртвых записей не заводится.
+const parseWords = (text: string): string[] =>
+  [...new Set(text.toLowerCase().split(/[\s,;]+/).filter(Boolean))]
+
+const scopeLabel = (s: StopScope) =>
+  (s.scope_kind === 'domain' ? 'Домен: ' : '') + s.name + (s.count ? ` (${s.count})` : '')
 
 const TITLE: Record<StopKind, string> = {
   stop: 'Стоп-слова',
@@ -28,6 +44,7 @@ export function StopPane({ active, tasks = [] }: { active: boolean; tasks?: Task
   const [st, setSt] = useState<StopState | null>(null)
   const [phrase, setPhrase] = useState('')
   const [err, setErr] = useState('')
+  const [where, setWhere] = useState<StopWhere>(api.GLOBAL_SCOPE)
   const statuses = useRef(new Map<string, string>())
 
   const load = () =>
@@ -73,8 +90,8 @@ export function StopPane({ active, tasks = [] }: { active: boolean; tasks?: Task
   async function accept(words: string[], kind: StopKind) {
     if (!words.length) return
     try {
-      const r = await api.stopAdd(words.map((word) => ({ word, kind })))
-      setSt((s) => (s ? { ...s, saved: r.saved } : s))
+      const r = await api.stopAdd(words.map((word) => ({ word, kind })), where)
+      setSt((s) => (s ? { ...s, saved: r.saved, scopes: r.scopes ?? s.scopes } : s))
       setErr('')
     } catch (e) {
       setErr(errText(e))
@@ -84,17 +101,29 @@ export function StopPane({ active, tasks = [] }: { active: boolean; tasks?: Task
   async function drop(words: string[]) {
     if (!words.length) return
     try {
-      const r = await api.stopRemove(words)
-      setSt((s) => (s ? { ...s, saved: r.saved } : s))
+      const r = await api.stopRemove(words, where)
+      setSt((s) => (s ? { ...s, saved: r.saved, scopes: r.scopes ?? s.scopes } : s))
       setErr('')
     } catch (e) {
       setErr(errText(e))
     }
   }
 
+  function chooseScope(key: string) {
+    const s = (st?.scopes ?? []).find((x) => scopeKey(x) === key)
+    if (!s) return
+    setWhere({ scope_kind: s.scope_kind, scope_id: s.scope_id })
+    // разбор всегда идёт по узлу: у домена берём первый ключ — его ветка и есть вход
+    if (s.scope_kind === 'node') setPhrase(s.scope_id)
+  }
+
   if (!st) return <div className="mut">загружаем список…</div>
 
   const sug = st.suggestion
+  const scopes = st.scopes ?? []
+  const current = scopes.find((s) => api.sameScope(s, where)) ?? null
+  // Слово чужой области на эту ветку не действует, поэтому и в списке его быть не должно.
+  const saved = st.saved.filter((w) => api.sameScope(w, where))
 
   return (
     <>
@@ -109,8 +138,38 @@ export function StopPane({ active, tasks = [] }: { active: boolean; tasks?: Task
 
       <div className="hint">
         Слова из этого списка <b>не покупаются</b>: узел с таким словом краул пропускает, и его
-        уточнения тоже. Модель только <b>предлагает</b> — что попадёт в список, решаете вы. Слово,
-        которое вы не приняли, она предложит снова: «отклонённого» система не помнит.
+        уточнения тоже. Модель только <b>предлагает</b> — что попадёт в список, решаете вы, и
+        своё слово можно вписать руками, не дожидаясь разбора. Слово, которое вы не приняли, она
+        предложит снова: «отклонённого» система не помнит.
+      </div>
+
+      <div className="bar-row">
+        <label className="stop-scope">
+          Список:
+          <select
+            data-testid="stop-scope"
+            className={'scope-' + where.scope_kind}
+            value={scopeKey(where)}
+            onChange={(e) => chooseScope(e.target.value)}
+          >
+            {scopes.map((s) => (
+              <option
+                key={scopeKey(s)}
+                value={scopeKey(s)}
+                className={s.scope_kind === 'domain' ? 'opt-domain' : undefined}
+              >
+                {scopeLabel(s)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span className="mut" data-testid="stop-scope-hint">
+          {where.scope_kind === 'global'
+            ? 'действует на всё дерево'
+            : where.scope_kind === 'domain'
+              ? `действует на ключи домена «${current?.name ?? where.scope_id}» и их уточнения`
+              : `действует только внутри ветки «${where.scope_id}»`}
+        </span>
       </div>
 
       <div className="bar-row">
@@ -140,10 +199,8 @@ export function StopPane({ active, tasks = [] }: { active: boolean; tasks?: Task
         <Block
           key={kind}
           kind={kind}
-          saved={st.saved.filter((w) => w.kind === kind)}
-          offered={(sug?.[kind] ?? []).filter(
-            (o) => !st.saved.some((w) => w.word === o.word),
-          )}
+          saved={saved.filter((w) => w.kind === kind)}
+          offered={(sug?.[kind] ?? []).filter((o) => !saved.some((w) => w.word === o.word))}
           onAccept={(ws) => void accept(ws, kind)}
           onDrop={(ws) => void drop(ws)}
         />
@@ -167,6 +224,15 @@ function Block({
 }) {
   const [left, setLeft] = useState<string[]>([])
   const [right, setRight] = useState<string[]>([])
+  const [own, setOwn] = useState('')
+
+  function addOwn() {
+    const words = parseWords(own)
+    if (!words.length) return
+    onAccept(words)
+    setOwn('')
+  }
+
   const pick = (e: React.ChangeEvent<HTMLSelectElement>) =>
     [...e.target.selectedOptions].map((o) => o.value)
 
@@ -257,6 +323,26 @@ function Block({
               </option>
             ))}
           </select>
+          <div className="stop-own">
+            <input
+              data-testid={'stop-own-' + kind}
+              value={own}
+              onChange={(e) => setOwn(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') addOwn()
+              }}
+              placeholder="своё слово — можно списком через запятую"
+            />
+            <button
+              className="act"
+              data-testid={'stop-own-add-' + kind}
+              disabled={!parseWords(own).length}
+              onClick={addOwn}
+              title="добавить свои слова в этот список, минуя разбор"
+            >
+              + Добавить
+            </button>
+          </div>
         </div>
       </div>
     </section>

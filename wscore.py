@@ -113,8 +113,15 @@ _SQL_PROBE = """CREATE TABLE IF NOT EXISTS probe (
 
 # Стоп-слова: что мы сознательно НЕ покупаем. Хранится слово, сравнение идёт по основе —
 # «проститутка» и «проститутки» это одно слово, а падежей у Вордстата полный набор.
+# Область действия — общая, узел или домен: «учебник» бессмыслен в ветке «pdf» и осмыслен
+# в ветке про школу, поэтому владелец списка входит в ключ.
 _SQL_STOPWORD = """CREATE TABLE IF NOT EXISTS stopword (
-    word TEXT PRIMARY KEY, kind TEXT NOT NULL, added_at INTEGER NOT NULL)"""
+    word TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    scope_kind TEXT NOT NULL DEFAULT 'global',    -- global | node | domain
+    scope_id TEXT NOT NULL DEFAULT '',            -- '' | фраза узла | id домена
+    added_at INTEGER NOT NULL,
+    PRIMARY KEY (word, scope_kind, scope_id))"""
 
 # node: базовые колонки (этап 1-2) + поля конвейера (design §3)
 _SQL_HISTORY = """CREATE TABLE IF NOT EXISTS history (
@@ -190,6 +197,7 @@ _SQL_INDEXES = (
     "CREATE INDEX IF NOT EXISTS idx_edge_parent ON edge(parent)",
     "CREATE INDEX IF NOT EXISTS idx_edge_child ON edge(child)",
     "CREATE INDEX IF NOT EXISTS idx_domain_member_phrase ON domain_member(phrase)",
+    "CREATE INDEX IF NOT EXISTS idx_stopword_scope ON stopword(scope_kind, scope_id)",
     "CREATE INDEX IF NOT EXISTS idx_node_status ON node(status)",
     "CREATE INDEX IF NOT EXISTS idx_node_task ON node(task_id)",
     "CREATE INDEX IF NOT EXISTS idx_task_created ON task(created_at)",
@@ -233,6 +241,7 @@ def connect(db_path=None, backfill=True):
     if cols and _PRE_PIPELINE_MARKER not in cols:
         con.execute("DROP TABLE IF EXISTS edge")   # схема этапа 1-2: пересобираем из cache
         con.execute("DROP TABLE IF EXISTS node")
+    _migrate_stopword_scope(con)
     for sql in (_SQL_NODE, _SQL_EDGE, _SQL_DOMAIN, _SQL_DOMAIN_MEMBER, _SQL_SERP, _SQL_TASK,
                 _SQL_REPORT, _SQL_HISTORY, _SQL_PROBE, _SQL_STOPWORD, *_SQL_INDEXES):
         con.execute(sql)
@@ -267,6 +276,24 @@ def _mark_orphan_probes(con):
                        "SELECT 1 FROM node WHERE node.phrase = cache.query)").fetchall()
     if rows:
         mark_probe(con, [r[0] for r in rows], "adjacent")
+
+
+def _migrate_stopword_scope(con):
+    """Дать старому списку исключений владельца: всё накопленное становится общим.
+
+    Ключ таблицы менялся (`word` -> `word + владелец`), а PRIMARY KEY в sqlite правится
+    только пересозданием. Слова вводил человек, поэтому переливаем, а не пересоздаём.
+    """
+    cols = {r[1] for r in con.execute("PRAGMA table_info(stopword)")}
+    if not cols or "scope_kind" in cols:
+        return False
+    con.execute("ALTER TABLE stopword RENAME TO stopword_pre_scope")
+    con.execute(_SQL_STOPWORD)
+    con.execute("INSERT OR IGNORE INTO stopword(word, kind, scope_kind, scope_id, added_at) "
+                "SELECT word, kind, 'global', '', added_at FROM stopword_pre_scope")
+    con.execute("DROP TABLE stopword_pre_scope")
+    con.commit()
+    return True
 
 
 def _add_missing_cols(con):
@@ -635,54 +662,239 @@ def unqueried_frontier(con, root, floor=FLOOR):
     условием остановки краула. Фразы под стоп-словами фронтиром не считаются: мы их
     сознательно не покупаем, и без этого краул гонялся бы за ними по кругу.
     -> список фраз по убыванию частоты."""
-    stems = stop_stems(con)
+    stops = stop_filter(con)
     return [r[0] for r in con.execute(f"""
         WITH RECURSIVE sub(ph) AS (
           SELECT ? UNION SELECT e.child FROM sub JOIN edge e ON e.parent = sub.ph)
         SELECT n.phrase FROM sub JOIN node n ON n.phrase = sub.ph
         WHERE n.queried = 0 AND COALESCE(n.freq, 0) >= ?
         ORDER BY COALESCE(n.freq, 0) DESC""", (normalize(root), floor))
-            if not is_stopped(r[0], stems)]
+            if not is_stopped(r[0], stops)]
 
 
 # ---------- стоп-слова ----------
 
 STOP_KINDS = ("stop", "brand", "unwanted")
 
+# Владелец списка исключений (design §4.10). Инвариант И1: ровно один из трёх, и `scope_id`
+# непуст тогда и только тогда, когда владелец не общий.
+STOP_SCOPES = ("global", "node", "domain")
+GLOBAL_SCOPE = ("global", "")
 
-def stopwords(con):
-    """Сохранённые исключения, новые сверху. -> [{word, kind, added_at}]"""
-    return [{"word": r[0], "kind": r[1], "added_at": r[2]}
-            for r in con.execute("SELECT word, kind, added_at FROM stopword "
-                                 "ORDER BY added_at DESC, word")]
+
+def _scope(scope_kind=None, scope_id=None):
+    """Нормализованная пара (владелец, id). Пустой владелец = общий список."""
+    kind = (scope_kind or "global").strip().lower()
+    if kind not in STOP_SCOPES:
+        raise ValueError(f"неизвестная область стоп-слов: {scope_kind!r}")
+    sid = normalize(scope_id) if kind != "global" else ""
+    if kind != "global" and not sid:
+        raise ValueError(f"область {kind} без адресата")
+    return kind, sid
+
+
+def check_scope(con, scope_kind, scope_id):
+    """Проверить владельца перед записью (инварианты И2 и И5).
+
+    Узел и домен должны существовать; у узла, принятого в домен, своего списка быть не
+    может — иначе один и тот же запрет жил бы в двух местах и расходился.
+    """
+    kind, sid = _scope(scope_kind, scope_id)
+    if kind == "node":
+        if con.execute("SELECT 1 FROM node WHERE phrase = ?", (sid,)).fetchone() is None:
+            raise ValueError(f"узла нет в дереве: {sid!r}")
+        owner = domain_of(con, sid)
+        if owner:
+            raise ValueError(f"узел {sid!r} входит в домен {owner!r}: "
+                             f"его стоп-слова живут у домена")
+    elif kind == "domain":
+        if con.execute("SELECT 1 FROM domain WHERE id = ?", (sid,)).fetchone() is None:
+            raise ValueError(f"домена нет: {sid!r}")
+    return kind, sid
+
+
+def stopwords(con, scope_kind=None, scope_id=None):
+    """Сохранённые исключения, новые сверху. Без области — весь список целиком.
+    -> [{word, kind, scope_kind, scope_id, added_at}]"""
+    sql = "SELECT word, kind, scope_kind, scope_id, added_at FROM stopword"
+    args = ()
+    if scope_kind is not None:
+        kind, sid = _scope(scope_kind, scope_id)
+        sql += " WHERE scope_kind = ? AND scope_id = ?"
+        args = (kind, sid)
+    return [{"word": r[0], "kind": r[1], "scope_kind": r[2], "scope_id": r[3], "added_at": r[4]}
+            for r in con.execute(sql + " ORDER BY added_at DESC, word", args)]
 
 
 def stop_stems(con):
-    """Основы сохранённых слов — по ним и идёт сравнение с фразами."""
-    return frozenset(stem(w) for (w,) in con.execute("SELECT word FROM stopword"))
+    """Основы слов ОБЩЕГО списка — они действуют на любую фразу дерева.
+    Словам узла и домена нужна область, поэтому им — `stop_filter`."""
+    return frozenset(stem(w) for (w,) in con.execute(
+        "SELECT word FROM stopword WHERE scope_kind = 'global'"))
 
 
-def add_stopwords(con, items):
-    """items: [(слово, категория)]. Уже сохранённое слово не дублируется. -> сколько добавлено."""
+def add_stopwords(con, items, scope_kind=None, scope_id=None):
+    """items: [(слово, категория)]. Уже сохранённое у этого владельца не дублируется.
+    -> сколько добавлено."""
+    kind, sid = check_scope(con, scope_kind, scope_id)
     now = int(time.time())
-    rows = [(normalize(w), k, now) for w, k in items
+    rows = [(normalize(w), k, kind, sid, now) for w, k in items
             if normalize(w) and k in STOP_KINDS]
-    cur = con.executemany("INSERT OR IGNORE INTO stopword(word, kind, added_at) VALUES (?, ?, ?)",
-                          rows)
+    cur = con.executemany(
+        "INSERT OR IGNORE INTO stopword(word, kind, scope_kind, scope_id, added_at) "
+        "VALUES (?, ?, ?, ?, ?)", rows)
     con.commit()
     return cur.rowcount
 
 
-def remove_stopwords(con, words):
-    ws = [(normalize(w),) for w in words if normalize(w)]
-    cur = con.executemany("DELETE FROM stopword WHERE word = ?", ws)
+def remove_stopwords(con, words, scope_kind=None, scope_id=None):
+    kind, sid = _scope(scope_kind, scope_id)
+    ws = [(normalize(w), kind, sid) for w in words if normalize(w)]
+    cur = con.executemany(
+        "DELETE FROM stopword WHERE word = ? AND scope_kind = ? AND scope_id = ?", ws)
     con.commit()
     return cur.rowcount
 
 
-def is_stopped(phrase, stems):
-    """Фраза попадает под исключение, если хоть одно её слово — стоп-слово."""
-    return bool(stems) and bool(words_of(phrase) & stems)
+class StopFilter:
+    """Что не покупаем — с учётом области действия (инвариант И4).
+
+    Слово общего списка бьёт по любой фразе. Слово узла или домена — только внутри своей
+    области. Область узла — сам узел и всё, что от него уточняется; принадлежность считаем
+    по словам, а не обходом рёбер: уточнение у Вордстата всегда содержит слова родителя
+    (на этом же построено `refinements`), поэтому проверка дешёвая и не зависит от того,
+    каким рёбрами фраза оказалась в дереве. Область домена — объединение областей его
+    ключей."""
+
+    def __init__(self, rows):
+        self.rows = list(rows)
+        self._global = {}
+        self._scoped = []
+        by_scope = {}
+        for r in self.rows:
+            if r["scope_kind"] == "global":
+                self._global.setdefault(stem(r["word"]), r)
+            else:
+                by_scope.setdefault((r["scope_kind"], r["scope_id"]), []).append(r)
+        self._pending = by_scope
+
+    def bind(self, areas):
+        """areas: {(scope_kind, scope_id): [фраза, …]} — из чего состоит каждая область."""
+        for key, rows in self._pending.items():
+            words = [words_of(p) for p in areas.get(key, ()) if normalize(p)]
+            if not words:
+                continue      # область без ключей ничего не покрывает
+            table = {}
+            for r in rows:
+                table.setdefault(stem(r["word"]), r)
+            self._scoped.append((words, table))
+        self._pending = {}
+        return self
+
+    def hit(self, phrase):
+        """Первое сработавшее исключение или None. -> строка stopword."""
+        ws = words_of(phrase)
+        if self._global:
+            common = ws & self._global.keys()
+            if common:
+                return self._global[min(common)]
+        for areas, table in self._scoped:
+            if not any(a <= ws for a in areas):
+                continue
+            common = ws & table.keys()
+            if common:
+                return table[min(common)]
+        return None
+
+    def words_for(self, phrase):
+        """Слова, которые уже действуют на эту фразу — что не нужно классифицировать заново."""
+        ws = words_of(phrase)
+        out = [r["word"] for r in self._global.values()]
+        for areas, table in self._scoped:
+            if any(a <= ws for a in areas):
+                out += [r["word"] for r in table.values()]
+        return sorted(set(out))
+
+    def __bool__(self):
+        return bool(self._global or self._scoped)
+
+
+def stop_areas(con):
+    """Из чего состоит каждая область: узел — сам собой, домен — своими ключами."""
+    areas = {}
+    for phrase, in con.execute(
+            "SELECT DISTINCT scope_id FROM stopword WHERE scope_kind = 'node'"):
+        areas[("node", phrase)] = [phrase]
+    for did, phrase in con.execute(
+            "SELECT domain_id, phrase FROM domain_member ORDER BY position"):
+        areas.setdefault(("domain", did), []).append(phrase)
+    return areas
+
+
+def stop_filter(con):
+    """Готовый фильтр: снимок всех исключений вместе с их областями."""
+    return StopFilter(stopwords(con)).bind(stop_areas(con))
+
+
+def stop_scope_options(con, limit=200):
+    """Кому можно адресовать список исключений — для выбора в UI.
+
+    Общий список, все домены и корни дерева вне доменов. Узел внутри домена сюда не
+    попадает (инвариант И2): его запреты живут у домена. Узел со своим списком показываем,
+    даже если он давно перестал быть корнем, — иначе список стал бы недоступен.
+    -> [{scope_kind, scope_id, name, count}]"""
+    counts = {(r[0], r[1]): r[2] for r in con.execute(
+        "SELECT scope_kind, scope_id, COUNT(*) FROM stopword GROUP BY scope_kind, scope_id")}
+    out = [{"scope_kind": "global", "scope_id": "", "name": "Общий список",
+            "count": counts.get(GLOBAL_SCOPE, 0)}]
+    for did, name in con.execute("SELECT id, name FROM domain ORDER BY created_at, id"):
+        out.append({"scope_kind": "domain", "scope_id": did, "name": name,
+                    "count": counts.get(("domain", did), 0)})
+    seen = set()
+    for phrase, in con.execute(
+            "SELECT n.phrase FROM node n "
+            "WHERE NOT EXISTS (SELECT 1 FROM edge WHERE child = n.phrase) "
+            "AND NOT EXISTS (SELECT 1 FROM domain_member dm WHERE dm.phrase = n.phrase) "
+            "ORDER BY COALESCE(n.freq, 0) DESC LIMIT ?", (limit,)):
+        seen.add(phrase)
+        out.append({"scope_kind": "node", "scope_id": phrase, "name": phrase,
+                    "count": counts.get(("node", phrase), 0)})
+    for (sk, sid), n in sorted(counts.items()):
+        if sk == "node" and sid not in seen:
+            out.append({"scope_kind": "node", "scope_id": sid, "name": sid, "count": n})
+    return out
+
+
+def is_stopped(phrase, stops):
+    """Фраза попадает под исключение, если хоть одно её слово — стоп-слово своей области.
+    `stops` — либо `StopFilter`, либо множество основ общего списка (`stop_stems`)."""
+    if isinstance(stops, StopFilter):
+        return stops.hit(phrase) is not None
+    return bool(stops) and bool(words_of(phrase) & stops)
+
+
+def stopword_violations(con):
+    """Нарушения инвариантов списка исключений — пусто, когда всё в порядке (testing-plan).
+    -> [(правило, пояснение)]"""
+    bad = []
+    for r in con.execute("SELECT word, kind, scope_kind, scope_id FROM stopword"):
+        word, kind, sk, sid = r
+        if sk not in STOP_SCOPES:
+            bad.append(("И1", f"{word!r}: неизвестный владелец {sk!r}"))
+        elif (sk == "global") != (sid == ""):
+            bad.append(("И1", f"{word!r}: владелец {sk!r} с адресатом {sid!r}"))
+        if kind not in STOP_KINDS:
+            bad.append(("И1", f"{word!r}: неизвестная категория {kind!r}"))
+        if sk == "node":
+            if con.execute("SELECT 1 FROM node WHERE phrase = ?", (sid,)).fetchone() is None:
+                bad.append(("И5", f"{word!r}: узла {sid!r} нет в дереве"))
+            elif domain_of(con, sid):
+                bad.append(("И2", f"{word!r}: узел {sid!r} уже в домене "
+                                  f"{domain_of(con, sid)!r}"))
+        if sk == "domain" and con.execute("SELECT 1 FROM domain WHERE id = ?",
+                                          (sid,)).fetchone() is None:
+            bad.append(("И5", f"{word!r}: домена {sid!r} нет"))
+    return bad
 
 
 def word_stats(con, root, exclude=(), floor=FLOOR, cap=400):
@@ -732,7 +944,7 @@ async def crawl_subtree(con, phrase, on_progress=None, workers=WORKERS, limit=LI
     db = db_path_of(con)
     root = normalize(phrase)
     sem = asyncio.Semaphore(max(1, workers))
-    stops = stop_stems(con)          # что не покупаем: снимок на весь прогон
+    stops = stop_filter(con)         # что не покупаем: снимок на весь прогон
     skipped = 0
     if is_stopped(root, stops):
         # Сам корень под стоп-словом: не покупаем НИЧЕГО, включая его пул. Все уточнения такой
@@ -854,13 +1066,13 @@ def repair_fully_loaded(con):
 
     Фразы под стоп-словами дырой не считаются: их не покупают намеренно, иначе каждый старт
     сервера снимал бы FULLY_LOADED со всей отфильтрованной ветки."""
-    stems = stop_stems(con)
+    stops = stop_filter(con)
     con.execute("CREATE TEMP TABLE IF NOT EXISTS _stopped(phrase TEXT PRIMARY KEY)")
     con.execute("DELETE FROM _stopped")
-    if stems:
+    if stops:
         holes = [(p,) for (p,) in con.execute(
             "SELECT phrase FROM node WHERE queried = 0 AND COALESCE(freq, 0) >= ?", (FLOOR,))
-            if is_stopped(p, stems)]
+            if is_stopped(p, stops)]
         con.executemany("INSERT INTO _stopped(phrase) VALUES (?)", holes)
     cur = con.execute(f"""
         UPDATE node SET status = 'LOADED'
@@ -1023,8 +1235,97 @@ def save_domain(con, domain_id, name, phrases):
         "INSERT INTO domain_member(domain_id, phrase, position) VALUES (?, ?, ?)",
         [(did, phrase, position) for position, phrase in enumerate(members)],
     )
+    moved = 0
+    for phrase in members:
+        moved += adopt_node_stopwords(con, phrase, did)
     con.commit()
-    return {"id": did, "name": title, "members": members}
+    return {"id": did, "name": title, "members": members, "stopwords_moved": moved}
+
+
+def domain_of(con, phrase):
+    """id домена, в который принят узел, или None."""
+    row = con.execute("SELECT domain_id FROM domain_member WHERE phrase = ?",
+                      (normalize(phrase),)).fetchone()
+    return row[0] if row else None
+
+
+def domain_id_for(name, taken=()):
+    """Опорный id домена из его названия: латиница и цифры как есть, кириллица —
+    транслитом, остальное — дефис. Занятый id разводим суффиксом."""
+    tr = {"а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh",
+          "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o",
+          "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "h", "ц": "ts",
+          "ч": "ch", "ш": "sh", "щ": "sch", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu",
+          "я": "ya"}
+    out = "".join(tr.get(ch, ch if ch.isalnum() and ch.isascii() else "-")
+                  for ch in normalize(name))
+    base = re.sub(r"-+", "-", out).strip("-") or "domain"
+    if base not in taken:
+        return base
+    n = 2
+    while f"{base}-{n}" in taken:
+        n += 1
+    return f"{base}-{n}"
+
+
+def create_domain(con, name, phrases):
+    """Новый домен из перечисленных узлов. id выводится из названия. -> save_domain."""
+    taken = {r[0] for r in con.execute("SELECT id FROM domain")}
+    members = [normalize(p) for p in phrases if normalize(p)]
+    for phrase in members:
+        owner = domain_of(con, phrase)
+        if owner:
+            raise ValueError(f"узел {phrase!r} уже в домене {owner!r}")
+    return save_domain(con, domain_id_for(name, taken), name, members)
+
+
+def add_domain_member(con, domain_id, phrase):
+    """Принять узел в существующий домен: он встаёт в конец, его стоп-слова переходят
+    домену (инвариант И3). -> {id, name, members, stopwords_moved}"""
+    did = normalize(domain_id)
+    qn = normalize(phrase)
+    row = con.execute("SELECT id, name FROM domain WHERE id = ?", (did,)).fetchone()
+    if row is None:
+        raise ValueError(f"домена нет: {domain_id!r}")
+    if not qn:
+        raise ValueError("нужна фраза узла")
+    owner = domain_of(con, qn)
+    if owner == did:
+        raise ValueError(f"узел {qn!r} уже в домене {did!r}")
+    if owner:
+        raise ValueError(f"узел {qn!r} уже в домене {owner!r}")
+    upsert_node(con, qn)
+    pos = con.execute("SELECT COALESCE(MAX(position), -1) + 1 FROM domain_member "
+                      "WHERE domain_id = ?", (did,)).fetchone()[0]
+    con.execute("INSERT INTO domain_member(domain_id, phrase, position) VALUES (?, ?, ?)",
+                (did, qn, pos))
+    moved = adopt_node_stopwords(con, qn, did)
+    con.commit()
+    members = [r[0] for r in con.execute(
+        "SELECT phrase FROM domain_member WHERE domain_id = ? ORDER BY position", (did,))]
+    return {"id": did, "name": row["name"] if hasattr(row, "keys") else row[1],
+            "members": members, "stopwords_moved": moved}
+
+
+def adopt_node_stopwords(con, phrase, domain_id):
+    """Перенести собственный список узла на домен (инварианты И2 и И3).
+
+    Слово, которое у домена уже есть, дублем не заводим: побеждает запись домена —
+    она старше и её категорию выбирал человек, глядя на весь домен целиком.
+    -> сколько слов переехало."""
+    qn = normalize(phrase)
+    did = normalize(domain_id)
+    rows = con.execute("SELECT word, kind, added_at FROM stopword "
+                       "WHERE scope_kind = 'node' AND scope_id = ?", (qn,)).fetchall()
+    if not rows:
+        return 0
+    cur = con.executemany(
+        "INSERT OR IGNORE INTO stopword(word, kind, scope_kind, scope_id, added_at) "
+        "VALUES (?, ?, 'domain', ?, ?)",
+        [(r[0], r[1], did, r[2]) for r in rows])
+    moved = cur.rowcount
+    con.execute("DELETE FROM stopword WHERE scope_kind = 'node' AND scope_id = ?", (qn,))
+    return moved
 
 
 def ensure_default_domains(con):
