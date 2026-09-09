@@ -96,7 +96,7 @@ def test_short_password_is_refused(page, mail):
 
 
 def test_broken_email_is_refused(page):
-    """Почту без собаки не пропускает сам браузер (поле type=email), платёж не начинается."""
+    """Почту без собаки форма не пропускает, платёж не начинается."""
     flows.calculate(page, 18, 6, 1994)
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill("почта-без-собаки")

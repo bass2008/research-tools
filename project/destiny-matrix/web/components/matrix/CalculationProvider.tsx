@@ -11,8 +11,11 @@ import {
 
 import { useSession } from "@/components/account/useSession";
 import { api, type MatrixListItem } from "@/lib/api";
+import { openedFor } from "@/lib/openedDate";
+import { useBirth } from "@/lib/useBirth";
 import {
   BIRTH_EVENT,
+  alignBirth,
   takeCalculationRequest,
   type StoredBirth,
 } from "@/lib/storage";
@@ -34,6 +37,7 @@ export default function CalculationProvider({ children }: { children: ReactNode 
   const [ownDates, setOwnDates] = useState<MatrixListItem[]>([]);
   const [datesReady, setDatesReady] = useState(false);
   const [requested, setRequested] = useState<StoredBirth | null>(null);
+  const birth = useBirth();
 
   useEffect(() => {
     const pending = takeCalculationRequest();
@@ -42,7 +46,10 @@ export default function CalculationProvider({ children }: { children: ReactNode 
     const onCalculation = (event: Event) => {
       // Запрос доставлен текущей странице — следующему обычному визиту он уже не принадлежит.
       takeCalculationRequest();
-      const value = (event as CustomEvent<StoredBirth | null>).detail;
+      const value = (event as CustomEvent<(StoredBirth & { aligned?: boolean }) | null>).detail;
+      // Согласование пола с открытой записью — не запрос расчёта: уводить с текущей страницы
+      // по нему нельзя.
+      if (value?.aligned) return;
       setRequested(
         value && typeof value.birth === "string" && (value.sex === "m" || value.sex === "f")
           ? value
@@ -83,14 +90,24 @@ export default function CalculationProvider({ children }: { children: ReactNode 
     };
   }, [session.status]);
 
+  // Пол показывается по купленной записи всегда, а не только сразу после «Рассчитать»: дату
+  // могли купить из кабинета, а в браузере остался прежний выбор пола — тогда форма и подпись
+  // разбора спорили друг с другом на одном экране.
+  useEffect(() => {
+    if (!datesReady || !birth) return;
+    const align = openedFor(birth, ownDates).align;
+    if (align) alignBirth(align);
+  }, [datesReady, ownDates, birth]);
+
   useEffect(() => {
     if (!requested || !datesReady) return;
-    // Пол в поиске права не участвует: см. комментарий в `MatrixReport.tsx`.
-    const paid = ownDates.find(
-      (row) => row.birth === requested.birth && row.access !== "locked",
-    );
+    // Кого открываем и каким полом подписываем — в `lib/openedDate`.
+    const opened = openedFor(requested, ownDates);
+    const paid = opened.row;
 
     if (paid) {
+      // Открылась купленная запись — переключатель и подпись обязаны показывать её пол.
+      if (opened.align) alignBirth(opened.align);
       const target = `/?m=${paid.id}#result`;
       const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
       if (current !== target) router.push(target);

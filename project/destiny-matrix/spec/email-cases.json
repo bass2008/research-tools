@@ -1,0 +1,374 @@
+{
+  "note": "Единый корпус адресов для фронта (web/lib/email.ts), BFF и сервера (EmailStr). Гоняется и vitest, и pytest: клиент обязан отвергать всё, что отвергнет сервер, и принимать всё, что сервер принимает.",
+  "normalize": [
+    {
+      "raw": "user@mail.ru",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": " user@mail.ru ",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "\tuser@mail.ru\n",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "User@Mail.RU",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "USER@MAIL.RU",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "Ivan.Petrov@Mail.RU",
+      "value": "ivan.petrov@mail.ru"
+    },
+    {
+      "raw": "<user@mail.ru>",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "  <User@Mail.ru>  ",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "user​@mail.ru",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "﻿user@mail.ru",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "user­@mail.ru",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "user@mail.ru ",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": " user@mail.ru ",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "user@mail.ru⁠",
+      "value": "user@mail.ru"
+    },
+    {
+      "raw": "ЮЗЕР@Mail.ru",
+      "value": "юзер@mail.ru"
+    },
+    {
+      "raw": "",
+      "value": ""
+    },
+    {
+      "raw": "   ",
+      "value": ""
+    }
+  ],
+  "valid": [
+    "user@mail.ru",
+    "u@mail.ru",
+    "user123@mail.ru",
+    "123@mail.ru",
+    "user.name@mail.ru",
+    "user.middle.name@mail.ru",
+    "user+tag@mail.ru",
+    "user+tag+more@mail.ru",
+    "user-name@mail.ru",
+    "user_name@mail.ru",
+    "user'quote@mail.ru",
+    "user!x@mail.ru",
+    "user#x@mail.ru",
+    "user$x@mail.ru",
+    "user%x@mail.ru",
+    "user&x@mail.ru",
+    "user*x@mail.ru",
+    "user=x@mail.ru",
+    "user?x@mail.ru",
+    "user^x@mail.ru",
+    "user`x@mail.ru",
+    "user{x}@mail.ru",
+    "user|x@mail.ru",
+    "user~x@mail.ru",
+    "user/dept@mail.ru",
+    "user@sub.mail.ru",
+    "user@deep.sub.mail.ru",
+    "user@mail.co.uk",
+    "user@mail-server.ru",
+    "user@ma-il.ru",
+    "user@1mail.ru",
+    "user@mail1.ru",
+    "user@mail.museum",
+    "user@mail.rus",
+    "user@mail.ru.ru",
+    "user@mail.r",
+    "user@mail.c",
+    "user@xn--80a1acny.xn--p1ai",
+    "user@почта.рф",
+    "тест@почта.рф",
+    "юзер@mail.ru",
+    "user@яндекс.рф",
+    "user@mail.2ru",
+    "user@mail.r2u",
+    "user@site.example"
+  ],
+  "invalid": [
+    {
+      "value": "",
+      "problem": "empty"
+    },
+    {
+      "value": "user",
+      "problem": "no-at"
+    },
+    {
+      "value": "user.mail.ru",
+      "problem": "no-at"
+    },
+    {
+      "value": "mail.ru",
+      "problem": "no-at"
+    },
+    {
+      "value": "user@@mail.ru",
+      "problem": "many-at"
+    },
+    {
+      "value": "user@mail@ru",
+      "problem": "many-at"
+    },
+    {
+      "value": "us er@mail.ru",
+      "problem": "space"
+    },
+    {
+      "value": "user @mail.ru",
+      "problem": "space"
+    },
+    {
+      "value": "user@ mail.ru",
+      "problem": "space"
+    },
+    {
+      "value": "user@mail ru",
+      "problem": "space"
+    },
+    {
+      "value": "user\t@mail.ru",
+      "problem": "space"
+    },
+    {
+      "value": "@mail.ru",
+      "problem": "local-empty"
+    },
+    {
+      "value": "\"ab\"@mail.ru",
+      "problem": "local-quoted"
+    },
+    {
+      "value": ".user@mail.ru",
+      "problem": "local-dot-start"
+    },
+    {
+      "value": ".@mail.ru",
+      "problem": "local-dot-start"
+    },
+    {
+      "value": "user.@mail.ru",
+      "problem": "local-dot-end"
+    },
+    {
+      "value": "user.name.@mail.ru",
+      "problem": "local-dot-end"
+    },
+    {
+      "value": "tatyana123.@mail.ru",
+      "problem": "local-dot-end"
+    },
+    {
+      "value": "user..name@mail.ru",
+      "problem": "local-dot-double"
+    },
+    {
+      "value": "user...name@mail.ru",
+      "problem": "local-dot-double"
+    },
+    {
+      "value": "user,name@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user;x@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user:x@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user(x)@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user[x]@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user<x@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user>x@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user\\x@mail.ru",
+      "problem": "local-bad-char"
+    },
+    {
+      "value": "user@",
+      "problem": "domain-empty"
+    },
+    {
+      "value": "user@mailru",
+      "problem": "domain-no-dot"
+    },
+    {
+      "value": "user@com",
+      "problem": "domain-no-dot"
+    },
+    {
+      "value": "user@localhost",
+      "problem": "domain-no-dot"
+    },
+    {
+      "value": "user@xn--p1ai",
+      "problem": "domain-no-dot"
+    },
+    {
+      "value": "user@mail_ru",
+      "problem": "domain-no-dot"
+    },
+    {
+      "value": "user@.mail.ru",
+      "problem": "domain-dot-edge"
+    },
+    {
+      "value": "user@.com",
+      "problem": "domain-dot-edge"
+    },
+    {
+      "value": "user@mail.ru.",
+      "problem": "domain-dot-edge"
+    },
+    {
+      "value": "user@gmail.com.",
+      "problem": "domain-dot-edge"
+    },
+    {
+      "value": "user@mail..ru",
+      "problem": "domain-dot-double"
+    },
+    {
+      "value": "user@-mail.ru",
+      "problem": "domain-hyphen-edge"
+    },
+    {
+      "value": "user@mail-.ru",
+      "problem": "domain-hyphen-edge"
+    },
+    {
+      "value": "user@mail.ru-",
+      "problem": "domain-hyphen-edge"
+    },
+    {
+      "value": "user@mail.-ru",
+      "problem": "domain-hyphen-edge"
+    },
+    {
+      "value": "user@mail.123",
+      "problem": "domain-numeric-tld"
+    },
+    {
+      "value": "user@127.0.0.1",
+      "problem": "domain-numeric-tld"
+    },
+    {
+      "value": "user@ma_il.ru",
+      "problem": "domain-bad-char"
+    },
+    {
+      "value": "user@mail.ru:25",
+      "problem": "domain-bad-char"
+    },
+    {
+      "value": "user@mail.ru;",
+      "problem": "domain-bad-char"
+    },
+    {
+      "value": "user@mail.ru%0a",
+      "problem": "domain-bad-char"
+    },
+    {
+      "value": "user@[127.0.0.1]",
+      "problem": "domain-bad-char"
+    },
+    {
+      "value": "user@mail.ру!",
+      "problem": "domain-bad-char"
+    },
+    {
+      "value": "user@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ru",
+      "problem": "label-too-long"
+    },
+    {
+      "value": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu@mail.ru",
+      "problem": "too-long"
+    },
+    {
+      "value": "user@mail.ru2",
+      "problem": "domain-tld-end"
+    },
+    {
+      "value": "user@gmail.com1",
+      "problem": "domain-tld-end"
+    },
+    {
+      "value": "user@sub.mail.ru2",
+      "problem": "domain-tld-end"
+    },
+    {
+      "value": "user@mail.co.uk1",
+      "problem": "domain-tld-end"
+    },
+    {
+      "value": "user@pc.local",
+      "problem": "domain-special-use"
+    },
+    {
+      "value": "user@box.test",
+      "problem": "domain-special-use"
+    },
+    {
+      "value": "user@host.invalid",
+      "problem": "domain-special-use"
+    },
+    {
+      "value": "user@node.arpa",
+      "problem": "domain-special-use"
+    },
+    {
+      "value": "user@site.onion",
+      "problem": "domain-special-use"
+    },
+    {
+      "value": "user@my.localhost",
+      "problem": "domain-special-use"
+    }
+  ]
+}

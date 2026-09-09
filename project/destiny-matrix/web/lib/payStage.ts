@@ -1,4 +1,5 @@
 import type { PaymentResponse } from "./api";
+import { normalizeEmail } from "./email";
 
 /**
  * Экран оплаты как конечный автомат.
@@ -45,7 +46,7 @@ export function reduce(stage: Stage, event: PayEvent): Stage {
       return { kind: "login-needed", email: event.email };
     case "email-changed":
       // требование пароля привязано к своей почте: сменили её — требование снято
-      return stage.kind === "login-needed" && stage.email !== event.email.trim().toLowerCase()
+      return stage.kind === "login-needed" && stage.email !== normalizeEmail(event.email)
         ? START
         : stage;
     case "receipt-missing":
@@ -60,5 +61,5 @@ export function reduce(stage: Stage, event: PayEvent): Stage {
 
 /** Требуется ли пароль владельца именно для этой почты. */
 export function needsOwnerPassword(stage: Stage, email: string): boolean {
-  return stage.kind === "login-needed" && stage.email === email.trim().toLowerCase();
+  return stage.kind === "login-needed" && stage.email === normalizeEmail(email);
 }

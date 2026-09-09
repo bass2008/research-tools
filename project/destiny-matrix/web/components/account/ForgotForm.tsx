@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { emailError, normalizeEmail } from "@/lib/email";
 
 export default function ForgotForm() {
   const [email, setEmail] = useState("");
@@ -16,10 +17,11 @@ export default function ForgotForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Проверьте адрес почты.");
+    const wrong = emailError(email);
+    if (wrong) return setError(wrong);
     setBusy(true);
     try {
-      await api.resetRequest(email.trim().toLowerCase());
+      await api.resetRequest(normalizeEmail(email));
       setSent(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Не получилось. Попробуйте ещё раз.");
@@ -33,7 +35,7 @@ export default function ForgotForm() {
       <div className="panel narrow" data-testid="forgot-sent">
         <h1 className="panel-h1">Письмо отправлено</h1>
         <p className="dim">
-          Если на {email.trim().toLowerCase()} есть аккаунт, ссылка для смены пароля уже там.
+          Если на {normalizeEmail(email)} есть аккаунт, ссылка для смены пароля уже там.
           Ссылка действует 4 часа.
         </p>
         <p className="hint">
@@ -57,7 +59,8 @@ export default function ForgotForm() {
   }
 
   return (
-    <form method="post" className="panel narrow" onSubmit={submit} data-testid="forgot-form">
+    <form method="post" className="panel narrow" onSubmit={submit} data-testid="forgot-form"
+          noValidate>
       <h1>Восстановление пароля</h1>
       <p className="dim">Пришлём ссылку для смены пароля на почту, указанную при оплате.</p>
       <label htmlFor="fmail">Почта</label>

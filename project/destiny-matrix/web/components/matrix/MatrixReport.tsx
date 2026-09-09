@@ -14,6 +14,7 @@ import { useMemo } from "react";
 
 import { calculate } from "@/lib/matrix";
 import { money } from "@/lib/tariffs";
+import { buildDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
 
 import LockIcon from "@/components/ui/LockIcon";
@@ -40,15 +41,17 @@ export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
   // Карта-пример до первого расчёта: без пометки человек принимал её за свою и уходил
   // покупать разбор по дате, которую не вводил.
   const example = birth === null;
-  const now = useMemo(() => new Date(), []);
+  // Пример считается от даты сборки: с часов браузера в статическом HTML стояла одна дата, а в
+  // браузере другая, и вся карта-пример пересчитывалась после гидратации (#418).
+  const seed = useMemo(buildDay, []);
   const matrix = useMemo(() => {
     try {
       if (birth) return calculate(birth.birth, birth.sex);
-      return calculate({ year: now.getFullYear() - 30, month: now.getMonth() + 1, day: now.getDate() }, "f");
+      return calculate({ year: seed.year - 30, month: seed.month, day: seed.day }, "f");
     } catch {
       return null;
     }
-  }, [birth, now]);
+  }, [birth, seed]);
 
   if (!matrix) return <div id="result" />;
 

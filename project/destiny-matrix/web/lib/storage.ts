@@ -46,6 +46,25 @@ export function saveBirth(v: StoredBirth): void {
   announce(v);
 }
 
+/** Привести сохранённую дату к тому, что открыто на экране. От `saveBirth` отличается тем, что
+ * не заводит запрос расчёта: это не новое действие человека, а согласование с уже открытой
+ * купленной записью. */
+export function alignBirth(v: StoredBirth): void {
+  memory = v;
+  try {
+    sessionStorage.setItem(BIRTH_KEY, JSON.stringify(v));
+  } catch {
+    /* приватный режим: дата остаётся в памяти вкладки */
+  }
+  // Отметка `aligned` нужна, чтобы согласование не выглядело как нажатие «Рассчитать»: иначе
+  // навигация уводила человека с текущей страницы на главную к открытому разбору.
+  try {
+    window.dispatchEvent(new CustomEvent(BIRTH_EVENT, { detail: { ...v, aligned: true } }));
+  } catch {
+    /* сервер или старый браузер */
+  }
+}
+
 /** Забрать одноразовый запрос расчёта. Купленная дата по нему может сразу открыть серверный
  * полный разбор; обычное возвращение на главную автоматической навигации не вызывает. */
 export function takeCalculationRequest(): StoredBirth | null {

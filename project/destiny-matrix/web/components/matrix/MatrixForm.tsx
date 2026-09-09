@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { track } from "@/lib/analytics";
 import { useHydrated } from "@/lib/hydrated";
+import { browserDay, buildDay } from "@/lib/today";
 import { MatrixError, MONTHS_ACC, calculate, daysInMonth, toIso, type Sex } from "@/lib/matrix";
 import { saveBirth } from "@/lib/storage";
 import { useBirth } from "@/lib/useBirth";
@@ -45,11 +46,17 @@ export default function MatrixForm({
   const testId = (what: string) => (promo ? `promo-${what}` : what);
 
   const router = useRouter();
-  const now = useMemo(() => new Date(), []);
+  // Дата сборки, а не часы браузера: страница статическая, и «сегодня» в её HTML не совпадает
+  // с датой у посетителя — в Москве после полуночи число в полях расходилось, React считал это
+  // расхождением текста и перерисовывал форму.
+  const seed = useMemo(buildDay, []);
   const saved = useBirth();
-  const [day, setDay] = useState(now.getDate());
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear() - 30);
+  const [day, setDay] = useState(seed.day);
+  const [month, setMonth] = useState(seed.month);
+  const [year, setYear] = useState(seed.year - 30);
+  // Верхний год списка: в HTML это год сборки, а после гидратации — фактический, иначе с января
+  // и до первого релиза года выбрать новый год было бы нечем.
+  const [maxYear, setMaxYear] = useState(seed.year);
   const [sex, setSex] = useState<Sex>("f");
   const [error, setError] = useState<string | null>(null);
   // Поля показывают дату, которую человек уже вводил: иначе «Рассчитать» во второй форме
@@ -70,8 +77,10 @@ export default function MatrixForm({
     }
   }, [saved, finish.kind]);
 
+  useEffect(() => setMaxYear(browserDay().year), []);
+
   const years: number[] = [];
-  for (let y = now.getFullYear(); y >= MIN_YEAR; y--) years.push(y);
+  for (let y = maxYear; y >= MIN_YEAR; y--) years.push(y);
 
   // До гидратации обработчик не подключён, и нажатие «Рассчитать» не делало ничего: человек на
   // медленном телефоне решал, что сайт сломан. Пока не готовы — говорим это прямо.

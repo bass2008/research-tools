@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { ApiError, api, type MatrixListItem } from "@/lib/api";
 import { track } from "@/lib/analytics";
+import { emailError, normalizeEmail } from "@/lib/email";
 import { needsOwnerPassword, reduce, START, type PayEvent, type Stage } from "@/lib/payStage";
 import { useBirth } from "@/lib/useBirth";
 import { byId, capLabel, money, periodLabel, type Tariff } from "@/lib/tariffs";
@@ -62,7 +63,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
   const here = usePathname();
   const session = useSession();
   const tariff = byId(tariffs, chosen) ?? tariffs[0];
-  const signedIn = session.status === "user" && session.email === email.trim().toLowerCase();
+  const signedIn = session.status === "user" && session.email === normalizeEmail(email);
 
   // Чек восстанавливается по своему адресу: раньше он жил только в состоянии формы, и после F5
   // или «Назад» человек вместо подтверждения оплаты видел форму покупки — иногда с чужой датой.
@@ -146,8 +147,9 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const mail = email.trim().toLowerCase();
-    if (!/^\S+@\S+\.\S+$/.test(mail)) return setError("Проверьте адрес почты.");
+    const mail = normalizeEmail(email);
+    const wrongMail = emailError(email);
+    if (wrongMail) return setError(wrongMail);
     if (!agreed) return setError("Нужно согласие на обработку персональных данных.");
     // Про чужую почту говорим раньше, чем про пароль: вошедшему человеку бессмысленно требовать
     // пароль от аккаунта, которым он не пользуется.
@@ -282,7 +284,11 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
   const known = needsOwnerPassword(stage, email);
 
   return (
-    <form method="post" className="panel paybox" data-testid="pay-modal" onSubmit={submit}>
+    // Проверку почты ведёт lib/email: она строже браузерной и называет причину. С нативной
+    // валидацией submit гасился раньше нашего обработчика, и адрес с невидимым символом из
+    // копипаста получал отказ без объяснения.
+    <form method="post" className="panel paybox" data-testid="pay-modal" onSubmit={submit}
+          noValidate>
       <h3>Что покупаем</h3>
       <div className="cap">
         {tariffs.length > 1

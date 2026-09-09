@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { emailError, normalizeEmail } from "@/lib/email";
 
 import { refreshSession } from "@/components/account/useSession";
 
@@ -29,8 +30,10 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setError("Проверьте адрес почты.");
+    const mail = normalizeEmail(email);
+    const wrong = emailError(email);
+    if (wrong) {
+      setError(wrong);
       emailInput.current?.focus();
       return;
     }
@@ -47,8 +50,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     setBusy(true);
     try {
       // Токен ставит BFF в httpOnly-куку; в ответе его нет, и в localStorage он не попадает.
-      if (isRegister) await api.register(email, password);
-      else await api.login(email, password);
+      if (isRegister) await api.register(mail, password);
+      else await api.login(mail, password);
       await refreshSession();
       // После регистрации пустая форма больше не должна оставаться в истории: «Назад» на неё
       // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
@@ -64,7 +67,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   };
 
   return (
-    <form method="post" className="form narrow" onSubmit={submit}>
+    <form method="post" className="form narrow" onSubmit={submit} noValidate>
       <h1>{isRegister ? "Регистрация" : "Вход"}</h1>
       <div className="sub">
         {isRegister

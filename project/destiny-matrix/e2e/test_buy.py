@@ -79,3 +79,41 @@ def test_second_date_opens_and_first_stays_open(page, mail):
     cards = flows.matrix_cards(page)
     texts = [cards.nth(i).inner_text() for i in range(cards.count())]
     assert sum("куплена" in t.lower() for t in texts) == 2, texts
+
+
+def test_purchased_sex_is_the_one_shown(page, mail):
+    """Дефект цикла 16: куплена мужская карта, человек выбирает «Женский» — открывается купленная
+    мужская, а переключатель остаётся на «Женский». Экран утверждал сразу и то, и другое.
+
+    Пол не меняет в разборе ни одного числа (engine/tests/test_method_contract.py), поэтому
+    открывается купленная запись — но подписана она обязана быть своим полом, и переключатель
+    обязан показывать его же."""
+    flows.buy(page, mail, 9, 2, 1985, sex="m")
+    expect(page.get_by_test_id("paid-matrix")).to_contain_text("9 февраля 1985")
+
+    flows.calculate(page, 9, 2, 1985, "f")
+    page.wait_for_timeout(1500)
+
+    assert page.get_by_test_id("sex-m").get_attribute("aria-pressed") == "true", \
+        "переключатель не показывает пол купленной карты"
+    assert page.get_by_test_id("sex-f").get_attribute("aria-pressed") == "false"
+    body = page.inner_text("body")
+    assert "мужская карта" in body, "подпись карты не совпала с купленной записью"
+    assert "женская карта" not in body, "на экране одновременно два пола"
+
+
+def test_sex_of_a_date_nobody_bought_stays_as_chosen(page, mail):
+    """Обратная сторона: пока дата не куплена, выбранный пол ничем не подменяется.
+
+    Подпись «мужская/женская карта» печатается только у купленного разбора, поэтому здесь
+    проверяется сам переключатель — он и есть то, что человек видит на бесплатной выкладке."""
+    flows.register(page, mail)
+    flows.calculate(page, 12, 6, 1992, "f")
+    page.wait_for_timeout(1200)
+    assert page.get_by_test_id("sex-f").get_attribute("aria-pressed") == "true"
+    assert page.get_by_test_id("sex-m").get_attribute("aria-pressed") == "false"
+
+    flows.calculate(page, 12, 6, 1992, "m")
+    page.wait_for_timeout(1200)
+    assert page.get_by_test_id("sex-m").get_attribute("aria-pressed") == "true"
+    assert page.get_by_test_id("sex-f").get_attribute("aria-pressed") == "false"

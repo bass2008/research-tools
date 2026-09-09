@@ -92,13 +92,21 @@ def test_account_report_works_without_browser_birth_and_uses_free_wording(page: 
     assert "бесплатный доступ" in text
 
 
-def test_refunded_twin_dates_keep_the_exact_payment_target(page: Page):
-    """После возврата две закрытые карты одной даты различаются полом, а кнопка под текущим
-    бесплатным разбором несёт id именно этой карты до кнопки и чека."""
-    mail = _mail("twins")
+def test_refunded_date_keeps_the_exact_payment_target(page: Page):
+    """После возврата кнопка под бесплатным разбором несёт id именно этой карты — до кнопки и чека.
+
+    Прежняя версия проверяла то же на двух картах одной даты, различавшихся полом. С 9 сентября
+    2026 такой пары кликами не создать: расчёт купленной даты открывает купленную запись и
+    приводит к её полу (`Decision 1`, `web/lib/openedDate.ts`). Обещание «цель платежа — именно
+    выбранная запись, а не соседняя» осталось: здесь его охраняет вторая дата в кабинете, а случай
+    двух записей одной даты — юнит-тесты `web/lib/paytarget.test.ts` («различает пол», «различает
+    две карты на одну дату», «уважает ссылку ?m= только на свою закрытую запись»).
+    """
+    mail = _mail("refund-target")
     flows.buy(page, mail, 5, 5, 1985, sex="f")
-    female_id = flows.matrix_ids(page)[0]
-    flows.calculate(page, 5, 5, 1985, sex="m")
+    bought_id = flows.matrix_ids(page)[0]
+    # вторая дата в кабинете — чтобы «именно эта запись» отличалось от «первая доступная»
+    flows.calculate(page, 17, 9, 1996, sex="m")
     flows.save_current(page)
     assert len(flows.matrix_ids(page)) == 2
 
@@ -110,20 +118,16 @@ def test_refunded_twin_dates_keep_the_exact_payment_target(page: Page):
     expect(buy).to_be_visible()
     # Пока не приехал прайс, кнопка живёт как `button` без адреса: чтение атрибута сразу после
     # появления давало плавающее падение под нагрузкой полного прогона.
-    expect(buy).to_have_attribute("href", f"/pay?m={female_id}", timeout=15_000)
+    expect(buy).to_have_attribute("href", f"/pay?m={bought_id}", timeout=15_000)
 
     buy.click()
-    page.wait_for_url(re.compile(rf"/pay\?m={female_id}$"))
-    expect(page.get_by_test_id("pay-target")).to_have_value(str(female_id))
-    option_texts = page.get_by_test_id("pay-target").locator("option").all_inner_texts()
-    assert any("(ж)" in text for text in option_texts), option_texts
-    assert any("(м)" in text for text in option_texts), option_texts
-    expect(page.get_by_test_id("pay-submit")).to_contain_text("(ж)")
+    page.wait_for_url(re.compile(rf"/pay\?m={bought_id}$"))
+    expect(page.get_by_test_id("pay-target")).to_have_value(str(bought_id))
 
     page.locator(".consent input[type=checkbox]").check()
     page.get_by_test_id("pay-submit").click()
     expect(page.get_by_test_id("paid-matrix")).to_be_visible(timeout=30_000)
-    assert "женская" in page.get_by_test_id("paid-matrix").inner_text().lower()
+    assert "5 мая 1985" in page.get_by_test_id("paid-matrix").inner_text()
 
 
 def test_recalculating_a_paid_date_opens_it_on_the_landing(page: Page, browser: Browser):

@@ -1,12 +1,12 @@
 // Общие обработчики BFF. Пути статические (без динамических сегментов) намеренно: rewrites из
 // next.config проверяются после файловых маршрутов, но до динамических, и динамический
 // `/api/auth/[action]` при заданном API_ORIGIN уехал бы мимо BFF прямо в api.
+import { emailError, normalizeEmail } from "@/lib/email";
+
 import { forward, json, readJson } from "./upstream";
 
-const EMAIL_RE = /^\S+@\S+\.\S+$/;
-
 function email(body: Record<string, unknown>): string {
-  return String(body.email ?? "").trim().toLowerCase();
+  return normalizeEmail(String(body.email ?? ""));
 }
 
 /** Вход и регистрация: наружу уходит только `authenticated`, токен — в куку. */
@@ -14,8 +14,11 @@ export async function credentials(req: Request, action: "login" | "register") {
   const body = await readJson(req);
   const mail = email(body);
   const password = String(body.password ?? "");
-  if (!EMAIL_RE.test(mail)) return json({ detail: "Проверьте адрес почты" }, 400);
-  if (password.length < 3) return json({ detail: "Пароль — не короче трёх знаков" }, 400);
+  // 422, а не 400: 400 на регистрации означает «почта занята», и экран оплаты по нему уходит
+  // пробовать вход. Отказ по формату поля обязан отличаться от занятой почты.
+  const wrong = emailError(mail);
+  if (wrong) return json({ detail: wrong }, 422);
+  if (password.length < 3) return json({ detail: "Пароль — не короче трёх знаков" }, 422);
   return forward(`/auth/${action}`, {
     method: "POST",
     body: { email: mail, password },
@@ -28,7 +31,8 @@ export async function payment(req: Request, path = "/payments/mock") {
   const body = await readJson(req);
   const mail = email(body);
   const tariff = String(body.tariff ?? "");
-  if (!EMAIL_RE.test(mail)) return json({ detail: "Проверьте адрес почты" }, 400);
+  const wrong = emailError(mail);
+  if (wrong) return json({ detail: wrong }, 422);
   // сам список тарифов живёт в базе: здесь проверяем только форму кода, существование — апстрим
   if (!/^[a-z][a-z0-9_-]{0,15}$/.test(tariff)) return json({ detail: "Неизвестный тариф" }, 400);
   // Цель платежа: либо номер уже сохранённой матрицы, либо дата, которую сервер сохранит сам.
