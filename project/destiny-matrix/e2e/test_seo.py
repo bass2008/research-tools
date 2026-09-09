@@ -407,12 +407,23 @@ def test_encyclopedia_is_a_table_of_contents_not_a_flat_list():
 
 
 def test_section_address_comes_only_from_the_registry():
-    """Единственный законный `?sec=` — у «Статей»: ветки справочника у них нет. Остальные
-    зашитые адреса раздела после переезда продолжали вести на фильтр."""
+    """Ссылок на `?sec=` не осталось ни одной. Раньше «Статьи» вели на фильтр, и эта ссылка
+    висела на каждой странице справочника: Яндекс скачивал адрес, читал canonical на
+    `/encyclopedia` и складывал его в исключённые — 889 страниц сборки на один лишний адрес.
+    Теперь раздел без своей ветки ведёт на якорь оглавления. Сам адрес с параметром продолжает
+    открываться: по нему приходят из выдачи и из закладок."""
     for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/o-metode"):
         body = re.sub(r"(?is)<script.*?</script>", "", _html(path))
         found = set(re.findall(r'href="(/encyclopedia\?sec=[a-z]+)"', body))
-        assert not {x for x in found if not x.endswith("sec=art")}, (path, found)
+        assert found == set(), (path, found)
+
+
+def test_articles_section_leads_to_the_anchor_of_the_index():
+    """«Статьи» — единственный раздел без своей шапки, и ведёт он на свой блок в оглавлении.
+    Якорь нового адреса поиску не создаёт, в отличие от параметра."""
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/o-metode"))
+    assert 'href="/encyclopedia#stati"' in body, "ссылка на блок статей пропала"
+    assert 'id="stati"' in _html("/encyclopedia"), "на оглавлении нет якоря блока статей"
 
 
 # Пересечения «аркан N в позиции X»: 80 адресов из реестра спроса. Спрашивают именно их —

@@ -138,14 +138,22 @@ def position(entry: dict, kind: str) -> dict:
 
 def chakra(entry: dict) -> dict:
     low = entry["title"].lower()
+    # У сахасрары, аджны и манипуры формы «<имя> в матрице судьбы» в спросе нет вовсе — есть
+    # только «чакра <имя> в матрице судьбы». Поэтому слово «чакра» стоит и в заголовке, и в
+    # запросах, а страница с нулевой основной формой объявляет свою через primary_query.
     queries = [
         f"{low} в матрице судьбы",
+        f"чакра {low} в матрице судьбы",
+        f"{low} чакра матрица судьбы",
         f"{low} аркан",
         f"{low} значение чакры",
         f"чакра {low} расчет по дате рождения",
     ] + list(entry.get("queries", ()))
+    primary = str(entry.get("primary_query") or "").strip()
+    if primary:
+        queries = [primary] + queries
     return {
-        "title": f"{entry['title']} в матрице судьбы — {entry['hint']}",
+        "title": f"Чакра {entry['title']} в матрице судьбы — {entry['hint']}",
         "description": clamp(entry["seo_description"]),
         "queries": _dedup(queries),
     }

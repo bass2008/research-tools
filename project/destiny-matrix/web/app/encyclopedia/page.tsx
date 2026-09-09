@@ -48,7 +48,7 @@ export default function EncyclopediaIndexPage() {
         ))}
       </div>
 
-      <div className="panel section-gap">
+      <div className="panel section-gap" id="stati">
         <h2>Статьи</h2>
         <div className="cap">Разборы понятий целиком · {articles.length}</div>
         <div className="enc-articles">

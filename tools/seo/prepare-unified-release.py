@@ -118,7 +118,14 @@ def tail_sources(reachable: list[dict], stats: dict[str, dict[str, int]]) -> lis
         item = read_json(source_paths[key])
         expected_arcana = list(map(int, key.split("-")))
         expected_index = stats[key]["exact_frequency"] >= 800
-        expected_primary = f"кармический хвост {key.replace('-', ' ')}" if expected_index else None
+        # Формулировка головного запроса — редакторское решение и живёт в самой статье: замер
+        # показал, что «кармический хвост A B C» не спрашивает никто, а спрос идёт на «A B C
+        # матрица судьбы». Реестр проверяет не шаблон, а согласованность: у индексируемого
+        # хвоста запрос совпадает с первым в `seo.queries` и несёт числа ключа.
+        expected_primary = (item.get("seo", {}).get("queries") or [None])[0] if expected_index else None
+        primary = item.get("publication", {}).get("primary_query")
+        if expected_index and not all(part in str(primary).split() for part in key.split("-")):
+            raise ValueError(f"{source_paths[key]}: primary_query {primary!r} без чисел ключа {key}")
         checks = {
             "key": (item.get("key"), key),
             "entity_type": (item.get("entity_type"), "karmic_tail"),

@@ -113,7 +113,7 @@ function keys(v: unknown): string[] | null {
   return out.length ? out : null;
 }
 
-/** Статья категории по схеме `article-requirements.md` D2: проза в полях, связи — списком ключей. */
+/** Статья категории по схеме `docs/article-requirements.md` D2: проза в полях, связи — списком ключей. */
 export interface ArticleContent {
   key: string;
   title: string;

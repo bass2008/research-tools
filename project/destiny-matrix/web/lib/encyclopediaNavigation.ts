@@ -12,7 +12,7 @@ export const ENCYCLOPEDIA_SECTIONS = [
   { key: "tls", title: "Кармические хвосты", hint: "тройки нижнего угла карты", segment: "karmic-tail", hub: "/encyclopedia/karmic-tail" },
   { key: "yer", title: "Матрица судьбы на год", hint: "аркан в рамке персонального года", externalRoot: "na-god", hub: "/na-god" },
   { key: "cmb", title: "Сочетания арканов", hint: "пары арканов рядом", segment: "combination", hub: "/encyclopedia/combination" },
-  { key: "art", title: "Статьи", hint: "разборы понятий целиком" },
+  { key: "art", title: "Статьи", hint: "разборы понятий целиком", anchor: "stati" },
 ] as const;
 
 export type EncyclopediaSectionKey = (typeof ENCYCLOPEDIA_SECTIONS)[number]["key"];
@@ -54,14 +54,20 @@ export function encyclopediaSectionHub(key: EncyclopediaSectionKey): string | nu
 export function encyclopediaSectionHref(key: EncyclopediaSectionKey): string {
   const section = BY_KEY.get(key);
   if (!section) throw new Error(`неизвестный раздел энциклопедии ${key}`);
-  if (!("hub" in section)) return `/encyclopedia?sec=${key}`;
+  // Раздел без хаба ведёт на якорь оглавления, а не на `?sec=`: параметр давал новый адрес,
+  // который поиск скачивал и складывал в «неканонические» — по одной такой ссылке с каждой
+  // страницы справочника. Якорь нового адреса не создаёт.
+  if (!("hub" in section)) return `/encyclopedia#${section.anchor}`;
   return "anchor" in section ? `${section.hub}#${section.anchor}` : section.hub;
 }
 
 /** Крошка — без якоря: в цепочке родителей стоит страница, а не её часть. */
 export function encyclopediaSectionCrumb(key: EncyclopediaSectionKey): { name: string; path: string } {
   const hub = encyclopediaSectionHub(key);
-  return { name: encyclopediaSection(key).title, path: hub ?? `/encyclopedia?sec=${key}` };
+  // Раздел без хаба ссылается на свой блок в оглавлении. Это единственная крошка с якорем:
+  // `item` в BreadcrumbList обязателен у всех звеньев, кроме последнего, а прежний `?sec=`
+  // заявлял там адрес, который сам несёт canonical на другой.
+  return { name: encyclopediaSection(key).title, path: hub ?? encyclopediaSectionHref(key) };
 }
 
 export function encyclopediaSectionFromSegment(segment: string | undefined): EncyclopediaSectionKey | null {

@@ -45,6 +45,11 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         disallow: [...PRIVATE, ...COMPUTED],
+        // Директива Яндекса: адреса с этими параметрами робот не скачивает вовсе. `canonical`
+        // на них стоит верно, но он читается только после загрузки страницы — а норма обхода
+        // у молодого домена тратится на каждой. `?tab=` — вкладки страницы аркана,
+        // `?sec=` — прежний фильтр разделов справочника, который поиск ещё помнит.
+        other: { "Clean-param": "tab&sec" },
       },
       ...UNWANTED.map((userAgent) => ({ userAgent, disallow: "/" })),
     ],
