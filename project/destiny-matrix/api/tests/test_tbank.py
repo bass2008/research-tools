@@ -2,12 +2,14 @@
 подменяются, потому что проверяется наша половина: подпись, идемпотентность, отзыв прав."""
 from __future__ import annotations
 
+import json
+
 import pytest
 from sqlalchemy import select
 
 from app import payments
 from app.payments.tbank import Tbank
-from app.models import Entitlement, Payment
+from app.models import Entitlement, Payment, User
 
 
 BANK = Tbank()
@@ -93,6 +95,67 @@ def test_authorized_then_confirmed_gives_one_right(client, db, bank):
                        "Status": state, "PaymentId": body["payment_id"], "Amount": 25_000})
         assert client.post("/api/payments/notify", json=note).status_code == 200
     assert len(db.scalars(select(Entitlement)).all()) == 1
+
+
+def test_second_payment_for_the_same_date_is_accepted_by_the_bank_and_grants_nothing(client, db, bank):
+    """Уведомление о втором платеже за уже открытую дату — приём, а не 500.
+
+    Живой прогон на тестовом терминале 09.09 дал четыре `500 Internal Server Error` на
+    `/api/payments/notify/tbank`: `IntegrityError` вылетал на вставке права внутри `access.grant`,
+    то есть до блока, который его ждал. Банк считает любой не-2xx недоставкой и повторяет — а
+    состояние уже конечное. Право при этом остаётся одно: уникальный индекс отработал.
+    """
+    first = start(client, "twice@example.ru")
+    note = signed({"TerminalKey": "1234DEMO", "OrderId": first["order_id"], "Success": True,
+                   "Status": "CONFIRMED", "PaymentId": first["payment_id"], "Amount": 25_000})
+    assert client.post("/api/payments/notify", json=note).status_code == 200
+
+    matrix_id = db.scalars(select(Payment)).first().matrix_id
+    second = Payment(user_id=db.scalars(select(User)).one().id, provider="tbank",
+                     status="NEW", amount=25_000, matrix_id=matrix_id,
+                     order_id="arcana-999-x", external_id="999",
+                     tariff_body=json.dumps({"id": "single", "name": "Полный разбор одной даты"}))
+    db.add(second)
+    db.commit()
+
+    late = signed({"TerminalKey": "1234DEMO", "OrderId": "arcana-999-x", "Success": True,
+                   "Status": "CONFIRMED", "PaymentId": "999", "Amount": 25_000})
+    answer = client.post("/api/payments/notify", json=late)
+    assert answer.status_code == 200, answer.text
+    assert answer.json()["duplicate"] is True
+    assert len(db.scalars(select(Entitlement)).all()) == 1
+
+
+def test_repeated_notification_never_answers_5xx(client, db, bank):
+    """Провайдер шлёт одно и то же уведомление сколько угодно раз — ответ всегда 2xx."""
+    body = start(client, "storm@example.ru")
+    note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+    codes = [client.post("/api/payments/notify", json=note).status_code for _ in range(6)]
+    assert codes == [200] * 6, codes
+    assert len(db.scalars(select(Entitlement)).all()) == 1
+
+
+def test_date_can_be_bought_again_after_a_refund(client, db, bank):
+    """Индекс частичный (`revoked_at IS NULL`): после возврата та же дата снова продаётся."""
+    body = start(client, "again@example.ru")
+    for state in ("CONFIRMED", "REFUNDED"):
+        note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
+                       "Status": state, "PaymentId": body["payment_id"], "Amount": 25_000})
+        assert client.post("/api/payments/notify", json=note).status_code == 200
+    matrix_id = db.scalars(select(Payment)).first().matrix_id
+
+    again = Payment(user_id=db.scalars(select(User)).one().id, provider="tbank",
+                    status="NEW", amount=25_000, matrix_id=matrix_id,
+                    order_id="arcana-777-x", external_id="777",
+                    tariff_body=json.dumps({"id": "single", "name": "Полный разбор одной даты"}))
+    db.add(again)
+    db.commit()
+    note = signed({"TerminalKey": "1234DEMO", "OrderId": "arcana-777-x", "Success": True,
+                   "Status": "CONFIRMED", "PaymentId": "777", "Amount": 25_000})
+    assert client.post("/api/payments/notify", json=note).status_code == 200
+    active = [r for r in db.scalars(select(Entitlement)).all() if r.revoked_at is None]
+    assert len(active) == 1, "после возврата новая покупка не выдала право"
 
 
 def test_notification_without_valid_token_is_rejected(client, db, bank):

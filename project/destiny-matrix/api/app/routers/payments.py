@@ -85,17 +85,60 @@ def _tariff(db: Session, code: str):
     return tariff
 
 
+class AlreadyGranted(Exception):
+    """Право на эту дату уже есть, и выдано оно не этим платежом.
+
+    Отдельное исключение, а не сразу `HTTPException`: браузеру нужен отказ (человек не должен
+    платить дважды), а уведомлению провайдера — приём, иначе он повторяет доставку до упора.
+    Решает это вызывающий, а не место, где обнаружен дубль.
+    """
+
+    def __init__(self, right: Entitlement) -> None:
+        super().__init__("право на эту дату уже выдано")
+        self.right = right
+
+
+def _active_right(db: Session, payment: Payment) -> Entitlement | None:
+    """Действующее право на ту же дату, кем бы оно ни было выдано."""
+    if payment.matrix_id is None:
+        return None
+    return db.scalar(select(Entitlement).where(Entitlement.user_id == payment.user_id,
+                                               Entitlement.matrix_id == payment.matrix_id,
+                                               Entitlement.revoked_at.is_(None)))
+
+
 def _grant_once(db: Session, payment: Payment, now: dt.datetime) -> Entitlement:
     """Право на платёж выдаётся один раз: провайдер сообщает об оплате несколько раз и повторяет
-    уведомление, пока не получит подтверждение приёма."""
+    уведомление, пока не получит подтверждение приёма.
+
+    Своё право ищется по платежу, чужое — по паре «человек и дата»: именно она уникальна в базе
+    (`ux_entitlement_active_matrix`), а не платёж. Без второй проверки повтор уведомления и второй
+    платёж на ту же дату шли вставлять запись и падали на индексе уже внутри `access.grant`.
+    """
     right = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
     if right is not None:
         return right
+    existing = _active_right(db, payment)
+    if existing is not None:
+        raise AlreadyGranted(existing)
     body = payment.body()
     tariff = tariffs.get(db, body["id"]) or _tariff(db, body["id"])
     user = db.get(User, payment.user_id)
     payment.paid_at = payment.paid_at or now
-    return access.grant(db, user, tariff, payment=payment, matrix_id=payment.matrix_id, now=now)
+    try:
+        return access.grant(db, user, tariff, payment=payment, matrix_id=payment.matrix_id, now=now)
+    except IntegrityError:
+        # Проверка выше не ловит гонку: два уведомления об одном платеже приходят одновременно,
+        # оба видят пустоту и оба идут вставлять. Ловит уникальный индекс — на нём и разбираемся.
+        db.rollback()
+        db.refresh(payment)
+        winner = db.scalar(select(Entitlement).where(Entitlement.payment_id == payment.id))
+        if winner is not None:
+            return winner
+        existing = _active_right(db, payment)
+        if existing is None:
+            raise
+        raise AlreadyGranted(existing) from None
 
 
 def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
@@ -111,16 +154,7 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
     if outcome is payments.Outcome.PAID:
         right = _grant_once(db, payment, now)
         fresh = right.starts_at == now
-        try:
-            db.commit()
-        except IntegrityError:
-            # право на эту дату уже выдано параллельным платежом: проверка перед записью гонку
-            # не ловит, ловит уникальный индекс. Деньги за второй платёж вернём тем же путём,
-            # что и обычный возврат, а второе право не создаём.
-            db.rollback()
-            db.refresh(payment)
-            raise HTTPException(status.HTTP_409_CONFLICT,
-                                detail="Разбор этой даты уже открыт — платить второй раз не нужно.")
+        db.commit()
         if fresh:
             mail.purchase(payment.user.email, payment.body()["name"], payment.external_id,
                           matrix_id=payment.matrix_id)
@@ -179,6 +213,9 @@ def _reusable(db: Session, user: User, matrix: SavedMatrix | None,
             apply(db, row, provider.state(row.external_id))
         except payments.PaymentError:
             continue                               # провайдер не ответил — старый счёт не предлагаем
+        except AlreadyGranted:
+            db.rollback()
+            continue                               # дата уже открыта: доплачивать нечего
         if row.paid_at is None and row.refunded_at is None and provider.reusable(row.status):
             return row
     return None
@@ -242,8 +279,14 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     payment.status = started.status
     payment.order_id = order
     db.flush()
-    apply(db, payment, payments.Update(external_id=started.external_id, order_id=order,
-                                       outcome=started.outcome, status=started.status))
+    try:
+        apply(db, payment, payments.Update(external_id=started.external_id, order_id=order,
+                                           outcome=started.outcome, status=started.status))
+    except AlreadyGranted as exc:
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            detail="Разбор этой даты уже открыт — платить второй раз не нужно.") \
+            from exc
     db.refresh(user)
 
     return _body(db, payment, user, matrix, tariff, order, autoregistered)
@@ -270,7 +313,14 @@ def notify(provider_name: str, payload: dict, db: Session = Depends(get_db)) -> 
     payment = _find(db, update.external_id, update.order_id)
     if payment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
-    apply(db, payment, update)
+    try:
+        apply(db, payment, update)
+    except AlreadyGranted:
+        # Провайдер повторяет доставку, пока не получит приём. Отказ на дубль он считает
+        # недоставкой и шлёт снова — а состояние уже конечное, повторы ничего не изменят.
+        db.rollback()
+        db.refresh(payment)
+        return {"ok": True, "status": payment.status, "duplicate": True}
     return {"ok": True, "status": payment.status}
 
 
@@ -294,6 +344,10 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
             apply(db, payment, provider.state(payment.external_id))
         except payments.PaymentError as exc:
             raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+        except AlreadyGranted:
+            # Доступ у человека есть, спрашивал он именно про него: это не ошибка, а ответ.
+            db.rollback()
+            db.refresh(payment)
     return {"ok": True, "status": payment.status, "state": payment.state(),
             "paid": payment.paid_at is not None,
             "matrix_id": payment.matrix_id, "payment_id": payment.external_id}

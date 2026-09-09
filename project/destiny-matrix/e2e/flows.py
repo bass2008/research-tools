@@ -66,7 +66,8 @@ def pay(page: Page, email: str, password: str = "1234") -> str:
     page.get_by_test_id("pay-submit").click()
     page.wait_for_function(
         """() => document.querySelector('[data-testid=paid-matrix]')
-                || document.querySelector('.paybox h3')?.innerText.includes('Доступ открыт')
+                || [...document.querySelectorAll('.paybox h1, .paybox h3')]
+                       .some(h => h.innerText.includes('Доступ открыт'))
                 || document.querySelector('.err')""",
         timeout=60_000)
     error = page.locator(".err")

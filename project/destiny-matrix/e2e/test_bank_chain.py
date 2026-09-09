@@ -32,7 +32,8 @@ def test_four_purchases_in_a_row_open_exactly_what_was_chosen(page, mail):
         flows.pay_on_bank_form(page, card)
         outcomes.append(page.url)
         if "/pay/done" in page.url:
-            expect(page.locator(".paybox h3")).to_contain_text("Доступ открыт", timeout=60_000)
+            # заголовок карточки успеха: на /pay/done это h1 (PayResult), в чеке кабинета — h3 (PayReceipt)
+            expect(page.locator(".paybox h1, .paybox h3")).to_contain_text("Доступ открыт", timeout=60_000)
             page.get_by_role("link", name="Открыть полный разбор").click()
             page.wait_for_timeout(1500)
             assert flows.locked_sections(page) == 0
