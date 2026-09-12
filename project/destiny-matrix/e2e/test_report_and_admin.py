@@ -230,16 +230,18 @@ def test_second_click_returns_the_same_file(page, mail):
 
 def test_pdf_holds_the_paid_report(page, mail):
     """В файле есть карты и объём: пустой PDF не должен считаться успехом."""
-    answer: dict = {}
-    page.on("response", lambda r: answer.update(r.json())
-            if r.url.endswith("/api/reports/pdf") and r.status == 200 else None)
-
     flows.buy(page, mail, 13, 12, 1994)
     page.get_by_role("link", name="Открыть полный разбор").click()
     page.wait_for_timeout(1200)
     button = page.get_by_test_id("save-pdf")
     expect(button).to_be_enabled(timeout=20_000)
-    button.click()
+    # Ответ ловим вокруг клика, а не слушателем на странице: кнопка говорит «Открыть» сразу после
+    # ответа, и прогон успевал дойти до ссылки раньше, чем обработчик события записывал тело.
+    with page.expect_response(
+        lambda r: r.url.endswith("/api/reports/pdf") and r.status == 200, timeout=180_000
+    ) as got:
+        button.click()
+    answer: dict = got.value.json()
     page.wait_for_function(
         "() => document.querySelector('[data-testid=save-pdf]').innerText.includes('Открыть')",
         timeout=180_000)

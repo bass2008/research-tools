@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+import { buildId } from "./lib/buildId";
 import { serverSettings } from "./lib/settings/server";
 
 // Фронт — node-сервер Next.js на той же машине, что api (docs/api-contract.md,
@@ -8,6 +9,10 @@ import { serverSettings } from "./lib/settings/server";
 // попадают в предрендеренный HTML и видны, не заплатив.
 const config: NextConfig = {
   reactStrictMode: true,
+  // Идентификатор сборки — от состава маршрутов, а не случайный. Случайный вшивается в разметку
+  // каждой страницы, из-за чего встроенный `ETag` сбрасывался на каждом релизе и поиск качал
+  // заново то, что не менялось. Почему именно состав маршрутов — в `lib/buildId.ts`.
+  generateBuildId: () => buildId(import.meta.dirname),
   // 404 несовпавшего адреса: без этого Next рендерит его динамически с пустым телом и
   // заголовком главной — страница живёт только в RSC-пейлоаде.
   experimental: { globalNotFound: true },

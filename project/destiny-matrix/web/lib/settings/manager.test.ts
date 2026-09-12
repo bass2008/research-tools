@@ -45,6 +45,7 @@ describe("SettingManager", () => {
     const allowed = new Set([
       path.join(root, "lib/settings/public.ts"),
       path.join(root, "lib/settings/server.ts"),
+      path.join(root, "lib/settings/build.ts"),
     ]);
     const directExceptions = new Map([
       [path.join(root, "lib/analytics.ts"), new Set(["NEXT_PUBLIC_METRIKA_ID"])],

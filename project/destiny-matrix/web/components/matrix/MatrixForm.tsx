@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { track } from "@/lib/analytics";
 import { useHydrated } from "@/lib/hydrated";
-import { browserDay, buildDay } from "@/lib/today";
+import { browserDay, exampleDay } from "@/lib/today";
 import { MatrixError, MONTHS_ACC, calculate, daysInMonth, toIso, type Sex } from "@/lib/matrix";
 import { saveBirth } from "@/lib/storage";
 import { useBirth } from "@/lib/useBirth";
@@ -46,16 +46,16 @@ export default function MatrixForm({
   const testId = (what: string) => (promo ? `promo-${what}` : what);
 
   const router = useRouter();
-  // Дата сборки, а не часы браузера: страница статическая, и «сегодня» в её HTML не совпадает
-  // с датой у посетителя — в Москве после полуночи число в полях расходилось, React считал это
+  // Дата-пример корпуса, а не часы браузера: страница статическая, и «сегодня» в её HTML не
+  // совпадает с датой у посетителя — в Москве после полуночи число расходилось, React считал это
   // расхождением текста и перерисовывал форму.
-  const seed = useMemo(buildDay, []);
+  const seed = useMemo(exampleDay, []);
   const saved = useBirth();
   const [day, setDay] = useState(seed.day);
   const [month, setMonth] = useState(seed.month);
   const [year, setYear] = useState(seed.year - 30);
-  // Верхний год списка: в HTML это год сборки, а после гидратации — фактический, иначе с января
-  // и до первого релиза года выбрать новый год было бы нечем.
+  // Верхний год списка: в HTML это год даты-примера, а после гидратации — фактический, иначе
+  // с января и до первого релиза года выбрать новый год было бы нечем.
   const [maxYear, setMaxYear] = useState(seed.year);
   const [sex, setSex] = useState<Sex>("f");
   const [error, setError] = useState<string | null>(null);

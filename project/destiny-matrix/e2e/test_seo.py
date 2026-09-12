@@ -160,12 +160,20 @@ def test_concept_hub_gets_an_incoming_link_when_written():
 
 @pytest.mark.parametrize("path", INFO_PAGES)
 def test_article_carries_the_fields_google_requires(path):
-    """Article без author/datePublished/publisher поиск отбраковывает целиком."""
+    """Article без author/datePublished/publisher поиск отбраковывает целиком.
+
+    `dateModified` в этот список не входит и печатается, только когда страница знает свою дату
+    правки. Общей датой корпуса его заполнять нельзя: она вшита в разметку всех 442 адресов, и
+    её обязательный сдвиг при правке одной статьи менял тело каждого."""
     html = _html(path)
     article = next((s for s in _schemas(html) if s.get("@type") == "Article"), None)
     assert article is not None, f"{path}: нет Article"
-    for field in ("author", "publisher", "datePublished", "dateModified", "headline"):
+    for field in ("author", "publisher", "datePublished", "headline"):
         assert article.get(field), f"{path}: в Article нет {field}"
+    assert "dateModified" not in article, (
+        f"{path}: в Article вернулась дата правки. Если она своя у страницы — это правильно, "
+        "поправьте тест; если общая корпусная — она снова перекачает весь корпус"
+    )
 
 
 @pytest.mark.parametrize("path", INFO_PAGES)
@@ -266,9 +274,9 @@ def test_hub_serves_a_page_or_leads_somewhere_useful(path, target):
         assert r.headers["location"].endswith(target), r.headers["location"]
 
 
-# Норма обхода молодого сайта тратится на скачивание того, что робот уже видел. Экономят её два
-# условных заголовка — `ETag` и `Last-Modified`, — и оба живут в отданном ответе, а не в
-# исходниках: `middleware.test.ts` сторожит логику, но не то, что заголовок дошёл до клиента.
+# Норма обхода молодого сайта тратится на скачивание того, что робот уже видел. Экономит её
+# условный запрос, и отвечает на него сам Next: `ETag` — хеш отданного тела. Живёт заголовок в
+# ответе, а не в исходниках, поэтому проверять его надо здесь.
 CONDITIONAL_PAGES = (
     "/encyclopedia",
     "/encyclopedia/arcanum/7",
@@ -280,66 +288,62 @@ CONDITIONAL_PAGES = (
     "/matrix",
 )
 
-def _corpus_date() -> str:
-    """Дата корпуса — из отданного заголовка, а не из константы в тесте: зашитая дата ломала бы
-    набор на каждой правке корпуса, а до того молча проверяла бы неверное число."""
-    stamp = requests.get(f"{BASE}/encyclopedia", timeout=30).headers.get("Last-Modified")
-    assert stamp, "корпус отдаётся без Last-Modified — обход платит за то, что уже видел"
-    return stamp
-
 
 @pytest.mark.parametrize("path", CONDITIONAL_PAGES)
-def test_corpus_answers_conditional_request_by_date(path):
-    """Яндекс сверяет дату. Next ставит только `ETag`, поэтому без `Last-Modified` корпус
-    качался целиком на каждом проходе."""
+def test_corpus_answers_conditional_request(path):
+    """Повторный заход с тем же отпечатком обязан стоить заголовков, а не сотни килобайт."""
     full = requests.get(f"{BASE}{path}", timeout=30)
     assert full.status_code == 200, (path, full.status_code)
-    stamp = full.headers.get("Last-Modified")
-    assert stamp, f"{path}: нет Last-Modified — обход платит за то, что уже видел"
+    tag = full.headers.get("ETag")
+    assert tag, f"{path}: нет ETag — обход платит за то, что уже видел"
 
-    same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-Modified-Since": stamp})
+    same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag})
     assert same.status_code == 304, (path, same.status_code)
     assert not same.content, f"{path}: 304 пришёл с телом {len(same.content)} байт"
 
-    older = requests.get(
-        f"{BASE}{path}", timeout=30, headers={"If-Modified-Since": "Mon, 25 Aug 2026 00:00:00 GMT"}
-    )
-    assert older.status_code == 200, (path, older.status_code)
-
-
-@pytest.mark.parametrize("path", CONDITIONAL_PAGES)
-def test_fingerprint_outranks_the_date(path):
-    """RFC 9110 §13.2.2: при обоих заголовках побеждает `If-None-Match`. Отпечаток знает о правке
-    текста, а дата корпуса — нет, поэтому ответ по дате спрятал бы правку от Googlebot, который
-    присылает оба."""
-    full = requests.get(f"{BASE}{path}", timeout=30)
-    tag = full.headers.get("ETag")
-    if not tag:
-        pytest.skip(f"{path} отдаётся динамически, отпечатка нет")
-
-    both = requests.get(
-        f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag, "If-Modified-Since": _corpus_date()}
-    )
-    assert both.status_code == 304, (path, both.status_code)
-
-    stale = requests.get(
-        f"{BASE}{path}",
-        timeout=30,
-        headers={"If-None-Match": '"stale"', "If-Modified-Since": _corpus_date()},
-    )
+    stale = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": '"stale"'})
     assert stale.status_code == 200, f"{path}: чужой отпечаток получил 304 — правка спрятана"
 
 
-def test_calculation_results_share_no_corpus_date():
-    """Разбор зависит от `?birth=`, поэтому общий `304` по дате корпуса отдал бы из кэша браузера
-    чужую карту. Эти адреса закрыты и от обхода, и от условного ответа."""
-    for path in ("/matrix/1-1-10", "/encyclopedia/comfort/4-6-13", "/encyclopedia/character/4-9-7"):
+@pytest.mark.parametrize("path", CONDITIONAL_PAGES)
+def test_date_does_not_cancel_the_fingerprint(path):
+    """RFC 9110 §13.1.3: при `If-None-Match` дату надо игнорировать. Next её не игнорирует и
+    теряет совпавший отпечаток — вместо `304` уходит полное тело. Оба заголовка сразу шлёт
+    всякий, у кого в кэше лежит ответ с датой; это и есть главный случай механизма."""
+    tag = requests.get(f"{BASE}{path}", timeout=30).headers["ETag"]
+    both = requests.get(
+        f"{BASE}{path}",
+        timeout=30,
+        headers={"If-None-Match": tag, "If-Modified-Since": "Mon, 01 Sep 2026 00:00:00 GMT"},
+    )
+    assert both.status_code == 304, (path, both.status_code)
+
+
+def test_missing_page_never_answers_not_modified():
+    """`304` на несуществующий адрес значит, что робот, однажды его видевший, не узнает об
+    удалении. Проверяется звёздочкой: по RFC 9110 §13.1.2 она подходит любому существующему
+    представлению, и только на ней видно, отвечает ли сервер за страницу, которой нет."""
+    for headers in ({"If-None-Match": "*"}, {"If-None-Match": '"whatever"'}):
+        gone = requests.get(f"{BASE}/encyclopedia/arcanum/99", timeout=30, headers=headers)
+        assert gone.status_code == 404, (headers, gone.status_code)
+
+
+def test_calculation_results_get_their_own_validator():
+    """Страницы расчёта закрыты от обхода, но человек к своей карте возвращается. Отпечаток у
+    каждой свой: общий отдал бы из кэша браузера чужой разбор.
+
+    Печатаемых на запрос это не касается: `ETag` — хеш тела, а тело такой страницы собирается
+    на лету и целиком серверу неизвестно."""
+    tags = {}
+    for path in ("/matrix/1-1-10", "/matrix/5-5-8", "/encyclopedia/comfort/4-6-13"):
         r = requests.get(f"{BASE}{path}", timeout=30)
-        assert r.headers.get("Last-Modified") is None, f"{path}: получил общую дату корпуса"
-        conditional = requests.get(
-            f"{BASE}{path}", timeout=30, headers={"If-Modified-Since": _corpus_date()}
-        )
-        assert conditional.status_code == 200, (path, conditional.status_code)
+        assert r.status_code == 200, (path, r.status_code)
+        tag = r.headers.get("ETag")
+        assert tag, f"{path}: нет ETag — возврат к своей карте стоит полной перекачки"
+        tags[path] = tag
+        same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag})
+        assert same.status_code == 304, (path, same.status_code)
+    assert len(set(tags.values())) == len(tags), f"разные разборы делят один отпечаток: {tags}"
 
 
 # Раздел справочника существовал только как фильтр `?sec=`: тот адрес несёт canonical на

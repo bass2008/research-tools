@@ -1,84 +1,65 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-const ISO = "2026-09-08T21:34:00Z";
+import { CONTENT_PUBLISHED } from "./corpusDates";
+import { browserDay, exampleDay } from "./today";
 
-async function load(buildIso: string | undefined) {
-  vi.resetModules();
-  if (buildIso === undefined) vi.stubEnv("NEXT_PUBLIC_BUILD_ISO", "");
-  else vi.stubEnv("NEXT_PUBLIC_BUILD_ISO", buildIso);
-  return import("./today");
-}
-
-beforeEach(() => {
-  vi.useFakeTimers();
-});
-
-afterEach(() => {
-  vi.useRealTimers();
-  vi.unstubAllEnvs();
-  vi.resetModules();
-});
-
-describe("дата сборки", () => {
-  it("берётся из метки сборки в UTC", async () => {
-    const { buildDay } = await load(ISO);
-    expect(buildDay()).toEqual({ day: 8, month: 9, year: 2026 });
+// Дата-пример вшита в разметку каждой страницы с формой. Пока она шла от метки сборки, каждая
+// сборка в новый день меняла тело ответа, а с ним встроенный `ETag`, — поиск качал заново то,
+// что не менялось. Поэтому она обязана быть неподвижной.
+describe("дата-пример", () => {
+  it("берётся из даты публикации корпуса, в UTC", () => {
+    const [year, month, day] = CONTENT_PUBLISHED.split("-").map(Number);
+    expect(exampleDay()).toEqual({ day, month, year });
   });
 
-  // Ровно то, что сломалось на проде: HTML напечатан при сборке, а страницу открывают позже —
-  // «сегодня» в первом рендере обязано остаться прежним, иначе React перерисовывает поддерево.
-  it("не меняется, сколько бы времени ни прошло после сборки", async () => {
-    const { buildDay } = await load(ISO);
-    vi.setSystemTime(new Date("2026-09-08T21:40:00Z"));
-    const right_after = buildDay();
-    vi.setSystemTime(new Date("2026-09-12T10:00:00Z"));
-    expect(buildDay()).toEqual(right_after);
+  // Запасной ветки «не разобралось — взять сегодня» нет намеренно: она молча возвращала бы
+  // расхождение гидратации. Вместо неё — требование к самой константе.
+  it("дата публикации корпуса — настоящая календарная дата", () => {
+    expect(CONTENT_PUBLISHED).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(Number.isNaN(Date.parse(`${CONTENT_PUBLISHED}T00:00:00Z`))).toBe(false);
   });
 
-  it("не зависит от часового пояса того, кто открыл страницу", async () => {
-    const { buildDay } = await load("2026-09-08T23:30:00Z");
-    // 8 сентября по UTC — 9 сентября в Москве; в первом рендере обязано быть UTC-число
-    expect(buildDay().day).toBe(8);
+  it("не зависит от часов того, кто открыл страницу", () => {
+    vi.useFakeTimers();
+    try {
+      const before = exampleDay();
+      vi.setSystemTime(new Date("2027-12-31T23:59:00Z"));
+      expect(exampleDay()).toEqual(before);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it("собирали не скриптом релиза — отступаем к дате открытия в UTC", async () => {
-    const { buildDay } = await load(undefined);
-    vi.setSystemTime(new Date("2026-03-01T05:00:00Z"));
-    expect(buildDay()).toEqual({ day: 1, month: 3, year: 2026 });
-  });
-
-  it("битую метку не превращаем в Invalid Date", async () => {
-    const { buildDay } = await load("не дата");
-    vi.setSystemTime(new Date("2026-03-01T05:00:00Z"));
-    expect(buildDay()).toEqual({ day: 1, month: 3, year: 2026 });
-  });
-
-  it("месяц человеческий: январь — 1, а не 0", async () => {
-    const { buildDay } = await load("2026-01-15T12:00:00Z");
-    expect(buildDay().month).toBe(1);
-  });
-
-  it("конец года не сдвигает год", async () => {
-    const { buildDay } = await load("2026-12-31T23:59:00Z");
-    expect(buildDay()).toEqual({ day: 31, month: 12, year: 2026 });
+  // Дата разбирается по UTC, и это не мелочь: у посетителя восточнее Гринвича `getDate()` дал бы
+  // другое число, чем стоит в готовом HTML. Проверяется сменой пояса процесса — иначе подмена
+  // `getUTCDate` на `getDate` теста не роняет.
+  it("не зависит от часового пояса", async () => {
+    vi.stubEnv("TZ", "Pacific/Kiritimati");
+    vi.resetModules();
+    try {
+      const { exampleDay: shifted } = await import("./today");
+      const [year, month, day] = CONTENT_PUBLISHED.split("-").map(Number);
+      expect(shifted()).toEqual({ day, month, year });
+    } finally {
+      vi.unstubAllEnvs();
+      vi.resetModules();
+    }
   });
 });
 
 describe("дата браузера", () => {
-  it("идёт за часами браузера, а не за сборкой", async () => {
-    const { browserDay, buildDay } = await load(ISO);
-    vi.setSystemTime(new Date("2026-09-12T10:00:00Z"));
-    expect(browserDay()).not.toEqual(buildDay());
-    expect(browserDay().day).toBe(12);
-  });
-
-  it("месяц человеческий", async () => {
-    const { browserDay } = await load(ISO);
-    vi.setSystemTime(new Date("2026-02-03T10:00:00Z"));
-    expect(browserDay().month).toBe(2);
+  it("идёт за часами браузера, а не за корпусом", () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2027-07-04T10:00:00Z"));
+      expect(browserDay()).not.toEqual(exampleDay());
+      expect(browserDay().year).toBe(2027);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
@@ -117,7 +98,7 @@ describe("клиентские компоненты не берут дату у 
     for (const file of ["components/matrix/MatrixForm.tsx", "components/matrix/MatrixReport.tsx"]) {
       const code = readFileSync(path.join(ROOT, file), "utf8");
       expect(code, file).toContain('from "@/lib/today"');
-      expect(code, file).toContain("buildDay");
+      expect(code, file).toContain("exampleDay");
     }
   });
 });

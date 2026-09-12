@@ -8,8 +8,20 @@ import { parseTail, tailByFormula, tailShape } from "./encyclopedia";
 describe("Article", () => {
   const ld = articleLd({ headline: "Заголовок", description: "Описание", path: "/x" });
 
-  it.each(["author", "publisher", "datePublished", "dateModified"])("несёт %s", (field) => {
+  it.each(["author", "publisher", "datePublished"])("несёт %s", (field) => {
     expect(ld).toHaveProperty(field);
+  });
+
+  // Дату правки страница печатает, только если знает свою. Общая дата корпуса стояла бы на всех
+  // 442 адресах и при каждом её сдвиге меняла тело каждого — весь корпус перекачивался бы
+  // из-за правки одной статьи.
+  it("без своей даты правки поля нет вовсе", () => {
+    expect(ld).not.toHaveProperty("dateModified");
+  });
+
+  it("со своей датой правки печатает её", () => {
+    const own = articleLd({ headline: "З", description: "О", path: "/x", modified: "2026-05-05" });
+    expect(own).toHaveProperty("dateModified", "2026-05-05");
   });
 
   it("ставит абсолютный адрес страницы", () => {

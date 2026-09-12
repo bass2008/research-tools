@@ -17,15 +17,21 @@ cd /home/sergey/Personal/research-tools/project/destiny-matrix && git branch --s
 (`conda run` глотает вывод). `~/.config/arcana/seo.env` не нужен: владение подтверждено DNS и
 Метрикой.
 
-Правился корпус (`web/content/**`, `tools/seo/content/**`) — сдвинуть `CONTENT_MODIFIED` в
-`web/lib/schema.ts` на сегодня. Заголовок `Last-Modified` берётся не оттуда, а из `BUILD_ISO`.
+Дат правки у сайта нет: ни в разметке страниц, ни в карте сайта. Двигать при релизе нечего —
+прежняя константа `CONTENT_MODIFIED` удалена вместе со своим сторожем.
+
+Условными запросами (`If-None-Match` → `304`) занимается сам Next: его `ETag` — хеш отданного
+тела, врать он не умеет. Своего механизма у сайта нет, делать при релизе ничего не нужно.
+Держится это на том, что `generateBuildId` (`web/lib/buildId.ts`) считает идентификатор сборки от
+состава маршрутов, а не случайно: случайный вшивается в разметку каждой страницы и сбрасывал
+`ETag` на каждом релизе. `Last-Modified` сайт не отдаёт — см. `docs/decisions.md`, Decision 8.
 
 ## 1. Регресс
 
 ```bash
 cd web
 npm run typecheck
-NEXT_PUBLIC_SITE_URL=https://arcana-sense.ru NEXT_PUBLIC_BUILD_ISO="$(date -u +%FT%TZ)" npm run build
+NEXT_PUBLIC_SITE_URL=https://arcana-sense.ru npm run build
 npm run check
 cd /home/sergey/Personal/research-tools
 python tools/seo/build-content.py --check
@@ -38,9 +44,10 @@ cd project/destiny-matrix/web && PORT=3399 node .next/standalone/server.js &
 
 - каждый адрес карты сайта: 200, `h1`, self-canonical, крошки;
 - `robots.txt` парсером `protego`: результаты расчёта закрыты, ни один адрес карты не закрыт;
-- `If-Modified-Since` с меткой сборки → 304, со старой датой → 200;
-- `If-None-Match` со своим отпечатком → 304, с чужим → 200;
-- приватное и результаты расчёта: без `Last-Modified`, 304 не отдают;
+- `If-None-Match` со своим отпечатком → 304, с чужим → 200, с обоими условными заголовками
+  сразу → 304, на несуществующем адресе → 404;
+- отпечаток есть у каждой предрендеренной страницы, включая закрытые от обхода результаты
+  расчёта, и у разных разборов он разный;
 - адреса вне реестров → 404;
 - новые страницы достижимы по внутренним ссылкам, не только из карты сайта.
 
@@ -123,8 +130,20 @@ cd ../infra && BASE=https://arcana-sense.ru ./check.sh
 ```
 
 Плюс на живом сайте: новые адреса 200 с `h1` и canonical; `robots.txt` и карта сайта содержат
-ожидаемое; изменившиеся страницы отвечают 200 на старую дату; калькулятор и кнопка покупки на
-месте.
+ожидаемое; калькулятор и кнопка покупки на месте. Условный ответ проверять отпечатком, а не датой —
+дат сайт не отдаёт, и запрос с `If-Modified-Since` вернёт 200 даже при полностью сломанном
+механизме:
+
+```bash
+U=https://arcana-sense.ru/encyclopedia/arcanum/7
+E=$(curl -sI $U | grep -i '^etag' | tr -d '\r' | awk '{print $2}')
+curl -s -o /dev/null -w 'свой отпечаток %{http_code}\n' -H "If-None-Match: $E" $U          # 304
+curl -s -o /dev/null -w 'чужой отпечаток %{http_code}\n' -H 'If-None-Match: "stale"' $U     # 200
+curl -s -o /dev/null -w 'оба заголовка %{http_code}\n' -H "If-None-Match: $E" \
+  -H 'If-Modified-Since: Tue, 01 Sep 2026 00:00:00 GMT' $U                                 # 304
+curl -s -o /dev/null -w 'нет страницы %{http_code}\n' -H 'If-None-Match: *' \
+  https://arcana-sense.ru/encyclopedia/arcanum/99                                          # 404
+```
 
 ## Ловушки
 
@@ -134,8 +153,6 @@ cd ../infra && BASE=https://arcana-sense.ru ./check.sh
 - **`noindex` не запрещает обход** — робот качает страницу, чтобы прочитать мету. Экономит
   только `Disallow`.
 - **`Allow: /`** Next печатает раньше запретов: парсер «первое совпадение» читает «всё открыто».
-- **Дата корпуса** без сдвига `CONTENT_MODIFIED` даёт неверный `lastmod`. Сторож —
-  `web/lib/contentModified.test.ts`.
 - **Два адреса на один головной запрос** — каннибализация. Сторож — `web/lib/primaryQuery.test.ts`.
 - **Скриптовая правка исходников** режет лишнее и оставляет битый синтаксис: файл дешевле
   перезаписать целиком. Сверять смысловое отличие, а не диф — переформатирование даёт 187 строк

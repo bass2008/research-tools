@@ -1,10 +1,10 @@
+import { CONTENT_PUBLISHED } from "./corpusDates";
 import { LEGAL, SITE } from "./site";
 
-// Дата публикации и правки корпуса. Article без author/datePublished/publisher Google
-// отбраковывает целиком, поэтому даты стоят константами: они относятся к контенту, а не к
-// сборке, и от прогона к прогону меняться не должны.
-export const CONTENT_PUBLISHED = "2026-04-01";
-export const CONTENT_MODIFIED = "2026-09-09";
+// Дата публикации живёт в `lib/corpusDates` и отсюда переизлучается: её импортируют как часть
+// разметки. Article без author/datePublished/publisher Google отбраковывает целиком, поэтому она
+// стоит константой. Даты правки у сайта нет вовсе — ни в разметке, ни в карте сайта.
+export { CONTENT_PUBLISHED };
 
 const abs = (path: string) => new URL(path, SITE.url).toString();
 
@@ -57,7 +57,10 @@ export function articleLd(opts: {
     author: AUTHOR,
     publisher: PUBLISHER,
     datePublished: opts.published ?? CONTENT_PUBLISHED,
-    dateModified: opts.modified ?? CONTENT_MODIFIED,
+    // Дата правки печатается, только если страница знает свою. Общей датой корпуса её заполнять
+    // нельзя: она вшита в разметку всех 442 страниц, а процесс требует сдвигать её при правке
+    // любой статьи — тело менялось у каждой, и поиск перекачивал корпус из-за одной статьи.
+    ...(opts.modified ? { dateModified: opts.modified } : {}),
     ...(opts.keywords?.length ? { keywords: opts.keywords.join(", ") } : {}),
     ...(opts.image ? { image: abs(opts.image) } : {}),
     mainEntityOfPage: { "@type": "WebPage", "@id": abs(opts.path) },

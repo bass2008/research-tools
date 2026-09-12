@@ -1,5 +1,6 @@
 import { forward, json } from "../../_lib/upstream";
 
+import { buildSettings } from "@/lib/settings/build";
 import { publicSettings } from "@/lib/settings/public";
 import { serverSettings } from "@/lib/settings/server";
 
@@ -23,6 +24,7 @@ export async function GET() {
       group: "frontend",
       items: [
         ...publicSettings.snapshot().map((row) => ({ component: "web-public", ...row })),
+        ...buildSettings.snapshot().map((row) => ({ component: "web-public", ...row })),
         ...serverSettings.snapshot().map((row) => ({ component: "web-server", ...row })),
       ],
     },

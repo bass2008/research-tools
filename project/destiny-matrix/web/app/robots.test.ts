@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import robots from "./robots";
+import sitemap from "./sitemap";
 import { PERSONAL_SECTION_KEYS } from "@/lib/sectionReadingShared";
 import { verification } from "@/lib/seo";
 
@@ -67,6 +68,16 @@ describe("robots.txt", () => {
 
   it("называет карту сайта", () => {
     expect(robots().sitemap).toMatch(/\/sitemap\.xml$/);
+  });
+
+  // Сквозной инвариант: адрес, который мы сами предлагаем поиску, не может быть у нас же
+  // запрещён к обходу. Ошибка такого рода видна только по падению индексации через недели.
+  it("ни один адрес карты сайта не закрыт к обходу", () => {
+    const disallow = [groupFor("*")?.disallow].flat().filter((value): value is string => Boolean(value));
+    const clash = sitemap()
+      .map((entry) => new URL(entry.url).pathname)
+      .filter((path) => disallow.some((prefix) => path.startsWith(prefix)));
+    expect(clash).toEqual([]);
   });
 });
 

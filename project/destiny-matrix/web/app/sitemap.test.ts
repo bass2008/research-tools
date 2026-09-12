@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import sitemap from "./sitemap";
 import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
-import { CONTENT_MODIFIED } from "@/lib/schema";
 import { SPEC } from "@/lib/sections";
 
 // Дефект A17: карту сайта пополняли вручную, и юридические страницы попали в неё не все.
@@ -107,10 +106,11 @@ describe("карта сайта", () => {
     }
   });
 
-  it("lastModified отражает смысловую правку, а не время сборки", () => {
-    const expected = new Date(`${CONTENT_MODIFIED}T00:00:00Z`).toISOString();
-    expect(new Set(sitemap().map((entry) => new Date(entry.lastModified!).toISOString())))
-      .toEqual(new Set([expected]));
+  // Даты в карте нет намеренно: честной она была бы только постраничной, а общая дата корпуса
+  // объявляла изменившимися все 444 адреса при правке одной статьи. Возврат такой даты — не
+  // улучшение, а возврат к неправде, поэтому её отсутствие закреплено тестом.
+  it("не ставит адресам дату правки", () => {
+    expect(sitemap().filter((entry) => entry.lastModified !== undefined)).toEqual([]);
   });
 
   it("не выдаёт приватные адреса", () => {

@@ -220,8 +220,12 @@ function checkSitemap() {
     return;
   }
   if (new Set(locs).size !== locs.length) fail("sitemap содержит дубли URL");
+  // Дат правки в карте нет намеренно (docs/decisions.md, Decision 8): общая дата на все адреса —
+  // ложный сигнал, а Google учитывает `lastmod`, только пока тот достоверен. Вернувшееся поле
+  // означает возврат общей даты корпуса, поэтому роняем приёмку. Появится своя дата у страницы —
+  // менять здесь вместе с `app/sitemap.ts`.
   const modified = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((match) => match[1]);
-  if (new Set(modified).size !== 1) fail("sitemap сообщает разные/плавающие даты одного корпуса");
+  if (modified.length) fail(`sitemap снова печатает дату правки (${modified.length} адресов)`);
   for (const raw of locs) {
     const target = new URL(raw);
     const pathname = target.pathname.replace(/\/$/, "") || "/";
@@ -452,10 +456,45 @@ if (fails.length) {
 console.log("ВСЁ ЧИСТО");
 }
 
+// Всё, что попало в чанк страницы корпуса и меняется само по себе, двигает разметку каждой
+// страницы, которая этот чанк грузит, и обесценивает `ETag`. Так уже ломалось дважды: меткой
+// коммита и датой правки корпуса (замер 11.09: 439 страниц из 442 от одного сдвига даты).
+// Список адресов берётся из карты сайта, а не из рукописных префиксов: так он не отстанет.
+const VOLATILE = ["CONTENT_MODIFIED", "NEXT_PUBLIC_BUILD_COMMIT", "NEXT_PUBLIC_BUILD_ISO",
+                  "NEXT_PUBLIC_BUILD_TIME", "NEXT_PUBLIC_BUILD_BRANCH"];
+
+function checkCorpusChunks() {
+  const file = path.join(ROOT, "sitemap.xml.body");
+  if (!fs.existsSync(file)) return;                 // собрано не на боевом адресе: сверять нечего
+  const routes = [...fs.readFileSync(file, "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map((match) => new URL(match[1]).pathname.replace(/(.)\/$/, "$1"));
+  const referenced = new Set();
+  for (const route of routes) {
+    const html = pages.get(route);
+    if (!html) continue;
+    for (const m of html.matchAll(/\/_next\/static\/chunks\/([A-Za-z0-9_.-]+\.js)/g)) referenced.add(m[1]);
+  }
+  if (!referenced.size) return fail("чанки: ни одна страница карты сайта не ссылается на чанки");
+  for (const name of [...referenced].sort()) {
+    const chunk = path.join(".next", "static", "chunks", name);
+    if (!fs.existsSync(chunk)) {
+      fail(`чанки: страницы ссылаются на ${name}, а файла в сборке нет`);
+      continue;
+    }
+    const text = fs.readFileSync(chunk, "utf8");
+    for (const marker of VOLATILE) {
+      if (text.includes(marker)) {
+        fail(`чанки: ${name} несёт ${marker} — разметка поедет от правки, которой на странице не видно`);
+      }
+    }
+  }
+}
+
 (async () => {
   const price = await loadOnDemand();
   checkPages();
   checkSitemap();
+  checkCorpusChunks();
   checkPrice(price);
   checkLegal();
   finish();

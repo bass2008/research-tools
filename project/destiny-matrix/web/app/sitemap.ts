@@ -22,7 +22,6 @@ import {
   yearHref,
 } from "@/lib/encyclopedia";
 import { SITE } from "@/lib/site";
-import { CONTENT_MODIFIED } from "@/lib/schema";
 
 export const dynamic = "force-static";
 
@@ -41,53 +40,55 @@ const PRODUCTION = "https://arcana-sense.ru";
 export default function sitemap(): MetadataRoute.Sitemap {
   if (SITE.url !== PRODUCTION) return [];
   const abs = (path: string) => new URL(path, SITE.url).toString();
-  // Дата отражает последнюю смысловую правку корпуса. `new Date()` на каждой сборке говорил
-  // поисковику, будто все сотни статей изменились одновременно, хотя менялся только image tag.
-  const modified = new Date(`${CONTENT_MODIFIED}T00:00:00Z`);
+  // `lastmod` в карте нет намеренно. Честная дата у нас была бы только постраничной, а общая
+  // дата корпуса стояла на всех 444 адресах сразу: при правке одной статьи карта заявляла, что
+  // изменились все. Google учитывает `lastmod`, лишь пока тот «consistently and verifiably
+  // accurate», и перестаёт верить сайту целиком, если это не так; в справке Яндекса про этот
+  // элемент не сказано ничего. Пустое поле честнее неверного: робот решает сам.
 
   return [
-    { url: abs("/"), lastModified: modified, priority: 1 },
-    { url: abs("/encyclopedia"), lastModified: modified, priority: 0.9 },
+    { url: abs("/"), priority: 1 },
+    { url: abs("/encyclopedia"), priority: 0.9 },
     // Шапки разделов: у каждой свой текст и свой головной запрос. Приоритет выше листьев —
     // это цель обхода, с которой раздаётся весь раздел.
     ...[ARCANUM_HUB, POSITION_HUB, CHAKRA_HUB, COMBINATION_HUB].map((url) => ({
       url: abs(url),
-      lastModified: modified,
+     
       priority: 0.85,
     })),
-    ...ARCANA.map((a) => ({ url: abs(arcanumHref(a.n)), lastModified: modified, priority: 0.8 })),
-    ...POSITIONS.map((p) => ({ url: abs(positionHref(p.key)), lastModified: modified, priority: 0.7 })),
+    ...ARCANA.map((a) => ({ url: abs(arcanumHref(a.n)), priority: 0.8 })),
+    ...POSITIONS.map((p) => ({ url: abs(positionHref(p.key)), priority: 0.7 })),
     // Пересечения «аркан N в позиции X»: адрес совпадает с формой запроса, и это единственная
     // форма, которая на этом сайте берёт позиции — раздел сочетаний стоит на медиане 5, а
     // каталоги позиций на 33–42. Набор задан реестром спроса, а не перебором 22 × 37.
     ...registryItems().map((item) => ({
       url: abs(positionArcanumHref(item.position, item.arcanum)),
-      lastModified: modified,
+     
       priority: 0.75,
     })),
-    ...CHAKRA_PAGES.map((c) => ({ url: abs(chakraHref(c.key)), lastModified: modified, priority: 0.6 })),
+    ...CHAKRA_PAGES.map((c) => ({ url: abs(chakraHref(c.key)), priority: 0.6 })),
     ...allCombinationSlugs().map((s) => ({
       url: abs(`/encyclopedia/combination/${s}`),
-      lastModified: modified,
+     
       priority: 0.5,
     })),
     // категории статей: в карту попадает только то, для чего есть написанный контент
     // шапки категорий в карте всегда: у них собственный текст, он не зависит от того, написаны
     // ли статьи внутри. По наличию статей строятся только сами статьи и корневые хабы.
-    { url: abs(KARMIC_TAIL_HUB), lastModified: modified, priority: 0.8 },
+    { url: abs(KARMIC_TAIL_HUB), priority: 0.8 },
     ...indexedKarmicTailKeys().map((key) => ({
       url: abs(karmicTailHref(key)),
-      lastModified: modified,
+     
       priority: 0.7,
     })),
-    { url: abs(YEAR_HUB), lastModified: modified, priority: 0.8 },
-    ...yearKeys().map((key) => ({ url: abs(yearHref(key)), lastModified: modified, priority: 0.7 })),
+    { url: abs(YEAR_HUB), priority: 0.8 },
+    ...yearKeys().map((key) => ({ url: abs(yearHref(key)), priority: 0.7 })),
     ...hubKeys()
       .filter(hasHubRoute)
-      .map((key) => ({ url: abs(hubHref(key)), lastModified: modified, priority: 0.8 })),
-    { url: abs("/contacts"), lastModified: modified, priority: 0.3 },
-    { url: abs("/oferta"), lastModified: modified, priority: 0.3 },
-    { url: abs("/privacy"), lastModified: modified, priority: 0.3 },
-    { url: abs("/refund"), lastModified: modified, priority: 0.3 },
+      .map((key) => ({ url: abs(hubHref(key)), priority: 0.8 })),
+    { url: abs("/contacts"), priority: 0.3 },
+    { url: abs("/oferta"), priority: 0.3 },
+    { url: abs("/privacy"), priority: 0.3 },
+    { url: abs("/refund"), priority: 0.3 },
   ];
 }
