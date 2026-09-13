@@ -313,5 +313,5 @@ class SecurityAudit(Base):
                 "outcome": self.outcome, "email": self.email, "ip": self.ip}
 
 
-AUDIT_ACTIONS = ("login", "register", "reset")
+AUDIT_ACTIONS = ("login", "register", "reset", "impersonate")
 AUDIT_OUTCOMES = ("success", "failed", "throttled")

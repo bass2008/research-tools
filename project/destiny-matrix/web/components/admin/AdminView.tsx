@@ -15,6 +15,7 @@ import { counted, plural } from "@/lib/plural";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
 import AdminSettings from "@/components/admin/AdminSettings";
+import UserActions from "@/components/admin/UserActions";
 
 const day = (iso: string) => new Date(iso).toLocaleDateString("ru-RU");
 
@@ -22,6 +23,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("ru-RU");
 function accessLine(u: AdminUser): string {
   const parts: string[] = [];
   if (u.owned > 0) parts.push(`куплено ${u.owned} навсегда`);
+  if (u.granted > 0) parts.push(`выдано ${u.granted}`);
   if (u.scopes.includes("all")) parts.push(u.until ? `подписка до ${day(u.until)}` : "подписка");
   return parts.length ? parts.join(" · ") : "нет прав";
 }
@@ -40,6 +42,27 @@ export default function AdminView() {
   // у строки админка целиком подменялась экраном «Админка недоступна» — проверить, прошли ли
   // деньги, становилось нечем.
   const [refundError, setRefundError] = useState<string | null>(null);
+
+  // Ссылка на файл подписана и живёт час, поэтому запрашиваем её в момент нажатия, а не держим
+  // в таблице: открытая полдня админка иначе отдавала бы просроченные ссылки.
+  const [downloading, setDownloading] = useState<number | null>(null);
+
+  const reloadUsers = () => {
+    void api.admin.users().then((u) => setUsers(u.items)).catch(() => undefined);
+  };
+
+  const download = async (job: AdminReportJob) => {
+    setDownloading(job.id);
+    setError(null);
+    try {
+      const { url } = await api.admin.reportLink(job.id);
+      window.open(url, "_blank", "noopener");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Файл не отдался.");
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   // Возврат необратим и трогает деньги, поэтому спрашиваем подтверждение и называем платёж целиком:
   // у покупателя с двумя оплатами сумма и почта совпадают, и по ним строки не различить.
@@ -174,12 +197,13 @@ export default function AdminView() {
                 <th>Доступ</th>
                 <th>Последнее появление</th>
                 <th>Зарегистрирован</th>
+                <th className="act">Действия</th>
               </tr>
             </thead>
             <tbody>
               {users === null ? (
                 <tr>
-                  <td colSpan={7} className="skeleton">
+                  <td colSpan={8} className="skeleton">
                     Загружаем…
                   </td>
                 </tr>
@@ -193,9 +217,12 @@ export default function AdminView() {
                     <td>{u.matrices}</td>
                     <td>{u.payments}</td>
                     <td className="num">{money(u.spent)} ₽</td>
-                    <td>{accessLine(u)}</td>
+                    <td className="acc">{accessLine(u)}</td>
                     <td className="small">{when(u.last_seen_at)}</td>
                     <td className="small">{when(u.created_at)}</td>
+                    <td className="act">
+                      <UserActions user={u} onGranted={reloadUsers} />
+                    </td>
                   </tr>
                 ))
               )}
@@ -303,6 +330,7 @@ export default function AdminView() {
                 <th>Статус</th>
                 <th>Заняло</th>
                 <th>Размер</th>
+                <th className="act">Файл</th>
               </tr>
             </thead>
             <tbody>
@@ -314,7 +342,7 @@ export default function AdminView() {
                 </tr>
               ) : jobs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="dim">
+                  <td colSpan={7} className="dim">
                     PDF ещё никто не печатал.
                   </td>
                 </tr>
@@ -332,6 +360,21 @@ export default function AdminView() {
                     <td className="num">{j.seconds === null ? "—" : `${j.seconds} с`}</td>
                     <td className="num">
                       {j.size_bytes === null ? "—" : `${Math.round(j.size_bytes / 1024)} КБ`}
+                    </td>
+                    <td className="act">
+                      {j.status === "done" ? (
+                        <button
+                          type="button"
+                          className="btn ghost sm"
+                          data-testid="report-download"
+                          disabled={downloading === j.id}
+                          onClick={() => download(j)}
+                        >
+                          {downloading === j.id ? "Готовим…" : "Скачать"}
+                        </button>
+                      ) : (
+                        <span className="dim">—</span>
+                      )}
                     </td>
                   </tr>
                 ))

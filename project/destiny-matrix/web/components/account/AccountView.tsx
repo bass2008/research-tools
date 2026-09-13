@@ -112,6 +112,7 @@ function MatrixName({
  * Метка доступа у строки матрицы. Купленная выделена особо: она остаётся у человека, даже когда
  * подписка кончится, — это разные вещи, и в списке они не должны выглядеть одинаково. Знак
  * пожизненного владения — ∞ в золотом круге: понятен без подписи и не спорит с текстом бейджа.
+ * Выданная админом открыта так же, но золота не получает: подарок — не покупка.
  */
 function AccessBadge({ item }: { item: MatrixListItem }) {
   if (item.access === "forever") {
@@ -121,6 +122,14 @@ function AccessBadge({ item }: { item: MatrixListItem }) {
           ∞
         </i>
         Куплена
+      </span>
+    );
+  }
+  if (item.access === "granted") {
+    // Выдана без оплаты. Бейдж обычный: знак владения (∞ в золоте) принадлежит купленным.
+    return (
+      <span className="badge sub" data-testid="access-badge">
+        Открыта
       </span>
     );
   }
@@ -268,7 +277,7 @@ export default function AccountView() {
               : session.used > session.limit
                 ? `${session.used} сохранено, слотов ${session.limit} — новую дату добавить нельзя,
                    пока не купите ещё один разбор; сохранённое никуда не делось`
-                : `${session.used} из ${session.limit} · слот даёт каждая покупка разбора`}
+                : `${session.used} из ${session.limit} · слот даёт каждый открытый разбор`}
           </dd>
         </dl>
         <div className="taglist" style={{ marginTop: 12 }}>

@@ -993,6 +993,54 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .admtable tr:hover td { background: var(--card2); }
 .admtable .badge { margin-left: 7px; }
 
+/* Действия над пользователем: список вместо ряда кнопок — в строке таблицы места нет. */
+.actions { position: relative; display: inline-flex; align-items: center; gap: 8px; text-align: left; }
+.actions-menu {
+  position: fixed; z-index: 65; min-width: 190px;
+  display: flex; flex-direction: column; padding: 4px; gap: 2px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.actions-menu button {
+  text-align: left; padding: 8px 10px; border: 0; border-radius: 7px;
+  background: transparent; color: inherit; font: inherit; cursor: pointer;
+}
+.actions-menu button:hover { background: var(--card2); }
+/* Колонка действий прилипает к правому краю: таблица людей шире экрана, и без этого кнопка
+   пряталась в горизонтальной прокрутке — до неё нужно было доскроллить. */
+.admtable td.act, .admtable th.act {
+  position: sticky; right: 0; z-index: 5; text-align: right; white-space: nowrap;
+  background: var(--card); box-shadow: -8px 0 12px -10px rgba(0,0,0,.35);
+}
+
+.admtable tr:hover td.act { background: var(--card2); }
+/* «куплено 2 навсегда» ломалось на три строки и растило высоту каждой строки таблицы. */
+.admtable td.acc { white-space: nowrap; }
+
+/* Модалка админки: выдать матрицу. Одна на весь раздел, поэтому без отдельного компонента. */
+.modal-back {
+  position: fixed; inset: 0; z-index: 70; display: flex; justify-content: center;
+  padding: 16px; background: rgba(20,20,20,.45);
+  /* Окно прижато к верху, а не по центру: в списке чисел 31 пункт, и по центру он открывался
+     вниз за край экрана — последние числа выбрать было нельзя. Сверху места хватает всем. */
+  align-items: flex-start; padding-top: min(6vh, 48px); overflow-y: auto;
+}
+.modal {
+  width: min(460px, 100%); display: flex; flex-direction: column; gap: 12px;
+  padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+}
+.modal .fields { gap: 8px; }
+.modal .btn.ghost.sm { align-self: center; }
+.modal { text-align: left; }
+.modal .cap { white-space: normal; }
+.modal h4 { margin: 0; }
+.modal label { display: flex; flex-direction: column; gap: 5px; font-size: 13.6px; }
+.modal input, .modal select {
+  padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--card2); color: inherit; font: inherit; text-align: left;
+}
+.modal-act { display: flex; justify-content: flex-end; gap: 8px; }
+
 /* история платежей */
 .paylist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .paylist li { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 10px 13px; border: 1px solid var(--line); border-radius: 12px; }

@@ -33,8 +33,9 @@ export interface MeResponse {
   is_admin: boolean;
 }
 
-/** Как открыта матрица: куплена бессрочно, открыта подпиской или закрыта. */
-export type MatrixAccess = "forever" | "subscription" | "locked";
+/** Как открыта матрица: куплена бессрочно, выдана без оплаты, открыта подпиской или закрыта.
+ * `granted` отличается от `forever` намеренно: знак купленного владения подарку не принадлежит. */
+export type MatrixAccess = "forever" | "granted" | "subscription" | "locked";
 
 export interface MatrixListItem {
   id: number;
@@ -83,6 +84,8 @@ export interface AdminUser {
   spent: number;
   scopes: string[];
   owned: number;
+  /** сколько дат открыто без оплаты: выдал админ или промо */
+  granted: number;
   until: string | null;
   rights: number;
 }
@@ -253,7 +256,7 @@ export type AuditCategory = "all" | "success" | "failed" | "throttled";
 export interface SecurityAuditRow {
   id: number;
   at: string;
-  action: "login" | "register" | "reset";
+  action: "login" | "register" | "reset" | "impersonate";
   outcome: "success" | "failed" | "throttled";
   email: string | null;
   ip: string | null;
@@ -328,6 +331,24 @@ export const api = {
         { method: "POST" },
       ),
     errors: () => request<{ items: ErrorRow[]; hour: number }>("/admin/errors"),
+
+    /** Войти под пользователем: кука сессии меняется на его, админ становится обычным посетителем. */
+    impersonate: (userId: number) =>
+      request<{ user: User; authenticated: boolean }>("/admin/impersonate", {
+        method: "POST",
+        body: JSON.stringify({ user_id: userId }),
+      }),
+
+    /** Выдать матрицу без оплаты: в кабинете она открыта, но помечена как выданная. */
+    addMatrix: (userId: number, birth: string, sex: Sex) =>
+      request<MatrixListItem>("/admin/matrices", {
+        method: "POST",
+        body: JSON.stringify({ user_id: userId, birth, sex }),
+      }),
+
+    /** Подписанная ссылка на чужой готовый PDF — проверить, что человек получил нужный файл. */
+    reportLink: (jobId: number) =>
+      request<{ url: string }>(`/admin/report-link?job=${jobId}`),
 
     securityAudit: (category: AuditCategory, page: number, pageSize: number) => {
       const q = new URLSearchParams({

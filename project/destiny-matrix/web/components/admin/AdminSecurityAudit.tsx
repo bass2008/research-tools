@@ -15,7 +15,8 @@ function when(iso: string): string {
   })}`;
 }
 
-const ACTION: Record<string, string> = { login: "вход", register: "регистрация", reset: "сброс" };
+const ACTION: Record<string, string> = { login: "вход", register: "регистрация", reset: "сброс",
+                                        impersonate: "имперсонированный вход" };
 const OUTCOME: Record<string, string> = { success: "успех", failed: "отказ", throttled: "лимит" };
 
 // Отбора «Отсечённые лимитом» здесь нет: такой исход продукт не записывает, и отбор всегда

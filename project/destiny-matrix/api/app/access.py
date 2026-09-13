@@ -53,18 +53,28 @@ def unlocked_matrix(db: Session, user: User | None, matrix_id: int | None,
 def matrix_state(rights: list[Entitlement], matrix_id: int) -> dict:
     """Как открыта конкретная матрица — для списка в кабинете.
 
-    `forever` — куплена бессрочным правом и останется; `subscription` — открыта, пока действует
-    срочное право (с датой окончания); `locked` — закрыта, разбор можно выкупить. Права передаются
-    списком, а не считаются заново на каждую строку: иначе список кабинета — запрос на матрицу.
+    `forever` — куплена бессрочным правом и останется; `granted` — открыта тем же бессрочным
+    правом, но выданным без денег (админ, промо, компенсация); `subscription` — открыта, пока
+    действует срочное право (с датой окончания); `locked` — закрыта, разбор можно выкупить.
+
+    Купленное и выданное разделены намеренно: в кабинете «Куплена» — знак владения со своей
+    отметкой, и выдавать её за подарок нельзя. Права передаются списком, а не считаются заново на
+    каждую строку: иначе список кабинета — запрос на матрицу.
     """
     ends: list[dt.datetime] = []
+    granted = False
     for right in rights:
         kinds = right.scopes()
         if ALL not in kinds and not (SINGLE in kinds and right.matrix_id == matrix_id):
             continue
         if right.expires_at is None:
-            return {"access": "forever", "access_until": None}
+            if right.payment_id is not None:
+                return {"access": "forever", "access_until": None}
+            granted = True
+            continue
         ends.append(right.expires_at)
+    if granted:
+        return {"access": "granted", "access_until": None}
     if ends:
         return {"access": "subscription", "access_until": iso(max(ends))}
     return {"access": "locked", "access_until": None}
@@ -144,8 +154,11 @@ def summary(db: Session, user: User | None, now: dt.datetime | None = None) -> d
         # None — без ограничения; иначе бесплатная плюс по одной за каждое разовое право
         "matrices_limit": None if MATRIX in kinds else 1 + len(singles),
         # сколько дат куплено бессрочно: покупка и подписка живут одновременно, и кабинет
-        # обязан показывать обе — раньше одна затирала другую
-        "owned": sum(1 for r in singles if r.expires_at is None),
+        # обязан показывать обе — раньше одна затирала другую. Выданные без денег сюда не входят:
+        # «куплено 2 даты» там, где заплатили за одну, — ложь и покупателю, и админке
+        "owned": sum(1 for r in singles if r.expires_at is None and r.payment_id is not None),
+        # сколько открыто без оплаты (выдал админ, промо): слот они занимают наравне с купленными
+        "granted": sum(1 for r in singles if r.expires_at is None and r.payment_id is None),
         # дата окончания срочного доступа. Наличие бессрочных покупок её не отменяет: подписка
         # кончится, а купленные даты останутся
         # только через iso(): голый isoformat() терял смещение, и браузер читал время как

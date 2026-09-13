@@ -1,20 +1,29 @@
 """Админка: кто зарегистрирован, когда заходил, что купил и какие даты сохранил."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+import json
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import access, monitor, printing
+from engine.matrix import calculate
+
+from .. import access, audit, monitor, printing
 from .. import reports as report_store
 from .. import payments as gateway
 from ..routers.payments import apply as apply_payment
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Payment, PaymentSweep, ReportJob, SavedMatrix, SecurityAudit, User, iso
+from ..models import (Entitlement, Payment, PaymentSweep, ReportJob, SavedMatrix, SecurityAudit,
+                      User, default_title, iso)
+from ..schemas import BirthIn
+from ..security import create_token
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+log = logging.getLogger("admin")
 
 
 def admin_user(user: User = Depends(current_user)) -> User:
@@ -43,6 +52,7 @@ def _row(db: Session, user: User) -> dict:
         "spent": int(paid[1]),
         "scopes": summary["scopes"],
         "owned": summary["owned"],
+        "granted": summary["granted"],
         "until": summary["until"],
         "rights": len(rights),
     }
@@ -147,6 +157,72 @@ def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_d
             select(ReportJob).where(ReportJob.user_id == user.id)
             .order_by(ReportJob.id.desc())).all()],
     }
+
+
+@router.post("/users/{user_id}/impersonate")
+def impersonate(user_id: int, request: Request, admin: User = Depends(admin_user),
+                db: Session = Depends(get_db)) -> dict:
+    """Войти под пользователем, чтобы увидеть сайт его глазами.
+
+    Токен выдаётся тот же, что и при обычном входе, поэтому дальше админ — обычный посетитель со
+    своей корзиной прав; вернуться к себе можно только повторным входом. Запись в журнале
+    безопасности обязательна: вход под чужим аккаунтом обязан быть виден, и в списке он должен
+    отличаться от настоящего входа этого человека.
+    """
+    target = db.get(User, user_id)
+    if target is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+    audit.record("impersonate", "success", email=target.email, ip=audit.client_ip(request))
+    log.info("админ %s вошёл под %s", admin.email, target.email)
+    return {"token": create_token(target.id, target.password_hash), "user": target.public()}
+
+
+@router.post("/users/{user_id}/matrices")
+def add_matrix(user_id: int, payload: BirthIn, _: User = Depends(admin_user),
+               db: Session = Depends(get_db)) -> dict:
+    """Выдать пользователю матрицу без оплаты: разбор открыт, но правом без платежа.
+
+    Право бессрочное и без `payment_id` — по этому признаку кабинет показывает её открытой, но не
+    купленной (`access.matrix_state`). Повторная выдача той же даты ничего не ломает: матрица
+    находится по дате и полу, а право не задваивается.
+    """
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+    try:
+        calculate(payload.birth, payload.sex)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
+                                              SavedMatrix.birth == payload.birth,
+                                              SavedMatrix.sex == payload.sex))
+    if row is None:
+        row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
+                          title=default_title(payload.birth))
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+    if not access.unlocked_matrix(db, user, row.id):
+        db.add(Entitlement(user_id=user.id, matrix_id=row.id, scope=json.dumps([access.SINGLE]),
+                           note="выдана админом"))
+        db.commit()
+    rights = access.active_rights(db, user)
+    return {**row.item(), **access.matrix_state(rights, row.id)}
+
+
+@router.get("/reports/{job_id}/link")
+def report_link(job_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Ссылка на готовый PDF любого пользователя: проверить, что человек получил именно то, за
+    что заплатил. Ссылка подписана на час — та же, что получает покупатель."""
+    job = db.get(ReportJob, job_id)
+    if job is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Задача печати не найдена")
+    if job.status != "done" or not job.object_key:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail="Файла нет: печать не завершилась")
+    matrix = db.get(SavedMatrix, job.matrix_id)
+    name = f"{default_title(matrix.birth)}.pdf".replace("/", "-") if matrix else None
+    return {"url": report_store.link(job.object_key, name)}
 
 
 @router.get("/pulse")

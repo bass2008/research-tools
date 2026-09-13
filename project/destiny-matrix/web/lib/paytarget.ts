@@ -9,7 +9,7 @@ export interface TargetRow {
   birth: string;
   sex: Sex;
   title: string | null;
-  access: "forever" | "subscription" | "locked";
+  access: "forever" | "granted" | "subscription" | "locked";
 }
 
 export interface LocalBirth {

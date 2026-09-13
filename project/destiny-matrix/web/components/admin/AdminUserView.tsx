@@ -13,6 +13,7 @@ import { birthLabel } from "@/components/matrix/MatrixResult";
 
 const ACCESS: Record<string, string> = {
   forever: "куплена навсегда",
+  granted: "выдана без оплаты",
   subscription: "по подписке",
   locked: "закрыта",
 };
