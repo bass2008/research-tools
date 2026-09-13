@@ -32,7 +32,7 @@ cd /home/sergey/Personal/research-tools/project/destiny-matrix && git branch --s
 cd web
 npm run typecheck
 NEXT_PUBLIC_SITE_URL=https://arcana-sense.ru npm run build
-npm run check
+npm run check      # после подъёма стенда (§3): без API даёт два ложных провала — /pay/single и прайс
 cd /home/sergey/Personal/research-tools
 python tools/seo/build-content.py --check
 python tools/seo/build-position-arcanum.py --check
@@ -147,6 +147,9 @@ curl -s -o /dev/null -w 'нет страницы %{http_code}\n' -H 'If-None-Mat
 
 ## Ловушки
 
+- **Память на выкладке.** `release-test.sh` и `release-prod.sh` собирают образы, и при поднятом
+  локальном стенде сборку убивает нехватка памяти («Canceled: context canceled» на экспорте
+  образа). Перед выкладкой: `cd compose && docker compose down`.
 - **Занятый порт.** При `EADDRINUSE` старый процесс продолжает отвечать, и проверка читает
   прошлую сборку. Убивать по порту: `ss -lptnH "sport = :3399" | grep -oP 'pid=\K[0-9]+' | xargs -r kill`.
   `pkill -f` совпадает с собственной командной строкой и убивает свою оболочку.

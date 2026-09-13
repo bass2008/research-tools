@@ -62,6 +62,7 @@
 | `docs/locale.md`, `docs/locale-ref-plan.md` | требования к многоязычности и подготовительный рефакторинг |
 | `docs/locale-plan.md` | план перевода сайта на другие языки |
 | `docs/foreign-acquiring.md` | приём денег вне России |
+| `docs/support-bot.md` | поддержка в Telegram: один бот, тема на клиента, включение и подводные камни |
 | `docs/t-bank-test-ac.md` | тестовый эквайринг: карты, локальный запуск, тестовый контур |
 | `docs/search-bot-base-strategy.md` | обход роботами: как устроен условный ответ (`ETag`, прибитый `buildId`, middleware) |
 | `docs/search-bot-google.md` | Googlebot: на чём он экономит обход и куда его тратит |
