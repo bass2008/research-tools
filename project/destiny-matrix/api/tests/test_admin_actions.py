@@ -4,9 +4,9 @@ from __future__ import annotations
 import pytest
 from sqlalchemy.orm import sessionmaker
 
-from app import audit
+from app import audit, presence
 from app.config import settings
-from app.models import ReportJob, SavedMatrix, SecurityAudit, User
+from app.models import ReportJob, SavedMatrix, SecurityAudit, User, as_utc, utcnow
 
 
 @pytest.fixture
@@ -156,3 +156,53 @@ def test_summary_does_not_call_a_gift_a_purchase(client, auth, db):
     row = next(r for r in client.get("/api/admin/users", headers=admin).json()["items"]
                if r["email"] == "buyer@example.ru")
     assert (row["owned"], row["granted"]) == (1, 1)
+
+
+@pytest.fixture
+def forget_presence():
+    """Буфер присутствия живёт в модуле, а не в базе: соседний тест не должен его наследовать."""
+    presence.forget()
+    yield
+    presence.forget()
+
+
+def beat(client, token: str, visitor: str) -> None:
+    answer = client.post("/api/pulse",
+                         json={"visitor": visitor, "tab": visitor, "path": "/account"},
+                         headers={"Authorization": f"Bearer {token}"})
+    assert answer.status_code == 200, answer.text
+
+
+def test_own_visit_moves_last_seen(client, db, db_engine, forget_presence):
+    """Обычный вход — это появление человека, и оно обязано попасть в «последнее появление»."""
+    token = buyer(client)["token"]
+    maker = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)
+    user = db.get(User, user_id(db))
+    assert user.last_seen_at is None
+
+    before = utcnow()
+    beat(client, token, "сам-покупатель")
+    assert presence.flush(maker) == 1
+    db.refresh(user)
+    assert user.last_seen_at is not None and as_utc(user.last_seen_at) >= before
+
+
+def test_impersonated_visit_leaves_last_seen_alone(client, auth, db, db_engine, forget_presence):
+    """Вход под пользователем — просмотр глазами админа: присутствие покупателя он не подделывает."""
+    token = buyer(client)["token"]
+    maker = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)
+    target = user_id(db)
+    user = db.get(User, target)
+    beat(client, token, "сам-покупатель")
+    assert presence.flush(maker) == 1
+    db.refresh(user)
+    was = user.last_seen_at
+    assert was is not None
+
+    admin = auth(settings.admins[0])
+    ghost = client.post(f"/api/admin/users/{target}/impersonate", headers=admin).json()["token"]
+    beat(client, ghost, "админ-под-покупателем")
+
+    assert presence.flush(maker) == 0, "чужая сессия попала в буфер последнего появления"
+    db.refresh(user)
+    assert user.last_seen_at == was, "«последнее появление» показало визит админа"

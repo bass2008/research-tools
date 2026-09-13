@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from . import errors, monitor, payments, presence, tariffs
 from .config import settings
 from .db import get_db
-from .deps import optional_user
+from .deps import ghost_session, optional_user
 from .models import User
 from .routers import ROUTERS
 from .schemas import PulseIn
@@ -46,11 +46,16 @@ def create_app() -> FastAPI:
 
     @app.post(f"{settings.api_prefix}/pulse", tags=["service"])
     def pulse(body: PulseIn, request: Request,
-              user: User | None = Depends(optional_user)) -> dict:
+              user: User | None = Depends(optional_user),
+              ghost: bool = Depends(ghost_session)) -> dict:
         """Отметка «я здесь» раз в 45 секунд. Онлайн остаётся в памяти; для вошедшего пользователя
-        последнее появление копится там же и записывается в БД только почасовым пакетом."""
+        последнее появление копится там же и записывается в БД только почасовым пакетом.
+
+        Админ, вошедший под чужим аккаунтом, появлением этого человека не считается: иначе
+        «последнее появление» в админке показывало бы визит админа вместо визита покупателя.
+        """
         presence.touch(body.visitor, body.path, request.headers.get("user-agent", ""), tab=body.tab)
-        if user is not None:
+        if user is not None and not ghost:
             presence.touch_user(user.id)
         return {"ok": True}
 

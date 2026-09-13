@@ -29,9 +29,14 @@ def random_password(length: int = 18) -> str:
     return secrets.token_urlsafe(length)
 
 
-def create_token(user_id: int, password_hash: str, ttl_days: int | None = None) -> str:
+def create_token(user_id: int, password_hash: str, ttl_days: int | None = None,
+                 ghost: bool = False) -> str:
     """Сессия привязана к текущему паролю: в подписи лежит его отпечаток, поэтому смена пароля
-    гасит все ранее выданные токены — на всех устройствах сразу."""
+    гасит все ранее выданные токены — на всех устройствах сразу.
+
+    `ghost` помечает сессию админа, вошедшего под чужим аккаунтом: права те же, но следов
+    присутствия она не оставляет — «последнее появление» принадлежит человеку, а не админу.
+    """
     now = dt.datetime.now(dt.timezone.utc)
     ttl = settings.jwt_ttl_days if ttl_days is None else ttl_days
     payload = {
@@ -41,6 +46,8 @@ def create_token(user_id: int, password_hash: str, ttl_days: int | None = None) 
         "iat": int(now.timestamp()),
         "exp": int((now + dt.timedelta(days=ttl)).timestamp()),
     }
+    if ghost:
+        payload["gho"] = True
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
@@ -73,14 +80,14 @@ def password_fingerprint(password_hash: str) -> str:
     return hashlib.sha256(password_hash.encode()).hexdigest()[:16]
 
 
-def read_token(token: str) -> tuple[int, str] | None:
-    """Возвращает id пользователя и отпечаток пароля, под который выдана сессия. Пропуска для
+def read_token(token: str) -> tuple[int, str, bool] | None:
+    """Возвращает id пользователя, отпечаток пароля и признак чужой сессии админа. Пропуска для
     сброса и печати сессией не считаются: у них свой typ."""
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         if payload.get("typ") != "session":
             return None
-        return int(payload["sub"]), str(payload["pwd"])
+        return int(payload["sub"]), str(payload["pwd"]), bool(payload.get("gho"))
     except (jwt.PyJWTError, KeyError, TypeError, ValueError):
         return None
 

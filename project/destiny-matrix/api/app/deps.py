@@ -20,11 +20,19 @@ def optional_user(
     read = read_token(credentials.credentials)
     if read is None:
         return None
-    user_id, fingerprint = read
+    user_id, fingerprint, _ = read
     user = db.get(User, user_id)
     if user is None or password_fingerprint(user.password_hash) != fingerprint:
         return None
     return user
+
+
+def ghost_session(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> bool:
+    """Пришёл ли запрос из сессии админа, вошедшего под чужим аккаунтом."""
+    if credentials is None or not credentials.credentials:
+        return False
+    read = read_token(credentials.credentials)
+    return bool(read and read[2])
 
 
 def current_user(user: User | None = Depends(optional_user)) -> User:

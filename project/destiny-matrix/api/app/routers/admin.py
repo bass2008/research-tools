@@ -164,17 +164,20 @@ def impersonate(user_id: int, request: Request, admin: User = Depends(admin_user
                 db: Session = Depends(get_db)) -> dict:
     """Войти под пользователем, чтобы увидеть сайт его глазами.
 
-    Токен выдаётся тот же, что и при обычном входе, поэтому дальше админ — обычный посетитель со
-    своей корзиной прав; вернуться к себе можно только повторным входом. Запись в журнале
-    безопасности обязательна: вход под чужим аккаунтом обязан быть виден, и в списке он должен
-    отличаться от настоящего входа этого человека.
+    Права у сессии те же, что у самого человека, поэтому дальше админ — обычный посетитель с его
+    корзиной прав; вернуться к себе можно только повторным входом. Токен помечен как чужой:
+    присутствие такой сессии не записывается покупателю. Запись в журнале безопасности
+    обязательна: вход под чужим аккаунтом обязан быть виден, и в списке он должен отличаться от
+    настоящего входа этого человека.
     """
     target = db.get(User, user_id)
     if target is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
     audit.record("impersonate", "success", email=target.email, ip=audit.client_ip(request))
     log.info("админ %s вошёл под %s", admin.email, target.email)
-    return {"token": create_token(target.id, target.password_hash), "user": target.public()}
+    # Сессия помечена как чужая: она не двигает «последнее появление» покупателя (см. pulse).
+    return {"token": create_token(target.id, target.password_hash, ghost=True),
+            "user": target.public()}
 
 
 @router.post("/users/{user_id}/matrices")

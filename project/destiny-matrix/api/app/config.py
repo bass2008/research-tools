@@ -53,8 +53,8 @@ class Settings(BaseSettings):
     matrices_hard_cap: int = Field(default=2000, ge=1)
 
     # Боевой pulse пишет последнее появление пакетно раз в час. Локальный compose переопределяет
-    # интервал на минуту, чтобы поведение можно было проверить без часового ожидания.
-    presence_flush_seconds: int = Field(default=3600, ge=60, le=86_400)
+    # интервал секундами, чтобы поведение можно было проверить без часового ожидания.
+    presence_flush_seconds: int = Field(default=3600, ge=5, le=86_400)
 
     # Почта. Без smtp_user и smtp_password отправка выключена: локально и в тестах письма
     # только пишутся в лог.
