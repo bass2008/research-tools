@@ -17,7 +17,7 @@ import {
 
 const REGISTRY = JSON.parse(
   readFileSync(path.join(__dirname, "..", "content", "position-arcanum.json"), "utf8"),
-) as { threshold: number; count: number; items: unknown[] };
+) as { threshold: number; show_threshold: number; count: number; items: unknown[] };
 
 const readings = registryItems().map((item) => ({
   item,
@@ -33,14 +33,18 @@ describe("реестр пересечений", () => {
     expect(registryItems().length).toBeGreaterThan(50);
   });
 
-  // Порог решает не существование адреса, а индексацию: плоские 22 × 38 адресов в выдаче были бы
-  // тем тонким корпусом, который уже дал 76 страниц хвостов на один показ за шесть дней. Запись
-  // без спроса живёт ради продукта — человек с картой должен дочитать про своё число.
-  it("в индекс не пускает записи ниже порога", () => {
-    const under = registryItems().filter((i) => i.frequency < REGISTRY.threshold);
-    expect(under.filter((i) => i.publication.index)).toEqual([]);
-    expect(indexedRegistryItems().filter((i) => i.frequency < REGISTRY.threshold)).toEqual([]);
-    expect(indexedRegistryItems().length).toBeLessThan(registryItems().length);
+  // Порогов два, и они отвечают на разные вопросы. `threshold` — стоит ли писать текст руками;
+  // `show_threshold` — показывать ли уже написанное. Довод «страница стоит дороже, чем приносит»
+  // относится только к первому: у готовой страницы показ не стоит ничего. Плоские 22 × 38
+  // адресов в выдаче по-прежнему запрещены, но не порогом спроса, а методом — существование
+  // записи решает `reachable_arcana`.
+  it("в индекс не пускает записи ниже порога показа", () => {
+    const show = REGISTRY.show_threshold;
+    expect(show).toBeGreaterThan(0);
+    expect(show).toBeLessThan(REGISTRY.threshold);
+    expect(registryItems().filter((i) => i.frequency < show && i.publication.index)).toEqual([]);
+    expect(indexedRegistryItems().filter((i) => i.frequency < show)).toEqual([]);
+    expect(indexedRegistryItems().length).toBeLessThanOrEqual(registryItems().length);
   });
 
   // Головной запрос — обещание «эта страница отвечает на эту фразу». У страницы вне индекса его
@@ -246,12 +250,15 @@ describe("собранная страница", () => {
   });
 
   // Страница вне индекса запросов не заявляет: у неё нет головного, а придуманные «вторые
-  // формулировки» целились бы в чужую выдачу.
+  // формулировки» целились бы в чужую выдачу. Сейчас таких страниц в реестре нет — после
+  // разделения порогов показываются все девяносто, — но механизм остаётся: запись со спросом
+  // ниже `show_threshold` закроется, и тогда запросов у неё быть не должно.
   it("страница вне индекса не заявляет чужих запросов", () => {
     const claimed = readings
       .filter(({ item }) => !item.publication.index)
-      .filter(({ reading }) => reading.seo.queries.length === 0);
-    expect(claimed.length).toBeGreaterThan(0);
+      .filter(({ reading }) => reading.seo.queries.length > 0)
+      .map(({ reading }) => `${reading.position}/${reading.arcanum}`);
+    expect(claimed).toEqual([]);
   });
 
   it("даёт каждой странице свой адрес и подпись", () => {

@@ -32,10 +32,17 @@ OUT = PROJECT / "web/content/position-arcanum.json"
 METHOD = PROJECT / "spec/method.json"
 POINTS = PROJECT / "content/data/points.json"
 
-# Поиск видит запись при спросе не ниже этого числа. Значение выбрано по отдаче: при 500 —
-# 80 страниц и 2 046 показов на страницу, при 300 добавляются 36 страниц по ~400, при 100 — ещё
-# 8 по ~137. Ниже порога страница стоит дороже, чем приносит.
+# Два разных решения, и раньше они были слиты в одно число.
+#
+# THRESHOLD — стоит ли ЗАВОДИТЬ страницу, то есть писать текст руками. Значение выбрано по
+# отдаче: при 500 — 80 страниц и 2 046 показов на страницу, при 300 добавляются 36 страниц
+# по ~400, при 100 — ещё 8 по ~137. Ниже этого страница стоит дороже, чем приносит.
+#
+# SHOW_THRESHOLD — показывать ли поиску страницу, которая УЖЕ написана. Здесь довод про
+# стоимость не работает: текст лежит, показ не стоит ничего. Закрывать готовую страницу имеет
+# смысл, только когда спроса нет совсем и она разбавляет корпус.
 THRESHOLD = 500
+SHOW_THRESHOLD = 50
 
 # Дата разбора, а не «сегодня»: `--check` сверяет файл побайтово, и подвижная дата ломала бы
 # проверку каждую полночь. Меняется руками вместе с пересмотром реестра — так же, как TODAY в
@@ -169,7 +176,7 @@ def main() -> int:
                 skipped += 1
                 continue
             _, phrase, wording = row["top"]
-            indexed = row["frequency"] >= THRESHOLD
+            indexed = row["frequency"] >= SHOW_THRESHOLD and bool(phrase)
             if not indexed:
                 # Без спроса головного запроса у страницы нет: заявить его — значит увести
                 # выдачу у той страницы, которая по нему и стоит.
@@ -191,18 +198,20 @@ def main() -> int:
                 },
             })
 
-    payload = {"threshold": THRESHOLD, "count": len(items), "items": items}
+    payload = {"threshold": THRESHOLD, "show_threshold": SHOW_THRESHOLD,
+               "count": len(items), "items": items}
     body = json.dumps(payload, ensure_ascii=False, indent=1) + "\n"
     if args.check:
         if not OUT.exists() or OUT.read_text(encoding="utf-8") != body:
             raise SystemExit(f"{OUT.name} устарел — выполните tools/seo/build-position-arcanum.py")
-        print(f"проверено: {len(items)} страниц, порог {THRESHOLD}")
+        print(f"проверено: {len(items)} страниц, порог заведения {THRESHOLD}, показа {SHOW_THRESHOLD}")
         return 0
     OUT.write_text(body, encoding="utf-8")
     shown = [item for item in items if item["publication"]["index"]]
     total = sum(item["frequency"] for item in shown)
     print(f"{OUT.name}: {len(items)} страниц, из них в индексе {len(shown)} "
-          f"({total:,} показов/мес), порог {THRESHOLD}; отброшено методом {skipped}")
+          f"({total:,} показов/мес), порог заведения {THRESHOLD}, показа {SHOW_THRESHOLD}; "
+          f"отброшено методом {skipped}")
     return 0
 
 

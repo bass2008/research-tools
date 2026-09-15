@@ -6123,7 +6123,7 @@
     {
       "entity": "position_arcanum:center/14",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "матрица судьбы 14 в центре",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6132,7 +6132,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6140,7 +6140,7 @@
     {
       "entity": "position_arcanum:center/16",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "матрица судьбы 16 в центре",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6149,7 +6149,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6174,7 +6174,7 @@
     {
       "entity": "position_arcanum:center/20",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "20 в центре матрицы судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6183,7 +6183,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6191,7 +6191,7 @@
     {
       "entity": "position_arcanum:center/22",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "22 в центре матрицы судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6200,7 +6200,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6395,7 +6395,7 @@
     {
       "entity": "position_arcanum:love_middle/12",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "12 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6404,7 +6404,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6412,7 +6412,7 @@
     {
       "entity": "position_arcanum:love_middle/13",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "13 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6421,7 +6421,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6429,7 +6429,7 @@
     {
       "entity": "position_arcanum:love_middle/14",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "14 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6438,7 +6438,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6446,7 +6446,7 @@
     {
       "entity": "position_arcanum:love_middle/15",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "15 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6455,7 +6455,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6480,7 +6480,7 @@
     {
       "entity": "position_arcanum:love_middle/17",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "17 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6489,7 +6489,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6582,7 +6582,7 @@
     {
       "entity": "position_arcanum:love_middle/3",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "3 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6591,7 +6591,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"
@@ -6599,7 +6599,7 @@
     {
       "entity": "position_arcanum:love_middle/4",
       "source": "web/content/position-arcanum.json",
-      "primary_query": null,
+      "primary_query": "4 под сердцем в матрице судьбы",
       "search_intent": "position_arcanum",
       "formula_verified": true,
       "position_context_verified": true,
@@ -6608,7 +6608,7 @@
       "paid_report_overlap": "encyclopedia deepens the in-report position texts",
       "internal_links": "automated",
       "metadata": "automated",
-      "decision": "noindex",
+      "decision": "keep",
       "reviewer": "Codex engineering/content audit",
       "reviewed_at": "2026-08-30",
       "independent_editor": "pending human sign-off"

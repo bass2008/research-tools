@@ -145,10 +145,15 @@ def test_position_arcanum_registry_matches_the_public_url_map():
              if row["entity"].startswith("position_arcanum:")}
     assert cards == {f"position_arcanum:{i['position']}/{i['arcanum']}" for i in registry["items"]}
 
-    # Ниже порога запись живёт, но только вне индекса: какие пересечения бывают, решает метод,
-    # какие из них видит поиск — спрос.
-    below = [i for i in registry["items"] if i["frequency"] < registry["threshold"]]
+    # Порогов два: `threshold` решает, писать ли текст руками, `show_threshold` — показывать ли
+    # уже написанное. Ниже порога показа запись живёт только вне индекса; между порогами страница
+    # написана и показывается — довод «стоит дороже, чем приносит» к готовому тексту не относится.
+    show = registry["show_threshold"]
+    assert 0 < show < registry["threshold"], show
+    below = [i for i in registry["items"] if i["frequency"] < show]
     assert all(not i["publication"]["index"] for i in below), below
+    assert all(i["publication"]["index"] == bool(i["publication"]["primary_query"])
+               for i in registry["items"]), "индекс и головной запрос разошлись"
     assert all(i["publication"]["index"] for i in registry["items"] if i not in below)
     assert all(i["publication"]["follow"] for i in registry["items"])
 
