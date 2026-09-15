@@ -74,7 +74,7 @@ describe("загрузчик сгенерированного контента",
 
   it("статистика показывает, сколько записей нашлось", () => {
     const s = contentStats();
-    expect(s).toMatchObject({ arcana: 22, positions: 37, chakras: 7, combinations: 231 });
+    expect(s).toMatchObject({ arcana: 22, positions: 38, chakras: 7, combinations: 231 });
     for (const v of Object.values(s)) expect(v).toBeGreaterThanOrEqual(0);
   });
 
@@ -123,7 +123,7 @@ describe("загрузчик сгенерированного контента",
     expect(day.sections.some((section) => section.h2.includes("полного характера"))).toBe(true);
   });
 
-  it("каждый аркан имеет полный корпус 37 позиционных трактовок", () => {
+  it("каждый аркан имеет полный корпус 38 позиционных трактовок", () => {
     const expected = new Set(POSITIONS.map((position) => position.key));
     for (let n = 1; n <= 22; n++) {
       const content = arcanumContent(n)!;

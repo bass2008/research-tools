@@ -99,6 +99,7 @@ export default async function YearPage({ params }: { params: Promise<Params> }) 
 
         <Sections items={item.sections} />
 
+
         <div className="section-gap">
           <CalcPromo
             arcanum={n ?? undefined}

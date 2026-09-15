@@ -31,13 +31,13 @@ def test_every_dataset_is_valid_standalone_json():
 def test_source_preserves_the_complete_content_contract():
     assert len(ARCANA) == 22
     assert len(CHAKRAS_TEXT) == 7
-    assert len(POINTS) == 17
+    assert len(POINTS) == 18
     assert len(SECTIONS_META) == 20
     assert sorted(IN_POSITIONS) == list(range(1, 23))
     expected_keys = {row["key"] for row in SECTIONS_META} | {row["key"] for row in POINTS}
-    assert len(expected_keys) == 37
+    assert len(expected_keys) == 38
     assert all(set(rows) == expected_keys for rows in IN_POSITIONS.values())
-    assert sum(len(rows) for rows in IN_POSITIONS.values()) == 22 * 37
+    assert sum(len(rows) for rows in IN_POSITIONS.values()) == 22 * 38
     assert len(PAIRS) == 22 * 21 // 2
     assert all(1 <= a < b <= 22 for a, b in PAIRS)
     assert all(row.get("report_label") for row in POINTS)
@@ -50,7 +50,7 @@ def test_point_interpretations_are_individual_editorial_texts():
     titles = {row["n"]: row["title"] for row in ARCANA}
     texts = [IN_POSITIONS[number][key] for number in range(1, 23) for key in point_keys]
 
-    assert len(texts) == len(set(texts)) == 22 * 17
+    assert len(texts) == len(set(texts)) == 22 * 18
     assert all("Сверять трактовку полезно" not in text for text in texts)
     assert all(
         IN_POSITIONS[number][key].startswith(f"Аркан «{titles[number]}»")

@@ -1,6 +1,6 @@
 {
  "threshold": 500,
- "count": 80,
+ "count": 90,
  "items": [
   {
    "position": "past_lives",
@@ -19,7 +19,14 @@
     "3-7-22",
     "9-12-3",
     "9-3-21"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы кармический хвост 3",
+    "exact_frequency": 9220,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -34,7 +41,14 @@
    "tails": [
     "12-16-4",
     "21-4-10"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "программа 4 матрица судьбы",
+    "exact_frequency": 5618,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -50,7 +64,14 @@
     "15-20-5",
     "15-5-8",
     "6-5-17"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "5 программа в матрице судьбы",
+    "exact_frequency": 6503,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -71,7 +92,14 @@
     "6-5-17",
     "6-8-20",
     "9-15-6"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "программа 6 матрица судьбы",
+    "exact_frequency": 10198,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -88,7 +116,14 @@
     "21-10-7",
     "21-7-13",
     "3-7-22"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "программа 7 матрица судьбы",
+    "exact_frequency": 8704,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -105,7 +140,14 @@
     "15-8-11",
     "6-14-8",
     "6-8-20"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "программа 8 матрица судьбы",
+    "exact_frequency": 10637,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -124,7 +166,14 @@
     "9-18-9",
     "9-3-21",
     "9-9-18"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "программа 9 матрица судьбы",
+    "exact_frequency": 15614,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -141,7 +190,14 @@
     "21-10-7",
     "21-4-10",
     "3-13-10"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы программа 10",
+    "exact_frequency": 6668,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -155,7 +211,14 @@
    "tails": [
     "15-8-11",
     "6-17-11"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "кармический хвост в матрице судьбы 11",
+    "exact_frequency": 738,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -173,7 +236,14 @@
     "15-8-11",
     "18-6-15",
     "9-15-6"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "кармический хвост в матрице судьбы 15",
+    "exact_frequency": 4696,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -187,7 +257,14 @@
    "tails": [
     "12-16-4",
     "21-10-16"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "16 программа в матрице судьбы",
+    "exact_frequency": 1564,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -205,7 +282,14 @@
     "18-9-9",
     "9-18-9",
     "9-9-18"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "18 в хвосте матрицы судьбы",
+    "exact_frequency": 4819,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -219,7 +303,14 @@
    "tails": [
     "12-19-7",
     "3-22-19"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы кармический хвост 19",
+    "exact_frequency": 3024,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -235,7 +326,14 @@
     "15-20-5",
     "6-20-14",
     "6-8-20"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "20 программа в матрице судьбы",
+    "exact_frequency": 3019,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -252,7 +350,14 @@
     "21-4-10",
     "21-7-13",
     "9-3-21"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы 21 кармический хвост",
+    "exact_frequency": 4299,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "past_lives",
@@ -266,7 +371,14 @@
    "tails": [
     "3-22-19",
     "3-7-22"
-   ]
+   ],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "кармический хвост в матрице судьбы 22",
+    "exact_frequency": 1201,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -277,7 +389,14 @@
    "wordings": {
     "center": 1686
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "3 в центре матрицы судьбы",
+    "exact_frequency": 1686,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -288,7 +407,14 @@
    "wordings": {
     "center": 1964
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "4 в центре матрицы судьбы",
+    "exact_frequency": 1964,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -299,7 +425,14 @@
    "wordings": {
     "center": 2956
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "5 в центре матрицы судьбы",
+    "exact_frequency": 2956,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -310,7 +443,14 @@
    "wordings": {
     "center": 2729
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "6 в центре матрицы судьбы",
+    "exact_frequency": 2729,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -321,7 +461,14 @@
    "wordings": {
     "center": 2332
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "7 в центре матрицы судьбы",
+    "exact_frequency": 2332,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -332,7 +479,14 @@
    "wordings": {
     "center": 2141
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "8 в центре матрицы судьбы",
+    "exact_frequency": 2141,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -343,7 +497,14 @@
    "wordings": {
     "center": 1681
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "9 в центре матрицы судьбы",
+    "exact_frequency": 1681,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -354,7 +515,14 @@
    "wordings": {
     "center": 2183
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "10 в центре матрицы судьбы",
+    "exact_frequency": 2183,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -365,7 +533,14 @@
    "wordings": {
     "center": 2532
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "11 в центре матрицы судьбы",
+    "exact_frequency": 2532,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -376,7 +551,14 @@
    "wordings": {
     "center": 1492
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "12 в центре матрицы судьбы",
+    "exact_frequency": 1492,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -387,18 +569,50 @@
    "wordings": {
     "center": 789
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "13 в центре матрицы судьбы",
+    "exact_frequency": 789,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
-   "arcanum": 15,
-   "frequency": 831,
-   "primary_query": "15 в центре матрицы судьбы",
+   "arcanum": 14,
+   "frequency": 489,
+   "primary_query": null,
    "wording": "center",
    "wordings": {
-    "center": 831
+    "center": 489
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 489,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "center",
+   "arcanum": 16,
+   "frequency": 326,
+   "primary_query": null,
+   "wording": "center",
+   "wordings": {
+    "center": 326
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 326,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "center",
@@ -409,7 +623,50 @@
    "wordings": {
     "center": 580
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "18 в центре матрицы судьбы",
+    "exact_frequency": 580,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "center",
+   "arcanum": 20,
+   "frequency": 470,
+   "primary_query": null,
+   "wording": "center",
+   "wordings": {
+    "center": 470
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 470,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "center",
+   "arcanum": 22,
+   "frequency": 376,
+   "primary_query": null,
+   "wording": "center",
+   "wordings": {
+    "center": 376
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 376,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -420,7 +677,14 @@
    "wordings": {
     "relations": 683
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 3",
+    "exact_frequency": 683,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -431,7 +695,14 @@
    "wordings": {
     "relations": 616
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 4",
+    "exact_frequency": 616,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -442,7 +713,14 @@
    "wordings": {
     "relations": 1136
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 5",
+    "exact_frequency": 1136,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -453,7 +731,14 @@
    "wordings": {
     "relations": 1764
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 6",
+    "exact_frequency": 1764,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -464,7 +749,14 @@
    "wordings": {
     "relations": 1474
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 7",
+    "exact_frequency": 1474,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -475,7 +767,14 @@
    "wordings": {
     "relations": 1053
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "8 матрица судьбы отношения",
+    "exact_frequency": 1053,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -486,7 +785,14 @@
    "wordings": {
     "relations": 1781
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "9 матрица судьбы отношения",
+    "exact_frequency": 1781,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -497,7 +803,14 @@
    "wordings": {
     "relations": 1002
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 10",
+    "exact_frequency": 1002,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -508,7 +821,14 @@
    "wordings": {
     "relations": 976
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 11",
+    "exact_frequency": 976,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -519,7 +839,14 @@
    "wordings": {
     "relations": 1265
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 15",
+    "exact_frequency": 1265,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -530,7 +857,14 @@
    "wordings": {
     "relations": 664
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 17",
+    "exact_frequency": 664,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -541,7 +875,14 @@
    "wordings": {
     "relations": 817
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 18",
+    "exact_frequency": 817,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -552,7 +893,14 @@
    "wordings": {
     "relations": 744
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 19",
+    "exact_frequency": 744,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -563,7 +911,14 @@
    "wordings": {
     "relations": 900
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 20",
+    "exact_frequency": 900,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -574,7 +929,14 @@
    "wordings": {
     "relations": 1094
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы отношения 21",
+    "exact_frequency": 1094,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "relations",
@@ -585,7 +947,14 @@
    "wordings": {
     "relations": 1148
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы 22 отношения",
+    "exact_frequency": 1148,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -596,7 +965,14 @@
    "wordings": {
     "money": 870
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "5 в денежном канале матрицы судьбы",
+    "exact_frequency": 870,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -607,7 +983,14 @@
    "wordings": {
     "money": 853
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы 6 деньги",
+    "exact_frequency": 853,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -618,7 +1001,14 @@
    "wordings": {
     "money": 646
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "7 в денежном канале матрицы судьбы",
+    "exact_frequency": 646,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -629,7 +1019,14 @@
    "wordings": {
     "money": 1077
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 8",
+    "exact_frequency": 1077,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -640,7 +1037,14 @@
    "wordings": {
     "money": 942
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 9",
+    "exact_frequency": 942,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -651,7 +1055,14 @@
    "wordings": {
     "money": 845
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 10",
+    "exact_frequency": 845,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -662,7 +1073,14 @@
    "wordings": {
     "money": 913
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 18",
+    "exact_frequency": 913,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -673,7 +1091,14 @@
    "wordings": {
     "money": 654
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 19",
+    "exact_frequency": 654,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -684,7 +1109,14 @@
    "wordings": {
     "money": 622
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 20",
+    "exact_frequency": 622,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -695,7 +1127,14 @@
    "wordings": {
     "money": 512
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 21",
+    "exact_frequency": 512,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "money",
@@ -706,10 +1145,53 @@
    "wordings": {
     "money": 799
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы денежный канал 22",
+    "exact_frequency": 799,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
+   "arcanum": 3,
+   "frequency": 398,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 398
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 398,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
+   "arcanum": 4,
+   "frequency": 377,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 377
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 377,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
    "arcanum": 5,
    "frequency": 902,
    "primary_query": "5 под сердцем в матрице судьбы",
@@ -717,10 +1199,17 @@
    "wordings": {
     "heart": 902
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "5 под сердцем в матрице судьбы",
+    "exact_frequency": 902,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 6,
    "frequency": 850,
    "primary_query": "6 под сердцем в матрице судьбы",
@@ -728,10 +1217,17 @@
    "wordings": {
     "heart": 850
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "6 под сердцем в матрице судьбы",
+    "exact_frequency": 850,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 7,
    "frequency": 962,
    "primary_query": "7 под сердцем в матрице судьбы",
@@ -739,10 +1235,17 @@
    "wordings": {
     "heart": 962
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "7 под сердцем в матрице судьбы",
+    "exact_frequency": 962,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 8,
    "frequency": 832,
    "primary_query": "8 под сердцем в матрице судьбы",
@@ -750,10 +1253,17 @@
    "wordings": {
     "heart": 832
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "8 под сердцем в матрице судьбы",
+    "exact_frequency": 832,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 9,
    "frequency": 557,
    "primary_query": "9 под сердцем в матрице судьбы",
@@ -761,10 +1271,17 @@
    "wordings": {
     "heart": 557
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "9 под сердцем в матрице судьбы",
+    "exact_frequency": 557,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 10,
    "frequency": 667,
    "primary_query": "10 под сердцем в матрице судьбы",
@@ -772,10 +1289,17 @@
    "wordings": {
     "heart": 667
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "10 под сердцем в матрице судьбы",
+    "exact_frequency": 667,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 11,
    "frequency": 697,
    "primary_query": "11 под сердцем в матрице судьбы",
@@ -783,10 +1307,89 @@
    "wordings": {
     "heart": 697
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "11 под сердцем в матрице судьбы",
+    "exact_frequency": 697,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
+   "arcanum": 12,
+   "frequency": 113,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 113
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 113,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
+   "arcanum": 13,
+   "frequency": 86,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 86
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 86,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
+   "arcanum": 14,
+   "frequency": 352,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 352
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 352,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
+   "arcanum": 15,
+   "frequency": 360,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 360
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 360,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
    "arcanum": 16,
    "frequency": 505,
    "primary_query": "16 под сердцем в матрице судьбы",
@@ -794,10 +1397,35 @@
    "wordings": {
     "heart": 505
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "16 под сердцем в матрице судьбы",
+    "exact_frequency": 505,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
+   "arcanum": 17,
+   "frequency": 398,
+   "primary_query": null,
+   "wording": "heart",
+   "wordings": {
+    "heart": 398
+   },
+   "tails": [],
+   "publication": {
+    "index": false,
+    "follow": true,
+    "primary_query": null,
+    "exact_frequency": 398,
+    "reviewed_at": "2026-09-14"
+   }
+  },
+  {
+   "position": "love_middle",
    "arcanum": 18,
    "frequency": 559,
    "primary_query": "18 под сердцем в матрице судьбы",
@@ -805,10 +1433,17 @@
    "wordings": {
     "heart": 559
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "18 под сердцем в матрице судьбы",
+    "exact_frequency": 559,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 19,
    "frequency": 628,
    "primary_query": "19 под сердцем в матрице судьбы",
@@ -816,10 +1451,17 @@
    "wordings": {
     "heart": 628
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "19 под сердцем в матрице судьбы",
+    "exact_frequency": 628,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 20,
    "frequency": 882,
    "primary_query": "20 под сердцем в матрице судьбы",
@@ -827,10 +1469,17 @@
    "wordings": {
     "heart": 882
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "20 под сердцем в матрице судьбы",
+    "exact_frequency": 882,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 21,
    "frequency": 706,
    "primary_query": "21 аркан под сердцем матрица судьбы",
@@ -838,10 +1487,17 @@
    "wordings": {
     "heart": 706
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "21 аркан под сердцем матрица судьбы",
+    "exact_frequency": 706,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
-   "position": "comfort_south",
+   "position": "love_middle",
    "arcanum": 22,
    "frequency": 1485,
    "primary_query": "22 под сердцем матрица судьбы",
@@ -849,7 +1505,14 @@
    "wordings": {
     "heart": 1485
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "22 под сердцем матрица судьбы",
+    "exact_frequency": 1485,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -860,7 +1523,14 @@
    "wordings": {
     "talent": 515
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "таланты матрица судьбы 4",
+    "exact_frequency": 515,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -871,7 +1541,14 @@
    "wordings": {
     "talent": 682
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы талант 5",
+    "exact_frequency": 682,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -882,7 +1559,14 @@
    "wordings": {
     "talent": 874
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "талант 6 матрица судьбы",
+    "exact_frequency": 874,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -893,7 +1577,14 @@
    "wordings": {
     "talent": 544
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "7 в талантах в матрице судьбы",
+    "exact_frequency": 544,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -904,7 +1595,14 @@
    "wordings": {
     "talent": 591
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "8 в талантах матрица судьбы",
+    "exact_frequency": 591,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -915,7 +1613,14 @@
    "wordings": {
     "talent": 738
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "таланта 9 матрица судьбы",
+    "exact_frequency": 738,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -926,7 +1631,14 @@
    "wordings": {
     "talent": 765
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "11 талант матрица судьбы",
+    "exact_frequency": 765,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -937,7 +1649,14 @@
    "wordings": {
     "talent": 781
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "матрица судьбы талант 12",
+    "exact_frequency": 781,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "profession",
@@ -948,7 +1667,14 @@
    "wordings": {
     "talent": 605
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "18 талант матрица судьбы",
+    "exact_frequency": 605,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "day",
@@ -959,7 +1685,14 @@
    "wordings": {
     "card": 542
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "10 визитка матрица судьбы",
+    "exact_frequency": 542,
+    "reviewed_at": "2026-09-14"
+   }
   },
   {
    "position": "day",
@@ -970,7 +1703,14 @@
    "wordings": {
     "card": 588
    },
-   "tails": []
+   "tails": [],
+   "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "11 визитка матрица судьбы",
+    "exact_frequency": 588,
+    "reviewed_at": "2026-09-14"
+   }
   }
  ]
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Реестр страниц «аркан N в позиции X»: что спрашивают и под каким именем.
+"""Реестр страниц «аркан N в позиции X»: что бывает по методу и что из этого спрашивают.
 
 Зачем отдельный корпус. Спрашивают пересечение — «8 аркан профессии», «21 аркан в отношениях»,
 «9 в хвосте матрицы судьбы». У сайта есть страница позиции (каталог 22 карточек) и страница
@@ -7,9 +7,11 @@
 ответом не является, и поиск ставит его ниже статьи про ровно одну пару. Замер на самом сайте:
 единственный раздел, где адрес повторяет запрос, стоит на медиане 5, каталоги позиций — на 33–42.
 
-Почему порог, а не «все 22 × 37». Плоская генерация 814 адресов — тот самый тонкий корпус,
-который уже дал 76 страниц хвостов на один показ за шесть дней. Адрес появляется только против
-записи с подтверждённым спросом.
+Два разных решения, и путать их нельзя. **Какие адреса бывают** решает метод: аркан, который
+движок не ставит в эту точку ни при какой дате рождения, страницы не получает, сколько бы его ни
+спрашивали. **Какие адреса видит поиск** решает спрос: ниже порога запись остаётся в реестре с
+`publication.index = false`, ровно как у ordered-хвостов. Плоская генерация 836 адресов — тот
+самый тонкий корпус, который уже дал 76 страниц хвостов на один показ за шесть дней.
 
 Источник частот — оплаченный Вордстат (`semcore.db`, поддерево «матрица судьбы»); база вне
 репозитория, поэтому результат работы скрипта коммитится как корпус.
@@ -25,13 +27,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DB = ROOT / "semcore.db"
-OUT = ROOT / "project/destiny-matrix/web/content/position-arcanum.json"
-METHOD = ROOT / "project/destiny-matrix/spec/method.json"
+PROJECT = ROOT / "project/destiny-matrix"
+OUT = PROJECT / "web/content/position-arcanum.json"
+METHOD = PROJECT / "spec/method.json"
+POINTS = PROJECT / "content/data/points.json"
 
-# Страница появляется при спросе не ниже этого числа. Значение выбрано по отдаче: при 500 —
+# Поиск видит запись при спросе не ниже этого числа. Значение выбрано по отдаче: при 500 —
 # 80 страниц и 2 046 показов на страницу, при 300 добавляются 36 страниц по ~400, при 100 — ещё
 # 8 по ~137. Ниже порога страница стоит дороже, чем приносит.
 THRESHOLD = 500
+
+# Дата разбора, а не «сегодня»: `--check` сверяет файл побайтово, и подвижная дата ломала бы
+# проверку каждую полночь. Меняется руками вместе с пересмотром реестра — так же, как TODAY в
+# prepare-unified-release.py.
+REVIEWED_AT = "2026-09-14"
 
 ROOT_PHRASE = "матрица судьбы"
 NUMBER = re.compile(r"(?<![\d/-])(2[0-2]|1[0-9]|[1-9])(?![\d/-])")
@@ -47,10 +56,47 @@ WORDING: dict[str, dict[str, str]] = {
     "center": {"center": r"центр"},
     "relations": {"relations": r"отношени|любов|брак|партн"},
     "money": {"money": r"деньг|денежн|финанс|доход"},
-    "comfort_south": {"heart": r"под сердц"},
+    # «Под сердцем» — партнёрская точка R1, а не вход линии отношений M. В M бывают только числа,
+    # кратные трём, а спрос «N аркан под сердцем» распределён ровно по 3–22, как и значения R1.
+    # Тринадцать адресов, стоявших под этим именем на M, уходят редиректом (tools/seo/recrawl-301.csv).
+    "love_middle": {"heart": r"под сердц"},
     "profession": {"talent": r"талант|професси"},
     "day": {"card": r"визитк"},
 }
+
+# Позиции, где адреса перечисляются по методу целиком, а спрос решает только индексацию.
+#
+# `center` — потому что бесплатный расчёт показывает E каждому, а статьи не было у четырёх из
+# шестнадцати возможных чисел: правило отбора работало против продукта. `love_middle` — потому
+# что это новая точка целиком и её двадцать трактовок написаны руками; завести её наполовину
+# значило бы снова нарезать адреса спросом и снова получить дыры.
+#
+# Остальные пять позиций остаются на пороге спроса: метод отсекает там максимум два числа из
+# двадцати двух, а полный перебор добавил бы шестьдесят страниц без спроса и без нужды продукта.
+BY_METHOD = ("center", "love_middle")
+
+
+def domains() -> dict[str, set[int]]:
+    """Позиция реестра → какие арканы в ней вообще бывают.
+
+    Точка отвечает за себя, раздел — за все свои точки: страница «N аркан в отношениях» честна,
+    если N встречается хотя бы в одной точке раздела.
+    """
+    method = json.loads(METHOD.read_text(encoding="utf-8"))
+    reachable = {key: set(values) for key, values in method["reachable_arcana"].items()}
+    by_section: dict[str, set[int]] = collections.defaultdict(set)
+    for point in json.loads(POINTS.read_text(encoding="utf-8")):
+        for section in point["sections"]:
+            by_section[section] |= reachable[point["key"]]
+    out = {}
+    for position in WORDING:
+        if position in reachable:
+            out[position] = reachable[position]
+        elif position in by_section:
+            out[position] = by_section[position]
+        else:
+            raise SystemExit(f"{position}: ни точка метода, ни раздел с точками")
+    return out
 
 
 def subtree(conn: sqlite3.Connection) -> dict[str, int]:
@@ -104,22 +150,30 @@ def main() -> int:
         for part in dict.fromkeys(triple.split("-")):
             in_tail[int(part)].append(triple)
 
+    domain = domains()
     with sqlite3.connect(f"file:{DB}?mode=ro", uri=True) as conn:
         raw = collect(subtree(conn))
 
     items, skipped = [], 0
     for position, per in raw.items():
-        for arcanum in sorted(per):
-            row = per[arcanum]
-            if row["frequency"] < THRESHOLD:
-                skipped += 1
-                continue
+        # Перебор по методу заводит все достижимые числа; остальные позиции живут на пороге
+        # спроса — запись без спроса там была бы страницей, которой никто не задавал вопроса.
+        asked = {a for a, r in per.items() if r["frequency"] >= THRESHOLD}
+        wanted = (domain[position] if position in BY_METHOD else asked) & domain[position]
+        skipped += len(set(per) - wanted)
+        for arcanum in sorted(wanted):
+            row = per.get(arcanum, {"frequency": 0, "wordings": {}, "top": (0, "", None)})
             # Хвост — тройка: аркан, который движок туда не ставит ни при какой дате, не может
             # иметь страницу «в хвосте», сколько бы его ни спрашивали.
             if position == "past_lives" and not in_tail[arcanum]:
                 skipped += 1
                 continue
             _, phrase, wording = row["top"]
+            indexed = row["frequency"] >= THRESHOLD
+            if not indexed:
+                # Без спроса головного запроса у страницы нет: заявить его — значит увести
+                # выдачу у той страницы, которая по нему и стоит.
+                phrase, wording = None, next(iter(WORDING[position]))
             items.append({
                 "position": position,
                 "arcanum": arcanum,
@@ -128,6 +182,13 @@ def main() -> int:
                 "wording": wording,
                 "wordings": {k: v for k, v in sorted(row["wordings"].items(), key=lambda x: -x[1])},
                 "tails": in_tail[arcanum] if position == "past_lives" else [],
+                "publication": {
+                    "index": indexed,
+                    "follow": True,
+                    "primary_query": phrase,
+                    "exact_frequency": row["frequency"],
+                    "reviewed_at": REVIEWED_AT,
+                },
             })
 
     payload = {"threshold": THRESHOLD, "count": len(items), "items": items}
@@ -138,8 +199,10 @@ def main() -> int:
         print(f"проверено: {len(items)} страниц, порог {THRESHOLD}")
         return 0
     OUT.write_text(body, encoding="utf-8")
-    total = sum(item["frequency"] for item in items)
-    print(f"{OUT.name}: {len(items)} страниц, {total:,} показов/мес, порог {THRESHOLD}; отброшено {skipped}")
+    shown = [item for item in items if item["publication"]["index"]]
+    total = sum(item["frequency"] for item in shown)
+    print(f"{OUT.name}: {len(items)} страниц, из них в индексе {len(shown)} "
+          f"({total:,} показов/мес), порог {THRESHOLD}; отброшено методом {skipped}")
     return 0
 
 

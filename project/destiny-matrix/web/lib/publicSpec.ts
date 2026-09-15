@@ -32,7 +32,21 @@ export interface PositionOut {
   text?: string;
   /** Позиционный абзац разложен на четыре переиспользуемых кубика роли. */
   role?: ReadingRole;
+  /** Статья про этот аркан именно в этой точке, если она есть в реестре пересечений. */
+  article?: PositionArticle;
 }
+
+export interface PositionArticle {
+  href: string;
+  label: string;
+}
+
+/** Готовые ссылки «позиция → статья» по ключу точки и аркану.
+ *
+ *  Считает их сервер: реестр пересечений живёт в `lib/positionArcanum.ts`, а тот читает корпус с
+ *  диска и в браузер не годится. Бесплатный расчёт рисуется в браузере, поэтому ссылки приходят
+ *  ему пропсом — как и толкования бесплатных разделов. */
+export type PositionArticles = Record<string, Record<number, PositionArticle>>;
 
 /** Толкования «аркан → текст» по ключу раздела. Клиенту сервер отдаёт только бесплатные. */
 export type PositionTextValue =
@@ -197,7 +211,11 @@ export const FREE_POSITION_KEYS: string[] = [
  * Толкования и позиции платных приходят с сервера отрисованной страницей, здесь их нет и быть
  * не может.
  */
-export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
+export function buildFree(
+  m: Matrix,
+  texts?: PositionTexts,
+  articles?: PositionArticles,
+): SectionOut[] {
   return CATALOG.map((meta) => {
     const detail = meta.access === "free" ? FREE_DETAIL[meta.key] : undefined;
     const positions = (() => {
@@ -216,11 +234,13 @@ export function buildFree(m: Matrix, texts?: PositionTexts): SectionOut[] {
           : meta.key === "comfort"
             ? comfortRoleMeta(key)
             : null;
+        const article = first ? undefined : articles?.[key]?.[arcanum];
         return {
           label,
           arcanum,
           href: arcanumHref(arcanum),
           text: first ? `Тот же аркан, что и в позиции «${first}»: толкование выше.` : text,
+          ...(article ? { article } : {}),
           ...(template && roleMeta
             ? {
                 role: {

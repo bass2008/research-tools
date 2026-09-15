@@ -8,6 +8,7 @@ import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import Price from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
+import PositionMap from "@/components/enc/PositionMap";
 import Sections from "@/components/enc/Sections";
 
 import { ARCANA } from "@/lib/arcana";
@@ -15,6 +16,7 @@ import { POSITIONS, arcanumHref, positionByKey, positionHref } from "@/lib/encyc
 import { arcanumInPosition, positionArcanumRows, positionContent } from "@/lib/content";
 import { positionArcanumHref, positionArcanumLabel } from "@/lib/positionArcanum";
 import { calculate } from "@/lib/matrix";
+import { mapPointsFor, mapPointsForSection } from "@/lib/matrixMap";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
 import { sectionByKey } from "@/lib/sections";
@@ -58,6 +60,11 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   const lead = extra.lead;
   const paragraphs = extra.meaning;
   const section = p.kind === "section" ? sectionByKey(p.key) : undefined;
+  // Точка отмечает себя, раздел — все свои точки: «линия любви в матрице где» просит показать
+  // линию целиком, а не одно звено.
+  const spots = p.kind === "section"
+    ? mapPointsForSection(p.key, extra.points.map((x) => x.key))
+    : mapPointsFor([p.key]);
   const crossings = positionArcanumRows()
     .filter((item) => item.position === p.key)
     .sort((a, b) => a.arcanum - b.arcanum);
@@ -106,6 +113,13 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
         <h1>{p.title}</h1>
         <p className="dim prose">{lead}</p>
+
+        <PositionMap
+          highlight={spots}
+          caption={spots.length === 1
+            ? `Где стоит эта точка: ${spots[0]!.label} · ${spots[0]!.symbol}`
+            : `Где стоят точки раздела: ${spots.map((x) => `${x.label} · ${x.symbol}`).join(", ")}`}
+        />
 
         <div className="panel section-gap">
           <h2>Как считается</h2>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import ReportSheet from "@/components/matrix/ReportSheet";
 import { calculate } from "@/lib/matrix";
-import { build } from "@/lib/sections";
+import { build, withPositionArticles } from "@/lib/sections";
 import { getTariffs } from "@/lib/tariffs.server";
 
 import { planLabel, readMatrixUnlocked, type Access, type SavedMatrix } from "./access";
@@ -48,7 +48,7 @@ export async function SavedReport({
   return (
     <ReportSheet
       matrix={matrix}
-      sections={build(matrix, unlocked)}
+      sections={withPositionArticles(matrix, build(matrix, unlocked))}
       planName={planLabel(access, await getTariffs(), unlocked)}
       unlocked={unlocked}
       saved={saved}

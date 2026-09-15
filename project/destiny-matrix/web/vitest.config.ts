@@ -7,6 +7,6 @@ export default defineConfig({
   test: {
     environment: "node",
     // `middleware.ts` Next требует в корне проекта, поэтому его тест лежит рядом с ним.
-    include: ["lib/**/*.test.ts", "app/**/*.test.ts", "*.test.ts"],
+    include: ["lib/**/*.test.ts", "app/**/*.test.ts", "components/**/*.test.tsx", "*.test.ts"],
   },
 });

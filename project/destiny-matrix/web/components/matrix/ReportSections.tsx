@@ -2,6 +2,8 @@
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
 // пропсами и в браузерный чанк не попадают) и клиентский разбор в браузере, где платных
 // разделов нет вовсе.
+import Link from "next/link";
+
 import { arcanumTitle } from "@/lib/arcana";
 import { counted, plural } from "@/lib/plural";
 
@@ -104,6 +106,20 @@ export default function ReportSections({
                         <CharacterRoleParts role={readingRole} />
                       ) : p.text && !s.fullArticle ? (
                         <p className="postext">{p.text}</p>
+                      ) : null}
+                      {/* Соседом карточки, а не внутри: карточка целиком обёрнута в ссылку на
+                          аркан, и вложить в неё вторую нельзя. Оформление — тот же `encref`,
+                          что у ссылок раздела. */}
+                      {p.article ? (
+                        <p className="encref">
+                          <Link
+                            href={printing ? publicHref(p.article.href) : p.article.href}
+                            data-entity-type="position_arcanum"
+                            data-entity-key={p.article.href.slice("/encyclopedia/position/".length)}
+                          >
+                            {p.article.label} →
+                          </Link>
+                        </p>
                       ) : null}
                     </li>
                   );

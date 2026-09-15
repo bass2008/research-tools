@@ -1,4 +1,5 @@
 import { arcanumTitle } from "@/lib/arcana";
+import { mapPoint } from "@/lib/matrixMap";
 import { publicHref } from "@/lib/site";
 import type { Matrix } from "@/lib/matrix";
 
@@ -11,7 +12,15 @@ const RIN = 142;
 
 const CHAKRA_COLORS = ["#c9453a", "#dd7b2a", "#d9ac1e", "#159c69", "#1f9ed6", "#3f5ec9", "#8e5bc4"];
 
-type NodeSpec = { angle: number; value: number; label: string; color: string; big?: boolean };
+type NodeSpec = {
+  angle: number;
+  value: number;
+  label: string;
+  color: string;
+  big?: boolean;
+  /** только у точек второго порядка: они стоят не на общем радиусе своего круга */
+  radius?: number;
+};
 
 function pt(angle: number, radius: number): [number, number] {
   const a = (angle * Math.PI) / 180;
@@ -51,6 +60,35 @@ export default function Octagram({
     { angle: 90, value: m.comfort_south, label: "Вход отношений и хвоста · M", color: "#7d92a1" },
   ];
 
+  // Точки второго порядка — те, что метод считает из внутренних: середины линий любви, денег,
+  // хвоста и таланта плюс чакровые пары аджны и анахаты. Их значения продукт и так показывает
+  // в разделах и в таблице чакр, но на самой карте их не было — человек читал «10 под сердцем»
+  // и не находил на схеме места, о котором речь. Координаты берутся из общей геометрии
+  // (`lib/matrixMap`), чтобы карта здесь и схема в энциклопедии не разъехались.
+  const chakra = (key: string) => m.chakras.find((row) => row.key === key);
+  const derived: NodeSpec[] = ([
+    ["karmic_tail_middle", m.karmic_tail[1]],
+    ["money_love_crossing", m.love[2]],
+    ["love_middle", m.love[1]],
+    ["money_middle", m.money[1]],
+    ["ajna_physics", chakra("ajna")?.physics],
+    ["ajna_energy", m.talent[1]],
+    ["anahata_physics", chakra("anahata")?.physics],
+    ["anahata_energy", chakra("anahata")?.energy],
+  ] as const)
+    .map(([key, value]): NodeSpec | null => {
+      const place = mapPoint(key);
+      if (!place || value === undefined) return null;
+      return {
+        angle: place.angle,
+        radius: place.radius,
+        value,
+        label: `${place.label} · ${place.symbol}`,
+        color: "#7d92a1",
+      };
+    })
+    .filter((spec): spec is NodeSpec => spec !== null);
+
   const ticks = [];
   for (let i = 0; i < 80; i++) {
     const a = 180 + i * 4.5;
@@ -79,14 +117,14 @@ export default function Octagram({
     }
   }
 
-  const node = (spec: NodeSpec, radius: number, size: number, font: number, key: string) => {
-    const [x, y] = pt(spec.angle, radius);
+  const node = (spec: NodeSpec, radius: number, size: number, font: number, key: string, small = false) => {
+    const [x, y] = pt(spec.angle, spec.radius ?? radius);
     const title = `${spec.label}: аркан ${spec.value} — ${arcanumTitle(spec.value)}`;
     const body = (
       <>
         <title>{title}</title>
         <circle cx={fmt(x)} cy={fmt(y)} r={size} fill={spec.color} />
-        <text className="n" x={fmt(x)} y={fmt(y)} fontSize={font}>
+        <text className={small ? "n sm" : "n"} x={fmt(x)} y={fmt(y)} fontSize={font}>
           {spec.value}
         </text>
       </>
@@ -117,7 +155,7 @@ export default function Octagram({
       className="oct"
       viewBox="0 0 620 620"
       role="img"
-      aria-label="Октаграмма матрицы судьбы: восемь внешних позиций, четыре точки комфорта и центр"
+      aria-label="Октаграмма матрицы судьбы: восемь внешних позиций, четыре точки комфорта, центр и восемь точек второго порядка — середины линий любви, денег, кармического хвоста и таланта"
     >
       <circle className="ring" cx={C} cy={C} r={R + 38} />
       <circle className="ring" cx={C} cy={C} r={R + 22} />
@@ -130,11 +168,12 @@ export default function Octagram({
         const [x2, y2] = pt(a + 180, R);
         return <line key={`ax${a}`} className="axis" x1={fmt(x1)} y1={fmt(y1)} x2={fmt(x2)} y2={fmt(y2)} />;
       })}
-      {/* небо — вертикальная ось точек комфорта, земля — горизонтальная */}
-      <text className="lbl" x={C} y={C - RIN - 34}>
+      {/* небо — вертикальная ось точек комфорта, земля — горизонтальная. Подписи «небо» стоят
+          внутри квадрата: снаружи, на радиусе 195, теперь сидят точки P и N. */}
+      <text className="lbl" x={C} y={C - RIN + 30}>
         небо
       </text>
-      <text className="lbl" x={C} y={C + RIN + 36}>
+      <text className="lbl" x={C} y={C + RIN - 30}>
         небо
       </text>
       <text className="lbl" x={C - RIN + 4} y={C - 30}>
@@ -143,6 +182,7 @@ export default function Octagram({
       <text className="lbl" x={C + RIN - 4} y={C - 30}>
         земля
       </text>
+      {derived.map((s, i) => node(s, RIN, 13, 11, `d${i}`, true))}
       {inner.map((s, i) => node(s, RIN, 15, 13, `i${i}`))}
       {outer.map((s, i) => node(s, R, s.big ? 24 : 19, s.big ? 19 : 15.5, `o${i}`))}
       {node(

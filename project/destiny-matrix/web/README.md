@@ -19,7 +19,7 @@ npm run typecheck
 | `lib/sections.ts` | порт `engine/sections.py`: 20 разделов, 2 бесплатных |
 | `lib/__fixtures__/golden.json` | 42 полных golden-вектора; полный parity-снимок содержит 92 526 расчётов |
 | `lib/arcana.ts` | корпус 22 арканов (нумерация матрицы, Шут — 22-й) |
-| `lib/encyclopedia.ts` | состав энциклопедии: 22 аркана + 37 позиций + 231 сочетание + 7 чакр + корень = 298 |
+| `lib/encyclopedia.ts` | состав энциклопедии: 22 аркана + 38 позиций + 231 сочетание + 7 чакр + корень = 299 |
 | `lib/tariffs.ts`, `lib/tariffs.server.ts` | тип и формат цены; server-only загрузчик прайса из базы |
 | `lib/analytics.ts` | цели Метрики; фильтр не пускает в параметры дату рождения |
 | `lib/settings/` | startup-менеджеры публичных и server-only настроек фронта |

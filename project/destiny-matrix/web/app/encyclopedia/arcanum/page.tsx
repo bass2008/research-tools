@@ -53,6 +53,12 @@ export default function ArcanumHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
+      <div className="panel section-gap">
+        <h2>Все 22 аркана</h2>
+        <div className="cap">{encyclopediaSection("arc").hint} · {ARCANA.length}</div>
+        <ArcanaDeck />
+      </div>
+
       <Sections items={hub.sections} />
 
       <div className="section-gap">
@@ -62,13 +68,6 @@ export default function ArcanumHubPage() {
           place="arcanum-hub"
         />
       </div>
-
-      <div className="panel section-gap">
-        <h2>Все 22 аркана</h2>
-        <div className="cap">{encyclopediaSection("arc").hint} · {ARCANA.length}</div>
-        <ArcanaDeck />
-      </div>
-
 
       <Faq items={hub.faq} />
 

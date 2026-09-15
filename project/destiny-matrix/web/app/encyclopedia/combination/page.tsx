@@ -46,16 +46,6 @@ export default function CombinationHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
-      <Sections items={hub.sections} />
-
-      <div className="section-gap">
-        <CalcPromo
-          title="Узнать свой аркан отношений"
-          lead="Карта по дате рождения строится бесплатно. Пара складывается из арканов отношений двоих, поэтому нужны две даты."
-          place="combination-hub"
-        />
-      </div>
-
       <div className="panel section-gap">
         <h2>Все сочетания</h2>
         <div className="cap">
@@ -65,6 +55,15 @@ export default function CombinationHubPage() {
         <CombinationMatrix />
       </div>
 
+      <Sections items={hub.sections} />
+
+      <div className="section-gap">
+        <CalcPromo
+          title="Узнать свой аркан отношений"
+          lead="Карта по дате рождения строится бесплатно. Пара складывается из арканов отношений двоих, поэтому нужны две даты."
+          place="combination-hub"
+        />
+      </div>
 
       <Faq items={hub.faq} />
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import ReportView from "@/components/matrix/ReportView";
-import { freePositionTexts } from "@/lib/sections";
+import { freePositionArticles, freePositionTexts } from "@/lib/sections";
 import { pageMeta } from "@/lib/site";
 
 import { pickMatrix, readAccess, readSavedMatrices } from "../_lib/access";
@@ -43,7 +43,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
             проверяется заново.
           </div>
         ) : null}
-        <ReportView texts={freePositionTexts()} saved={saved} />
+        <ReportView texts={freePositionTexts()} articles={freePositionArticles()} saved={saved} />
       </Sheet>
     );
   }
@@ -55,7 +55,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
     if (wanted) notFound();
     return (
       <Sheet other={OTHER}>
-        <ReportView granted={access.paid} texts={freePositionTexts()} />
+        <ReportView granted={access.paid} texts={freePositionTexts()} articles={freePositionArticles()} />
       </Sheet>
     );
   }

@@ -10,9 +10,10 @@
 from __future__ import annotations
 
 import json
+from dataclasses import fields
 from pathlib import Path
 
-from engine.matrix import CHAKRAS as CHAKRA_ROWS, COLUMNS
+from engine.matrix import CHAKRAS as CHAKRA_ROWS, COLUMNS, Matrix
 from engine.sections import SPEC
 
 from . import seo
@@ -242,8 +243,15 @@ def build_arcana_catalog(items: list[dict]) -> list[dict]:
 
 
 def build_point_catalog() -> list[dict]:
-    """Small client-safe point catalog generated from the canonical point metadata."""
-    return [{"key": point["key"], "report_label": point["report_label"]} for point in POINTS]
+    """Small client-safe point catalog generated from the canonical point metadata.
+
+    Таблица «Все позиции карты» читает матрицу по ключу, поэтому в каталог идут только точки,
+    которые лежат в расчёте отдельным числом. Партнёрская точка R1 живёт внутри линии отношений
+    и своего поля не имеет: страница в энциклопедии у неё есть, строки в таблице — нет.
+    """
+    scalar = {field.name for field in fields(Matrix) if field.default == 0}
+    return [{"key": point["key"], "report_label": point["report_label"]}
+            for point in POINTS if point["key"] in scalar]
 
 
 def write_raw(name: str, payload: dict) -> Path:

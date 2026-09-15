@@ -24,11 +24,13 @@ import ReportSections from "@/components/matrix/ReportSections";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import UnlockCta from "@/components/pay/UnlockCta";
-import { buildFree, type PositionTexts } from "@/lib/publicSpec";
+import { buildFree, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
 import { useSession } from "@/components/account/useSession";
 import { useOwnDates } from "@/components/matrix/CalculationProvider";
 
-export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
+export default function MatrixReport(
+  { texts, articles }: { texts?: PositionTexts; articles?: PositionArticles },
+) {
   const lead = useLead();
   // цену из кода не печатаем: она видна ровно тогда, когда API недоступен и купить нельзя
   const priceKnown = usePriceKnown();
@@ -55,7 +57,7 @@ export default function MatrixReport({ texts }: { texts?: PositionTexts }) {
 
   if (!matrix) return <div id="result" />;
 
-  const sections = buildFree(matrix, texts);
+  const sections = buildFree(matrix, texts, articles);
   const locked = sections.filter((s) => !s.positions.length);
   const anyDate = session.status === "user" && session.unlimited;
   // Право ищем по дате, а не по паре «дата + пол». Пол не меняет в карте ни одного числа

@@ -13,7 +13,8 @@ import { arcanumShort, arcanumTitle } from "@/lib/arcana";
 import { matrixItem, matrixSlugs } from "@/lib/content";
 import { POSITIONS, arcanumHref, chakraHref, positionHref } from "@/lib/encyclopedia";
 import type { Matrix } from "@/lib/matrix";
-import { build } from "@/lib/sections";
+import { build, withPositionArticles } from "@/lib/sections";
+import { POINT_KEYS } from "@/lib/publicSpec";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
@@ -46,7 +47,11 @@ const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const DATES_SHOWN = 12;
 
 
-const POINT_POSITIONS = POSITIONS.filter((p) => p.kind === "point");
+// Только точки, которые лежат в расчёте отдельным числом: таблица читает матрицу по ключу.
+// Партнёрская точка R1 живёт внутри линии отношений, её строка тут появиться не может —
+// зато сама линия отношений печатается ниже целиком.
+const SCALAR_POINTS = new Set<string>(POINT_KEYS);
+const POINT_POSITIONS = POSITIONS.filter((p) => p.kind === "point" && SCALAR_POINTS.has(p.key));
 
 // Линии карты: третий аркан в каждой — итог, поэтому он выделен золотым.
 const LINES: Array<[string, string, (m: Matrix) => number[]]> = [
@@ -99,7 +104,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
   const { item, key, m, dates, title, description } = data;
   const slug = item.slug;
 
-  const sections = build(m, false);
+  const sections = withPositionArticles(m, build(m, false));
   const free = sections.filter((s) => s.access === "free");
   const paid = sections.filter((s) => s.access === "paid");
   const monthName = MONTHS_NOM[key.month - 1];
@@ -227,6 +232,16 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
                   <span className="lb">
                     <b>{p.label}</b> · <Link href={p.href}>{arcanumTitle(p.arcanum)}</Link> —{" "}
                     {p.text}
+                    {/* Ссылка на статью про это число именно в этой точке: её считает
+                        `withPositionArticles`, и без вывода она пропадала зря. */}
+                    {p.article ? (
+                      <>
+                        {" "}
+                        <Link href={p.article.href} data-entity-type="position_arcanum">
+                          {p.article.label} →
+                        </Link>
+                      </>
+                    ) : null}
                   </span>
                 </li>
               ))}

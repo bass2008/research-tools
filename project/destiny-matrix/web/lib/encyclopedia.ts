@@ -30,7 +30,7 @@ function unique<T>(rows: T[], key: (row: T) => string, expected: number, name: s
 export const POSITIONS: PositionPage[] = unique(
   positions.items.map((row) => ({ key: row.key, kind: row.kind as PositionPage["kind"], title: row.title })),
   (row) => row.key,
-  37,
+  38,
   "positions.json",
 );
 

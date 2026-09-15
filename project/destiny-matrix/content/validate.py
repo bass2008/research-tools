@@ -159,7 +159,7 @@ def check_combinations(rep: Report, items: list[dict], arcana: list[dict],
 
 
 def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]) -> None:
-    rep.check(len(items) == 37, f"позиций {len(items)}, а нужно 37 (20 разделов + 17 точек)")
+    rep.check(len(items) == 38, f"позиций {len(items)}, а нужно 38 (20 разделов + 18 точек)")
     by_key = {p["key"]: p for p in items}
     rep.check(len(by_key) == len(items), "дубли ключей в positions.json")
     rep.check(set(by_key) == set(SECTION_KEYS) | set(POINT_KEYS),
@@ -336,7 +336,7 @@ def check_links(rep: Report, data: dict[str, dict]) -> None:
     pages |= {f"/encyclopedia/position/{p['key']}" for p in data["positions.json"]["items"]}
     pages |= {f"/encyclopedia/combination/{c['key']}" for c in data["combinations.json"]["items"]}
     pages |= {f"/encyclopedia/chakra/{c['key']}" for c in data["chakras.json"]["items"]}
-    rep.check(len(pages) == 298, f"страниц энциклопедии {len(pages)}, по контракту 298")
+    rep.check(len(pages) == 299, f"страниц энциклопедии {len(pages)}, по контракту 299")
 
     out_degree: Counter[str] = Counter()
     in_degree: Counter[str] = Counter()

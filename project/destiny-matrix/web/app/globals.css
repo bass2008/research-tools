@@ -291,8 +291,30 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .oct .axis { stroke: #cbd6dd; stroke-width: 1; }
 .oct text { font-family: var(--sans); text-anchor: middle; dominant-baseline: central; }
 .oct .n { font-weight: 700; fill: #fff; }
+/* точки второго порядка (N, O, P, S, T, R, R1, R2) — кружок меньше, и число в нём тоже:
+   общее правило .n в медиазапросах ниже раздувает кегль и вытолкнуло бы цифры за круг */
+.oct .n.sm { font-size: 11px; }
 .oct .age { fill: #9aa9b4; font-size: 8.4px; font-weight: 700; }
 .oct .lbl { fill: #8d9ca7; font-size: 8.6px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; }
+
+/* Схема карты в энциклопедии: та же октаграмма, но без чисел — отмечено только место. Отвечает
+   на запросы вида «где находится визитка в матрице судьбы», которые текстом «внешняя точка A»
+   не закрываются. */
+.posmap { margin: 0; }
+.posmap-svg { max-width: 520px; margin: 0 auto; }
+.posmap figcaption {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13.4px;
+  line-height: 1.5;
+  color: var(--dim);
+}
+.posmap .spot circle { fill: #ced9e0; }
+.posmap .spot text { fill: #60707c; font-weight: 700; }
+.posmap .spot.on circle { fill: var(--gold); }
+.posmap .spot.on text { fill: #fff; }
+.posmap .spot .halo { fill: none; stroke: var(--gold); stroke-width: 2; opacity: 0.45; }
+
 
 /* чакры */
 .chak { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 13.2px; }
@@ -490,6 +512,12 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   line-height: 1.5;
   color: var(--dim);
 }
+/* В карточке раздела меру строки задаёт сама колонка сетки, а не общий потолок 46ch: он оставлял
+   текст узкой полосой посередине, а ссылка под ним шла во всю ширину карточки — на широкой
+   колонке они расходились по левому краю на 127 px. Ссылке дана та же мера, иначе они разъедутся
+   снова. */
+.poslist .character-role-parts,
+.poslist .encref { max-width: 90%; margin-inline: auto; }
 .character-role-parts p { margin: 0; }
 .character-role-parts strong { color: var(--text); }
 .character-role .character-role-parts { margin-top: 0; font-size: 14px; }
@@ -1614,6 +1642,7 @@ table.mx td.self { background: var(--card2); }
   .oct .lbl { font-size: 16px; }
   .oct .age { font-size: 14px; }
   .oct .n { font-size: 15px; }
+  .oct .n.sm { font-size: 13px; }
 }
 
 /* Обёртки композиций — флекс-элементы кадра: при нехватке высоты они сжимались, а карты внутри
@@ -1625,6 +1654,7 @@ table.mx td.self { background: var(--card2); }
   .oct .lbl { font-size: 18px; }
   .oct .age { font-size: 16px; }
   .oct .n { font-size: 18px; }
+  .oct .n.sm { font-size: 15px; }
   /* На 320 px «Купить полный разбор — 250 ₽» ломалось так, что тире висело отдельной
      строкой, а цена уезжала вторым столбцом: кнопка держит строку целиком. */
   .btnrow .btn { padding-left: 14px; padding-right: 14px; font-size: 13.6px; }

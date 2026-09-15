@@ -18,13 +18,11 @@ import {
   positionByKey,
   karmicTailHref,
   positionHref,
-  yearHref,
 } from "@/lib/encyclopedia";
 import {
   arcanumContent,
   combinationContent,
   karmicTails,
-  yearArcanum,
 } from "@/lib/content";
 import { pageMeta } from "@/lib/site";
 import { sentence } from "@/lib/text";
@@ -80,7 +78,6 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
   const prev = n === 1 ? 22 : n - 1;
   const next = n === 22 ? 1 : n + 1;
 
-  const year = yearArcanum(n);
   // обратная ссылка на хвосты: аркан — самая посещаемая страница справочника, и без неё
   // разобранные тройки висели бы только на своём хабе
   const crossings = registryItems().filter((item) => item.arcanum === n);
@@ -113,7 +110,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
     <>
       <div className="cap">
         Один и тот же аркан в разных позициях говорит о разном.{" "}
-        {/* 17 точек октаграммы разбираются отдельным разделом: со страницы аркана к ним не было хода */}
+        {/* 18 точек карты разбираются отдельным разделом: со страницы аркана к ним не было хода */}
         <Link href={encyclopediaSectionHref("pts")}>Все позиции карты</Link>
       </div>
       <dl className="kv">
@@ -154,19 +151,12 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
     </>
   );
 
-  const yearTab = (
+  // Вкладки «На год» здесь нет намеренно. Она пересказывала первый абзац годовой статьи —
+  // совпадение 47–80% шестисловных шинглов, — и по запросу «N аркан на год» Яндекс показывал эту
+  // страницу вместо самой статьи (в Google, где корпус тот же, годовые стоят на 10–18 месте, а
+  // арканы на 40–50). Год — отдельная тема; ссылка на неё живёт в блоке «Где ещё разбирается».
+  const elsewhereTab = (
     <>
-      {year ? (
-        <>
-          <div className="cap">Тот же аркан в рамке персонального года</div>
-          <p>{year.short}</p>
-          <p className="small">
-            <Link href={yearHref(n)}>{year.title}</Link>
-          </p>
-        </>
-      ) : (
-        <p className="dim">Статья про этот аркан в рамке года ещё не написана.</p>
-      )}
       {/* Тот же аркан на конкретных позициях: страница аркана отвечает «какая это энергия»,
           пересечение — «что она делает именно здесь». Спрашивают чаще второе. */}
       {crossings.length ? (
@@ -278,7 +268,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
           { key: "meaning", title: "Значение", body: meaning },
           { key: "positions", title: encyclopediaSection("sec").title, body: positions },
           { key: "combos", title: "Сочетания с другими арканами", body: combos },
-          { key: "year", title: "На год", body: yearTab },
+          { key: "where", title: "Позиции и хвосты", body: elsewhereTab },
         ]}
       />
 
@@ -286,8 +276,9 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
         path={arcanumHref(n)}
         refs={[]}
         // блок хвостов на этой же странице уже вывел свои тройки: без этого один и тот же
-        // хвост стоял ссылкой дважды
-        skip={[...(year ? [yearHref(n)] : []), ...tails.map((t) => karmicTailHref(t.key))]}
+        // хвост стоял ссылкой дважды. Годовая статья, наоборот, показывается именно здесь —
+        // своей вкладки у неё больше нет.
+        skip={tails.map((t) => karmicTailHref(t.key))}
         title="Где ещё разбирается этот аркан"
         hint="Статьи, которые ссылаются на эту страницу"
       />

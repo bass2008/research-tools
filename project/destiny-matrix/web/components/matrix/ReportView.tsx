@@ -17,7 +17,7 @@ import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import { useSession } from "@/components/account/useSession";
 import UnlockCta from "@/components/pay/UnlockCta";
-import { buildFree, type PositionTexts } from "@/lib/publicSpec";
+import { buildFree, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
 import type { SavedMatrix } from "@/app/_lib/access";
 
 /**
@@ -30,10 +30,12 @@ import type { SavedMatrix } from "@/app/_lib/access";
 export default function ReportView({
   granted = false,
   texts,
+  articles,
   saved = [],
 }: {
   granted?: boolean;
   texts?: PositionTexts;
+  articles?: PositionArticles;
   saved?: SavedMatrix[];
 }) {
   const lead = useLead();
@@ -87,7 +89,7 @@ export default function ReportView({
     );
   }
 
-  const sections = buildFree(matrix, texts);
+  const sections = buildFree(matrix, texts, articles);
   const locked = sections.filter((s) => !s.positions.length);
   const currentSaved = saved.find((row) => row.birth === matrix.birth && row.sex === matrix.sex);
 

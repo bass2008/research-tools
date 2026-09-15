@@ -52,6 +52,12 @@ export default function ChakraHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
+      <div className="panel section-gap">
+        <h2>Семь уровней</h2>
+        <div className="cap">{encyclopediaSection("chk").hint} · {CHAKRA_PAGES.length}</div>
+        <ChakraList />
+      </div>
+
       <Sections items={hub.sections} />
 
       <div className="section-gap">
@@ -61,13 +67,6 @@ export default function ChakraHubPage() {
           place="chakra-hub"
         />
       </div>
-
-      <div className="panel section-gap">
-        <h2>Семь уровней</h2>
-        <div className="cap">{encyclopediaSection("chk").hint} · {CHAKRA_PAGES.length}</div>
-        <ChakraList />
-      </div>
-
 
       <Faq items={hub.faq} />
 

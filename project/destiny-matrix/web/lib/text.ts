@@ -21,7 +21,8 @@ export function sentence(text: string): string {
   const value = text.trim();
   if (!value) return value;
   const head = value[0].toUpperCase() + value.slice(1);
-  return /[.!?…]$/.test(head) ? head : `${head}.`;
+  // Закрывающая кавычка после знака — тоже конец фразы, иначе «…послушать?» получает вторую точку.
+  return /[.!?…][»"”']?$/.test(head) ? head : `${head}.`;
 }
 
 /** Кубик роли бывает двух видов: придаточное к «человек» («переводит спор в задачу») и готовое

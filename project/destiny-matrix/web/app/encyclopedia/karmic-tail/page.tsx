@@ -70,16 +70,6 @@ export default function KarmicTailHubPage() {
         <h1>{hub.title}</h1>
         <p className="dim prose">{hub.short}</p>
 
-        <Sections items={hub.sections} />
-
-        <div className="section-gap">
-          <CalcPromo
-            title="Построить свою карту"
-            lead="Карта по дате рождения строится бесплатно и без регистрации. Свою тройку с толкованием открывает полный разбор."
-            place="karmic-tail-hub"
-          />
-        </div>
-
         {items.length ? (
           <div className="panel section-gap">
             <h2>Разобранные тройки</h2>
@@ -101,6 +91,16 @@ export default function KarmicTailHubPage() {
             </div>
           </div>
         ) : null}
+
+        <Sections items={hub.sections} />
+
+        <div className="section-gap">
+          <CalcPromo
+            title="Построить свою карту"
+            lead="Карта по дате рождения строится бесплатно и без регистрации. Свою тройку с толкованием открывает полный разбор."
+            place="karmic-tail-hub"
+          />
+        </div>
 
         <Faq items={hub.faq} />
 

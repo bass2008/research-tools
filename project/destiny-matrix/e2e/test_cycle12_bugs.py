@@ -22,6 +22,12 @@ def _position_text(page: Page, label: str) -> str:
     li = page.locator(".poslist li", has_text=label).first
     li.wait_for()
     body = _norm(li.inner_text())
+    # Ссылка на статью про этот аркан в этой точке живёт соседом карточки внутри той же строки.
+    # Толкованием она не является, а на странице позиции её нет — иначе сверка ниже ловила бы
+    # навигацию, а не текст.
+    ref = li.locator("[data-entity-type='position_arcanum']")
+    if ref.count():
+        body = _norm(body.replace(_norm(ref.first.inner_text()), ""))
     assert " — " in body, f"строка «{label}» без толкования: «{body}»"
     return body.split(" — ", 1)[1]
 

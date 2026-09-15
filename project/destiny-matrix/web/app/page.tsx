@@ -11,7 +11,7 @@ import MatrixForm from "@/components/matrix/MatrixForm";
 import MatrixReport from "@/components/matrix/MatrixReport";
 import TariffsProvider from "@/components/pay/TariffsProvider";
 import { LANDING_SLIDES } from "@/lib/heroSlides";
-import { freePositionTexts } from "@/lib/sections";
+import { freePositionArticles, freePositionTexts } from "@/lib/sections";
 import { SITE, pageMeta } from "@/lib/site";
 import { getTariffs } from "@/lib/tariffs.server";
 import { lead, money, periodLabel, type Tariff } from "@/lib/tariffs";
@@ -101,7 +101,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
         slides={LANDING_SLIDES}
         place="landing"
         fullReport={paidResult !== null}
-        below={paidResult ?? <MatrixReport texts={freePositionTexts()} />}
+        below={paidResult ?? <MatrixReport texts={freePositionTexts()} articles={freePositionArticles()} />}
       >
         <MatrixForm />
       </CalcHero>

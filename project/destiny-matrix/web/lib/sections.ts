@@ -14,20 +14,28 @@ import {
 import { PERSONAL_SECTION_KEYS } from "./sectionReadingShared";
 import {
   CATALOG,
+  FREE_POSITION_KEYS,
   arcanumHref,
   type Access,
+  type PositionArticle,
+  type PositionArticles,
   type PositionOut,
   type PositionTextValue,
   type PositionTexts,
   type SectionOut,
 } from "./publicSpec";
 import {
+  positionArcanumHref,
+  positionArcanumLabel,
+  registryItem,
+} from "./positionArcanum";
+import {
   positionKeys,
   resolveSectionPositions,
   type SectionPositionDefinition,
 } from "./sectionResolver";
 
-export type { Access, PositionOut, PositionTexts, SectionOut };
+export type { Access, PositionArticle, PositionArticles, PositionOut, PositionTexts, SectionOut };
 export { arcanumHref };
 
 export interface SectionSpec {
@@ -130,6 +138,60 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
     }
     return out;
   });
+}
+
+/** Ссылки «карточка → статья» для готового разбора.
+ *
+ *  Отдельным проходом, а не внутри `build`: её результат сверяется с Python-движком дословно
+ *  (`spec/golden.json`), а реестр пересечений — артефакт сайта, движку метода он неизвестен.
+ *  Повтор аркана внутри раздела уже отослан к первой карточке, второй ссылки на ту же статью
+ *  там быть не должно. */
+export function withPositionArticles(matrix: Matrix, sections: SectionOut[]): SectionOut[] {
+  return sections.map((section) => {
+    const spec = SPEC.find((row) => row.key === section.key);
+    if (!spec || !section.positions.length) return section;
+    const resolved = spec.positions(matrix);
+    const seen = new Set<string>();
+    return {
+      ...section,
+      positions: section.positions.map((position, index) => {
+        const key = resolved[index]?.[2];
+        if (!key) return position;
+        const mark = `${key}:${position.arcanum}`;
+        if (seen.has(mark)) return position;
+        seen.add(mark);
+        const article = positionArticle(key, position.arcanum);
+        return article ? { ...position, article } : position;
+      }),
+    };
+  });
+}
+
+/** Статья про аркан именно в этой точке — только если она есть в реестре пересечений.
+ *
+ *  Реестр держит не все пары: часть точек метода вообще не разобрана отдельными страницами, и
+ *  придумывать адрес под карточку нельзя — он приведёт в 404. */
+function positionArticle(positionKey: string, arcanum: number): PositionArticle | undefined {
+  const item = registryItem(positionKey, arcanum);
+  if (!item) return undefined;
+  return {
+    href: positionArcanumHref(positionKey, arcanum),
+    label: positionArcanumLabel(item),
+  };
+}
+
+/** Ссылки «позиция → статья» бесплатных разделов для браузера: реестр читает корпус с диска. */
+export function freePositionArticles(): PositionArticles {
+  const out: PositionArticles = {};
+  for (const key of FREE_POSITION_KEYS) {
+    const byArcanum: Record<number, PositionArticle> = {};
+    for (let n = 1; n <= 22; n++) {
+      const article = positionArticle(key, n);
+      if (article) byArcanum[n] = article;
+    }
+    if (Object.keys(byArcanum).length) out[key] = byArcanum;
+  }
+  return out;
 }
 
 /** Толкования бесплатных разделов для браузера: платные сюда не попадают намеренно. */

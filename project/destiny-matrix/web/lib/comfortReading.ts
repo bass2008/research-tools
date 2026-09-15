@@ -1,6 +1,6 @@
 import type { Matrix } from "./matrix";
 import type { ReadingConclusion, ReadingRole } from "./readingTypes";
-import { withRepeat } from "./text";
+import { cubeClause, withRepeat } from "./text";
 
 export type ComfortPositionKey = "center" | "comfort_south" | "comfort_north";
 
@@ -60,10 +60,10 @@ export function buildComfortConclusion(items: ReadingRole[]): ReadingConclusion 
       repeatedSummary(items),
     ),
     strength:
-      `Опора тройки появляется, когда в базовом состоянии человек ${first.strength}, ` +
+      `Опора тройки появляется, когда в базовом состоянии ${cubeClause(first.strength)}, ` +
       `в первой реакции ${middle.strength}, а для возвращения к себе ${last.strength}.`,
     tension:
-      `Цикл уводит от центра, когда человек ${first.risk}; затем автоматически ${middle.risk}; ` +
+      `Цикл уводит от центра, когда ${cubeClause(first.risk)}; затем автоматически ${middle.risk}; ` +
       `а попытка восстановиться закрепляет перекос, если он ${last.risk}. Эти признаки полезно проверять по одной реальной ситуации, а не принимать за постоянные качества.`,
     practice:
       `При следующей сильной реакции сделайте короткую паузу и назовите три вещи: что было моей опорой до события, что я сделал автоматически и какое действие позиции K вернёт управление. ` +

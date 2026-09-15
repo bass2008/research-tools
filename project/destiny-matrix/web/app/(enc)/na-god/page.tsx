@@ -11,6 +11,9 @@ import Price from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
 
+import { counted } from "@/lib/plural";
+import { buildYear, calendarYear, decadeExample } from "@/lib/yearExample";
+
 import { arcanumTitle } from "@/lib/arcana";
 import { categoryHub, yearArcanum, yearKeys } from "@/lib/content";
 import { YEAR_HUB, arcanumHref, yearHref } from "@/lib/encyclopedia";
@@ -33,6 +36,10 @@ export const metadata: Metadata = pageMeta({
 
 export default function YearHubPage() {
   const hub = HUB!;
+  // Год берётся на сборке, а не от даты публикации корпуса: иначе с первого января хаб утверждал
+  // бы прошлогодний аркан, пока кто-нибудь не сдвинет `CONTENT_PUBLISHED`.
+  const math = calendarYear(buildYear());
+  const example = decadeExample(math.arcanum);
   const keys = yearKeys();
   const arcana = keys
     .map((key) => ({ key, n: /^\d{1,2}$/.test(key) ? Number(key) : null }))
@@ -73,6 +80,38 @@ export default function YearHubPage() {
         <p className="dim prose">{hub.short}</p>
 
         <Sections items={hub.sections} />
+
+        {/* Расчёт живёт на хабе, а не на 23 страницах арканов: одинаковый блок на каждой поднимал
+            их похожесть между собой с 10,9 до 21,5 процента, а это лучший по различимости раздел
+            сайта и единственный с полной индексацией. Здесь же он к месту — на сам хаб идёт
+            отдельный спрос «матрица судьбы рассчитать на год», 905 показов в месяц. */}
+        <div className="panel section-gap" id="raschet">
+          <h2>Как посчитать свой аркан года</h2>
+          <div className="cap">Два разных числа, и их часто путают</div>
+          <p>
+            <b>Аркан календарного года</b> один для всех: сложите цифры самого года и сверните
+            сумму к числу от 1 до 22. Для {math.year} года это {math.digits} = {math.sum}
+            {math.sum === math.arcanum ? "" : `, то есть ${math.arcanum}`} — год проходит под
+            арканом {math.arcanum}, {arcanumTitle(math.arcanum)}.
+          </p>
+          <p>
+            <b>Личный аркан десятилетия</b> считается из вашей карты и у каждого свой. Внешний круг
+            делится на восемь секторов по десять лет, и каждый идёт под своей точкой: портрет
+            личности, затем духовная мужская линия рода, духовная задача и дальше по кругу.
+            {example ? (
+              <>
+                {" "}Человек, родившийся {example.birth}, сейчас в{" "}
+                {counted(example.age, "год", "года", "лет")} проживает сектор {example.from}–
+                {example.to} лет: у него там стоит {example.label}.
+              </>
+            ) : null}
+          </p>
+          <p className="small" style={{ marginBottom: 0 }}>
+            Свой сектор видно в расчёте — возрастная шкала идёт по кругу карты по часовой стрелке.
+            Календарный аркан и личный совпадают редко, и путать их не стоит: первый описывает год
+            для всех, второй — только ваше десятилетие.
+          </p>
+        </div>
 
         <div className="section-gap">
           <CalcPromo

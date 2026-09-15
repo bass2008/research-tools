@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import ReportSheet from "@/components/matrix/ReportSheet";
 import { birthLabel, calculate } from "@/lib/matrix";
-import { build } from "@/lib/sections";
+import { build, withPositionArticles } from "@/lib/sections";
 import { pageMeta } from "@/lib/site";
 
 import { readPrintPage } from "../../_lib/access";
@@ -50,7 +50,7 @@ export default async function PrintReportPage({ searchParams }: { searchParams: 
       <div className="wrap">
         <ReportSheet
           matrix={matrix}
-          sections={build(matrix, page.unlocked)}
+          sections={withPositionArticles(matrix, build(matrix, page.unlocked))}
           planName={page.plan}
           unlocked={page.unlocked}
           saved={[]}

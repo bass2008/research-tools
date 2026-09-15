@@ -243,7 +243,7 @@ const HUBS = articles("hubs.json");
 
 for (const [name, actual, expected] of [
   ["arcana.json", ARCANA_JSON.size, 22],
-  ["positions.json", POSITIONS_JSON.size, 37],
+  ["positions.json", POSITIONS_JSON.size, 38],
   ["chakras.json", CHAKRAS_JSON.size, 7],
   ["combinations.json", COMBINATIONS_JSON.size, 231],
   ["karmic-tails.json", KARMIC_TAILS.size, 26],
@@ -361,7 +361,7 @@ export function arcanumContent(n: number): ArcanumContent | null {
     !keywords.every(safe) ||
     !meaning ||
     !inPositions ||
-    Object.keys(inPositions).length !== 37 ||
+    Object.keys(inPositions).length !== 38 ||
     plus.length < 3 ||
     !plus.every(safe) ||
     minus.length < 3 ||
@@ -412,22 +412,27 @@ export interface PositionArcanumRow {
   position: string;
   arcanum: number;
   frequency: number;
-  primaryQuery: string;
+  /** Головной запрос есть только у записи, которую видит поиск: без спроса заявлять его нельзя. */
+  primaryQuery: string | null;
   wording: string;
   wordings: Record<string, number>;
   tails: string[];
+  publication: { index: boolean; follow: boolean };
 }
 
 // Реестр страниц «аркан N в позиции X»: его строит tools/seo/build-position-arcanum.py из
-// оплаченного Вордстата. Адрес появляется только против записи реестра — плоская генерация
-// 22 × 37 адресов была бы тем самым тонким корпусом, который уже дал 76 страниц хвостов на
-// один показ. `readItems` сверяет `count`, поэтому обрезанный файл упадёт на загрузке.
+// оплаченного Вордстата и достижимых значений метода. Какие адреса бывают, решает метод; какие
+// из них видит поиск — спрос. Плоская генерация 22 × 38 адресов была бы тем самым тонким
+// корпусом, который уже дал 76 страниц хвостов на один показ. `readItems` сверяет `count`,
+// поэтому обрезанный файл упадёт на загрузке.
 const POSITION_ARCANUM: PositionArcanumRow[] = readItems("position-arcanum.json").map((raw) => {
   const position = typeof raw.position === "string" ? raw.position : "";
   const arcanum = typeof raw.arcanum === "number" ? raw.arcanum : NaN;
   const wording = typeof raw.wording === "string" ? raw.wording : "";
-  const query = typeof raw.primary_query === "string" ? raw.primary_query : "";
-  if (!position || !Number.isInteger(arcanum) || !wording || !query) {
+  const query = typeof raw.primary_query === "string" ? raw.primary_query : null;
+  const publication = (raw.publication ?? {}) as Bag;
+  const index = typeof publication.index === "boolean" ? publication.index : true;
+  if (!position || !Number.isInteger(arcanum) || !wording || (index && !query)) {
     throw new Error(`[content] негодная запись position-arcanum: ${JSON.stringify(raw)}`);
   }
   return {
@@ -438,8 +443,17 @@ const POSITION_ARCANUM: PositionArcanumRow[] = readItems("position-arcanum.json"
     wording,
     wordings: (raw.wordings ?? {}) as Record<string, number>,
     tails: numbersOrStrings(raw.tails),
+    publication: {
+      index,
+      follow: typeof publication.follow === "boolean" ? publication.follow : true,
+    },
   };
 });
+
+/** Пересечения, которые видит поиск: карта сайта строится по ним, а не по всему реестру. */
+export function indexedPositionArcanumRows(): PositionArcanumRow[] {
+  return POSITION_ARCANUM.filter((row) => row.publication.index);
+}
 
 function numbersOrStrings(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((x): x is string => typeof x === "string") : [];

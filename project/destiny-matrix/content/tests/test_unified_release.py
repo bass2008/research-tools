@@ -145,17 +145,37 @@ def test_position_arcanum_registry_matches_the_public_url_map():
              if row["entity"].startswith("position_arcanum:")}
     assert cards == {f"position_arcanum:{i['position']}/{i['arcanum']}" for i in registry["items"]}
 
+    # Ниже порога запись живёт, но только вне индекса: какие пересечения бывают, решает метод,
+    # какие из них видит поиск — спрос.
     below = [i for i in registry["items"] if i["frequency"] < registry["threshold"]]
-    assert below == [], below
+    assert all(not i["publication"]["index"] for i in below), below
+    assert all(i["publication"]["index"] for i in registry["items"] if i not in below)
+    assert all(i["publication"]["follow"] for i in registry["items"])
 
 
 def test_position_arcanum_primary_queries_are_unique():
     """Два адреса не могут целиться в один головной запрос: поиск выберет между ними сам и
-    обычно занизит оба."""
+    обычно занизит оба. У страницы вне индекса головного запроса нет вовсе — заявить его
+    значило бы увести выдачу у той страницы, которая по нему и стоит."""
     registry = load(WEB / "position-arcanum.json")["items"]
-    queries = [i["primary_query"].strip().lower() for i in registry]
+    assert all(i["primary_query"] is None for i in registry if not i["publication"]["index"])
+    queries = [i["primary_query"].strip().lower() for i in registry if i["publication"]["index"]]
     duplicates = {q for q in queries if queries.count(q) > 1}
     assert duplicates == set(), sorted(duplicates)
+
+
+def test_position_arcanum_pages_exist_only_for_arcana_the_method_produces():
+    """Страница «аркан N в позиции X» обязана быть про то, что бывает. Девять статей «под
+    сердцем» описывали значения, которых в точке M не бывает ни при какой дате рождения."""
+    method = load(PROJECT / "spec" / "method.json")
+    reachable = {key: set(values) for key, values in method["reachable_arcana"].items()}
+    by_section: dict[str, set[int]] = {}
+    for point in load(PROJECT / "content" / "data" / "points.json"):
+        for section in point["sections"]:
+            by_section.setdefault(section, set()).update(reachable[point["key"]])
+    for item in load(WEB / "position-arcanum.json")["items"]:
+        domain = reachable.get(item["position"]) or by_section[item["position"]]
+        assert item["arcanum"] in domain, (item["position"], item["arcanum"])
 
 
 def test_tail_crossings_exist_in_the_method():

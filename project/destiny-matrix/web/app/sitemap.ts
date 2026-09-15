@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { ARCANA } from "@/lib/arcana";
 import { hubKeys, indexedKarmicTailKeys, yearKeys } from "@/lib/content";
-import { positionArcanumHref, registryItems } from "@/lib/positionArcanum";
+import { indexedRegistryItems, positionArcanumHref } from "@/lib/positionArcanum";
 import {
   ARCANUM_HUB,
   CHAKRA_HUB,
@@ -60,8 +60,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...POSITIONS.map((p) => ({ url: abs(positionHref(p.key)), priority: 0.7 })),
     // Пересечения «аркан N в позиции X»: адрес совпадает с формой запроса, и это единственная
     // форма, которая на этом сайте берёт позиции — раздел сочетаний стоит на медиане 5, а
-    // каталоги позиций на 33–42. Набор задан реестром спроса, а не перебором 22 × 37.
-    ...registryItems().map((item) => ({
+    // каталоги позиций на 33–42. В карту идут только записи со спросом: остальные существуют
+    // ради продукта и закрыты noindex.
+    ...indexedRegistryItems().map((item) => ({
       url: abs(positionArcanumHref(item.position, item.arcanum)),
      
       priority: 0.75,

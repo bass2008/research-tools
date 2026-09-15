@@ -36572,144 +36572,144 @@
     ]
   },
   {
-    "birth": "2026-09-09",
+    "birth": "2026-09-15",
     "sex": "f",
     "reason": "current_date_boundary",
     "contract": "spec/method.json",
     "review": "engineering_cross_check_pending_human_signoff",
     "matrix": {
-      "birth": "2026-09-09",
+      "birth": "2026-09-15",
       "sex": "f",
-      "day": 9,
+      "day": 15,
       "month": 9,
       "year": 10,
-      "mission": 10,
-      "center": 11,
-      "father_line": 18,
+      "mission": 7,
+      "center": 5,
+      "father_line": 6,
       "mother_line": 19,
-      "descendants": 20,
-      "inheritance": 19,
+      "descendants": 17,
+      "inheritance": 22,
       "karmic_tail": [
-        21,
-        4,
-        10
+        12,
+        19,
+        7
       ],
       "comfort_west": 20,
-      "comfort_north": 20,
-      "comfort_east": 21,
-      "comfort_south": 21,
+      "comfort_north": 14,
+      "comfort_east": 15,
+      "comfort_south": 12,
       "sky": [
         9,
-        10,
-        19
+        7,
+        16
       ],
       "ground": [
-        9,
+        15,
         10,
-        19
+        7
       ],
       "social_male": [
-        18,
-        20,
-        11
+        6,
+        17,
+        5
       ],
       "social_female": [
         19,
-        19,
-        11
+        22,
+        5
       ],
-      "harmony": 6,
-      "planetary": 10,
+      "harmony": 15,
+      "planetary": 7,
       "money": [
-        21,
-        9,
-        6
+        15,
+        6,
+        9
       ],
       "love": [
+        12,
         21,
-        9,
-        6
+        9
       ],
       "talent": [
         9,
-        11,
-        20
+        5,
+        14
       ],
-      "purpose_personal": 11,
-      "purpose_social": 22,
+      "purpose_personal": 5,
+      "purpose_social": 10,
       "chakras": [
         {
           "key": "sahasrara",
           "title": "Сахасрара",
           "hint": "связь с большим замыслом",
-          "physics": 9,
+          "physics": 15,
           "energy": 9,
-          "emotions": 18
+          "emotions": 6
         },
         {
           "key": "ajna",
           "title": "Аджна",
           "hint": "видение и интуиция",
-          "physics": 11,
-          "energy": 11,
-          "emotions": 22
+          "physics": 8,
+          "energy": 5,
+          "emotions": 13
         },
         {
           "key": "vishuddha",
           "title": "Вишудха",
           "hint": "слово, честность, судьба",
           "physics": 20,
-          "energy": 20,
-          "emotions": 4
+          "energy": 14,
+          "emotions": 7
         },
         {
           "key": "anahata",
           "title": "Анахата",
           "hint": "любовь и отношения",
-          "physics": 4,
-          "energy": 4,
+          "physics": 7,
+          "energy": 19,
           "emotions": 8
         },
         {
           "key": "manipura",
           "title": "Манипура",
           "hint": "статус, воля, деньги",
-          "physics": 11,
-          "energy": 11,
-          "emotions": 22
+          "physics": 5,
+          "energy": 5,
+          "emotions": 10
         },
         {
           "key": "svadhisthana",
           "title": "Свадхистана",
           "hint": "радость, дети, творчество",
-          "physics": 21,
-          "energy": 21,
-          "emotions": 6
+          "physics": 15,
+          "energy": 12,
+          "emotions": 9
         },
         {
           "key": "muladhara",
           "title": "Муладхара",
           "hint": "тело, опора, материя",
           "physics": 10,
-          "energy": 10,
-          "emotions": 20
+          "energy": 7,
+          "emotions": 17
         }
       ],
       "chakra_totals": {
-        "physics": 14,
-        "energy": 14,
-        "emotions": 1
+        "physics": 8,
+        "energy": 8,
+        "emotions": 7
       },
       "age_scale": [
         {
           "from": 0,
           "to": 10,
-          "arcanum": 9
+          "arcanum": 15
         },
         {
           "from": 10,
           "to": 20,
-          "arcanum": 18
+          "arcanum": 6
         },
         {
           "from": 20,
@@ -36729,17 +36729,17 @@
         {
           "from": 50,
           "to": 60,
-          "arcanum": 20
+          "arcanum": 17
         },
         {
           "from": 60,
           "to": 70,
-          "arcanum": 10
+          "arcanum": 7
         },
         {
           "from": 70,
           "to": 80,
-          "arcanum": 19
+          "arcanum": 22
         }
       ]
     },
@@ -36752,8 +36752,8 @@
         "positions": [
           {
             "label": "Портрет личности",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Духовная задача",
@@ -36775,18 +36775,18 @@
         "positions": [
           {
             "label": "Центр карты",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Вход линии отношений и хвоста",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
             "label": "Внутренняя точка таланта",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 14,
+            "href": "/encyclopedia/arcanum/14"
           }
         ]
       },
@@ -36944,8 +36944,8 @@
         "positions": [
           {
             "label": "Портрет личности",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Духовная задача",
@@ -36967,18 +36967,18 @@
         "positions": [
           {
             "label": "Центр карты",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Вход линии отношений и хвоста",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
             "label": "Внутренняя точка таланта",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 14,
+            "href": "/encyclopedia/arcanum/14"
           }
         ]
       },
@@ -36995,13 +36995,13 @@
           },
           {
             "label": "Средняя точка таланта",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Внутренняя точка таланта",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 14,
+            "href": "/encyclopedia/arcanum/14"
           }
         ]
       },
@@ -37013,18 +37013,18 @@
         "positions": [
           {
             "label": "Кармическая задача",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
             "label": "Личное предназначение",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Социальное предназначение",
-            "arcanum": 22,
-            "href": "/encyclopedia/arcanum/22"
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
           }
         ]
       },
@@ -37036,8 +37036,8 @@
         "positions": [
           {
             "label": "Материальная женская линия рода",
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 22,
+            "href": "/encyclopedia/arcanum/22"
           },
           {
             "label": "Внутренняя левая точка",
@@ -37054,13 +37054,13 @@
         "positions": [
           {
             "label": "Вход денежной линии",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Денежное направление",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           }
         ]
       },
@@ -37072,8 +37072,8 @@
         "positions": [
           {
             "label": "Духовная мужская линия рода",
-            "arcanum": 18,
-            "href": "/encyclopedia/arcanum/18"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           },
           {
             "label": "Духовная женская линия рода",
@@ -37082,13 +37082,13 @@
           },
           {
             "label": "Итог мужской ветви",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Итог женской ветви",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           }
         ]
       },
@@ -37105,13 +37105,13 @@
           },
           {
             "label": "Вторая задача неба",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
             "label": "Итог неба",
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 16,
+            "href": "/encyclopedia/arcanum/16"
           }
         ]
       },
@@ -37123,18 +37123,18 @@
         "positions": [
           {
             "label": "Вход линии отношений и хвоста",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
             "label": "Средняя точка хвоста",
-            "arcanum": 4,
-            "href": "/encyclopedia/arcanum/4"
+            "arcanum": 19,
+            "href": "/encyclopedia/arcanum/19"
           },
           {
             "label": "Кармическая задача",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -37146,23 +37146,23 @@
         "positions": [
           {
             "label": "Личное предназначение",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Социальное предназначение",
-            "arcanum": 22,
-            "href": "/encyclopedia/arcanum/22"
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
           },
           {
             "label": "Духовное предназначение",
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Планетарное предназначение",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -37174,23 +37174,23 @@
         "positions": [
           {
             "label": "Вход денежной линии",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Денежное направление",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
-          },
-          {
-            "label": "Пересечение денег и отношений",
             "arcanum": 6,
             "href": "/encyclopedia/arcanum/6"
           },
           {
+            "label": "Пересечение денег и отношений",
+            "arcanum": 9,
+            "href": "/encyclopedia/arcanum/9"
+          },
+          {
             "label": "Итог земли",
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -37202,13 +37202,13 @@
         "positions": [
           {
             "label": "Денежное направление",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           },
           {
             "label": "Вход денежной линии",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -37220,23 +37220,23 @@
         "positions": [
           {
             "label": "Вход линии отношений и хвоста",
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
+          },
+          {
+            "label": "Партнёрская точка",
             "arcanum": 21,
             "href": "/encyclopedia/arcanum/21"
           },
           {
-            "label": "Партнёрская точка",
+            "label": "Пересечение денег и отношений",
             "arcanum": 9,
             "href": "/encyclopedia/arcanum/9"
           },
           {
-            "label": "Пересечение денег и отношений",
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
-          },
-          {
             "label": "Внутренняя точка таланта",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 14,
+            "href": "/encyclopedia/arcanum/14"
           }
         ]
       },
@@ -37248,8 +37248,8 @@
         "positions": [
           {
             "label": "Духовная мужская линия рода",
-            "arcanum": 18,
-            "href": "/encyclopedia/arcanum/18"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           },
           {
             "label": "Духовная женская линия рода",
@@ -37258,8 +37258,8 @@
           },
           {
             "label": "Материальная мужская линия рода",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
           }
         ]
       },
@@ -37271,23 +37271,23 @@
         "positions": [
           {
             "label": "Материальная женская линия рода",
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 22,
+            "href": "/encyclopedia/arcanum/22"
           },
           {
             "label": "Итог мужской ветви",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Итог женской ветви",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Планетарное предназначение",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -37304,13 +37304,13 @@
           },
           {
             "label": "Энергия опоры",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
             "label": "Итог опоры тела",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
           }
         ]
       },
@@ -37322,13 +37322,13 @@
         "positions": [
           {
             "label": "Сахасрара · физика",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Аджна · физика",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 8,
+            "href": "/encyclopedia/arcanum/8"
           },
           {
             "label": "Вишудха · физика",
@@ -37337,18 +37337,18 @@
           },
           {
             "label": "Анахата · физика",
-            "arcanum": 4,
-            "href": "/encyclopedia/arcanum/4"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
             "label": "Манипура · физика",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Свадхистана · физика",
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "Муладхара · физика",
@@ -37357,18 +37357,18 @@
           },
           {
             "label": "Итог физики",
-            "arcanum": 14,
-            "href": "/encyclopedia/arcanum/14"
+            "arcanum": 8,
+            "href": "/encyclopedia/arcanum/8"
           },
           {
             "label": "Итог энергии",
-            "arcanum": 14,
-            "href": "/encyclopedia/arcanum/14"
+            "arcanum": 8,
+            "href": "/encyclopedia/arcanum/8"
           },
           {
             "label": "Итог эмоций",
-            "arcanum": 1,
-            "href": "/encyclopedia/arcanum/1"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -37380,13 +37380,13 @@
         "positions": [
           {
             "label": "Радость и творчество",
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
+            "arcanum": 9,
+            "href": "/encyclopedia/arcanum/9"
           },
           {
             "label": "Центр карты",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           }
         ]
       },
@@ -37398,18 +37398,18 @@
         "positions": [
           {
             "label": "Кармическая задача",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
             "label": "Центр карты",
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "label": "Духовное предназначение",
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -37421,13 +37421,13 @@
         "positions": [
           {
             "label": "0–10 лет",
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "label": "10–20 лет",
-            "arcanum": 18,
-            "href": "/encyclopedia/arcanum/18"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           },
           {
             "label": "20–30 лет",
@@ -37446,18 +37446,18 @@
           },
           {
             "label": "50–60 лет",
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
           },
           {
             "label": "60–70 лет",
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
             "label": "70–80 лет",
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 22,
+            "href": "/encyclopedia/arcanum/22"
           }
         ]
       }

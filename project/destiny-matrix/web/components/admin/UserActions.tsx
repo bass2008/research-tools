@@ -7,11 +7,16 @@ import { createPortal } from "react-dom";
 
 import { ApiError, api, type AdminUser } from "@/lib/api";
 import { MONTHS_ACC, daysInMonth, toIso, type Sex } from "@/lib/matrix";
+import { exampleDay } from "@/lib/today";
 
 // Дата собирается тремя списками и переключателем пола — как в калькуляторе на сайте. Ввод датой
 // одним полем выглядел чужеродно и на телефоне открывал системный календарь, в котором до 1970-х
 // докручивать долго.
-const THIS_YEAR = new Date().getUTCFullYear();
+//
+// Верхний год берётся из `lib/today`: собственный вызов часов в клиентском компоненте расходится
+// с готовой серверной разметкой, сторож — `lib/today.test.ts` (он ищет вызов по всему файлу,
+// включая комментарии).
+const THIS_YEAR = exampleDay().year;
 const YEARS = Array.from({ length: THIS_YEAR - 1900 + 1 }, (_, i) => THIS_YEAR - i);
 
 export default function UserActions({ user, onGranted }: {

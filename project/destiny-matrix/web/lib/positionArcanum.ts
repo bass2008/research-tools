@@ -1,12 +1,14 @@
 import {
   arcanumContent,
   indexedKarmicTailKeys,
+  indexedPositionArcanumRows,
   karmicTail,
   positionArcanumRows,
   positionContent,
 } from "./content";
 import type { PositionArcanumRow } from "./content";
 import { karmicTailHref, positionHref } from "./encyclopedia";
+import { sectionLineKeys } from "./matrixMap";
 import { clip } from "./text";
 
 // Страница на пересечении «аркан N в позиции X». Отдельная от каталога позиции и от страницы
@@ -15,7 +17,7 @@ import { clip } from "./text";
 // самом сайте: единственный раздел, где адрес повторяет запрос, стоит на медиане 5, каталоги
 // позиций — на 33–42.
 //
-// Текст собирается из корпуса, а не пишется под каждый адрес: 814 позиционных трактовок (22 × 37)
+// Текст собирается из корпуса, а не пишется под каждый адрес: 836 позиционных трактовок (22 × 38)
 // уже написаны и проверены, а `positionRoleTemplate` раскладывает каждую на роль, силу, риск и
 // действие. Так же собраны 231 статья сочетаний — это принятый в проекте способ.
 
@@ -105,7 +107,9 @@ function sentence(text: string): string {
   const value = text.trim().replace(/\s+/g, " ");
   if (!value) return "";
   const head = value[0]!.toUpperCase() + value.slice(1);
-  return /[.!?…]$/.test(head) ? head : `${head}.`;
+  // Закрывающая кавычка после знака — тоже конец фразы: без этого «…послушать?» получало
+  // вторую точку, и склейка уезжала в описание страницы.
+  return /[.!?…][»"”']?$/.test(head) ? head : `${head}.`;
 }
 
 /** То же для середины фразы: со строчной, без точки. */
@@ -144,6 +148,12 @@ export function registryItems(): RegistryItem[] {
   return positionArcanumRows();
 }
 
+/** Записи, которые видит поиск. Остальные страницы существуют ради продукта: человек с картой
+ *  должен дочитать про своё число, даже если этого числа никто не спрашивает. */
+export function indexedRegistryItems(): RegistryItem[] {
+  return indexedPositionArcanumRows();
+}
+
 export function registryItem(position: string, arcanum: number): RegistryItem | null {
   return positionArcanumRows().find((i) => i.position === position && i.arcanum === arcanum) ?? null;
 }
@@ -180,6 +190,8 @@ export interface PositionArcanumReading {
   tails: Array<{ key: string; href: string; short: string }>;
   positionTitle: string;
   positionHref: string;
+  /** Что подсветить на схеме карты: точка отмечает себя, раздел — все свои точки. */
+  mapKeys: string[];
 }
 
 export function buildPositionArcanum(position: string, arcanum: number): PositionArcanumReading {
@@ -225,10 +237,15 @@ export function buildPositionArcanum(position: string, arcanum: number): Positio
     .filter((x): x is string => x !== null);
 
   const sections: Array<{ h2: string; paragraphs: string[] }> = [
+    // Суть идёт только сюда. Раньше она же стояла первым экраном и в первом ответе FAQ, и на
+    // странице одна и та же фраза читалась трижды подряд; теперь первый экран называет аркан,
+    // а этот абзац отвечает на свой заголовок. Исключение — одиннадцать текстов корпуса, где
+    // суть написана в три слова («Дар видеть иначе.»): абзацем такая строка не работает, и к
+    // ней возвращается описание аркана, даже ценой повтора первого экрана.
     {
       h2: `Что означает ${arcanum} аркан ${name.inside}`,
       paragraphs: [
-        repeats(read.essence, content.short)
+        read.essence.length >= 60
           ? read.essence
           : `${read.essence} Это ${content.title}: ${inline(clip(content.short, 150))}.`,
       ],
@@ -310,17 +327,24 @@ export function buildPositionArcanum(position: string, arcanum: number): Positio
       description: describe(name.h1(arcanum), read),
       queries: buildQueries(item, arcanum, name),
     },
-    short: shortLead(name.h1(arcanum), read),
+    short: shortLead(name.h1(arcanum), content.title, content.short, read),
     sections,
     faq,
     tails,
     positionTitle: place.title,
     positionHref: positionHref(position),
+    // Раздел-линия подсвечивается целиком: у хвоста это M–N–D, и середина N важнее краёв.
+    mapKeys: place.kind === "section"
+      ? sectionLineKeys(position, place.points.map((x) => x.key))
+      : [position],
   };
 }
 
-/** Запросы страницы: главный из реестра, остальные — вторые формулировки того же пересечения. */
+/** Запросы страницы: главный из реестра, остальные — вторые формулировки того же пересечения.
+ *  У записи вне индекса головного запроса нет — заявить его значило бы увести выдачу у той
+ *  страницы, которая по нему и стоит. */
 function buildQueries(item: RegistryItem, arcanum: number, name: Naming): string[] {
+  if (!item.primaryQuery) return [];
   const out = [item.primaryQuery];
   const head = inline(name.h1(arcanum));
   const extras = [
@@ -334,24 +358,15 @@ function buildQueries(item: RegistryItem, arcanum: number, name: Naming): string
   return out;
 }
 
-/** Суть уже содержит короткое описание аркана? Тогда приписка «Это X: <то же самое>» — повтор.
- *  Проверяется по первым словам: тексты корпуса пересекаются дословно, а не по смыслу. */
-function repeats(essence: string, short: string): boolean {
-  const haystack = inline(essence);
-  const whole = inline(short).trim();
-  if (whole.length > 15 && haystack.includes(whole)) return true;
-  // Короткое описание бывает само из двух частей через двоеточие — «чувство момента: везёт тем,
-  // кто заметил». Резать по нему нельзя: у одних арканов первая часть длиннее порога, у других
-  // короче, и приписка «Это X: …» появлялась через страницу. Сверяем началом, а не половиной.
-  const head = whole.slice(0, 25);
-  return head.length >= 15 && haystack.includes(head);
-}
-
-/** Первый экран: суть, а если она в два слова — вместе с силой. «Дар видеть иначе.» одной
- *  строкой первым экраном не работает. */
-function shortLead(head: string, read: Role): string {
-  const base = `${head} — ${inline(read.essence)}.`;
-  return base.length >= 80 ? base : `${base} ${sentence(read.strength)}`;
+/** Первый экран: что это за аркан и где он стоит. Суть сюда не идёт — она отвечает на свой
+ *  заголовок ниже, а дословный повтор в двух абзацах подряд читался как брак. Если короткое
+ *  описание аркана в два слова («Дар видеть иначе.»), первым экраном его одного мало. */
+function shortLead(head: string, title: string, short: string, read: Role): string {
+  // Точка, а не двоеточие: у девятнадцати арканов из двадцати двух своё двоеточие уже стоит
+  // внутри короткого описания («глубина и поиск смысла: доходит до сути»), и подводка читалась
+  // с двумя двоеточиями подряд.
+  const base = `${head} — это ${title}. ${sentence(clip(short, 150))}`;
+  return base.length >= 80 ? base : `${base} ${sentence(read.essence)}`;
 }
 
 /** Описание для выдачи: 160 знаков, обрыв посреди слова там читается как брак. Действие
@@ -390,13 +405,28 @@ function fragment(text: string, inside: string, short: string): string | null {
   return value.length > 25 ? clip(value, 130) : null;
 }
 
+/** Цепочки в три слова: по ним видно, что пункт списка уже сказан рядом другими словами. */
+function chains(text: string): Set<string> {
+  const words = text.toLowerCase().match(/[а-яёa-z0-9]+/g) ?? [];
+  const out = new Set<string>();
+  for (let i = 0; i + 3 <= words.length; i++) out.add(words.slice(i, i + 3).join(" "));
+  return out;
+}
+
 /** Перечисление словами корпуса: списки `plus`/`minus` уникальны для аркана и потому расходят
- *  страницы между собой сильнее любого шаблона. */
+ *  страницы между собой сильнее любого шаблона.
+ *
+ *  Пункт выбрасывается не только при дословном совпадении с уже сказанным, но и при общей цепочке
+ *  в три слова: текст корпуса часто пересказывает `plus` своими словами, и рядом вставало
+ *  «видит перекос раньше других и называет его прямо. Вообще в плюсе этот аркан — про человека,
+ *  который видит перекос и называет его прямо». */
 function listing(items: string[], said = ""): string {
   const spoken = inline(said);
+  const spokenChains = spoken ? chains(spoken) : new Set<string>();
   const parts = items
     .map(inline)
     .filter((x) => x && !(spoken && (spoken.includes(x) || x.includes(spoken))))
+    .filter((x) => ![...chains(x)].some((c) => spokenChains.has(c)))
     .slice(0, 3);
   if (!parts.length) return "действует по своей сильной стороне";
   if (parts.length === 1) return parts[0]!;

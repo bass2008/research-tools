@@ -7,6 +7,7 @@ import { indexedKarmicTailKeys, positionContent } from "./content";
 import { POSITIONS } from "./encyclopedia";
 import {
   buildPositionArcanum,
+  indexedRegistryItems,
   positionArcanumHref,
   positionArcanumLabel,
   positionArcanumSiblings,
@@ -32,11 +33,22 @@ describe("реестр пересечений", () => {
     expect(registryItems().length).toBeGreaterThan(50);
   });
 
-  // Порог — весь смысл реестра: плоские 22 × 37 адресов были бы тем тонким корпусом, который уже
-  // дал 76 страниц хвостов на один показ за шесть дней.
-  it("не содержит записей ниже порога", () => {
+  // Порог решает не существование адреса, а индексацию: плоские 22 × 38 адресов в выдаче были бы
+  // тем тонким корпусом, который уже дал 76 страниц хвостов на один показ за шесть дней. Запись
+  // без спроса живёт ради продукта — человек с картой должен дочитать про своё число.
+  it("в индекс не пускает записи ниже порога", () => {
     const under = registryItems().filter((i) => i.frequency < REGISTRY.threshold);
-    expect(under).toEqual([]);
+    expect(under.filter((i) => i.publication.index)).toEqual([]);
+    expect(indexedRegistryItems().filter((i) => i.frequency < REGISTRY.threshold)).toEqual([]);
+    expect(indexedRegistryItems().length).toBeLessThan(registryItems().length);
+  });
+
+  // Головной запрос — обещание «эта страница отвечает на эту фразу». У страницы вне индекса его
+  // нет: заявить его значило бы увести выдачу у той страницы, которая по нему и стоит.
+  it("головной запрос есть ровно у индексируемых записей", () => {
+    expect(registryItems().filter((i) => i.publication.index && !i.primaryQuery)).toEqual([]);
+    expect(registryItems().filter((i) => !i.publication.index && i.primaryQuery)).toEqual([]);
+    expect(registryItems().filter((i) => !i.publication.follow)).toEqual([]);
   });
 
   it("ссылается только на существующие позиции корпуса", () => {
@@ -227,9 +239,19 @@ describe("собранная страница", () => {
 
   it("берёт главный запрос из реестра", () => {
     const wrong = readings
+      .filter(({ item }) => item.publication.index)
       .filter(({ item, reading }) => reading.seo.queries[0] !== item.primaryQuery)
       .map(({ reading }) => `${reading.position}/${reading.arcanum}`);
     expect(wrong).toEqual([]);
+  });
+
+  // Страница вне индекса запросов не заявляет: у неё нет головного, а придуманные «вторые
+  // формулировки» целились бы в чужую выдачу.
+  it("страница вне индекса не заявляет чужих запросов", () => {
+    const claimed = readings
+      .filter(({ item }) => !item.publication.index)
+      .filter(({ reading }) => reading.seo.queries.length === 0);
+    expect(claimed.length).toBeGreaterThan(0);
   });
 
   it("даёт каждой странице свой адрес и подпись", () => {
@@ -251,5 +273,15 @@ describe("собранная страница", () => {
     expect(registryItem("center", 99)).toBeNull();
     expect(() => buildPositionArcanum("center", 99)).toThrow();
     expect(() => buildPositionArcanum("nonsense", 6)).toThrow();
+  });
+
+  // Своё двоеточие стоит внутри короткого описания у девятнадцати арканов из двадцати двух,
+  // и подводка «— это Отшельник: глубина и поиск смысла: доходит до сути» читалась с двумя
+  // подряд. Замер длины и похожести такое не видит — видно только глазами, поэтому сторож.
+  it("не склеивает подводку из двух двоеточий", () => {
+    const broken = registryItems()
+      .map((i) => buildPositionArcanum(i.position, i.arcanum).short)
+      .filter((short) => (short.match(/:/g) ?? []).length > 1);
+    expect(broken).toEqual([]);
   });
 });

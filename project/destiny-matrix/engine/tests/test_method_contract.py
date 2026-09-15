@@ -65,6 +65,45 @@ def test_declared_tail_set_is_exhaustive_for_supported_dates():
     assert seen == expected
 
 
+def test_declared_reachable_arcana_are_exhaustive_for_supported_dates():
+    """Какие числа бывают в точке — факт метода, а не выборка спроса: на нём стоит набор
+    страниц «аркан N в позиции X». Девять статей «под сердцем» описывали значения, которых
+    в точке M не бывает, и поймать это можно было только перебором."""
+    declared = {key: set(values) for key, values in METHOD["reachable_arcana"].items()}
+    assert set(declared) == {point["key"] for point in METHOD["points"]} | set(METHOD["purposes"])
+    seen: dict[str, set[int]] = {key: set() for key in declared}
+    cursor = dt.date.fromisoformat(METHOD["scope"]["minimum_birth_date"])
+    while cursor <= dt.date.today():
+        m = calculate(cursor)
+        for key in declared:
+            value = getattr(m, key, None)
+            if isinstance(value, int):
+                seen[key].add(value)
+        seen["karmic_tail_middle"].add(m.karmic_tail[1])
+        seen["love_middle"].add(m.love[1])
+        seen["money_middle"].add(m.money[1])
+        seen["money_love_crossing"].add(m.love[2])
+        seen["ajna_energy"].add(m.talent[1])
+        seen["ajna_physics"].add(m.chakras[1].physics)
+        seen["anahata_physics"].add(m.chakras[3].physics)
+        seen["anahata_energy"].add(m.chakras[3].energy)
+        cursor += dt.timedelta(days=1)
+    assert seen == declared
+
+
+def test_external_source_witness_matches_the_engine():
+    """Единственная живая внешняя сверка формул. Исполняемый первоисточник умер — по его адресу
+    отдаётся библиотека оформления, — поэтому предметную формулу держит разобранный пример
+    стороннего источника, сохранённый в spec/sources."""
+    source = next(s for s in METHOD["sources"] if s["kind"] == "secondary_cross_check")
+    assert (ROOT / source["copy"]).exists(), source["copy"]
+    witness = source["witness"]
+    matrix = calculate(witness["birth"])
+    for key, expected in witness["points"].items():
+        assert getattr(matrix, key) == expected, (key, getattr(matrix, key), expected)
+    assert matrix.love == witness["love"]
+
+
 def test_golden_coverage_and_every_named_value():
     assert len(GOLDEN) >= 30
     assert {int(case["birth"][-2:]) for case in GOLDEN} >= set(range(23, 32))

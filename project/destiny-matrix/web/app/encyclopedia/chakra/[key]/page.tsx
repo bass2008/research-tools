@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import PositionMap from "@/components/enc/PositionMap";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
@@ -10,6 +11,7 @@ import Price from "@/components/pay/Price";
 import { ARCANA } from "@/lib/arcana";
 import { CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref } from "@/lib/encyclopedia";
 import { chakraContent } from "@/lib/content";
+import { mapPointsBySymbol } from "@/lib/matrixMap";
 import { pageMeta } from "@/lib/site";
 import { articleLd } from "@/lib/schema";
 import { NOT_FOUND_META } from "@/lib/seo";
@@ -46,6 +48,9 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
   const extra = chakraContent(c.key);
   if (!extra) throw new Error(`нет канонического материала чакры ${c.key}`);
   const paragraphs = extra.level;
+  // Уровень — это горизонтальная пара точек карты, и «где находится свадхистана» спрашивают
+  // ровно про место. Символы пары лежат в контракте метода.
+  const spots = mapPointsBySymbol([c.physics, c.energy]);
   const title = extra.seo.title;
 
   return (
@@ -74,6 +79,11 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           Чакра {c.title} в матрице судьбы — уровень {c.index}
         </h1>
         <p className="dim prose">{c.hint}</p>
+
+        <PositionMap
+          highlight={spots}
+          caption={`Где этот уровень стоит в карте: ${spots.map((x) => `${x.label} · ${x.symbol}`).join(" и ")}`}
+        />
 
         <div className="prose section-gap">
           {paragraphs.map((text, i) => (

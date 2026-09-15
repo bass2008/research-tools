@@ -54,6 +54,17 @@ export default function PositionHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
+      <div className="panel section-gap" id="tochki">
+        <h2>{encyclopediaSection("pts").title}</h2>
+        <div className="cap">{encyclopediaSection("pts").hint} · {points.length}</div>
+        <PositionRows items={points} />
+      </div>
+      <div className="panel section-gap" id="razdely">
+        <h2>{encyclopediaSection("sec").title}</h2>
+        <div className="cap">{encyclopediaSection("sec").hint} · {sections.length}</div>
+        <PositionRows items={sections} />
+      </div>
+
       <Sections items={hub.sections} />
 
       <div className="section-gap">
@@ -63,19 +74,6 @@ export default function PositionHubPage() {
           place="position-hub"
         />
       </div>
-
-      <div className="panel section-gap" id="tochki">
-        <h2>{encyclopediaSection("pts").title}</h2>
-        <div className="cap">{encyclopediaSection("pts").hint} · {points.length}</div>
-        <PositionRows items={points} />
-      </div>
-
-      <div className="panel section-gap" id="razdely">
-        <h2>{encyclopediaSection("sec").title}</h2>
-        <div className="cap">{encyclopediaSection("sec").hint} · {sections.length}</div>
-        <PositionRows items={sections} />
-      </div>
-
 
       <Faq items={hub.faq} />
 

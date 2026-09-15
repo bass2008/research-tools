@@ -298,12 +298,15 @@ def url_registry(tails: list[dict]) -> list[dict]:
     for item in item_list("positions.json"):
         add(f"/encyclopedia/position/{item['key']}", item["kind"], "keep", True,
             "каноническая позиция метода")
-    # Пересечения «аркан N в позиции X»: адрес появляется только против записи реестра спроса
-    # (tools/seo/build-position-arcanum.py, порог 500). Спрашивают именно пересечение, а каталог
-    # из 22 карточек формально содержит ответ, но ответом не является.
+    # Пересечения «аркан N в позиции X»: какие адреса бывают, решает метод, а спрос решает, видит
+    # ли их поиск (tools/seo/build-position-arcanum.py, порог 500). Спрашивают именно пересечение,
+    # а каталог из 22 карточек формально содержит ответ, но ответом не является.
     for item in read_json(WEB_CONTENT / "position-arcanum.json")["items"]:
+        indexed = item["publication"]["index"]
         add(f"/encyclopedia/position/{item['position']}/{item['arcanum']}", "position_arcanum",
-            "keep", True, f"пересечение со спросом {item['frequency']}: {item['primary_query']}")
+            "keep" if indexed else "noindex", indexed,
+            f"пересечение со спросом {item['frequency']}: {item['primary_query']}" if indexed
+            else "достижимое по методу пересечение без спроса: страница для продукта, не для поиска")
     for item in item_list("chakras.json"):
         add(f"/encyclopedia/chakra/{item['key']}", "chakra", "keep", True,
             "канонический уровень карты энергий")
@@ -369,7 +372,8 @@ def review_cards(tails: list[dict], urls: list[dict]) -> list[dict]:
             "claims_reviewed": "automated contract/safety audit",
             "unique_value": "позиционная трактовка корпуса плюс сравнение с другими позициями аркана",
             "paid_report_overlap": "encyclopedia deepens the in-report position texts",
-            "internal_links": "automated", "metadata": "automated", "decision": "keep",
+            "internal_links": "automated", "metadata": "automated",
+            "decision": "keep" if item["publication"]["index"] else "noindex",
             "reviewer": "Codex engineering/content audit", "reviewed_at": TODAY,
             "independent_editor": "pending human sign-off",
         })
