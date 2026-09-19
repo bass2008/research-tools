@@ -39,7 +39,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_ttl_days: int = 30
 
-    mock_payments: bool = True
+    # Выключено по умолчанию: включённая мок-оплата открывает платный разбор любому, кто
+    # знает адрес /api/payments/mock. Стенды включают её явно.
+    mock_payments: bool = False
 
     # Пусто = кросс-доменных запросов нет вообще. Браузер обращается только к своему origin:
     # страницы отдаёт node-сервер Next.js, а его BFF ходит в API с сервера, где CORS не
@@ -64,6 +66,12 @@ class Settings(BaseSettings):
     mail_to_log: bool = False
     smtp_user: str = ""
     smtp_password: str = ""
+    # У Selectel исходящие 25/465/587 закрыты, поэтому боевая машина шлёт письма тем же Postbox,
+    # но по его API на 443. Ключи заданы — идём через API, нет — остаётся SMTP.
+    postbox_key_id: str = ""
+    postbox_secret: str = ""
+    postbox_endpoint: str = "https://postbox.cloud.yandex.net"
+    postbox_region: str = "ru-central1"
     mail_from: str = "noreply@arcana-sense.ru"
     mail_from_name: str = "Arcana Sense"
     mail_reply_to: str = "hello@arcana-sense.ru"
@@ -82,6 +90,9 @@ class Settings(BaseSettings):
     print_token_ttl_seconds: int = Field(default=120, ge=30, le=900)
 
     # Object Storage под готовые отчёты. Без ключей печать отключена — файлу негде лежать.
+    # где лежат готовые отчёты: s3 на проде, local на стендах (см. app/store.py)
+    reports_store: str = "s3"
+    reports_dir: str = "/tmp/arcana-reports"
     s3_endpoint: str = "https://storage.yandexcloud.net"
     s3_region: str = "ru-central1"
     s3_reports_bucket: str = ""
@@ -163,7 +174,11 @@ class Settings(BaseSettings):
 
     @property
     def pdf_enabled(self) -> bool:
-        return bool(self.browser_url and self.s3_reports_bucket and self.s3_access_key)
+        if not self.browser_url:
+            return False
+        if self.reports_store == "local":
+            return bool(self.reports_dir)
+        return bool(self.s3_reports_bucket and self.s3_access_key)
 
     def is_admin(self, email: str | None) -> bool:
         return bool(email) and email.strip().lower() in self.admins
@@ -194,6 +209,8 @@ SENSITIVE_SETTINGS = frozenset({
     "jwt_secret",
     "smtp_user",
     "smtp_password",
+    "postbox_key_id",
+    "postbox_secret",
     "browser_secret",
     "s3_access_key",
     "s3_secret_key",
@@ -267,8 +284,11 @@ class SettingManager:
 
     @property
     def pdf_enabled(self) -> bool:
-        return bool(self.get("browser_url") and self.get("s3_reports_bucket")
-                    and self.get("s3_access_key"))
+        if not self.get("browser_url"):
+            return False
+        if self.get("reports_store") == "local":
+            return bool(self.get("reports_dir"))
+        return bool(self.get("s3_reports_bucket") and self.get("s3_access_key"))
 
     def is_admin(self, email: str | None) -> bool:
         return bool(email) and email.strip().lower() in self.admins

@@ -121,11 +121,15 @@ def test_admin_downloads_any_report(page, mail):
         lambda r: "/api/admin/report-link" in r.url and r.status == 200, timeout=30_000
     ) as answer:
         row.get_by_test_id("report-download").click()
-    # Имя файла в ссылке закодировано дважды: сначала для заголовка Content-Disposition
-    # (filename*=UTF-8''…), потом как параметр запроса.
-    link = urllib.parse.unquote(urllib.parse.unquote(answer.value.json()["url"]))
-    assert ".pdf" in link, f"ссылка ведёт не на файл: {link}"
-    assert "13 декабря 1994" in link, f"в имени файла не дата разбора: {link}"
+    # Проверяем сам файл, а не вид ссылки: у Object Storage ключ и имя видны в адресе, у
+    # локального хранилища стендов они спрятаны в подписанном пропуске. Обещание же не в том,
+    # как выглядит ссылка, а в том, что по ней приезжает разбор с датой в имени.
+    url = answer.value.json()["url"]
+    file = page.request.get(url)
+    assert file.status == 200, f"скачивание отчёта отдало {file.status}: {url}"
+    assert file.body().startswith(b"%PDF"), "по ссылке приехал не PDF"
+    assert "13 декабря 1994" in urllib.parse.unquote(
+        file.headers.get("content-disposition", "")), "в заголовке нет даты разбора"
 
 
 def test_dialog_closes_by_escape_and_by_click_outside(page, mail):

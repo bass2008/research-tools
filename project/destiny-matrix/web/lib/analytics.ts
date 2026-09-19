@@ -53,6 +53,17 @@ export function track(goal: Goal, params?: GoalParams): void {
   );
 }
 
+/** Отметка присутствия: продлевает время визита, не считаясь просмотром страницы. */
+export function alive(seconds: number): void {
+  if (typeof window === "undefined") return;
+  const id = metrikaId();
+  try {
+    if (id && window.ym) window.ym(id, "params", { alive: seconds });
+  } catch {
+    /* см. выше */
+  }
+}
+
 export function notBounce(): void {
   if (typeof window === "undefined") return;
   const id = metrikaId();

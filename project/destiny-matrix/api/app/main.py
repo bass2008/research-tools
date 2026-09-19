@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import errors, monitor, payments, presence, tariffs
+from . import errors, monitor, payments, presence, store, tariffs
 from .config import settings
 from .db import get_db
 from .deps import ghost_session, optional_user
@@ -18,6 +18,9 @@ from .schemas import PulseIn
 
 def create_app() -> FastAPI:
     settings.check()
+    # Локальное хранилище чистится ровно здесь, при поднятии приложения: ленивая чистка при первой
+    # печати снесла бы файлы, ссылки на которые уже выданы.
+    store.prepare()
     app = FastAPI(title=settings.app_name, version="0.1.0",
                   docs_url="/api/docs", openapi_url="/api/openapi.json")
     if settings.origins:

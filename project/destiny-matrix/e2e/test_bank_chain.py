@@ -14,7 +14,7 @@ import pytest
 from playwright.sync_api import expect
 
 import flows
-from conftest import ADMIN, BASE
+from conftest import ADMIN, BASE, _api_command
 
 pytestmark = pytest.mark.bank
 
@@ -82,9 +82,7 @@ def test_notification_opens_access_without_the_browser(page, mail, api_notify):
 
 def sweep_now() -> str:
     """Досверка платежей — то же, что делает cron на машине."""
-    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
-    done = subprocess.run(["docker", "compose", "-f", str(compose), "exec", "-T", "api",
-                           "python", "-m", "app.sweep"], capture_output=True, text=True)
+    done = _api_command(["python", "-m", "app.sweep"])
     assert done.returncode == 0, done.stderr or done.stdout
     return (done.stdout + done.stderr).strip()
 

@@ -83,16 +83,37 @@ def mail() -> str:
     return f"e2e-{uuid.uuid4().hex[:10]}@example.ru"
 
 
+# Тестовый контур живёт на боевой машине отдельным проектом compose: те же прогоны гоняются
+# против него, и тогда логи и служебные команды берутся по ssh, а не у локального docker.
+REMOTE_HOST = os.environ.get("E2E_SSH_HOST", "root@45.80.130.166")
+REMOTE_API = os.environ.get("E2E_REMOTE_API", "arcana-test-test-api-1")
+REMOTE = "arcana-sense.ru" in BASE
+
+
+def _api_command(args: list[str]) -> subprocess.CompletedProcess:
+    if REMOTE:
+        return subprocess.run(["ssh", "-n", REMOTE_HOST, "docker", "exec", REMOTE_API, *args],
+                              capture_output=True, text=True)
+    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
+    return subprocess.run(["docker", "compose", "-f", str(compose), "exec", "-T", "api", *args],
+                          capture_output=True, text=True)
+
+
 @pytest.fixture
 def api_log():
     """Письма на стенде не уходят по SMTP, а пишутся в лог — оттуда берём ссылку на сброс."""
     compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
 
     def read(pattern: str) -> str | None:
-        out = subprocess.run(["docker", "compose", "-f", str(compose),
-                              "logs", "--no-log-prefix", "--tail", "3000", "api"],
-                             capture_output=True, text=True).stdout
-        found = [line for line in out.splitlines() if pattern in line]
+        if REMOTE:
+            out = subprocess.run(["ssh", "-n", REMOTE_HOST, "docker", "logs", "--tail", "3000",
+                                  REMOTE_API], capture_output=True, text=True)
+            text = out.stdout + out.stderr      # uvicorn пишет в stderr
+        else:
+            text = subprocess.run(["docker", "compose", "-f", str(compose),
+                                   "logs", "--no-log-prefix", "--tail", "3000", "api"],
+                                  capture_output=True, text=True).stdout
+        found = [line for line in text.splitlines() if pattern in line]
         return found[-1] if found else None
     return read
 
@@ -100,12 +121,9 @@ def api_log():
 @pytest.fixture
 def api_notify():
     """Послать стенду подписанное уведомление — то, что банк не может доставить на 127.0.0.1."""
-    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
 
     def send(payment_id: str, status: str = "CONFIRMED") -> str:
-        done = subprocess.run(["docker", "compose", "-f", str(compose), "exec", "-T", "api",
-                               "python", "-m", "app.selfnotify", str(payment_id), status],
-                              capture_output=True, text=True)
+        done = _api_command(["python", "-m", "app.selfnotify", str(payment_id), status])
         assert done.returncode == 0, done.stderr or done.stdout
         return done.stdout.strip()
     return send

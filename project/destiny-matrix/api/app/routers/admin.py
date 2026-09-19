@@ -210,6 +210,7 @@ def add_matrix(user_id: int, payload: BirthIn, _: User = Depends(admin_user),
         db.add(Entitlement(user_id=user.id, matrix_id=row.id, scope=json.dumps([access.SINGLE]),
                            note="выдана админом"))
         db.commit()
+        printing.warm(user.id, row.id)
     rights = access.active_rights(db, user)
     return {**row.item(), **access.matrix_state(rights, row.id)}
 

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Вход в реестр Selectel. Токен лежит рядом, а не в метаданных машины: CRaaS их не выдаёт.
+set -e
+. /root/.craas
+echo "$CRAAS_TOKEN" | docker login cr.selcloud.ru -u "$CRAAS_USER" --password-stdin >/dev/null

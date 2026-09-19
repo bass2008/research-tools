@@ -165,3 +165,32 @@ def test_admin_queue_expires_an_abandoned_running_job(client, auth, db, printing
     assert body["running"] == 0 and body["failed"] == 1
     assert body["items"][0]["status"] == "failed"
     assert "брошена" in body["items"][0]["error"]
+
+
+def test_missing_file_is_reprinted_instead_of_a_dead_link(client, db, printing, monkeypatch):
+    """Хранилище чистит отчёты по сроку, а задание остаётся `done`. Без проверки наличия кнопка
+    «Сохранить как PDF» отдавала бы ссылку на удалённый объект — и так навсегда."""
+    from app import printing as printing_mod
+    from app.models import ReportJob
+
+    headers, mid = buy(client, email="gone@example.ru")
+    first = client.post("/api/reports/render", json={"matrix_id": mid}, headers=headers).json()
+    assert first["status"] == "done" and first["cached"] is False
+    assert len(printing["render"]) == 1
+
+    # файл на месте: повторное нажатие печать не запускает
+    monkeypatch.setattr(printing_mod, "store", lambda: type("S", (), {"exists": staticmethod(lambda key: True)})())
+    again = client.post("/api/reports/render", json={"matrix_id": mid}, headers=headers).json()
+    assert again["cached"] is True
+    assert len(printing["render"]) == 1, "печать запустилась, хотя файл существует"
+
+    # файла не стало
+    monkeypatch.setattr(printing_mod, "store", lambda: type("S", (), {"exists": staticmethod(lambda key: False)})())
+    fresh = client.post("/api/reports/render", json={"matrix_id": mid}, headers=headers).json()
+    assert fresh["cached"] is False, "отдали кэш, которого нет в хранилище"
+    assert fresh["url"], "нет ссылки на свежий файл"
+    assert len(printing["render"]) == 2, "повторная печать не запустилась"
+
+    stale = db.get(ReportJob, first["job_id"])
+    db.refresh(stale)
+    assert stale.status == "expired" and stale.object_key is None, "пропажа не отмечена в задании"

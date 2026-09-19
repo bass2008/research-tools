@@ -3,11 +3,12 @@
 # удаление — APPLY=1. Живые покупатели под маску не попадают: она про адреса прогонов.
 set -euo pipefail
 
-IP=84.201.157.100
+IP="${ARCANA_PROD_IP:-45.80.130.166}"
+SSH_USER="${ARCANA_SSH_USER:-root}"
 APPLY="${APPLY:-0}"
 
 # python едет на машину по stdin: так не приходится экранировать кавычки в ssh-команде
-ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" \
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
   "cd /srv/arcana && docker compose exec -T -e APPLY='$APPLY' api python -" <<'PY'
 import os, sqlite3
 

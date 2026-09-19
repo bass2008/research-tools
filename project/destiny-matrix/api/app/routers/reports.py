@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,7 +12,8 @@ from ..db import get_db
 from ..deps import current_user
 from ..models import ReportJob, SavedMatrix, User, default_title, utcnow
 from ..schemas import ReportRequest
-from ..security import create_print_token, read_print_token
+from ..security import create_print_token, read_file_token, read_print_token
+from ..store import disposition, store
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -42,6 +43,24 @@ def _wait_for(db: Session, job: ReportJob) -> ReportJob | None:
         if job.status != "running":
             return None
     return None
+
+
+@router.get("/file")
+def file(token: str = Query(..., min_length=16)) -> Response:
+    """Выдача файла из локального хранилища — замена подписанной ссылке S3. Пропуск живёт час,
+    как и подпись, и годится ровно на один ключ: в PDF есть дата рождения."""
+    if settings.reports_store != "local":
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Не найдено")
+    read = read_file_token(token)
+    if read is None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Ссылка устарела")
+    key, filename = read
+    try:
+        body = store().read(key)
+    except (OSError, ValueError):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Файл не найден") from None
+    headers = {"Content-Disposition": disposition(filename)} if filename else {}
+    return Response(content=body, media_type="application/pdf", headers=headers)
 
 
 @router.post("/render")

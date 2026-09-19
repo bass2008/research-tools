@@ -92,6 +92,31 @@ def read_token(token: str) -> tuple[int, str, bool] | None:
         return None
 
 
+def create_file_token(key: str, filename: str | None = None) -> str:
+    """Пропуск к готовому файлу локального хранилища: замена подписанной ссылке S3. В PDF есть
+    дата рождения, поэтому путь не должен открываться без подписи."""
+    now = dt.datetime.now(dt.timezone.utc)
+    payload = {
+        "typ": "file",
+        "key": key,
+        "name": filename or "",
+        "iat": int(now.timestamp()),
+        "exp": int((now + dt.timedelta(seconds=settings.report_link_ttl_seconds)).timestamp()),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def read_file_token(token: str) -> tuple[str, str] | None:
+    """Ключ и имя файла, на которые выдан пропуск."""
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        if payload.get("typ") != "file":
+            return None
+        return str(payload["key"]), str(payload.get("name") or "")
+    except (jwt.PyJWTError, KeyError, TypeError, ValueError):
+        return None
+
+
 def create_print_token(matrix_id: int, user_id: int) -> str:
     """Пропуск для печати: браузерный сервис открывает платную страницу без куки владельца.
     Живёт минуту и годится только на чтение одной матрицы, поэтому утечка ничего не открывает."""

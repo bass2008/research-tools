@@ -1,5 +1,6 @@
-"""Отправка писем через Postbox (SMTP). Без ключей просто пишет в лог и возвращает False —
-локальная разработка и тесты не должны требовать доступа к почте.
+"""Отправка писем через Postbox: по API на 443, а если его ключей нет — по SMTP. Без тех и
+других ключей письмо просто пишется в лог — локальная разработка и тесты не должны требовать
+доступа к почте.
 
 Письмо никогда не содержит дату рождения: она специальная категория персональных данных, и в
 переписке ей делать нечего. В письма уходят только почта, тариф и номер платежа.
@@ -10,6 +11,8 @@ import logging
 import smtplib
 from email.message import EmailMessage
 
+import boto3
+
 from .config import settings
 
 log = logging.getLogger("arcana.mail")
@@ -18,12 +21,29 @@ log = logging.getLogger("arcana.mail")
 def enabled() -> bool:
     if settings.mail_to_log:
         return False
-    return bool(settings.smtp_user and settings.smtp_password)
+    return bool((settings.postbox_key_id and settings.postbox_secret)
+                or (settings.smtp_user and settings.smtp_password))
+
+
+def _by_api(msg: EmailMessage) -> None:
+    ses = boto3.client("sesv2", endpoint_url=settings.postbox_endpoint,
+                       region_name=settings.postbox_region,
+                       aws_access_key_id=settings.postbox_key_id,
+                       aws_secret_access_key=settings.postbox_secret)
+    # Raw, а не Simple: только так до получателя доходит Reply-To.
+    ses.send_email(Content={"Raw": {"Data": msg.as_bytes()}})
+
+
+def _by_smtp(msg: EmailMessage) -> None:
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as smtp:
+        smtp.starttls()
+        smtp.login(settings.smtp_user, settings.smtp_password)
+        smtp.send_message(msg)
 
 
 def send(to: str, subject: str, body: str) -> bool:
     if not enabled():
-        log.warning("письмо не отправлено (SMTP не настроен): %s → %s", subject, to)
+        log.warning("письмо не отправлено (почта не настроена): %s → %s", subject, to)
         if settings.mock_payments or settings.mail_to_log:   # на стенде письма читают из лога
             log.warning("%s", body)
         return False
@@ -35,10 +55,10 @@ def send(to: str, subject: str, body: str) -> bool:
     msg["Subject"] = subject
     msg.set_content(body)
     try:
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as smtp:
-            smtp.starttls()
-            smtp.login(settings.smtp_user, settings.smtp_password)
-            smtp.send_message(msg)
+        if settings.postbox_key_id and settings.postbox_secret:
+            _by_api(msg)
+        else:
+            _by_smtp(msg)
         return True
     except Exception as exc:                      # noqa: BLE001
         # платёж и регистрация не должны падать из-за почты

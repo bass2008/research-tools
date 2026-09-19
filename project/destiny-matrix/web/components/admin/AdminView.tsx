@@ -190,6 +190,7 @@ export default function AdminView() {
           <table className="admtable" data-testid="admin-users">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Почта</th>
                 <th>Матриц</th>
                 <th>Платежей</th>
@@ -203,13 +204,14 @@ export default function AdminView() {
             <tbody>
               {users === null ? (
                 <tr>
-                  <td colSpan={8} className="skeleton">
+                  <td colSpan={9} className="skeleton">
                     Загружаем…
                   </td>
                 </tr>
               ) : (
                 users.map((u) => (
                   <tr key={u.id} data-testid="admin-user-row">
+                    <td className="num">{u.id}</td>
                     <td>
                       <Link href={`/admin/users/${u.id}`}>{u.email}</Link>
                       {u.is_admin ? <span className="badge sub">админ</span> : null}

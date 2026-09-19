@@ -16,9 +16,13 @@ services:
         required: false
     environment:
       APP_ENV: ${APP_ENV:-dev}
+      # локальная разработка платит игрушечными деньгами
+      MOCK_PAYMENTS: ${MOCK_PAYMENTS:-1}
       SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
       # локально платим моком и читаем письма из логов; живой банк — PAYMENT_PROVIDER=tbank
       PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock}
+      # отчёты остаются в контейнере: раньше прогоны e2e складывали PDF в боевой бакет
+      REPORTS_STORE: ${REPORTS_STORE:-local}
       MAIL_TO_LOG: ${MAIL_TO_LOG:-1}
       # прогрев печати после оплаты; PRINT_WARMUP=0 — проверять печать по нажатию
       PRINT_WARMUP: ${PRINT_WARMUP:-1}

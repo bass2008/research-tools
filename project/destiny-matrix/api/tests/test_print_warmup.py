@@ -11,7 +11,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from app import monitor, printing, reports
-from app.models import ReportJob
+from app.config import settings
+from app.models import ReportJob, User
 
 
 class Inline:
@@ -52,6 +53,22 @@ def test_payment_starts_printing_by_itself(client, db, printer):
     job = db.scalars(select(ReportJob)).one()
     assert job.status == "done", f"печать не дошла до конца: {job.status} {job.error}"
     assert job.object_key and job.size_bytes, "файл не сохранён"
+    assert len(printer) == 1, f"рендеров: {len(printer)}"
+
+
+def test_granted_matrix_is_printed_too(client, db, printer, auth):
+    """Матрица, выданная админом без оплаты: печать должна начаться так же, как после покупки."""
+    client.post("/api/payments/mock",
+                json={"tariff": "single", "email": "gift@example.ru", "birth": "1990-05-05"})
+    target = db.query(User).filter(User.email == "gift@example.ru").one().id
+    printer.clear()
+
+    given = client.post(f"/api/admin/users/{target}/matrices",
+                        json={"birth": "1984-03-17", "sex": "m"}, headers=auth(settings.admins[0]))
+
+    assert given.status_code == 200, given.text
+    job = db.scalars(select(ReportJob).where(ReportJob.matrix_id == given.json()["id"])).one()
+    assert job.status == "done", f"печать не дошла до конца: {job.status} {job.error}"
     assert len(printer) == 1, f"рендеров: {len(printer)}"
 
 

@@ -29,6 +29,7 @@ function env() {
       THREADS: {
         get: async (key) => store.get(key) ?? null,
         put: async (key, value) => void store.set(key, value),
+        delete: async (key) => void store.delete(key),
       },
     },
   };
@@ -159,5 +160,33 @@ describe("бот поддержки", () => {
 
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { ok: true });
+  });
+
+  it("удалённая тема заводится заново, сообщение клиента не теряется", async () => {
+    const t = env();
+    t.store.set(`chat:${CLIENT}`, "8");
+    t.store.set("topic:8", String(CLIENT));
+    const calls = [];
+    let topic = 8;
+    globalThis.fetch = async (url, init) => {
+      const method = String(url).split("/").pop();
+      const payload = JSON.parse(init.body);
+      calls.push([method, payload]);
+      if (method === "copyMessage" && payload.message_thread_id === 8) {
+        return new Response(JSON.stringify(
+          { ok: false, description: "Bad Request: message thread not found" }), { status: 400 });
+      }
+      const result = method === "createForumTopic" ? { message_thread_id: ++topic } : {};
+      return new Response(JSON.stringify({ ok: true, result }), { status: 200 });
+    };
+
+    await handle(clientMessage(), t.env);
+
+    assert.deepEqual(calls.map(([method]) => method),
+      ["copyMessage", "createForumTopic", "copyMessage"]);
+    assert.equal(calls.at(-1)[1].message_thread_id, 9);
+    assert.equal(t.store.get(`chat:${CLIENT}`), "9");
+    assert.equal(t.store.get("topic:9"), String(CLIENT));
+    assert.equal(t.store.has("topic:8"), false);
   });
 });

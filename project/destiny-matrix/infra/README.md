@@ -7,8 +7,8 @@ web-контейнер выкладывает при старте в `/srv/arcan
 Решение и его причины — `docs/api-contract.md`, раздел «Раскладка деплоя — решено».
 
 **Релиз живёт не здесь, а в `compose/scripts/`:** `release-test.sh` — на тестовый домен,
-`release-prod.sh` — на прод. Оба собирают образы, отправляют их в реестр Yandex и на машине
-делают только `docker compose pull` и рестарт `arcana.service`. Здесь, в `infra/`, остаётся то,
+`release-prod.sh` — на прод. Оба собирают образы, отправляют их в реестр Selectel (CRaaS) и на
+машине делают только `docker compose pull` и рестарт `arcana.service`. Здесь, в `infra/`, остаётся то,
 что живёт вне образов: nginx, машина, приёмка.
 
 **Конфигурация nginx живёт здесь, а не на машине.** Любая правка — таймаут, заголовок, пароль,
@@ -17,19 +17,28 @@ web-контейнер выкладывает при старте в `/srv/arcan
 
 ```
 infra/
+  deploy-selectel.sh       развернуть машину Selectel: пакеты, swap, docker, служба, временный nginx
+  bootstrap-machine.sh     секреты, токен реестра, сертификаты, пароль тестового домена, конфиги
   deploy-nginx.sh          разложить конфиги nginx: бэкап → nginx -t → reload, при ошибке откат
+  arcana-registry-login    вход машины в CRaaS: токен лежит в /root/.craas
   nginx/                   источник правды для nginx
-    arcana.conf            прод: статика с диска, проксирование, таймаут печати
-    arcana-test.conf       тестовый домен: пароль, noindex, открытые вебхук банка и health
+    arcana-selectel.conf       прод и лендинг: статика с диска, таймаут печати, путь ACME
+    arcana-test-selectel.conf  тестовый домен: пароль, noindex, открытые вебхук банка и health
+    arcana.conf, arcana-test.conf  прежняя раскладка в Yandex Cloud, остались для истории
     conf.d/                настройки уровня http: сжатие, лимиты, формат лога, карты фильтров
     snippets/              правила отсечения сканеров, подключаются в оба server-блока
   check.sh                 приёмка живого сайта (DNS, TLS, страницы, BFF, кука, ассеты)
   terraform/
     README.md              подробности: раскладка, доставка, стоимость, что проверено
-    server/                VM, сеть, IP, A-записи, cloud-init: docker, nginx, служба arcana
+    selectel/              действующая машина: сеть, роутер, порт, floating IP, CRaaS
+    server/                прежняя VM в Yandex Cloud: сеть, IP, A-записи, cloud-init
     site/                  бакет ассетов (только `_next/static` и картинки) + deploy.sh + check.sh
     modules/static-site/   бакет, публичное чтение, при желании CNAME, сертификат и CDN
 ```
+
+Сайт живёт на машине Selectel `45.80.130.166`; вход по ssh — `root`. DNS обеих зон ведёт
+Cloudflare, отчёты и бэкапы лежат в R2. Прежняя машина в Yandex Cloud (`84.201.157.100`)
+какое-то время остаётся выключенной под откат.
 
 | корень | state | что трогает |
 |---|---|---|
@@ -41,39 +50,35 @@ infra/
 
 ## Путь от нуля до работающего сайта
 
-```bash
-tf                                                    # экспортирует TF_VAR_yc_*
-source ../terraform/bootstrap/export-backend-env.sh   # ключи к state-бакету
-```
+Состояние terraform лежит в R2 (`r2://arcana-backups/tfstate/matritsa/…`); ключи к нему —
+`source ~/.config/arcana/tfstate.env`.
 
-**1. Бакет ассетов** (можно пропустить: без него nginx отдаёт `_next/static` с диска)
+**1. Машина**
 
 ```bash
-cd infra/terraform/site
-cp terraform.tfvars.example terraform.tfvars
-terraform init && terraform apply
+cd infra/terraform/selectel
+terraform init && terraform apply                 # сеть, порт, floating IP, сервер, CRaaS
 ```
 
-**2. Машина**
+**2. Раскладка на машине**
 
 ```bash
-cd ../server
-cp terraform.tfvars.example terraform.tfvars     # ssh_public_key = file("~/.ssh/id_ed25519.pub")
-terraform init && terraform apply
-
-terraform output cloud_init_log_command           # дождаться `matritsa bootstrap finished`
+cd ../.. && ./deploy-selectel.sh <ip>             # пакеты, swap, docker, служба arcana, nginx на 80
 ```
 
-После этого apply уже созданы: docker и docker-compose, nginx на 80, `/srv/arcana/.env` с
-адресом сайта и реестром, вход в реестр по IAM-токену из метаданных (`arcana-registry-login`,
-пароля на машине нет вовсе) и служба `arcana` — она поднимает `docker compose` из
-`/srv/arcana` и ждёт, пока туда приедет `docker-compose.yml` первого релиза.
+Скрипт оставляет машину в рабочем состоянии без TLS: этого достаточно, чтобы сертификаты
+выписались по http.
 
-**3. TLS** — после того как A-записи разошлись (зона делегирована, это минуты):
+**3. Секреты, сертификаты и конфиги**
 
 ```bash
-terraform output certbot_command                  # один сертификат на matritsa. и api.
+IP=<ip> ./bootstrap-machine.sh
 ```
+
+Кладёт `/srv/arcana/.env` и `.env.test`, токен реестра (`/root/.craas` +
+`arcana-registry-login`), выписывает оба сертификата через webroot, включает таймер продления и
+раскладывает конфиги nginx. A-записи к этому моменту должны указывать на машину — иначе проверка
+владения доменом уйдёт на старый адрес.
 
 **4. Первый релиз** — с рабочей машины, не с VM:
 
@@ -108,7 +113,7 @@ cd ../../compose && scripts/release-prod.sh
   `reports/unified/tested-commit.txt` записан тот же sha. Файл пишет `release-test.sh` после
   того, как тестовый домен ответил.
 - **откат.** Прошлый тег лежит на машине в `/srv/arcana/.env.previous.tag`: вернуть его в `.env`
-  и `sudo systemctl restart arcana`. Образы прошлого релиза чистятся не раньше суток
+  и `systemctl restart arcana` (готовый сценарий — `compose/scripts/rollback-prod.sh`). Образы прошлого релиза чистятся не раньше суток
   (`docker image prune --filter until=24h`), поэтому pull за ними не пойдёт.
 - **статика.** Web-контейнер при старте копирует `_next/static` в `/srv/arcana/static`, и nginx
   отдаёт её с диска. Вкладка, открытая до релиза, догрузит свои чанки, пока каталог не
@@ -116,8 +121,8 @@ cd ../../compose && scripts/release-prod.sh
 - **схема базы.** Отдельного шага миграций нет: контейнер API при старте вызывает
   `Base.metadata.create_all` (`api/app/schema.py`). Значит новая колонка появится сама, а
   переименование или удаление — нет: такие правки надо делать явно, до релиза.
-- **диск.** 20 ГБ, каждый релиз добавляет около 2,7 ГБ образов, поэтому чистка в скрипте
-  обязательна: без неё машина заполнялась на 100 %.
+- **диск.** 25 ГБ локального NVMe, каждый релиз добавляет около 2,7 ГБ образов, поэтому чистка
+  в скрипте обязательна: без неё машина заполнялась на 100 %.
 
 ## Чего инфраструктура не знает
 

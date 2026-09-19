@@ -2,9 +2,10 @@
 # Read-only снимок prod-БД перед/после релиза. Ничего не удаляет и не блокирует платежи.
 set -euo pipefail
 
-IP="${ARCANA_PROD_IP:-84.201.157.100}"
+IP="${ARCANA_PROD_IP:-45.80.130.166}"
+SSH_USER="${ARCANA_SSH_USER:-root}"
 
-ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" \
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
   "cd /srv/arcana && docker compose exec -T api python -" <<'PY'
 from __future__ import annotations
 

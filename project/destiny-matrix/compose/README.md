@@ -203,19 +203,21 @@ scripts/backup.sh
 
 Копия снимается через `sqlite3 .backup` внутри контейнера (база в WAL, файловая копия без `-wal` —
 устаревший снимок), проверяется `integrity_check` на этой машине и только потом уходит в
-`s3://db-backups-hjb4rfs/destiny-matrix/api-ГГГГММДД-ЧЧММ.db.gz`. У бакета включены версии; копия
-живёт 90 дней, неактуальная версия — 30.
+`r2://arcana-backups/destiny-matrix/api-ГГГГММДД-ЧЧММ.db.gz`. Пока жив аккаунт Яндекса, та же
+копия кладётся и в `s3://db-backups-hjb4rfs/` — вторым адресатом, и её отсутствие релиз не
+останавливает. Восстановление проверяется подъёмом сервиса: `scripts/restore-check.sh`.
 
 Вернуть копию на машину:
 
 ```bash
-yc storage s3api list-objects --bucket db-backups-hjb4rfs --prefix destiny-matrix/
-yc storage s3api get-object --bucket db-backups-hjb4rfs --key destiny-matrix/api-… api.db.gz
+set -a; . ~/.config/arcana/r2.env; set +a
+python3 scripts/r2-last.py                                   # ключ свежей копии
+python3 scripts/r2-get.py destiny-matrix/api-… api.db.gz
 gunzip api.db.gz
-scp api.db ubuntu@84.201.157.100:/tmp/
-ssh ubuntu@84.201.157.100 "sudo systemctl stop arcana \
-  && sudo docker run --rm -v arcana_api-var:/var -v /tmp:/in alpine sh -c 'rm -f /var/api.db-wal /var/api.db-shm && cp /in/api.db /var/api.db' \
-  && sudo systemctl start arcana"
+scp api.db root@45.80.130.166:/tmp/
+ssh root@45.80.130.166 "systemctl stop arcana \
+  && docker run --rm -v arcana_api-var:/var -v /tmp:/in alpine sh -c 'rm -f /var/api.db-wal /var/api.db-shm && cp /in/api.db /var/api.db' \
+  && systemctl start arcana"
 ```
 
 ## Что где лежит

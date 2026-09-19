@@ -1,0 +1,14 @@
+# Бот поддержки живёт здесь, а не на нашем сервере: у машин ни в Yandex Cloud, ни в Selectel нет
+# связи с api.telegram.org (замеры 12.09 и 19.09 — код 000 в обе стороны), а узлы Cloudflare
+# видят и Telegram, и нас.
+name = "arcana-support-bot"
+main = "worker.js"
+compatibility_date = "2026-09-18"
+account_id = "04db91244d8beed7741e3d47759db9fb"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "THREADS"
+id = "161d75487e014b2885f2f4b337bd12d6"
+
+# BOT_TOKEN, WEBHOOK_SECRET и SUPPORT_CHAT_ID кладутся секретами: wrangler secret put.

@@ -6,9 +6,16 @@ cd "$(dirname "$0")/.."
 REQUIRE_TEST_EVIDENCE=1 scripts/assert-release-candidate.sh
 
 SITE=https://arcana-sense.ru
-IP=84.201.157.100
-REGISTRY=cr.yandex/crp68mnbmb6e88p35jsq
+IP="${ARCANA_PROD_IP:-45.80.130.166}"
+SSH_USER="${ARCANA_SSH_USER:-root}"
+REGISTRY="${ARCANA_REGISTRY:-cr.selcloud.ru/arcana}"
 TAG="$(git rev-parse --short HEAD)"
+
+# Реестр Selectel не выдаёт токен по метаданным машины, как это делал Yandex CR: пароль лежит
+# в файле вне репозитория и им же логинится машина.
+CRAAS_ENV="${CRAAS_ENV:-$HOME/.config/arcana/craas.env}"
+test -r "$CRAAS_ENV" || { echo "нет реквизитов реестра: $CRAAS_ENV" >&2; exit 1; }
+set -a; . "$CRAAS_ENV"; set +a
 
 export SITE_URL="$SITE" BUILD_COMMIT="$TAG" BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"
@@ -25,7 +32,7 @@ export BUILD_ISO="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 ZSTD="compression=zstd,compression-level=10,force-compression=true"
 
 echo "== сборка и отправка $TAG"
-yc container registry configure-docker >/dev/null
+echo "$CRAAS_TOKEN" | docker login cr.selcloud.ru -u "$CRAAS_USER" --password-stdin >/dev/null
 docker buildx build --push -f api.Dockerfile \
   --output "type=image,name=$REGISTRY/api:$TAG,$ZSTD" ..
 docker buildx build --push -f browser.Dockerfile \
@@ -50,16 +57,14 @@ scripts/backup.sh
 
 echo "== запуск на $IP"
 # На машину едет только база: без override там нет ни сборки, ни dev-секретов.
-# Всё, кроме systemctl, делает ubuntu: он в группе docker, а .env принадлежит ему. Через sudo
-# логин и pull расходились — токен писался в ~ubuntu, а читался из /root.
-scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "ubuntu@$IP:/srv/arcana/docker-compose.yml"
-ssh -o StrictHostKeyChecking=accept-new "ubuntu@$IP" "cd /srv/arcana \
+scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.yml"
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && (grep -E '^(REGISTRY|TAG|BUILD_COMMIT)=' .env > .env.previous.tag 2>/dev/null || true) \
   && sed -i '/^TAG=/d;/^REGISTRY=/d;/^BUILD_COMMIT=/d' .env \
   && printf 'REGISTRY=%s\nTAG=%s\nBUILD_COMMIT=%s\n' '$REGISTRY' '$TAG' '$TAG' >> .env \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
-  && docker compose pull -q && sudo systemctl restart arcana \
+  && docker compose pull -q && systemctl restart arcana \
   && docker image prune -a -f --filter until=24h >/dev/null"
 # Диск машины 20 ГБ, каждый релиз добавляет ~2,7 ГБ образов: без чистки он заполнился на 100 %
 # и следующий релиз упал на «no space left on device». Чистим после перезапуска, чтобы удалялись

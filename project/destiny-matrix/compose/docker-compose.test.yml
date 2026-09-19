@@ -26,6 +26,8 @@ services:
       APP_ENV: prod
       SITE_URL: https://test.arcana-sense.ru
       PAYMENT_PROVIDER: tbank
+      # как и на локальном стенде: прогоны не должны попадать в боевое хранилище
+      REPORTS_STORE: local
       MAIL_TO_LOG: 1
       PRINT_WARMUP: 0
       PRINT_SLOTS: 1

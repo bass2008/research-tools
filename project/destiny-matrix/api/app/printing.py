@@ -18,6 +18,7 @@ from . import access, reports
 from .config import settings
 from .db import SessionLocal
 from .models import ReportJob, SavedMatrix, User, as_utc, utcnow
+from .store import store
 from .security import create_print_token
 
 log = logging.getLogger("arcana.printing")
@@ -44,10 +45,20 @@ _waiting = 0
 
 
 def ready(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
-    return db.scalars(select(ReportJob)
-                      .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
-                             ReportJob.status == "done")
-                      .order_by(ReportJob.id.desc())).first()
+    """Готовый файл, если он и правда существует. Хранилище чистит отчёты по сроку, а запись
+    остаётся `done` — без этой проверки кнопка отдала бы ссылку на удалённый объект."""
+    row = db.scalars(select(ReportJob)
+                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
+                            ReportJob.status == "done")
+                     .order_by(ReportJob.id.desc())).first()
+    if row is None or not row.object_key:
+        return row
+    if store().exists(row.object_key):
+        return row
+    row.status = "expired"
+    row.object_key = None
+    db.commit()
+    return None
 
 
 def expire_stale(db: Session) -> int:

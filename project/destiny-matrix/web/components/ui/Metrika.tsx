@@ -4,7 +4,8 @@ import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef } from "react";
 
-import { metrikaId, notBounce } from "@/lib/analytics";
+import { alive, metrikaId, notBounce } from "@/lib/analytics";
+import { trackEngagement } from "@/lib/engagement";
 
 // Сайт одноэкранный: без notBounce отказы стабильно около 90 % и тест трафика
 // ничего не измеряет. Пятнадцать секунд — порог из плана запуска.
@@ -19,6 +20,26 @@ export default function Metrika() {
     if (!id) return;
     const t = window.setTimeout(notBounce, NOT_BOUNCE_MS);
     return () => window.clearTimeout(t);
+  }, [id, path]);
+
+  // Длительность визита в Метрике — расстояние между первым и последним событием, и для визита
+  // из одной страницы последним навсегда остаётся notBounce. Отсечки досылают служебные хиты,
+  // пока вкладка на экране: без них чтение статьи неотличимо от ухода на пятнадцатой секунде.
+  useEffect(() => {
+    if (!id) return;
+    const seen = trackEngagement({
+      now: () => Date.now(),
+      schedule: (run, ms) => window.setTimeout(run, ms),
+      cancel: (handle) => window.clearTimeout(handle),
+      hidden: () => document.hidden,
+      send: alive,
+    });
+    const onVisibility = () => seen.visibility();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      seen.stop();
+    };
   }, [id, path]);
 
   // Переходы по Link не перезагружают страницу, и счётчик их не видит: хит отправляем сами.

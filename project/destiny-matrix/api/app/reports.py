@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import json
 import urllib.error
-import urllib.parse
 import urllib.request
 
 from .config import settings
+from .store import store
 
 
 class RenderError(RuntimeError):
@@ -37,13 +37,6 @@ def browser_settings() -> list[dict]:
     return body["items"]
 
 
-def _client():
-    import boto3
-    return boto3.client("s3", endpoint_url=settings.s3_endpoint, region_name=settings.s3_region,
-                        aws_access_key_id=settings.s3_access_key,
-                        aws_secret_access_key=settings.s3_secret_key)
-
-
 def render(url: str) -> bytes:
     """Отдать URL браузерному сервису и получить PDF."""
     body = json.dumps({"url": url, "secret": settings.browser_secret}).encode()
@@ -62,21 +55,10 @@ def render(url: str) -> bytes:
 
 
 def upload(key: str, pdf: bytes) -> None:
-    _client().put_object(Bucket=settings.s3_reports_bucket, Key=key, Body=pdf,
-                         ContentType="application/pdf")
+    store().upload(key, pdf)
 
 
 def link(key: str, filename: str | None = None) -> str:
-    """Ссылка на готовый файл. Имя задаём явно: ключ в хранилище — «<юзер>/<матрица>/<джоб>.pdf»,
-    и в загрузках у покупателя лежал файл с номером задачи вместо даты разбора."""
-    params: dict = {"Bucket": settings.s3_reports_bucket, "Key": key}
-    if filename:
-        safe = filename.replace('"', "").replace("\n", " ")
-        ascii_name = "".join(c if c.isascii() and c.isprintable() else "_" for c in safe)
-        quoted = urllib.parse.quote(safe)
-        params["ResponseContentDisposition"] = (
-            f'attachment; filename="{ascii_name}"; filename*=UTF-8\'\'{quoted}'
-        )
-    return _client().generate_presigned_url(
-        "get_object", Params=params, ExpiresIn=settings.report_link_ttl_seconds,
-    )
+    """Ссылка на готовый файл. Имя задаём явно: ключ хранит номера («<юзер>/<матрица>/<джоб>.pdf»),
+    а в загрузках у покупателя должна лежать дата разбора."""
+    return store().link(key, filename)

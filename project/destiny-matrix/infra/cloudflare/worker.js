@@ -40,17 +40,32 @@ async function topicFor(env, chat) {
   return topic;
 }
 
+async function forget(env, chat, topic) {
+  await env.THREADS.delete(`chat:${chat.id}`);
+  await env.THREADS.delete(`topic:${topic}`);
+}
+
 async function fromClient(env, message, chat) {
   if ((message.text ?? "").startsWith("/start")) {
     await call(env, "sendMessage", { chat_id: chat.id, text: env.GREETING ?? GREETING });
     return;
   }
-  await call(env, "copyMessage", {
+  const copy = (topic) => call(env, "copyMessage", {
     chat_id: Number(env.SUPPORT_CHAT_ID),
     from_chat_id: chat.id,
     message_id: message.message_id,
-    message_thread_id: await topicFor(env, chat),
+    message_thread_id: topic,
   });
+  const topic = await topicFor(env, chat);
+  try {
+    await copy(topic);
+  } catch (failure) {
+    // Тему в группе могли удалить руками, а пара в KV об этом не знает: Telegram отвечает
+    // «message thread not found», и письмо клиента пропадало молча. Заводим тему заново.
+    if (!/thread not found/i.test(String(failure))) throw failure;
+    await forget(env, chat, topic);
+    await copy(await topicFor(env, chat));
+  }
 }
 
 async function fromSupport(env, message) {

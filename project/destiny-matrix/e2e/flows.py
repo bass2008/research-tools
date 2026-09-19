@@ -134,6 +134,12 @@ def save_current(page: Page) -> None:
 def matrix_ids(page: Page) -> list[int]:
     """Номера матриц владельца — из ссылок на карточках кабинета."""
     account(page)
+    # Список приезжает запросом после отрисовки страницы: на удалённом стенде он не успевал,
+    # и карточки читались из пустого кабинета.
+    try:
+        page.locator("[data-testid=matrix-card]").first.wait_for(state="attached", timeout=10_000)
+    except Exception:                      # noqa: BLE001 — у человека может не быть ни одной
+        return []
     hrefs = page.locator("[data-testid=matrix-card] a").evaluate_all(
         "els => els.map(e => e.getAttribute('href'))")
     out = []

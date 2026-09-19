@@ -12,8 +12,8 @@
 cd /home/sergey/Personal/research-tools/project/destiny-matrix && git branch --show-current
 ```
 
-Нужно: `yc` с токеном, `docker buildx`, ssh к `ubuntu@84.201.157.100`,
-`~/.config/arcana/test-auth.env`. Python — `/home/sergey/miniconda3/envs/research3.12/bin/python`
+Нужно: `docker buildx`, ssh к `root@45.80.130.166`, `~/.config/arcana/craas.env` (реестр
+Selectel), `~/.config/arcana/r2.env` (бэкап) и `~/.config/arcana/test-auth.env`. Python — `/home/sergey/miniconda3/envs/research3.12/bin/python`
 (`conda run` глотает вывод). `~/.config/arcana/seo.env` не нужен: владение подтверждено DNS и
 Метрикой.
 

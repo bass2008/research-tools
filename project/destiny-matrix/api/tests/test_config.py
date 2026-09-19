@@ -8,7 +8,7 @@ from app.config import SettingManager, Settings, settings
 def test_defaults_are_dev_friendly():
     s = Settings(_env_file=None)
     assert s.jwt_ttl_days == 30
-    assert s.mock_payments is True
+    assert s.mock_payments is False      # включается только явно: см. test_payments
     assert s.api_prefix == "/api"
     assert s.presence_flush_seconds == 3600
     assert len(s.jwt_secret.encode()) >= 32   # иначе PyJWT предупреждает про слабый ключ

@@ -20,6 +20,15 @@ from app import tariffs  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
+def mock_payments(monkeypatch):
+    """Оплата в контрактных тестах — игрушечная. Боевой дефолт её выключает, иначе любой запрос
+    к /api/payments/mock открывал бы платный разбор."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "mock_payments", True)
+
+
+@pytest.fixture(autouse=True)
 def no_warmup(monkeypatch):
     """Прогрев печати после оплаты в контрактных тестах выключен: браузера здесь нет, а фоновый
     поток переживал свой тест и мешал следующему. Тесты самого прогрева включают его сами."""

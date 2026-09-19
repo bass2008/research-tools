@@ -224,15 +224,18 @@ def test_second_purchase_adds_second_right(client, db):
     assert {tuple(r.scopes()) for r in rights} == {("single",), ("single", "matrix", "all")}
 
 
-def test_mock_flag_exists_in_settings():
-    """Выключатель мок-оплаты есть и по умолчанию включён.
+def test_mock_is_off_until_switched_on():
+    """Мок-оплата выключена, пока её не включили явно.
+
+    Это не вкус, а деньги: при включённом моке запрос к /api/payments/mock открывает платный
+    разбор кому угодно. Стенды включают флаг сами, боевой контур — нет.
 
     Проверять отказ через подмену переменной здесь нельзя: настройки кешируются на процесс,
     а приложение читает их при создании. Поведение выключенного мока проверяется на стенде.
     """
     from app.config import Settings
-    assert Settings(_env_file=None).mock_payments is True
-    assert Settings(_env_file=None, mock_payments=False).mock_payments is False
+    assert Settings(_env_file=None).mock_payments is False
+    assert Settings(_env_file=None, mock_payments=True).mock_payments is True
 
 
 def test_payments_listing_shows_own_history(client, auth, db):
