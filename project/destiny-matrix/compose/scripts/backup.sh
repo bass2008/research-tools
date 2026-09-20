@@ -7,7 +7,7 @@ IP="${ARCANA_PROD_IP:-45.80.130.166}"
 SSH_USER="${ARCANA_SSH_USER:-root}"
 BUCKET=db-backups-hjb4rfs
 PREFIX=destiny-matrix
-CONTAINER=arcana-api-1
+CONTAINER=${ARCANA_API_CONTAINER:-arcana-ru-api-1}
 
 STAMP="$(TZ=Europe/Moscow date '+%Y%m%d-%H%M')"
 NAME="api-$STAMP.db.gz"

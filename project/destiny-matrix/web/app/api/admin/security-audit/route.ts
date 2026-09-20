@@ -8,3 +8,5 @@ export const GET = (req: NextRequest) => {
   const qs = req.nextUrl.searchParams.toString();
   return forward(`/admin/security-audit${qs ? `?${qs}` : ""}`, { auth: true });
 };
+
+export const DELETE = () => forward("/admin/security-audit", { auth: true, method: "DELETE" });

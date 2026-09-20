@@ -65,3 +65,4 @@ export function langsOfPath(path: string): readonly Lang[] | null {
   const key = KEYS.find((k) => SERVICE_PAGES[k].path === path);
   return key ? SERVICE_PAGES[key].langs : null;
 }
+

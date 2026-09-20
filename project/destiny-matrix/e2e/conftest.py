@@ -86,7 +86,7 @@ def mail() -> str:
 # Тестовый контур живёт на боевой машине отдельным проектом compose: те же прогоны гоняются
 # против него, и тогда логи и служебные команды берутся по ssh, а не у локального docker.
 REMOTE_HOST = os.environ.get("E2E_SSH_HOST", "root@45.80.130.166")
-REMOTE_API = os.environ.get("E2E_REMOTE_API", "arcana-test-test-api-1")
+REMOTE_API = os.environ.get("E2E_REMOTE_API", "arcana-test-ru-api-1")
 REMOTE = "arcana-sense.ru" in BASE
 
 
@@ -94,7 +94,7 @@ def _api_command(args: list[str]) -> subprocess.CompletedProcess:
     if REMOTE:
         return subprocess.run(["ssh", "-n", REMOTE_HOST, "docker", "exec", REMOTE_API, *args],
                               capture_output=True, text=True)
-    container = os.environ.get("E2E_API_CONTAINER", "arcana-api-1")
+    container = os.environ.get("E2E_API_CONTAINER", "arcana-ru-api-1")
     return subprocess.run(["docker", "exec", container, *args], capture_output=True, text=True)
 
 
@@ -104,7 +104,7 @@ def api_log():
 
     # Читаем контейнер по имени, а не через compose: файл стенда требует SITE_LANG и имя
     # проекта, и без них команда возвращала пустоту — тест падал не потому, что письмо не ушло.
-    container = os.environ.get("E2E_API_CONTAINER", "arcana-api-1")
+    container = os.environ.get("E2E_API_CONTAINER", "arcana-ru-api-1")
 
     def read(pattern: str) -> str | None:
         host = [REMOTE_HOST] if REMOTE else []

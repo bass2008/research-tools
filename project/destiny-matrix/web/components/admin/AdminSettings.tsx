@@ -44,8 +44,12 @@ function SettingGroup({ title, rows }: { title: string; rows: ApplicationSetting
 export default function AdminSettings() {
   const [settings, setSettings] = useState<ApplicationSettings | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Простыня на полсотни строк открывается редко и только под конкретный вопрос, поэтому
+  // запрос уходит вместе с раскрытием, а не при загрузке страницы.
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
     let active = true;
     void api.admin.settings()
       .then((answer) => { if (active) setSettings(answer); })
@@ -53,7 +57,7 @@ export default function AdminSettings() {
         if (active) setError(err instanceof ApiError ? err.message : "Настройки не загрузились.");
       });
     return () => { active = false; };
-  }, []);
+  }, [open]);
 
   return (
     <div className="panel section-gap" data-testid="admin-settings">
@@ -61,6 +65,14 @@ export default function AdminSettings() {
       <div className="cap">
         Startup-снимок из памяти процессов. Для изменения значения нужен перезапуск приложения.
       </div>
+      <div style={{ margin: "8px 0" }}>
+        <button type="button" className="btn sm ghost" data-testid="admin-settings-toggle"
+                aria-expanded={open} onClick={() => setOpen((was) => !was)}>
+          {open ? "Скрыть" : "Показать"}
+        </button>
+      </div>
+      {!open ? null : (
+        <>
       {error ? <p className="err" role="status">{error}</p> : null}
       {!settings && !error ? <p className="skeleton">Загружаем…</p> : null}
       {settings ? (
@@ -72,6 +84,8 @@ export default function AdminSettings() {
           <SettingGroup title="Backend" rows={settings.backend.items} />
         </>
       ) : null}
+        </>
+      )}
     </div>
   );
 }

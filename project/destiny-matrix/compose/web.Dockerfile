@@ -46,7 +46,10 @@ ENV NEXT_PUBLIC_BUILD_COMMIT=${BUILD_COMMIT} \
     NEXT_PUBLIC_BUILD_ISO=${BUILD_ISO}
 # Кеш Next переживает пересборку слоя: правка одного компонента не заставляет печатать
 # 5 544 страницы заново. Кеш живёт в докере, в образ не попадает.
-RUN --mount=type=cache,target=/app/.next/cache npm run build
+# sharing=locked: русская и английская сборки идут одновременно (docker-compose.full.yml) и
+# делят один кеш Next. Без замка вторая входит в тот же каталог и роняет первую паникой
+# внутри rust-части сборщика.
+RUN --mount=type=cache,target=/app/.next/cache,sharing=locked npm run build
 
 FROM node:22-alpine AS runtime
 WORKDIR /app

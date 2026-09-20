@@ -226,8 +226,18 @@ function scopeList(value: unknown): string[] {
 
 export interface Pulse {
   at: string;
-  memory: { total_mb: number; used_mb: number; percent: number };
-  cpu: { load1: number; load5: number; load15: number; cores: number; percent: number };
+  memory: {
+    total_mb: number; used_mb: number; percent: number;
+    swap_total_mb: number; swap_used_mb: number; swap_percent: number;
+  };
+  cpu: {
+    load1: number; load5: number; load15: number; cores: number;
+    percent: number; window_seconds: number;
+  };
+  contours: {
+    title: string; percent: number; memory_mb: number;
+    items: { name: string; percent: number; memory_mb: number }[];
+  }[];
   disk: { path: string; total_gb: number; free_gb: number; used_gb: number; percent: number };
   data_disk: { path: string; total_gb: number; free_gb: number; used_gb: number; percent: number };
   online: {
@@ -318,11 +328,21 @@ export const api = {
   payments: () => request<{ items: PaymentItem[] }>("/payments"),
 
   admin: {
-    users: () => request<{ items: AdminUser[] }>("/admin/users"),
+    users: (page = 1, pageSize = 10) => {
+      const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      return request<{ items: AdminUser[]; total: number; page: number; page_size: number }>(
+        `/admin/users?${q.toString()}`,
+      );
+    },
     payments: () => request<{ items: AdminPayment[] }>("/admin/payments"),
     user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
-    reports: () => request<{ items: AdminReportJob[]; running: number; failed: number;
-                            avg_seconds: number | null }>("/admin/reports"),
+    reports: (page = 1, pageSize = 10) => {
+      const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      return request<{ items: AdminReportJob[]; running: number; failed: number;
+                       avg_seconds: number | null; total: number }>(
+        `/admin/reports?${q.toString()}`,
+      );
+    },
     sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
     pulse: () => request<Pulse>("/admin/pulse"),
     settings: () => request<ApplicationSettings>("/admin/settings"),
@@ -360,6 +380,8 @@ export const api = {
       });
       return request<SecurityAuditPage>(`/admin/security-audit?${q.toString()}`);
     },
+    clearSecurityAudit: () =>
+      request<{ removed: number }>("/admin/security-audit", { method: "DELETE" }),
   },
 
   // Дата уходит на сервер только по явному действию авторизованного пользователя:

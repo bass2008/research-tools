@@ -28,10 +28,21 @@ function accessLine(u: AdminUser): string {
   return parts.length ? parts.join(" · ") : "нет прав";
 }
 
+const USER_SIZES = [10, 25, 50, 100];
+
 export default function AdminView() {
   const [users, setUsers] = useState<AdminUser[] | null>(null);
+  // Список растёт, а в каждой строке считаются права и покупки: отдаём страницами, новые сверху.
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [usersPage, setUsersPage] = useState(1);
+  const [usersSize, setUsersSize] = useState(10);
   const [payments, setPayments] = useState<AdminPayment[] | null>(null);
   const [jobs, setJobs] = useState<AdminReportJob[] | null>(null);
+  const [jobsTotal, setJobsTotal] = useState(0);
+  const [jobsRunning, setJobsRunning] = useState(0);
+  const [jobsFailed, setJobsFailed] = useState(0);
+  const [jobsPage, setJobsPage] = useState(1);
+  const [jobsSize, setJobsSize] = useState(10);
   const [sweeps, setSweeps] = useState<SweepRun[] | null>(null);
   const [avgSeconds, setAvgSeconds] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +59,9 @@ export default function AdminView() {
   const [downloading, setDownloading] = useState<number | null>(null);
 
   const reloadUsers = () => {
-    void api.admin.users().then((u) => setUsers(u.items)).catch(() => undefined);
+    void api.admin.users(usersPage, usersSize)
+      .then((u) => { setUsers(u.items); setUsersTotal(u.total); })
+      .catch(() => undefined);
   };
 
   const download = async (job: AdminReportJob) => {
@@ -92,7 +105,7 @@ export default function AdminView() {
       // Обе таблицы должны быть одним снимком. Пока перечитывались только люди, платёж,
       // пришедший между открытием админки и возвратом, попадал в покупатели, но отсутствовал
       // в платежах до F5.
-      void Promise.allSettled([api.admin.users(), api.admin.payments()]).then(([freshUsers, freshPayments]) => {
+      void Promise.allSettled([api.admin.users(usersPage, usersSize), api.admin.payments()]).then(([freshUsers, freshPayments]) => {
         if (freshUsers.status === "fulfilled") setUsers(freshUsers.value.items);
         if (freshPayments.status === "fulfilled") setPayments(freshPayments.value.items);
       });
@@ -116,17 +129,36 @@ export default function AdminView() {
       }
       setError((was) => was ?? (err instanceof ApiError ? err.message : "Часть данных не пришла."));
     };
-    void api.admin.users().then((u) => setUsers(u.items)).catch(fail);
     void api.admin.payments().then((p) => setPayments(p.items)).catch(fail);
-    void api.admin
-      .reports()
-      .then((r) => {
-        setJobs(r.items);
-        setAvgSeconds(r.avg_seconds);
-      })
-      .catch(fail);
+
     void api.admin.sweeps().then((s) => setSweeps(s.items)).catch(fail);
   }, []);
+
+  // Очередь печати тоже страницами: сводка «в работе / с ошибкой» приходит по всей очереди.
+  useEffect(() => {
+    void api.admin.reports(jobsPage, jobsSize)
+      .then((r) => {
+        setJobs(r.items);
+        setJobsTotal(r.total);
+        setJobsRunning(r.running);
+        setJobsFailed(r.failed);
+        setAvgSeconds(r.avg_seconds);
+      })
+      .catch((err: unknown) => {
+        if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err.message);
+        else setError((was) => was ?? "Очередь печати не пришла.");
+      });
+  }, [jobsPage, jobsSize]);
+
+  // Список людей перезапрашивается при смене страницы и размера — остальные таблицы не трогаем.
+  useEffect(() => {
+    void api.admin.users(usersPage, usersSize)
+      .then((u) => { setUsers(u.items); setUsersTotal(u.total); })
+      .catch((err: unknown) => {
+        if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err.message);
+        else setError((was) => was ?? "Список людей не пришёл.");
+      });
+  }, [usersPage, usersSize]);
 
   const settled = (payments ?? []).filter((p) => p.state === "paid");
   const paidTotal = settled.reduce((sum, p) => sum + p.amount, 0);
@@ -179,7 +211,7 @@ export default function AdminView() {
       <div className="panel section-gap">
         <h3>Пользователи</h3>
         <div className="cap">
-          {users ? `${counted(users.length, "человек", "человека", "человек")} всего` : "загружаем…"}
+          {users ? `${counted(usersTotal, "человек", "человека", "человек")} всего` : "загружаем…"}
           {payments
             ? ` · оплачено ${money(paidTotal)} ₽ за ` +
               `${counted(settled.length, "платёж", "платежа", "платежей")}` +
@@ -230,6 +262,33 @@ export default function AdminView() {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div
+          data-testid="users-pager"
+          style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}
+        >
+          <button type="button" className="btn ghost sm" disabled={usersPage <= 1}
+                  data-testid="users-prev"
+                  onClick={() => setUsersPage((p) => Math.max(1, p - 1))}>
+            Назад
+          </button>
+          <span className="dim">
+            Стр. {usersPage} из {Math.max(1, Math.ceil(usersTotal / usersSize))}
+          </span>
+          <button type="button" className="btn ghost sm"
+                  disabled={usersPage >= Math.ceil(usersTotal / usersSize)}
+                  data-testid="users-next"
+                  onClick={() => setUsersPage((p) => p + 1)}>
+            Вперёд
+          </button>
+          <label className="dim">
+            На странице:{" "}
+            <select value={usersSize} data-testid="users-size"
+                    onChange={(e) => { setUsersSize(Number(e.target.value)); setUsersPage(1); }}>
+              {USER_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
         </div>
       </div>
 
@@ -318,8 +377,8 @@ export default function AdminView() {
         <div className="cap">
           {jobs === null
             ? "Печать PDF: что запрашивали и сколько это заняло"
-            : `Печатей: ${jobs.length} · в работе: ${jobs.filter((j) => j.status === "running").length}` +
-              ` · с ошибкой: ${jobs.filter((j) => j.status === "failed").length}` +
+            : `Печатей: ${jobsTotal} · в работе: ${jobsRunning}` +
+              ` · с ошибкой: ${jobsFailed}` +
               (avgSeconds ? ` · в среднем ${avgSeconds} с` : "")}
         </div>
         <div className="tablewrap">
@@ -383,6 +442,33 @@ export default function AdminView() {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div
+          data-testid="reports-pager"
+          style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}
+        >
+          <button type="button" className="btn ghost sm" disabled={jobsPage <= 1}
+                  data-testid="reports-prev"
+                  onClick={() => setJobsPage((p) => Math.max(1, p - 1))}>
+            Назад
+          </button>
+          <span className="dim">
+            Стр. {jobsPage} из {Math.max(1, Math.ceil(jobsTotal / jobsSize))}
+          </span>
+          <button type="button" className="btn ghost sm"
+                  disabled={jobsPage >= Math.ceil(jobsTotal / jobsSize)}
+                  data-testid="reports-next"
+                  onClick={() => setJobsPage((p) => p + 1)}>
+            Вперёд
+          </button>
+          <label className="dim">
+            На странице:{" "}
+            <select value={jobsSize} data-testid="reports-size"
+                    onChange={(e) => { setJobsSize(Number(e.target.value)); setJobsPage(1); }}>
+              {USER_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
         </div>
       </div>
 

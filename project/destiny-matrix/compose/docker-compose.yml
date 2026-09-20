@@ -8,7 +8,7 @@
 name: arcana
 
 services:
-  api:
+  ru-api:
     image: ${REGISTRY:-arcana}/api:${TAG:-dev}
     # Секреты — только файлом, и ни одной строкой в environment: явное значение в compose имеет
     # приоритет над env_file, поэтому `S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}` затирал бы ключ из файла
@@ -29,7 +29,7 @@ services:
       SITE_URL: ${SITE_URL:-https://arcana-sense.ru}
       # печать PDF: браузер отдельным сервисом, готовые файлы — в Object Storage
       BROWSER_URL: ${BROWSER_URL:-http://browser:3001}
-      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://web:3000}
+      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://ru-web:3000}
       # мониторинг: свои метрики уезжают в Yandex Cloud, токен берётся из метаданных машины.
       # Пусто — метрики собираются только для админки и никуда не отправляются (так на стенде).
       MONITORING_FOLDER: ${MONITORING_FOLDER:-}
@@ -40,6 +40,13 @@ services:
       # логи nginx только на чтение: краулеры ходят по страницам, до api не доходят, и увидеть их
       # можно единственным способом — прочитать лог. Нет каталога (стенд) — счётчик молчит.
       - ${NGINX_LOG_DIR:-/var/log/nginx}:/var/log/nginx:ro
+      # админка показывает, сколько ест каждый контур: имена контейнеров лежат в метаданных
+      # docker, потребление — в cgroup хоста. Только чтение; без них остаётся общая загрузка.
+      - /sys/fs/cgroup:/host/cgroup:ro
+      - /var/lib/docker/containers:/host/containers:ro
+    # без этого в смонтированном каталоге видна только собственная ветка контейнера: docker по
+    # умолчанию даёт приватное пространство имён cgroup, и соседей в нём нет
+    cgroup: host
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
       interval: 10s
@@ -50,13 +57,16 @@ services:
 
   # Chromium для печати PDF. Отдельный контейнер: повышенные права и 300+ МБ памяти на печать
   # не должны жить рядом с сайтом, а зависший браузер лечится перезапуском одного сервиса.
-  browser:
+  ru-browser:
     image: ${REGISTRY:-arcana}/browser:${TAG:-dev}
     # печать одна на машину: браузер держит до 350 МБ, второй такой в 2 ГБ не влезает. Тестовый
     # контур ходит сюда же через сеть arcana-print, а предел одновременных печатей — внутри сервиса.
+    # Алиас `browser` оставлен: по этому имени в сеть печати ходят все три соседних контура.
     networks:
-      - default
-      - print
+      default: {}
+      print:
+        aliases:
+          - browser
     # тот же файл секретов, что у api: BROWSER_SECRET у них обязан совпадать
     env_file:
       - path: .env
@@ -74,11 +84,11 @@ services:
       start_period: 5s
     restart: unless-stopped
 
-  web:
+  ru-web:
     image: ${REGISTRY:-arcana}/web:${TAG:-dev}
     environment:
       # BFF ходит в api по имени сервиса — наружу этот адрес не попадает
-      API_INTERNAL_URL: http://api:8010
+      API_INTERNAL_URL: http://ru-api:8010
       # язык и витрина вшиты в сборку образа; здесь они нужны приёмке и логам
       NEXT_PUBLIC_SITE_LANG: "${SITE_LANG:?язык развёртки обязателен, ru или en}"
       NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
@@ -91,7 +101,7 @@ services:
       - ${STATIC_DIR:-/srv/arcana/static}:/static-out
     command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
     depends_on:
-      api:
+      ru-api:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]

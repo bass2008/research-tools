@@ -168,6 +168,8 @@ def test_admin_sees_lists_and_stranger_does_not(page, mail):
     # BFF объединяет startup-снимки двух процессов, но API возвращает секреты только обрезанными.
     settings = page.get_by_test_id("admin-settings")
     expect(settings).to_be_visible(timeout=20_000)
+    # таблица переменных свёрнута: полсотни строк открываются кнопкой, а не при загрузке
+    page.get_by_test_id("admin-settings-toggle").click()
     expect(page.get_by_test_id("admin-settings-frontend")).to_contain_text("NEXT_PUBLIC_SITE_URL")
     backend = page.get_by_test_id("admin-settings-backend")
     expect(backend).to_contain_text("JWT_SECRET")

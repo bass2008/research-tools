@@ -2,7 +2,7 @@
   "generated_at": "2026-08-30",
   "raw_source": "logs/needs-lab/матрица-судьбы-dd5dcc98/params.json",
   "raw_sha256": "7c2a1e147e377fd95af26a69e0bd756afe40d82bb99104d67ee3776f4e558e8d",
-  "classifier_sha256": "8b582e990b02d205d5762c34b11945879c25ce4c9c83fad2b27bc5a61d8c90cf",
+  "classifier_sha256": "b248ec6c7a3e3c67e3ff9e14be1e3a8d213ed9451b893de0dc5905a2c5665be2",
   "raw_rows": 603,
   "raw_frequency": 199240,
   "unique_unordered_shapes": 257,

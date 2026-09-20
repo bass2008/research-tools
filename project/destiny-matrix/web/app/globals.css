@@ -1255,6 +1255,12 @@ body:has(.printmode) { background: #fff; }
 .pnums { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0; }
 .ptrouble { margin: 6px 0; padding-left: 18px; color: #c0392b; }
 
+/* Разбивка ресурсов по контурам: сколько ест русский сайт, английский и их тесты. */
+.pcontours { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 10px 0; }
+.pcontour { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.pcontour ul { margin: 6px 0 0; padding-left: 16px; }
+.pcontour li { line-height: 1.5; }
+
 /* Столбец действий в админских таблицах: кнопка прижата к правому краю строки. */
 .postab td.act { text-align: right; white-space: nowrap; }
 

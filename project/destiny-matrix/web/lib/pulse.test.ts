@@ -5,8 +5,10 @@ import type { Pulse } from "./api";
 
 const calm: Pulse = {
   at: "2026-08-25T10:00:00Z",
-  memory: { total_mb: 1967, used_mb: 900, percent: 45 },
-  cpu: { load1: 0.2, load5: 0.2, load15: 0.2, cores: 2, percent: 10 },
+  memory: { total_mb: 1967, used_mb: 900, percent: 45,
+            swap_total_mb: 0, swap_used_mb: 0, swap_percent: 0 },
+  cpu: { load1: 0.2, load5: 0.2, load15: 0.2, cores: 2, percent: 10, window_seconds: 60 },
+  contours: [],
   disk: { path: "/", total_gb: 19, free_gb: 11, used_gb: 8, percent: 44 },
   data_disk: { path: "/srv/api/var", total_gb: 19, free_gb: 11, used_gb: 8, percent: 44 },
   online: { people: 3, tabs: 5, robots: 12, pages: [{ path: "/", people: 2, tabs: 4 }] },

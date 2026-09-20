@@ -59,9 +59,19 @@ def _row(db: Session, user: User) -> dict:
 
 
 @router.get("/users")
-def users(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
-    rows = db.scalars(select(User).order_by(User.id.desc())).all()
-    return {"items": [_row(db, u) for u in rows]}
+def users(page: int = 1, page_size: int = 10,
+          _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Страница списка: у каждой строки считаются права и покупки, поэтому отдавать всех разом
+    дорого. Порядок — от новых регистраций к старым."""
+    page = max(1, page)
+    page_size = min(max(page_size, 1), 200)
+    total = db.scalar(select(func.count(User.id))) or 0
+    rows = db.scalars(
+        select(User).order_by(User.created_at.desc(), User.id.desc())
+        .offset((page - 1) * page_size).limit(page_size)
+    ).all()
+    return {"items": [_row(db, u) for u in rows], "total": int(total),
+            "page": page, "page_size": page_size}
 
 
 @router.get("/payments")
@@ -103,18 +113,29 @@ def refund(payment_id: int, _: User = Depends(admin_user), db: Session = Depends
 
 
 @router.get("/reports")
-def reports(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+def reports(page: int = 1, page_size: int = 10,
+            _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     """Очередь печати: что печатали, сколько это заняло и что упало. Клиенту она не видна —
-    для него запрос синхронный."""
+    для него запрос синхронный.
+
+    Строки отдаются страницей, а сводка считается по всей очереди: «сколько упало» про очередь
+    целиком, а не про десять последних записей."""
     printing.expire_stale(db)
+    page = max(1, page)
+    page_size = min(max(page_size, 1), 200)
     rows = db.execute(
         select(ReportJob, User.email).join(User, User.id == ReportJob.user_id)
         .order_by(ReportJob.id.desc())
     ).all()
     running = sum(1 for job, _e in rows if job.status == "running")
     done = [job.seconds() for job, _e in rows if job.status == "done" and job.seconds()]
+    page_rows = rows[(page - 1) * page_size:(page - 1) * page_size + page_size]
     return {
-        "items": [{**job.item(), "user_id": job.user_id, "email": email} for job, email in rows],
+        "items": [{**job.item(), "user_id": job.user_id, "email": email}
+                  for job, email in page_rows],
+        "total": len(rows),
+        "page": page,
+        "page_size": page_size,
         "running": running,
         "failed": sum(1 for job, _e in rows if job.status == "failed"),
         # среднее время печати: по нему видно, хватает ли машине процессора
@@ -271,3 +292,12 @@ def security_audit(category: str = "all", page: int = 1, page_size: int = 10,
     ).all()
     return {"items": [r.item() for r in rows], "total": int(total),
             "page": page, "page_size": page_size}
+
+
+@router.delete("/security-audit")
+def clear_security_audit(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Очистить журнал целиком: он растёт на каждую попытку входа, и разбор старых перебора
+    заканчивается вместе с самим перебором."""
+    removed = db.query(SecurityAudit).delete()
+    db.commit()
+    return {"removed": int(removed)}

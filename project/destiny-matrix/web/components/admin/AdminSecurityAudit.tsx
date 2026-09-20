@@ -36,6 +36,8 @@ export default function AdminSecurityAudit() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [error, setError] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -57,13 +59,28 @@ export default function AdminSecurityAudit() {
     return () => {
       alive = false;
     };
-  }, [category, page, pageSize]);
+  }, [category, page, pageSize, reload]);
 
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
   const pick = (c: AuditCategory) => {
     setCategory(c);
     setPage(1);
+  };
+
+  // Журнал растёт на каждую попытку входа, и после разбора перебора старые записи мешают
+  // видеть новые. Спрашиваем подтверждение: восстановить удалённое нечем.
+  const clear = () => {
+    if (!window.confirm(`Удалить все записи журнала (${total})? Отменить будет нельзя.`)) return;
+    setClearing(true);
+    api.admin
+      .clearSecurityAudit()
+      .then(() => {
+        setPage(1);
+        setReload((n) => n + 1);
+      })
+      .catch((err) => setError(err instanceof ApiError ? err.message : "Очистить не вышло."))
+      .finally(() => setClearing(false));
   };
 
   return (
@@ -95,6 +112,17 @@ export default function AdminSecurityAudit() {
             {t.label}
           </button>
         ))}
+        {/* очистка стоит в том же ряду, что и отбор: обе кнопки про одну таблицу */}
+        <button
+          type="button"
+          className="btn sm ghost"
+          data-testid="audit-clear"
+          onClick={clear}
+          disabled={clearing || !total}
+          style={{ marginLeft: "auto" }}
+        >
+          {clearing ? "Чистим…" : "Очистить"}
+        </button>
       </div>
 
       {error ? (

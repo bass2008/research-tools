@@ -16,7 +16,7 @@ services:
   # Имена сервисов уникальны на всю машину: compose добавляет алиас по имени сервиса в каждую
   # сеть, и одноимённый «web» в общей сети печати уже приводил к тому, что браузер печатал
   # чужую страницу.
-  prod-en-api:
+  en-api:
     image: ${REGISTRY:-arcana}/api:${TAG:-prod-en}
     # Секреты — только файлом: явное значение в environment имеет приоритет над env_file и
     # затёрло бы ключ пустой строкой.
@@ -35,7 +35,7 @@ services:
       PRINT_WARMUP: 0
       PRINT_SLOTS: 1
       BROWSER_URL: http://browser:3001
-      WEB_INTERNAL_URL: http://prod-en-web:3000
+      WEB_INTERNAL_URL: http://en-web:3000
       MONITORING_FOLDER: ""
       BUILD_COMMIT: ${TAG:-prod-en}
     volumes:
@@ -54,10 +54,10 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  prod-en-web:
+  en-web:
     image: ${REGISTRY:-arcana}/web:${TAG:-prod-en}
     environment:
-      API_INTERNAL_URL: http://prod-en-api:8010
+      API_INTERNAL_URL: http://en-api:8010
       # язык и витрина вшиты в образ на сборке; здесь они нужны приёмке и логам
       NEXT_PUBLIC_SITE_LANG: en
       NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: 1
@@ -72,7 +72,7 @@ services:
       - default
       - print
     depends_on:
-      prod-en-api:
+      en-api:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]

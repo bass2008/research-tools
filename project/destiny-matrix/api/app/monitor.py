@@ -39,21 +39,142 @@ def memory() -> dict:
     with open("/proc/meminfo", encoding="utf-8") as f:
         for line in f:
             name, _, rest = line.partition(":")
-            if name in ("MemTotal", "MemAvailable"):
+            if name in ("MemTotal", "MemAvailable", "SwapTotal", "SwapFree"):
                 values[name] = int(rest.strip().split()[0])
     total = values.get("MemTotal", 0)
     free = values.get("MemAvailable", 0)
     used = max(total - free, 0)
+    swap_total = values.get("SwapTotal", 0)
+    swap_used = max(swap_total - values.get("SwapFree", 0), 0)
     return {"total_mb": total // 1024, "used_mb": used // 1024,
-            "percent": round(used * 100 / total, 1) if total else 0.0}
+            "percent": round(used * 100 / total, 1) if total else 0.0,
+            "swap_total_mb": swap_total // 1024, "swap_used_mb": swap_used // 1024,
+            "swap_percent": round(swap_used * 100 / swap_total, 1) if swap_total else 0.0}
+
+
+def _cpu_ticks() -> tuple[int, int]:
+    """Занятые и все тики процессора с загрузки машины: строка `cpu` из `/proc/stat`."""
+    with open("/proc/stat", encoding="utf-8") as f:
+        fields = [int(x) for x in f.readline().split()[1:9]]
+    total = sum(fields)
+    return total - fields[3] - fields[4], total
+
+
+CPU_WINDOW = 60
+_cpu_marks: list[tuple[float, int, int]] = []
 
 
 def cpu() -> dict:
+    """Загрузка процессора за последнюю минуту — доля занятых тиков, 0–100 % на ядро.
+
+    Раньше здесь печатался `load1 * 100 / ядра`, и на одном ядре панель показывала «136 %».
+    Load — длина очереди, а не проценты: он считает и тех, кто ждёт диск, и превышает сотню
+    там, где процессор наполовину свободен.
+
+    Окно фиксированное, а не «от прошлого опроса»: админку опрашивают раз в десять секунд,
+    фоновый мониторинг — раз в минуту, и при общей отметке интервал зависел бы от того, кто
+    спросил последним. Храним снимки и считаем от самого раннего в пределах минуты; пока
+    истории меньше, окно короче, и настоящую длину отдаём рядом с числом.
+    """
+    now = time.time()
+    busy, total = _cpu_ticks()
+    _cpu_marks.append((now, busy, total))
+    while len(_cpu_marks) > 2 and _cpu_marks[1][0] >= now - CPU_WINDOW:
+        _cpu_marks.pop(0)
+    while len(_cpu_marks) > 120:
+        _cpu_marks.pop(0)
+
+    first = _cpu_marks[0]
+    window_ticks = total - first[2]
+    percent = round((busy - first[1]) * 100 / window_ticks, 1) if window_ticks > 0 else 0.0
+    window_seconds = round(now - first[0], 1)
+
     with open("/proc/loadavg", encoding="utf-8") as f:
         one, five, fifteen = f.read().split()[:3]
     cores = os.cpu_count() or 1
     return {"load1": float(one), "load5": float(five), "load15": float(fifteen),
-            "cores": cores, "percent": round(float(one) * 100 / cores, 1)}
+            "cores": cores, "percent": percent, "window_seconds": window_seconds}
+
+
+# Контейнеры соседних контуров видны только через хостовые cgroup: имя и потребление лежат в
+# разных местах, поэтому каталог docker монтируется на чтение (`HOST_CONTAINERS`), а счётчики —
+# из `HOST_CGROUP`. Без монтирования разбивки просто нет, общая загрузка машины остаётся.
+HOST_CGROUP = "/host/cgroup"
+HOST_CONTAINERS = "/host/containers"
+# Где лежат счётчики контейнера, зависит от того, кто ими управляет: systemd на сервере кладёт
+# их в `system.slice/docker-<id>.scope`, Docker Desktop — в `docker/<id>`.
+CGROUP_LAYOUTS = ("{root}/system.slice/docker-{cid}.scope", "{root}/docker/{cid}")
+
+_container_mark: dict[str, tuple[float, int]] = {}
+
+
+def _container_names() -> dict[str, str]:
+    """Идентификатор контейнера → имя, из метаданных docker на хосте."""
+    names: dict[str, str] = {}
+    try:
+        ids = os.listdir(HOST_CONTAINERS)
+    except OSError:
+        return names
+    for cid in ids:
+        try:
+            with open(f"{HOST_CONTAINERS}/{cid}/config.v2.json", encoding="utf-8") as f:
+                names[cid] = json.load(f).get("Name", "").lstrip("/") or cid[:12]
+        except (OSError, ValueError):
+            continue
+    return names
+
+
+def containers() -> list[dict]:
+    """Сколько процессора и памяти ест каждый контейнер: доля за время с прошлого опроса."""
+    rows: list[dict] = []
+    now = time.time()
+    for cid, name in _container_names().items():
+        base = next((path for path in
+                     (layout.format(root=HOST_CGROUP, cid=cid) for layout in CGROUP_LAYOUTS)
+                     if os.path.isdir(path)), None)
+        if base is None:
+            continue
+        try:
+            with open(f"{base}/cpu.stat", encoding="utf-8") as f:
+                usec = next(int(line.split()[1]) for line in f if line.startswith("usage_usec"))
+            with open(f"{base}/memory.current", encoding="utf-8") as f:
+                memory_bytes = int(f.read().strip())
+        except (OSError, StopIteration, ValueError):
+            continue
+        percent = 0.0
+        was = _container_mark.get(cid)
+        if was:
+            elapsed = now - was[0]
+            if elapsed > 0.5:
+                percent = round((usec - was[1]) / (elapsed * 10_000), 1)
+        _container_mark[cid] = (now, usec)
+        rows.append({"name": name, "percent": percent,
+                     "memory_mb": round(memory_bytes / 2**20)})
+    return sorted(rows, key=lambda r: -r["percent"])
+
+
+def contours(rows: list[dict]) -> list[dict]:
+    """Контейнеры, собранные в контуры: язык виден в имени, тест отделён от боевого."""
+    groups = (
+        ("Русский сайт", lambda n: "-ru-" in n and "test" not in n),
+        ("Английский сайт", lambda n: "-en-" in n and "test" not in n),
+        ("Тест русский", lambda n: "test" in n and "-ru-" in n),
+        ("Тест английский", lambda n: "test" in n and "-en-" in n),
+    )
+    out = []
+    for title, belongs in groups:
+        mine = [r for r in rows if belongs(r["name"])]
+        if mine:
+            out.append({"title": title,
+                        "percent": round(sum(r["percent"] for r in mine), 1),
+                        "memory_mb": sum(r["memory_mb"] for r in mine),
+                        "items": mine})
+    known = {r["name"] for g in out for r in g["items"]}
+    rest = [r for r in rows if r["name"] not in known]
+    if rest:
+        out.append({"title": "Прочее", "percent": round(sum(r["percent"] for r in rest), 1),
+                    "memory_mb": sum(r["memory_mb"] for r in rest), "items": rest})
+    return out
 
 
 def disk(path: str = "/") -> dict:
@@ -174,6 +295,7 @@ def snapshot(db: Session, with_crawlers: bool = True) -> dict:
         "at": iso(utcnow()),
         "memory": memory(),
         "cpu": cpu(),
+        "contours": contours(containers()),
         "disk": disk("/"),
         "data_disk": disk(_data_dir()),
         "online": {"people": presence.online(), "tabs": presence.tabs(),

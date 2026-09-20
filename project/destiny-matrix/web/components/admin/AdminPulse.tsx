@@ -98,13 +98,37 @@ export default function AdminPulse() {
             занятое, а подпись — про свободное, и цифры читались как «остаток». */}
         <Bar label="Память" percent={pulse.memory.percent}
              note={`занято ${pulse.memory.used_mb} из ${pulse.memory.total_mb} МБ`} />
+        <Bar label="Подкачка" percent={pulse.memory.swap_percent}
+             note={pulse.memory.swap_total_mb
+               ? `занято ${pulse.memory.swap_used_mb} из ${pulse.memory.swap_total_mb} МБ`
+               : "файла подкачки нет"} />
         <Bar label="Процессор" percent={pulse.cpu.percent}
-             note={`load ${pulse.cpu.load1} на ${pulse.cpu.cores} ядра`} />
+             note={`в среднем за ${Math.round(pulse.cpu.window_seconds)} с · load ${pulse.cpu.load1} на ${pulse.cpu.cores} ядра`} />
         <Bar label="Диск" percent={pulse.disk.percent}
              note={`занято ${pulse.disk.used_gb} из ${pulse.disk.total_gb} ГБ · свободно ${pulse.disk.free_gb} ГБ`} />
         <Bar label="Том с базой" percent={pulse.data_disk.percent}
              note={`занято ${pulse.data_disk.used_gb} из ${pulse.data_disk.total_gb} ГБ · ${pulse.data_disk.path}`} />
       </div>
+
+      {pulse.contours.length ? (
+        <div className="pcontours" data-testid="pulse-contours">
+          {pulse.contours.map((group) => (
+            <div className="pcontour" key={group.title}>
+              <div className="pcap">
+                <span>{group.title}</span>
+                <b>{group.percent}% · {group.memory_mb} МБ</b>
+              </div>
+              <ul className="small dim">
+                {group.items.map((row) => (
+                  <li key={row.name}>
+                    {row.name.replace(/^arcana-|-1$/g, "")} — {row.percent}% · {row.memory_mb} МБ
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="pnums">
         <span data-testid="pulse-online">

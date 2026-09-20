@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 
 import { apiUpstream, serverSettings } from "@/lib/settings/server";
 
-export const SESSION_COOKIE = "destiny_session";
+export const SESSION_COOKIE = serverSettings.get("sessionCookieName");
 
 // срок как у JWT в api (jwt_ttl_days = 30)
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
@@ -71,7 +71,7 @@ export function dropSession(res: NextResponse): NextResponse {
 }
 
 interface ForwardOptions {
-  method?: "GET" | "POST" | "PATCH";
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
   /** подставить Authorization из куки; без куки — 401 без обращения к апстриму */
   auth?: boolean;
   /** подставить Authorization, если кука есть; без неё всё равно обратиться к апстриму */

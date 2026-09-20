@@ -1,22 +1,19 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-
 import { D, L, LANGS, SITE_HOSTS } from "@/lib/i18n";
 
 /**
- * Ссылка на ту же страницу другой языковой версии. Версии живут на разных доменах, путь у них
- * общий (`docs/eng-ver.md` §2), поэтому адрес считается, а не хранится.
+ * Ссылка на другую языковую версию — всегда её главная.
  *
- * Клиентский компонент ради `usePathname`: подвал печатается на 5 544 статических страницах, и
- * передавать путь пропом в каждую значило бы менять сигнатуру всего дерева.
+ * Путь не переносится: у страниц оплаты пары не существует (кассы за пределами России нет), и
+ * ссылка уводила покупателя с формы оплаты на `arcana-sense.com/pay`, которого нет. Главная
+ * работает для любой страницы, с которой её нажали.
  */
 export default function LanguageLink() {
-  const path = usePathname() || "/";
   const other = LANGS.find((lang) => lang !== L);
   if (!other) return null;
   return (
-    <a href={`${SITE_HOSTS[other]}${path}`} hrefLang={other} rel="alternate">
+    <a href={SITE_HOSTS[other]} hrefLang={other} rel="alternate">
       {D.nav.otherLanguage[other]}
     </a>
   );
