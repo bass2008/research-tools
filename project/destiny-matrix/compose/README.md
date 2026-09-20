@@ -172,7 +172,7 @@ curl http://<ip>/version/current.txt     # commit, branch, время сборк
 опрос — та же обработка, только инициатива наша:
 
 ```bash
-docker compose exec -T api python -m app.sweep     # на машине это делает cron каждые 5 минут
+docker compose exec -T ru-api python -m app.sweep     # на машине это делает cron каждые 5 минут
 ```
 
 Берутся платежи без исхода за последние сутки, у которых статус не терминальный. **Если таких нет,
@@ -186,7 +186,7 @@ docker compose exec -T api python -m app.sweep     # на машине это д
 На стенде уведомление можно послать себе самому — банк до `127.0.0.1` не дотянется:
 
 ```bash
-docker compose exec -T api python -m app.selfnotify <payment_id> CONFIRMED
+docker compose exec -T ru-api python -m app.selfnotify <payment_id> CONFIRMED
 ```
 
 Подпись считается тем же кодом, который её проверяет, поэтому путь уведомления проверяется
