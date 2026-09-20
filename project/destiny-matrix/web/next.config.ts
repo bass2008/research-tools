@@ -2,14 +2,32 @@ import type { NextConfig } from "next";
 
 import { buildId } from "./lib/buildId";
 import { REDIRECTS } from "./lib/redirects";
+import { publicSettings } from "./lib/settings/public";
 import { serverSettings } from "./lib/settings/server";
 
 // Фронт — node-сервер Next.js на той же машине, что api (docs/api-contract.md,
 // «Раскладка деплоя»). Статического экспорта нет: BFF обязан обработать запрос, чтобы
 // поставить httpOnly-куку, а страница отчёта печатается на запрос — иначе платные разделы
 // попадают в предрендеренный HTML и видны, не заплатив.
+const SITE_LANG = publicSettings.get("siteLang");
+
 const config: NextConfig = {
   reactStrictMode: true,
+  // Корпус языка развёртки. Статический импорт JSON переменной не принимает, а собирать
+  // один и тот же модуль под два языка нужно обеим сборкам — отсюда алиас на каталог языка.
+  turbopack: {
+    resolveAlias: {
+      "@/corpus/arcana-catalog.json": `./content/${SITE_LANG}/arcana-catalog.json`,
+      "@/corpus/chakras.json": `./content/${SITE_LANG}/chakras.json`,
+      "@/corpus/hubs.json": `./content/${SITE_LANG}/hubs.json`,
+      "@/corpus/points-catalog.json": `./content/${SITE_LANG}/points-catalog.json`,
+      "@/corpus/positions.json": `./content/${SITE_LANG}/positions.json`,
+      "@/corpus/sections.json": `./content/${SITE_LANG}/sections.json`,
+      "@/corpus/text-policy.json": `./content/${SITE_LANG}/text-policy.json`,
+      "@/labels.json": `./lib/__fixtures__/labels/${SITE_LANG}.json`,
+      "@/labels-public.json": `./lib/__fixtures__/labels-public/${SITE_LANG}.json`,
+    },
+  },
   // Идентификатор сборки — от состава маршрутов, а не случайный. Случайный вшивается в разметку
   // каждой страницы, из-за чего встроенный `ETag` сбрасывался на каждом релизе и поиск качал
   // заново то, что не менялось. Почему именно состав маршрутов — в `lib/buildId.ts`.

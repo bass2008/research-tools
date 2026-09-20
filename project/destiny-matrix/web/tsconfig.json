@@ -14,7 +14,8 @@
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./*"] }
+    "paths": { "@/corpus/*": ["./content/ru/*"], "@/labels.json": ["./lib/__fixtures__/labels/ru.json"],
+      "@/labels-public.json": ["./lib/__fixtures__/labels-public/ru.json"], "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules"]

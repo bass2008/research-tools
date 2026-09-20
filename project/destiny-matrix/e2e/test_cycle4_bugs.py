@@ -18,8 +18,8 @@ pytestmark = pytest.mark.bug
 PROMO_PAGES = (
     "/encyclopedia/karmic-tail",
     "/encyclopedia/karmic-tail/18-9-9",
-    "/na-god",
-    "/na-god/7",
+    "/year",
+    "/year/7",
 )
 
 
@@ -47,7 +47,7 @@ def test_calculator_promises_only_what_free_calculation_shows(path):
 def test_year_pages_do_not_promise_a_calculation_that_does_not_exist():
     """Расчёта персонального года в движке нет: ни бесплатно, ни в платном разборе. Страницы
     «на год» не должны предлагать «рассчитать свой год»."""
-    for path in ("/na-god", "/na-god/7", "/na-god/22"):
+    for path in ("/year", "/year/7", "/year/22"):
         html = _html(path)
         assert "Рассчитать свой год" not in html, f"{path}: обещан расчёт года"
         assert "Посмотреть свой персональный год" not in html, f"{path}: обещан персональный год"
@@ -56,14 +56,14 @@ def test_year_pages_do_not_promise_a_calculation_that_does_not_exist():
 def test_other_year_arcana_block_lists_all_of_them_in_order():
     """Список «Другие арканы года» строился по строковым ключам и обрезался на двенадцати:
     после «19» шла «2», а арканы 3–8 не попадали в блок вовсе."""
-    html = _html("/na-god/7")
-    links = re.findall(r'href="/na-god/(\d+)"', html)
+    html = _html("/year/7")
+    links = re.findall(r'href="/year/(\d+)"', html)
     numbers = [int(n) for n in links]
     missing = [n for n in range(1, 23) if n != 7 and n not in numbers]
     assert not missing, f"в блоке нет арканов {missing}"
     block = re.search(r"Другие арканы года.*?</div>\s*</div>", html, re.S)
     assert block, "блок «Другие арканы года» не найден"
-    order = [int(n) for n in re.findall(r'href="/na-god/(\d+)"', block.group(0))]
+    order = [int(n) for n in re.findall(r'href="/year/(\d+)"', block.group(0))]
     assert order == sorted(order), f"порядок не по возрастанию: {order[:8]}"
 
 
@@ -74,14 +74,14 @@ def test_card_descriptions_are_cut_at_a_word_boundary():
     import json
     import pathlib as _p
 
-    root = _p.Path(__file__).resolve().parents[1] / "web/content"
+    root = _p.Path(__file__).resolve().parents[1] / "web/content/ru"
     shorts = []
     for name in ("year-arcana.json", "karmic-tails.json"):
         for item in json.loads((root / name).read_text())["items"]:
             shorts.append(item["short"])
 
     broken = []
-    for path in ("/na-god", "/encyclopedia/karmic-tail"):
+    for path in ("/year", "/encyclopedia/karmic-tail"):
         for shown in re.findall(r'class="ds">([^<]{40,})…', _html(path)):
             # источник ищем по точному префиксу: у разных статей начала совпадают, и поиск по
             # первым сорока знакам подсовывал чужой текст
@@ -97,7 +97,7 @@ def test_card_descriptions_are_cut_at_a_word_boundary():
 def test_hub_breadcrumb_is_a_short_name_not_the_whole_headline():
     """В крошку подставлялся полный заголовок статьи: на телефоне три строки, и то же
     предложение стояло строкой ниже заголовком."""
-    for path in ("/programmy", "/karmicheskaya-matrica", "/energii"):
+    for path in ("/programs", "/karmic-matrix", "/energies"):
         html = _html(path)
         crumbs = re.search(r'<p class="crumbs[^"]*">(.*?)</p>', html, re.S).group(1)
         crumb_text = re.sub(r"<[^>]+>", "", crumbs).strip()
@@ -110,7 +110,7 @@ def test_hub_breadcrumb_is_a_short_name_not_the_whole_headline():
 def test_arcanum_links_to_its_year_page_once():
     """Ссылка на «N на год» стояла дважды подряд: отдельным блоком и в связях."""
     html = _html("/encyclopedia/arcanum/7")
-    assert html.count('href="/na-god/7"') == 1, f"ссылок на /na-god/7: {html.count('href=\"/na-god/7\"')}"
+    assert html.count('href="/year/7"') == 1, f"ссылок на /year/7: {html.count('href=\"/year/7\"')}"
 
 
 def test_tail_page_does_not_repeat_the_same_arcanum_link():
@@ -124,7 +124,7 @@ def test_tail_page_does_not_repeat_the_same_arcanum_link():
 
 @pytest.mark.parametrize(
     "expected",
-    ("/encyclopedia/karmic-tail", "/na-god"),
+    ("/encyclopedia/karmic-tail", "/year"),
 )
 def test_encyclopedia_leads_to_the_category_hubs(page: Page, expected):
     """Раньше страницы категорий находились только поиском; поиск со справочника убран, поэтому
@@ -139,7 +139,7 @@ def test_encyclopedia_leads_to_the_category_hubs(page: Page, expected):
 
 def test_error_about_days_in_month_disappears_when_the_date_is_fixed(page: Page):
     """Красное «В этом месяце 28 дней» висело до уход со страницы, даже когда число исправлено."""
-    page.goto(f"{BASE}/programmy", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/programs", wait_until="domcontentloaded")
     page.wait_for_selector('[data-testid="promo-submit"]:not([disabled])', timeout=20000)
     page.select_option("#pd", "31")
     page.select_option("#pm", "2")
@@ -162,7 +162,7 @@ def test_promo_form_starts_from_the_date_already_calculated(page: Page):
     page.click('[data-testid="calc-submit"]')
     page.wait_for_timeout(1200)
 
-    page.goto(f"{BASE}/programmy", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/programs", wait_until="domcontentloaded")
     page.wait_for_selector('[data-testid="promo-submit"]:not([disabled])', timeout=20000)
     assert page.input_value("#pd") == "7", f"число в форме: {page.input_value('#pd')}"
     assert page.input_value("#pm") == "3", f"месяц в форме: {page.input_value('#pm')}"
@@ -193,7 +193,7 @@ def test_error_resets_on_every_calculator_form(page: Page):
     по признаку «форма расчёта», а не по памяти."""
     for path, prefix, submit in (
         ("/", "", "calc-submit"),
-        ("/programmy", "p", "promo-submit"),
+        ("/programs", "p", "promo-submit"),
     ):
         page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
         page.wait_for_selector(f'[data-testid="{submit}"]:not([disabled])', timeout=15000)
@@ -243,7 +243,7 @@ def test_arcanum_page_points_to_the_year_article_without_retelling_it():
     вместо самой статьи. Ссылка осталась — без неё годовая статья теряет входящий вес.
     """
     html = _html("/encyclopedia/arcanum/7")
-    assert html.count('href="/na-god/7"') == 1, "ссылки на годовую статью нет или она печатается дважды"
+    assert html.count('href="/year/7"') == 1, "ссылки на годовую статью нет или она печатается дважды"
     assert "Год под седьмым арканом" not in html, "вводный абзац годовой статьи снова на странице аркана"
     assert "Тот же аркан в рамке персонального года" not in html, "подводка вкладки осталась"
     tabs = re.findall(r'role="tab"[^>]*>([^<]+)<', html)

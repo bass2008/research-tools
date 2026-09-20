@@ -2,9 +2,10 @@
 // серверный и вызывается только после того, как кука подтвердила тариф.
 import Link from "next/link";
 
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import type { Matrix } from "@/lib/matrix";
 import { DISCLAIMER } from "@/lib/site";
-import { counted } from "@/lib/plural";
 import LockIcon from "@/components/ui/LockIcon";
 import SavePdfButton from "@/components/matrix/SavePdfButton";
 import MatrixResult, { birthLabel } from "@/components/matrix/MatrixResult";
@@ -49,16 +50,19 @@ export default function ReportSheet({
     <>
       {printing || embedded ? null : (
         <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <Link href="/account">Кабинет</Link>{" "}
-          <span>/</span> <span>Мой разбор</span>
+          <Link href="/">{D.nav.home[L]}</Link> <span>/</span>{" "}
+          <Link href="/account">{D.nav.account[L]}</Link> <span>/</span>{" "}
+          <span>{D.nav.myReading[L]}</span>
         </p>
       )}
-      <Heading>Разбор матрицы судьбы</Heading>
+      <Heading>{D.sheet.title[L]}</Heading>
       <div className="rsub">
         <p className="dim">
-          {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} · {unlocked
-            ? <>тариф «{planName}»</>
-            : "бесплатный доступ"} — открыто {open} из {counted(sections.length, "раздела", "разделов", "разделов")}
+          {birthLabel(matrix.birth)} ·{" "}
+          {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]} ·{" "}
+          {/* тариф называем только там, где он есть: без кассы имя тарифа обещает покупку */}
+          {!ALL_FREE && unlocked ? D.sheet.planNamed[L](planName) : D.sheet.freeAccess[L]} —{" "}
+          {D.sheet.openOf[L](open, sections.length)}
         </p>
         {printing || locked.length ? null : (
           /* кнопка и её сообщение живут в одной ячейке: иначе текст ошибки становился третьим
@@ -79,11 +83,8 @@ export default function ReportSheet({
 
       {locked.length && !printing ? (
         <div className="allbox">
-          <h3>Ещё {counted(locked.length, "раздел", "раздела", "разделов")} в полном разборе</h3>
-          <p>
-            Сейчас открыты бесплатные разделы. Полный разбор добавляет остальные — одним платежом,
-            без подписки.
-          </p>
+          <h3>{D.sheet.moreInFull[L](locked.length)}</h3>
+          <p>{D.sheet.moreInFullText[L]}</p>
           <div className="alllist">
             {locked.map((s) => (
               <span key={s.key}>
@@ -92,7 +93,7 @@ export default function ReportSheet({
             ))}
           </div>
           <UnlockCta place="report_upgrade" matrixId={currentId}>
-            Купить
+            {D.nav.buy[L]}
           </UnlockCta>
         </div>
       ) : null}
@@ -103,7 +104,7 @@ export default function ReportSheet({
           отдельно от сайта, поэтому несёт её сам. */}
       {printing ? (
         <p className="small section-gap dim">
-          Arcana Sense · arcana-sense.ru
+          {D.sheet.printedBy[L]}
           <br />
           {DISCLAIMER}
         </p>

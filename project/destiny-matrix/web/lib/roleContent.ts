@@ -1,3 +1,4 @@
+import { D, DR, L } from "./i18n";
 import { arcanumContent, type ArcanumContent } from "./content";
 import type { ReadingRoleTemplate } from "./readingTypes";
 
@@ -40,7 +41,7 @@ function splitPosition(text: string): {
 } {
   const parts = text.trim().split(/(?<=[.!?…])\s+/).filter(Boolean);
   if (!parts.length) throw new Error("[role-content] пустой позиционный текст");
-  const head = parts[0].replace(/^Аркан «[^»]+» · [^·]+ ·\s*/, "");
+  const head = parts[0].replace(D.clause.corpusPrefix[L], "");
   const action = parts.at(-1)!;
   // 14 текстов ролевых позиций написаны в два предложения: суть и действие, середины нет.
   if (parts.length < 3) return { essence: head, strength: null, risk: null, action };
@@ -82,119 +83,119 @@ export function positionRoleTemplate(number: number, position: string): ReadingR
 
 const VARIANT_FRAMES: Record<string, { essence: string; strength: string; risk: string }> = {
   resource_direction: {
-    essence: "В денежном направлении этот аркан задаёт условие движения и удержания ресурса",
-    strength: "Ресурс сохраняется, когда человек",
-    risk: "Движение теряет устойчивость, когда человек",
+    essence: DR.frames.resource_direction.essence[L],
+    strength: DR.frames.resource_direction.strength[L],
+    risk: DR.frames.resource_direction.risk[L],
   },
   growth_personal: {
-    essence: "Как личный рост этот аркан показывает качество, которое важно вырастить прежде всего для себя",
-    strength: "Личный рост идёт, когда человек",
-    risk: "Рост подменяется движением по кругу, когда человек",
+    essence: DR.frames.growth_personal.essence[L],
+    strength: DR.frames.growth_personal.strength[L],
+    risk: DR.frames.growth_personal.risk[L],
   },
   growth_social: {
-    essence: "Как польза для других этот аркан показывает, чем личный опыт становится полезен за пределами своей истории",
-    strength: "Опыт превращается в пользу, когда человек",
-    risk: "Польза остаётся заявленной, а не сделанной, когда человек",
+    essence: DR.frames.growth_social.essence[L],
+    strength: DR.frames.growth_social.strength[L],
+    risk: DR.frames.growth_social.risk[L],
   },
   loop_root: {
-    essence: "Как корень сценария этот аркан показывает возвращающийся вопрос, с которого начинается знакомый круг",
-    strength: "Круг размыкается, когда человек",
-    risk: "Круг замыкается снова, когда человек",
+    essence: DR.frames.loop_root.essence[L],
+    strength: DR.frames.loop_root.strength[L],
+    risk: DR.frames.loop_root.risk[L],
   },
   loop_autopilot: {
-    essence: "Как состояние автопилота этот аркан описывает привычную опору, которая включается без выбора",
-    strength: "Автоматизм остаётся полезной привычкой, когда человек",
-    risk: "Опора превращается в автопилот, когда человек",
+    essence: DR.frames.loop_autopilot.essence[L],
+    strength: DR.frames.loop_autopilot.strength[L],
+    risk: DR.frames.loop_autopilot.risk[L],
   },
   money_entry_mature: {
-    essence: "Как вход денежной линии этот аркан показывает привычный способ начинать движение — тот, который к зрелому возрасту уже проверен делом",
-    strength: "Привычный вход продолжает работать, когда человек",
-    risk: "Привычный вход перестаёт кормить, когда человек",
+    essence: DR.frames.money_entry_mature.essence[L],
+    strength: DR.frames.money_entry_mature.strength[L],
+    risk: DR.frames.money_entry_mature.risk[L],
   },
   money_mature: {
-    essence: "В зрелом денежном направлении этот аркан показывает, что начинает работать лучше через накопленный опыт",
-    strength: "Опыт превращается в цену работы, когда человек",
-    risk: "Зрелый ракурс не срабатывает сам собой, когда человек",
+    essence: DR.frames.money_mature.essence[L],
+    strength: DR.frames.money_mature.strength[L],
+    risk: DR.frames.money_mature.risk[L],
   },
   family_male_gift: {
-    essence: "Как итог мужской ветви этот аркан показывает дар, который можно превратить в собственную опору",
-    strength: "Поддержка мужской ветви проявляется конструктивно, когда человек",
-    risk: "Дар превращается в семейную обязанность, когда человек",
+    essence: DR.frames.family_male_gift.essence[L],
+    strength: DR.frames.family_male_gift.strength[L],
+    risk: DR.frames.family_male_gift.risk[L],
   },
   family_female_gift: {
-    essence: "Как итог женской ветви этот аркан показывает дар, который помогает поддерживать жизнь и связи",
-    strength: "Поддержка женской ветви проявляется конструктивно, когда человек",
-    risk: "Поддержка женской ветви становится семейной обязанностью, когда человек",
+    essence: DR.frames.family_female_gift.essence[L],
+    strength: DR.frames.family_female_gift.strength[L],
+    risk: DR.frames.family_female_gift.risk[L],
   },
   sky_total: {
-    essence: "В итоге неба этот аркан соединяет две исходные духовные задачи в один проверяемый урок",
-    strength: "Общий урок проживается зрело, когда человек",
-    risk: "Итог повторяет исходные задачи вместо их соединения, когда человек",
+    essence: DR.frames.sky_total.essence[L],
+    strength: DR.frames.sky_total.strength[L],
+    risk: DR.frames.sky_total.risk[L],
   },
   money_choice: {
-    essence: "В точке R этот аркан показывает личный выбор на пересечении денег, договорённостей и отношений",
-    strength: "Выбор поддерживает денежное движение, когда человек",
-    risk: "Денежный и партнёрский сценарии спутываются, когда человек",
+    essence: DR.frames.money_choice.essence[L],
+    strength: DR.frames.money_choice.strength[L],
+    risk: DR.frames.money_choice.risk[L],
   },
   ground_total: {
-    essence: "В итоге земли этот аркан показывает, во что складываются материальные решения и насколько результат устойчив",
-    strength: "Материальная опора становится надёжной, когда человек",
-    risk: "Результат остаётся неустойчивым, когда человек",
+    essence: DR.frames.ground_total.essence[L],
+    strength: DR.frames.ground_total.strength[L],
+    risk: DR.frames.ground_total.risk[L],
   },
   relation_knot: {
-    essence: "В партнёрской точке R1 этот аркан показывает главный внутренний узел близости",
-    strength: "Узел становится местом честного выбора, когда человек",
-    risk: "Привычный сценарий близости усиливается, когда человек",
+    essence: DR.frames.relation_knot.essence[L],
+    strength: DR.frames.relation_knot.strength[L],
+    risk: DR.frames.relation_knot.risk[L],
   },
   relation_form: {
-    essence: "В точке R этот аркан показывает форму союза, договорённостей и совместных решений",
-    strength: "Форма отношений остаётся живой, когда человек",
-    risk: "Договорённость подменяет близость или разрушает её, когда человек",
+    essence: DR.frames.relation_form.essence[L],
+    strength: DR.frames.relation_form.strength[L],
+    risk: DR.frames.relation_form.risk[L],
   },
   ancestry_male_task: {
-    essence: "Как итог задач мужской ветви этот аркан показывает сценарий, которому требуется новое продолжение",
-    strength: "Сценарий меняется без отрицания рода, когда человек",
-    risk: "Старое правило мужской ветви воспроизводится автоматически, когда человек",
+    essence: DR.frames.ancestry_male_task.essence[L],
+    strength: DR.frames.ancestry_male_task.strength[L],
+    risk: DR.frames.ancestry_male_task.risk[L],
   },
   ancestry_female_task: {
-    essence: "Как итог задач женской ветви этот аркан показывает сценарий, которому требуется новое продолжение",
-    strength: "Женская ветвь получает новое продолжение, когда человек",
-    risk: "Старое правило женской ветви воспроизводится автоматически, когда человек",
+    essence: DR.frames.ancestry_female_task.essence[L],
+    strength: DR.frames.ancestry_female_task.strength[L],
+    risk: DR.frames.ancestry_female_task.risk[L],
   },
   body_total: {
-    essence: "В итоге опоры этот аркан описывает бытовой режим, в котором проще возвращать устойчивость",
-    strength: "Запас поддерживается, когда человек",
-    risk: "Бытовой ресурс расходуется быстрее, когда человек",
+    essence: DR.frames.body_total.essence[L],
+    strength: DR.frames.body_total.strength[L],
+    risk: DR.frames.body_total.risk[L],
   },
   rest_result: {
-    essence: "Как результат радости этот аркан показывает способ переключения, который способен вернуть живой интерес",
-    strength: "Отдых действительно восстанавливает, когда человек",
-    risk: "Имитация отдыха оставляет прежнюю перегрузку, когда человек",
+    essence: DR.frames.rest_result.essence[L],
+    strength: DR.frames.rest_result.strength[L],
+    risk: DR.frames.rest_result.risk[L],
   },
   decade: {
-    essence: "В роли десятилетия этот аркан задаёт тему этапа и вопрос, который постепенно становится главным",
-    strength: "Сильное прохождение периода заметно, когда человек",
-    risk: "Риск десятилетия усиливается, когда человек",
+    essence: DR.frames.decade.essence[L],
+    strength: DR.frames.decade.strength[L],
+    risk: DR.frames.decade.risk[L],
   },
   chakra_physics: {
-    essence: "В физической колонке этот аркан описывает материальный ритм уровня, а не состояние организма",
-    strength: "Ритм уровня согласован, когда человек",
-    risk: "Перегрузка материального ритма заметна, когда человек",
+    essence: DR.frames.chakra_physics.essence[L],
+    strength: DR.frames.chakra_physics.strength[L],
+    risk: DR.frames.chakra_physics.risk[L],
   },
   chakra_physics_total: {
-    essence: "В итоге физики этот аркан собирает общий материальный ритм семи уровней без медицинских выводов",
-    strength: "Колонка работает согласованно, когда человек",
-    risk: "Общий ритм становится односторонним, когда человек",
+    essence: DR.frames.chakra_physics_total.essence[L],
+    strength: DR.frames.chakra_physics_total.strength[L],
+    risk: DR.frames.chakra_physics_total.risk[L],
   },
   chakra_energy_total: {
-    essence: "В итоге энергии этот аркан собирает способ распределять усилие между семью уровнями",
-    strength: "Усилие распределяется устойчиво, когда человек",
-    risk: "Энергетический ритм становится односторонним, когда человек",
+    essence: DR.frames.chakra_energy_total.essence[L],
+    strength: DR.frames.chakra_energy_total.strength[L],
+    risk: DR.frames.chakra_energy_total.risk[L],
   },
   chakra_emotions_total: {
-    essence: "В итоге эмоций этот аркан собирает характер отклика семи уровней",
-    strength: "Эмоциональный отклик остаётся гибким, когда человек",
-    risk: "Отклик закрепляется в одном способе, когда человек",
+    essence: DR.frames.chakra_emotions_total.essence[L],
+    strength: DR.frames.chakra_emotions_total.strength[L],
+    risk: DR.frames.chakra_emotions_total.risk[L],
   },
 };
 
@@ -202,16 +203,7 @@ const VARIANT_FRAMES: Record<string, { essence: string; strength: string; risk: 
  * Возраст — самостоятельный контекст, а не подпись над одним и тем же текстом. Рамки не
  * предсказывают события: они меняют вопрос, с которым читается аркан десятилетия.
  */
-export const AGE_FRAME_TEXTS = [
-  "Рамка 0–10 лет описывает знакомство с базовыми правилами мира и первые способы просить поддержку; вывод для взрослого читается как история усвоенного ответа, а не характеристика ребёнка задним числом.",
-  "Рамка 10–20 лет рассматривает отделение от готовых правил и первые самостоятельные выборы; смысл периода проверяется по тому, какой способ пробовать и ошибаться человек перенёс во взрослую жизнь.",
-  "Рамка 20–30 лет задаёт вопрос практического самоопределения: как идеи проверялись делом, отношениями и ответственностью за последствия без требования успеть к определённому возрасту.",
-  "Рамка 30–40 лет показывает отношение к уже выбранному направлению: что стало устойчивым, что держится только по привычке и какой опыт позволяет пересобрать способ действия без возрастного кризиса по расписанию.",
-  "Рамка 40–50 лет читает аркан через ревизию накопленного опыта и свободу выбирать повторно; она не означает автоматической смены работы, отношений или жизненного уклада в сорок лет.",
-  "Рамка 50–60 лет рассматривает переход от личного опыта к его отбору и передаче: что действительно работает, чему можно научить другого и от каких прежних доказательств уже допустимо отказаться.",
-  "Рамка 60–70 лет задаёт вопрос избирательности: на какие связи, задачи и формы участия стоит направлять внимание, чтобы вклад оставался добровольным и соразмерным текущим возможностям.",
-  "Рамка 70–80 лет помогает соединить пройденные этапы в целую историю, увидеть повторяющиеся способы выбора и оставить открытым новый ответ; она не оценивает качество или продолжительность жизни.",
-] as const;
+export const AGE_FRAME_TEXTS = DR.decades.map((frame) => frame[L]);
 
 export function ageFrameText(index: number): string {
   const value = AGE_FRAME_TEXTS[index];

@@ -1,0 +1,73 @@
+{
+ "count": 17,
+ "items": [
+  {
+   "key": "day",
+   "report_label": "Personality portrait — point A"
+  },
+  {
+   "key": "month",
+   "report_label": "Spiritual task — point B"
+  },
+  {
+   "key": "year",
+   "report_label": "Material task — point C"
+  },
+  {
+   "key": "mission",
+   "report_label": "Karmic task — point D"
+  },
+  {
+   "key": "center",
+   "report_label": "Centre of the chart — comfort zone"
+  },
+  {
+   "key": "father_line",
+   "report_label": "Spiritual male family line — point F"
+  },
+  {
+   "key": "mother_line",
+   "report_label": "Spiritual female family line — point G"
+  },
+  {
+   "key": "descendants",
+   "report_label": "Material male family line — point H"
+  },
+  {
+   "key": "inheritance",
+   "report_label": "Material female family line — point I"
+  },
+  {
+   "key": "comfort_west",
+   "report_label": "Inner left point — J"
+  },
+  {
+   "key": "comfort_north",
+   "report_label": "Inner point of talent — K"
+  },
+  {
+   "key": "comfort_east",
+   "report_label": "Entry of the money line — L"
+  },
+  {
+   "key": "comfort_south",
+   "report_label": "Entry of relationships and the tail — M"
+  },
+  {
+   "key": "harmony",
+   "report_label": "Spiritual purpose"
+  },
+  {
+   "key": "planetary",
+   "report_label": "Planetary purpose"
+  },
+  {
+   "key": "purpose_personal",
+   "report_label": "Personal purpose"
+  },
+  {
+   "key": "purpose_social",
+   "report_label": "Social purpose"
+  }
+ ]
+}

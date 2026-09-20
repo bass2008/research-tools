@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { D, L } from "@/lib/i18n";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
-import Price from "@/components/pay/Price";
+import Price, { PriceOrFree } from "@/components/pay/Price";
 
 import { arcanum } from "@/lib/arcana";
 import { buildCombinationArticle } from "@/lib/combinationReading";
@@ -73,10 +74,10 @@ export default async function CombinationPage({ params }: { params: Promise<Para
 
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb("cmb"),
-          { name: `${a} и ${b}` },
+          { name: D.encCombination.pairCrumb[L](a, b) },
         ]}
       />
         <JsonLd
@@ -84,7 +85,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
             headline: c.seo.title,
             description: c.seo.description,
             path: combinationHref(a, b),
-            keywords: [`${a} и ${b} в матрице судьбы`, `сочетание ${a} и ${b} аркана`],
+            keywords: D.encCombination.keywords[L](a, b),
           })}
         />
 
@@ -95,13 +96,13 @@ export default async function CombinationPage({ params }: { params: Promise<Para
           <ArcanumCard n={a} size="grid" eager decorative />
           <ArcanumCard n={b} size="grid" eager decorative />
           <figcaption className="arc-cap">
-            {a} · {x.title} и {b} · {y.title}
+            {D.encCombination.cardPair[L](a, x.title, b, y.title)}
           </figcaption>
         </figure>
 
         <div className="arc-body">
           <h1>
-            {a} и {b}: {c.title}
+            {D.encCombination.h1[L](a, b, c.title)}
           </h1>
           <p className="hero-lead">{sentence(c.short)}</p>
           <div className="taglist">
@@ -121,11 +122,11 @@ export default async function CombinationPage({ params }: { params: Promise<Para
           ))}
         </div>
 
-        <h2 className="vh">Что даёт пара и где спотыкается</h2>
+        <h2 className="vh">{D.encCombination.givesAndStumbles[L]}</h2>
         <div className="twocol section-gap">
           <div className="panel">
-            <h3>Что даёт пара</h3>
-            <div className="cap">Сильные стороны обоих арканов</div>
+            <h3>{D.encCombination.gives[L]}</h3>
+            <div className="cap">{D.encCombination.givesHint[L]}</div>
             <ul className="pmlist plus">
               {[...xContent.plus.slice(0, 3), ...yContent.plus.slice(0, 3)].map((p, i) => (
                 <li key={`${p}-${i}`}>{p}</li>
@@ -133,8 +134,8 @@ export default async function CombinationPage({ params }: { params: Promise<Para
             </ul>
           </div>
           <div className="panel">
-            <h3>Где спотыкается</h3>
-            <div className="cap">Тени, которые усиливают друг друга</div>
+            <h3>{D.encCombination.stumbles[L]}</h3>
+            <div className="cap">{D.encCombination.stumblesHint[L]}</div>
             <ul className="pmlist minus">
               {[...xContent.minus.slice(0, 3), ...yContent.minus.slice(0, 3)].map((p, i) => (
                 <li key={`${p}-${i}`}>{p}</li>
@@ -145,7 +146,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
 
         {article.groups.map((group) => (
           <div className="section-gap" key={group.key}>
-            <h2>{group.title}: {a} и {b}</h2>
+            <h2>{D.encCombination.groupTitle[L](group.title, a, b)}</h2>
             <p className="dim prose">{group.lead}</p>
             {group.contexts.map((context) => (
               <section className="section-gap" key={context.key}>
@@ -155,7 +156,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
                   {context.variants.map((variant) => (
                     <div className="panel" key={`${context.key}-${variant.order}`}>
                       <h3>{variant.heading}</h3>
-                      <div className="cap">Порядок точек {variant.order}</div>
+                      <div className="cap">{D.encCombination.variantOrder[L](variant.order)}</div>
                       {variant.paragraphs.map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                       ))}
@@ -171,16 +172,16 @@ export default async function CombinationPage({ params }: { params: Promise<Para
         ))}
 
         <div className="panel section-gap">
-          <h2>Как проверить сочетание на практике</h2>
-          <div className="cap">Сначала позиции, затем реальная ситуация</div>
+          <h2>{D.encCombination.howToCheck[L]}</h2>
+          <div className="cap">{D.encCombination.howToCheckHint[L]}</div>
           {article.practice.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
         </div>
 
         <div className="panel section-gap">
-          <h2>Соседние сочетания</h2>
-          <div className="cap">Пары, которые стоят рядом в таблице</div>
+          <h2>{D.encCombination.neighbours[L]}</h2>
+          <div className="cap">{D.encCombination.neighboursHint[L]}</div>
           <div className="taglist">
             {/* голый слаг «4-9» ничего не говорит: подписываем парой имён, как везде */}
             {neighbours.map((href) => {
@@ -188,28 +189,27 @@ export default async function CombinationPage({ params }: { params: Promise<Para
               const [p1, p2] = pairSlug.split("-").map(Number);
               return (
                 <Link key={href} href={href}>
-                  {p1} · {arcanum(p1).title} и {p2} · {arcanum(p2).title}
+                  {D.encCombination.cardPair[L](p1, arcanum(p1).title, p2, arcanum(p2).title)}
                 </Link>
               );
             })}
             {/* подпись обещает список сочетаний — значит и открывать надо его вкладку,
                 а не «Значение», где сочетаний на экране нет */}
-            <Link href={`${arcanumHref(a)}?tab=combos`}>Все сочетания {a} аркана</Link>
-            <Link href={`${arcanumHref(b)}?tab=combos`}>Все сочетания {b} аркана</Link>
+            <Link href={`${arcanumHref(a)}?tab=combos`}>{D.encCombination.allCombosOf[L](a)}</Link>
+            <Link href={`${arcanumHref(b)}?tab=combos`}>{D.encCombination.allCombosOf[L](b)}</Link>
           </div>
         </div>
 
         <div className="allbox">
-          <h2>Есть ли эта пара в вашей карте</h2>
+          <h2>{D.encCombination.pairInYourChart[L]}</h2>
           <p>
-            Сочетание работает по-разному в зависимости от позиций: в центре, в линии рода или в денежном
-            канале. Постройте октаграмму по своей дате — расчёт бесплатный, дата остаётся в браузере.
+            {D.encCombination.calcLead[L]}
           </p>
           <Link className="btn" href="/#calc">
-            Рассчитать матрицу
+            {D.matrixPages.calcMatrix[L]}
           </Link>
           <p className="small" style={{ marginTop: 10 }}>
-            Полный разбор — <Price />.
+            {D.encCombination.fullReading[L]} <PriceOrFree />.
           </p>
         </div>
     </>

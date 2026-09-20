@@ -1,9 +1,11 @@
 // Серверная половина спецификации отчёта. Платные подписи и ключи позиций не попадают
 // в клиентский чанк; сам корпус трактовок читается строго из web/content/arcana.json.
 import sectionSpec from "./__fixtures__/sections.json";
+import { sectionLabels } from "./i18n/methodLabels";
 import { buildCharacterReading, characterRoleTemplate } from "./character";
 import { characterHref, type CharacterPositionKey } from "./characterTypes";
 import { arcanumInPosition, karmicTail } from "./content";
+import { D, L } from "./i18n";
 import type { Matrix } from "./matrix";
 import {
   buildSectionReading,
@@ -54,7 +56,21 @@ interface PrivateSectionRow {
   positions: SectionPositionDefinition[];
 }
 
-const PRIVATE_ROWS = sectionSpec.sections as PrivateSectionRow[];
+// Схема (селекторы и ключи точек) — контракт, слова — словарь языка сборки. Подпись позиции
+// ключуется её местом в разделе: в одном разделе бывает несколько позиций одной точки.
+const PRIVATE_ROWS: PrivateSectionRow[] = (sectionSpec.sections as PrivateSectionRow[]).map(
+  (row) => {
+    const text = sectionLabels(row.key);
+    return {
+      ...row,
+      title: text.title,
+      lead: text.lead,
+      positions: row.positions.map((position, index) =>
+        position.label ? { ...position, label: text.positions[index] } : position,
+      ),
+    };
+  },
+);
 const PRIVATE_BY_KEY = new Map(PRIVATE_ROWS.map((row) => [row.key, row]));
 if (PRIVATE_ROWS.length !== 20 || PRIVATE_BY_KEY.size !== 20) {
   throw new Error(`sections.json: ожидалось 20 уникальных разделов, получено ${PRIVATE_ROWS.length}`);
@@ -92,7 +108,7 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
         arcanum,
         href: arcanumHref(arcanum),
         text: first
-          ? `Тот же аркан, что и в позиции «${first}»: толкование выше.`
+          ? D.report.sameArcanum[L](first)
           : arcanumInPosition(arcanum, positionKey),
       };
     });
@@ -133,7 +149,7 @@ export function build(matrix: Matrix, unlocked = false): SectionOut[] {
         : {}),
     };
     if (spec.access === "paid" && !unlocked) {
-      out.teaser = `${positions.length} позиций в полном разборе`;
+      out.teaser = D.report.positionsInFull[L](positions.length);
       out.positions = [];
     }
     return out;

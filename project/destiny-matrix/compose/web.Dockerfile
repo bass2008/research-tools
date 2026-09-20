@@ -20,6 +20,14 @@ ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 ARG NEXT_PUBLIC_METRIKA_ID=""
 ENV NEXT_PUBLIC_METRIKA_ID=${NEXT_PUBLIC_METRIKA_ID}
 
+# Язык развёртки: от него зависят корпус, словари и адрес другой языковой версии. Значение
+# вшивается в сборку — страницы печатаются заранее и сменить язык на запрос не могут.
+ARG NEXT_PUBLIC_SITE_LANG=ru
+ENV NEXT_PUBLIC_SITE_LANG=${NEXT_PUBLIC_SITE_LANG}
+# Витрина без оплаты: на английском домене кассы пока нет, разбор открыт всем.
+ARG NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT=0
+ENV NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT=${NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT}
+
 ARG NEXT_PUBLIC_YANDEX_VERIFICATION=""
 ENV NEXT_PUBLIC_YANDEX_VERIFICATION=${NEXT_PUBLIC_YANDEX_VERIFICATION}
 ARG NEXT_PUBLIC_GOOGLE_VERIFICATION=""

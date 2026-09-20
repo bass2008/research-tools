@@ -5,6 +5,7 @@
 // импортирует её только серверный код. Разделение не косметическое: клиентский чанк виден в
 // исходнике страницы, поэтому один импорт lib/sections.ts из компонента с "use client"
 // выкладывает наружу то, за что платят (сторож — scripts/check-build.cjs).
+import { D, L } from "./i18n";
 import type { Matrix } from "./matrix";
 import {
   CHARACTER_ROLE_META,
@@ -118,9 +119,9 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
   ) {
     const key = section.positions.map((position) => position.arcanum).join("-");
     const labels = {
-      character: `Подробнее про характер ${key} в энциклопедии →`,
-      comfort: `Подробнее про центр и внутренние точки ${key} в энциклопедии →`,
-      profession: `Подробнее про профессию и дело по душе ${key} в энциклопедии →`,
+      character: D.encLinks.moreCharacter[L](key),
+      comfort: D.encLinks.moreComfort[L](key),
+      profession: D.encLinks.moreProfession[L](key),
     } as const;
     return {
       href: section.personalHref,
@@ -134,7 +135,7 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
     const key = section.positions.map((position) => position.arcanum).join("-");
     return {
       href: `/encyclopedia/karmic-tail/${key}`,
-      label: `Подробнее про кармический хвост ${key} в энциклопедии →`,
+      label: D.encLinks.moreTail[L](key),
       entityType: "karmic_tail",
       positionKey: section.key,
       entityKey: key,
@@ -144,7 +145,7 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
     const key = section.personalHref.split("/").at(-1)?.split("?")[0] ?? section.key;
     return {
       href: section.personalHref,
-      label: `Подробнее про ваш раздел «${section.title}» в энциклопедии →`,
+      label: D.encLinks.moreYourSection[L](section.title),
       entityType: "section_reading",
       positionKey: section.key,
       entityKey: key,
@@ -152,7 +153,7 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
   }
   return {
     href: positionHref(section.key),
-    label: `Подробнее про раздел «${section.title}» в энциклопедии →`,
+    label: D.encLinks.moreSection[L](section.title),
     entityType: "position",
     positionKey: section.key,
     entityKey: section.key,
@@ -165,8 +166,8 @@ export function sectionEntityLink(section: SectionOut): SectionEntityLink {
  * Список жил в трёх местах сразу, и переименование раздела ломало то витрину, то эталон
  * тестов. Теперь источник один: правится в движке, снимок пересобирается вместе с контентом.
  */
-import catalog from "@/content/sections.json";
-import pointCatalog from "@/content/points-catalog.json";
+import catalog from "@/corpus/sections.json";
+import pointCatalog from "@/corpus/points-catalog.json";
 
 interface PublicSectionRow extends SectionMeta {
   lead?: string;
@@ -239,7 +240,7 @@ export function buildFree(
           label,
           arcanum,
           href: arcanumHref(arcanum),
-          text: first ? `Тот же аркан, что и в позиции «${first}»: толкование выше.` : text,
+          text: first ? D.report.sameArcanum[L](first) : text,
           ...(article ? { article } : {}),
           ...(template && roleMeta
             ? {

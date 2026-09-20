@@ -1,0 +1,73 @@
+{
+ "key": "by-birth-date",
+ "crumb": "By birth date",
+ "order": 7,
+ "title": "Reading the destiny matrix by birth date",
+ "seo": {
+  "title": "Destiny matrix by birth date: how to read it",
+  "description": "How a birth date turns into the numbers of the chart: day, month, the sum of the year’s digits and reducing. Why different dates give one chart.",
+  "queries": [
+   "destiny matrix by date of birth",
+   "destiny matrix by birth date reading",
+   "destiny matrix birth date decoded",
+   "free destiny matrix reading by date of birth"
+  ]
+ },
+ "short": "A birth date gives only three numbers, and the whole chart is built out of them: the day gives the personality portrait, the month the spiritual task, the sum of the year’s digits the material one. The rest of the points come from those three taken in pairs, so the chart depends not on the date as such but on what it reduced to.",
+ "sections": [
+  {
+   "h2": "How a date turns into numbers",
+   "paragraphs": [
+    "There is one rule: every sum is reduced to the range from 1 to 22. If a number is greater than 22, its digits are added together, and the step repeats until the result is no more than 22. The number 22 itself is kept and does not turn into 4.",
+    "The day of birth gives point A, the personality portrait: the way a person is seen at first glance. The month gives point B, the spiritual task. The year first becomes the sum of its digits and is then reduced: 1993 gives 22, while 1987 gives 25 first and then 7. That is point C, the material task. Their sum after reducing is point D, the karmic task, and reducing all four gives the centre of the chart, E."
+   ]
+  },
+  {
+   "h2": "Why different dates can give one chart",
+   "paragraphs": [
+    "The chart depends on the three reduced numbers, not on the date. If the day, month and year of two people reduce to the same three arcana, their charts match completely, with different birthdays. There are 5 544 such combinations in all.",
+    "A practical consequence follows: the same chart does not mean the same life. The scheme describes a set of leanings rather than a biography, and two people with one chart usually recognise themselves in different parts of it."
+   ]
+  },
+  {
+   "h2": "What to read after the calculation",
+   "paragraphs": [
+    "The order is the same as for any chart: the centre, then the three outer points it was built from, then the family line, money and relationships. Starting with a line and skipping the centre is the most common mistake: a line describes qualities, but it does not say whose they are.",
+    "Calculation on the site is free and needs no sign-up, and the chart is built at once. After it, every number becomes a link to its own meaning, and it makes sense to read your own number rather than a general description of the arcanum."
+   ]
+  },
+  {
+   "h2": "What a date does not show",
+   "paragraphs": [
+    "Neither the time nor the place of birth is used by the scheme, only the calendar date. So the chart does not tell apart people born on the same day, and it does not claim the precision of an astrological natal chart, where the time matters.",
+    "And the chart holds no events. There are no future dates in it, no sums of money and no decisions of any kind: what it describes is a set of steady leanings, not the things that are going to happen."
+   ]
+  }
+ ],
+ "faq": [
+  {
+   "q": "How do I work out a destiny matrix from a birth date?",
+   "a": "Take the day, the month and the sum of the year’s digits, reduce each one to the range 1–22, then get the karmic task as the reduction of their sum and the centre as the reduction of all four."
+  },
+  {
+   "q": "Is the time of birth needed?",
+   "a": "No, the scheme uses only the calendar date. Time and place of birth are needed for a natal chart; here they do not go into the calculation."
+  },
+  {
+   "q": "Why is the year added up first and reduced only after that?",
+   "a": "Because a year is a four-digit number, and the rule of reducing applies to the sum of its digits: 1987 gives 25, and 25 reduces to 7."
+  },
+  {
+   "q": "Can two people have the same matrix?",
+   "a": "Yes. The chart depends on three reduced numbers rather than on the date itself, so different birthdays can give one chart. There are 5 544 variants in all."
+  }
+ ],
+ "related": [
+  "decoding",
+  "method",
+  "position/day",
+  "position/month",
+  "position/year",
+  "position/center"
+ ]
+}

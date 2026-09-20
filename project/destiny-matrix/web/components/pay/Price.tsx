@@ -1,6 +1,8 @@
 "use client";
 
-import { byId, money } from "@/lib/tariffs";
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
+import { byId, priceLabel } from "@/lib/tariffs";
 
 import { useLead, usePriceKnown, useTariffs } from "@/components/pay/TariffsProvider";
 
@@ -15,6 +17,15 @@ export default function Price({ id }: { id?: string }) {
   const main = useLead();
   const known = usePriceKnown();
   const t = id ? byId(items, id) : main;
-  if (!known || !t) return <span className="nowrap price-wait">уточняется</span>;
-  return <span className="nowrap">{money(t.price)} ₽</span>;
+  if (!known || !t) return <span className="nowrap price-wait">{D.pay.priceBeingUpdated[L]}</span>;
+  return <span className="nowrap">{priceLabel(t)}</span>;
+}
+
+/**
+ * Цена там, где предложение можно закрыть словом: «полный разбор — 250 ₽» и «полный разбор —
+ * бесплатно». На витрине без оплаты цены нет, а обещание платного разбора было бы ложью.
+ */
+export function PriceOrFree() {
+  if (ALL_FREE) return <span className="nowrap">{D.pay.freeWord[L]}</span>;
+  return <Price />;
 }

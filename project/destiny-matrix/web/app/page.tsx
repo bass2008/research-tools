@@ -10,11 +10,13 @@ import HashScroll from "@/components/ui/HashScroll";
 import MatrixForm from "@/components/matrix/MatrixForm";
 import MatrixReport from "@/components/matrix/MatrixReport";
 import TariffsProvider from "@/components/pay/TariffsProvider";
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import { LANDING_SLIDES } from "@/lib/heroSlides";
 import { freePositionArticles, freePositionTexts } from "@/lib/sections";
 import { SITE, pageMeta } from "@/lib/site";
 import { getTariffs } from "@/lib/tariffs.server";
-import { lead, money, periodLabel, type Tariff } from "@/lib/tariffs";
+import { lead, periodLabel, priceLabel, type Tariff } from "@/lib/tariffs";
 
 // Цена — предмет договора, поэтому первый экран, разметка Offer и описание в поиске печатаются
 // по запросу и берут прайс из базы. Пересборка для смены цены не нужна.
@@ -27,11 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const prices = await getTariffs();
   const main = prices.length ? lead(prices) : null;
   return pageMeta({
-    title: "Матрица судьбы — расчёт по дате рождения с расшифровкой",
+    title: D.homeMeta.title[L],
     description:
-      "Рассчитайте матрицу судьбы по дате рождения: октаграмма 22 арканов, карта энергий по чакрам, " +
-      "20 разделов разбора. Расчёт и два раздела бесплатно" +
-      (main ? `, полный разбор — ${money(main.price)} ₽.` : "."),
+      D.homeMeta.descriptionHead[L] +
+      (ALL_FREE
+        ? D.homeMeta.descriptionFree[L]
+        : D.homeMeta.descriptionPaidHead[L] +
+          (main ? D.homeMeta.descriptionPaidPrice[L](priceLabel(main)) : ".")),
     path: "/",
   });
 }
@@ -40,9 +44,8 @@ function productJsonLd(tariffs: Tariff[]) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "Матрица судьбы — полный разбор",
-    description:
-      "Персональный разбор по дате рождения: октаграмма арканов, карта энергий по чакрам, 20 разделов.",
+    name: D.homeMeta.productName[L],
+    description: D.homeMeta.productDescription[L],
     brand: { "@type": "Brand", name: "Arcana Sense" },
     offers: tariffs.map((t) => ({
       "@type": "Offer",
@@ -83,10 +86,14 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(tariffs)) }}
-      />
+      {/* Offer печатаем только там, где есть что купить: на витрине без оплаты цена
+          в разметке была бы обещанием несуществующей покупки. */}
+      {ALL_FREE ? null : (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(tariffs)) }}
+        />
+      )}
 
       <HashScroll />
 
@@ -111,78 +118,66 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
           колоды, и длинный список чипов её перегружал. */}
       <section className="wrap offerbar">
         <div className="pricelead">
-          {main ? (
+          {ALL_FREE ? (
             <>
-              <b>{money(main.price)} ₽</b>
-              <span className="what">
-                полный разбор, все 20 разделов,{" "}
-                {periodLabel(main) === "навсегда" ? "один платёж" : periodLabel(main)}
-              </span>
+              <b>{D.common.free[L][0].toUpperCase() + D.common.free[L].slice(1)}</b>
+              <span className="what">{D.home.freeAllSections[L]}</span>
+            </>
+          ) : main ? (
+            <>
+              <b>{priceLabel(main)}</b>
+              <span className="what">{D.home.priceWhat[L](periodLabel(main))}</span>
             </>
           ) : (
-            <span className="what">
-              Цена уточняется — справочник сейчас недоступен. Расчёт карты работает и без него.
-            </span>
+            <span className="what">{D.home.priceUnknown[L]}</span>
           )}
-          <span className="free">карта и 2 раздела — бесплатно, без регистрации</span>
+          <span className="free">
+            {ALL_FREE ? D.home.freeNoteAll[L] : D.home.freeNote[L]}
+          </span>
         </div>
         <div className="chips">
+          <span className="chip">✦ {D.home.chipSections[L]}</span>
+          <span className="chip">✦ {D.home.chipChakras[L]}</span>
+          <span className="chip">✦ {D.home.chipDecades[L]}</span>
           <span className="chip">
-            ✦ <b>20 разделов</b> отчёта
+            ✦ {ALL_FREE ? D.home.chipNoPayment[L] : D.home.chipOnePayment[L]}
           </span>
-          <span className="chip">
-            ✦ <b>Карта энергий</b> по чакрам
-          </span>
-          <span className="chip">
-            ✦ <b>Разбор по десятилетиям</b> до 80 лет
-          </span>
-          <span className="chip">✦ Один платёж, без списаний</span>
         </div>
         <p className="small">
-          {tariffs.length
-            ? `Тарифы: ${tariffs.map((t) => `${t.name} — ${money(t.price)} ₽`).join(" · ")}. `
+          {!ALL_FREE && tariffs.length
+            ? D.home.tariffsLine[L](tariffs.map((t) => `${t.name} — ${priceLabel(t)}`).join(" · "))
             : ""}
-          <Link href="#plans">Что входит</Link>
+          {/* Без кассы блока тарифов на странице нет, и якорь «#plans» никуда не ведёт:
+              на витрине без оплаты ссылка отправляет к самому разбору. */}
+          <Link href={ALL_FREE ? "#result" : "#plans"}>{D.home.plansLink[L]}</Link>
         </p>
       </section>
 
       <section className="edit">
         <div className="wrap">
-          <span className="eyebrow">Что вы держите в руках</span>
-          <h2>Опоры персональной модели личности</h2>
+          <span className="eyebrow">{D.home.pillarsEyebrow[L]}</span>
+          <h2>{D.home.pillarsTitle[L]}</h2>
           <div className="pillars">
             <div className="pil">
-              <h3>Центр карты</h3>
-              <p>
-                Ядро матрицы: центральное число, к которому сходятся все линии. С него начинают читать
-                карту и к нему возвращаются в конце.
-              </p>
+              <h3>{D.home.pillarCenter[L]}</h3>
+              <p>{D.home.pillarCenterText[L]}</p>
             </div>
             <div className="pil">
-              <h3>Портрет личности</h3>
-              <p>
-                Как вас считывают люди в первые минуты и какую роль вы занимаете в группе — часто не ту,
-                которую выбрали бы сами.
-              </p>
+              <h3>{D.home.pillarPortrait[L]}</h3>
+              <p>{D.home.pillarPortraitText[L]}</p>
             </div>
             <div className="pil">
-              <h3>Внутренняя мотивация</h3>
-              <p>Глубинные причины решений: что вами двигает, когда вы устали и уже не притворяетесь.</p>
+              <h3>{D.home.pillarMotivation[L]}</h3>
+              <p>{D.home.pillarMotivationText[L]}</p>
             </div>
             <div className="pil">
-              <h3>Системные ресурсы</h3>
-              <p>
-                Родовая поддержка и накопленный опыт: на что можно опереться, даже если сейчас так не
-                кажется.
-              </p>
+              <h3>{D.home.pillarResources[L]}</h3>
+              <p>{D.home.pillarResourcesText[L]}</p>
             </div>
           </div>
           <div className="quote">
             <div className="qm">“</div>
-            <p>
-              В матрице нет приговора: есть склонности и цена, которую каждая из них берёт. Куда
-              вложить силы, а где не спорить с собой — решаете вы.
-            </p>
+            <p>{D.quote.text[L]}</p>
           </div>
 
           {/* Почта собирается и без оплаты: до этого лид приходил только из формы платежа. */}

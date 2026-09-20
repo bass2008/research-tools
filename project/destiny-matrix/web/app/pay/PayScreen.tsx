@@ -1,5 +1,6 @@
 "use client";
 
+import { D, L } from "@/lib/i18n";
 import Link from "next/link";
 
 import PayForm from "@/components/pay/PayForm";
@@ -23,9 +24,9 @@ export default function PayScreen({
     <main id="content" className="page">
       <div className="wrap">
         <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Оплата</span>
+          <Link href="/">{D.nav.home[L]}</Link> <span>/</span> <span>{D.encLinks.payTitle[L]}</span>
         </p>
-        <h1>Оплата</h1>
+        <h1>{D.encLinks.payTitle[L]}</h1>
         {/* прайс приходит из базы; если его нет — API недоступен, и платёж всё равно не
             пройдёт. Называть цену из кода в этот момент нельзя. */}
         {tariffs.length ? (
@@ -34,13 +35,10 @@ export default function PayScreen({
           </TariffsProvider>
         ) : (
           <div className="panel paybox">
-            <h3>Цена уточняется</h3>
-            <p className="dim">
-              Справочник цен сейчас недоступен, поэтому оплату открыть не можем. Обновите
-              страницу через минуту — расчёт карты работает и без этого.
-            </p>
+            <h3>{D.encLinks.priceUnknownTitle[L]}</h3>
+            <p className="dim">{D.encLinks.priceUnknownText[L]}</p>
             <button className="btn wide" type="button" onClick={() => window.location.reload()}>
-              Обновить
+              {D.encLinks.refresh[L]}
             </button>
           </div>
         )}

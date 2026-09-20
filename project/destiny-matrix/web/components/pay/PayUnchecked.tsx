@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { D, L } from "@/lib/i18n";
+
 /**
  * Платёж по адресу есть, а сервер о нём молчит.
  *
@@ -11,14 +13,13 @@ import Link from "next/link";
 export default function PayUnchecked({ paymentId }: { paymentId: string | null }) {
   return (
     <div className="panel paybox">
-      <h3>Не удалось проверить платёж</h3>
+      <h3>{D.payResult.uncheckedTitle[L]}</h3>
       <p className="dim">
-        Сервер не ответил, поэтому мы не знаем, прошёл ли платёж {paymentId}. Обновите страницу
-        через минуту — если деньги списались, разбор уже открыт в{" "}
-        <Link href="/account">кабинете</Link>.
+        {D.payResult.uncheckedLead[L](paymentId ?? "")}{" "}
+        <Link href="/account">{D.payResult.uncheckedAccount[L]}</Link>.
       </p>
       <button className="btn wide" type="button" onClick={() => window.location.reload()}>
-        Проверить ещё раз
+        {D.payResult.uncheckedRetry[L]}
       </button>
     </div>
   );

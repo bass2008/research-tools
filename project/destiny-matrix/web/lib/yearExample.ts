@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 import { calculate } from "./matrix";
 import { exampleDay } from "./today";
 
@@ -57,16 +58,18 @@ export interface DecadeExample {
   label: string;
 }
 
+// Порядок внешнего круга — контракт расчёта (`age_scale`), поэтому подписи берутся по нему,
+// а не по алфавиту ключей.
 const RING_LABELS = [
-  "портрет личности",
-  "духовная мужская линия рода",
-  "духовная задача",
-  "духовная женская линия рода",
-  "материальная задача",
-  "материальная мужская линия рода",
-  "кармическая задача",
-  "материальная женская линия рода",
-];
+  D.mapPoints.day[L],
+  D.mapPoints.father_line[L],
+  D.mapPoints.month[L],
+  D.mapPoints.mother_line[L],
+  D.mapPoints.year[L],
+  D.mapPoints.descendants[L],
+  D.mapPoints.mission[L],
+  D.mapPoints.inheritance[L],
+].map((label) => label.toLowerCase());
 
 /** Дата рождения, у которой текущее десятилетие идёт под нужным арканом.
  *
@@ -104,7 +107,7 @@ export function decadeExample(arcanum: number): DecadeExample | null {
         age,
         from: slot.from,
         to: slot.to,
-        label: RING_LABELS[index] ?? "точка внешнего круга",
+        label: RING_LABELS[index] ?? D.encYear.ringFallback[L],
       };
     }
   }

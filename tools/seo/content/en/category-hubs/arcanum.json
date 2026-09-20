@@ -1,0 +1,88 @@
+{
+ "key": "arcanum",
+ "crumb": "22 arcana",
+ "title": "The 22 arcana of the destiny matrix: what each number means",
+ "seo": {
+  "title": "22 arcana in the destiny matrix: meanings",
+  "description": "What all 22 arcana of the destiny matrix mean: how a number comes out of a date of birth, and why the same arcanum reads differently in different positions.",
+  "queries": [
+   "destiny matrix arcana",
+   "destiny matrix arcana calculator",
+   "destiny matrix arcana chart",
+   "destiny matrix arcana meaning",
+   "destiny matrix chart arcana calculator",
+   "destiny matrix chart arcana meaning",
+   "destiny matrix chart arcana number",
+   "arcana meaning in destiny matrix"
+  ]
+ },
+ "short": "An arcanum is a number from 1 to 22 that a part of the date of birth, or the sum of other points of the chart, reduces to. The whole matrix is built out of these 22 meanings: the same number in different positions says different things.",
+ "sections": [
+  {
+   "h2": "What an arcanum is in the destiny matrix",
+   "paragraphs": [
+    "The arcanum is the unit of the language the chart is written in. There are 22 of them, and each one stands for a recognisable way of acting: how a person takes on a task, what they avoid, what they treat as normal. The names of the arcana match the major cards of the tarot, because the scheme borrowed its labels from there, but the calculation is not a card spread: the numbers come out of the date by arithmetic.",
+    "The range is exactly 1 to 22 because of the rule for reducing a number: any sum that goes past 22 is replaced by the sum of its own digits, and the step repeats until the result is 22 or less. The number 22 is kept as it is at that point and does not turn into 4."
+   ]
+  },
+  {
+   "h2": "Where the numbers of the chart come from",
+   "paragraphs": [
+    "Three arcana come straight from the date: the day gives point A, the month gives point B, and the sum of the digits of the year gives point C. The fourth one, D, comes from reducing their sum, and the centre of the chart, E, from reducing all four. After that, every next point is put together from two points that are already known.",
+    "One thing follows from this, and it matters: the chart depends not on the date as such, but on the three reduced numbers. People with different birthdays can end up with the same matrix, if their day, month and year reduced to the same three arcana."
+   ]
+  },
+  {
+   "h2": "Why the same arcanum reads differently",
+   "paragraphs": [
+    "The meaning of an arcanum is always completed by its position. The number 8 at the centre of the chart and the number 8 on the money line are one energy in two different roles: in the first case it describes what a person counts as their normal state, in the second, how income comes to them and goes away again.",
+    "So the page of an arcanum answers the question “what kind of energy is this”, and the page of a position answers the question “what does it do right here”. Both are worth reading: a meaning without a position stays a general description of character, and a position without a meaning is an empty frame.",
+    "In the plus and in the minus, one and the same arcanum looks almost like its own opposite. These are not two different numbers but two modes of one: the expressed mode, when the energy is used, and the suppressed mode, when it is avoided."
+   ]
+  },
+  {
+   "h2": "How to use the list of arcana",
+   "paragraphs": [
+    "If the chart is already built, start from your own numbers: the centre first, then the three outer points, then the rest. Trying to read all 22 meanings one after another is a waste of effort, because 16 of them will not appear anywhere in your chart in a position that matters.",
+    "If there is no chart yet, build one from the date of birth: it is free and needs no sign-up. Once the calculation is done, every number in the chart turns into a link to its own meaning, and you can open any of them right away."
+   ]
+  },
+  {
+   "h2": "Myths and common mistakes",
+   "paragraphs": [
+    "“Some arcana are good and some are bad.” No. Every arcanum describes both a resource and the price of it; what makes one of them hard is not the number but the suppressed mode, in which the energy is never used at all.",
+    "“An arcanum is a tarot card, so a spread is needed.” Only the names and the order match. Nothing is drawn at random in the destiny matrix: every number is worked out from the date in one definite way, and one date always gives one chart.",
+    "“Knowing your main arcanum is enough.” One number is too little: the sense of it comes from the links between the points. The arcanum of the centre, taken without the outer points, does not explain where it came from, so it reads flat."
+   ]
+  }
+ ],
+ "faq": [
+  {
+   "q": "How many arcana are there in the destiny matrix?",
+   "a": "Twenty-two. The range is set by the rule for reducing a number: any sum above 22 is replaced by the sum of its digits, until the result lands within 1 to 22, and 22 itself is kept as it is."
+  },
+  {
+   "q": "How do I find my arcana from my date of birth?",
+   "a": "The day gives point A, the month gives point B, the sum of the digits of the year gives point C, their sum after reducing gives point D, and reducing all four gives the centre of the chart, E. The other points are put together from the ones already found."
+  },
+  {
+   "q": "Why is the same arcanum described differently on different pages?",
+   "a": "Because the meaning is completed by the position. One and the same number at the centre of the chart, on the money line and in a pair of relationships describes one energy in three different roles."
+  },
+  {
+   "q": "Are the arcana of the destiny matrix and tarot cards the same thing?",
+   "a": "The names and the numbering of the major cards match, but the way they are obtained does not. In the destiny matrix the numbers are worked out from the date of birth by arithmetic, with no spread and no chance in it."
+  },
+  {
+   "q": "What does an arcanum in the plus and in the minus mean?",
+   "a": "These are two modes of one number: the expressed mode, when the energy is used for what it is meant for, and the suppressed mode, when it is avoided. The descriptions look opposite, but they speak about one arcanum."
+  }
+ ],
+ "related": [
+  "position/center",
+  "position/day",
+  "method",
+  "energies",
+  "karmic-matrix"
+ ]
+}

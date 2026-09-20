@@ -1,6 +1,7 @@
 "use client";
 
 import SiteLink from "@/components/ui/SiteLink";
+import { D, L } from "@/lib/i18n";
 import { usePathname } from "next/navigation";
 
 /** Кнопка «Купить» в шапке.
@@ -14,7 +15,7 @@ export default function BuyButton({ plain }: { plain?: boolean }) {
   const href = matrix ? `/pay?m=${matrix[1]}` : "/pay";
   return (
     <SiteLink plain={plain} className="btn sm" data-testid="buy-top" href={href}>
-      Купить
+      {D.nav.buy[L]}
     </SiteLink>
   );
 }

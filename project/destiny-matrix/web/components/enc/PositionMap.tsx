@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import { MAP_CENTER, MAP_POINTS, mapXY, type MapPoint } from "@/lib/matrixMap";
 
 // Схема карты с подсвеченной точкой. Отвечает на запрос «где находится визитка в матрице судьбы»
@@ -40,7 +41,7 @@ export default function PositionMap({
 
   return (
     <figure className="posmap">
-      <svg className="oct posmap-svg" viewBox="0 0 620 620" role="img" aria-label={`Схема матрицы судьбы, отмечено: ${names}`}>
+      <svg className="oct posmap-svg" viewBox="0 0 620 620" role="img" aria-label={D.octagram.mapAria[L](names)}>
         {ring(286, "ring")}
         {ring(270, "ring")}
         <polygon className="side" points={octagon} />

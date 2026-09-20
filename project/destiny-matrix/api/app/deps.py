@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from .i18n import say
 from .db import get_db
 from .models import User
 from .security import password_fingerprint, read_token
@@ -37,5 +38,5 @@ def ghost_session(credentials: HTTPAuthorizationCredentials | None = Depends(bea
 
 def current_user(user: User | None = Depends(optional_user)) -> User:
     if user is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Нужен вход: передайте токен")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("auth.token_required"))
     return user

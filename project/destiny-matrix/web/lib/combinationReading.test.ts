@@ -1,3 +1,4 @@
+import { arcanumTitle } from "./arcana";
 import { describe, expect, it } from "vitest";
 
 import { allCombinationSlugs } from "./encyclopedia";
@@ -27,9 +28,12 @@ describe("полные статьи сочетаний", () => {
       .toEqual(["3-4", "4-3"]);
     expect(article.contexts.find((context) => context.key === "E-K")?.variants.map((x) => x.order))
       .toEqual(["3-4"]);
-    expect(buildCombinationContext(4, 3, "A-B").heading).toContain("4 Император в A");
-    expect(buildCombinationContext(4, 3, "E-M").heading).toContain("4 Император в E");
-    expect(buildCombinationContext(3, 10, "B-P").heading).toContain("10 Колесо в P");
+    // Заголовок собирается из названия аркана и подписи позиции — сверяем с ними, а не с
+    // русским видом строки.
+    expect(buildCombinationContext(4, 3, "A-B").heading).toContain(arcanumTitle(4));
+    expect(buildCombinationContext(4, 3, "A-B").heading).toMatch(/\bA\b/);
+    expect(buildCombinationContext(4, 3, "E-M").heading).toMatch(/\bE\b/);
+    expect(buildCombinationContext(3, 10, "B-P").heading).toContain(arcanumTitle(10));
   });
 
   it("использует в связях P те же специальные силу и риск, что персональный разбор", () => {

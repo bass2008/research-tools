@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
@@ -91,7 +92,7 @@ describe("дефект 8 сентября 2026: точка перед @", () => 
   });
 
   it("человек читает, что именно исправить", () => {
-    expect(emailError(broken)).toBe("Перед @ стоит точка — уберите её: you@mail.ru.");
+    expect(emailError(broken)).toBe(D.emailErrors["local-dot-end"][L]);
   });
 
   it("тот же адрес без точки проходит", () => {
@@ -136,8 +137,8 @@ describe("сообщения об ошибке", () => {
   });
 
   it("на пустое поле просит ввести почту, а не «проверьте»", () => {
-    expect(emailError("")).toBe("Введите почту.");
-    expect(emailError("   ")).toBe("Введите почту.");
+    expect(emailError("")).toBe(D.emailErrors.empty[L]);
+    expect(emailError("   ")).toBe(D.emailErrors.empty[L]);
   });
 });
 

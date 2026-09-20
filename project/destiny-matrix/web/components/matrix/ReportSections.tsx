@@ -2,10 +2,11 @@
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
 // пропсами и в браузерный чанк не попадают) и клиентский разбор в браузере, где платных
 // разделов нет вовсе.
+import { ALL_FREE } from "@/lib/access";
 import Link from "next/link";
 
 import { arcanumTitle } from "@/lib/arcana";
-import { counted, plural } from "@/lib/plural";
+import { D, L } from "@/lib/i18n";
 
 import type { SectionOut } from "@/lib/publicSpec";
 import { publicHref } from "@/lib/site";
@@ -33,9 +34,9 @@ function gridColumns(n: number): 2 | 4 | undefined {
 
 /** Подпись итога зависит от числа ролей: «тройка» стояла и над парой, и над четырьмя ролями. */
 function conclusionLabel(roles: number | undefined): string {
-  if (roles === 2) return "Как складывается пара";
-  if (roles && roles > 3) return "Как складываются роли раздела";
-  return "Как складывается тройка";
+  if (roles === 2) return D.report.pairSummary[L];
+  if (roles && roles > 3) return D.report.rolesSummary[L];
+  return D.report.tripleSummary[L];
 }
 
 export default function ReportSections({
@@ -59,12 +60,12 @@ export default function ReportSections({
   return (
     <div className="section-gap" data-testid="report">
       <div className="rhead">
-        <h2>Расшифровка вашей матрицы</h2>
-        {/* счётчик нужен, только пока есть что открывать: у оплатившего «0 под замком» — шум */}
-        {locked > 0 ? (
+        <h2>{D.report.readingTitle[L]}</h2>
+        {/* Счётчик «столько открыто, столько под замком» нужен только там, где замок можно снять
+            деньгами. На витрине без кассы он считал бы то, что откроется само через секунду. */}
+        {locked > 0 && !ALL_FREE ? (
           <div className="cnt">
-            <b>{open}</b> {plural(open, "раздел открыт", "раздела открыто", "разделов открыто")} ·{" "}
-            <b>{locked}</b> под замком
+            {D.report.openSections[L](open)} · {D.report.lockedCount[L](locked)}
           </div>
         ) : null}
       </div>
@@ -145,18 +146,23 @@ export default function ReportSections({
           </details>
         ) : (
           <div className="acc lock" key={s.key} data-testid={`section-${s.key}`} data-locked="true">
-            {checking || printing ? (
+            {checking || printing || ALL_FREE ? (
               <span className="head">
                 {s.title}
                 <span className="unlock">
-                  <LockIcon /> {printing ? "Не открыт" : "Проверяем доступ…"}
+                  <LockIcon />{" "}
+                  {printing
+                    ? D.report.notOpened[L]
+                    : checking
+                      ? D.report.checkingAccess[L]
+                      : D.report.notLoaded[L]}
                 </span>
               </span>
             ) : (
               <UnlockCta className="head" place={place} section={s.key} matrixId={matrixId}>
                 {s.title}
                 <span className="unlock">
-                  <LockIcon /> Открыть
+                  <LockIcon /> {D.report.unlock[L]}
                 </span>
               </UnlockCta>
             )}

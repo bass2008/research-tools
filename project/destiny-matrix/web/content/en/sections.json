@@ -1,0 +1,141 @@
+{
+ "count": 20,
+ "items": [
+  {
+   "key": "character",
+   "title": "Character and personal qualities",
+   "access": "free",
+   "lead": "How you are built and what people see in you at first glance.",
+   "positions": [
+    {
+     "label": "Personality portrait",
+     "selector": "A",
+     "position_key": "day"
+    },
+    {
+     "label": "Spiritual task",
+     "selector": "B",
+     "position_key": "month"
+    },
+    {
+     "label": "Material task",
+     "selector": "C",
+     "position_key": "year"
+    }
+   ]
+  },
+  {
+   "key": "comfort",
+   "title": "The centre and the inner points",
+   "access": "free",
+   "lead": "Centre E and the two inner channel points on the vertical axis.",
+   "positions": [
+    {
+     "label": "Centre of the chart",
+     "selector": "E",
+     "position_key": "center"
+    },
+    {
+     "label": "Entry of the relationship line and the tail",
+     "selector": "M",
+     "position_key": "comfort_south"
+    },
+    {
+     "label": "Inner point of talent",
+     "selector": "K",
+     "position_key": "comfort_north"
+    }
+   ]
+  },
+  {
+   "key": "profession",
+   "title": "Profession and work you love",
+   "access": "paid"
+  },
+  {
+   "key": "realisation",
+   "title": "The path of self-realisation",
+   "access": "paid"
+  },
+  {
+   "key": "karma40",
+   "title": "Karmic task before 40",
+   "access": "paid"
+  },
+  {
+   "key": "resources",
+   "title": "What opens wealth and resource for you",
+   "access": "paid"
+  },
+  {
+   "key": "family_gifts",
+   "title": "Support and gifts of your family line",
+   "access": "paid"
+  },
+  {
+   "key": "soul_tasks",
+   "title": "Spiritual tasks and lessons of the soul",
+   "access": "paid"
+  },
+  {
+   "key": "past_lives",
+   "title": "Tasks of past lives",
+   "access": "paid"
+  },
+  {
+   "key": "purpose",
+   "title": "Your purpose",
+   "access": "paid"
+  },
+  {
+   "key": "money",
+   "title": "Money in the destiny matrix",
+   "access": "paid"
+  },
+  {
+   "key": "money40",
+   "title": "How money changes after 40",
+   "access": "paid"
+  },
+  {
+   "key": "relations",
+   "title": "Relationships in the destiny matrix",
+   "access": "paid"
+  },
+  {
+   "key": "parents_children",
+   "title": "Karma of relationships with parents and children",
+   "access": "paid"
+  },
+  {
+   "key": "ancestry",
+   "title": "Family tasks down to the seventh generation",
+   "access": "paid"
+  },
+  {
+   "key": "body_resource",
+   "title": "Body resource and recovery",
+   "access": "paid"
+  },
+  {
+   "key": "chakras",
+   "title": "Energy map: reading the seven levels",
+   "access": "paid"
+  },
+  {
+   "key": "rest",
+   "title": "Your ideal way to rest",
+   "access": "paid"
+  },
+  {
+   "key": "loops",
+   "title": "Programs: what repeats in circles",
+   "access": "paid"
+  },
+  {
+   "key": "years",
+   "title": "Reading by decades up to 80",
+   "access": "paid"
+  }
+ ]
+}

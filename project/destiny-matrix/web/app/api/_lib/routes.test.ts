@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -93,7 +94,7 @@ describe("BFF: регистрация и вход", () => {
   it("отказ по почте приходит раньше отказа по паролю", async () => {
     const res = await credentials(post({ email: "user.@mail.ru", password: "1" }), "register");
     expect(await res.json()).toEqual({
-      detail: "Перед @ стоит точка — уберите её: you@mail.ru.",
+      detail: D.emailErrors["local-dot-end"][L],
     });
   });
 
@@ -109,7 +110,7 @@ describe("BFF: регистрация и вход", () => {
   it("почты нет вовсе — просит ввести", async () => {
     const res = await credentials(post({ password: "secret" }), "register");
     expect(res.status).toBe(422);
-    expect(await res.json()).toEqual({ detail: "Введите почту." });
+    expect(await res.json()).toEqual({ detail: D.emailErrors.empty[L] });
     expect(upstream).not.toHaveBeenCalled();
   });
 });
@@ -141,7 +142,7 @@ describe("BFF: платёж", () => {
     const res = await payment(post({ ...good, tariff: "ПЛОХОЙ", email: "user.@mail.ru" }),
                               "/payments/start");
     expect(await res.json()).toEqual({
-      detail: "Перед @ стоит точка — уберите её: you@mail.ru.",
+      detail: D.emailErrors["local-dot-end"][L],
     });
   });
 });

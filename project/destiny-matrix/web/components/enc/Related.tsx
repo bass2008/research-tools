@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import Link from "next/link";
 
 import { relatedBoth } from "@/lib/related";
@@ -6,8 +7,8 @@ export default function Related({
   path,
   refs,
   skip = [],
-  title = "Смотрите также",
-  hint = "Страницы, на которые ссылается разбор, и те, что ссылаются на него",
+  title = D.octagram.relatedTitle[L],
+  hint = D.octagram.relatedHint[L],
 }: {
   path: string;
   refs: string[];

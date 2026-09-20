@@ -24,6 +24,7 @@ infra/
   nginx/                   источник правды для nginx
     arcana-selectel.conf       прод и лендинг: статика с диска, таймаут печати, путь ACME
     arcana-test-selectel.conf  тестовый домен: пароль, noindex, открытые вебхук банка и health
+    arcana-test-en-selectel.conf  английский тест: тот же пароль, свой порт 3300, вебхука банка нет
     arcana.conf, arcana-test.conf  прежняя раскладка в Yandex Cloud, остались для истории
     conf.d/                настройки уровня http: сжатие, лимиты, формат лога, карты фильтров
     snippets/              правила отсечения сканеров, подключаются в оба server-блока
@@ -105,6 +106,7 @@ cd ../../compose && scripts/release-prod.sh
 | скрипт | куда | тег образов | чем отличается |
 |---|---|---|---|
 | `release-test.sh` | `test.arcana-sense.ru` | `test-<sha>` | своя база, тестовый терминал банка, Метрика в сборку не попадает, домен под Basic Auth |
+| `release-test-eng.sh` | `test.arcana-sense.com` | `test-en-<sha>` | язык `en` вшит в образ, витрина без оплаты, своя база, кассы нет вовсе |
 | `release-prod.sh` | `arcana-sense.ru` | `<sha>` | требует `REQUIRE_TEST_EVIDENCE=1`: тот же коммит обязан был пройти на тесте |
 
 Что важно знать про механику:

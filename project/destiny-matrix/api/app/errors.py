@@ -14,6 +14,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import delete, select
 
+from .i18n import say
 from .db import SessionLocal
 from .models import ErrorLog, utcnow
 
@@ -50,7 +51,7 @@ async def watch(request: Request, call_next):
     except Exception as exc:                       # noqa: BLE001 — записываем и отдаём 500
         remember(request.method, request.url.path, 500, f"{type(exc).__name__}: {exc}",
                  traceback.format_exc())
-        return JSONResponse({"detail": "Внутренняя ошибка"}, status_code=500)
+        return JSONResponse({"detail": say("error.internal")}, status_code=500)
     if answer.status_code >= 500:
         remember(request.method, request.url.path, answer.status_code, "ответ сервера", None)
     return answer

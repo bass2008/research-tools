@@ -16,7 +16,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTENT = ROOT / "web" / "content"
+LANG = os.environ.get("ENCYCLOPEDIA_LANG", "ru")
+CONTENT = ROOT / "web" / "content" / LANG
 
 
 def _run(content_dir: Path) -> tuple[int, str]:

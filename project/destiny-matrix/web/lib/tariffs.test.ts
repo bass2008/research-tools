@@ -1,3 +1,4 @@
+import { D, L, groupNumber } from "./i18n";
 import { describe, expect, it } from "vitest";
 
 import { LEAD_ID, capLabel, lead, money, periodLabel, priceLabel, type Tariff } from "./tariffs";
@@ -20,18 +21,20 @@ describe("прайс", () => {
   });
 
   it("копейки печатаются рублями", () => {
-    expect(priceLabel(SINGLE)).toBe("250 ₽");
-    expect(money(199_900)).toBe("1 999");
+    expect(priceLabel(SINGLE)).toBe(D.pay.priceFormat[L](money(SINGLE.price)));
+    // Разделитель разрядов у языков свой (`lib/i18n/format.ts`): сверяем с ним, а не с видом
+    // одного языка.
+    expect(money(199_900)).toBe(groupNumber(1999));
   });
 
   it("разовый бессрочен, срочный измеряется месяцами", () => {
-    expect(periodLabel(SINGLE)).toBe("навсегда");
-    expect(periodLabel(MONTH)).toBe("на 3 месяца");
+    expect(periodLabel(SINGLE)).toBe(D.pay.forever[L]);
+    expect(periodLabel(MONTH)).toBe(D.pay.forMonths[L](3));
   });
 
   it("подпись охвата: бессрочный — по scope, срочный — подписка", () => {
-    expect(capLabel(SINGLE)).toBe("Одна дата");
-    expect(capLabel(MONTH)).toBe("Подписка");
+    expect(capLabel(SINGLE)).toBe(D.pay.oneDate[L]);
+    expect(capLabel(MONTH)).toBe(D.pay.subscription[L]);
   });
 
   it("рекламируем разовый — с него начинают", () => {

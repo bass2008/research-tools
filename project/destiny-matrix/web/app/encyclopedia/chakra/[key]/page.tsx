@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { D, L } from "@/lib/i18n";
 import PositionMap from "@/components/enc/PositionMap";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import Price from "@/components/pay/Price";
 
+import { ALL_FREE } from "@/lib/access";
 import { ARCANA } from "@/lib/arcana";
 import { CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref } from "@/lib/encyclopedia";
 import { chakraContent } from "@/lib/content";
@@ -58,8 +60,8 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
 
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb("chk"),
           { name: c.title },
         ]}
@@ -76,37 +78,38 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
             формулировка со спросом у верхних трёх чакр, а «<имя> — уровень N» не спрашивает
             никто. Номер уровня остаётся, но после названия страницы. */}
         <h1>
-          Чакра {c.title} в матрице судьбы — уровень {c.index}
+          {D.encChakra.h1[L](c.title, c.index)}
         </h1>
         <p className="dim prose">{c.hint}</p>
 
         <PositionMap
           highlight={spots}
-          caption={`Где этот уровень стоит в карте: ${spots.map((x) => `${x.label} · ${x.symbol}`).join(" и ")}`}
+          caption={D.encChakra.caption[L](
+            spots.map((x) => `${x.label} · ${x.symbol}`).join(` ${D.encArcanum.and[L]} `),
+          )}
         />
 
         <div className="prose section-gap">
           {paragraphs.map((text, i) => (
             <p key={i}>{text}</p>
           ))}
-          <h2>Как считается уровень</h2>
+          <h2>{D.encChakra.howCounted[L]}</h2>
           <p>
-            В карте энергий уровень {c.title} использует классическую пару точек {c.physics} и {c.energy}.
-            Первое число записывается в колонку физики, второе — энергии, эмоции равны их
-            редуцированной сумме. Искусственного смещения по номеру строки в методике нет.
+            {D.encChakra.howCountedText[L](c.title, c.physics, c.energy)}
           </p>
           <p>
-            Итог колонки — тоже аркан: он собирает семь уровней в одно число.{" "}
-            <Link href={positionHref("chakras")}>Раздел «Карта энергий по чакрам»</Link> показывает всю
-            таблицу целиком, а <Link href={positionHref("body_resource")}>«Ресурс тела и восстановление»</Link>{" "}
-            разбирает нижний уровень.
+            {D.encChakra.totalsText[L]}{" "}
+            <Link href={positionHref("chakras")}>{D.encChakra.sectionChakras[L]}</Link>{" "}
+            {D.encChakra.showsWholeTable[L]}{" "}
+            <Link href={positionHref("body_resource")}>{D.encChakra.sectionBody[L]}</Link>{" "}
+            {D.encChakra.coversLowest[L]}
           </p>
         </div>
 
         {extra.columns.length ? (
           <div className="panel section-gap">
-            <h3>Три колонки уровня</h3>
-            <div className="cap">Материя, энергия и чувства на этом уровне</div>
+            <h3>{D.encChakra.threeColumns[L]}</h3>
+            <div className="cap">{D.encChakra.threeColumnsHint[L]}</div>
             <dl className="kv">
               {extra.columns.map((col) => (
                 <div key={col.title} style={{ display: "contents" }}>
@@ -120,15 +123,15 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
 
         <div className="section-gap">
           <CalcPromo
-            title="Посмотреть свой уровень"
-            lead={`Какой аркан стоит у вас на уровне «${c.title}» — видно сразу после расчёта. Бесплатно, без регистрации.`}
+            title={D.encChakra.promoTitle[L]}
+            lead={D.encChakra.promoLead[L](c.title)}
             place="chakra"
           />
         </div>
 
         <div className="panel section-gap">
-          <h3>Остальные уровни</h3>
-          <div className="cap">Шесть остальных уровней, сверху вниз</div>
+          <h3>{D.encChakra.otherLevels[L]}</h3>
+          <div className="cap">{D.encChakra.otherLevelsHint[L]}</div>
           <div className="taglist">
             {CHAKRA_PAGES.filter((o) => o.key !== c.key).map((o) => (
               <Link key={o.key} href={chakraHref(o.key)}>
@@ -139,8 +142,8 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         </div>
 
         <div className="panel section-gap">
-          <h3>Какой аркан стоит на этом уровне</h3>
-          <div className="cap">22 значения — откройте своё после расчёта</div>
+          <h3>{D.encChakra.whichArcanum[L]}</h3>
+          <div className="cap">{D.encChakra.whichArcanumHint[L]}</div>
           <div className="taglist">
             {ARCANA.map((a) => (
               <Link key={a.n} href={arcanumHref(a.n)}>
@@ -151,13 +154,17 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         </div>
 
         <div className="allbox">
-          <h3>Построить свою карту энергий</h3>
+          <h3>{D.encChakra.buildEnergyMap[L]}</h3>
           <p>
-            Таблица чакр считается вместе с октаграммой по дате рождения. Расчёт бесплатный и идёт в
-            браузере; полная расшифровка карты энергий входит в разбор за <Price />.
+            {D.encChakra.buildEnergyMapText[L]}{" "}
+            {ALL_FREE ? (
+              <>{D.encChakra.fullMapOpen[L]}</>
+            ) : (
+              <>{D.encChakra.fullMapPaid[L]} <Price />.</>
+            )}
           </p>
           <Link className="btn" href="/#calc">
-            Рассчитать матрицу
+            {D.matrixPages.calcMatrix[L]}
           </Link>
         </div>
     </>

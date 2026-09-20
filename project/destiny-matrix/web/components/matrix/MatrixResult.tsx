@@ -1,4 +1,5 @@
 import { arcanum, arcanumTitle } from "@/lib/arcana";
+import { D, L } from "@/lib/i18n";
 import { birthLabel, type Matrix } from "@/lib/matrix";
 
 import ArcanumCard from "@/components/matrix/ArcanumCard";
@@ -37,21 +38,21 @@ export default function MatrixResult({
   // одинаково в карте, в разборе, в таблице позиций и в справочнике. Второй строкой идёт
   // пояснение — оно объясняет, а не называет.
   const main: Array<[string, number, string]> = [
-    ["Центр карты", m.center, "Ядро карты: к нему сходятся все линии"],
-    ["Портрет личности", m.day, "Внешняя точка A — аркан дня рождения"],
-    ["Материальная задача", m.year, "Внешняя точка C — свёртка года рождения"],
-    ["Кармическая задача", m.mission, "Внешняя точка D — сумма A, B и C"],
-    ["Вход денежной линии", m.money[0], "Точка L — начало канала L–R2–R"],
-    ["Вход линии отношений", m.love[0], "Точка M — начало канала M–R1–R"],
+    [D.report.pointCenter[L], m.center, D.report.pointCenterHint[L]],
+    [D.report.pointPortrait[L], m.day, D.report.pointPortraitHint[L]],
+    [D.report.pointMaterial[L], m.year, D.report.pointMaterialHint[L]],
+    [D.report.pointKarmic[L], m.mission, D.report.pointKarmicHint[L]],
+    [D.report.pointMoney[L], m.money[0], D.report.pointMoneyHint[L]],
+    [D.report.pointLove[L], m.love[0], D.report.pointLoveHint[L]],
   ];
 
   return (
     <>
       <div className="rgrid">
         <div className="panel">
-          <h2>{example ? "Пример карты" : "Ваша матрица"}</h2>
+          <h2>{example ? D.report.exampleChart[L] : D.report.yourChart[L]}</h2>
           <div className="cap">
-            {example ? "Выберите свою дату выше — карта пересчитается" : `${birthLabel(m.birth)} · все позиции карты`}
+            {example ? D.report.exampleHint[L] : D.report.allPositionsOf[L](birthLabel(m.birth))}
           </div>
           <Octagram m={m} printing={printing} />
         </div>
@@ -61,36 +62,36 @@ export default function MatrixResult({
 
           <div className="mini">
             <div className="mb">
-              <h3>Поиск себя</h3>
-              <p>Линия неба и линия земли: духовная и материальная задачи.</p>
+              <h3>{D.report.selfSearch[L]}</h3>
+              <p>{D.report.selfSearchHint[L]}</p>
               <div className="row">
-                Небо: <Bub v={m.sky[0]} absolute={printing} /> <Bub v={m.sky[1]} absolute={printing} /> <Bub v={m.sky[2]} gold absolute={printing} />
+                {D.report.sky[L]}: <Bub v={m.sky[0]} absolute={printing} /> <Bub v={m.sky[1]} absolute={printing} /> <Bub v={m.sky[2]} gold absolute={printing} />
               </div>
               <div className="row">
-                Земля: <Bub v={m.ground[0]} absolute={printing} /> <Bub v={m.ground[1]} absolute={printing} /> <Bub v={m.ground[2]} gold absolute={printing} />
+                {D.report.ground[L]}: <Bub v={m.ground[0]} absolute={printing} /> <Bub v={m.ground[1]} absolute={printing} /> <Bub v={m.ground[2]} gold absolute={printing} />
               </div>
             </div>
             <div className="mb">
-              <h3>Социализация</h3>
-              <p>Родовые ветви: результат и признание в социуме.</p>
+              <h3>{D.report.socialisation[L]}</h3>
+              <p>{D.report.socialisationHint[L]}</p>
               <div className="row">
-                М: <Bub v={m.social_male[0]} absolute={printing} /> <Bub v={m.social_male[1]} absolute={printing} /> <Bub v={m.social_male[2]} gold absolute={printing} />
+                {D.report.maleBranch[L]}: <Bub v={m.social_male[0]} absolute={printing} /> <Bub v={m.social_male[1]} absolute={printing} /> <Bub v={m.social_male[2]} gold absolute={printing} />
               </div>
               <div className="row">
-                Ж: <Bub v={m.social_female[0]} absolute={printing} /> <Bub v={m.social_female[1]} absolute={printing} />{" "}
+                {D.report.femaleBranch[L]}: <Bub v={m.social_female[0]} absolute={printing} /> <Bub v={m.social_female[1]} absolute={printing} />{" "}
                 <Bub v={m.social_female[2]} gold absolute={printing} />
               </div>
             </div>
             <div className="mb">
-              <h3>Духовное предназначение</h3>
-              <p>Состояние, из которого получается всё остальное.</p>
+              <h3>{D.report.spiritualPurpose[L]}</h3>
+              <p>{D.report.spiritualPurposeHint[L]}</p>
               <div className="row">
                 <Bub v={m.harmony} gold absolute={printing} /> {arcanumTitle(m.harmony)}
               </div>
             </div>
             <div className="mb">
-              <h3>Планетарное предназначение</h3>
-              <p>То, что выходит за рамки личной истории.</p>
+              <h3>{D.report.planetaryPurpose[L]}</h3>
+              <p>{D.report.planetaryPurposeHint[L]}</p>
               <div className="row">
                 <Bub v={m.planetary} gold absolute={printing} /> {arcanumTitle(m.planetary)}
               </div>
@@ -100,8 +101,8 @@ export default function MatrixResult({
       </div>
 
       <div className="panel section-gap">
-        <h2>Главные точки</h2>
-        <div className="cap">Шесть позиций, которые задают всё остальное</div>
+        <h2>{D.report.mainPoints[L]}</h2>
+        <div className="cap">{D.report.mainPointsHint[L]}</div>
         <div className="mp">
           {main.map(([who, v, hint]) => (
             <a
@@ -126,15 +127,15 @@ export default function MatrixResult({
 
 
       <div className="panel section-gap">
-        <h2>Все позиции карты</h2>
-        <div className="cap">Позиция · аркан · как читается</div>
+        <h2>{D.report.allPositions[L]}</h2>
+        <div className="cap">{D.report.allPositionsHint[L]}</div>
         <div className="tabscroll">
           <table className="postab short">
             <thead>
               <tr>
-                <th>Позиция</th>
-                <th>Аркан</th>
-                <th>Значение</th>
+                <th>{D.report.columnPosition[L]}</th>
+                <th>{D.report.columnArcanum[L]}</th>
+                <th>{D.report.columnMeaning[L]}</th>
               </tr>
             </thead>
             <tbody>

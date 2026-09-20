@@ -6,6 +6,7 @@ import Metrika from "@/components/ui/Metrika";
 import PulseBeacon from "@/components/ui/PulseBeacon";
 import TariffsProvider from "@/components/pay/TariffsProvider";
 import { FONT_CLASS, FONT_VARS } from "./fonts";
+import { D, L } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import { verification } from "@/lib/seo";
 
@@ -14,12 +15,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Матрица судьбы — расчёт по дате рождения с расшифровкой",
+    default: D.meta.siteTitle[L],
     template: "%s — Arcana Sense",
   },
-  description:
-    "Калькулятор матрицы судьбы: октаграмма 22 арканов, карта энергий по чакрам и разбор " +
-    "по 20 разделам. Расчёт карты и два раздела разбора — бесплатно и без регистрации.",
+  description: D.meta.siteDescription[L],
   applicationName: SITE.name,
   // canonical задаёт каждая страница сама (pageMeta): в корневом layout он делал главную
   // канонической для всех 404, потому что при notFound() метаданные сегмента отбрасываются
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
     // без явного значения og:title наследует заголовок главной — и 404 представлялся ею
     title: SITE.name,
     siteName: SITE.name,
-    locale: "ru_RU",
+    locale: D.meta.ogLocale[L],
     url: SITE.url,
     images: [{ url: SITE.ogImage, width: SITE.ogWidth, height: SITE.ogHeight, alt: SITE.name }],
   },
@@ -47,7 +46,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={FONT_CLASS}>
+    <html lang={D.meta.htmlLang[L]} className={FONT_CLASS}>
       <head>
         <style dangerouslySetInnerHTML={{ __html: FONT_VARS }} />
       </head>

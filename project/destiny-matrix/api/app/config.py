@@ -43,6 +43,16 @@ class Settings(BaseSettings):
     # знает адрес /api/payments/mock. Стенды включают её явно.
     mock_payments: bool = False
 
+    # Витрина без оплаты: разбор любой даты открыт всем, включая незарегистрированных. Нужна
+    # рынку, где эквайринга ещё нет (английский сайт). Выключено по умолчанию: включённый флаг
+    # на боевом .ru раздал бы платный разбор бесплатно. Фронт знает о нём из своей переменной
+    # сборки — страницы матриц статические, и решать это на запрос он не может.
+    all_free_without_payment: bool = False
+
+    # Язык развёртки: на нём сервер отвечает и пишет письма. Один контур — один язык, как и у
+    # фронта: страницы там печатаются заранее, и разойтись эти два языка не должны.
+    site_lang: str = "ru"
+
     # Пусто = кросс-доменных запросов нет вообще. Браузер обращается только к своему origin:
     # страницы отдаёт node-сервер Next.js, а его BFF ходит в API с сервера, где CORS не
     # действует. Заполнять только под служебный клиент на другом домене (см. README).
@@ -72,9 +82,10 @@ class Settings(BaseSettings):
     postbox_secret: str = ""
     postbox_endpoint: str = "https://postbox.cloud.yandex.net"
     postbox_region: str = "ru-central1"
-    mail_from: str = "noreply@arcana-sense.ru"
+    # Почтовый домен один на оба языка: форвардер бесплатно обслуживает один домен, и это .com.
+    mail_from: str = "noreply@arcana-sense.com"
     mail_from_name: str = "Arcana Sense"
-    mail_reply_to: str = "hello@arcana-sense.ru"
+    mail_reply_to: str = "hello@arcana-sense.com"
     site_url: str = "https://arcana-sense.ru"
 
     # срок жизни ссылки на сброс пароля

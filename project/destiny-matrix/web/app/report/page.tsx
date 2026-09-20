@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,54 +16,48 @@ import { SavedReport, Sheet } from "../_lib/report";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMeta({
-  title: "Мой разбор матрицы судьбы",
+  title: D.pages.reportTitle[L],
   description:
-    "Личный отчёт по матрице судьбы: октаграмма, позиции карты и часть разделов бесплатно, " +
-    "остальные — в полном разборе.",
+    D.pages.reportDescription[L],
   path: "/report",
   noindex: true,
 });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
-const OTHER = <Link href="/encyclopedia">Энциклопедия</Link>;
+const OTHER = <Link href="/encyclopedia">{D.nav.encyclopedia[L]}</Link>;
 
 export default async function ReportPage({ searchParams }: { searchParams: Search }) {
   const wanted = (await searchParams).m;
   const access = await readAccess();
-
-  if (!access.paid) {
-    // Дата из браузера и запись в кабинете связываются по id: без списка кнопка под бесплатным
-    // разбором выбирала первую закрытую запись, а не ту, которую человек сейчас читает.
-    const saved = access.authenticated ? await readSavedMatrices() : [];
-    return (
-      <Sheet other={OTHER}>
-        {access.offline ? (
-          <div className="err">
-            Сервер не подтвердил доступ, поэтому платные разделы закрыты. Обновите страницу — доступ
-            проверяется заново.
-          </div>
-        ) : null}
-        <ReportView texts={freePositionTexts()} articles={freePositionArticles()} saved={saved} />
-      </Sheet>
-    );
-  }
-
-  const saved = await readSavedMatrices();
+  // Дата из браузера и запись в кабинете связываются по id: без списка кнопка под бесплатным
+  // разбором выбирала первую закрытую запись, а не ту, которую человек сейчас читает.
+  const saved = access.authenticated ? await readSavedMatrices() : [];
   const chosen = pickMatrix(saved, wanted);
-  if (!chosen) {
-    // явный `?m=` на чужую или несуществующую матрицу — это 404, а не «покажем свою»
-    if (wanted) notFound();
+
+  // явный `?m=` на чужую или несуществующую матрицу — это 404, а не «покажем свою»
+  if (wanted && !chosen) notFound();
+
+  // Открыт ли разбор, решает сервер и присылает это в самой записи (`access` → `unlocked`).
+  // Раньше страница считала доступ сама, по наличию прав, и на витрине без кассы — где прав не
+  // заводят — отвечала «матрица не выбрана» при открытой записи в кабинете.
+  if (chosen?.unlocked) {
     return (
       <Sheet other={OTHER}>
-        <ReportView granted={access.paid} texts={freePositionTexts()} articles={freePositionArticles()} />
+        <SavedReport chosen={chosen} saved={saved} access={access} />
       </Sheet>
     );
   }
 
   return (
     <Sheet other={OTHER}>
-      <SavedReport chosen={chosen} saved={saved} access={access} />
+      {access.offline ? <div className="err">{D.pages.reportOffline[L]}</div> : null}
+      <ReportView
+        granted={access.paid}
+        texts={freePositionTexts()}
+        articles={freePositionArticles()}
+        saved={saved}
+      />
     </Sheet>
   );
 }

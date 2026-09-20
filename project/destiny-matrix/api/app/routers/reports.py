@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..i18n import say
 from .. import access, printing, reports, tariffs
 from ..config import settings
 from ..db import get_db
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 def _own_matrix(db: Session, user: User, matrix_id: int) -> SavedMatrix:
     row = db.get(SavedMatrix, matrix_id)
     if row is None or row.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
     return row
 
 
@@ -50,15 +51,15 @@ def file(token: str = Query(..., min_length=16)) -> Response:
     """Выдача файла из локального хранилища — замена подписанной ссылке S3. Пропуск живёт час,
     как и подпись, и годится ровно на один ключ: в PDF есть дата рождения."""
     if settings.reports_store != "local":
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Не найдено")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("report.not_found"))
     read = read_file_token(token)
     if read is None:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Ссылка устарела")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=say("report.link_expired"))
     key, filename = read
     try:
         body = store().read(key)
     except (OSError, ValueError):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Файл не найден") from None
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("report.file_missing")) from None
     headers = {"Content-Disposition": disposition(filename)} if filename else {}
     return Response(content=body, media_type="application/pdf", headers=headers)
 
@@ -71,7 +72,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
     row = _own_matrix(db, user, payload.matrix_id)
     if not access.unlocked_matrix(db, user, row.id):
         raise HTTPException(status.HTTP_402_PAYMENT_REQUIRED,
-                            detail="Разбор этой даты не оплачен")
+                            detail=say("report.not_paid"))
 
     done = printing.ready(db, user.id, row.id)
     if done is not None and done.object_key:
@@ -82,7 +83,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
 
     if not settings.pdf_enabled:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail="Печать PDF не настроена")
+                            detail=say("report.print_off"))
 
     busy = printing.running(db, user.id, row.id)
     if busy is not None:
@@ -93,18 +94,16 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
                     "seconds": waited.seconds()}
         if busy.status == "running":
             raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT,
-                                detail="Печать этого разбора всё ещё идёт — откройте страницу "
-                                       "через минуту, файл появится сам")
+                                detail=say("report.print_running"))
 
     try:
         job = printing.run(db, user.id, row.id)
     except printing.Busy as exc:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail="Сейчас печатается много разборов — нажмите ещё раз через "
-                                   "минуту, ваш файл встанет в очередь") from exc
+                            detail=say("report.print_busy")) from exc
     except Exception as exc:                       # noqa: BLE001
         raise HTTPException(status.HTTP_502_BAD_GATEWAY,
-                            detail="Не удалось напечатать PDF") from exc
+                            detail=say("report.print_failed")) from exc
     return {"job_id": job.id, "status": "done", "cached": False,
             "url": reports.link(job.object_key, _filename(row)), "size_bytes": job.size_bytes,
             "seconds": job.seconds()}
@@ -117,20 +116,27 @@ def page(matrix_id: int, t: str = Query(..., description="print-токен"),
     поэтому куку владельца браузерному сервису отдавать не нужно."""
     read = read_print_token(t)
     if read is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Пропуск недействителен")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("report.pass_invalid"))
     user_id, allowed = read
     if allowed != matrix_id:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Пропуск выдан на другую матрицу")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=say("report.pass_other_matrix"))
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Пропуск недействителен")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("report.pass_invalid"))
     row = _own_matrix(db, user, matrix_id)
     # страница печати считает матрицу сама, как и обычный разбор: ей нужны дата, пол и признак
     # оплаты, а не готовые разделы
     unlocked = access.unlocked_matrix(db, user, row.id)
     plan = tariffs.get(db, tariffs.SINGLE_ID)
-    return {**row.item(), "unlocked": unlocked,
-            "plan": (plan.name if plan else "Полный разбор") if unlocked else "Бесплатный просмотр"}
+    # Название плана берётся из тарифа только там, где тарифы и правда показываются: на витрине
+    # без кассы их имена остаются русскими из посевной таблицы, и они уезжали в шапку PDF.
+    if not unlocked:
+        plan_name = say("report.plan_free")
+    elif plan and not settings.all_free_without_payment:
+        plan_name = plan.name
+    else:
+        plan_name = say("report.plan_full")
+    return {**row.item(), "unlocked": unlocked, "plan": plan_name}
 
 
 @router.get("")

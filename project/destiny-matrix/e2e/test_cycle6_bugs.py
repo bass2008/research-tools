@@ -58,7 +58,7 @@ def test_chakra_page_does_not_link_to_itself_among_other_levels(page: Page):
 
 @pytest.mark.parametrize(
     "path",
-    ("/na-god", "/encyclopedia/karmic-tail", "/programmy", "/energii"),
+    ("/year", "/encyclopedia/karmic-tail", "/programs", "/energies"),
 )
 def test_carousel_button_never_points_at_the_page_it_stands_on(page: Page, path):
     """Кнопка слайда вела на тот же адрес: видимый клик, после которого ничего не происходит."""
@@ -130,14 +130,14 @@ def test_back_shows_the_section_the_address_points_at(page: Page):
     """Адрес возвращался к разделу, а на экране оставались «22 аркана»: popstate не читался.
     Теперь адрес раздела — его собственная страница, поэтому расхождение адреса и содержимого
     невозможно; обещание то же, механизм другой."""
-    page.goto(f"{BASE}/na-god", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/year", wait_until="domcontentloaded")
     _wait_section(page, "Матрица судьбы на год", "адрес просит раздел «на год», а подсвечен другой")
     page.get_by_role("link", name="Энциклопедия").first.click()
     page.wait_for_url("**/encyclopedia")
     # На оглавлении не подсвечен никакой раздел: это перечень ветвей, а не рабочая область одной.
     assert _section_title(page) == "", f"на оглавлении подсвечен раздел «{_section_title(page)}»"
     page.go_back()
-    page.wait_for_url("**/na-god")
+    page.wait_for_url("**/year")
     _wait_section(page, "Матрица судьбы на год",
                   "адрес показывает раздел «на год», а меню — другой раздел")
 
@@ -168,7 +168,7 @@ def test_arcanum_tab_survives_reload_and_back(page: Page):
 def test_second_form_on_article_follows_the_date_already_calculated(page: Page):
     """Форма в статье держала своё «сегодня минус 30 лет» и перетирала посчитанную дату:
     следующая оплата уходила на дату, которую человек не вводил."""
-    page.goto(f"{BASE}/o-metode", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/method", wait_until="domcontentloaded")
     page.wait_for_selector('[data-testid="calc-submit"]:not([disabled])')
     page.select_option("#d", "5")
     page.select_option("#m", "5")

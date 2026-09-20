@@ -1,0 +1,844 @@
+[
+ {
+  "n": 1,
+  "slug": "magician",
+  "title": "The Magician",
+  "short": "the will and the skill to start first, without waiting for anyone’s permission",
+  "keywords": [
+   "magician",
+   "will",
+   "beginning",
+   "initiative",
+   "word",
+   "first step"
+  ],
+  "meaning": [
+   "The Magician is about a person having hands and using them. This is the energy of a start: saw it, named it, took it, did it. The first arcanum does not ask whether the world is ready and collects no approvals — it tries, and draws its conclusions from the result.",
+   "The strength of the Magician is focus. While attention holds on one thing, it moves faster than anyone around; the moment focus scatters, what is left is a dozen unfinished starts and tiredness for no reason. That is why life with this energy goes in waves: a sprint, a drop, another sprint.",
+   "The word here is not decoration but a tool. The first arcanum makes a promise and launches itself with it: once it is said out loud, it has to be done. Hence the other side — the ease with which a person takes on more than they later want to carry.",
+   "At its worst the Magician turns into a manipulator: the same ability to see a weak spot and press it precisely, only aimed at people instead of the work. The sign is simple — few results, many impressed onlookers."
+  ],
+  "plus": [
+   "moves from thought to action quickly",
+   "explains complicated things in plain words",
+   "needs no outside permission to begin",
+   "senses where a task is weak"
+  ],
+  "minus": [
+   "drops things halfway when the thrill is gone",
+   "promises more than they are ready to carry",
+   "pushes people instead of doing the work",
+   "scatters across five beginnings at once"
+  ],
+  "seo_description": "The first arcanum is will, a start and the spoken word. What the Magician means in character, money and relationships, where its strength lies and where it falls apart into unfinished beginnings.",
+  "queries": [
+   "first arcanum",
+   "magician in the destiny matrix",
+   "arcanum 1 for a woman"
+  ],
+  "repeat": "A doubled start makes drive run through everything: where others are still choosing, this person has already begun — and begun in several matters at once. The danger is that launching becomes the answer to any task: one thing asks for a sprint, another for finishing what was started. Tell apart where a first step is needed and where the work has to be carried to the end, or a pile of bright beginnings gathers with not a single finish."
+ },
+ {
+  "n": 2,
+  "slug": "priestess",
+  "title": "The High Priestess",
+  "short": "instinct ahead of arguments: reads the situation before anyone explains it",
+  "keywords": [
+   "high priestess",
+   "instinct",
+   "intuition",
+   "silence",
+   "observation",
+   "secret"
+  ],
+  "meaning": [
+   "The second arcanum listens. It gathers what is not said out loud: pauses, tones of voice, who looked at whom. A person with this energy often knows how a conversation will end before it does, and cannot say why — the explanation is found afterwards.",
+   "The Priestess needs silence the way others need air. An hour without people and without tasks is not laziness but work: everything collected during the day is digested there. Take that hour away and instinct is the first thing to fade — before strength and before mood.",
+   "Knowledge here is kept, not handed out. The second arcanum stays silent not out of spite: it sees that half of what is said will be used against the one who said it. Hence the reputation of a closed person, and the main trap — staying silent even where a clear “no” had to be said once."
+  ],
+  "plus": [
+   "senses people and situations without explanations",
+   "keeps other people’s secrets and does not gossip",
+   "knows how to wait for the right moment",
+   "sees the second layer in any situation"
+  ],
+  "minus": [
+   "stays silent where it is time to speak plainly",
+   "drowns in observing instead of acting",
+   "takes their own anxiety for a premonition",
+   "withdraws at the first sign of pressure"
+  ],
+  "seo_description": "The second arcanum is instinct, silence and hidden knowledge. How the High Priestess reads in character, relationships and money, and why an hour alone each day matters.",
+  "queries": [
+   "second arcanum",
+   "high priestess in the destiny matrix",
+   "arcanum 2 meaning in relationships"
+  ],
+  "repeat": "Instinct stops being a hint for one occasion and becomes a constant background: the person reads a situation in different matters before anyone puts it into words. The price is silence instead of an answer: where a direct sentence is needed, observation and a pause are chosen again. Each time it is worth checking what the role asks for — silence or something said out loud."
+ },
+ {
+  "n": 3,
+  "slug": "empress",
+  "title": "The Empress",
+  "short": "a generosity that makes warmth around itself and grows living things",
+  "keywords": [
+   "empress",
+   "generosity",
+   "care",
+   "warmth",
+   "fertility",
+   "beauty"
+  ],
+  "meaning": [
+   "The third arcanum feeds. Not only with food: with attention, a home, money, a kind word at the right minute. Where this energy appears, people’s shoulders come down and for the first time in a long while they begin to eat calmly.",
+   "The Empress grows slow things: children, a garden, a business, a reputation. It fares badly where one precise strike is needed and well where seven years of steady care are needed. Beauty for it is not decoration but a condition: in an ugly space the third arcanum does not want to work, and it is right.",
+   "There is one big danger — care instead of a life of your own. A person starts measuring themselves by how much they have given, goes into debt for someone else’s comfort and gets angry when the gratitude is smaller than the bills. The third arcanum is healthy when it feeds itself first and everyone else afterwards."
+  ],
+  "plus": [
+   "creates warmth and comfort around them",
+   "can grow living things and bring them to maturity",
+   "is generous without counting on a return",
+   "feels beauty and makes a space pleasant"
+  ],
+  "minus": [
+   "smothers with care and does not ask whether it is wanted",
+   "lives other people’s affairs instead of their own",
+   "waits for gratitude and takes offence in silence",
+   "gets stuck in comfort when it is time to move"
+  ],
+  "seo_description": "The third arcanum is generosity, care and the ability to grow. The meaning of the Empress in money, relationships and family lines, its strengths and its slide into self-sacrifice.",
+  "queries": [
+   "third arcanum",
+   "empress in the destiny matrix",
+   "arcanum 3 money"
+  ],
+  "repeat": "Care runs as one continuous stream: the warmth a person wraps their own people in stops being a private gesture and becomes the way any affair is run. The risk is feeding where a decision is expected and growing someone else’s while your own stays untested. One role asks for shelter, another for free hands, and telling them apart has to be done consciously."
+ },
+ {
+  "n": 4,
+  "slug": "emperor",
+  "title": "The Emperor",
+  "short": "order and support: holds the structure other people stand on",
+  "keywords": [
+   "emperor",
+   "order",
+   "structure",
+   "power",
+   "responsibility",
+   "support"
+  ],
+  "meaning": [
+   "The fourth arcanum sets the frame. Rules, boundaries, deadlines, “this is how it is done here” — all of that is its language. Inside such a frame people work calmly, even if from the outside it looks dull: it is clear who answers for what and how the week will end.",
+   "The Emperor answers for the result, not for the process, and so it puts up with dullness, routine and unpleasant conversations. It is respected not for charm but because what it says comes true: it promised wages on the fifth, and they come on the fifth.",
+   "The weak spot is a firmness that outlives its usefulness. A rule invented for order keeps working when it gets in everyone’s way, and the person defends it as if defending themselves. The second imbalance is the endless “I answer for everything myself”, out of which loneliness at the top grows."
+  ],
+  "plus": [
+   "keeps their word and their deadlines",
+   "builds systems that work without them",
+   "takes responsibility instead of looking for someone to blame",
+   "stays calm in a crisis while others make noise"
+  ],
+  "minus": [
+   "holds on to a rule when it already gets in the way",
+   "replaces a conversation with an order",
+   "carries everything alone and burns out in silence",
+   "cannot let go of control even in small things"
+  ],
+  "seo_description": "The fourth arcanum is order, structure and responsibility. What the Emperor gives in a profession and in money, how it reads in family lines and where it turns into tyranny.",
+  "queries": [
+   "fourth arcanum",
+   "emperor in the destiny matrix",
+   "arcanum 4 for a man"
+  ],
+  "repeat": "Order becomes a theme that runs through everything: the person builds support not in one place but everywhere they can reach, and it really is calmer next to them. The price is a regulation where a live conversation is needed, and control over what holds perfectly well on its own. It is worth telling apart the part that truly carries weight and the part where a spoken agreement is enough."
+ },
+ {
+  "n": 5,
+  "slug": "hierophant",
+  "title": "The Hierophant",
+  "short": "leaning on knowledge and tradition: explains things until they become clear",
+  "keywords": [
+   "hierophant",
+   "teacher",
+   "knowledge",
+   "tradition",
+   "meaning",
+   "mentor"
+  ],
+  "meaning": [
+   "The fifth arcanum translates. It has the rare ability to take something complicated — a law, a method, someone else’s experience — and tell it so that a person leaves with a clear head. That is why this energy often leads into teaching, expertise and mentoring, even when the diploma says something else.",
+   "The Hierophant needs a tested footing: a school, a method, a teacher to stand behind. It does not like inventing from scratch and should not — its strength is in carrying what has already been found to people without losing the meaning on the way.",
+   "Next to this energy there is always the temptation to speak on behalf of the truth. Then a living person turns into a broadcaster: they stop listening, start correcting everyone and defend a tradition even where it has long been empty."
+  ],
+  "plus": [
+   "explains complicated things briefly and to the point",
+   "respects experience and does not reinvent what is settled",
+   "holds on to meaning while fashion changes around",
+   "can gather students around them"
+  ],
+  "minus": [
+   "gives a lecture where help was asked for",
+   "hides behind an authority instead of deciding",
+   "mistakes being right for being the truth",
+   "clings to an old form with no content left"
+  ],
+  "seo_description": "The fifth arcanum is knowledge, tradition and teaching. The meaning of the Hierophant in a profession, in relationships and in purpose, where it gives authority and where it turns into lecturing.",
+  "queries": [
+   "fifth arcanum",
+   "hierophant in the destiny matrix",
+   "arcanum 5 purpose"
+  ],
+  "repeat": "Explaining turns into a permanent role: the person not only knows but keeps passing knowledge on, and one teacherly voice is heard in each of these matters. Hence an analysis where help with hands was expected, and a reference to something tested instead of a decision of their own. Tell apart where a lesson is needed and where it is enough to do the work quietly alongside."
+ },
+ {
+  "n": 6,
+  "slug": "lovers",
+  "title": "The Lovers",
+  "short": "attraction and choice: draws people close and demands you decide who exactly",
+  "keywords": [
+   "lovers",
+   "choice",
+   "attraction",
+   "union",
+   "sympathy",
+   "agreement"
+  ],
+  "meaning": [
+   "The sixth arcanum lives in attraction. People come closer by themselves, liking appears quickly, a conversation runs easily — and this works both privately and in business: the right person turns up exactly when they are needed.",
+   "But the gift comes with a task: to choose. The sixth arcanum puts a person between two good options and gives no third one. While the choice is not made, the energy goes into hesitation, and both options spoil on their own.",
+   "Another trait is living in two camps. Not necessarily a romance: two jobs, two countries, two circles of friends. This can be dragged out for a long time, but the price grows, and at some point circumstances make the choice instead of the person, usually more roughly than they would."
+  ],
+  "plus": [
+   "gets on with people easily and builds unions",
+   "senses who is one of theirs and who is not",
+   "can reach an agreement without pressure",
+   "brings any venture to life when a partner is near"
+  ],
+  "minus": [
+   "delays a decision to the last moment",
+   "lives in two camps and lies to both",
+   "dissolves into a partner and loses themselves",
+   "changes course for someone else’s liking"
+  ],
+  "seo_description": "The sixth arcanum is attraction, union and choice. How the Lovers read in relationships, in compatibility and in business, and why the main task of this energy is to decide rather than to drag things out.",
+  "queries": [
+   "sixth arcanum",
+   "arcanum 6 in relationships",
+   "lovers in the destiny matrix"
+  ],
+  "repeat": "The theme of choice sounds more than once, so movement starts to depend on who is nearby: a partner becomes a condition rather than a pleasant addition. The other side is an endless postponement of the decision and a life split between camps, where every side is told “almost yes”. Each role needs its own choice, made separately and said out loud."
+ },
+ {
+  "n": 7,
+  "slug": "chariot",
+  "title": "The Chariot",
+  "short": "speed and drive: arrives first, as long as the reins are not dropped",
+  "keywords": [
+   "chariot",
+   "speed",
+   "drive",
+   "movement",
+   "victory",
+   "road"
+  ],
+  "meaning": [
+   "The seventh arcanum drives. It needs a goal on the horizon and permission to race: set up that way, a person overtakes more capable people, because those are still choosing the route. Victory for it is not vanity but fuel.",
+   "The Chariot rests on steering. Two horses pull in different directions — excitement and calculation, and the whole strength of the arcanum is in who holds the reins. Let go, and the same speed carries the person into a wall: missed deadlines, broken relationships, projects started an hour before departure.",
+   "This energy is bad at standing still. A pause reads as defeat, rest as laziness, and any “wait” causes anger. So the seventh arcanum has to learn not to brake but to plan a route: a goal a year ahead puts out half of the fuss."
+  ],
+  "plus": [
+   "moves towards a clear goal faster than anyone",
+   "is not afraid of competition or a head-on clash",
+   "gets ready in a minute when it is time to act",
+   "carries to victory what it believed in"
+  ],
+  "minus": [
+   "knocks people over at their own speed",
+   "mistakes movement for progress",
+   "breaks into aggression when blocked",
+   "cannot stop and rest"
+  ],
+  "seo_description": "The seventh arcanum is speed, drive and victory. The meaning of the Chariot in a profession, in money and in relationships, where it gives a sprint and where it drives into a wall.",
+  "queries": [
+   "seventh arcanum",
+   "chariot in the destiny matrix",
+   "arcanum 7 meaning"
+  ],
+  "repeat": "Speed stops being an episode and becomes the character of the movement: the person accelerates in several directions at once and overtakes those still checking the map. The payment is people knocked over on the way and kilometres instead of a result. It helps to name, each time, the point you are driving to and the matter where speed will not help at all."
+ },
+ {
+  "n": 8,
+  "slug": "strength",
+  "title": "Strength",
+  "short": "inner power without shouting: copes where others give up",
+  "keywords": [
+   "strength",
+   "endurance",
+   "power",
+   "fairness",
+   "calm",
+   "taming"
+  ],
+  "meaning": [
+   "The eighth arcanum is about power that does not have to prove it is power. A person with this energy enters a conflict last and leaves it first: they have enough in reserve not to fuss and not to get petty.",
+   "Strength works through endurance. What is wild is not killed here but tamed: fear, anger, someone else’s hysteria, a heavy task. Hence an effect that looks strange — next to the eighth arcanum even those who came to shout calm down.",
+   "The other side is the habit of putting up with things. If I have endured, I will endure a bit more; that is how people drag for years what should have been stopped long ago. And a second trap: strength looking for someone to lean on as punishment — then a calm person suddenly turns out to be the one feared at home."
+  ],
+  "plus": [
+   "keeps calm where others break down",
+   "carries a long load without strain",
+   "calms people down by being there",
+   "handles fear without running from it"
+  ],
+  "minus": [
+   "endures for years instead of one conversation",
+   "presses with their weight even without meaning to",
+   "refuses to ask for help on principle",
+   "stores anger and discharges it on those close"
+  ],
+  "seo_description": "The eighth arcanum is inner strength and endurance. What Strength means in character, money and the family line, how it helps in a crisis and why its main risk is enduring too long.",
+  "queries": [
+   "eighth arcanum",
+   "arcanum 8 meaning",
+   "strength in the destiny matrix"
+  ],
+  "repeat": "Endurance becomes the running theme: the person carries a load in several places at once and everywhere looks like someone who will not break. The problem is that patience replaces a conversation, and what one direct sentence would solve stretches into years of silent weight. Maturity here is not the size of the reserve but the moment when it is time not to endure once more but to speak and ask for help."
+ },
+ {
+  "n": 9,
+  "slug": "hermit",
+  "title": "The Hermit",
+  "short": "depth and the search for meaning: gets to the bottom of things when left alone",
+  "keywords": [
+   "hermit",
+   "depth",
+   "meaning",
+   "solitude",
+   "research",
+   "silence"
+  ],
+  "meaning": [
+   "The ninth arcanum digs. It is not enough to know what works — it has to understand why, and on that road a person moves away from noise. Solitude for them is a working state, not a misfortune: in silence they see what drowns in company.",
+   "Such energy makes good narrow specialists, researchers and masters. Years spent on one question are not lost here: the ninth arcanum comes back with an answer everyone else later pays for.",
+   "The price is a slow entry into contact. The person seems cold, answers after a pause, rarely calls first, and those close read it as indifference. Plus the risk of freezing over completely: first solitude is chosen, then it starts choosing for you."
+  ],
+  "plus": [
+   "gets to the cause rather than to its trace",
+   "works without outside motivation",
+   "can bear solitude without pining in it",
+   "becomes a real master in a narrow field"
+  ],
+  "minus": [
+   "withdraws instead of talking",
+   "dismisses simple joys",
+   "delays a decision until everything is understood",
+   "isolates themselves into real loneliness"
+  ],
+  "seo_description": "The ninth arcanum is depth, meaning and solitude. The meaning of the Hermit in a profession, in relationships and in spiritual tasks, where it gives mastery and where it brings cold and isolation.",
+  "queries": [
+   "ninth arcanum",
+   "arcanum 9 meaning",
+   "hermit in the destiny matrix"
+  ],
+  "repeat": "Depth comes with a surplus: the person goes into the essence not on one occasion but on any, and in each of them prefers to work it out alone. The price is a pause stretched until there is nothing left to decide, and people close left outside the conversation. Some answers are not dug up in silence: they have to be won out loud and among people."
+ },
+ {
+  "n": 10,
+  "slug": "wheel",
+  "title": "The Wheel",
+  "short": "a sense of timing: luck comes to those who noticed which way it turned",
+  "keywords": [
+   "wheel",
+   "fate",
+   "moment",
+   "chance",
+   "cycle",
+   "luck"
+  ],
+  "meaning": [
+   "The tenth arcanum works in waves. In a person’s life things change not gradually but by turns: a chance meeting, a sudden offer, a phone call after which the year looks different. Planning five years ahead does not work for them, but catching the moment works excellently.",
+   "The main skill here is boarding the train on time. The Wheel brings chances regularly but does not hold them: miss one and wait for the next turn, and it will not come tomorrow. People who get along with this arcanum live ready: the bag is packed, money is set aside, the answer is thought through in advance.",
+   "The weakness is believing that luck decides everything. Then a person stops working and starts waiting, and the wheel turns without them, only now past them. The second imbalance is an endless “now is not the time”, which is a convenient place to hide fear."
+  ],
+  "plus": [
+   "feels the moment and changes course in time",
+   "takes change lightly",
+   "sees a pattern where others see a coincidence",
+   "gets back up quickly after a failure"
+  ],
+  "minus": [
+   "waits for luck instead of working",
+   "drops what was started at the first downturn",
+   "lives in bursts with no footing",
+   "excuses inaction with “the wrong time”"
+  ],
+  "seo_description": "The tenth arcanum is fate, cycle and a sense of timing. How the Wheel reads in money, in purpose and in the programs of the matrix, and why its chances come in waves.",
+  "queries": [
+   "tenth arcanum",
+   "arcanum 10 meaning",
+   "wheel of fortune destiny matrix"
+  ],
+  "repeat": "Changeability becomes the general rule: the person catches the moment and changes course in several matters at once, and from outside it looks like rare luck. The weak spot is the habit of waiting for the turn and dropping the work at the first downturn. It is sensible to bet on timing in one place and to keep steady work in the others, with no signs required."
+ },
+ {
+  "n": 11,
+  "slug": "justice",
+  "title": "Justice",
+  "short": "balance and honesty: weighs things and calls them by their names",
+  "keywords": [
+   "justice",
+   "honesty",
+   "balance",
+   "law",
+   "choice",
+   "consequence"
+  ],
+  "meaning": [
+   "The eleventh arcanum weighs. It sees where the imbalance is: who put in more, who got someone else’s share, what paid for another person’s ease. Hence a sharp sense of truth and a complete inability to pretend that everything is fine.",
+   "This energy sews an action to its consequence. People with strong Justice get feedback on their decisions quickly — both good and bad. Debts, promises and things left unsaid come back to them sooner than to others, and that teaches precision.",
+   "The imbalance looks like a court with no right to a defence. The person starts measuring everyone by their own measure, demands an account, remembers every offence point by point and confuses justice with retribution. Healthy Justice knows how to close a question instead of keeping it on file."
+  ],
+  "plus": [
+   "sees an imbalance and names it directly",
+   "decides on the merits, not on sympathy",
+   "keeps agreements to the letter",
+   "learns from consequences quickly"
+  ],
+  "minus": [
+   "judges people instead of understanding them",
+   "demands retribution and cannot forgive",
+   "freezes in being right and loses the relationship",
+   "torments themselves over old mistakes"
+  ],
+  "seo_description": "The eleventh arcanum is honesty, balance and answering for your actions. The meaning of Justice in relationships, money and karma, where it gives clarity and where it turns into a courtroom.",
+  "queries": [
+   "eleventh arcanum",
+   "arcanum 11 meaning",
+   "justice destiny matrix"
+  ],
+  "repeat": "The account is kept more than once, and the same measure spreads over everything: the person notices an imbalance in every matter and names it out loud. The other side of precision is a verdict instead of an attempt to understand, and a bill issued for every small thing. Weigh actions, and leave people the right to be wrong, or being right will remain and the relationship will not."
+ },
+ {
+  "n": 12,
+  "slug": "hanged",
+  "title": "The Hanged Man",
+  "short": "a pause and another angle: the one who agreed to wait wins",
+  "keywords": [
+   "hanged man",
+   "pause",
+   "sacrifice",
+   "another view",
+   "acceptance",
+   "waiting"
+  ],
+  "meaning": [
+   "The twelfth arcanum stops things. It does not punish — it simply stops: the matter freezes, the answer does not come, the door does not open. While the person struggles, it gets worse; as soon as they agree to wait, the picture changes by itself.",
+   "The point of this pause is to see differently. Hanging upside down you see the same thing from the other side, and usually realise you were running the wrong way. Half of the decisions of the twelfth arcanum arrive the moment it stops looking for them.",
+   "The theme of a voluntary giving-up lives here too: refusing the quick thing to get the real one. It works only when it is your own choice. If a person makes a sacrifice and keeps score, instead of freedom they get the role of a martyr — and years of waiting with no result."
+  ],
+  "plus": [
+   "can wait without panic",
+   "finds an unusual angle on a dead end",
+   "calmly lets go of what is not theirs",
+   "bears uncertainty longer than others"
+  ],
+  "minus": [
+   "plays the victim and keeps score",
+   "confuses acceptance with doing nothing",
+   "hangs in a pause for years",
+   "gives away what is theirs and then demands the debt back"
+  ],
+  "seo_description": "The twelfth arcanum is a pause, another angle and voluntary giving-up. How the Hanged Man reads in karma, money and relationships, and how acceptance differs from the role of a victim.",
+  "queries": [
+   "twelfth arcanum",
+   "arcanum 12 meaning",
+   "hanged man destiny matrix"
+  ],
+  "repeat": "The pause turns into a way of living: the person slows down and looks from another angle not in one place but in several, and often wins against those who rushed straight away. The trouble starts when waiting becomes the only move: one matter really is ripening, another is simply going bad without movement. Separate a pause that has a deadline from hanging that has none."
+ },
+ {
+  "n": 13,
+  "slug": "death",
+  "title": "Death",
+  "short": "an ending and a renewal: clears away the old to make room",
+  "keywords": [
+   "death",
+   "change",
+   "ending",
+   "renewal",
+   "transition",
+   "finale"
+  ],
+  "meaning": [
+   "The thirteenth arcanum ends things. A job, a city, a marriage, a circle of friends — one of these closes for good on a regular basis, and every time it feels as if the world has collapsed. A year later it turns out that only the old form collapsed.",
+   "This energy is not about dying but about shedding a skin. It takes away what is no longer alive: a contract with no content, a relationship with no conversation, work with no interest. Holding on to that is pointless — the thirteenth arcanum will bring it to an end anyway; the only question is whether quietly or with a crash.",
+   "People with strong Death can start from zero and are not afraid of losing status. Their weak spot is the habit of demolishing too early: a little boredom and they quit, one quarrel and a person is crossed out. The real task here is to tell the dead from the merely tired."
+  ],
+  "plus": [
+   "does not cling to what is dead",
+   "starts from zero calmly",
+   "lives through losses and moves on",
+   "helps others through a breaking point"
+  ],
+  "minus": [
+   "cuts ties instead of talking",
+   "makes a drama out of any change",
+   "avoids attachment so as not to lose",
+   "demolishes what could have been repaired"
+  ],
+  "seo_description": "The thirteenth arcanum is an ending, a breaking point and renewal. The meaning of Death in the karma of past lives, in money and in relationships — with no mysticism and no scare stories.",
+  "queries": [
+   "thirteenth arcanum",
+   "arcanum 13 meaning",
+   "death in the destiny matrix"
+  ],
+  "repeat": "The theme of an ending sounds more than once, and the person becomes the one who knows how to close things: they part with what has served its time earlier than others, and in several matters at once. The danger is demolishing out of habit, tearing down what one conversation would repair. Before any demolition it is worth naming out loud what exactly has died; if there is no answer, this is a repair, not an ending."
+ },
+ {
+  "n": 14,
+  "slug": "temperance",
+  "title": "Temperance",
+  "short": "measure and blending: joins what does not join and keeps an even pace",
+  "keywords": [
+   "temperance",
+   "measure",
+   "balance",
+   "blending",
+   "patience",
+   "flow"
+  ],
+  "meaning": [
+   "The fourteenth arcanum mixes. Its business is to find the proportion: how much work and how much rest, how much is yours and how much belongs to others, where the hot has to be diluted with the cold. People with this energy often end up between two sides and reconcile them unexpectedly easily.",
+   "Measure here is not about modesty but about pace. Temperance wins over the long run: it does not spend itself in a month and does not burn out; it moves evenly and arrives first when the fast ones have already dropped off.",
+   "Such a person becomes a translator between people who are not alike — family and work, a manager and a team, two relatives who have not spoken for ten years. That is valuable and tiring: other people’s conflicts pass through them, and they say nothing about it.",
+   "The imbalance is half-measures. Afraid of tipping the scales, a person is never fully anywhere: not in a quarrel, not in a celebration, not in a decision. Lukewarm water instead of hot and cold is the most common thing the fourteenth arcanum degenerates into."
+  ],
+  "plus": [
+   "keeps an even pace and does not burn out",
+   "reconciles people who do not hear each other",
+   "feels the proportion in work and in money",
+   "gets back into shape and recovers faster than most"
+  ],
+  "minus": [
+   "avoids sharp conversations",
+   "lives at half strength just to avoid tipping the scales",
+   "carries other people’s conflicts",
+   "dilutes their own wishes until they have no taste"
+  ],
+  "seo_description": "The fourteenth arcanum is measure, balance and blending. What Temperance gives in relationships, money and the body’s resource, and why its main risk is living at half strength.",
+  "queries": [
+   "arcanum 14",
+   "arcanum 14 in relationships",
+   "temperance in the destiny matrix",
+   "arcanum 14 for a woman"
+  ],
+  "repeat": "An even pace spreads over everything: the person holds the middle and joins what does not join in several matters at once, and there are noticeably fewer breakdowns around them. The price of smoothness is diluted wishes and detours around sharp corners that cannot be avoided. Mixing is good where a compound is needed; where a choice is needed, the scales have to be tipped and someone’s displeasure endured."
+ },
+ {
+  "n": 15,
+  "slug": "devil",
+  "title": "The Devil",
+  "short": "passion and matter: gives a powerful pull and the bill for it",
+  "keywords": [
+   "devil",
+   "passion",
+   "matter",
+   "temptation",
+   "dependency",
+   "shadow"
+  ],
+  "meaning": [
+   "The fifteenth arcanum wants. Strongly, bodily, without explanations: money, a person, power, taste, speed. This pull is a real engine, and people who have it achieve what the decent and the moderate only dream about.",
+   "The trouble starts where wanting becomes the master. The same mechanism gives drive in work and dependency in life: working until three in the morning, a person you return to against your will, a purchase you regret an hour later. The fifteenth arcanum does not tell them apart — the person has to.",
+   "This energy also sees other people’s weaknesses right through. At its best it makes a strong negotiator who knows what each person needs; at its worst, someone who keeps people on a hook and calls it love. The test is simple: does the other person become freer next to you."
+  ],
+  "plus": [
+   "knows how to want and to get material things",
+   "sees people’s motives right through",
+   "is not afraid of the dark side, their own or someone else’s",
+   "charges a venture up to real excitement"
+  ],
+  "minus": [
+   "falls into dependencies — on people, things, work",
+   "keeps others on a hook",
+   "trades freedom for comfort",
+   "justifies the means by the result"
+  ],
+  "seo_description": "The fifteenth arcanum is passion, matter and dependency. The meaning of the Devil in money, relationships and the programs of the matrix: where it gives power and where it puts you on a hook.",
+  "queries": [
+   "arcanum 15",
+   "devil in the destiny matrix",
+   "arcanum 15 in relationships",
+   "arcanum 15 money"
+  ],
+  "repeat": "The pull grows stronger and becomes the engine of everything: the person wants densely, gets material results and in every matter sees other people’s motives right through. The bill arrives the same way — an attachment to people, things or work that is hard to leave without losses. The test is simple: can you walk out of the work and out of the bond calmly; if not, this is no longer about desire."
+ },
+ {
+  "n": 16,
+  "slug": "tower",
+  "title": "The Tower",
+  "short": "the courage to pull down what was built wrong",
+  "keywords": [
+   "tower",
+   "destruction",
+   "truth",
+   "breaking point",
+   "release",
+   "risk"
+  ],
+  "meaning": [
+   "The sixteenth arcanum breaks things — and almost always for good reason. It pulls down constructions that held on agreements with yourself: an unloved job with good pay, a marriage for the children’s sake, a beautiful façade with a crack in the foundation.",
+   "Events here come suddenly and from outside: a dismissal, a break-up, a move you did not plan. Going through it is far easier if you do not argue with the fact. People with a strong Tower tell the same story: the first weeks were frightening, and then it became clear that there was no other way.",
+   "The arcanum gives steady nerves and a taste for truth — you cannot agree with such a person to keep up appearances. The other side is the habit of living in tension and of undermining what is calm when nothing has happened for too long."
+  ],
+  "plus": [
+   "is not afraid to tell the truth and lose comfort",
+   "pulls themselves together quickly in a catastrophe",
+   "breaks free of what drags them down",
+   "sees the crack in someone else’s beautiful construction"
+  ],
+  "minus": [
+   "sets off an explosion out of boredom",
+   "cuts things off in one stroke and then picks up the pieces",
+   "lives in constant tension",
+   "confuses honesty with rudeness"
+  ],
+  "seo_description": "The sixteenth arcanum is a break, truth and release. How the Tower reads in karma, money and relationships, and why its events come suddenly and from outside.",
+  "queries": [
+   "arcanum 16",
+   "tower in the destiny matrix",
+   "arcanum 16 meaning"
+  ],
+  "repeat": "Truth sounds more than once, and the person spares no comfortable construction in any matter: where the crack is, that is where the blow lands. It costs an explosion out of boredom, rudeness passed off as honesty, and pieces you then pick up yourself. Pull down what is held up by props, not everything that simply stands too quietly."
+ },
+ {
+  "n": 17,
+  "slug": "star",
+  "title": "The Star",
+  "short": "inspiration and a landmark: sees the goal before the road appears",
+  "keywords": [
+   "star",
+   "inspiration",
+   "hope",
+   "image",
+   "talent",
+   "landmark"
+  ],
+  "meaning": [
+   "The seventeenth arcanum shines over a distance. A person sees an image of the future — a picture, a design, something that does not exist yet — and infects others with it. It is no accident that creative professions and everything that begins with “imagine this” are drawn to this energy.",
+   "The Star does well where taste and a sense of direction are needed, and badly where routine has to be carried every day. The ideal arrangement is simple: the person with the seventeenth arcanum shows where, and someone else works out how.",
+   "The weakness is living inside the picture. The dream is so beautiful that reality looks offensive, and the person stops taking steps so as not to spoil the design. The second risk is hoping that things will arrange themselves, because “I can see how it should be”."
+  ],
+  "plus": [
+   "sees the future as an image and infects others with it",
+   "does not lose hope in hard times",
+   "feels beauty and has taste",
+   "comforts someone else’s despair simply by being there"
+  ],
+  "minus": [
+   "lives in the dream instead of taking steps",
+   "cannot bear routine and small work",
+   "takes offence at reality for not matching",
+   "waits for things to come together on their own"
+  ],
+  "seo_description": "The seventeenth arcanum is inspiration, hope and a landmark. The meaning of the Star in talents, purpose and rest, where it gives an image of the future and where it leads into daydreaming.",
+  "queries": [
+   "arcanum 17",
+   "star in the destiny matrix",
+   "arcanum 17 talents"
+  ],
+  "repeat": "The image of the future shines in several matters at once: the person sees the goal before the road and can infect others with it, not only themselves. The shadow is living in the picture instead of taking steps, and resenting reality for not matching it. A dream holds when it has one dull action for this week; without that only the light is left."
+ },
+ {
+  "n": 18,
+  "slug": "moon",
+  "title": "The Moon",
+  "short": "sensitivity and depth: hears the invisible, gets confused by the obvious",
+  "keywords": [
+   "moon",
+   "sensitivity",
+   "imagination",
+   "fear",
+   "dream",
+   "subconscious"
+  ],
+  "meaning": [
+   "The eighteenth arcanum lives in half-light. It gathers what is not put into words: the mood of a room, someone else’s anxiety, a dream of its own out of which an idea comes in the morning. Such fineness produces artists, psychologists and people others come to in order to talk things out.",
+   "The other side of fineness is distortion. The same imagination that builds images also builds fears: an unanswered message turns into a break-up, a tired voice from a manager into a dismissal. The eighteenth arcanum does not lie on purpose; it simply fills in what is missing with the darkest option.",
+   "This energy has a noticeable rhythm: a week of clarity, a week of fog. Arguing with it is useless, taking it into account is useful: important conversations and decisions are better moved into the light phase, and the dark one left for sleep, water and silence."
+  ],
+  "plus": [
+   "feels someone else’s state without words",
+   "reads images and dreams as hints",
+   "can bear someone else’s pain without being frightened by it",
+   "works with subtle things where logic is powerless"
+  ],
+  "minus": [
+   "builds fears up and believes them",
+   "drowns in other people’s emotions",
+   "escapes direct conversations into hints",
+   "loses footing in the dark phase"
+  ],
+  "seo_description": "The eighteenth arcanum is sensitivity, imagination and fear. How the Moon reads in relationships, in the body’s resource and in spiritual tasks, and how to live with its change of phases.",
+  "queries": [
+   "arcanum 18",
+   "moon in the destiny matrix",
+   "arcanum 18 in relationships",
+   "arcanum 18 fears"
+  ],
+  "repeat": "Sensitivity works with no switch: the person reads someone else’s state in one matter and in another, catching what arguments do not reach. The same channel brings fears built up into something you believe like a fact, and hints instead of a direct conversation. A premonition is worth checking against something outside — a fact, a date, someone else’s words."
+ },
+ {
+  "n": 19,
+  "slug": "sun",
+  "title": "The Sun",
+  "short": "clarity and warmth: with it everything is clearer and easier, including for itself",
+  "keywords": [
+   "sun",
+   "clarity",
+   "warmth",
+   "joy",
+   "recognition",
+   "simplicity"
+  ],
+  "meaning": [
+   "The nineteenth arcanum lights things up. With it the complicated becomes simple, the tense becomes warm, and people are drawn to such a person without explanations. It is rarely unnoticed: even when silent, its mood sets the room.",
+   "This energy likes being visible and earns recognition deservedly: success comes through people and openness, not through hidden moves. The childlike note here is not naivety but the ability to be glad while keeping a live mind — that is what is most often bought from the Sun.",
+   "The shadow is simple: without attention the nineteenth arcanum goes out. Then playing to the audience begins, along with resentment at being overlooked and irritation with those who shine nearby. Plus a habit of not noticing what is unpleasant — in such light shadows hide in the corners rather than disappear."
+  ],
+  "plus": [
+   "makes the complicated clear and light",
+   "warms people and gathers them around",
+   "earns recognition openly, without intrigue",
+   "knows how to be glad and is not ashamed of it"
+  ],
+  "minus": [
+   "depends on attention and goes out without it",
+   "does not notice the unpleasant part of the truth",
+   "outshines those nearby",
+   "plays to the audience instead of doing the work"
+  ],
+  "seo_description": "The nineteenth arcanum is clarity, warmth and recognition. The meaning of the Sun in character, profession and relationships, and why this energy goes out without attention.",
+  "queries": [
+   "arcanum 19",
+   "sun in the destiny matrix",
+   "arcanum 19 meaning"
+  ],
+  "repeat": "There is more light than usual: the person makes several sides of life clear and easy at once, and people are drawn to them with no effort on their part. The weak spot is dependence on attention: with no response the clarity fades, and the unpleasant part of the truth stays unnoticed. Sometimes it helps to step into the shade and check whether the work holds when nobody is watching."
+ },
+ {
+  "n": 20,
+  "slug": "judgement",
+  "title": "Judgement",
+  "short": "a summing-up and a calling: gathers what was done and calls you to do your own",
+  "keywords": [
+   "judgement",
+   "summing-up",
+   "calling",
+   "call",
+   "family",
+   "assessment"
+  ],
+  "meaning": [
+   "The twentieth arcanum settles the account. In a person’s life a moment of reckoning comes round regularly: everything that has been gathering for years is presented at once — reputation, debts, actions, habits. There is little pleasure in it, but after such a review it becomes clear what to do next.",
+   "The second meaning is a call. People with this energy do not choose work by profit: they are called somewhere, and without their own work they feel out of place even on a good salary. Usually that call is connected with the family line: to continue, to correct, to bring up what was started there.",
+   "The imbalance is living under a verdict. A person judges themselves by someone else’s measure, waits for everyone’s assessment and knows in advance that they fell short. The second distortion is the opposite: appointing yourself the judge and explaining to everyone how they ought to live."
+  ],
+  "plus": [
+   "hears their calling and follows it",
+   "can sum things up and admit the facts",
+   "raises a family theme and closes it",
+   "gathers people around a shared cause"
+  ],
+  "minus": [
+   "lives under someone else’s assessment",
+   "judges others in the name of something higher",
+   "delays a decision until the last call",
+   "confuses a calling with a duty to the family"
+  ],
+  "seo_description": "The twentieth arcanum is a summing-up, an assessment and a calling. What Judgement means in purpose, in the family line and in money, and how a call differs from a duty to the family.",
+  "queries": [
+   "arcanum 20",
+   "judgement in the destiny matrix",
+   "arcanum 20 purpose"
+  ],
+  "repeat": "The account is settled more than once, and the person lives with a constant check: what has been done is measured all the time against what it was started for. The other side is living under someone else’s assessment and passing verdicts on others in the name of something higher. It helps to draw the line at an appointed time and by your own measure, not on every occasion and not in someone else’s voice."
+ },
+ {
+  "n": 21,
+  "slug": "world",
+  "title": "The World",
+  "short": "wholeness and scale: one room and one role are too small",
+  "keywords": [
+   "world",
+   "scale",
+   "wholeness",
+   "travel",
+   "completion",
+   "breadth"
+  ],
+  "meaning": [
+   "The twenty-first arcanum widens. For a person with this energy the yard is small, the city is small, one profession is small: they gather experience from different environments and in the end put together something of their own that none of their teachers had.",
+   "The World is about completion. It rarely gives a quick result, but it carries long cycles to the end: a long education, emigration, a ten-year venture, a book, a child who has grown up. Here it matters to understand the scale of the task and not to compare yourself with those who run short distances.",
+   "The weak spot is grandness instead of life. While the person thinks about the world, the rubbish stands unemptied and their mother has not been called for two weeks. And a second trap: the endless “let me look around a bit more” — a hundred open doors and not one walked through."
+  ],
+  "plus": [
+   "thinks in long periods and carries them through",
+   "moves easily between environments and languages",
+   "puts a whole together out of unlike parts",
+   "sees their work on the scale of the world, not of the yard"
+  ],
+  "minus": [
+   "reasons about great things and forgets those close by",
+   "delays a choice, keeping every door open",
+   "dismisses the small and the local",
+   "gets tired of long distances and quits near the finish"
+  ],
+  "seo_description": "The twenty-first arcanum is scale, wholeness and the completion of a cycle. The meaning of the World in purpose, profession and family tasks, where it gives breadth and where it lifts you off the ground.",
+  "queries": [
+   "arcanum 21",
+   "world in the destiny matrix",
+   "arcanum 21 purpose"
+  ],
+  "repeat": "The scale grows, and one role becomes too small: the person thinks in long periods and moves easily between environments where others get stuck. Breadth costs the people close by: the large is visible, and whoever is right next to you falls into the blind spot. A long distance needs a small mark — a short deadline, a living person, something to do this week."
+ },
+ {
+  "n": 22,
+  "slug": "fool",
+  "title": "The Fool",
+  "short": "freedom and lightness: starts from a blank page as many times as it takes",
+  "keywords": [
+   "fool",
+   "freedom",
+   "lightness",
+   "risk",
+   "beginning",
+   "unpredictability"
+  ],
+  "meaning": [
+   "The twenty-second arcanum walks without a map. It takes on the unfamiliar without preparation and often wins precisely because it did not know how things are supposed to be done. In the matrix the Fool stands last, not at zero: this is not the start of the path but the freedom you receive after all the other lessons.",
+   "Such energy cannot bear cages. A schedule, a dress code, the eternal “this is how it is done here” put a person out faster than any workload; but in uncertainty, where everyone else panics, they come alive and find a way out through a joke and a sideways move.",
+   "The price is thoughtlessness. The contract is unread, the money is spent, the promise is forgotten, and those close are tired of being the adult for two. A healthy twenty-second arcanum is free inside its obligations, not instead of them: freedom costs exactly as much as the person has paid for it themselves."
+  ],
+  "plus": [
+   "starts again without fear and without baggage",
+   "finds a way out where there are no rules",
+   "releases tension and keeps everyone from going stiff",
+   "takes a risk and wins on not knowing"
+  ],
+  "minus": [
+   "runs away from responsibility",
+   "spends money and time without counting",
+   "does not read contracts and gets caught",
+   "shifts everyday life onto those close"
+  ],
+  "seo_description": "The twenty-second arcanum is freedom, lightness and risk. What the Fool means in character, money and relationships, and why in the destiny matrix it stands last rather than at zero.",
+  "queries": [
+   "arcanum 22",
+   "fool in the destiny matrix",
+   "arcanum 22 meaning",
+   "the fool arcanum"
+  ],
+  "repeat": "Lightness comes with a surplus: the person starts again as often as needed, and does it in several matters at once, carrying no baggage. The price is leaving everywhere exactly when it got boring and obligations appeared. Freedom needs a shore: a named deadline and the point after which leaving counts as running away."
+ }
+]

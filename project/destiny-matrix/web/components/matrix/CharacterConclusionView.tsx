@@ -1,9 +1,10 @@
+import { D, L } from "@/lib/i18n";
 import type { ReadingConclusion } from "@/lib/readingTypes";
 
 /** Компактный персональный итог; длинные связи остаются в статье энциклопедии. */
 export default function CharacterConclusionView({
   reading,
-  label = "Как складывается тройка",
+  label = D.report.tripleSummary[L],
   showSummary = true,
   idPrefix = "character-reading",
 }: {
@@ -22,17 +23,17 @@ export default function CharacterConclusionView({
         </div>
       ) : null}
       <section className="character-conclusion section-gap" aria-labelledby={resultTitleId}>
-        <h2 id={resultTitleId}>Итог разбора</h2>
+        <h2 id={resultTitleId}>{D.sheet.conclusionTitle[L]}</h2>
         <div className="panel">
-          <h3>Главная сила</h3>
+          <h3>{D.sheet.mainStrength[L]}</h3>
           <p>{reading.strength}</p>
         </div>
         <div className="panel">
-          <h3>Главное напряжение</h3>
+          <h3>{D.sheet.mainTension[L]}</h3>
           <p>{reading.tension}</p>
         </div>
         <div className="panel">
-          <h3>Практический шаг</h3>
+          <h3>{D.sheet.practicalStep[L]}</h3>
           <p>{reading.practice}</p>
         </div>
       </section>

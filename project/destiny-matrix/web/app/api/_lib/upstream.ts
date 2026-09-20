@@ -1,6 +1,7 @@
 // BFF: единственный путь браузера к api. Адрес апстрима — серверная переменная
 // API_INTERNAL_URL (в бандл не попадает, префикса NEXT_PUBLIC_ у неё нет намеренно), токен
 // живёт в httpOnly-куке и в JS недоступен.
+import { D, L } from "@/lib/i18n";
 import { isIP } from "node:net";
 
 import { cookies } from "next/headers";
@@ -103,7 +104,7 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
 
   if (opts.auth || opts.optionalAuth) {
     const token = await sessionToken();
-    if (!token && opts.auth) return json({ detail: "Нужен вход: сессии нет" }, 401);
+    if (!token && opts.auth) return json({ detail: D.bffErrors.noSession[L] }, 401);
     if (token) headers.Authorization = `Bearer ${token}`;
   }
   // User-Agent пробрасываем только там, где он нужен: по нему api отличает роботов от людей
@@ -119,7 +120,7 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
   try {
     res = await fetch(upstreamUrl(path), { method, headers, body: payload, cache: "no-store" });
   } catch {
-    return json({ detail: "Сервис недоступен: сервер приложения не отвечает." }, 502);
+    return json({ detail: D.bffErrors.upstreamDown[L] }, 502);
   }
 
   // апстрим может ответить не-JSON (HTML 404 прокси, 502 балансировщика) — наверх всё равно
@@ -131,7 +132,7 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
       data = JSON.parse(text);
     } catch {
       return json(
-        { detail: res.ok ? "Сервер ответил в неожиданном формате." : `Сервер ответил ошибкой ${res.status}.` },
+        { detail: res.ok ? D.apiErrors.unexpected[L] : D.apiErrors.status[L](res.status) },
         res.ok ? 502 : res.status,
       );
     }

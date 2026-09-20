@@ -4,27 +4,38 @@
 шаблонное описание дало бы 231 почти одинаковый сниппет, и Яндекс склеил бы страницы.
 Запросы — длинный хвост из `docs/product-checks-2.md`: числовые формулировки («14 аркан в
 отношениях») по рекламе не кликают, но именно их ищут в органике.
+
+Шаблоны заголовков и запросов языкозависимы и лежат в `spec/i18n/<lang>.json`: у английского
+поля другой порядок слов и другой набор служебных слов, отрезать которые по русскому списку
+нельзя.
 """
 from __future__ import annotations
 
+import json
 import re
+from functools import lru_cache
+
+from .labels import DEFAULT_LANG, SPEC_DIR
 
 TITLE_LIMIT = 70
 # 165 знаков: сниппет длиннее выдача обрезает сама, и обрыв делает не она, а мы
 DESC_LIMIT = 165
 # короче этого описание отбрасывает приёмка контента (web/lib/content.ts)
 MIN_DESC = 60
-# служебные слова: описание, оканчивающееся на них, читается как обрубок
-STOP_TAIL = {
-    "и", "а", "но", "или", "что", "чтобы", "как", "когда", "если", "потому", "поэтому", "то",
-    "же", "ли", "бы", "в", "во", "на", "за", "по", "под", "над", "от", "до", "из", "к", "ко",
-    "с", "со", "у", "о", "об", "про", "для", "без", "при", "через", "не", "ни", "это", "этот",
-    "эта", "тот", "та", "то", "те", "их", "его", "её", "свой", "своя", "своё", "там", "тут",
-    "уже", "ещё", "весь", "вся", "всё",
-}
 
 
-def clamp(text: str, limit: int = DESC_LIMIT) -> str:
+@lru_cache(maxsize=None)
+def _seo_of(lang: str) -> dict:
+    return json.loads((SPEC_DIR / f"{lang}.json").read_text(encoding="utf-8"))["seo"]
+
+
+@lru_cache(maxsize=None)
+def stop_tail(lang: str = DEFAULT_LANG) -> frozenset[str]:
+    """Служебные слова: описание, оканчивающееся на них, читается как обрубок."""
+    return frozenset(word.lower() for word in _seo_of(lang)["stop_tail"])
+
+
+def clamp(text: str, limit: int = DESC_LIMIT, lang: str = DEFAULT_LANG) -> str:
     """Описание кончается законченной мыслью, а не многоточием посреди слова.
 
     Раньше строку резали по лимиту и дописывали «…»: 86 описаний сочетаний обрывались
@@ -48,27 +59,27 @@ def clamp(text: str, limit: int = DESC_LIMIT) -> str:
     # Обрыв по последнему пробелу оставлял описание на служебном слове: «…что мы друг другу
     # обещаем и что.» Такой вариант годится только когда других нет вовсе.
     variants.append(head.rsplit(" ", 1)[0].rstrip(" ,;:—-") + ".")
-    good = [v for v in variants if len(v) >= MIN_DESC and _ends_well(v)]
+    good = [v for v in variants if len(v) >= MIN_DESC and _ends_well(v, lang)]
     if good:
         return max(good, key=len)
     # ни один разрез не кончается значимым словом: отрезаем служебные слова с конца
-    return _trim_tail(max(variants or [head], key=len))
+    return _trim_tail(max(variants or [head], key=len), lang)
 
 
-def _ends_well(text: str) -> bool:
+def _ends_well(text: str, lang: str = DEFAULT_LANG) -> bool:
     """Последнее слово не служебное: обрыв на нём читается как огрызок фразы."""
     words = text.rstrip(".!?").split()
-    return bool(words) and words[-1].strip('.,;:—-«»"').lower() not in STOP_TAIL
+    return bool(words) and words[-1].strip('.,;:—-«»"').lower() not in stop_tail(lang)
 
 
-def first_sentence(text: str, limit: int = DESC_LIMIT) -> str:
+def first_sentence(text: str, limit: int = DESC_LIMIT, lang: str = DEFAULT_LANG) -> str:
     parts = re.split(r"(?<=[.!?])\s+", text.strip())
     out = parts[0].strip()
     for nxt in parts[1:]:
         if len(out) >= 110:
             break
         out = f"{out} {nxt.strip()}"
-    return clamp(out, limit)
+    return clamp(out, limit, lang)
 
 
 def _dedup(items: list[str]) -> list[str]:
@@ -80,88 +91,69 @@ def _dedup(items: list[str]) -> list[str]:
     return list(seen)
 
 
-def arcanum(entry: dict) -> dict:
+def arcanum(entry: dict, lang: str = DEFAULT_LANG) -> dict:
+    tpl = _seo_of(lang)
     n, title = entry["n"], entry["title"]
     low = title.lower()
-    queries = [
-        f"{n} аркан",
-        f"{n} аркан значение",
-        f"{n} аркан в матрице судьбы",
-        f"{n} аркан {low}",
-        f"аркан {low} значение",
-        f"{n} аркан в отношениях",
-        f"{n} аркан деньги",
-        f"{n} аркан предназначение",
-        f"{n} аркан в центре матрицы",
-        f"{n} аркан плюсы и минусы",
-        f"что означает {n} аркан",
-    ] + list(entry.get("queries", ()))
+    queries = [q.format(n=n, title=title, low=low) for q in tpl["arcanum_queries"]] \
+        + list(entry.get("queries", ()))
     return {
-        "title": f"{n} аркан — {title}: значение в матрице судьбы",
-        "description": clamp(entry["seo_description"]),
+        "title": tpl["arcanum_title"].format(n=n, title=title, low=low),
+        "description": clamp(entry["seo_description"], DESC_LIMIT, lang),
         "queries": _dedup(queries),
     }
 
 
-def combination(a: dict, b: dict, pair: dict) -> dict:
-    na, nb = a["n"], b["n"]
-    queries = [
-        f"сочетание {na} и {nb} аркана",
-        f"{na} и {nb} аркан",
-        f"{na} и {nb} аркан в матрице судьбы",
-        f"{na} {nb} аркан совместимость",
-        f"{na} и {nb} аркан вместе",
-        f"{a['title'].lower()} и {b['title'].lower()} в матрице судьбы",
-        f"аркан {na} с арканом {nb}",
-    ]
+def combination(a: dict, b: dict, pair: dict, lang: str = DEFAULT_LANG) -> dict:
+    tpl = _seo_of(lang)
+    values = {
+        "a": a["n"], "b": b["n"],
+        "a_title": a["title"], "b_title": b["title"],
+        "a_low": a["title"].lower(), "b_low": b["title"].lower(),
+    }
     return {
-        "title": f"Сочетание {na} и {nb} аркана — {a['title']} и {b['title']}",
+        "title": tpl["combination_title"].format(**values),
         # первый абзац бывает одним коротким предложением: описание короче 60 знаков
         # приёмка отбрасывает, и на странице встаёт шаблон вместо написанного текста
-        "description": first_sentence(" ".join(pair["paragraphs"]), DESC_LIMIT),
-        "queries": _dedup(queries),
+        "description": first_sentence(" ".join(pair["paragraphs"]), DESC_LIMIT, lang),
+        "queries": _dedup([q.format(**values) for q in tpl["combination_queries"]]),
     }
 
 
-def position(entry: dict, kind: str) -> dict:
+def position(entry: dict, kind: str, lang: str = DEFAULT_LANG) -> dict:
+    tpl = _seo_of(lang)
     base = list(entry.get("queries", ()))
-    if kind == "section":
-        base += [f"{entry['title'].lower()} в матрице судьбы"]
-    else:
-        base += [f"{entry['title'].lower()} матрица судьбы"]
+    pattern = tpl["section_query"] if kind == "section" else tpl["point_query"]
+    base += [pattern.format(title=entry["title"], low=entry["title"].lower())]
     return {
         "title": entry["seo_title"],
-        "description": clamp(entry["seo_description"]),
+        "description": clamp(entry["seo_description"], DESC_LIMIT, lang),
         "queries": _dedup(base),
     }
 
 
-def chakra(entry: dict) -> dict:
+def chakra(entry: dict, lang: str = DEFAULT_LANG) -> dict:
+    tpl = _seo_of(lang)
     low = entry["title"].lower()
     # У сахасрары, аджны и манипуры формы «<имя> в матрице судьбы» в спросе нет вовсе — есть
     # только «чакра <имя> в матрице судьбы». Поэтому слово «чакра» стоит и в заголовке, и в
     # запросах, а страница с нулевой основной формой объявляет свою через primary_query.
-    queries = [
-        f"{low} в матрице судьбы",
-        f"чакра {low} в матрице судьбы",
-        f"{low} чакра матрица судьбы",
-        f"{low} аркан",
-        f"{low} значение чакры",
-        f"чакра {low} расчет по дате рождения",
-    ] + list(entry.get("queries", ()))
+    queries = [q.format(title=entry["title"], low=low, hint=entry["hint"])
+               for q in tpl["chakra_queries"]] + list(entry.get("queries", ()))
     primary = str(entry.get("primary_query") or "").strip()
     if primary:
         queries = [primary] + queries
     return {
-        "title": f"Чакра {entry['title']} в матрице судьбы — {entry['hint']}",
-        "description": clamp(entry["seo_description"]),
+        "title": tpl["chakra_title"].format(title=entry["title"], hint=entry["hint"], low=low),
+        "description": clamp(entry["seo_description"], DESC_LIMIT, lang),
         "queries": _dedup(queries),
     }
 
 
-def _trim_tail(text: str) -> str:
+def _trim_tail(text: str, lang: str = DEFAULT_LANG) -> str:
     """Отрезать служебные слова с конца: «…потому что видят то.» → «…потому что видят»."""
     words = text.rstrip(".!?").split()
-    while len(words) > 6 and words[-1].strip('.,;:—-«»"').lower() in STOP_TAIL:
+    tail = stop_tail(lang)
+    while len(words) > 6 and words[-1].strip('.,;:—-«»"').lower() in tail:
         words.pop()
     return " ".join(words).rstrip(" ,;:—-") + "."

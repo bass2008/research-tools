@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { D, L } from "@/lib/i18n";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
@@ -35,8 +36,8 @@ export default function PositionHubPage() {
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           { name: encyclopediaSection("pts").title },
         ]}
       />
@@ -69,8 +70,8 @@ export default function PositionHubPage() {
 
       <div className="section-gap">
         <CalcPromo
-          title="Построить свою карту"
-          lead="Карта по дате рождения строится бесплатно: после расчёта каждая точка станет ссылкой на свою позицию с уже подставленным арканом."
+          title={D.enc.promoPositionTitle[L]}
+          lead={D.enc.promoPositionLead[L]}
           place="position-hub"
         />
       </div>

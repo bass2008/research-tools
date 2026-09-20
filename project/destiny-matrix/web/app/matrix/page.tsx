@@ -3,10 +3,11 @@ import Link from "next/link";
 
 import Crumbs from "@/components/ui/Crumbs";
 
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import { matrixCount } from "@/lib/content";
 import Price from "@/components/pay/Price";
 import { pageMeta } from "@/lib/site";
-import { counted, plural } from "@/lib/plural";
 import { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } from "./matrices";
 
 // Каталог остаётся страницей — это путь человека с главной к конкретной карте, — но из индекса
@@ -18,10 +19,9 @@ import { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } from "./matric
 // В `Disallow` каталог не добавлен намеренно: чтобы прочитать `noindex`, робот обязан скачать
 // страницу. Запрет обхода вместе с `noindex` оставил бы её в выдаче адресом без описания.
 export const metadata: Metadata = pageMeta({
-  title: "Все матрицы судьбы: 5544 карты по свёрнутым числам даты",
+  title: D.matrixPages.catalogTitle[L],
   description:
-    "Каталог матриц судьбы: 5544 карты по свёрнутым числам даты. На каждой — октаграмма, " +
-    "позиции карты и два бесплатных раздела разбора.",
+    D.matrixPages.catalogDescription[L],
   path: "/matrix",
   noindex: true,
   follow: true,
@@ -37,41 +37,44 @@ export default function MatrixIndexPage() {
   return (
     <main id="content" className="page">
       <div className="wrap">
-        <Crumbs trail={[{ name: "Главная", path: "/" }, { name: "Все матрицы" }]} />
+        <Crumbs trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.allMatrices[L] }]} />
 
-        <h1>Все матрицы судьбы</h1>
+        <h1>{D.matrixPages.catalogH1[L]}</h1>
         <p className="dim prose">
-          Матрица зависит не от даты, а от трёх свёрнутых чисел: аркана дня (1–22), аркана месяца
-          (1–12) и аркана года{ready ? ` (${years[0]}–${years[years.length - 1]})` : ""}. Поэтому все
-          даты рождения с 1900 года дают {ready ? matrixCount() : 5544} различных карт — каждая
-          разобрана отдельной страницей. Свою карту удобнее получить{" "}
-          <Link href="/#calc">расчётом по дате</Link>: он идёт в браузере, дата не уходит на сервер.
+          {D.matrixPages.catalogLead[L](
+            ready ? ` (${years[0]}–${years[years.length - 1]})` : "",
+            ready ? matrixCount() : 5544,
+          )}{" "}
+          <Link href="/#calc">{D.matrixPages.catalogCalcLink[L]}</Link>
+          {D.matrixPages.catalogCalcTail[L]}
         </p>
 
         <div className="panel section-gap">
-          <h2>Как устроен адрес</h2>
-          <div className="cap">Слаг матрицы — три числа через дефис</div>
+          <h2>{D.matrixPages.addressTitle[L]}</h2>
+          <div className="cap">{D.matrixPages.addressHint[L]}</div>
           <p style={{ margin: 0 }}>
-            <code>/matrix/14-6-7</code> — день сведён к 14, месяц к 6, год к 7. Так читается матрица
-            всех, кто родился 14 июня года с суммой цифр 7 (например, 2005). Карта и два раздела на
-            каждой странице открыты бесплатно, остальные 18 входят в полный разбор за{" "}
-            <Price />.
+            <code>/matrix/14-6-7</code> {D.matrixPages.addressExample[L]}{" "}
+            {ALL_FREE ? (
+              <>{D.matrixPages.allFreeSections[L]}</>
+            ) : (
+              <>
+                {D.matrixPages.paidTail[L]} <Price />.
+              </>
+            )}
           </p>
         </div>
 
         {ready ? (
           <>
-            <h2 className="section-gap">Вход по аркану дня</h2>
+            <h2 className="section-gap">{D.matrixPages.entryByDay[L]}</h2>
             <p className="dim">
-              Внутри каждой страницы — ссылки на все 12 месяцев, все{" "}
-              {counted(years.length, "аркан", "аркана", "арканов")} года и все
-              22 аркана дня, поэтому от любой карты можно дойти до любой другой.
+              {D.matrixPages.entryLead[L](D.matrixPages.yearArcanaCount[L](years.length))}
             </p>
             <div className="cardgrid">
               {DAY_KEYS.map((day) => (
                 <div className="ecard" key={day}>
-                  <div className="num">день {day}</div>
-                  <div className="nm">Аркан дня {day}</div>
+                  <div className="num">{D.matrixPages.dayWord[L]} {day}</div>
+                  <div className="nm">{D.matrixPages.dayArcanum[L](day)}</div>
                   <div className="taglist" style={{ marginTop: 8 }}>
                     {MONTH_KEYS.map((month) => (
                       // 264 ссылки сетки: с префетчем каждый просмотр каталога тянул RSC-пейлоад
@@ -87,34 +90,31 @@ export default function MatrixIndexPage() {
           </>
         ) : (
           <div className="panel section-gap">
-            <h2>Каталог ещё не собран</h2>
-            <div className="cap">Нет content/matrices.json — список троек считает engine/precompute.py</div>
+            <h2>{D.matrixPages.catalogMissing[L]}</h2>
+            <div className="cap">{D.matrixPages.catalogMissingHint[L]}</div>
             <p style={{ margin: 0 }}>
-              Расчёт по своей дате работает и без каталога: он идёт в браузере на том же движке.
+              {D.matrixPages.catalogMissingText[L]}
             </p>
           </div>
         )}
 
         <div className="panel section-gap">
-          <h2>Куда дальше</h2>
-          <div className="cap">Справочник, на который ссылается каждая позиция карты</div>
+          <h2>{D.matrixPages.whereNext[L]}</h2>
+          <div className="cap">{D.matrixPages.whereNextHint[L]}</div>
           <div className="taglist">
-            <Link href="/encyclopedia">Энциклопедия матрицы судьбы</Link>
-            <Link href="/encyclopedia/position/character">Характер</Link>
-            <Link href="/encyclopedia/position/money">Деньги</Link>
-            <Link href="/encyclopedia/position/relations">Отношения</Link>
-            <Link href="/encyclopedia/position/center">Центр карты</Link>
+            <Link href="/encyclopedia">{D.matrixPages.encyclopediaFull[L]}</Link>
+            <Link href="/encyclopedia/position/character">{D.matrixPages.linkCharacter[L]}</Link>
+            <Link href="/encyclopedia/position/money">{D.matrixPages.linkMoney[L]}</Link>
+            <Link href="/encyclopedia/position/relations">{D.matrixPages.linkRelations[L]}</Link>
+            <Link href="/encyclopedia/position/center">{D.matrixPages.linkCenter[L]}</Link>
           </div>
         </div>
 
         <div className="allbox">
-          <h2>Найти свою матрицу</h2>
-          <p>
-            Вводить слаг руками не нужно: расчёт по дате рождения сам приведёт к нужной карте и покажет
-            карту и два раздела сразу.
-          </p>
+          <h2>{D.matrixPages.findYours[L]}</h2>
+          <p>{D.matrixPages.findYoursText[L]}</p>
           <Link className="btn" href="/#calc">
-            Рассчитать матрицу бесплатно
+            {D.matrixPages.calcFree[L]}
           </Link>
         </div>
       </div>

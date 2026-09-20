@@ -1,0 +1,41 @@
+import labels from "@/labels-public.json";
+
+/** Публичная половина слов метода: названия чакр, колонки, шаблоны подписей и два бесплатных
+ *  раздела.
+ *
+ *  Отдельный файл нужен не для порядка, а для пейволла: полный словарь несёт вводки и подписи
+ *  восемнадцати платных разделов, а расчёт карты идёт в браузере — один импорт увозит их
+ *  в видимый чанк. Всё, что работает на клиенте, читает этот срез; полный `methodLabels`
+ *  остаётся серверному коду. */
+export interface PublicLabels {
+  lang: string;
+  chakras: Record<string, { title: string; hint: string }>;
+  chakra_columns: Record<string, string>;
+  expansions: { chakra_physics: string; age_scale: string };
+  sections: Record<string, { title: string; lead: string; positions: string[] }>;
+}
+
+export const PUBLIC_METHOD: PublicLabels = labels as PublicLabels;
+
+export function chakraTitle(key: string): string {
+  const row = PUBLIC_METHOD.chakras[key];
+  if (!row) throw new Error(`нет подписи чакры ${key} в словаре ${PUBLIC_METHOD.lang}`);
+  return row.title;
+}
+
+export function chakraHint(key: string): string {
+  return PUBLIC_METHOD.chakras[key]?.hint ?? "";
+}
+
+export function columnTitle(key: string): string {
+  return PUBLIC_METHOD.chakra_columns[key] ?? key;
+}
+
+/** «Сахасрара · физика» и «0–10 лет»: порядок слов в подписи тоже переводится. */
+export function chakraPhysicsLabel(title: string): string {
+  return PUBLIC_METHOD.expansions.chakra_physics.replace("{chakra}", title);
+}
+
+export function ageScaleLabel(from: number, to: number): string {
+  return PUBLIC_METHOD.expansions.age_scale.replace("{from}", String(from)).replace("{to}", String(to));
+}

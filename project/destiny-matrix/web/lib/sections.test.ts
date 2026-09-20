@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 import { describe, expect, it } from "vitest";
 
 import { buildFree, sectionEntityLink } from "@/lib/publicSpec";
@@ -14,9 +15,11 @@ function section(key: string) {
   return s;
 }
 
-function text(key: string, label: string) {
-  const p = section(key).positions.find((x) => x.label === label);
-  if (!p) throw new Error(`нет позиции «${label}» в разделе ${key}`);
+// Позиция ищется по номеру в разделе, а не по подписи: подписи приходят из словаря языка,
+// и сверка с русской строкой проверяла бы язык сборки, а не привязку толкования.
+function textAt(key: string, index: number) {
+  const p = section(key).positions[index];
+  if (!p) throw new Error(`в разделе ${key} нет позиции №${index}`);
   return p.text ?? "";
 }
 
@@ -24,13 +27,10 @@ describe("разделы разбора", () => {
   it("толкование ключуется позицией, а не разделом", () => {
     // пул раздела «комфорт» написан про центр карты: под внутренней точкой он утверждал
     // «такой центр гасят», хотя речь про другую точку
-    expect(text("comfort", "Вход линии отношений и хвоста")).toBe(
-      arcanumInPosition(m.comfort_south, "comfort_south"),
-    );
-    expect(text("comfort", "Внутренняя точка таланта")).toBe(
-      arcanumInPosition(m.comfort_north, "comfort_north"),
-    );
-    expect(text("comfort", "Центр карты")).toBe(arcanumInPosition(m.center, "center"));
+    // Порядок позиций раздела задан спецификацией: центр, вход линии отношений, точка таланта.
+    expect(textAt("comfort", 0)).toBe(arcanumInPosition(m.center, "center"));
+    expect(textAt("comfort", 1)).toBe(arcanumInPosition(m.comfort_south, "comfort_south"));
+    expect(textAt("comfort", 2)).toBe(arcanumInPosition(m.comfort_north, "comfort_north"));
   });
 
   it("позиции одного раздела не пересказывают друг друга", () => {
@@ -49,7 +49,9 @@ describe("разделы разбора", () => {
   it("толкования карты энергий совпадают со страницей позиции в справочнике", () => {
     for (const position of section("chakras").positions) {
       // Повтор аркана намеренно ссылается на первую строку вместо второго одинакового абзаца.
-      if (position.text?.startsWith("Тот же аркан")) continue;
+      // Повтор аркана намеренно ссылается на первую строку вместо второго одинакового абзаца;
+      // формулировка ссылки живёт в словаре языка.
+      if (position.text?.startsWith(D.report.sameArcanum[L]("").slice(0, 12))) continue;
       expect(position.text).toBe(arcanumInPosition(position.arcanum, "chakras"));
     }
   });

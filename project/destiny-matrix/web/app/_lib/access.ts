@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 // Доступ к платным разделам определяется здесь — на сервере, по httpOnly-куке. В браузер
 // признак доступа не отдаётся и из JavaScript не читается: страница либо напечатана с
 // разделами, либо без них.
@@ -23,8 +24,16 @@ export interface Access {
   email: string | null;
   /** виды доступа из действующих прав: single | matrix | all. Пусто — платных разделов нет */
   scopes: string[];
-  /** есть хоть одно действующее право: разовое привязано к своей матрице */
+  /** есть хоть одно действующее право: разовое привязано к своей матрице.
+   *
+   *  Это признак покупки, а не доступа. Открыт ли разбор конкретной записи, решает сервер и
+   *  присылает в списке матриц полем `access` — фронт читает его как `unlocked`. Выводить
+   *  доступ из прав фронт не должен: на витрине без кассы прав не заводят вовсе
+   *  (`api/app/access.py`), и страница «Мой разбор» отвечала «матрица не выбрана» тому, у кого
+   *  в кабинете лежала открытая запись. */
   paid: boolean;
+  /** витрина без оплаты: сервер открыл всё сам, покупкой это не является */
+  allFree: boolean;
   /** право открывать любые даты */
   unlimited: boolean;
   /** до какого числа действует срочное право; null — бессрочно или прав нет */
@@ -39,6 +48,7 @@ const NO_ACCESS: Access = {
   email: null,
   scopes: [],
   paid: false,
+  allFree: false,
   unlimited: false,
   until: null,
   used: 0,
@@ -84,10 +94,12 @@ export async function readAccess(): Promise<Access> {
   const user = (raw.user ?? {}) as Record<string, unknown>;
   const rights = (raw.access ?? {}) as Record<string, unknown>;
   const scopes = scopeList(rights.scopes);
+  const allFree = rights.all_free === true;
   return {
     authenticated: true,
     email: typeof user.email === "string" ? user.email : null,
     scopes,
+    allFree,
     paid: scopes.length > 0,
     unlimited: raw.unlimited === true,
     until: typeof raw.until === "string" ? raw.until : null,
@@ -132,19 +144,19 @@ export async function readPrintPage(id: number, token: string): Promise<PrintPag
     sex: row.sex === "f" ? "f" : "m",
     title: typeof row.title === "string" ? row.title : null,
     unlocked: row.unlocked === true,
-    plan: typeof row.plan === "string" ? row.plan : "разбор",
+    plan: typeof row.plan === "string" ? row.plan : D.sheet.planReading[L],
   };
 }
 
 /** Как назвать доступ в отчёте: имя тарифа берём из базы, а не из кода. */
 export function planLabel(access: Access, tariffs: Tariff[], unlocked: boolean): string {
   if (access.unlimited) {
-    return tariffs.find((t) => t.scope.includes("all"))?.name ?? "без ограничений";
+    return tariffs.find((t) => t.scope.includes("all"))?.name ?? D.sheet.planUnlimited[L];
   }
   if (unlocked) {
-    return tariffs.find((t) => !t.scope.includes("all"))?.name ?? "разовый разбор";
+    return tariffs.find((t) => !t.scope.includes("all"))?.name ?? D.sheet.planSingle[L];
   }
-  return "бесплатные разделы";
+  return D.sheet.planFree[L];
 }
 
 /**

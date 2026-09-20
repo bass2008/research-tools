@@ -5,6 +5,8 @@
 // в ожидании ответа; открыть разделы она не может.
 import { useEffect, useState } from "react";
 
+import { D, L } from "@/lib/i18n";
+
 import { ApiError, api } from "@/lib/api";
 import { needsReload, ownerChanged, sessionAppeared } from "@/lib/session";
 import { cachePaid, cachedPaid, clearBirth, forgetSession } from "@/lib/storage";
@@ -103,7 +105,7 @@ export function refreshSession(): Promise<Session> {
         ...EMPTY,
         status: "offline",
         cached: cachedPaid(),
-        error: err instanceof ApiError ? err.message : "Не удалось проверить доступ.",
+        error: err instanceof ApiError ? err.message : D.pay.checkFailed[L],
       });
     })
     .finally(() => {

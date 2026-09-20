@@ -18,7 +18,7 @@ pytestmark = pytest.mark.bug
 
 PHONE_WIDTHS = (320, 360, 390, 414)
 
-PUBLIC_PAGES = ("/", "/pay", "/account", "/report", "/matrices", "/privacy", "/oferta", "/refund",
+PUBLIC_PAGES = ("/", "/pay", "/account", "/report", "/matrices", "/privacy", "/terms", "/refund",
                 "/contacts", "/login", "/register", "/forgot", "/encyclopedia",
                 "/encyclopedia/arcanum/7", "/matrix")
 
@@ -293,7 +293,7 @@ def empty_labels(line: str) -> list[str]:
 
 def test_c11_requisites_have_no_empty_labels(page):
     """C11. В реквизитах оферты висит «адрес:», за которым сразу идёт «Почта:»."""
-    page.goto(f"{BASE}/oferta", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/terms", wait_until="domcontentloaded")
     page.wait_for_timeout(800)
     lines = [line.strip() for line in page.inner_text("body").split("\n")
              if "ИНН" in line and "ОГРНИП" in line]

@@ -5,6 +5,9 @@ cd "$(dirname "$0")/.."
 
 REQUIRE_TEST_EVIDENCE=1 scripts/assert-release-candidate.sh
 
+# Юнит-тесты того языка, который собираем: красные тесты сборки не выкладываются.
+scripts/assert-unit-tests.sh ru
+
 SITE=https://arcana-sense.ru
 IP="${ARCANA_PROD_IP:-45.80.130.166}"
 SSH_USER="${ARCANA_SSH_USER:-root}"
@@ -48,6 +51,12 @@ docker buildx build --push -f web.Dockerfile \
   --build-arg "BUILD_ISO=$BUILD_ISO" \
   --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
 
+# Язык развёртки и режим витрины обязательны в compose-файле, а в `.env` на машине их не было:
+# любой вызов `docker compose` там падал на интерполяции. Дописываем до снимка — он тоже compose.
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
+  && sed -i '/^SITE_LANG=/d;/^ALL_FREE_WITHOUT_PAYMENT=/d' .env \
+  && printf 'SITE_LANG=ru\nALL_FREE_WITHOUT_PAYMENT=0\n' >> .env"
+
 echo "== диагностический снимок и проверенная копия БД"
 # Оба действия read-only относительно рабочей базы. Счета, callback и права продолжают
 # обслуживаться текущими контейнерами, пока новые образы уже лежат в registry.
@@ -59,13 +68,17 @@ echo "== запуск на $IP"
 # На машину едет только база: без override там нет ни сборки, ни dev-секретов.
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.yml"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
-  && (grep -E '^(REGISTRY|TAG|BUILD_COMMIT)=' .env > .env.previous.tag 2>/dev/null || true) \
-  && sed -i '/^TAG=/d;/^REGISTRY=/d;/^BUILD_COMMIT=/d' .env \
-  && printf 'REGISTRY=%s\nTAG=%s\nBUILD_COMMIT=%s\n' '$REGISTRY' '$TAG' '$TAG' >> .env \
+  && (grep -E '^(REGISTRY|TAG|BUILD_COMMIT)=' .env > .env.rollback.candidate 2>/dev/null || true) \
+  && sed -i '/^TAG=/d;/^REGISTRY=/d;/^BUILD_COMMIT=/d;/^SITE_LANG=/d;/^ALL_FREE_WITHOUT_PAYMENT=/d' .env \
+  && printf 'REGISTRY=%s\nTAG=%s\nBUILD_COMMIT=%s\nSITE_LANG=ru\nALL_FREE_WITHOUT_PAYMENT=0\n' '$REGISTRY' '$TAG' '$TAG' >> .env \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && docker compose pull -q && systemctl restart arcana \
+  && mv -f .env.rollback.candidate .env.previous.tag \
   && docker image prune -a -f --filter until=24h >/dev/null"
+# Тег для отката переносится только после удачного перезапуска. Пока он писался сразу, упавшая
+# попытка релиза затирала им же настоящую работавшую версию: после двух заходов в файле лежал
+# тег сегодняшней сборки, и откат по нему вернул бы тот же код.
 # Диск машины 20 ГБ, каждый релиз добавляет ~2,7 ГБ образов: без чистки он заполнился на 100 %
 # и следующий релиз упал на «no space left on device». Чистим после перезапуска, чтобы удалялись
 # только образы, которые уже никем не заняты.

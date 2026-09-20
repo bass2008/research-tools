@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
 //
 // Главным считается `seo.queries[0]`: именно он стоит в title и определяет, за что страница
 // борется. Остальные запросы делить можно и нужно — одну тему описывают десятки формулировок.
-const CONTENT = path.join(__dirname, "..", "content");
+const CONTENT = path.join(__dirname, "..", "content", process.env.NEXT_PUBLIC_SITE_LANG ?? "ru");
 const SOURCES: Record<string, string> = {
   "arcana.json": "n",
   "positions.json": "key",

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 import PayResult from "@/components/pay/PayResult";
+import { D, L } from "@/lib/i18n";
 import { pageMeta } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMeta({
-  title: "Результат оплаты",
-  description: "Возврат с платёжной формы: проверяем платёж и открываем разбор.",
+  title: D.payResult.donePageTitle[L],
+  description: D.payResult.donePageDescription[L],
   path: "/pay/done",
   noindex: true,
 });

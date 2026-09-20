@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { D, L } from "@/lib/i18n";
 import { NOT_FOUND_META } from "@/lib/seo";
 
 import NotFoundBody from "@/components/ui/NotFoundBody";
@@ -16,7 +17,7 @@ export const metadata: Metadata = NOT_FOUND_META;
 // не было ни заголовка, ни текста — только RSC-пейлоад. Здесь документ собирается целиком.
 export default function GlobalNotFound() {
   return (
-    <html lang="ru" className={FONT_CLASS}>
+    <html lang={D.meta.htmlLang[L]} className={FONT_CLASS}>
       <head>
         <style dangerouslySetInnerHTML={{ __html: FONT_VARS }} />
       </head>

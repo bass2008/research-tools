@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { D, L } from "@/lib/i18n";
+
 import type { Stage } from "@/lib/payStage";
 
 import { birthLabel } from "@/components/matrix/MatrixResult";
@@ -28,31 +30,32 @@ export default function PayReceipt({
 
   return (
     <div className="panel paybox">
-      <h3>Доступ открыт</h3>
+      <h3>{D.payResult.receiptTitle[L]}</h3>
       <div className="cap">
-        Платёж {stage.paymentId} · тариф «{tariffName}»
+        {D.payResult.receiptLine[L](String(stage.paymentId), tariffName)}
       </div>
       <p className="dim">
-        {test ? "Это тестовый приём оплаты: списаний не происходит. " : ""}
-        Разделы открыты в аккаунте <b data-testid="account-email">{stage.email}</b>, а не в этом
-        браузере, — поэтому доступ работает и с телефона.
+        {test ? D.payResult.testNote[L] : ""}
+        {D.payResult.receiptAccountHead[L]}{" "}
+        <b data-testid="account-email">{stage.email}</b>
+        {D.payResult.receiptAccountTail[L]}
       </p>
 
       <p className="hint">
-        Вход с другого устройства — <Link href="/login">на странице входа</Link>: почта{" "}
-        {stage.email} и пароль, который вы задали.
+        {D.payResult.receiptSignIn[L]}{" "}
+        <Link href="/login">{D.payResult.receiptSignInPage[L]}</Link>
+        {D.payResult.receiptCredentials[L](stage.email)}
       </p>
 
       {signedInto ? (
         <p className="hint" data-testid="signed-into" style={{ textAlign: "left" }}>
-          Аккаунт на {signedInto} уже существовал — мы вошли в него, а не создали новый. Поэтому в
-          кабинете есть прежние матрицы и платежи.
+          {D.payResult.receiptExisting[L](signedInto)}
         </p>
       ) : null}
 
       {label ? (
         <p className="hint" style={{ textAlign: "left" }}>
-          Этим платежом открыта: <b>{label}</b>.
+          {D.payResult.receiptOpened[L]} <b>{label}</b>.
         </p>
       ) : null}
 
@@ -61,13 +64,12 @@ export default function PayReceipt({
         href={stage.matrix ? `/report?m=${stage.matrix.id}` : "/report"}
         style={{ marginTop: 14 }}
       >
-        Открыть полный разбор
+        {D.payResult.openFull[L]}
       </Link>
 
       {label ? (
         <p className="small" data-testid="paid-matrix">
-          {label} сохранена в кабинете — платные разделы печатает сервер, поэтому разбор
-          открывается с любого устройства.
+          {D.payResult.receiptSavedTail[L](label)}
         </p>
       ) : null}
     </div>

@@ -100,4 +100,3 @@ done
 fi
 
 say "итог"
-echo "Сравнивать с эталоном нынешней машины: docs/migration-bench.md"

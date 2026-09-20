@@ -1,4 +1,5 @@
 import { arcanumTitle } from "@/lib/arcana";
+import { D, L } from "@/lib/i18n";
 
 import ArcanumCard from "./ArcanumCard";
 import MatrixForm from "./MatrixForm";
@@ -11,8 +12,8 @@ import MatrixForm from "./MatrixForm";
 export default function CalcPromo({
   arcanum,
   caption,
-  title = "Постройте свою матрицу",
-  lead = "Расчёт бесплатный, без регистрации. Карта строится сразу.",
+  title = D.home.promoTitle[L],
+  lead = D.calc.formLead[L],
   place = "encyclopedia",
 }: {
   arcanum?: number;

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Сборка статей в источники данных сайта.
 
-Авторы сдают по файлу на статью в `tools/seo/content/<категория>/<ключ>.json`; сайт читает по
-файлу на категорию в `web/content/<категория>.json`. Этот скрипт переносит первое во второе и
-проверяет то, что иначе выяснится молча: страница просто не появится, а причину придётся искать
-глазами.
+Авторы сдают по файлу на статью в `tools/seo/content/<lang>/<категория>/<ключ>.json`; сайт читает
+по файлу на категорию в `web/content/<lang>/<категория>.json`. Этот скрипт переносит первое во
+второе и проверяет то, что иначе выяснится молча: страница просто не появится, а причину
+придётся искать глазами.
 
-    python tools/seo/build-content.py            # проверить и собрать
-    python tools/seo/build-content.py --check    # только проверить
+    python tools/seo/build-content.py                 # русский: проверить и собрать
+    python tools/seo/build-content.py --lang en       # английский
+    python tools/seo/build-content.py --check         # только проверить
 
 Две категории не заводят новых страниц, а обогащают существующие (`arcana`, `positions`): их
 статьи вливаются в готовый корпус пополю — приходят `meaning`, `seo`, `article_sections` и `faq`, всё остальное
@@ -22,9 +23,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "tools/seo/content"
-DST = ROOT / "project/destiny-matrix/web/content"
+SRC_ROOT = ROOT / "tools/seo/content"
+DST_ROOT = ROOT / "project/destiny-matrix/web/content"
 METHOD = ROOT / "project/destiny-matrix/spec/method.json"
+DEFAULT_LANG = "ru"
 
 BRAND = len(" — Arcana Sense")
 TITLE_LIMIT = 70
@@ -33,12 +35,21 @@ TITLE_LIMIT = 70
 # целиком, потому что реклама целительства требует разрешения, которого не получить. Фильтр ловит
 # подстроку, а не смысл, поэтому «не гарантирует» и «время не лечит» тоже под него попадают —
 # сборка обязана сказать об этом здесь, а не молча отдать сайту урезанную статью.
-BANNED = (
-    "лечен", "лечит", "лечи́", "лечение", "диагноз", "заболеван", "исцел", "целитель",
-    "болезн", "симптом", "терапи", "препарат", "набор веса", "алкогол", "похуден",
-    "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник",
-    "гарантиру", "уязвимые зоны",
-)
+BANNED_BY_LANG = {
+    "ru": (
+        "лечен", "лечит", "лечи́", "лечение", "диагноз", "заболеван", "исцел", "целитель",
+        "болезн", "симптом", "терапи", "препарат", "набор веса", "алкогол", "похуден",
+        "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник",
+        "гарантиру", "уязвимые зоны",
+    ),
+    "en": (
+        "cure", "cures", "healing", "heals", "diagnos", "disease", "illness", "symptom",
+        "therapy", "treatment", "medication", "weight gain", "weight loss", "alcohol",
+        "recovery from illness", "immunity", "chronic", "doctor", "clinic", "physician",
+        "guarantee", "guaranteed", "vulnerable zones",
+    ),
+}
+BANNED = BANNED_BY_LANG[DEFAULT_LANG]
 
 # Минимумы повторяют загрузчик сайта (web/lib/content.ts): что не проходит здесь, не попадёт на
 # страницу и там — только там об этом узнают после сборки.
@@ -196,15 +207,21 @@ def load(path: Path, problems: list[str]) -> dict | None:
         return None
 
 
-def base_items(name: str) -> list[dict]:
-    raw = json.loads((DST / name).read_text())
+def base_items(dst: Path, name: str) -> list[dict]:
+    raw = json.loads((dst / name).read_text())
     return raw.get("items", raw) if isinstance(raw, dict) else raw
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="только проверить, ничего не писать")
+    parser.add_argument("--lang", default=DEFAULT_LANG, help="язык корпуса (ru, en)")
     args = parser.parse_args()
+
+    global BANNED
+    BANNED = BANNED_BY_LANG[args.lang]
+    src = SRC_ROOT / args.lang
+    dst = DST_ROOT / args.lang
 
     problems: list[str] = []
     losses: list[str] = []
@@ -214,7 +231,7 @@ def main() -> int:
     tail_primary: dict[str, str] = {}
 
     for category in ARTICLE:
-        folder = SRC / category
+        folder = src / category
         files = sorted(folder.glob("*.json")) if folder.exists() else []
         key_field = KEY_FIELD.get(category, "key")
         items, seen = [], {}
@@ -247,7 +264,7 @@ def main() -> int:
             hygiene(item, where, "", losses)
             trim_description(item, where)
             items.append(item)
-        target = DST / f"{category}.json"
+        target = dst / f"{category}.json"
         expected_payload = {"items": items}
         if args.check:
             if not target.exists() or load(target, problems) != expected_payload:
@@ -263,12 +280,12 @@ def main() -> int:
                  f"лишние {sorted(set(seen) - allowed_tails)}")
 
     for category, (base_name, key_field) in ENRICH.items():
-        folder = SRC / category
+        folder = src / category
         files = sorted(folder.glob("*.json")) if folder.exists() else []
         if not files:
             written.append(f"{base_name}: без изменений")
             continue
-        base = base_items(base_name)
+        base = base_items(dst, base_name)
         index = {str(x.get(key_field)): x for x in base}
         touched, seen = 0, {}
         for path in files:
@@ -295,11 +312,11 @@ def main() -> int:
             touched += 1
         expected_payload = {"count": len(base), "items": base}
         if args.check:
-            if not (DST / base_name).exists() or load(DST / base_name, problems) != expected_payload:
+            if not (dst / base_name).exists() or load(dst / base_name, problems) != expected_payload:
                 fail(problems, base_name,
                      "собранный артефакт устарел — выполните tools/seo/build-content.py")
         else:
-            (DST / base_name).write_text(
+            (dst / base_name).write_text(
                 json.dumps(expected_payload, ensure_ascii=False, indent=1) + "\n"
             )
         written.append(f"{base_name}: обогащено {touched} из {len(base)}")

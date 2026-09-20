@@ -1,4 +1,4 @@
-import catalog from "@/content/arcana-catalog.json";
+import catalog from "@/corpus/arcana-catalog.json";
 
 /** Client-safe arcanum metadata generated from content/data/arcana.json. */
 export interface ArcanumSource {

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 // Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
 import SiteLink from "@/components/ui/SiteLink";
+import { D, L } from "@/lib/i18n";
 
 import { personVisible } from "@/lib/session";
 
@@ -41,17 +42,17 @@ export default function SessionBadge({ plain }: { plain?: boolean }) {
       // короткое слово влезает, а смысл тот же — сверка ещё идёт.
       return (
         <span style={{ ...ROW, color: "var(--dim2)" }} className="checking">
-          проверяем…
+          {D.auth.checking[L]}
         </span>
       );
     }
     return (
       <span style={ROW}>
         <SiteLink plain={plain} data-testid="nav-login" href="/login">
-          Войти
+          {D.auth.signIn[L]}
         </SiteLink>
         <SiteLink plain={plain} data-testid="nav-register" href="/register">
-          Регистрация
+          {D.auth.registerTitle[L]}
         </SiteLink>
       </span>
     );
@@ -80,11 +81,11 @@ export default function SessionBadge({ plain }: { plain?: boolean }) {
           window.location.assign("/");
         }}
       >
-        {failed ? "Выйти ещё раз" : "Выйти"}
+        {failed ? D.auth.signOutAgain[L] : D.auth.signOut[L]}
       </button>
       {failed ? (
         <span className="err inline" role="alert" data-testid="logout-error">
-          Сервер не ответил — выход не выполнен, вы остались в аккаунте.
+          {D.auth.signOutFailed[L]}
         </span>
       ) : null}
     </span>

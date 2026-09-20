@@ -1,5 +1,6 @@
 "use client";
 
+import { D, L } from "@/lib/i18n";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -26,8 +27,8 @@ export default function EncCrumbs({
   const path = usePathname();
   const parts = path.split("/").filter(Boolean);
   const trail: { name: string; href?: string }[] = [
-    { name: "Главная", href: "/" },
-    { name: "Энциклопедия", href: "/encyclopedia" },
+    { name: D.nav.home[L], href: "/" },
+    { name: D.nav.encyclopedia[L], href: "/encyclopedia" },
   ];
 
   if (articles[path]) {
@@ -38,7 +39,9 @@ export default function EncCrumbs({
     const section = encyclopediaSection(encyclopediaSectionFromExternalRoot(parts[0])!);
     trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     trail.push({
-      name: /^\d{4}$/.test(parts[1]) ? `Матрица судьбы на ${parts[1]} год` : `${parts[1]} на год`,
+      name: /^\d{4}$/.test(parts[1])
+        ? D.encYear.matrixForYear[L](parts[1])
+        : D.encYear.yearOf[L](parts[1]),
     });
   } else if (positions[parts[1]]) {
     const key = parts[1];
@@ -61,7 +64,7 @@ export default function EncCrumbs({
         const n = Number(slug);
         trail.push({ name: `${n} · ${arcana[n - 1] ?? ""}`.trim() });
       } else if (parts[1] === "combination") {
-        trail.push({ name: slug.replace("-", " и ") });
+        trail.push({ name: slug.replace("-", ` ${D.encArcanum.and[L]} `) });
       } else if (parts[1] === "chakra") {
         trail.push({ name: chakras[slug] ?? slug });
       } else {

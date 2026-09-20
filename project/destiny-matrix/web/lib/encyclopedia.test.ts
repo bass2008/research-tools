@@ -1,3 +1,4 @@
+import { L } from "./i18n";
 import { describe, expect, it } from "vitest";
 
 import { ARCANA, arcanum, roman } from "./arcana";
@@ -176,7 +177,16 @@ describe("формулировки", () => {
     }
   });
 
-  it("нет латиницы в названиях арканов", () => {
+  // Латиница в русском названии аркана означала бы, что в корпус попало английское имя.
+  // Английский корпус на латинице и написан, поэтому правило проверяется на своём языке.
+  it.runIf(L === "ru")("нет латиницы в названиях арканов", () => {
     for (const a of ARCANA) expect(a.title, a.title).not.toMatch(/[A-Za-z]/);
+  });
+
+  it("у каждого аркана непустое название без служебных символов", () => {
+    for (const a of ARCANA) {
+      expect(a.title.trim().length, String(a.n)).toBeGreaterThan(2);
+      expect(a.title, a.title).not.toMatch(/[<>{}]/);
+    }
   });
 });

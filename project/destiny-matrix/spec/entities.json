@@ -26,9 +26,9 @@
       ],
       "sample_birth": "1949-01-04",
       "publication": {
-        "index": false,
+        "index": true,
         "follow": true,
-        "primary_query": null,
+        "primary_query": "матрица судьбы 3 13 10",
         "exact_frequency": 464,
         "reviewed_at": "2026-08-30"
       }
@@ -90,9 +90,9 @@
       ],
       "sample_birth": "1949-01-02",
       "publication": {
-        "index": false,
+        "index": true,
         "follow": true,
-        "primary_query": null,
+        "primary_query": "матрица судьбы 6 14 8",
         "exact_frequency": 247,
         "reviewed_at": "2026-08-30"
       }
@@ -202,9 +202,9 @@
       ],
       "sample_birth": "1949-01-03",
       "publication": {
-        "index": false,
+        "index": true,
         "follow": true,
-        "primary_query": null,
+        "primary_query": "матрица судьбы 9 18 9",
         "exact_frequency": 0,
         "reviewed_at": "2026-08-30"
       }
@@ -394,9 +394,9 @@
       ],
       "sample_birth": "1908-12-22",
       "publication": {
-        "index": false,
+        "index": true,
         "follow": true,
-        "primary_query": null,
+        "primary_query": "матрица судьбы 21 10 7",
         "exact_frequency": 178,
         "reviewed_at": "2026-08-30"
       }

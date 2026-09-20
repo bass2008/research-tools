@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { LongformReading } from "@/lib/readingTypes";
+import { D, L } from "@/lib/i18n";
 import { positionHref } from "@/lib/publicSpec";
 import type { PersonalSectionKey } from "@/lib/sectionReadings";
 
@@ -17,26 +18,26 @@ export default function PersonalSectionArticle({
 }) {
   return (
     <>
-      <p className="eyebrow">Персональный раздел матрицы</p>
+      <p className="eyebrow">{D.sheet.personalEyebrow[L]}</p>
       <h1>{reading.title}</h1>
       <p className="dim prose">{reading.lead}</p>
 
       <CharacterReadingView reading={reading} />
 
       <div className="allbox">
-        <h2>Как устроен раздел «{sectionTitle}»</h2>
+        <h2>{D.sheet.howSectionWorks[L](sectionTitle)}</h2>
         <p>
-          Общая статья объясняет метод чтения раздела, а эта страница применяет его к вашему рассчитанному результату.
+          {D.sheet.personalExplainer[L]}
         </p>
         <div className="btnrow center">
           <Link className="btn" href={positionHref(sectionKey)}>
-            Открыть статью о разделе
+            {D.sheet.openSectionArticle[L]}
           </Link>
           <Link className="btn ghost" href="/report">
-            Вернуться к отчёту
+            {D.sheet.backToReport[L]}
           </Link>
           <Link className="btn ghost" href="/#calc">
-            Рассчитать другую дату
+            {D.sheet.otherDate[L]}
           </Link>
         </div>
       </div>

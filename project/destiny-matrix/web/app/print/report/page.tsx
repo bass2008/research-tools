@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -22,8 +23,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
   const token = String((Array.isArray(params.t) ? params.t[0] : params.t) ?? "");
   const page = Number.isInteger(id) && id > 0 && token ? await readPrintPage(id, token) : null;
   return pageMeta({
-    title: page ? `Матрица судьбы — ${birthLabel(page.birth)}` : "Разбор для печати",
-    description: "Полный разбор матрицы судьбы по дате рождения.",
+    title: page ? D.pages.printTitle[L](birthLabel(page.birth)) : D.pages.printFallbackTitle[L],
+    description: D.pages.printDescription[L],
     path: "/print/report",
     noindex: true,
   });

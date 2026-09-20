@@ -1,4 +1,4 @@
-import policyJson from "@/content/text-policy.json";
+import policyJson from "@/corpus/text-policy.json";
 
 interface PolicyGroup {
   id: string;

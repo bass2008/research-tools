@@ -1,3 +1,5 @@
+import { D, L } from "@/lib/i18n";
+import { sectionLabels } from "@/lib/i18n/methodLabels";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -31,8 +33,7 @@ function data(triple: string) {
   const reading = buildSectionReading("profession", item.matrix);
   const path = `/encyclopedia/profession/${triple}`;
   const description =
-    `Персональный разбор линии таланта ${triple}: исходный дар B, форма работы P, ` +
-    `внутренний результат K, связи и практический шаг.`;
+    D.encLinks.professionDescription[L](triple);
   return { reading, path, description };
 }
 
@@ -57,17 +58,17 @@ export default async function ProfessionReadingPage({ params }: { params: Promis
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb("sec"),
-          { name: "Профессия и дело по душе", path: positionHref("profession") },
+          { name: sectionLabels("profession").title, path: positionHref("profession") },
           { name: reading.slug },
         ]}
       />
       <JsonLd data={articleLd({ headline: reading.title, description, path })} />
       <PersonalSectionArticle
         sectionKey="profession"
-        sectionTitle="Профессия и дело по душе"
+        sectionTitle={sectionLabels("profession").title}
         reading={reading}
       />
     </>

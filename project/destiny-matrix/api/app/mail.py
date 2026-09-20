@@ -13,6 +13,7 @@ from email.message import EmailMessage
 
 import boto3
 
+from .i18n import say
 from .config import settings
 
 log = logging.getLogger("arcana.mail")
@@ -72,53 +73,55 @@ def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = 
     # человек шёл по письму и попадал в чужой по смыслу разбор.
     report = f"{settings.site_url}/report" + (f"?m={matrix_id}" if matrix_id else "")
     lines = [
-        f"Ваш разбор готов: {tariff_name}.",
-        f"Номер платежа: {payment_id}.",
+        say("mail.purchase.ready", tariff=tariff_name),
+        say("mail.purchase.payment", id=payment_id),
         "",
-        f"Смотреть разбор — {report}",
-        f"Кабинет — {settings.site_url}/account",
+        say("mail.purchase.open", url=report),
+        say("mail.account", url=f"{settings.site_url}/account"),
     ]
     if password:
-        lines += ["", f"Вход: {to}", f"Пароль: {password}"]
-    lines += ["", "Если разбор не открылся, ответьте на это письмо."]
-    return send(to, "Arcana Sense — ваш разбор готов", "\n".join(lines))
+        lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
+    lines += ["", say("mail.purchase.help")]
+    return send(to, say("mail.purchase.subject"), "\n".join(lines))
 
 
 def welcome(to: str) -> bool:
+    # На витрине без оплаты обещать «после оплаты» нельзя: платить там негде и незачем.
+    access_line = ("mail.welcome.open" if settings.all_free_without_payment
+                   else "mail.welcome.afterPayment")
     body = "\n".join([
-        f"Аккаунт создан: {to}.",
+        say("mail.welcome.created", email=to),
         "",
-        f"Кабинет — {settings.site_url}/account",
-        "Разбор открывается сразу после оплаты.",
+        say("mail.account", url=f"{settings.site_url}/account"),
+        say(access_line),
         "",
-        "Если аккаунт создавали не вы, ответьте на это письмо.",
+        say("mail.welcome.help"),
     ])
-    return send(to, "Arcana Sense — аккаунт создан", body)
+    return send(to, say("mail.welcome.subject"), body)
 
 
 def refund(to: str, tariff_name: str, payment_id: str) -> bool:
     # «Разбор закрыт» звучало так, будто закрыт весь доступ: у покупателя нескольких дат
     # закрывается ровно одна — та, за которую вернули деньги. Саму дату не называем:
     # дата рождения в письмах не участвует.
-    closed = "Разбор по этому платежу закрыт; другие оплаченные даты остаются открытыми."
     body = "\n".join([
-        f"Платёж возвращён: {tariff_name}.",
-        f"Номер платежа: {payment_id}.",
+        say("mail.refund.done", tariff=tariff_name),
+        say("mail.purchase.payment", id=payment_id),
         "",
-        closed,
-        "Сохранённые даты остаются в кабинете.",
-        "Деньги вернутся тем же способом, которым платили — обычно в течение нескольких дней.",
+        say("mail.refund.closed"),
+        say("mail.refund.saved"),
+        say("mail.refund.money"),
         "",
-        "Если возврат оформляли не вы, ответьте на это письмо.",
+        say("mail.refund.help"),
     ])
-    return send(to, "Arcana Sense — платёж возвращён", body)
+    return send(to, say("mail.refund.subject"), body)
 
 
 def reset(to: str, link: str, hours: int) -> bool:
     body = "\n".join([
-        "Восстановление пароля в Arcana Sense.",
+        say("mail.reset.lead"),
         "",
-        f"Ссылка: {link}",
-        f"Действует {hours} ч. Если это были не вы, письмо можно удалить.",
+        say("mail.reset.link", link=link),
+        say("mail.reset.expires", hours=hours),
     ])
-    return send(to, "Arcana Sense — восстановление пароля", body)
+    return send(to, say("mail.reset.subject"), body)

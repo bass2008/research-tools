@@ -94,25 +94,24 @@ def _api_command(args: list[str]) -> subprocess.CompletedProcess:
     if REMOTE:
         return subprocess.run(["ssh", "-n", REMOTE_HOST, "docker", "exec", REMOTE_API, *args],
                               capture_output=True, text=True)
-    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
-    return subprocess.run(["docker", "compose", "-f", str(compose), "exec", "-T", "api", *args],
-                          capture_output=True, text=True)
+    container = os.environ.get("E2E_API_CONTAINER", "arcana-api-1")
+    return subprocess.run(["docker", "exec", container, *args], capture_output=True, text=True)
 
 
 @pytest.fixture
 def api_log():
     """Письма на стенде не уходят по SMTP, а пишутся в лог — оттуда берём ссылку на сброс."""
-    compose = pathlib.Path(__file__).resolve().parent.parent / "compose" / "docker-compose.yml"
+
+    # Читаем контейнер по имени, а не через compose: файл стенда требует SITE_LANG и имя
+    # проекта, и без них команда возвращала пустоту — тест падал не потому, что письмо не ушло.
+    container = os.environ.get("E2E_API_CONTAINER", "arcana-api-1")
 
     def read(pattern: str) -> str | None:
-        if REMOTE:
-            out = subprocess.run(["ssh", "-n", REMOTE_HOST, "docker", "logs", "--tail", "3000",
-                                  REMOTE_API], capture_output=True, text=True)
-            text = out.stdout + out.stderr      # uvicorn пишет в stderr
-        else:
-            text = subprocess.run(["docker", "compose", "-f", str(compose),
-                                   "logs", "--no-log-prefix", "--tail", "3000", "api"],
-                                  capture_output=True, text=True).stdout
+        host = [REMOTE_HOST] if REMOTE else []
+        name = REMOTE_API if REMOTE else container
+        cmd = (["ssh", "-n", *host] if REMOTE else []) + ["docker", "logs", "--tail", "3000", name]
+        out = subprocess.run(cmd, capture_output=True, text=True)
+        text = out.stdout + out.stderr      # uvicorn пишет в stderr
         found = [line for line in text.splitlines() if pattern in line]
         return found[-1] if found else None
     return read

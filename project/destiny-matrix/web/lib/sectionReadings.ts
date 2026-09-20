@@ -1,3 +1,4 @@
+import { D, DR, L } from "./i18n";
 import {
   arcanumContent,
   chakraContent,
@@ -68,310 +69,376 @@ interface ReadingDefinition {
 }
 
 const DEFINITIONS: Record<PersonalSectionKey, ReadingDefinition> = {
+
+
   comfort: {
-    title: "Центр и внутренние точки",
-    lead:
-      "Персональный разбор центра E, автоматической реакции M и таланта K, который помогает вернуть управление.",
-    rolesTitle: "Три внутренних ориентира",
-    rolesLead:
-      "E показывает базовое состояние, M — первую реакцию без подготовки, K — качество, через которое проще вернуться к себе. Точки отвечают на разные вопросы и читаются вместе.",
-    interactionsTitle: "Как внутренние точки влияют друг на друга",
-    interactionsLead:
-      "Сначала читаются роли E, M и K, затем три связи между ними. Повтор одного аркана усиливает общую тему, но не превращает разные точки в одну.",
+
+
+    title: DR.sectionDefs.comfort.title[L],
+    lead: DR.sectionDefs.comfort.lead[L],
+    rolesTitle: DR.sectionDefs.comfort.rolesTitle[L],
+    rolesLead: DR.sectionDefs.comfort.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.comfort.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.comfort.interactionsLead[L],
     roles: SECTION_ROLES.comfort,
     edges: [
       {
         left: "E",
         right: "M",
-        title: "Опора и автоматическая реакция",
-        question: "Эта связь показывает, сохраняется ли внутренний центр в момент первой реакции.",
+        title: DR.sectionDefs.comfort.edges["E|M"].title[L],
+        question: DR.sectionDefs.comfort.edges["E|M"].question[L],
         context: "E-M",
       },
       {
         left: "E",
         right: "K",
-        title: "Опора и возвращающий талант",
-        question: "Эта связь показывает, какое врождённое качество поддерживает базовое состояние.",
+        title: DR.sectionDefs.comfort.edges["E|K"].title[L],
+        question: DR.sectionDefs.comfort.edges["E|K"].question[L],
         context: "E-K",
       },
       {
         left: "M",
         right: "K",
-        title: "От реакции к управлению",
-        question: "Эта связь показывает, как превратить автоматическую реакцию в осознанное действие.",
+        title: DR.sectionDefs.comfort.edges["M|K"].title[L],
+        question: DR.sectionDefs.comfort.edges["M|K"].question[L],
         context: "M-K",
       },
     ],
   },
+
+
   profession: {
-    title: "Профессия и дело по душе",
-    lead:
-      "Персональный разбор линии таланта B–P–K: исходный дар, подходящая форма работы и внутренний результат реализации.",
-    rolesTitle: "Три звена профессиональной реализации",
-    rolesLead:
-      "B показывает исходное качество, P — задачи и формат труда, K — состояние, к которому приводит зрелая реализация. Линия описывает способ работать, а не назначает единственную профессию.",
-    interactionsTitle: "Как талант превращается в дело",
-    interactionsLead:
-      "Линия читается в порядке B→P→K, а затем проверяется прямая связь B↔K. Повторы усиливают одну тему; разные арканы показывают, где нужен перевод из качества в рабочее действие.",
+
+
+    title: DR.sectionDefs.profession.title[L],
+    lead: DR.sectionDefs.profession.lead[L],
+    rolesTitle: DR.sectionDefs.profession.rolesTitle[L],
+    rolesLead: DR.sectionDefs.profession.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.profession.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.profession.interactionsLead[L],
     roles: SECTION_ROLES.profession,
     edges: [
       {
         left: "B",
         right: "P",
-        title: "От дара к рабочей задаче",
-        question: "Эта связь показывает, как естественное качество становится конкретным способом работать.",
+        title: DR.sectionDefs.profession.edges["B|P"].title[L],
+        question: DR.sectionDefs.profession.edges["B|P"].question[L],
         context: "B-P",
       },
       {
         left: "P",
         right: "K",
-        title: "От работы к внутреннему результату",
-        question: "Эта связь показывает, даёт ли выбранный формат труда ощущение собственной реализации.",
+        title: DR.sectionDefs.profession.edges["P|K"].title[L],
+        question: DR.sectionDefs.profession.edges["P|K"].question[L],
         context: "P-K",
       },
       {
         left: "B",
         right: "K",
-        title: "Дар и итог реализации",
-        question: "Эта связь проверяет, сохранилось ли исходное качество в конечном результате.",
+        title: DR.sectionDefs.profession.edges["B|K"].title[L],
+        question: DR.sectionDefs.profession.edges["B|K"].question[L],
         context: "B-K",
       },
     ],
   },
+
+
   realisation: {
-    title: "Путь самореализации",
-    lead: "Персональный путь от возвращающейся задачи D через личный рост к пользе для других.",
-    rolesTitle: "Три уровня пути",
-    rolesLead: "D показывает корневой повтор, личное предназначение — внутреннее изменение, социальное — форму пользы. Это последовательность, а не три конкурирующие миссии.",
-    interactionsTitle: "Как задача становится реализацией",
-    interactionsLead: "Основной ход читается D→личное→социальное; прямая связь D↔социальное нужна как проверка, не потерян ли исходный опыт на большем масштабе.",
+
+
+    title: DR.sectionDefs.realisation.title[L],
+    lead: DR.sectionDefs.realisation.lead[L],
+    rolesTitle: DR.sectionDefs.realisation.rolesTitle[L],
+    rolesLead: DR.sectionDefs.realisation.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.realisation.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.realisation.interactionsLead[L],
     roles: SECTION_ROLES.realisation,
     edges: [
-      { left: "D", right: "личное", title: "От повтора к личному росту", question: "Как новый ответ на корневую задачу меняет самого человека." },
-      { left: "личное", right: "социальное", title: "От личного роста к пользе", question: "Как внутреннее изменение становится полезным другим." },
+      { left: "D", right: "personal", title: DR.sectionDefs.realisation.edges["D|personal"].title[L], question: DR.sectionDefs.realisation.edges["D|personal"].question[L] },
+      { left: "personal", right: "social", title: DR.sectionDefs.realisation.edges["personal|social"].title[L], question: DR.sectionDefs.realisation.edges["personal|social"].question[L] },
       {
         left: "D",
-        right: "социальное",
-        title: "Корень и социальный масштаб",
-        question: "Сохраняется ли смысл исходной задачи на большем масштабе.",
+        right: "social",
+        title: DR.sectionDefs.realisation.edges["D|social"].title[L],
+        question: DR.sectionDefs.realisation.edges["D|social"].question[L],
         // Проверка «не потерян ли исходный опыт» осмысленна, только если средний уровень не
         // повторяет ни один из краёв: иначе цепочка D→личное→социальное уже её содержит.
         when: (roles) => new Set(roles.map((role) => role.arcanum)).size === roles.length,
       },
     ],
   },
+
+
   karma40: {
-    title: "Кармическая задача до 40 лет",
-    lead: "Персональный возрастной ракурс I–J без обещания автоматического события или перелома ровно в сорок лет.",
-    rolesTitle: "Наследство и способ защиты",
-    rolesLead: "I показывает семейное наследство в повседневных решениях, J — привычный способ согласовать внешний образ с внутренней опорой.",
-    interactionsTitle: "Как наследство становится задачей первой части пути",
-    interactionsLead: "Связь I↔J показывает, какое правило человек защищает автоматически и как сохранить его ресурс без прежнего перекоса.",
+
+
+    title: DR.sectionDefs.karma40.title[L],
+    lead: DR.sectionDefs.karma40.lead[L],
+    rolesTitle: DR.sectionDefs.karma40.rolesTitle[L],
+    rolesLead: DR.sectionDefs.karma40.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.karma40.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.karma40.interactionsLead[L],
     roles: SECTION_ROLES.karma40,
-    edges: [{ left: "I", right: "J", title: "Наследство и автоматическая защита", question: "Как семейное правило влияет на привычный способ восстанавливать контроль." }],
+    edges: [{ left: "I", right: "J", title: DR.sectionDefs.karma40.edges["I|J"].title[L], question: DR.sectionDefs.karma40.edges["I|J"].question[L] }],
   },
+
+
   resources: {
+
+
     // Название берётся из spec/sections.json: там «вам», и по нему построены крошка над статьёй
     // и заголовок раздела в отчёте. Расхождение было видно на одной странице сразу дважды.
-    title: "Что открывает вам блага и ресурс",
-    lead: "Персональная связка L→R2: вход в ресурс, условие его удержания, возможная блокировка и практический шаг.",
-    rolesTitle: "Два звена ресурсного канала",
-    rolesLead: "L показывает первый способ включиться в движение, R2 — направление, которое помогает превратить импульс в устойчивый результат.",
-    interactionsTitle: "От входа к удержанию",
-    interactionsLead: "Пара читается по направлению L→R2. Она описывает способ действовать и не является обещанием богатства.",
+    title: DR.sectionDefs.resources.title[L],
+    lead: DR.sectionDefs.resources.lead[L],
+    rolesTitle: DR.sectionDefs.resources.rolesTitle[L],
+    rolesLead: DR.sectionDefs.resources.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.resources.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.resources.interactionsLead[L],
     roles: SECTION_ROLES.resources,
-    edges: [{ left: "L", right: "R2", title: "Вход и условие удержания", question: "Что помогает первому импульсу стать устойчивым движением." }],
+    edges: [{ left: "L", right: "R2", title: DR.sectionDefs.resources.edges["L|R2"].title[L], question: DR.sectionDefs.resources.edges["L|R2"].question[L] }],
   },
+
+
   family_gifts: {
-    title: "Поддержка и дары вашего рода",
-    lead: "Персональный разбор двух родовых ветвей и двух разных итогов их поддержки без оценки семьи и поиска виноватых.",
-    rolesTitle: "Две ветви и два дара",
-    rolesLead: "F и G называют исходные принципы ветвей, а два итога показывают, во что их поддержка складывается в собственной жизни человека.",
-    interactionsTitle: "Как взаимодействуют ветви и итоги",
-    interactionsLead: "Читаются четыре значимые связи вместо механического перебора всех шести пар: каждая ветвь со своим итогом, связь исходных правил и связь двух даров.",
+
+
+    title: DR.sectionDefs.family_gifts.title[L],
+    lead: DR.sectionDefs.family_gifts.lead[L],
+    rolesTitle: DR.sectionDefs.family_gifts.rolesTitle[L],
+    rolesLead: DR.sectionDefs.family_gifts.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.family_gifts.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.family_gifts.interactionsLead[L],
     roles: SECTION_ROLES.family_gifts,
     edges: [
-      { left: "F", right: "итог М", title: "Мужская ветвь и её дар", question: "Как принцип мужской ветви становится доступной силой." },
-      { left: "G", right: "итог Ж", title: "Женская ветвь и её дар", question: "Как принцип женской ветви становится доступной силой." },
-      { left: "F", right: "G", title: "Два исходных правила", question: "Где принципы ветвей поддерживают или уточняют друг друга." },
-      { left: "итог М", right: "итог Ж", title: "Взаимодействие двух даров", question: "Как две формы поддержки могут работать вместе." },
+      { left: "F", right: "total_m", title: DR.sectionDefs.family_gifts.edges["F|total_m"].title[L], question: DR.sectionDefs.family_gifts.edges["F|total_m"].question[L] },
+      { left: "G", right: "total_f", title: DR.sectionDefs.family_gifts.edges["G|total_f"].title[L], question: DR.sectionDefs.family_gifts.edges["G|total_f"].question[L] },
+      { left: "F", right: "G", title: DR.sectionDefs.family_gifts.edges["F|G"].title[L], question: DR.sectionDefs.family_gifts.edges["F|G"].question[L] },
+      { left: "total_m", right: "total_f", title: DR.sectionDefs.family_gifts.edges["total_m|total_f"].title[L], question: DR.sectionDefs.family_gifts.edges["total_m|total_f"].question[L] },
     ],
   },
+
+
   soul_tasks: {
-    title: "Духовные задачи и уроки души",
-    lead: "Персональный разбор двух исходных задач B и D и итога неба, который соединяет их в один урок.",
-    rolesTitle: "Две задачи и общий итог",
-    rolesLead: "B и D отвечают на разные исходные вопросы, а итог неба показывает способ удержать обе задачи вместе. Даже при совпадении номера итог остаётся отдельной ролью и не дублирует исходную точку дословно.",
-    interactionsTitle: "Как две задачи образуют общий урок",
-    interactionsLead: "Сначала сравниваются B и D, затем их связь переводится в итог неба. Повтор аркана усиливает тему, но не отменяет разницу ролей.",
+
+
+    title: DR.sectionDefs.soul_tasks.title[L],
+    lead: DR.sectionDefs.soul_tasks.lead[L],
+    rolesTitle: DR.sectionDefs.soul_tasks.rolesTitle[L],
+    rolesLead: DR.sectionDefs.soul_tasks.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.soul_tasks.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.soul_tasks.interactionsLead[L],
     roles: SECTION_ROLES.soul_tasks,
     edges: [
-      { left: "B", right: "D", title: "Две исходные задачи", question: "Как врождённый вопрос встречается с возвращающимся жизненным сюжетом." },
+      { left: "B", right: "D", title: DR.sectionDefs.soul_tasks.edges["B|D"].title[L], question: DR.sectionDefs.soul_tasks.edges["B|D"].question[L] },
     ],
     syntheses: [{
       sources: ["B", "D"],
-      target: "итог неба",
-      title: "От пары к общему уроку",
-      question: "Как две исходные задачи вместе образуют итог неба и проверяются действием.",
+      target: "sky_total",
+      title: DR.sectionDefs.soul_tasks.syntheses["B, D|sky_total"].title[L],
+      question: DR.sectionDefs.soul_tasks.syntheses["B, D|sky_total"].question[L],
     }],
   },
+
+
   purpose: {
-    title: "Ваше предназначение",
-    lead: "Персональная траектория четырёх уровней: личного, социального, духовного и планетарного.",
-    rolesTitle: "Четыре масштаба одной темы",
-    rolesLead: "Уровни не назначают четыре разных дела. Каждый следующий показывает, как уже прожитое качество расширяет масштаб влияния.",
-    interactionsTitle: "Как соединяются уровни предназначения",
-    interactionsLead: "Граф читается личное→социальное, затем оба уровня соединяются в духовном, а духовный переводится в планетарный масштаб.",
+
+
+    title: DR.sectionDefs.purpose.title[L],
+    lead: DR.sectionDefs.purpose.lead[L],
+    rolesTitle: DR.sectionDefs.purpose.rolesTitle[L],
+    rolesLead: DR.sectionDefs.purpose.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.purpose.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.purpose.interactionsLead[L],
     roles: SECTION_ROLES.purpose,
     edges: [
-      { left: "личное", right: "социальное", title: "От себя к пользе другим", question: "Как личное качество становится социальной ролью." },
-      { left: "духовное", right: "планетарное", title: "От смысла к большему масштабу", question: "Как направление выходит за рамки личной биографии." },
+      { left: "personal", right: "social", title: DR.sectionDefs.purpose.edges["personal|social"].title[L], question: DR.sectionDefs.purpose.edges["personal|social"].question[L] },
+      { left: "spiritual", right: "planetary", title: DR.sectionDefs.purpose.edges["spiritual|planetary"].title[L], question: DR.sectionDefs.purpose.edges["spiritual|planetary"].question[L] },
     ],
     syntheses: [{
-      sources: ["личное", "социальное"],
-      target: "духовное",
-      title: "Личное и социальное образуют духовный уровень",
-      question: "Как верность себе и подтверждённая польза другим вместе создают общее направление.",
+      sources: ["personal", "social"],
+      target: "spiritual",
+      title: DR.sectionDefs.purpose.syntheses["personal, social|spiritual"].title[L],
+      question: DR.sectionDefs.purpose.syntheses["personal, social|spiritual"].question[L],
     }],
   },
+
+
   money: {
-    title: "Деньги в матрице судьбы",
-    lead: "Персональная денежная линия L→R2→R→земля: вход, направление, личный выбор и устойчивость результата.",
-    rolesTitle: "Четыре звена денежного движения",
-    rolesLead: "Линия показывает логику решений, а не прогноз суммы: L запускает движение, R2 удерживает направление, R добавляет выбор, итог земли проверяет устойчивость.",
-    interactionsTitle: "Как деньги проходят по линии",
-    interactionsLead: "Основные переходы читаются последовательно. Связь входа с итогом используется только в общем выводе, чтобы не дублировать три промежуточных шага.",
+
+
+    title: DR.sectionDefs.money.title[L],
+    lead: DR.sectionDefs.money.lead[L],
+    rolesTitle: DR.sectionDefs.money.rolesTitle[L],
+    rolesLead: DR.sectionDefs.money.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.money.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.money.interactionsLead[L],
     roles: SECTION_ROLES.money,
     edges: [
-      { left: "L", right: "R2", title: "От входа к направлению", question: "Как первый импульс становится повторяемым способом действия." },
-      { left: "R2", right: "R", title: "От направления к личному выбору", question: "Где правило движения встречается с договорённостями и решениями." },
-      { left: "R", right: "земля", title: "От выбора к устойчивому результату", question: "Как решение закрепляется в материальной опоре." },
+      { left: "L", right: "R2", title: DR.sectionDefs.money.edges["L|R2"].title[L], question: DR.sectionDefs.money.edges["L|R2"].question[L] },
+      { left: "R2", right: "R", title: DR.sectionDefs.money.edges["R2|R"].title[L], question: DR.sectionDefs.money.edges["R2|R"].question[L] },
+      { left: "R", right: "ground_total", title: DR.sectionDefs.money.edges["R|ground_total"].title[L], question: DR.sectionDefs.money.edges["R|ground_total"].question[L] },
     ],
   },
+
+
   money40: {
-    title: "Как меняются деньги после 40 лет",
-    lead: "Персональный зрелый ракурс R2–L: накопленный опыт, новая опора и проверяемый денежный эксперимент.",
-    rolesTitle: "Направление и вход в зрелом ракурсе",
-    rolesLead: "Арканы не меняются автоматически по возрасту. Меняется порядок вопроса: сначала рассматривается накопленное направление R2, затем привычный вход L.",
-    interactionsTitle: "Что перестаёт работать по-старому",
-    interactionsLead: "Связь R2↔L читается отдельно от раздела ресурсов: здесь важен опыт, который позволяет пересобрать способ начинать денежное движение.",
+
+
+    title: DR.sectionDefs.money40.title[L],
+    lead: DR.sectionDefs.money40.lead[L],
+    rolesTitle: DR.sectionDefs.money40.rolesTitle[L],
+    rolesLead: DR.sectionDefs.money40.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.money40.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.money40.interactionsLead[L],
     roles: SECTION_ROLES.money40,
-    edges: [{ left: "R2", right: "L", title: "Зрелое направление и новая опора", question: "Как накопленный опыт меняет привычный денежный вход без резкого возрастного перелома." }],
+    edges: [{ left: "R2", right: "L", title: DR.sectionDefs.money40.edges["R2|L"].title[L], question: DR.sectionDefs.money40.edges["R2|L"].question[L] }],
   },
+
+
   relations: {
-    title: "Отношения в матрице судьбы",
-    lead: "Персональный сценарий близости M→R1→R с внутренним ресурсом K — без подмены совместимостью двух дат.",
-    rolesTitle: "Четыре роли личного сценария близости",
-    rolesLead: "M показывает вход, R1 — главный узел, R — форму договорённостей, K — качество, которое помогает сохранять себя.",
-    interactionsTitle: "Как складывается сценарий отношений",
-    interactionsLead: "Три последовательные связи показывают развитие сценария; прямая M↔K остаётся частью вывода и не дублирует уже прочитанные переходы.",
+
+
+    title: DR.sectionDefs.relations.title[L],
+    lead: DR.sectionDefs.relations.lead[L],
+    rolesTitle: DR.sectionDefs.relations.rolesTitle[L],
+    rolesLead: DR.sectionDefs.relations.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.relations.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.relations.interactionsLead[L],
     roles: SECTION_ROLES.relations,
     edges: [
-      { left: "M", right: "R1", title: "От входа к главному узлу", question: "Как первая реакция создаёт основной вопрос близости." },
-      { left: "R1", right: "R", title: "От узла к форме союза", question: "Как внутренний вопрос становится договорённостью или повтором." },
-      { left: "R", right: "K", title: "Форма союза и внутренний ресурс", question: "Как сохранять себя внутри совместных решений." },
+      { left: "M", right: "R1", title: DR.sectionDefs.relations.edges["M|R1"].title[L], question: DR.sectionDefs.relations.edges["M|R1"].question[L] },
+      { left: "R1", right: "R", title: DR.sectionDefs.relations.edges["R1|R"].title[L], question: DR.sectionDefs.relations.edges["R1|R"].question[L] },
+      { left: "R", right: "K", title: DR.sectionDefs.relations.edges["R|K"].title[L], question: DR.sectionDefs.relations.edges["R|K"].question[L] },
     ],
   },
+
+
   parents_children: {
-    title: "Карма отношений с родителями и детьми",
-    lead: "Персональный разбор двух полученных семейных правил и того, как они продолжаются в собственном поведении.",
-    rolesTitle: "Полученные правила и их продолжение",
-    rolesLead: "F и G показывают принципы двух ветвей, H — не прогноз детей, а способ, которым человек передаёт эти правила дальше в любых близких и зависимых отношениях.",
-    interactionsTitle: "Как семейные правила влияют друг на друга",
-    interactionsLead: "Три связи помогают отделить ценность каждого правила от автоматического повторения и подходят пользователю независимо от наличия детей.",
+
+
+    title: DR.sectionDefs.parents_children.title[L],
+    lead: DR.sectionDefs.parents_children.lead[L],
+    rolesTitle: DR.sectionDefs.parents_children.rolesTitle[L],
+    rolesLead: DR.sectionDefs.parents_children.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.parents_children.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.parents_children.interactionsLead[L],
     roles: SECTION_ROLES.parents_children,
     edges: [
-      { left: "F", right: "G", title: "Два полученных правила", question: "Где принципы ветвей поддерживают или оспаривают друг друга." },
-      { left: "F", right: "H", title: "Мужская ветвь и продолжение", question: "Как правило мужской ветви становится собственным поведением." },
-      { left: "G", right: "H", title: "Женская ветвь и продолжение", question: "Как правило женской ветви становится собственным поведением." },
+      { left: "F", right: "G", title: DR.sectionDefs.parents_children.edges["F|G"].title[L], question: DR.sectionDefs.parents_children.edges["F|G"].question[L] },
+      { left: "F", right: "H", title: DR.sectionDefs.parents_children.edges["F|H"].title[L], question: DR.sectionDefs.parents_children.edges["F|H"].question[L] },
+      { left: "G", right: "H", title: DR.sectionDefs.parents_children.edges["G|H"].title[L], question: DR.sectionDefs.parents_children.edges["G|H"].question[L] },
     ],
   },
+
+
   ancestry: {
-    title: "Родовые задачи до седьмого колена",
-    lead: "Персональный широкий родовой ракурс: наследство I, итоги задач двух ветвей и масштаб изменения.",
-    rolesTitle: "Наследство, две ветви и масштаб",
-    rolesLead: "Формула не рассчитывает семь отдельных поколений. Она соединяет текущее наследство, два разных итога задач ветвей и планетарный уровень.",
-    interactionsTitle: "Как повторяющийся сценарий меняет продолжение",
-    interactionsLead: "Связи читаются от I к каждой ветви, между двумя итогами и от их общего смысла к более широкому масштабу — без языка родовых проклятий.",
+
+
+    title: DR.sectionDefs.ancestry.title[L],
+    lead: DR.sectionDefs.ancestry.lead[L],
+    rolesTitle: DR.sectionDefs.ancestry.rolesTitle[L],
+    rolesLead: DR.sectionDefs.ancestry.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.ancestry.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.ancestry.interactionsLead[L],
     roles: SECTION_ROLES.ancestry,
     edges: [
-      { left: "I", right: "задача М", title: "Наследство и задача мужской ветви", question: "Как общее наследство проявляется в сценарии мужской ветви." },
-      { left: "I", right: "задача Ж", title: "Наследство и задача женской ветви", question: "Как общее наследство проявляется в сценарии женской ветви." },
-      { left: "задача М", right: "задача Ж", title: "Два итога задач", question: "Где ветви усиливают или уравновешивают повтор." },
+      { left: "I", right: "task_m", title: DR.sectionDefs.ancestry.edges["I|task_m"].title[L], question: DR.sectionDefs.ancestry.edges["I|task_m"].question[L] },
+      { left: "I", right: "task_f", title: DR.sectionDefs.ancestry.edges["I|task_f"].title[L], question: DR.sectionDefs.ancestry.edges["I|task_f"].question[L] },
+      { left: "task_m", right: "task_f", title: DR.sectionDefs.ancestry.edges["task_m|task_f"].title[L], question: DR.sectionDefs.ancestry.edges["task_m|task_f"].question[L] },
     ],
     syntheses: [{
-      sources: ["задача М", "задача Ж"],
-      target: "планетарное",
-      title: "От общего итога ветвей к масштабу",
-      question: "Как совместный смысл двух ветвей переводит личное изменение на более широкий уровень.",
+      sources: ["task_m", "task_f"],
+      target: "planetary",
+      title: DR.sectionDefs.ancestry.syntheses["task_m, task_f|planetary"].title[L],
+      question: DR.sectionDefs.ancestry.syntheses["task_m, task_f|planetary"].question[L],
     }],
   },
+
+
   body_resource: {
-    title: "Ресурс тела и восстановление",
-    lead: "Персональная бытовая схема C–D–итог опоры: устойчивость, расход запаса и наблюдаемый способ восстановления.",
-    rolesTitle: "Три элемента бытовой устойчивости",
-    rolesLead: "Раздел описывает режим и поведение. Он не оценивает состояние организма и не заменяет рекомендации профильного специалиста.",
-    interactionsTitle: "Как опора переходит в восстановление",
-    interactionsLead: "Сначала сравниваются C и D, затем их сумма сворачивается в итог опоры. Повтор усиливает тему, но не является медицинским признаком.",
+
+
+    title: DR.sectionDefs.body_resource.title[L],
+    lead: DR.sectionDefs.body_resource.lead[L],
+    rolesTitle: DR.sectionDefs.body_resource.rolesTitle[L],
+    rolesLead: DR.sectionDefs.body_resource.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.body_resource.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.body_resource.interactionsLead[L],
     roles: SECTION_ROLES.body_resource,
     edges: [
-      { left: "C", right: "D", title: "Опора и расход запаса", question: "Как материальная организация встречается с возвращающимся способом действия." },
+      { left: "C", right: "D", title: DR.sectionDefs.body_resource.edges["C|D"].title[L], question: DR.sectionDefs.body_resource.edges["C|D"].question[L] },
     ],
     syntheses: [{
       sources: ["C", "D"],
-      target: "итог",
-      title: "От суммы C и D к итогу восстановления",
-      question: "Как бытовая опора и способ расходовать силы вместе образуют итог восстановления.",
+      target: "total",
+      title: DR.sectionDefs.body_resource.syntheses["C, D|total"].title[L],
+      question: DR.sectionDefs.body_resource.syntheses["C, D|total"].question[L],
     }],
   },
+
+
   chakras: {
-    title: "Карта энергий: толкование семи уровней",
-    lead: "Персональная карта семи уровней в трёх колонках с итогами, повторами и практическим наблюдением без медицинских выводов.",
-    rolesTitle: "Семь уровней и три итога",
-    rolesLead: "Каждая строка отвечает за свой жизненный уровень, а физика, энергия и эмоции показывают три разных способа проявления одной темы.",
-    interactionsTitle: "Ведущие темы и согласование карты",
-    interactionsLead: "Итог учитывает максимум и минимум, согласованность колонок, повтор арканов и заметные разрывы между значениями.",
+
+
+    title: DR.sectionDefs.chakras.title[L],
+    lead: DR.sectionDefs.chakras.lead[L],
+    rolesTitle: DR.sectionDefs.chakras.rolesTitle[L],
+    rolesLead: DR.sectionDefs.chakras.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.chakras.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.chakras.interactionsLead[L],
     roles: SECTION_ROLES.chakras,
     edges: [],
   },
+
+
   rest: {
-    title: "Ваш идеальный формат отдыха",
-    lead: "Персональная пара результата радости и центра E: способ переключения и критерий, по которому видно реальное восстановление.",
-    rolesTitle: "Формат отдыха и критерий результата",
-    rolesLead: "Первая роль предлагает способ переключения, E помогает проверить его по состоянию после отдыха, а не по универсальному списку полезных занятий.",
-    interactionsTitle: "Как понять, что отдых сработал",
-    interactionsLead: "Связь показывает, какой эксперимент стоит провести и какой наблюдаемый признак отличает восстановление от его имитации.",
+
+
+    title: DR.sectionDefs.rest.title[L],
+    lead: DR.sectionDefs.rest.lead[L],
+    rolesTitle: DR.sectionDefs.rest.rolesTitle[L],
+    rolesLead: DR.sectionDefs.rest.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.rest.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.rest.interactionsLead[L],
     roles: SECTION_ROLES.rest,
-    edges: [{ left: "радость", right: "E", title: "Переключение и внутренний критерий", question: "Как выбранный формат отдыха возвращает состояние, из которого снова можно действовать." }],
+    edges: [{ left: "joy", right: "E", title: DR.sectionDefs.rest.edges["joy|E"].title[L], question: DR.sectionDefs.rest.edges["joy|E"].question[L] }],
   },
+
+
   loops: {
-    title: "Программы: что повторяется по кругу",
-    lead: "Персональный разбор D–E–духовное: корень сюжета, состояние автопилота и проверяемая точка выхода.",
-    rolesTitle: "Корень, автопилот и выход",
-    rolesLead: "Тройка читается как программа только внутри рассчитанного раздела. Произвольные три числа не получают такого названия автоматически.",
-    interactionsTitle: "Как замыкается и разрывается круг",
-    interactionsLead: "Связи D↔E, E↔духовное и D↔духовное показывают запуск, переход к автоматизму и возможность нового действия.",
+
+
+    title: DR.sectionDefs.loops.title[L],
+    lead: DR.sectionDefs.loops.lead[L],
+    rolesTitle: DR.sectionDefs.loops.rolesTitle[L],
+    rolesLead: DR.sectionDefs.loops.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.loops.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.loops.interactionsLead[L],
     roles: SECTION_ROLES.loops,
     edges: [
-      { left: "D", right: "E", title: "От корня к автопилоту", question: "Как возвращающийся сюжет захватывает привычную внутреннюю опору." },
-      { left: "E", right: "духовное", title: "От автопилота к точке выхода", question: "Как осознанное качество возвращает возможность выбрать действие." },
-      { left: "D", right: "духовное", title: "Корень и новый ответ", question: "Как точка выхода отвечает именно на исходный повтор, а не отвлекает от него." },
+      { left: "D", right: "E", title: DR.sectionDefs.loops.edges["D|E"].title[L], question: DR.sectionDefs.loops.edges["D|E"].question[L] },
+      { left: "E", right: "spiritual", title: DR.sectionDefs.loops.edges["E|spiritual"].title[L], question: DR.sectionDefs.loops.edges["E|spiritual"].question[L] },
+      { left: "D", right: "spiritual", title: DR.sectionDefs.loops.edges["D|spiritual"].title[L], question: DR.sectionDefs.loops.edges["D|spiritual"].question[L] },
     ],
   },
+
+
   years: {
-    title: "Разбор по десятилетиям до 80 лет",
-    lead: "Персональная возрастная линия из восьми этапов с текущим и следующим периодом без гарантированных предсказаний.",
-    rolesTitle: "Восемь десятилетий",
-    rolesLead: "Каждый аркан задаёт тему периода, сильный способ прохождения, риск и переход. Граница десятилетия меняет ракурс, но не обещает событие в конкретный день.",
-    interactionsTitle: "Переходы, повторы и возвращения",
-    interactionsLead: "Шкала учитывает соседние переходы, соседний повтор, возвращение аркана через несколько этапов и резкую смену темы.",
+
+
+    title: DR.sectionDefs.years.title[L],
+    lead: DR.sectionDefs.years.lead[L],
+    rolesTitle: DR.sectionDefs.years.rolesTitle[L],
+    rolesLead: DR.sectionDefs.years.rolesLead[L],
+    interactionsTitle: DR.sectionDefs.years.interactionsTitle[L],
+    interactionsLead: DR.sectionDefs.years.interactionsLead[L],
     roles: SECTION_ROLES.years,
     edges: [
       ...([0, 1, 2, 3, 4, 5, 6] as const).map((index) => ({
         left: `${index * 10}–${index * 10 + 10}`,
         right: `${index * 10 + 10}–${index * 10 + 20}`,
-        title: `Переход ${index * 10 + 10} лет`,
-        question: "Как тема одного десятилетия готовит следующий возрастной этап.",
+        title: DR.readingBody.decadeEdgeTitle[L](index * 10 + 10),
+        question: DR.readingBody.decadeEdgeQuestion[L],
       })),
     ],
   },
@@ -460,13 +527,13 @@ function interactions(
       return {
         key,
         title: allRoles
-          ? `${content.title} во всех ролях`
-          : `${content.title} повторяется: позиции ${roleKeys.join(", ")}`,
+          ? DR.readingBody.repeatAllTitle[L](content.title)
+          : DR.readingBody.repeatSomeTitle[L](content.title, roleKeys.join(", ")),
         roles: roleKeys,
         paragraphs: [
           allRoles
-            ? `Один и тот же ${left.arcanum} аркан проходит через весь раздел. Роли не сливаются: каждая отвечает на свой вопрос, но одна тема становится особенно заметной и в ресурсе, и в риске.`
-            : `Один и тот же ${left.arcanum} аркан стоит в позициях ${roleKeys.join(", ")}. Это не два независимых сюжета, а усиленная тема, которая проявляется сразу в нескольких звеньях раздела.`,
+            ? DR.readingBody.repeatAllText[L](left.arcanum)
+            : DR.readingBody.repeatSomeText[L](left.arcanum, roleKeys.join(", ")),
           `${questions.join(" ")} ${content.repeat}`,
         ],
       };
@@ -482,27 +549,31 @@ function interactions(
       const [leftStrength, rightStrength] = pairCubes(edgeLeft.strength, edgeRight.strength);
       const [leftRisk, rightRisk] = pairCubes(edgeLeft.risk, edgeRight.risk);
       return [
-        `${edge.question} В согласованном переходе «${edgeLeft.label} → ${edgeRight.label}» первое качество создаёт условие: ${leftStrength}; второе переводит его дальше: ${rightStrength}.`,
-        `Напряжение заметно так: в позиции ${edgeLeft.key} — ${leftRisk}; в позиции ${edgeRight.key} — ${rightRisk}. Это не конфликт арканов, а место, где важно сменить способ действия.`,
-        `Практический переход начинается не с попытки проявить оба аркана сразу. Сначала проверьте действие ${edgeLeft.key}: ${edgeLeft.action} Затем добавьте действие ${edgeRight.key}: ${edgeRight.action}`,
+        DR.readingBody.edgeAgreed[L](
+          edge.question, edgeLeft.label, edgeRight.label, leftStrength, rightStrength,
+        ),
+        DR.readingBody.edgeTension[L](edgeLeft.key, leftRisk, edgeRight.key, rightRisk),
+        DR.readingBody.edgePractice[L](
+          edgeLeft.key, edgeLeft.action, edgeRight.key, edgeRight.action,
+        ),
       ];
     });
     return {
       key,
       title: edges.length > 1
-        ? `${left.title} и ${right.title} сразу в ${edges.length} связях`
+        ? DR.readingBody.pairManyTitle[L](left.title, right.title, edges.length)
         : first.title,
       roles: roleKeys,
       paragraphs: [
         ...(edges.length > 1
-          ? [`Пара ${left.arcanum}–${right.arcanum} соединяет несколько ролей. Общий смысл читается один раз, а позиционные переходы показывают разные задачи этой связи.`]
+          ? [DR.readingBody.pairManyText[L](left.arcanum, right.arcanum)]
           : []),
         ...contextual,
       ],
       ...(first.context
         ? {
             href: `/encyclopedia/combination/${key}`,
-            linkLabel: `Подробнее про сочетание ${key.replace("-", " и ")} аркана в энциклопедии →`,
+            linkLabel: DR.readingBody.pairLink[L](key.replace("-", ` ${D.encArcanum.and[L]} `)),
           }
         : {}),
     };
@@ -520,10 +591,12 @@ function interactions(
       title: synthesis.title,
       roles: [...synthesis.sources, synthesis.target],
       paragraphs: [
-        `${synthesis.question} Исходные роли читаются вместе: ${sourceLabels}. Итог «${target.label}» не заменяет их, а показывает результат их совместной работы.`,
-        `Согласованный переход начинается с двух условий — ${sourceStrengths}. В роли ${target.key} они складываются в качество: ${cubeClause(target.strength)}.`,
-        `Разрыв возникает, если один из источников выпадает: ${sourceRisks}. Тогда итог проявляется через риск: ${cubeClause(target.risk)}.`,
-        `Практическая проверка идёт в том же порядке. Сначала исходные роли: ${sourceActions} Затем действие итога ${target.key}: ${target.action}`,
+        DR.readingBody.synthesisIntro[L](synthesis.question, sourceLabels, target.label),
+        DR.readingBody.synthesisAgreed[L](
+          sourceStrengths, target.key, cubeClause(target.strength),
+        ),
+        DR.readingBody.synthesisGap[L](sourceRisks, cubeClause(target.risk)),
+        DR.readingBody.synthesisPractice[L](sourceActions, target.key, target.action),
       ],
     } satisfies ReadingInteraction;
   });
@@ -545,9 +618,9 @@ function interactions(
 }
 
 const CHAKRA_COLUMNS = [
-  ["physics", "Физика"],
-  ["energy", "Энергия"],
-  ["emotions", "Эмоции"],
+  ["physics", DR.chakraYears.columnPhysicsTitle[L]],
+  ["energy", DR.chakraYears.columnEnergyTitle[L]],
+  ["emotions", DR.chakraYears.columnEmotionsTitle[L]],
 ] as const;
 
 // Семь пунктов — треть шкалы 1..22. Меньшую разницу описываем как рабочую вариативность,
@@ -561,14 +634,16 @@ export function chakraColumnModifier(
 ): { modifier: string; action: string } {
   const content = arcanum(number);
   const frames = {
-    physics: ["в материальном ритме", "в наблюдаемом распорядке"],
-    energy: ["в распределении усилия", "в выборе, куда направлять внимание"],
-    emotions: ["в эмоциональном отклике", "в способе замечать и выражать переживание"],
+    physics: DR.readingBody.wherePhysics[L],
+    energy: DR.readingBody.whereEnergy[L],
+    emotions: DR.readingBody.whereEmotions[L],
   } as const;
   const [where, actionWhere] = frames[column];
   return {
-    modifier: `${content.title} ${where} проявляется через качество «${content.plus[0]}»; перегрузка заметна по тенденции «${content.minus[0]}».`,
-    action: `Для наблюдения ${actionWhere} используйте шаг: ${positionRoleTemplate(number, "chakras").action}`,
+    modifier: DR.readingBody.chakraModifier[L](content.title, where, content.plus[0], content.minus[0]),
+    action: DR.readingBody.chakraAction[L](
+      actionWhere, positionRoleTemplate(number, "chakras").action,
+    ),
   };
 }
 
@@ -617,48 +692,76 @@ function chakraInteractions(matrix: Matrix): ReadingInteraction[] {
     for (const [column] of CHAKRA_COLUMNS) repeats.set(row[column], (repeats.get(row[column]) ?? 0) + 1);
   }
   const repeated = [...repeats.entries()].filter(([, count]) => count > 1).sort((a, b) => b[1] - a[1]);
-  const names = { physics: "физики", energy: "энергии", emotions: "эмоций" } as const;
+  const names = {
+    physics: DR.readingBody.columnPhysics[L],
+    energy: DR.readingBody.columnEnergy[L],
+    emotions: DR.readingBody.columnEmotions[L],
+  } as const;
   return [
     {
       key: "levels",
-      title: "Ведущий и ресурсный уровни",
+      title: DR.readingBody.levelsTitle[L],
       roles: [leading.row.title, quiet.row.title],
-      caption: `Уровни ${leading.row.title}–${quiet.row.title}`,
+      caption: DR.readingBody.levelsCaption[L](leading.row.title, quiet.row.title),
       paragraphs: [
-        `${leading.row.title} набирает самый заметный суммарный акцент (${leading.score}), поэтому его тема чаще других оказывается на переднем плане. ${quiet.row.title} имеет самый спокойный показатель (${quiet.score}) и может служить местом для бережного, небольшого эксперимента.`,
-        "Максимум и минимум не означают «хорошую» и «плохую» чакру: это сравнительные акценты внутри одной карты, а не оценка состояния организма.",
+        DR.readingBody.levelsText[L](leading.row.title, leading.score, quiet.row.title, quiet.score),
+        DR.readingBody.levelsNote[L],
       ],
     },
     {
       key: "imbalance",
-      title: "Главный внутренний разрыв карты",
+      title: DR.readingBody.imbalanceTitle[L],
       roles: [mainGap.row.title, mainGap.high.column, mainGap.low.column],
-      caption: `Уровень ${mainGap.row.title} · ${mainGap.high.title}–${mainGap.low.title}`,
+      caption: DR.readingBody.imbalanceCaption[L](
+        mainGap.row.title, mainGap.high.title, mainGap.low.title,
+      ),
       paragraphs: [
-        `${mainGap.row.title} даёт наибольшую разницу внутри одного уровня: ${mainGap.high.title.toLowerCase()} — ${mainGap.high.value}, ${mainGap.low.title.toLowerCase()} — ${mainGap.low.value}, разрыв — ${mainGap.gap}. ${mainGap.gap >= CHAKRA_NOTICEABLE_GAP ? "По правилу карты это заметный разрыв: способы проявления уровня полезно согласовывать отдельно." : "Разница меньше порога заметного разрыва и описывает обычную вариативность способов проявления."}`,
-        "Это сравнительный показатель внутри рассчитанной карты. Он не является медицинским выводом и описывает только различие способов проявления.",
+        DR.readingBody.imbalanceText[L](
+          mainGap.row.title,
+          mainGap.high.title.toLowerCase(), mainGap.high.value,
+          mainGap.low.title.toLowerCase(), mainGap.low.value,
+          mainGap.gap,
+          mainGap.gap >= CHAKRA_NOTICEABLE_GAP
+            ? DR.readingBody.imbalanceNoticeable[L]
+            : DR.readingBody.imbalanceOrdinary[L],
+        ),
+        DR.readingBody.imbalanceNote[L],
       ],
     },
     {
       key: "columns",
-      title: "Согласование трёх колонок",
+      title: DR.readingBody.columnsTitle[L],
       roles: [high[0], low[0]],
-      caption: `Колонки ${CHAKRA_COLUMNS.find(([key]) => key === high[0])![1]}–${CHAKRA_COLUMNS.find(([key]) => key === low[0])![1]}`,
+      caption: DR.readingBody.columnsCaption[L](
+        CHAKRA_COLUMNS.find(([key]) => key === high[0])![1],
+        CHAKRA_COLUMNS.find(([key]) => key === low[0])![1],
+      ),
       paragraphs: [
-        `Среди итогов сильнее выделяется колонка ${names[high[0]]} (${high[1]}), спокойнее — колонка ${names[low[0]]} (${low[1]}). Разница ${columnGap} ${columnGap >= CHAKRA_NOTICEABLE_GAP ? "достигает порога заметного разрыва" : "остаётся ниже порога заметного разрыва"} и показывает, насколько способы проявления требуют сознательного согласования.`,
-        "Практически полезно найти одно действие, которое можно одновременно увидеть в распорядке, поддержать вниманием и проверить по эмоциональному отклику.",
+        DR.readingBody.columnsText[L](
+          names[high[0]], high[1], names[low[0]], low[1], columnGap,
+          columnGap >= CHAKRA_NOTICEABLE_GAP
+            ? DR.readingBody.columnsReaches[L]
+            : DR.readingBody.columnsBelow[L],
+        ),
+        DR.readingBody.columnsNote[L],
       ],
     },
     {
       key: "repeats",
-      title: "Повторы арканов в карте",
+      title: DR.readingBody.repeatsTitle[L],
       roles: repeated.map(([number]) => String(number)),
-      ...(repeated.length ? { caption: `Повторяющиеся арканы ${repeated.map(([number]) => number).join("–")}` } : {}),
+      ...(repeated.length
+        ? { caption: DR.readingBody.repeatsCaption[L](repeated.map(([number]) => number).join("–")) }
+        : {}),
       paragraphs: [
         repeated.length
-          ? `Повторяются арканы ${repeated.map(([number, count]) => `${number} (${count} раза)`).join(", ")}. Один смысл проходит через разные уровни и колонки, но каждый раз отвечает на другой вопрос.`
-          : "В двадцати одной ячейке нет повторяющихся арканов: связи лучше искать через уровни и итоги колонок, а не придумывать общий повтор.",
-        "Повтор усиливает тему, но не создаёт отдельного значения и не является медицинским признаком.",
+          ? DR.readingBody.repeatsText[L](
+              repeated
+                .map(([number, count]) => DR.readingBody.repeatsCount[L](number, count))
+                .join(", "),
+            )
+          : DR.readingBody.repeatsNone[L],
+        DR.readingBody.repeatsNote[L],
       ],
     },
   ];
@@ -671,21 +774,16 @@ function age(matrix: Matrix, now = new Date()): number {
   return Math.max(0, value);
 }
 
-const DECADE_TURNING_THEMES = new Map<number, string>([
-  [10, "смену курса"],
-  [13, "завершение прежнего этапа"],
-  [16, "перестройку неработающей конструкции"],
-  [20, "подведение итогов и новый ответ"],
-  [21, "завершение большого цикла"],
-  [22, "начало нового цикла"],
-]);
+const DECADE_TURNING_THEMES = new Map<number, string>(
+  Object.entries(DR.sharedBlock.turning[L]).map(([key, value]) => [Number(key), value]),
+);
 
 /** Одна точка матрицы входит в два раздела: «Личное предназначение» стоит и в `purpose`, и в
  *  `realisation`. Рамки роли различают формулировки, но предметный текст один, поэтому читателю,
  *  открывшему оба разбора, повтор объясняется прямо и уводится ссылкой. Замер до рамок и этой
  *  отсылки: `realisation` ~ `purpose` — 214 общих 8-грамм, 37–47 % меньшего разбора. */
 const SHARED_ROLES: Partial<Record<PersonalSectionKey, { section: PersonalSectionKey; roles: string[] }>> = {
-  realisation: { section: "purpose", roles: ["личное", "социальное"] },
+  realisation: { section: "purpose", roles: ["personal", "social"] },
   money40: { section: "resources", roles: ["L"] },
   loops: { section: "rest", roles: ["E"] },
 };
@@ -737,31 +835,26 @@ function sharedWording(
   const { other, labels, named, aliases } = ctx;
   const places = ctx.places.map((place) => place.charAt(0).toLowerCase() + place.slice(1));
   if (many) {
+    const joined = labels.join(` ${D.encArcanum.and[L]} `);
     const lead = named
-      ? `${labels.join(" и ")} — это ${places.join(" и ")}. Те же позиции читает раздел «${other}»: `
-      : `${labels.join(" и ")} — те же позиции, что читает и раздел «${other}»: `;
+      ? DR.sharedBlock.manyLeadNamed[L](joined, places.join(` ${D.encArcanum.and[L]} `), other)
+      : DR.sharedBlock.manyLeadPlain[L](joined, other);
     return {
-      title: `Те же позиции в разделе «${other}»`,
-      caption: "Одни и те же позиции карты, два разных вопроса",
-      paragraphs: [
-        `${lead}там они стоят в другом ряду и отвечают на другой вопрос, но значения арканов те же. ` +
-        `Если вы открыли оба разбора, часть текста совпадёт: это не ошибка расчёта, а одни и те же позиции в двух рамках.`,
-      ],
+      title: DR.sharedBlock.manyTitle[L](other),
+      caption: DR.sharedBlock.manyCaption[L],
+      paragraphs: [`${lead}${DR.sharedBlock.manyBody[L]}`],
     };
   }
   const alias = aliases[0] && aliases[0].toLowerCase() !== places[0]?.toLowerCase()
-    ? `там она названа «${aliases[0].toLowerCase()}», `
-    : "там она ";
+    ? DR.sharedBlock.aliasNamed[L](aliases[0].toLowerCase())
+    : DR.sharedBlock.aliasPlain[L];
   const lead = named
-    ? `${labels[0]} — это ${places[0]}. Ту же позицию читает раздел «${other}»: ${alias}`
-    : `${labels[0]} — та же позиция, что читает и раздел «${other}»: ${alias}`;
+    ? DR.sharedBlock.oneLeadNamed[L](labels[0], places[0], other, alias)
+    : DR.sharedBlock.oneLeadPlain[L](labels[0], other, alias);
   return {
-    title: `Та же позиция в разделе «${other}»`,
-    caption: "Одна позиция карты, два разных вопроса",
-    paragraphs: [
-      `${lead}стоит в другом ряду и отвечает на другой вопрос, но значение аркана то же. ` +
-      `Если вы открыли оба разбора, часть текста совпадёт: это не ошибка расчёта, а одна позиция в двух рамках.`,
-    ],
+    title: DR.sharedBlock.oneTitle[L](other),
+    caption: DR.sharedBlock.oneCaption[L],
+    paragraphs: [`${lead}${DR.sharedBlock.oneBody[L]}`],
   };
 }
 
@@ -775,7 +868,7 @@ function sharedInteraction(
   const parts = items
     .filter((role) => shared.roles.includes(role.key))
     .map((role) => ({
-      label: `«${role.label.toLowerCase()}»`,
+      label: D.common.quoted[L](role.label.toLowerCase()),
       place: positionContent(sourceRole(section, role.key)?.position ?? "")?.title ?? "",
       alias: aliasIn(shared.section, role.key),
     }));
@@ -791,13 +884,13 @@ function sharedInteraction(
     ...(sharedLinkIsExact(section, shared.section)
       ? {
         href: sectionReadingHref(shared.section, matrix),
-        linkLabel: `Открыть разбор «${other}» для этой матрицы →`,
+        linkLabel: DR.sharedBlock.openOther[L](other),
       }
       : {
         // Свой разбор соседнего раздела по этому адресу не найти: одному слагу «Программ»
         // отвечают разные результаты отдыха. Уводим на общую статью — она верна всегда.
         href: positionHref(shared.section),
-        linkLabel: `Как читается раздел «${other}» →`,
+        linkLabel: DR.sharedBlock.openGeneral[L](other),
       }),
   }];
 }
@@ -810,13 +903,16 @@ export function buildSectionReading(
   const definition = DEFINITIONS[section];
   const roleItems = roles(section, matrix);
   const slug = sectionReadingSlug(section, matrix);
+  const date = `${matrix.day}–${matrix.month}–${matrix.year}`;
   const title = section === "chakras"
-    ? `${definition.title} для матрицы ${matrix.day}–${matrix.month}–${matrix.year}`
+    ? DR.sectionReading.titleForMatrix[L](definition.title, date)
     : section === "years"
       ? (matrix.birth
         ? `${definition.title}: ${birthLabel(matrix.birth)}`
-        : `${definition.title}: линия ${slug}`)
-      : `${definition.title} ${slug}: ${roleItems.map((role) => role.title).join(", ")}`;
+        : DR.sectionReading.titleLine[L](definition.title, slug))
+      : DR.sectionReading.titleRoles[L](
+        definition.title, slug, roleItems.map((role) => role.title).join(", "),
+      );
   const base: LongformReading = {
     slug,
     title,
@@ -837,13 +933,13 @@ export function buildSectionReading(
     return {
       ...base,
       layout: "chakras",
-      caption: "Как читается персональная карта семи уровней",
+      caption: DR.chakraYears.chakraCaption[L],
       chakraRows: rows,
       interactions,
-      summary: `Карта соединяет семь уровней и три колонки. Ведущий акцент — ${leading}; вывод строится по значениям всех ячеек, итогам колонок, повторам и разрывам, а не по одному максимальному числу.`,
-      strength: "Ресурс карты проявляется, когда материальный ритм, распределение усилия и эмоциональный отклик проверяются вместе и ни одна колонка не объявляется главной навсегда.",
-      tension: "Дисбаланс — это заметная разница способов проявления внутри карты, а не заключение о состоянии организма. Безопасный вывод описывает только наблюдаемое поведение.",
-      practice: "Выберите один уровень и в течение недели наблюдайте три колонки: что происходит в распорядке, куда уходит усилие и какой отклик остаётся после действия. Меняйте только один небольшой элемент за раз.",
+      summary: DR.chakraYears.chakraSummary[L](leading),
+      strength: DR.chakraYears.chakraStrength[L],
+      tension: DR.chakraYears.chakraTension[L],
+      practice: DR.chakraYears.chakraPractice[L],
     };
   }
   if (section === "years") {
@@ -870,35 +966,75 @@ export function buildSectionReading(
     periods.forEach((period, index) => returned.set(period.arcanum, [...(returned.get(period.arcanum) ?? []), index]));
     const returnText = [...returned.entries()]
       .filter(([, indexes]) => indexes.some((value, index) => index > 0 && value - indexes[index - 1] > 1))
-      .map(([number, indexes]) => `${number} аркан возвращается на этапах ${indexes.map((index) => `${index * 10}–${index * 10 + 10}`).join(" и ")}`);
+      .map(([number, indexes]) => DR.chakraYears.returnsText[L](
+        number,
+        indexes.map((index) => `${index * 10}–${index * 10 + 10}`).join(` ${D.encArcanum.and[L]} `),
+      ));
     const sharpChangeText = periods.slice(0, -1).flatMap((period, index) => {
       const following = periods[index + 1];
       if (period.arcanum === following.arcanum) return [];
       const markers = [period, following].flatMap((item) => {
         const theme = DECADE_TURNING_THEMES.get(item.arcanum);
-        return theme ? [`${item.arcanum} аркан обозначает ${theme}`] : [];
+        return theme ? [DR.chakraYears.sharpMarker[L](item.arcanum, theme)] : [];
       });
       if (!markers.length) return [];
-      return [`Переход ${period.from}–${period.to} → ${following.from}–${following.to} отмечен как резкая смена темы: ${markers.join(", а ")}. Это характеристика смены ракурса, а не обещание события на границе десятилетий.`];
+      return [DR.chakraYears.sharpText[L](
+        period.from, period.to, following.from, following.to,
+        markers.join(DR.chakraYears.sharpJoin[L]),
+      )];
     });
     return {
       ...base,
       layout: "years",
-      caption: "Как читается персональная линия до 80 лет",
+      caption: DR.chakraYears.yearsCaption[L],
       agePeriods: periods,
       interactions: [
         ...base.interactions,
-        ...(returnText.length ? [{ key: "returns", title: "Возвращение темы", roles: [], paragraphs: [returnText.join("; ") + ". Возврат не повторяет период буквально: прежняя тема встречается с новым опытом."] }] : []),
-        ...(sharpChangeText.length ? [{ key: "sharp-changes", title: "Резкая смена темы", roles: [], paragraphs: sharpChangeText }] : []),
+        ...(returnText.length
+          ? [{
+              key: "returns",
+              title: DR.chakraYears.returnsTitle[L],
+              roles: [],
+              paragraphs: [returnText.join("; ") + DR.chakraYears.returnsTail[L]],
+            }]
+          : []),
+        ...(sharpChangeText.length
+          ? [{
+              key: "sharp-changes",
+              title: DR.chakraYears.sharpTitle[L],
+              roles: [],
+              paragraphs: sharpChangeText,
+            }]
+          : []),
       ],
       summary: !known
-        ? `Линия ${slug} описывает восемь десятилетий подряд. Текущий этап отмечается только в персональном разборе: откройте раздел из своего расчёта, чтобы линия показала возраст.`
+        ? DR.chakraYears.yearsSummaryUnknown[L](slug)
         : currentAge < 80
-        ? `Сейчас возраст ${currentAge} лет относится к этапу ${current.from}–${current.to} с ${current.arcanum} арканом ${current.title}. ${next ? `Следующий этап ${next.from}–${next.to} переводит линию к ${next.arcanum} аркану ${next.title}.` : "Это последний этап шкалы до 80 лет."}`
-        : `Возраст ${currentAge} лет находится за пределами шкалы до 80. Восемь периодов читаются как пройденная линия опыта, а не как прогноз следующего десятилетия.`,
-      strength: !known ? "Сильные стороны линии видны при сравнении десятилетий между собой: одна и та же тема на разных этапах проходит по-разному." : currentAge < 80 ? sentence(current.strength) : "Ресурс линии — возможность сопоставить повторяющиеся темы разных десятилетий с реальными событиями своей биографии.",
-      tension: !known ? "Риск линии — читать восемь арканов как расписание событий. Возрастная рамка меняет вопрос этапа, а не обещает происшествие." : currentAge < 80 ? `${sentence(current.risk)} Возрастная рамка не обещает конкретных событий и не отменяет личный выбор.` : "После 80 лет раздел не продолжает формулу произвольными прогнозами.",
-      practice: !known ? "Сопоставьте периоды с тем, что происходило на самом деле, и отметьте, какая тема возвращалась. Персональный возраст покажет разбор из вашего расчёта." : currentAge < 80 ? `Для текущего этапа используйте действие: ${current.action}${next ? ` Переход готовит вопрос следующего периода: ${next.essence}` : ""}` : "Отметьте, какие темы возвращались на разных этапах, и отделите подтверждённые факты от поздних объяснений.",
+        ? DR.chakraYears.yearsSummaryCurrent[L](
+            currentAge, current.from, current.to, current.arcanum, current.title,
+            next
+              ? DR.chakraYears.yearsNext[L](next.from, next.to, next.arcanum, next.title)
+              : DR.chakraYears.yearsLast[L],
+          )
+        : DR.chakraYears.yearsBeyond[L](currentAge),
+      strength: !known
+        ? DR.chakraYears.yearsStrengthUnknown[L]
+        : currentAge < 80
+          ? sentence(current.strength)
+          : DR.chakraYears.yearsStrengthBeyond[L],
+      tension: !known
+        ? DR.chakraYears.yearsTensionUnknown[L]
+        : currentAge < 80
+          ? DR.chakraYears.yearsTensionCurrent[L](sentence(current.risk))
+          : DR.chakraYears.yearsTensionBeyond[L],
+      practice: !known
+        ? DR.chakraYears.yearsPracticeUnknown[L]
+        : currentAge < 80
+          ? DR.chakraYears.yearsPracticeCurrent[L](
+              current.action,
+              next ? DR.chakraYears.yearsPracticeNext[L](next.essence) : "",
+            )
+          : DR.chakraYears.yearsPracticeBeyond[L],
     };
   }
   return base;
@@ -923,19 +1059,19 @@ function reachable(section: PersonalSectionKey): Map<string, MatrixItem> {
  *  «те же правила к одному достижимому результату» стоял на 17 страницах — единственная
  *  реальная шаблонность на страницах разделов. */
 export function sectionExampleNote(section: PersonalSectionKey, matrix: Matrix): string {
-  const lead = "Общая статья объясняет порядок и границы метода.";
+  const lead = DR.sectionReading.exampleLead[L];
   const code = sectionReadingSlug(section, matrix);
   if (section === "chakras") {
-    return `${lead} Карта матрицы ${matrix.day}–${matrix.month}–${matrix.year} показывает все семь уровней в трёх колонках и общий итог каждой колонки.`;
+    return DR.sectionReading.exampleChakras[L](lead, `${matrix.day}–${matrix.month}–${matrix.year}`);
   }
   if (section === "years") {
-    return `${lead} Линия ${code} показывает восемь десятилетий подряд, переходы между ними и возвращение темы.`;
+    return DR.sectionReading.exampleYears[L](lead, code);
   }
   const roles = buildSectionReading(section, matrix).roles
     .filter((role) => !role.sameAs)
     .slice(0, 4)
     .map((role) => `${role.label.toLowerCase()} — ${role.title}`);
-  return `${lead} На результате ${code} те же правила читают роли раздела: ${roles.join(", ")}.`;
+  return DR.sectionReading.exampleRoles[L](lead, code, roles.join(", "));
 }
 
 export function sectionReadingSlugs(section: PersonalSectionKey): string[] {

@@ -15,6 +15,7 @@ FastAPI-сервер конвейера drill: команды (HTTP), чтени
 Запуск: conda run -n research3.12 uvicorn server:app --port 8000
 """
 import asyncio
+import functools
 import json
 import os
 import time
@@ -590,6 +591,40 @@ async def api_estimate(phrase: str = Query(...)):
     """Нижняя оценка объёма full_load/drill по уже известному поддереву."""
     _node_or_404(wscore.normalize(phrase))
     return wscore.estimate_subtree(CTX.con, phrase)
+
+
+class SuggestIn(BaseModel):
+    phrases: list[str]
+    source: str = "google"
+    region: str = "2840"
+    max_phrases: int | None = None
+
+
+@app.post("/api/suggest")
+async def api_suggest(body: SuggestIn):
+    """Подсказки поисковой строки по списку фраз: из кэша, недостающее докупается.
+
+    Синхронная ручка, а не задача очереди: подсказки не принадлежат ни узлу дерева, ни работе
+    второго слоя — это замер по произвольному списку фраз (например, по адресам чужого сайта).
+    Оплата у провайдера пофразная, поэтому `max_phrases` ограничивает именно платные фразы,
+    а всё, что уже лежит в таблице, отдаётся бесплатно."""
+    phrases = [p for p in (x.strip() for x in body.phrases) if p]
+    if not phrases:
+        raise HTTPException(422, "нужен непустой список фраз")
+    if body.source not in wscore.SUGGEST_SOURCES:
+        raise HTTPException(422, f"неизвестный источник: {body.source!r}")
+    loop = asyncio.get_running_loop()
+    try:
+        async with CTX.net:
+            out = await loop.run_in_executor(
+                None, functools.partial(wscore.fetch_suggests, phrases, body.source,
+                                        body.region, wscore.db_path_of(CTX.con),
+                                        body.max_phrases))
+    except (wscore.XmlRiverError, RuntimeError) as e:
+        raise HTTPException(502, str(e))
+    return {"source": body.source, "region": body.region,
+            "suggests": out,
+            "empty": [p for p, items in out.items() if not items]}
 
 
 # ---------- деревья потребностей: второй слой (needs_layer) ----------

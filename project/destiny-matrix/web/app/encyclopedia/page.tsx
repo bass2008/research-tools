@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { D, L } from "@/lib/i18n";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import { articleList, encSections } from "@/components/enc/EncShell";
 
@@ -11,10 +12,9 @@ import JsonLd from "@/components/ui/JsonLd";
 import { encyclopediaSectionHref, encyclopediaSectionHub } from "@/lib/encyclopediaNavigation";
 
 export const metadata: Metadata = pageMeta({
-  title: "Энциклопедия матрицы судьбы: арканы, позиции, чакры",
+  title: D.enc.title[L],
   description:
-    "Справочник по матрице судьбы: значения 22 арканов, 20 разделов отчёта, 17 позиций карты, " +
-    "7 чакр и 231 сочетание арканов. Все страницы с перекрёстными ссылками.",
+    D.enc.description[L],
   path: "/encyclopedia",
 });
 
@@ -30,10 +30,10 @@ export default function EncyclopediaIndexPage() {
 
   return (
     <>
-      <CrumbsLd trail={[{ name: "Главная", path: "/" }, { name: "Энциклопедия" }]} />
+      <CrumbsLd trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.encyclopedia[L] }]} />
       <JsonLd
         data={itemListLd({
-          name: "Разделы справочника",
+          name: D.enc.sectionsName[L],
           items: withHub.map((s) => ({ name: s.title, path: encyclopediaSectionHub(s.key)! })),
         })}
       />
@@ -49,8 +49,8 @@ export default function EncyclopediaIndexPage() {
       </div>
 
       <div className="panel section-gap" id="stati">
-        <h2>Статьи</h2>
-        <div className="cap">Разборы понятий целиком · {articles.length}</div>
+        <h2>{D.enc.articles[L]}</h2>
+        <div className="cap">{D.enc.articlesHint[L](articles.length)}</div>
         <div className="enc-articles">
           {articles.map((a) => (
             <Link className="enc-article" key={a.href} href={a.href}>
@@ -62,12 +62,11 @@ export default function EncyclopediaIndexPage() {
       </div>
 
       <div className="panel section-gap">
-        <h3>Каталог матриц</h3>
+        <h3>{D.enc.matrixCatalog[L]}</h3>
         <p className="dim prose">
-          Все карты по свёрнутым числам даты: день, месяц и год после свёртки дают три аркана, и
-          вариантов таких троек ровно 5 544.
+          {D.enc.matrixCatalogText[L]}
         </p>
-        <Link href="/matrix">Открыть каталог</Link>
+        <Link href="/matrix">{D.enc.openCatalog[L]}</Link>
       </div>
     </>
   );

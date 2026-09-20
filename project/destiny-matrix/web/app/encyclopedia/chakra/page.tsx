@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { D, L } from "@/lib/i18n";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
@@ -33,8 +34,8 @@ export default function ChakraHubPage() {
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           { name: encyclopediaSection("chk").title },
         ]}
       />
@@ -53,7 +54,7 @@ export default function ChakraHubPage() {
       <p className="dim prose">{hub.short}</p>
 
       <div className="panel section-gap">
-        <h2>Семь уровней</h2>
+        <h2>{D.enc.sevenLevels[L]}</h2>
         <div className="cap">{encyclopediaSection("chk").hint} · {CHAKRA_PAGES.length}</div>
         <ChakraList />
       </div>
@@ -62,8 +63,8 @@ export default function ChakraHubPage() {
 
       <div className="section-gap">
         <CalcPromo
-          title="Построить свою карту энергий"
-          lead="Чакровая таблица считается вместе с картой по дате рождения — бесплатно и без регистрации."
+          title={D.enc.promoChakraTitle[L]}
+          lead={D.enc.promoChakraLead[L]}
           place="chakra-hub"
         />
       </div>

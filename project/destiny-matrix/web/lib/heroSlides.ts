@@ -1,4 +1,5 @@
 import { encyclopediaSectionHref } from "./encyclopediaNavigation";
+import { D, L } from "./i18n";
 
 export interface HeroSlide {
   eyebrow: string;
@@ -7,62 +8,32 @@ export interface HeroSlide {
   link: { label: string; href: string };
 }
 
-// Порядок совпадает с порядком композиций в CalcHero: веер, кольцо, триптих, лента, мозаика.
-export const LANDING_SLIDES: HeroSlide[] = [
-  {
-    eyebrow: "Arcana Sense · матрица судьбы по 22 арканам",
-    heading: "Матрица судьбы: разбор по дате рождения",
-    link: { label: "Что входит в разбор", href: "/#plans" },
-  },
-  {
-    eyebrow: "17 позиций карты",
-    heading: "Октаграмма: где какой аркан стоит именно у вас",
-    link: { label: "Позиции карты", href: encyclopediaSectionHref("pts") },
-  },
-  {
-    eyebrow: "портрет · центр · материальная задача",
-    heading: "Три аркана, с которых читают вашу карту",
-    link: { label: "22 аркана", href: encyclopediaSectionHref("arc") },
-  },
-  {
-    eyebrow: "разбор по десятилетиям до 80 лет",
-    heading: "Какая энергия ведёт вас в каждом десятилетии",
-    link: { label: "Матрица на год", href: "/na-god" },
-  },
-  {
-    eyebrow: "20 разделов отчёта",
-    heading: "Деньги, отношения, род и предназначение — в одном разборе",
-    link: { label: "Каталог матриц", href: "/matrix" },
-  },
+// Тексты слайдов живут в словаре языка, адреса — здесь: путь у всех языков один.
+const LANDING_HREFS = [
+  "/#plans",
+  encyclopediaSectionHref("pts"),
+  encyclopediaSectionHref("arc"),
+  "/year",
+  "/matrix",
 ];
 
-export const ENCYCLOPEDIA_SLIDES: HeroSlide[] = [
-  {
-    eyebrow: "Arcana Sense · 22 аркана",
-    heading: "Матрица судьбы по дате рождения",
-    link: { label: "Что входит в разбор", href: "/#plans" },
-  },
-  {
-    eyebrow: "17 позиций карты",
-    heading: "Посмотрите свои арканы в октаграмме",
-    link: { label: "Позиции карты", href: encyclopediaSectionHref("pts") },
-  },
-  {
-    eyebrow: "портрет · центр · материальная задача",
-    heading: "Ваши три главных аркана — за минуту",
-    link: { label: "22 аркана", href: encyclopediaSectionHref("arc") },
-  },
-  {
-    // Надпись раньше называла десятилетия, а заголовок — год: два разных предмета в одном
-    // слайде. Персональный год продукт не считает, статья объясняет, как посчитать его самому,
-    // поэтому слайд обещает разбор рамки года, а не расчёт.
-    eyebrow: "как читается персональный год",
-    heading: "Аркан вашего года и что он требует",
-    link: { label: "Матрица на год", href: "/na-god" },
-  },
-  {
-    eyebrow: "20 разделов отчёта",
-    heading: "Весь справочник — на вашей дате рождения",
-    link: { label: "Разделы отчёта", href: encyclopediaSectionHref("sec") },
-  },
+const ENCYCLOPEDIA_HREFS = [
+  "/#plans",
+  encyclopediaSectionHref("pts"),
+  encyclopediaSectionHref("arc"),
+  "/year",
+  encyclopediaSectionHref("sec"),
 ];
+
+function slides(rows: typeof D.slides.landing, hrefs: string[]): HeroSlide[] {
+  return rows.map((row, index) => ({
+    eyebrow: row.eyebrow[L],
+    heading: row.heading[L],
+    link: { label: row.link[L], href: hrefs[index] },
+  }));
+}
+
+// Порядок совпадает с порядком композиций в CalcHero: веер, кольцо, триптих, лента, мозаика.
+export const LANDING_SLIDES: HeroSlide[] = slides(D.slides.landing, LANDING_HREFS);
+
+export const ENCYCLOPEDIA_SLIDES: HeroSlide[] = slides(D.slides.encyclopedia, ENCYCLOPEDIA_HREFS);

@@ -1,0 +1,137 @@
+{
+ "count": 22,
+ "items": [
+  {
+   "n": 1,
+   "slug": "magician",
+   "title": "The Magician",
+   "short": "the will and the skill to start first, without waiting for anyone’s permission"
+  },
+  {
+   "n": 2,
+   "slug": "priestess",
+   "title": "The High Priestess",
+   "short": "instinct ahead of arguments: reads the situation before anyone explains it"
+  },
+  {
+   "n": 3,
+   "slug": "empress",
+   "title": "The Empress",
+   "short": "a generosity that makes warmth around itself and grows living things"
+  },
+  {
+   "n": 4,
+   "slug": "emperor",
+   "title": "The Emperor",
+   "short": "order and support: holds the structure other people stand on"
+  },
+  {
+   "n": 5,
+   "slug": "hierophant",
+   "title": "The Hierophant",
+   "short": "leaning on knowledge and tradition: explains things until they become clear"
+  },
+  {
+   "n": 6,
+   "slug": "lovers",
+   "title": "The Lovers",
+   "short": "attraction and choice: draws people close and demands you decide who exactly"
+  },
+  {
+   "n": 7,
+   "slug": "chariot",
+   "title": "The Chariot",
+   "short": "speed and drive: arrives first, as long as the reins are not dropped"
+  },
+  {
+   "n": 8,
+   "slug": "strength",
+   "title": "Strength",
+   "short": "inner power without shouting: copes where others give up"
+  },
+  {
+   "n": 9,
+   "slug": "hermit",
+   "title": "The Hermit",
+   "short": "depth and the search for meaning: gets to the bottom of things when left alone"
+  },
+  {
+   "n": 10,
+   "slug": "wheel",
+   "title": "The Wheel",
+   "short": "a sense of timing: luck comes to those who noticed which way it turned"
+  },
+  {
+   "n": 11,
+   "slug": "justice",
+   "title": "Justice",
+   "short": "balance and honesty: weighs things and calls them by their names"
+  },
+  {
+   "n": 12,
+   "slug": "hanged",
+   "title": "The Hanged Man",
+   "short": "a pause and another angle: the one who agreed to wait wins"
+  },
+  {
+   "n": 13,
+   "slug": "death",
+   "title": "Death",
+   "short": "an ending and a renewal: clears away the old to make room"
+  },
+  {
+   "n": 14,
+   "slug": "temperance",
+   "title": "Temperance",
+   "short": "measure and blending: joins what does not join and keeps an even pace"
+  },
+  {
+   "n": 15,
+   "slug": "devil",
+   "title": "The Devil",
+   "short": "passion and matter: gives a powerful pull and the bill for it"
+  },
+  {
+   "n": 16,
+   "slug": "tower",
+   "title": "The Tower",
+   "short": "the courage to pull down what was built wrong"
+  },
+  {
+   "n": 17,
+   "slug": "star",
+   "title": "The Star",
+   "short": "inspiration and a landmark: sees the goal before the road appears"
+  },
+  {
+   "n": 18,
+   "slug": "moon",
+   "title": "The Moon",
+   "short": "sensitivity and depth: hears the invisible, gets confused by the obvious"
+  },
+  {
+   "n": 19,
+   "slug": "sun",
+   "title": "The Sun",
+   "short": "clarity and warmth: with it everything is clearer and easier, including for itself"
+  },
+  {
+   "n": 20,
+   "slug": "judgement",
+   "title": "Judgement",
+   "short": "a summing-up and a calling: gathers what was done and calls you to do your own"
+  },
+  {
+   "n": 21,
+   "slug": "world",
+   "title": "The World",
+   "short": "wholeness and scale: one room and one role are too small"
+  },
+  {
+   "n": 22,
+   "slug": "fool",
+   "title": "The Fool",
+   "short": "freedom and lightness: starts from a blank page as many times as it takes"
+  }
+ ]
+}

@@ -1,3 +1,5 @@
+import { D, L } from "./i18n";
+import type { Phrase } from "./i18n/dict";
 import {
   arcanumContent,
   combinationContent,
@@ -24,6 +26,8 @@ export type CombinationContextGroupKey = "character" | "comfort" | "profession";
 
 interface ContextDefinition {
   key: CombinationContextKey;
+  /** Подписи связи берутся из словаря: у каждого языка своя формулировка вопроса и ролей. */
+  dict: { title: Phrase; question: Phrase; left: Phrase; right: Phrase };
   title: string;
   question: string;
   leftRole: "A" | "B" | "C" | "E" | "M" | "K" | "P";
@@ -71,138 +75,54 @@ export interface CombinationArticleReading {
   practice: string[];
 }
 
-const CONTEXTS: ContextDefinition[] = [
-  {
-    key: "A-B",
-    title: "Внешний образ и внутренняя задача",
-    question: "Как первое впечатление соотносится с тем, что движет человеком изнутри",
-    leftRole: "A",
-    rightRole: "B",
-    leftLabel: "портрет личности",
-    rightLabel: "духовная задача",
-    leftPosition: "day",
-    rightPosition: "month",
-    group: "character",
-  },
-  {
-    key: "B-C",
-    title: "От внутреннего качества к поступку",
-    question: "Как внутренняя задача превращается в практическое действие",
-    leftRole: "B",
-    rightRole: "C",
-    leftLabel: "духовная задача",
-    rightLabel: "материальная задача",
-    leftPosition: "month",
-    rightPosition: "year",
-    group: "character",
-  },
-  {
-    key: "A-C",
-    title: "Первое впечатление и реальное поведение",
-    question: "Совпадает ли ожидание от внешнего образа с тем, как человек действует на деле",
-    leftRole: "A",
-    rightRole: "C",
-    leftLabel: "портрет личности",
-    rightLabel: "материальная задача",
-    leftPosition: "day",
-    rightPosition: "year",
-    group: "character",
-  },
-  {
-    key: "E-M",
-    title: "Внутренняя опора и автоматическая реакция",
-    question: "Что происходит с базовым состоянием, когда человек реагирует без подготовки",
-    leftRole: "E",
-    rightRole: "M",
-    leftLabel: "внутренний центр",
-    rightLabel: "автоматическая реакция",
-    leftPosition: "center",
-    rightPosition: "comfort_south",
-    group: "comfort",
-  },
-  {
-    key: "E-K",
-    title: "Внутренний центр и форма таланта",
-    question: "Как врождённый талант помогает вернуться в устойчивое состояние",
-    leftRole: "E",
-    rightRole: "K",
-    leftLabel: "внутренний центр",
-    rightLabel: "талант, возвращающий управление",
-    leftPosition: "center",
-    rightPosition: "comfort_north",
-    group: "comfort",
-  },
-  {
-    key: "M-K",
-    title: "От реакции к возвращению в центр",
-    question: "Как перевести первую реакцию в действие, которое возвращает человеку управление",
-    leftRole: "M",
-    rightRole: "K",
-    leftLabel: "автоматическая реакция",
-    rightLabel: "талант, возвращающий управление",
-    leftPosition: "comfort_south",
-    rightPosition: "comfort_north",
-    group: "comfort",
-  },
-  {
-    key: "B-P",
-    title: "Исходный дар и форма работы",
-    question: "Как врождённый дар превращается в конкретный тип профессиональных задач",
-    leftRole: "B",
-    rightRole: "P",
-    leftLabel: "исходный дар",
-    rightLabel: "форма профессиональной реализации",
-    leftPosition: "month",
-    rightPosition: "profession",
-    group: "profession",
-  },
-  {
-    key: "P-K",
-    title: "Форма работы и внутренний результат",
-    question: "Как выбранный способ работать влияет на ощущение реализованности",
-    leftRole: "P",
-    rightRole: "K",
-    leftLabel: "форма профессиональной реализации",
-    rightLabel: "внутренний результат",
-    leftPosition: "profession",
-    rightPosition: "comfort_north",
-    group: "profession",
-  },
-  {
-    key: "B-K",
-    title: "Дар и результат его реализации",
-    question: "Совпадает ли итог работы с тем качеством, которое было дано изначально",
-    leftRole: "B",
-    rightRole: "K",
-    leftLabel: "исходный дар",
-    rightLabel: "внутренний результат",
-    leftPosition: "month",
-    rightPosition: "comfort_north",
-    group: "profession",
-  },
-];
+const CONTEXTS: ContextDefinition[] = ([
+  { key: "A-B", dict: D.combination.ab, leftRole: "A", rightRole: "B",
+    leftPosition: "day", rightPosition: "month", group: "character" },
+  { key: "B-C", dict: D.combination.bc, leftRole: "B", rightRole: "C",
+    leftPosition: "month", rightPosition: "year", group: "character" },
+  { key: "A-C", dict: D.combination.ac, leftRole: "A", rightRole: "C",
+    leftPosition: "day", rightPosition: "year", group: "character" },
+  { key: "E-M", dict: D.combination.em, leftRole: "E", rightRole: "M",
+    leftPosition: "center", rightPosition: "comfort_south", group: "comfort" },
+  { key: "E-K", dict: D.combination.ek, leftRole: "E", rightRole: "K",
+    leftPosition: "center", rightPosition: "comfort_north", group: "comfort" },
+  { key: "M-K", dict: D.combination.mk, leftRole: "M", rightRole: "K",
+    leftPosition: "comfort_south", rightPosition: "comfort_north", group: "comfort" },
+  { key: "B-P", dict: D.combination.bp, leftRole: "B", rightRole: "P",
+    leftPosition: "month", rightPosition: "profession", group: "profession" },
+  { key: "P-K", dict: D.combination.pk, leftRole: "P", rightRole: "K",
+    leftPosition: "profession", rightPosition: "comfort_north", group: "profession" },
+  { key: "B-K", dict: D.combination.bk, leftRole: "B", rightRole: "K",
+    leftPosition: "month", rightPosition: "comfort_north", group: "profession" },
+] as const).map((item) => ({
+  ...item,
+  title: item.dict.title[L],
+  question: item.dict.question[L],
+  leftLabel: item.dict.left[L],
+  rightLabel: item.dict.right[L],
+}));
 
 const GROUPS: Array<Omit<CombinationContextGroup, "contexts">> = [
   {
     key: "character",
-    title: "Как пара работает в характере",
-    lead: "Допустимые порядки пары для трёх связей раздела «Характер и личные качества».",
+    title: D.combination.groups.character.title[L],
+    lead: D.combination.groups.character.lead[L],
     href: "/encyclopedia/position/character",
-    linkLabel: "Как читается раздел «Характер и личные качества» →",
+    linkLabel: D.combination.groups.character.link[L],
   },
   {
     key: "comfort",
-    title: "Как пара работает в центре и внутренних точках",
-    lead: "Допустимые порядки пары для связей внутреннего центра E, реакции M и возвращающего таланта K.",
+    title: D.combination.groups.comfort.title[L],
+    lead: D.combination.groups.comfort.lead[L],
     href: "/encyclopedia/position/comfort",
-    linkLabel: "Как читается раздел «Центр и внутренние точки» →",
+    linkLabel: D.combination.groups.comfort.link[L],
   },
   {
     key: "profession",
-    title: "Как пара работает в линии таланта",
-    lead: "Допустимые порядки пары для перехода от исходного дара B через форму работы P к результату K.",
+    title: D.combination.groups.profession.title[L],
+    lead: D.combination.groups.profession.lead[L],
     href: "/encyclopedia/position/profession",
-    linkLabel: "Как читается раздел «Профессия и дело по душе» →",
+    linkLabel: D.combination.groups.profession.link[L],
   },
 ];
 
@@ -294,11 +214,22 @@ export function buildCombinationContext(
     title: context.title,
     question: context.question,
     order: `${leftNumber}-${rightNumber}`,
-    heading: `${leftNumber} ${left.title} в ${context.leftRole}, ${rightNumber} ${right.title} в ${context.rightRole}`,
+    heading: D.combination.heading[L](
+      leftNumber, left.title, context.leftRole, rightNumber, right.title, context.rightRole,
+    ),
     paragraphs: [
-      `${context.question}. В этом порядке ${left.title} занимает позицию ${context.leftRole} — ${context.leftLabel}: ${leftRole.essence} ${right.title} занимает позицию ${context.rightRole} — ${context.rightLabel}: ${rightRole.essence}`,
-      `В сильном проявлении в позиции ${context.leftRole} ${cubeClause(leftRole.strength)}, а в позиции ${context.rightRole} — ${cubeClause(rightRole.strength)}. Пара работает согласованно, когда первое качество задаёт свой этап, а второе не спорит с ним, а продолжает его в собственной роли.`,
-      `Напряжение появляется, когда в позиции ${context.leftRole} ${cubeClause(leftRole.risk)}, а в позиции ${context.rightRole} — ${cubeClause(rightRole.risk)}. Проверять эту связь полезно по последовательности: что было показано или задумано сначала и каким действием ситуация завершилась.`,
+      D.combination.intro[L](
+        context.question, left.title, context.leftRole, context.leftLabel, leftRole.essence,
+        right.title, context.rightRole, context.rightLabel, rightRole.essence,
+      ),
+      D.combination.strong[L](
+        context.leftRole, cubeClause(leftRole.strength),
+        context.rightRole, cubeClause(rightRole.strength),
+      ),
+      D.combination.tension[L](
+        context.leftRole, cubeClause(leftRole.risk),
+        context.rightRole, cubeClause(rightRole.risk),
+      ),
     ],
   };
 }
@@ -332,8 +263,8 @@ export function buildCombinationArticle(a: number, b: number): CombinationArticl
       contexts: contexts.filter((context) => definition(context.key).group === group.key),
     })).filter((group) => group.contexts.length > 0),
     practice: [
-      `Сначала определите позиции пары в своей карте: смысл сочетания меняется в зависимости от того, читается ли оно в характере, во внутренних точках или в линии таланта. Для ${content.a} ${left.title} и ${content.b} ${right.title} важно не менять арканы местами автоматически, а выбрать вариант с точным порядком ролей.`,
-      `Затем сравните один реальный эпизод с двумя сторонами пары. Отметьте, где человек ${left.plus[0]} и где ${right.plus[0]}; отдельно проверьте моменты, когда он ${left.minus[0]} или ${right.minus[0]}. Такое наблюдение показывает, какое качество стоит включать первым, а каким завершать действие.`,
+      D.combination.practiceFirst[L](content.a, left.title, content.b, right.title),
+      D.combination.practiceSecond[L](left.plus[0], right.plus[0], left.minus[0], right.minus[0]),
     ],
   };
 }

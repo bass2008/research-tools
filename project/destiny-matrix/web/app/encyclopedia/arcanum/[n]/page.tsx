@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { D, L } from "@/lib/i18n";
 import ArcanumCard, { arcanumImage } from "@/components/matrix/ArcanumCard";
 import Tabs from "@/components/ui/Tabs";
 import Faq from "@/components/ui/Faq";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import Sections from "@/components/enc/Sections";
-import Price from "@/components/pay/Price";
+import Price, { PriceOrFree } from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
 
 import { ARCANA } from "@/lib/arcana";
@@ -109,9 +110,9 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
   const positions = (
     <>
       <div className="cap">
-        Один и тот же аркан в разных позициях говорит о разном.{" "}
+        {D.encArcanum.positionsHint[L]}{" "}
         {/* 18 точек карты разбираются отдельным разделом: со страницы аркана к ним не было хода */}
-        <Link href={encyclopediaSectionHref("pts")}>Все позиции карты</Link>
+        <Link href={encyclopediaSectionHref("pts")}>{D.encArcanum.allPositionsLink[L]}</Link>
       </div>
       <dl className="kv">
         {Object.entries(e.inPositions).map(([key, text]) => {
@@ -129,7 +130,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
 
   const combos = (
     <>
-      <div className="cap">21 пара: аркан рядом с каждым из остальных</div>
+      <div className="cap">{D.encArcanum.combosHint[L]}</div>
       {/* Плашка с парой карт: пара опознаётся по картинке, а не только по имени. Миниатюры
           берём из половинных файлов — 260 px хватает на 46 px с запасом под retina. */}
       <div className="combos">
@@ -141,7 +142,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
             </span>
             <span className="cbd">
               <span className="cnm">
-                {e.title} и {ARCANA[c.with - 1].title}
+                {e.title} {D.encArcanum.and[L]} {ARCANA[c.with - 1].title}
               </span>
               <span className="ctl">{c.short}</span>
             </span>
@@ -161,10 +162,8 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
           пересечение — «что она делает именно здесь». Спрашивают чаще второе. */}
       {crossings.length ? (
         <>
-          <h3 className="section-gap">Этот аркан на конкретных позициях</h3>
-          <div className="cap">
-            {crossings.length} разбора: то же число в разных ролях карты
-          </div>
+          <h3 className="section-gap">{D.encArcanum.crossingsTitle[L]}</h3>
+          <div className="cap">{D.encArcanum.crossingsHint[L](crossings.length)}</div>
           <div className="taglist">
             {crossings.map((item) => (
               <Link
@@ -180,15 +179,15 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
       ) : null}
       {tails.length ? (
         <>
-          <h3 className="section-gap">Кармические хвосты с этим арканом</h3>
-          <div className="cap">Тройки нижнего угла карты, куда входит {n} аркан</div>
+          <h3 className="section-gap">{D.encArcanum.tailsTitle[L]}</h3>
+          <div className="cap">{D.encArcanum.tailsHint[L](n)}</div>
           <div className="taglist">
             {tails.map((t) => (
               <Link key={t.key} href={karmicTailHref(t.key)}>
                 {t.key}
               </Link>
             ))}
-            <Link href={KARMIC_TAIL_HUB}>Все хвосты</Link>
+            <Link href={KARMIC_TAIL_HUB}>{D.encArcanum.allTails[L]}</Link>
           </div>
         </>
       ) : null}
@@ -199,8 +198,8 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb("arc"),
           { name: `${n} · ${e.title}` },
         ]}
@@ -227,9 +226,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
         </figure>
 
         <div className="arc-body">
-          <h1>
-            {n} в матрице судьбы: {e.title}
-          </h1>
+          <h1>{D.encArcanum.h1[L](n, e.title)}</h1>
           <p className="hero-lead">{sentence(e.short)}</p>
           <div className="taglist">
             {e.keywords.map((k) => (
@@ -239,11 +236,11 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
 
           {/* две колонки первого экрана — раздел страницы: без своего h2 иерархия шла
               h1 → h3, и разбор аркана читался как продолжение заголовка */}
-          <h2 className="vh">Сильная сторона и изнанка аркана</h2>
+          <h2 className="vh">{D.encArcanum.strengthAndShadow[L]}</h2>
           <div className="twocol arc-pm">
             <div className="panel">
-              <h3>Сильная сторона</h3>
-              <div className="cap">Что этот аркан даёт</div>
+              <h3>{D.encArcanum.strength[L]}</h3>
+              <div className="cap">{D.encArcanum.strengthHint[L]}</div>
               <ul className="pmlist plus">
                 {e.plus.map((x) => (
                   <li key={x}>{x}</li>
@@ -251,8 +248,8 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
               </ul>
             </div>
             <div className="panel">
-              <h3>Изнанка</h3>
-              <div className="cap">Как тот же аркан работает против</div>
+              <h3>{D.encArcanum.shadow[L]}</h3>
+              <div className="cap">{D.encArcanum.shadowHint[L]}</div>
               <ul className="pmlist minus">
                 {e.minus.map((x) => (
                   <li key={x}>{x}</li>
@@ -265,10 +262,10 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
 
       <Tabs
         items={[
-          { key: "meaning", title: "Значение", body: meaning },
+          { key: "meaning", title: D.encArcanum.tabMeaning[L], body: meaning },
           { key: "positions", title: encyclopediaSection("sec").title, body: positions },
-          { key: "combos", title: "Сочетания с другими арканами", body: combos },
-          { key: "where", title: "Позиции и хвосты", body: elsewhereTab },
+          { key: "combos", title: D.encArcanum.tabCombos[L], body: combos },
+          { key: "where", title: D.encArcanum.tabWhere[L], body: elsewhereTab },
         ]}
       />
 
@@ -279,21 +276,18 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
         // хвост стоял ссылкой дважды. Годовая статья, наоборот, показывается именно здесь —
         // своей вкладки у неё больше нет.
         skip={tails.map((t) => karmicTailHref(t.key))}
-        title="Где ещё разбирается этот аркан"
-        hint="Статьи, которые ссылаются на эту страницу"
+        title={D.encArcanum.relatedTitle[L]}
+        hint={D.encArcanum.relatedHint[L]}
       />
 
       <div className="allbox">
-        <h3>Где этот аркан в вашей карте</h3>
-        <p>
-          Аркан {n} ({e.title}) может стоять в центре, в линии рода или в денежном канале — от
-          позиции зависит всё. Постройте свою октаграмму: расчёт бесплатный и идёт в браузере.
-        </p>
+        <h3>{D.encArcanum.whereInYourChart[L]}</h3>
+        <p>{D.encArcanum.whereInYourChartText[L](n, e.title)}</p>
         <Link className="btn" href="/#calc">
-          Рассчитать матрицу бесплатно
+          {D.matrixPages.calcFree[L]}
         </Link>
         <p className="small" style={{ marginTop: 10 }}>
-          Полный разбор всех 20 разделов — <Price />.
+          {D.encArcanum.fullReadingAll[L]} <PriceOrFree />.
         </p>
       </div>
     </>

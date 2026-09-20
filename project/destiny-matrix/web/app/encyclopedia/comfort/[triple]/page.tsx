@@ -1,3 +1,5 @@
+import { D, L } from "@/lib/i18n";
+import { sectionLabels } from "@/lib/i18n/methodLabels";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -31,8 +33,7 @@ function data(triple: string) {
   const reading = buildSectionReading("comfort", item.matrix);
   const path = `/encyclopedia/comfort/${triple}`;
   const description =
-    `Персональный разбор внутренних точек ${triple}: базовое состояние E, ` +
-    `автоматическая реакция M, возвращающий талант K, связи и практический шаг.`;
+    D.encLinks.comfortDescription[L](triple);
   return { reading, path, description };
 }
 
@@ -57,17 +58,17 @@ export default async function ComfortReadingPage({ params }: { params: Promise<P
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb("sec"),
-          { name: "Центр и внутренние точки", path: positionHref("comfort") },
+          { name: sectionLabels("comfort").title, path: positionHref("comfort") },
           { name: reading.slug },
         ]}
       />
       <JsonLd data={articleLd({ headline: reading.title, description, path })} />
       <PersonalSectionArticle
         sectionKey="comfort"
-        sectionTitle="Центр и внутренние точки"
+        sectionTitle={sectionLabels("comfort").title}
         reading={reading}
       />
     </>

@@ -1,5 +1,6 @@
 // Колода лежит готовыми webp 520×780 в public/img/arcana — оптимизатор next/image не нужен,
 // иначе standalone потребовал бы sharp и рантайм-обработку на той же виртуалке.
+import { D, L } from "@/lib/i18n";
 import { arcanumTitle } from "@/lib/arcana";
 
 const WIDTH = { big: 260, grid: 132, mini: 56 } as const;
@@ -36,7 +37,7 @@ export default function ArcanumCard({
       src={arcanumImage(n, half)}
       width={width}
       height={Math.round(width * RATIO)}
-      alt={decorative ? "" : `Аркан ${n} — ${arcanumTitle(n)}`}
+      alt={decorative ? "" : D.octagram.cardAlt[L](n, arcanumTitle(n))}
       loading={eager ? "eager" : "lazy"}
       decoding="async"
     />

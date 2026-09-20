@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 
 import ResetForm from "@/components/account/ResetForm";
@@ -6,8 +7,8 @@ import { pageMeta } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMeta({
-  title: "Новый пароль",
-  description: "Смена пароля по ссылке из письма.",
+  title: D.pages.resetTitle[L],
+  description: D.pages.resetDescription[L],
   path: "/reset",
   noindex: true,
 });

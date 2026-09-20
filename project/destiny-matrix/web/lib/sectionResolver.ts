@@ -1,3 +1,4 @@
+import { ageScaleLabel, chakraPhysicsLabel } from "./i18n/publicLabels";
 import type { Matrix } from "./matrix";
 
 export interface SectionPositionDefinition {
@@ -58,7 +59,8 @@ export function resolveSectionPositions(
     if (row.expand === "chakra_physics") {
       result.push(
         ...matrix.chakras.map(
-          (chakra) => [`${chakra.title} · физика`, chakra.physics, row.position_key] as ResolvedSectionPosition,
+          (chakra) =>
+            [chakraPhysicsLabel(chakra.title), chakra.physics, row.position_key] as ResolvedSectionPosition,
         ),
       );
       continue;
@@ -66,7 +68,8 @@ export function resolveSectionPositions(
     if (row.expand === "age_scale") {
       result.push(
         ...matrix.age_scale.map(
-          (period) => [`${period.from}–${period.to} лет`, period.arcanum, row.position_key] as ResolvedSectionPosition,
+          (period) =>
+            [ageScaleLabel(period.from, period.to), period.arcanum, row.position_key] as ResolvedSectionPosition,
         ),
       );
       continue;

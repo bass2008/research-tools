@@ -15,7 +15,9 @@ const PUBLISHER = {
   name: SITE.name,
   url: SITE.url,
   legalName: LEGAL.entity,
-  taxID: LEGAL.inn,
+  // Номер печатается только там, где он есть: пустой `taxID` в разметке — заявление о том,
+  // чего нет.
+  ...(LEGAL.inn ? { taxID: LEGAL.inn } : {}),
   email: `mailto:${LEGAL.email}`,
   logo: { "@type": "ImageObject", url: abs(SITE.ogImage) },
 };

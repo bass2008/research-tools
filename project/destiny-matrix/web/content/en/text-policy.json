@@ -1,0 +1,139 @@
+{
+ "style_patterns": [
+  "\\bit is worth noting\\b",
+  "\\bit should be noted\\b",
+  "\\bin the framework of\\b",
+  "\\bthus,\\b",
+  "\\bin this connection\\b",
+  "\\bthe aforementioned\\b",
+  "\\bthe above-mentioned\\b",
+  "\\bfor the purpose of\\b",
+  "\\btakes place\\b",
+  "\\bdirectly depends\\b",
+  "\\bplays an important role\\b",
+  "\\bone should not forget\\b",
+  "\\btaking into account the fact\\b",
+  "\\bis being carried out\\b"
+ ],
+ "blocked": [
+  {
+   "id": "medical",
+   "scopes": [
+    "content",
+    "html"
+   ],
+   "prefixes": [
+    "health",
+    "disease",
+    "illness",
+    "diagnos",
+    "cure",
+    "cures",
+    "healing",
+    "heals",
+    "symptom",
+    "therap",
+    "medicat",
+    "immunit",
+    "weight loss",
+    "alcohol",
+    "recover from",
+    "doctor",
+    "physician",
+    "clinic",
+    "ailment",
+    "chronic",
+    "spine",
+    "adrenal",
+    "thyroid",
+    "stomach",
+    "intestin",
+    "blood sugar",
+    "osteopath",
+    "homeopath",
+    "nutritionist",
+    "vitamin",
+    "supplement",
+    "fasting",
+    "detox",
+    "diet"
+   ],
+   "phrases": [
+    "weight gain",
+    "vulnerable zones",
+    "health map",
+    "sleep schedule",
+    "metabolism",
+    "hormonal background",
+    "hormone levels"
+   ]
+  },
+  {
+   "id": "guarantee-wording",
+   "scopes": [
+    "content"
+   ],
+   "prefixes": [
+    "guarante"
+   ],
+   "phrases": []
+  },
+  {
+   "id": "guarantee-claim",
+   "scopes": [
+    "content",
+    "html"
+   ],
+   "prefixes": [],
+   "phrases": [
+    "we guarantee",
+    "guarantee of the result",
+    "guaranteed result",
+    "is certain to come true",
+    "100% result"
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "text": "Entertainment helps you switch over.",
+   "content_blocked": false,
+   "html_blocked": false
+  },
+  {
+   "text": "A strong attraction does not yet mean closeness.",
+   "content_blocked": false,
+   "html_blocked": false
+  },
+  {
+   "text": "A reputation as a reliable person is built over years.",
+   "content_blocked": false,
+   "html_blocked": false
+  },
+  {
+   "text": "The text promises healing with no grounds.",
+   "content_blocked": true,
+   "html_blocked": true
+  },
+  {
+   "text": "Here the vulnerable zones are listed.",
+   "content_blocked": true,
+   "html_blocked": true
+  },
+  {
+   "text": "The health map is built automatically.",
+   "content_blocked": true,
+   "html_blocked": true
+  },
+  {
+   "text": "We guarantee the result.",
+   "content_blocked": true,
+   "html_blocked": true
+  },
+  {
+   "text": "This is certain to come true.",
+   "content_blocked": true,
+   "html_blocked": true
+  }
+ ]
+}

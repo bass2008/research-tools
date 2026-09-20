@@ -493,3 +493,58 @@ def test_old_poisoned_cache_entry_is_dropped_on_read(empty_db, monkeypatch):
     data = wscore.fetch_wordstat("проба", con)
     assert wscore.parse_popular(data) == [], "в кэш-онли вернётся пустой пул"
     assert con.execute("SELECT COUNT(*) FROM cache").fetchone()[0] == 0, "отрава удалена"
+
+
+# ---------------------------------------------------------------- §5.1 подсказки (suggest)
+
+def test_suggest_is_kept_per_source_and_region(empty_db):
+    """Ключ подсказок — фраза + источник + регион: тот же корень в другом гео покупается
+    заново, потому что подсказывают там другое (§10.2)."""
+    con = wscore.connect(empty_db)
+    wscore.save_suggest(con, "google", "2840", {"destiny matrix": ["destiny matrix calculator"]})
+
+    assert wscore.load_suggest(con, ["Destiny Matrix"], "google", "2840") == {
+        "destiny matrix": ["destiny matrix calculator"]}
+    assert wscore.missing_suggests(con, ["destiny matrix"], "google", "2840") == []
+    assert wscore.missing_suggests(con, ["destiny matrix"], "google", "2826") == ["destiny matrix"]
+    assert wscore.missing_suggests(con, ["destiny matrix"], "yandex", "2840") == ["destiny matrix"]
+    con.close()
+
+
+def test_empty_suggest_is_a_result_not_a_miss(empty_db):
+    """«Не подсказывают ничего» — это замер, а не промах: второй раз за него не платим."""
+    con = wscore.connect(empty_db)
+    wscore.save_suggest(con, "google", "2840", {"arcanum 7 destiny matrix": []})
+    assert wscore.missing_suggests(con, ["arcanum 7 destiny matrix"], "google", "2840") == []
+    con.close()
+
+
+def test_suggest_splits_by_longest_root(empty_db):
+    """Ответ провайдера плоский; подсказка уходит к самому длинному подходящему корню,
+    иначе весь хвост достаётся короткому."""
+    out = wscore._split_suggests(
+        ["destiny matrix", "destiny matrix money"],
+        ["destiny matrix 7", "destiny matrix money line 8", "чужое"])
+    assert out == {"destiny matrix": ["destiny matrix 7"],
+                   "destiny matrix money": ["destiny matrix money line 8"]}
+
+
+def test_suggest_split_requires_a_word_boundary():
+    """«destiny matrix 2026» — запрос про год, а не про двадцатый аркан: голый `startswith`
+    отдавал его чужой странице, потому что 20 — префикс 2026."""
+    out = wscore._split_suggests(
+        ["destiny matrix 20", "destiny matrix 2"],
+        ["destiny matrix 2026", "destiny matrix 20 year", "destiny matrix 2 meaning"])
+    assert out == {"destiny matrix 20": ["destiny matrix 20 year"],
+                   "destiny matrix 2": ["destiny matrix 2 meaning"]}
+
+
+def test_fetch_suggests_does_not_go_to_network_in_cache_only(empty_db):
+    """Режим «только кэш»: чего нет — за тем в сеть не идём, а падаем (§0)."""
+    con = wscore.connect(empty_db)
+    wscore.save_suggest(con, "google", "2840", {"есть": ["есть подсказка"]})
+    con.close()
+
+    assert wscore.fetch_suggests(["есть"], db_path=str(empty_db)) == {"есть": ["есть подсказка"]}
+    with pytest.raises(RuntimeError, match="только кэш"):
+        wscore.fetch_suggests(["есть", "нет такого"], db_path=str(empty_db))

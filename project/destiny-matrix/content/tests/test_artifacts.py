@@ -7,9 +7,11 @@ from pathlib import Path
 from content import build
 from engine.sections import DEFINITIONS
 
+CTX = build.context("ru")
+
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "web" / "content"
+OUT = ROOT / "web" / "content" / "ru"
 
 
 def _items(name: str) -> list[dict]:
@@ -20,10 +22,10 @@ def _items(name: str) -> list[dict]:
 
 def test_core_content_artifacts_have_no_generation_drift():
     expected = {
-        "arcana.json": build.build_arcana(),
-        "combinations.json": build.build_combinations(),
-        "positions.json": build.build_positions(),
-        "chakras.json": build.build_chakras(),
+        "arcana.json": build.build_arcana(CTX),
+        "combinations.json": build.build_combinations(CTX),
+        "positions.json": build.build_positions(CTX),
+        "chakras.json": build.build_chakras(CTX),
     }
     for name, items in expected.items():
         actual = _items(name)
@@ -48,14 +50,14 @@ def test_core_content_artifacts_have_no_generation_drift():
 
 
 def test_client_arcana_catalog_contains_no_article_or_paid_text():
-    expected = build.build_arcana_catalog(build.build_arcana())
+    expected = build.build_arcana_catalog(build.build_arcana(CTX))
     actual = _items("arcana-catalog.json")
     assert actual == expected
     assert all(set(row) == {"n", "slug", "title", "short"} for row in actual)
 
 
 def test_client_point_catalog_is_generated_from_canonical_labels():
-    expected = build.build_point_catalog()
+    expected = build.build_point_catalog(CTX)
     actual = _items("points-catalog.json")
     assert actual == expected
     assert all(set(row) == {"key", "report_label"} for row in actual)

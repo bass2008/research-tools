@@ -3,10 +3,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { chakraHint, chakraTitle } from "./i18n/publicLabels";
+import { SITE_LANG } from "./i18n/lang";
 import type { Matrix } from "./matrix";
 import { isBlockedText } from "./textPolicy";
 
-const DIR = path.join(process.cwd(), "content");
+// Корпус лежит по каталогам языка; предрасчёт матриц один на все языки и остаётся уровнем выше.
+const DIR = path.join(process.cwd(), "content", SITE_LANG);
+const SHARED_DIR = path.join(process.cwd(), "content");
 
 type Bag = Record<string, unknown>;
 
@@ -20,9 +24,9 @@ function safe(text: string): boolean {
   return true;
 }
 
-function readItems(file: string): Bag[] {
+function readItems(file: string, shared = false): Bag[] {
   try {
-    const raw = fs.readFileSync(path.join(DIR, file), "utf8");
+    const raw = fs.readFileSync(path.join(shared ? SHARED_DIR : DIR, file), "utf8");
     const parsed = JSON.parse(raw) as unknown;
     const items = (parsed as { items?: unknown })?.items ?? parsed;
     if (!Array.isArray(items)) throw new Error("корень должен содержать массив items");
@@ -102,8 +106,8 @@ function numbers(v: unknown): number[] | null {
   return out.length ? out : null;
 }
 
-// Указатель связи: ключ статьи («energii», «18-9-9») либо путь вида «arcanum/7»,
-// «position/center», «na-god/8». Слэш разрешён обязательно: без него терялись все связи, кроме
+// Указатель связи: ключ статьи («energies», «18-9-9») либо путь вида «arcanum/7»,
+// «position/center», «year/8». Слэш разрешён обязательно: без него терялись все связи, кроме
 // внутрикатегорийных, — у шапки «на год» из двенадцати оставалась одна.
 function keys(v: unknown): string[] | null {
   if (!Array.isArray(v)) return null;
@@ -271,7 +275,7 @@ export function karmicTails(): ArticleContent[] {
 }
 
 // В одном файле лежат и «N на год» (ключ 1…22), и год-штамп «на 2026» (ключ 2026): у них общий
-// шаблон и общий адрес /na-god/<ключ>, различается только подача.
+// шаблон и общий адрес /year/<ключ>, различается только подача.
 export function yearArcanum(key: string | number): ArticleContent | null {
   return YEAR_ARCANA.get(String(key)) ?? null;
 }
@@ -624,9 +628,16 @@ let MATRICES: Map<string, MatrixItem> | null = null;
 function matrices(): Map<string, MatrixItem> {
   if (MATRICES) return MATRICES;
   const m = new Map<string, MatrixItem>();
-  for (const raw of readItems("matrices.json")) {
+  for (const raw of readItems("matrices.json", true)) {
     const it = raw as unknown as MatrixItem;
     if (typeof it.slug === "string" && it.matrix && typeof it.matrix.center === "number") {
+      // Предрасчёт один на все языки: числа в нём языка не имеют, а подписи чакр — имеют,
+      // и достались они от языка, на котором файл считали. Ставим слова языка сборки.
+      it.matrix.chakras = (it.matrix.chakras ?? []).map((row) => ({
+        ...row,
+        title: chakraTitle(row.key),
+        hint: chakraHint(row.key),
+      }));
       m.set(it.slug, it);
     }
   }

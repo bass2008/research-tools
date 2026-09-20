@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
+import { ALL_FREE } from "@/lib/access";
 import { track } from "@/lib/analytics";
+import { D, L } from "@/lib/i18n";
 import { LANDING_SLIDES, type HeroSlide } from "@/lib/heroSlides";
 
 import ArcanumCard from "@/components/matrix/ArcanumCard";
@@ -138,11 +140,7 @@ function Ring() {
       })}
       <span className="ringcore">
         <Seal />
-        <span className="rc-t">
-          22
-          <br />
-          аркана
-        </span>
+        <span className="rc-t">{D.slides.landing[2].link[L]}</span>
       </span>
     </div>
   );
@@ -197,10 +195,17 @@ export default function CalcHero({
     const href = s.link.href.split(/[?#]/)[0] ?? s.link.href;
     const here = href.replace(/\/$/, "") === path.replace(/\/$/, "");
     if (!here) return s.link;
-    return { label: "Каталог матриц", href: "/matrix" };
+    return { label: D.nav.matrixCatalog[L], href: "/matrix" };
   }
 
   function primaryAction() {
+    if (ALL_FREE) {
+      return (
+        <Link className="btn gold" href={fullReport ? "#result" : "/#calc"}>
+          {fullReport ? D.home.heroToReport[L] : D.home.heroFree[L]}
+        </Link>
+      );
+    }
     return (
       <Link
         className="btn gold"
@@ -209,7 +214,7 @@ export default function CalcHero({
           if (!fullReport) track("buy_click", { place: `${place}-hero` });
         }}
       >
-        {fullReport ? <>Перейти к полному разбору</> : <>Купить полный разбор — <Price /></>}
+        {fullReport ? D.home.heroToReport[L] : <>{D.home.heroBuy[L]}<Price /></>}
       </Link>
     );
   }
@@ -355,17 +360,17 @@ export default function CalcHero({
                   key={s.heading}
                   type="button"
                   className={k === i ? "pip on" : "pip"}
-                  aria-label={`Показать: ${s.heading}`}
+                  aria-label={D.home.showSlide[L](s.heading)}
                   aria-current={k === i}
                   onClick={() => go(k)}
                 />
               ))}
             </div>
             <div className="pair">
-              <button type="button" className="arw" aria-label="Предыдущее" onClick={() => go(i - 1)}>
+              <button type="button" className="arw" aria-label={D.home.prevSlide[L]} onClick={() => go(i - 1)}>
                 ‹
               </button>
-              <button type="button" className="arw" aria-label="Следующее" onClick={() => go(i + 1)}>
+              <button type="button" className="arw" aria-label={D.home.nextSlide[L]} onClick={() => go(i + 1)}>
                 ›
               </button>
             </div>

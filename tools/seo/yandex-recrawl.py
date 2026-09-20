@@ -2,8 +2,7 @@
 """Очередь переобхода Яндекс.Вебмастера: что слать сегодня и что уже слали.
 
 Робот дошёл сам до 90 адресов карты из 444, поэтому остальное показываем ему адресно. Квота —
-150 адресов в сутки, не накапливается; план разбивки на три дня —
-project/destiny-matrix/docs/yandex-recrawl-plan.md.
+150 адресов в сутки и не накапливается, поэтому корпус уходит порциями.
 
 Порядок задаёт спрос: сумма частот запросов, ведущих на адрес. Журнал отправленного лежит рядом
 с артефактами аудита, поэтому повторный запуск в тот же день ничего не дублирует.
@@ -25,10 +24,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 AUDIT = ROOT / "tools/seo/audit"
-CONTENT = ROOT / "project/destiny-matrix/web/content"
+# Очередь переобхода — про русский домен (SITE ниже), поэтому и корпус берётся русский.
+CONTENT = ROOT / "project/destiny-matrix/web/content/ru"
 LOG = AUDIT / "recrawl-log.csv"
 TOKEN = Path.home() / ".config/arcana/webmaster.token"
 CRAWLED = AUDIT / "yandex-crawled.txt"
+# Список адресов, которые надо показать роботу помимо карты сайта: только что открытые страницы
+# и старые пути, отдающие `301` после переименования.
+EXTRA = ROOT / "tools/seo/recrawl-extra.txt"
 
 API = "https://api.webmaster.yandex.net/v4"
 SITE = "https://arcana-sense.ru"
@@ -131,12 +134,36 @@ def priority(url: str, freq: int, seen: set[str]) -> str:
     return "P5" if url in seen else "P4"
 
 
+def extra_urls() -> list[str]:
+    """Адреса из `recrawl-extra.txt` — то, чего очередь по карте сайта не увидит.
+
+    Карта знает только нынешние адреса, а после переименования роботу нужно показать и старый:
+    иначе он не узнает о `301` и будет держать в индексе прежний путь месяцами. Туда же идут
+    страницы, которые только что открыли от индексации, — в карте они новички без истории.
+    """
+    if not EXTRA.exists():
+        return []
+    out = []
+    for line in EXTRA.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and line not in out:
+            out.append(line)
+    return out
+
+
 def build_queue(sitemap: str, seen_file: Path) -> list[tuple[str, str, int]]:
     freqs, seen = demand(), crawled(seen_file)
     rows = [(priority(u, freqs.get(u, 0), seen), u, freqs.get(u, 0)) for u in sitemap_urls(sitemap)]
     # Внутри приоритета — по спросу, а при равном спросе сочетания уходят в конец: их 231, и без
     # этого они вытеснили бы всё остальное из первых суток.
-    return sorted(rows, key=lambda r: (r[0], -r[2], r[1].startswith("/encyclopedia/combination/"), r[1]))
+    rows.sort(key=lambda r: (r[0], -r[2], r[1].startswith("/encyclopedia/combination/"), r[1]))
+    # Ручной список идёт первым и своим приоритетом: его адреса либо только что открыли, либо
+    # они отдают `301` и в карте их нет вовсе — спрос по ним не посчитать.
+    known = {r[1] for r in rows}
+    head = [("P0", u, freqs.get(u, 0)) for u in extra_urls() if u not in known]
+    inside = [r for r in rows if r[1] in set(extra_urls())]
+    rest = [r for r in rows if r[1] not in set(extra_urls())]
+    return head + [("P0", u, f) for _, u, f in inside] + rest
 
 
 def journal() -> dict[str, str]:
@@ -188,8 +215,15 @@ def cmd_send(args) -> int:
     if status != 200:
         sys.exit(f"{status} на /recrawl/quota: {quota}")
     left_today = quota.get("quota_remainder", 0)
-    done = journal()
+    # Журнал бережёт квоту от повторов, но после переименования адресов повтор как раз нужен:
+    # старые пути отправлялись, когда отвечали 200, а теперь отдают 301 — роботу надо показать
+    # новое состояние.
+    done = set() if args.again else journal()
     queue = [r for r in build_queue(args.sitemap, args.seen) if r[1] not in done]
+    if args.only:
+        wanted = {l.strip() for l in args.only.read_text(encoding="utf-8").splitlines()
+                  if l.strip() and not l.startswith("#")}
+        queue = [r for r in queue if r[1] in wanted]
     if args.priority:
         wanted = set(args.priority.split(","))
         queue = [r for r in queue if r[0] in wanted]
@@ -235,6 +269,9 @@ def main() -> int:
     s = sub.add_parser("send")
     s.add_argument("--limit", type=int, default=0, help="не больше этого числа за запуск")
     s.add_argument("--priority", help="только эти группы, например P1,P2,P3")
+    s.add_argument("--again", action="store_true",
+                   help="слать и то, что уже отправлялось: адрес изменился с прошлого раза")
+    s.add_argument("--only", type=Path, help="файл со списком путей: слать только их")
     s.add_argument("--pause", type=float, default=0.3)
     s.add_argument("--dry-run", action="store_true")
     s.set_defaults(fn=cmd_send)

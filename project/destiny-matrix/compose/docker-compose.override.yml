@@ -47,6 +47,9 @@ services:
       dockerfile: ../compose/web.Dockerfile
       args:
         NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
+        # язык корпуса и словарей вшивается на сборке: страницы печатаются заранее
+        NEXT_PUBLIC_SITE_LANG: ${SITE_LANG:-ru}
+        NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
         # локально счётчик выключен: включить — METRIKA_ID=111856670 scripts/run.sh
         NEXT_PUBLIC_METRIKA_ID: ${METRIKA_ID:-}
         # версия сборки: отдаётся на /version/current.txt и видна в админке

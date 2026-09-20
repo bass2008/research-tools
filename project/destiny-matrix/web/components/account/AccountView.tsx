@@ -3,18 +3,19 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { ALL_FREE } from "@/lib/access";
+import { D, L, dateTimeLabel, dayLabel } from "@/lib/i18n";
 import { ApiError, api, type MatrixListItem, type PaymentItem } from "@/lib/api";
 import { calculate } from "@/lib/matrix";
 import { useBirth } from "@/lib/useBirth";
-import { money } from "@/lib/tariffs";
-import { counted } from "@/lib/plural";
+import { money, priceLabel } from "@/lib/tariffs";
 
 import { birthLabel } from "@/components/matrix/MatrixResult";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import { useTariffs } from "@/components/pay/TariffsProvider";
 import { useSession } from "@/components/account/useSession";
 
-const dateCount = (n: number) => counted(n, "дата", "даты", "дат");
+const dateCount = (n: number) => D.account.datesCount[L](n);
 
 /**
  * Подпись матрицы прямо в строке списка: имя, а рядом карандаш. Имя нужно, чтобы список из
@@ -55,8 +56,8 @@ function MatrixName({
           type="button"
           className="iconbtn"
           data-testid="rename-matrix"
-          title="Подписать матрицу"
-          aria-label="Подписать матрицу"
+          title={D.account.signMatrix[L]}
+          aria-label={D.account.signMatrix[L]}
           onClick={() => {
             setValue(item.title ?? "");
             setFailed(null);
@@ -94,9 +95,9 @@ function MatrixName({
         disabled={busy}
         onClick={() => void save()}
       >
-        {busy ? "…" : "Сохранить"}
+        {busy ? "…" : D.account.save[L]}
       </button>
-      <button type="button" className="iconbtn" title="Отменить" onClick={() => setEditing(false)}>
+      <button type="button" className="iconbtn" title={D.account.cancel[L]} onClick={() => setEditing(false)}>
         ✕
       </button>
       {failed ? (
@@ -121,7 +122,15 @@ function AccessBadge({ item }: { item: MatrixListItem }) {
         <i className="lifetime" aria-hidden="true">
           ∞
         </i>
-        Куплена
+        {D.account.badgeBought[L]}
+      </span>
+    );
+  }
+  if (item.access === "open") {
+    // витрина без оплаты: открыта всем, покупкой не является
+    return (
+      <span className="badge sub" data-testid="access-badge">
+        {D.account.badgeOpen[L]}
       </span>
     );
   }
@@ -129,7 +138,7 @@ function AccessBadge({ item }: { item: MatrixListItem }) {
     // Выдана без оплаты. Бейдж обычный: знак владения (∞ в золоте) принадлежит купленным.
     return (
       <span className="badge sub" data-testid="access-badge">
-        Открыта
+        {D.account.badgeOpen[L]}
       </span>
     );
   }
@@ -137,13 +146,13 @@ function AccessBadge({ item }: { item: MatrixListItem }) {
     const until = item.access_until ? new Date(item.access_until) : null;
     return (
       <span className="badge sub" data-testid="access-badge">
-        По подписке{until ? ` · до ${until.toLocaleDateString("ru-RU")}` : ""}
+        {D.account.badgeSubscription[L](until ? dayLabel(item.access_until) : "")}
       </span>
     );
   }
   return (
     <span className="badge off" data-testid="access-badge">
-      Закрыта
+      {D.account.badgeClosed[L]}
     </span>
   );
 }
@@ -164,7 +173,7 @@ export default function AccountView() {
       setItems(res.items);
       setError(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Кабинет недоступен.");
+      setError(err instanceof ApiError ? err.message : D.account.unavailable[L]);
     }
   }, []);
 
@@ -185,33 +194,33 @@ export default function AccountView() {
     try {
       const row = await api.renameMatrix(id, title);
       setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, title: row.title } : x)) ?? prev);
-      setNote("Имя изменено");
+      setNote(D.account.renamed[L]);
       setError(null);
       return null;
     } catch (err) {
-      return err instanceof ApiError ? err.message : "Не получилось переименовать матрицу.";
+      return err instanceof ApiError ? err.message : D.account.renameFailed[L];
     }
   };
 
-  if (session.status === "loading") return <p className="skeleton">Проверяем доступ…</p>;
+  if (session.status === "loading") return <p className="skeleton">{D.account.checkingAccess[L]}</p>;
 
   if (session.status !== "user") {
     return (
       <div className="panel narrow">
-        <h3>Нужен вход</h3>
+        <h3>{D.account.needSignIn[L]}</h3>
         <p className="dim">
-          Кабинет хранит сохранённые матрицы и доступ к платным разделам. Расчёт без регистрации остаётся
-          доступным — он идёт в браузере.
+          {D.account.needSignInText[L]}
         </p>
         {session.status === "offline" ? (
-          <div className="err" role="alert" aria-live="assertive">{session.error ?? "Сервер не ответил."} Обновите страницу.</div>
+          <div className="err" role="alert" aria-live="assertive">{session.error ?? D.account.serverSilent[L]} {D.account.refreshPage[L]}</div>
         ) : null}
         <Link className="btn wide" href="/login">
-          Войти
+          {D.auth.signIn[L]}
         </Link>
         <p className="hint">
-          Нет аккаунта? <Link href="/register">Зарегистрироваться</Link> · или{" "}
-          <Link href="/#calc">просто рассчитать</Link>
+          {D.auth.noAccount[L]} <Link href="/register">{D.auth.register[L]}</Link>{" "}
+          {D.account.orJustCalculate[L]}{" "}
+          <Link href="/#calc">{D.account.justCalculate[L]}</Link>
         </p>
       </div>
     );
@@ -231,12 +240,12 @@ export default function AccountView() {
   return (
     <>
       <div className="panel">
-        <h3>Ваш доступ</h3>
+        <h3>{D.account.yourAccess[L]}</h3>
         <div className="cap" data-testid="account-email">
           {session.email}
         </div>
         <dl className="kv">
-          <dt>Доступ</dt>
+          <dt>{D.account.accessWord[L]}</dt>
           <dd data-testid="account-access">
             {/* покупки и подписка выводятся отдельными строками: они живут одновременно, и
                 одна не отменяет другую — раньше подписка затирала купленные даты */}
@@ -245,69 +254,73 @@ export default function AccountView() {
                 <i className="lifetime" aria-hidden="true">
                   ∞
                 </i>{" "}
-                Куплено {dateCount(session.owned)} навсегда
-                {singlePlan ? ` · «${singlePlan.name}»` : ""}
+                {D.account.boughtForever[L](dateCount(session.owned))}
+                {singlePlan ? ` · ${D.common.quoted[L](singlePlan.name)}` : ""}
               </div>
             ) : null}
             {/* тариф «на все даты» снят с витрины, и по его отсутствию в справочнике блок
                 оказывался пустым: у оплатившего доступ строка «Доступ» была пустой, а рядом
                 висело предложение купить */}
-            {session.unlimited ? (
+            {!ALL_FREE && session.unlimited ? (
               <div>
                 {unlimitedPlan
-                  ? `${unlimitedPlan.name} — ${money(unlimitedPlan.price)} ₽`
-                  : "Доступ ко всем датам"}
-                {until ? ` · до ${until.toLocaleDateString("ru-RU")}` : ""}
+                  ? `${unlimitedPlan.name} — ${priceLabel(unlimitedPlan)}`
+                  : D.account.allDatesAccess[L]}
+                {session.until ? D.account.until[L](dayLabel(session.until)) : ""}
               </div>
             ) : null}
-            {session.owned === 0 && !session.unlimited ? (
+            {ALL_FREE ? (
+              <div>{D.account.allFreeAccess[L]}</div>
+            ) : null}
+            {!ALL_FREE && session.owned === 0 && !session.unlimited ? (
               <div>
-                {plan ? `${plan.name} — ${money(plan.price)} ₽` : "не оплачен"}
-                {plan ? "" : " · два раздела открыты бесплатно"}
-                {until ? ` · до ${until.toLocaleDateString("ru-RU")}` : ""}
+                {plan ? `${plan.name} — ${priceLabel(plan)}` : D.account.notPaid[L]}
+                {plan ? "" : D.account.twoFreeSections[L]}
+                {session.until ? D.account.until[L](dayLabel(session.until)) : ""}
               </div>
             ) : null}
           </dd>
-          <dt>Матрицы</dt>
+          <dt>{D.account.matricesWord[L]}</dt>
           <dd>
             {/* после возврата слот пропадает, а сохранённое остаётся: строка «2 из 1» выглядела
                 поломкой и не объясняла, почему нельзя добавить дату */}
             {session.limit === null
-              ? `${session.used} · хранение без ограничений`
+              ? D.account.storageUnlimited[L](session.used)
               : session.used > session.limit
-                ? `${session.used} сохранено, слотов ${session.limit} — новую дату добавить нельзя,
-                   пока не купите ещё один разбор; сохранённое никуда не делось`
-                : `${session.used} из ${session.limit} · слот даёт каждый открытый разбор`}
+                ? D.account.storageOver[L](session.used, session.limit)
+                : D.account.storageOf[L](session.used, session.limit)}
           </dd>
         </dl>
         <div className="taglist" style={{ marginTop: 12 }}>
           {/* На чистом устройстве /report не знает дату из sessionStorage. Сохранённую матрицу
               открываем по её серверному id, поэтому ссылка работает на любом устройстве. */}
           {items === null ? (
-            <span className="dim" aria-disabled="true">Мой разбор загружается…</span>
+            <span className="dim" aria-disabled="true">{D.account.reportLoading[L]}</span>
           ) : paidFirst ? (
-            <Link data-testid="account-report" href={`/matrices/${paidFirst.id}`}>Мой разбор</Link>
+            <Link data-testid="account-report" href={`/matrices/${paidFirst.id}`}>{D.nav.myReading[L]}</Link>
           ) : list.length ? (
-            <Link data-testid="account-report" href={`/matrices/${list[0].id}`}>Мой разбор</Link>
+            <Link data-testid="account-report" href={`/matrices/${list[0].id}`}>{D.nav.myReading[L]}</Link>
           ) : (
-            <Link data-testid="account-report" href="/report">Мой разбор</Link>
+            <Link data-testid="account-report" href="/report">{D.nav.myReading[L]}</Link>
           )}
-          <Link href="/#calc">Новый расчёт</Link>
+          <Link href="/#calc">{D.nav.newCalculation[L]}</Link>
           {/* покупку предлагаем тем, у кого прав нет. Смотрим на права, а не на найденный
               тариф: «на все даты» снят с витрины, и оплатившему предлагали купить снова */}
-          {session.paid || session.unlimited ? null : (
-            <Link href="/pay">Купить полный разбор</Link>
+          {ALL_FREE || session.paid || session.unlimited ? null : (
+            <Link href="/pay">{D.account.buyFullReading[L]}</Link>
           )}
-          {session.admin ? <Link href="/admin">Админка</Link> : null}
+          {session.admin ? <Link href="/admin">{D.account.admin[L]}</Link> : null}
         </div>
         <p className="hint" style={{ textAlign: "left" }}>
-          Доступ живёт в аккаунте, поэтому разбор открывается с любого устройства.
+          {D.account.accessLivesInAccount[L]}
         </p>
       </div>
 
       <div className="panel section-gap">
-        <h3>Сохранённые матрицы</h3>
-        <div className="cap">Дата рождения уходит на сервер по вашему действию: этой кнопкой или при оплате разбора</div>
+        <h3>{D.account.savedMatrices[L]}</h3>
+        <div className="cap">
+          {ALL_FREE ? D.account.savedMatricesHintFree[L] : D.account.savedMatricesHint[L]}
+        </div>
         {note ? (
           <div className="okmsg" role="status" data-testid="account-note">
             {note}
@@ -322,11 +335,11 @@ export default function AccountView() {
           {/* отказ сети раньше оставлял вечное «Загружаем список…» рядом с сообщением об
               ошибке и предложением сохранить дату — три состояния одновременно */}
           {items === null && error ? (
-            <li className="dim">Список не загрузился: {error}</li>
+            <li className="dim">{D.account.listFailed[L](error)}</li>
           ) : items === null ? (
-            <li className="skeleton">Загружаем список…</li>
+            <li className="skeleton">{D.account.listLoading[L]}</li>
           ) : list.length === 0 ? (
-            <li className="dim">Пока ничего не сохранено.</li>
+            <li className="dim">{D.account.listEmpty[L]}</li>
           ) : (
             list.map((it) => (
               <li
@@ -339,24 +352,26 @@ export default function AccountView() {
                 <div>
                   <MatrixName item={it} onSave={(title) => rename(it.id, title)} />
                   <div className="small">
-                    {birthLabel(it.birth)} · {it.sex === "f" ? "женская" : "мужская"} карта · аркан центра{" "}
+                    {birthLabel(it.birth)} ·{" "}
+                    {it.sex === "f" ? D.calc.femaleChart[L] : D.calc.maleChart[L]}{" "}
+                    {D.account.chartWord[L]} · {D.account.centreArcanum[L]}{" "}
                     {safeCenter(it.birth, it.sex)}
                   </div>
                 </div>
                 {it.access === "locked" ? (
                   <span className="matact">
                     <Link className="btn ghost sm" href={`/matrices/${it.id}`}>
-                      Два раздела
+                      {D.account.twoSections[L]}
                     </Link>
                     {/* id даты уходит в ссылку: на экране оплаты она уже выбрана, и платёж
                         открывает именно её, а не «первую сохранённую» */}
                     <Link className="btn sm" href={`/pay?m=${it.id}`}>
-                      Открыть{singlePlan ? ` — ${money(singlePlan.price)} ₽` : ""}
+                      {singlePlan ? D.account.openFor[L](priceLabel(singlePlan)) : D.account.open[L]}
                     </Link>
                   </span>
                 ) : (
                   <Link className="btn ghost sm" href={`/matrices/${it.id}`}>
-                    Открыть
+                    {D.account.open[L]}
                   </Link>
                 )}
               </li>
@@ -371,12 +386,12 @@ export default function AccountView() {
         {items !== null && local && !list.some((it) => it.birth === local.birth && it.sex === local.sex) ? (
           <div style={{ marginTop: 14 }}>
             <p className="small">
-              В браузере открыт расчёт на {birthLabel(local.birth)} — можно сохранить его в кабинет.
+              {D.account.localCalc[L](birthLabel(local.birth))}
             </p>
             <SaveMatrixButton
               birth={local.birth}
               sex={local.sex}
-              label="Сохранить текущую матрицу"
+              label={D.account.saveCurrent[L]}
               openReport={false}
               onSaved={async () => {
                 await reload();
@@ -386,14 +401,15 @@ export default function AccountView() {
           </div>
         ) : (
           <p className="small" style={{ marginTop: 14 }}>
-            <Link href="/#calc">Рассчитайте матрицу</Link>, чтобы сохранить её здесь.
+            <Link href="/#calc">{D.account.calculateToSave[L]}</Link>{D.account.calculateToSaveTail[L]}
           </p>
         )}
 
         {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}
       </div>
 
-      <PaymentsPanel />
+      {/* платить негде: истории платежей на витрине без кассы не бывает */}
+      {ALL_FREE ? null : <PaymentsPanel />}
     </>
   );
 }
@@ -410,16 +426,16 @@ function PaymentsPanel() {
     api
       .payments()
       .then((res) => setRows(res.items))
-      .catch((err) => setFailed(err instanceof ApiError ? err.message : "Платежи недоступны."));
+      .catch((err) => setFailed(err instanceof ApiError ? err.message : D.account.paymentsUnavailable[L]));
   }, []);
 
   return (
     <div className="panel section-gap" data-testid="payments-panel">
-      <h3>Мои платежи</h3>
-      <div className="cap">Цена в строке — та, что была на момент покупки</div>
+      <h3>{D.account.myPayments[L]}</h3>
+      <div className="cap">{D.account.paymentsHint[L]}</div>
       {failed ? <div className="err" role="alert" aria-live="assertive">{failed}</div> : null}
-      {rows === null && !failed ? <p className="skeleton">Загружаем платежи…</p> : null}
-      {rows && rows.length === 0 ? <p className="dim">Платежей пока нет.</p> : null}
+      {rows === null && !failed ? <p className="skeleton">{D.account.paymentsLoading[L]}</p> : null}
+      {rows && rows.length === 0 ? <p className="dim">{D.account.paymentsEmpty[L]}</p> : null}
       {rows && rows.length ? (
         <ul className="paylist">
           {rows.map((p) => {
@@ -427,27 +443,23 @@ function PaymentsPanel() {
             return (
               <li key={p.id} data-testid="payment-row">
                 <span className="pw">
-                  <b>{p.tariff.name ?? "Тариф"}</b>
+                  <b>{p.tariff.name ?? D.account.planWord[L]}</b>
                   <span className="small">
-                    {when.toLocaleDateString("ru-RU")} {when.toLocaleTimeString("ru-RU", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
-                    · {p.external_id}
+                    {dateTimeLabel(p.created_at)} · {p.external_id}
                   </span>
                 </span>
                 <span className="pa">
-                  {money(p.amount)} ₽
+                  {D.pay.priceFormat[L](money(p.amount))}
                   <span className="small">
                     {p.state === "refunded"
-                        ? "возвращён"
+                        ? D.account.stateRefunded[L]
                         : p.state === "paid"
-                          ? "оплачен"
+                          ? D.account.statePaid[L]
                           : p.state === "abandoned"
-                            ? "брошен"
+                            ? D.account.stateAbandoned[L]
                             : p.state === "failed"
-                              ? "не прошёл"
-                              : "не оплачен"}
+                              ? D.account.stateFailed[L]
+                              : D.account.stateUnpaid[L]}
                   </span>
                 </span>
               </li>

@@ -1,11 +1,12 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 
 import AuthForm from "@/components/account/AuthForm";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
-  title: "Вход в кабинет",
-  description: "Вход в личный кабинет: сохранённые матрицы и доступ к разделам разбора.",
+  title: D.pages.loginTitle[L],
+  description: D.pages.loginDescription[L],
   path: "/login",
   noindex: true,
 });

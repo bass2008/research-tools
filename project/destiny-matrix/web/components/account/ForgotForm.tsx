@@ -4,8 +4,11 @@ import { useHydrated } from "@/lib/hydrated";
 import Link from "next/link";
 import { useState } from "react";
 
+import { ALL_FREE } from "@/lib/access";
 import { ApiError, api } from "@/lib/api";
+import { D, L } from "@/lib/i18n";
 import { emailError, normalizeEmail } from "@/lib/email";
+import { LEGAL } from "@/lib/site";
 
 export default function ForgotForm() {
   const [email, setEmail] = useState("");
@@ -24,7 +27,7 @@ export default function ForgotForm() {
       await api.resetRequest(normalizeEmail(email));
       setSent(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не получилось. Попробуйте ещё раз.");
+      setError(err instanceof ApiError ? err.message : D.auth.generic[L]);
     } finally {
       setBusy(false);
     }
@@ -33,14 +36,13 @@ export default function ForgotForm() {
   if (sent) {
     return (
       <div className="panel narrow" data-testid="forgot-sent">
-        <h1 className="panel-h1">Письмо отправлено</h1>
+        <h1 className="panel-h1">{D.auth.mailSent[L]}</h1>
         <p className="dim">
-          Если на {normalizeEmail(email)} есть аккаунт, ссылка для смены пароля уже там.
-          Ссылка действует 4 часа.
+          {D.auth.mailSentText[L](normalizeEmail(email))}
         </p>
         <p className="hint">
-          Письма нет? Проверьте папку со спамом или напишите на{" "}
-          <a href="mailto:hello@arcana-sense.ru">hello@arcana-sense.ru</a>.
+          {D.auth.noMail[L]}{" "}
+          <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.
         </p>
         {/* из этого экрана не было выхода: ошибиться в адресе можно, а переввести его — нет */}
         <button
@@ -49,10 +51,10 @@ export default function ForgotForm() {
           data-testid="forgot-again"
           onClick={() => setSent(false)}
         >
-          Ввести другой адрес
+          {D.auth.otherAddress[L]}
         </button>
         <p className="hint">
-          Вспомнили пароль? <Link href="/login">Войти</Link>
+          {D.auth.rememberedPassword[L]} <Link href="/login">{D.auth.signIn[L]}</Link>
         </p>
       </div>
     );
@@ -61,9 +63,9 @@ export default function ForgotForm() {
   return (
     <form method="post" className="panel narrow" onSubmit={submit} data-testid="forgot-form"
           noValidate>
-      <h1>Восстановление пароля</h1>
-      <p className="dim">Пришлём ссылку для смены пароля на почту, указанную при оплате.</p>
-      <label htmlFor="fmail">Почта</label>
+      <h1>{D.auth.forgotTitle[L]}</h1>
+      <p className="dim">{D.auth.forgotLead[L]}</p>
+      <label htmlFor="fmail">{D.auth.email[L]}</label>
       <input
         disabled={!hydrated}
         id="fmail"
@@ -78,11 +80,11 @@ export default function ForgotForm() {
         placeholder="you@mail.ru"
       />
       <button className="btn wide" data-testid="forgot-submit" style={{ marginTop: 14 }} disabled={busy || !hydrated}>
-        {!hydrated ? "Готовим форму…" : busy ? "Отправляем…" : "Прислать ссылку"}
+        {!hydrated ? D.auth.preparing[L] : busy ? D.auth.sending[L] : D.auth.sendLink[L]}
       </button>
       {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}
       <p className="hint">
-        Вспомнили пароль? <Link href="/login">Войти</Link>
+        {D.auth.rememberedPassword[L]} <Link href="/login">{D.auth.signIn[L]}</Link>
       </p>
     </form>
   );

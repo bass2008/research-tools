@@ -22,7 +22,11 @@ done
 echo "== секреты"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "mkdir -p /srv/arcana"
 scp -q "$SECRETS/.env" "$SECRETS/.env.test" "$SSH_USER@$IP:/srv/arcana/"
-ssh "$SSH_USER@$IP" "chmod 600 /srv/arcana/.env /srv/arcana/.env.test"
+# Английскому контуру банк не нужен: из общих секретов ему достаточно BROWSER_SECRET, чтобы
+# печать ходила к общему браузеру. Файла нет — контур поднимется, но печать ответит 403.
+[ -f "$SECRETS/.env.test-en" ] && scp -q "$SECRETS/.env.test-en" "$SSH_USER@$IP:/srv/arcana/"
+ssh "$SSH_USER@$IP" "chmod 600 /srv/arcana/.env /srv/arcana/.env.test /srv/arcana/.env.test-en 2>/dev/null || \
+  chmod 600 /srv/arcana/.env /srv/arcana/.env.test"
 
 echo "== вход в реестр"
 # Реестр Selectel не отдаёт токен по метаданным машины, как Yandex CR: кладём его файлом.
@@ -39,9 +43,9 @@ ssh "$SSH_USER@$IP" "mkdir -p /var/www/certbot
   certbot certificates 2>/dev/null | grep -q 'Certificate Name: arcana-sense.ru' || \
     certbot certonly --webroot -w /var/www/certbot --non-interactive --agree-tos -m '$EMAIL' \
       --cert-name arcana-sense.ru -d arcana-sense.ru -d www.arcana-sense.ru -d test.arcana-sense.ru
-  certbot certificates 2>/dev/null | grep -q 'Certificate Name: arcana-sense.com' || \
-    certbot certonly --webroot -w /var/www/certbot --non-interactive --agree-tos -m '$EMAIL' \
-      --cert-name arcana-sense.com -d arcana-sense.com"
+  certbot certificates 2>/dev/null | grep -A4 'Certificate Name: arcana-sense.com' | grep -q 'test.arcana-sense.com' || \
+    certbot certonly --webroot -w /var/www/certbot --non-interactive --agree-tos -m '$EMAIL' --expand \
+      --cert-name arcana-sense.com -d arcana-sense.com -d test.arcana-sense.com"
 
 echo "== перезагрузка nginx после продления"
 ssh "$SSH_USER@$IP" "mkdir -p /etc/letsencrypt/renewal-hooks/deploy
@@ -75,5 +79,5 @@ IP="$IP" SSH_USER="$SSH_USER" ./deploy-nginx.sh
 
 cat <<'NEXT'
 == дальше вручную:
-  cd ../compose && ./scripts/release-prod.sh && ./scripts/release-test.sh
+  cd ../compose && ./scripts/release-prod.sh && ./scripts/release-test.sh && ./scripts/release-test-eng.sh
 NEXT

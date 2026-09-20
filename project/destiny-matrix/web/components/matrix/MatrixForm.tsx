@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { track } from "@/lib/analytics";
+import { D, L } from "@/lib/i18n";
 import { useHydrated } from "@/lib/hydrated";
 import { browserDay, exampleDay } from "@/lib/today";
 import { MatrixError, MONTHS_ACC, calculate, daysInMonth, toIso, type Sex } from "@/lib/matrix";
@@ -29,8 +30,8 @@ export type Finish =
  */
 export default function MatrixForm({
   name = "calc",
-  title = "Введите дату рождения",
-  lead = "Расчёт бесплатный, без регистрации. Карта строится сразу.",
+  title = D.calc.formTitle[L],
+  lead = D.calc.formLead[L],
   finish = { kind: "here" },
   place = "landing",
 }: {
@@ -96,7 +97,7 @@ export default function MatrixForm({
   const submit = () => {
     const maxDay = daysInMonth(year, month);
     if (day > maxDay) {
-      setError(`В этом месяце ${maxDay} дней — выберите другое число.`);
+      setError(D.calc.tooManyDays[L](maxDay));
       return;
     }
     try {
@@ -114,7 +115,7 @@ export default function MatrixForm({
         document.getElementById("result")?.scrollIntoView({ block: "start", behavior: "smooth" });
       });
     } catch (e) {
-      setError(e instanceof MatrixError ? e.message : "Не получилось рассчитать — проверьте дату.");
+      setError(e instanceof MatrixError ? e.message : D.calc.genericError[L]);
     }
   };
 
@@ -124,7 +125,7 @@ export default function MatrixForm({
       <div className="sub">{lead}</div>
       <div className="fields">
         <div>
-          <label htmlFor={fieldId("d")}>Число</label>
+          <label htmlFor={fieldId("d")}>{D.calc.day[L]}</label>
           <select
             id={fieldId("d")}
             disabled={!ready}
@@ -139,7 +140,7 @@ export default function MatrixForm({
           </select>
         </div>
         <div>
-          <label htmlFor={fieldId("m")}>Месяц</label>
+          <label htmlFor={fieldId("m")}>{D.calc.month[L]}</label>
           <select
             id={fieldId("m")}
             disabled={!ready}
@@ -154,7 +155,7 @@ export default function MatrixForm({
           </select>
         </div>
         <div>
-          <label htmlFor={fieldId("y")}>Год</label>
+          <label htmlFor={fieldId("y")}>{D.calc.year[L]}</label>
           <select
             id={fieldId("y")}
             disabled={!ready}
@@ -169,7 +170,7 @@ export default function MatrixForm({
           </select>
         </div>
       </div>
-      <div className="sexrow" role="group" aria-label="Пол">
+      <div className="sexrow" role="group" aria-label={D.calc.sex[L]}>
         <button
           type="button"
           data-testid={testId("sex-f")}
@@ -179,7 +180,7 @@ export default function MatrixForm({
           className={sex === "f" ? "on" : ""}
           onClick={() => change(() => setSex("f"))}
         >
-          Женский
+          {D.calc.female[L]}
         </button>
         <button
           type="button"
@@ -190,15 +191,14 @@ export default function MatrixForm({
           className={sex === "m" ? "on" : ""}
           onClick={() => change(() => setSex("m"))}
         >
-          Мужской
+          {D.calc.male[L]}
         </button>
       </div>
       {/* Прежняя подпись обещала, что пол задаёт подписи родовых линий: разборы обоих полов
           совпадают дословно, кроме названия карты, — обещание было неправдой. Названия линий
           заданы формулами точек F, G, H, I и одинаковы у всех. */}
       <p className="hint" style={{ textAlign: "left", marginTop: 6 }}>
-        Пол попадает в название карты — «мужская» или «женская». На числа и на текст разбора он не
-        влияет: в самом методе пола нет.
+        {D.calc.sexHint[L]}
       </p>
       <button
         type="button"
@@ -208,14 +208,13 @@ export default function MatrixForm({
         disabled={!ready}
         onClick={submit}
       >
-        {ready ? "Рассчитать матрицу" : "Секунду, готовим расчёт…"}
+        {ready ? D.calc.submit[L] : D.calc.submitWaiting[L]}
       </button>
       {/* без скриптов расчёт не запустится никогда: подпись «Секунду, готовим расчёт…»
           обещала бы то, чего не произойдёт */}
       <noscript>
         <div className="err" role="alert" aria-live="assertive">
-          Расчёт идёт прямо в браузере, поэтому нужен включённый JavaScript: дата рождения
-          никуда не отправляется, и считать её на сервере мы не станем.
+          {D.calc.noScript[L]}
         </div>
       </noscript>
       {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}

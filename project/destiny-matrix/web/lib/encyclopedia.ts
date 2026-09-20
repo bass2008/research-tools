@@ -1,6 +1,6 @@
-import chakras from "@/content/chakras.json";
-import hubs from "@/content/hubs.json";
-import positions from "@/content/positions.json";
+import chakras from "@/corpus/chakras.json";
+import hubs from "@/corpus/hubs.json";
+import positions from "@/corpus/positions.json";
 
 import { ARCANA } from "./arcana";
 import method from "./__fixtures__/method.json";
@@ -100,7 +100,7 @@ export function parseCombinationSlug(slug: string): [number, number] | null {
 }
 
 export const KARMIC_TAIL_HUB = "/encyclopedia/karmic-tail";
-export const YEAR_HUB = "/na-god";
+export const YEAR_HUB = "/year";
 
 // Шапка каждого типа страниц справочника. Хаб обязан лежать на префиксе своих листьев:
 // `/encyclopedia/combination` над `/encyclopedia/combination/8-11`. Так адрес совпадает с

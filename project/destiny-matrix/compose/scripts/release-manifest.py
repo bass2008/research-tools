@@ -33,7 +33,10 @@ def main() -> int:
     if not sitemap.exists():
         raise SystemExit("нет production build sitemap.xml.body")
     xml = sitemap.read_text(encoding="utf-8")
+    # Корпус лежит по каталогам языка (`docs/eng-ver.md` §5); `matrices.json` общий на оба
+    # и остаётся уровнем выше. В слепок идут оба языка: релиз один на весь репозиторий.
     content_files = sorted((PROJECT / "web" / "content").glob("*.json"))
+    content_files += sorted((PROJECT / "web" / "content").glob("*/*.json"))
     contract_files = [PROJECT / "spec" / "method.json", PROJECT / "spec" / "entities.json"]
     audit_files = sorted((ROOT / "tools" / "seo" / "audit").glob("*.json"))
     status = git("status", "--porcelain", "--", "project/destiny-matrix", "tools/seo")

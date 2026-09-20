@@ -19,6 +19,10 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-prod}
       MOCK_PAYMENTS: ${MOCK_PAYMENTS:-0}
+      # Витрина без оплаты: открыта на английском контуре, закрыта на русском. Значение задаёт
+      # раскладка (scripts/run.sh, release-*.sh) — общее для api и сборки фронта.
+      ALL_FREE_WITHOUT_PAYMENT: "${ALL_FREE_WITHOUT_PAYMENT:?режим витрины задаётся раскладкой}"
+      SITE_LANG: "${SITE_LANG:?язык развёртки обязателен, ru или en}"
       ADMIN_EMAILS: ${ADMIN_EMAILS:-snborodaenko@mail.ru}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123}
       MATRICES_HARD_CAP: ${MATRICES_HARD_CAP:-2000}
@@ -75,6 +79,9 @@ services:
     environment:
       # BFF ходит в api по имени сервиса — наружу этот адрес не попадает
       API_INTERNAL_URL: http://api:8010
+      # язык и витрина вшиты в сборку образа; здесь они нужны приёмке и логам
+      NEXT_PUBLIC_SITE_LANG: "${SITE_LANG:?язык развёртки обязателен, ru или en}"
+      NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-1}
     ports:
       # наружу смотрит nginx хоста, поэтому node слушает только localhost

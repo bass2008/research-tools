@@ -1,3 +1,4 @@
+import { L } from "./i18n";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -82,8 +83,15 @@ describe("загрузчик сгенерированного контента",
     const character = positionContent("character")!;
     expect(character.sections).toHaveLength(8);
     expect(character.faq).toHaveLength(5);
-    expect(character.sections.some((section) => section.h2.includes("Точка A"))).toBe(true);
+    // Контрольная тройка называется цифрами и читается одинаково на любом языке.
     expect(character.sections.some((section) => section.h2.includes("4–3–22"))).toBe(true);
+  });
+
+  // Заголовки статьи пишутся на языке корпуса: у английского они свои, и сверять их с русскими
+  // значит проверять не содержание, а язык сборки.
+  it.runIf(L === "ru")("статья характера называет точку A в заголовке", () => {
+    const character = positionContent("character")!;
+    expect(character.sections.some((section) => section.h2.includes("Точка A"))).toBe(true);
   });
 
   it("разделы центра и профессии опубликованы как полные непротиворечивые статьи", () => {
@@ -98,15 +106,20 @@ describe("загрузчик сгенерированного контента",
       ...profession.sections.flatMap((section) => section.paragraphs),
       ...profession.faq.map((item) => item.a),
     ].join(" ");
-    expect(text).not.toContain("деньги приходят как естественное следствие");
-    expect(text).not.toContain("дело не в человеке и не в усилиях");
-    expect(text).toContain("доход зависит от навыков, спроса, качества результата и условий работы");
+    if (L === "ru") {
+      expect(text).not.toContain("деньги приходят как естественное следствие");
+      expect(text).not.toContain("дело не в человеке и не в усилиях");
+      expect(text).toContain("доход зависит от навыков, спроса, качества результата и условий работы");
+    }
   });
 
   // Оферта называла бесплатным раздел «Что даёт вам внутренний комфорт», а он ещё в прошлой
   // итерации стал «Центром и внутренними точками»: публичный документ обещал то, чего на сайте нет.
-  it("оферта называет бесплатные разделы их нынешними именами", () => {
-    const page = readFileSync(path.join(__dirname, "..", "app", "oferta", "page.tsx"), "utf8");
+  // Проверка про обещание русской оферты: «эти разделы бесплатны». Английские условия — свой
+  // документ: касса за пределами России не подключена, открыты все двадцать разделов, делить
+  // нечего, и перечня там нет.
+  it.runIf(L === "ru")("оферта называет бесплатные разделы их нынешними именами", () => {
+    const page = readFileSync(path.join(__dirname, "legal", "terms.ts"), "utf8");
     const free = SPEC.filter((section) => section.access === "free");
     expect(free).toHaveLength(2);
     for (const section of free) {
@@ -118,9 +131,11 @@ describe("загрузчик сгенерированного контента",
     const day = positionContent("day")!;
     expect(day.sections.length).toBeGreaterThanOrEqual(8);
     expect(day.faq).toHaveLength(5);
-    expect(day.sections.some((section) => section.h2.includes("Где находится визитка"))).toBe(true);
-    expect(day.sections.some((section) => section.h2.includes("Как рассчитать"))).toBe(true);
-    expect(day.sections.some((section) => section.h2.includes("полного характера"))).toBe(true);
+    if (L === "ru") {
+      expect(day.sections.some((section) => section.h2.includes("Где находится визитка"))).toBe(true);
+      expect(day.sections.some((section) => section.h2.includes("Как рассчитать"))).toBe(true);
+      expect(day.sections.some((section) => section.h2.includes("полного характера"))).toBe(true);
+    }
   });
 
   it("каждый аркан имеет полный корпус 38 позиционных трактовок", () => {

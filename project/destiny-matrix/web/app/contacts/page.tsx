@@ -1,3 +1,5 @@
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -6,10 +8,9 @@ import Crumbs from "@/components/ui/Crumbs";
 import { LEGAL, pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
-  title: "Контакты и реквизиты",
+  title: D.pages.contactsTitle[L],
   description:
-    "Как связаться с исполнителем: почта для обращений, реквизиты предпринимателя, сроки ответа " +
-    "и ссылки на оферту и возврат.",
+    D.pages.contactsDescription[L],
   path: "/contacts",
 });
 
@@ -19,45 +20,49 @@ export default function ContactsPage() {
   return (
     <main id="content" className="page">
       <div className="wrap prose">
-        <Crumbs trail={[{ name: "Главная", path: "/" }, { name: "Контакты" }]} />
-        <h1>Контакты и реквизиты</h1>
+        <Crumbs trail={[{ name: D.nav.home[L], path: "/" }, { name: D.pages.contactsCrumb[L] }]} />
+        <h1>{D.pages.contactsTitle[L]}</h1>
 
-        <h2>Связаться</h2>
+        <h2>{D.pages.contactsReach[L]}</h2>
         <p>
-          Почта для любых обращений — от вопроса по разбору до возврата платежа:{" "}
-          <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Отвечаем в течение рабочего дня,
-          претензии рассматриваем в срок до 10 рабочих дней с момента получения.
+          {D.pages.contactsMailLead[L]}{" "}
+          <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>
+          {D.pages.contactsMailTail[L]}
         </p>
         <p>
-          Если вопрос про оплату, приложите номер платежа — он показан на странице после оплаты и
-          приходит в чеке. Дату рождения в письме указывать не нужно.
+          {D.pages.contactsSupportLead[L]}{" "}
+          <Link href="/support">{D.pages.contactsSupportLink[L]}</Link>
+          {D.pages.contactsSupportTail[L]}
         </p>
+        {/* Про номер платежа — только там, где платят: на открытой витрине его не бывает. */}
+        {ALL_FREE ? null : <p>{D.pages.contactsPaymentNote[L]}</p>}
 
-        <h2>Исполнитель</h2>
+        <h2>{D.pages.contactsSeller[L]}</h2>
         <dl className="kv">
-          <dt>Наименование</dt>
+          <dt>{D.pages.contactsName[L]}</dt>
           <dd>{LEGAL.entity}</dd>
-          <dt>ИНН</dt>
-          <dd>{LEGAL.inn}</dd>
-          <dt>ОГРНИП</dt>
-          <dd>{LEGAL.ogrnip}</dd>
-          {/* вид деятельности нужен проверяющему: наименование в чеке должно ему соответствовать */}
-          <dt>Вид деятельности</dt>
-          <dd>
-            Разработка компьютерного программного обеспечения, включая адаптацию и модификацию
-            web-страниц (пп. 62 п. 2 ст. 346.43 НК РФ). Патентная система налогообложения, НДС не
-            облагается.
-          </dd>
-          <dt>Сайт</dt>
+          {/* Номера и вид деятельности нужны проверяющему российской кассы: наименование в чеке
+              должно им соответствовать. Там, где кассы нет, нет и строк. */}
+          {LEGAL.inn ? (
+            <>
+              <dt>{D.pages.contactsTaxId[L]}</dt>
+              <dd>{LEGAL.inn}</dd>
+              <dt>{D.pages.contactsRegistration[L]}</dt>
+              <dd>{LEGAL.ogrnip}</dd>
+              <dt>{D.pages.contactsActivity[L]}</dt>
+              <dd>{D.pages.contactsActivityText[L]}</dd>
+            </>
+          ) : null}
+          <dt>{D.pages.contactsSite[L]}</dt>
           <dd>{LEGAL.site}</dd>
-          <dt>Почта</dt>
+          <dt>{D.pages.contactsEmail[L]}</dt>
           <dd>
             <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>
           </dd>
           {/* телефон печатается только здесь и только когда задан: его требует эквайрер, закон — нет */}
           {LEGAL.phone ? (
             <>
-              <dt>Телефон</dt>
+              <dt>{D.pages.contactsPhone[L]}</dt>
               <dd>
                 <a href={`tel:${LEGAL.phone.replace(/[^+\d]/g, "")}`}>{LEGAL.phone}</a>
               </dd>
@@ -65,11 +70,11 @@ export default function ContactsPage() {
           ) : null}
         </dl>
 
-        <h2>Документы</h2>
+        <h2>{D.pages.contactsDocuments[L]}</h2>
         <p>
-          <Link href="/oferta">Публичная оферта</Link> — что именно покупается и на каких условиях.{" "}
-          <Link href="/privacy">Политика обработки персональных данных</Link> — что мы храним и
-          зачем. <Link href="/refund">Условия возврата</Link> — как отказаться и получить деньги.
+          <Link href="/terms">{D.nav.terms[L]}</Link> {D.pages.contactsTermsNote[L]}{" "}
+          <Link href="/privacy">{D.nav.privacy[L]}</Link> {D.pages.contactsPrivacyNote[L]}{" "}
+          <Link href="/refund">{D.nav.refund[L]}</Link> {D.pages.contactsRefundNote[L]}
         </p>
       </div>
     </main>

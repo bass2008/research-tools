@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import { faqLd } from "@/lib/schema";
 
 import JsonLd from "@/components/ui/JsonLd";
@@ -6,7 +7,7 @@ import type { QA } from "@/lib/content";
 
 // Блок вопросов и его разметка выводятся вместе — FAQPage без видимого текста на странице
 // поиск считает разметкой без содержания.
-export default function Faq({ items, title = "Частые вопросы" }: { items: QA[]; title?: string }) {
+export default function Faq({ items, title = D.octagram.faqTitle[L] }: { items: QA[]; title?: string }) {
   if (!items.length) return null;
   return (
     <div className="panel section-gap">

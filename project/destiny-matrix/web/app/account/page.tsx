@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -5,8 +6,8 @@ import AccountView from "@/components/account/AccountView";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
-  title: "Личный кабинет",
-  description: "Сохранённые матрицы, тариф и доступ к разделам разбора.",
+  title: D.pages.accountTitle[L],
+  description: D.pages.accountDescription[L],
   path: "/account",
   noindex: true,
 });
@@ -16,9 +17,9 @@ export default function AccountPage() {
     <main id="content" className="page">
       <div className="wrap">
         <p className="crumbs">
-          <Link href="/">Главная</Link> <span>/</span> <span>Кабинет</span>
+          <Link href="/">{D.nav.home[L]}</Link> <span>/</span> <span>{D.nav.account[L]}</span>
         </p>
-        <h1>Личный кабинет</h1>
+        <h1>{D.pages.accountTitle[L]}</h1>
         <AccountView />
       </div>
     </main>

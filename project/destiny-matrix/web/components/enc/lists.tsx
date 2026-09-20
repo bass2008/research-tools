@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import Link from "next/link";
 
 import ArcanumCard from "@/components/matrix/ArcanumCard";
@@ -104,7 +105,7 @@ export function CombinationMatrix() {
                   <td key={b.n}>
                     <Link
                       href={combinationHref(a.n, b.n)}
-                      title={`${a.n} и ${b.n}`}
+                      title={D.octagram.pairTitle[L](a.n, b.n)}
                       // 462 ячейки таблицы: префетч каждой пары стоил бы мегабайты трафика
                       prefetch={false}
                     >

@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { arcanumTitle } from "@/lib/arcana";
+import { D, L } from "@/lib/i18n";
+import { columnTitle } from "@/lib/i18n/publicLabels";
 import type { LongformReading } from "@/lib/readingTypes";
 import { arcanumHref } from "@/lib/publicSpec";
 import { publicHref } from "@/lib/site";
@@ -25,7 +27,7 @@ export default function CharacterReadingView({
   return (
     <article className="character-reading" data-testid={reading.testId}>
       <div className="character-summary panel">
-        <p className="cap">{reading.caption ?? `Как складывается сочетание ${reading.slug}`}</p>
+        <p className="cap">{reading.caption ?? D.sheet.combinationCaption[L](reading.slug)}</p>
         <p>{reading.summary}</p>
       </div>
 
@@ -37,10 +39,10 @@ export default function CharacterReadingView({
             <table className="chak personal-chakras">
               <thead>
                 <tr>
-                  <th>Уровень</th>
-                  <th>Физика</th>
-                  <th>Энергия</th>
-                  <th>Эмоции</th>
+                  <th>{D.report.chakraLevel[L]}</th>
+                  <th>{columnTitle("physics")}</th>
+                  <th>{columnTitle("energy")}</th>
+                  <th>{columnTitle("emotions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -81,8 +83,8 @@ export default function CharacterReadingView({
                 data-next={period.next || undefined}
               >
                 <p className="cap">
-                  {period.from}–{period.to} лет
-                  {period.current ? " · текущий этап" : period.next ? " · следующий этап" : ""}
+                  {D.sheet.ageRange[L](period.from, period.to)}
+                  {period.current ? D.sheet.currentStage[L] : period.next ? D.sheet.nextStage[L] : ""}
                 </p>
                 <h3>
                   <Link href={href(arcanumHref(period.arcanum))}>
@@ -115,8 +117,7 @@ export default function CharacterReadingView({
                 <p className="character-question">{role.question}</p>
                 {role.sameAs ? (
                   <p className="character-role-parts dim">
-                    Тот же аркан, что и в роли «{role.sameAs.label}»: разбор выше. Обе позиции
-                    формулы дали одно число, поэтому второй раз тот же текст не повторяется.
+                    {D.sheet.sameAsRole[L](role.sameAs.label)}
                   </p>
                 ) : (
                   <CharacterRoleParts role={role} />
@@ -135,7 +136,7 @@ export default function CharacterReadingView({
             {interaction.caption ? (
               <p className="cap">{interaction.caption}</p>
             ) : interaction.roles.length ? (
-              <p className="cap">Позиции {interaction.roles.join("–")}</p>
+              <p className="cap">{D.sheet.interactionRoles[L](interaction.roles.join("–"))}</p>
             ) : null}
             <h3>{interaction.title}</h3>
             {interaction.paragraphs.map((paragraph, index) => (

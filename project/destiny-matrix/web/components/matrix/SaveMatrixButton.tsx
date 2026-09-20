@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { D, L } from "@/lib/i18n";
 import type { Sex } from "@/lib/matrix";
 
 import { birthLabel } from "@/components/matrix/MatrixResult";
@@ -19,8 +20,8 @@ import { birthLabel } from "@/components/matrix/MatrixResult";
 export default function SaveMatrixButton({
   birth,
   sex,
-  label = "Сохранить матрицу в кабинет",
-  done = "Сохранено в кабинете",
+  label = D.report.saveMatrix[L],
+  done = D.report.savedToAccount[L],
   openReport = true,
   onSaved,
 }: {
@@ -50,15 +51,15 @@ export default function SaveMatrixButton({
       setState("idle");
       if (err instanceof ApiError && err.status === 402) {
         // без даты в тексте: она специальная категория ПД и в сообщения не попадает
-        setLimit(`${err.message} Уже сохранённые даты остаются в кабинете.`);
+        setLimit(`${err.message} ${D.report.limitTail[L]}`);
         return;
       }
       setError(
         err instanceof ApiError && err.status === 401
-          ? "Нужен вход: сохранить матрицу можно только в свой кабинет."
+          ? D.report.needLogin[L]
           : err instanceof ApiError
             ? err.message
-            : "Не получилось сохранить матрицу.",
+            : D.report.saveFailed[L],
       );
     }
   };
@@ -70,9 +71,9 @@ export default function SaveMatrixButton({
         data-testid="save-matrix"
         onClick={save}
         disabled={state !== "idle"}
-        title={`Матрица на ${birthLabel(birth)}`}
+        title={D.report.saveTitle[L](birthLabel(birth))}
       >
-        {state === "done" ? done : state === "busy" ? "Сохраняем…" : label}
+        {state === "done" ? done : state === "busy" ? D.report.saving[L] : label}
       </button>
       {limit ? (
         <div className="err" data-testid="limit-message" role="status">

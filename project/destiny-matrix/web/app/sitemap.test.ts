@@ -3,21 +3,40 @@ import { describe, expect, it, vi } from "vitest";
 import sitemap from "./sitemap";
 import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
 import { SPEC } from "@/lib/sections";
+import {
+  SERVICE_PAGES,
+  hasServicePage,
+  servicePages,
+  type ServiceKey,
+} from "@/lib/servicePages";
 
 // Дефект A17: карту сайта пополняли вручную, и юридические страницы попали в неё не все.
+// Теперь набор служебных страниц задан реестром `lib/servicePages.ts`, и он же проверяется:
+// у языка, где страницы нет, её не должно быть и в карте.
+const SERVICE_PATHS = servicePages().map((key) => SERVICE_PAGES[key].path);
 // адреса первого уровня, которые не являются концепт-хабами
-const STATIC_PATHS = ["/", "/encyclopedia", "/na-god", "/contacts", "/oferta",
-  "/privacy", "/refund"];
+const STATIC_PATHS = ["/", "/encyclopedia", "/year", ...SERVICE_PATHS];
 
 describe("карта сайта", () => {
   const paths = sitemap().map((entry) => new URL(entry.url).pathname);
 
-  it.each(["/", "/encyclopedia", "/oferta", "/privacy", "/refund", "/contacts"])(
-    "содержит %s",
-    (path) => {
-      expect(paths).toContain(path);
-    },
-  );
+  it.each(["/", "/encyclopedia", ...SERVICE_PATHS])("содержит %s", (path) => {
+    expect(paths).toContain(path);
+  });
+
+  // Источников у карты несколько, и «О методе» какое-то время стоял в ней дважды: он и хаб,
+  // и служебная страница. Поиск читает дубль как признак того, что сайт не знает своих адресов.
+  it("каждый адрес встречается один раз", () => {
+    const seen = paths.filter((path, i) => paths.indexOf(path) !== i);
+    expect([...new Set(seen)]).toEqual([]);
+  });
+
+  it("не обещает поиску страницу, которой на этом языке нет", () => {
+    const missing = (Object.keys(SERVICE_PAGES) as ServiceKey[])
+      .filter((key) => !hasServicePage(key))
+      .map((key) => SERVICE_PAGES[key].path);
+    for (const path of missing) expect(paths, path).not.toContain(path);
+  });
 
   // Шапка раздела — цель обхода, с которой раздаётся весь раздел, и собственный ответ на его
   // головной запрос. Без записи в карте она осталась бы страницей без входящих ссылок из поиска.
@@ -27,7 +46,7 @@ describe("карта сайта", () => {
     "/encyclopedia/chakra",
     "/encyclopedia/combination",
     "/encyclopedia/karmic-tail",
-    "/na-god",
+    "/year",
   ])("содержит шапку раздела %s", (path) => {
     expect(paths).toContain(path);
   });
@@ -85,7 +104,7 @@ describe("карта сайта", () => {
   });
 
   it("держит шапки категорий независимо от наличия статей", () => {
-    expect(paths).toContain("/na-god");
+    expect(paths).toContain("/year");
     expect(paths).toContain("/encyclopedia/karmic-tail");
   });
 
@@ -94,16 +113,17 @@ describe("карта сайта", () => {
     expect(paths.some((p) => p.startsWith("/encyclopedia/karmic-tail/"))).toBe(true);
   });
 
-  it("выдаёт только хвосты, прошедшие demand gate", () => {
+  // Порога спроса у хвостов больше нет: метод даёт ровно 26 достижимых троек, статьи написаны
+  // на все, и закрывать готовую страницу из-за того, что Вордстат не показал по ней частоту,
+  // значит доверять отсутствию данных больше, чем самому тексту.
+  it("выдаёт все достижимые хвосты", () => {
     const published = paths
       .filter((p) => p.startsWith("/encyclopedia/karmic-tail/"))
       .map((p) => p.split("/").at(-1)!)
       .sort();
+    expect(published).toEqual(karmicTailKeys().sort());
     expect(published).toEqual(indexedKarmicTailKeys().sort());
-    expect(published).toHaveLength(22);
-    for (const key of karmicTailKeys().filter((item) => !indexedKarmicTailKeys().includes(item))) {
-      expect(published).not.toContain(key);
-    }
+    expect(published).toHaveLength(26);
   });
 
   // Даты в карте нет намеренно: честной она была бы только постраничной, а общая дата корпуса

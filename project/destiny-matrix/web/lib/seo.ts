@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { D, L } from "./i18n";
 import { SITE } from "./site";
 import { createPublicSettings, publicSettings, type PublicSettingInput } from "./settings/public";
 
@@ -7,13 +8,13 @@ import { createPublicSettings, publicSettings, type PublicSettingInput } from ".
  * задаёт сегмент, который вызвал notFound(). */
 export const NOT_FOUND_META: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: "Страница не найдена",
-  description: "Такой страницы на сайте нет. Отсюда можно вернуться к расчёту или в справочник.",
+  title: D.meta.notFoundTitle[L],
+  description: D.meta.notFoundDescription[L],
   robots: { index: false, follow: false },
   // без этого 404 наследует canonical корневого layout и объявляет себя главной страницей
   alternates: { canonical: null },
   openGraph: {
-    title: "Страница не найдена",
+    title: D.meta.notFoundTitle[L],
     url: undefined,
     images: [{ url: SITE.ogImage, width: SITE.ogWidth, height: SITE.ogHeight, alt: SITE.name }],
   },

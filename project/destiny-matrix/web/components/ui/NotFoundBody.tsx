@@ -1,3 +1,5 @@
+import { D, L } from "@/lib/i18n";
+
 /** Текст и выходы страницы 404: он одинаков и для маршрутного not-found, и для глобального.
  *
  *  Выходы — обычные `<a>`, а не `<Link>`. Глобальная страница 404 собирает собственный документ,
@@ -7,15 +9,12 @@
 export default function NotFoundBody() {
   return (
     <div className="wrap prose">
-      <h1>Такой страницы нет</h1>
-      <p>
-        Возможно, ссылка устарела. Отсюда можно вернуться к расчёту или в справочник — тупиков на
-        сайте быть не должно.
-      </p>
+      <h1>{D.nav.notFoundTitle[L]}</h1>
+      <p>{D.nav.notFoundText[L]}</p>
       <div className="taglist">
-        <a href="/">Главная и расчёт</a>
-        <a href="/encyclopedia">Энциклопедия</a>
-        <a href="/report">Мой разбор</a>
+        <a href="/">{D.nav.notFoundHome[L]}</a>
+        <a href="/encyclopedia">{D.nav.encyclopedia[L]}</a>
+        <a href="/report">{D.nav.myReading[L]}</a>
       </div>
     </div>
   );

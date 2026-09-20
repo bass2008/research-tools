@@ -1,0 +1,3759 @@
+{
+ "source": "google",
+ "region": "2840",
+ "roots": 112,
+ "suggests_total": 2256,
+ "empty_roots": [],
+ "pages_without_a_single_confirmed_key": [
+  "category-hubs/chakra",
+  "category-hubs/karmic-tail",
+  "hubs/author",
+  "karmic-tails/15-8-11",
+  "karmic-tails/21-10-16",
+  "karmic-tails/21-10-7",
+  "karmic-tails/3-13-10",
+  "karmic-tails/3-7-22",
+  "karmic-tails/6-14-8",
+  "karmic-tails/6-5-17",
+  "karmic-tails/6-8-20",
+  "karmic-tails/9-9-18",
+  "positions/chakras",
+  "positions/loops",
+  "positions/money40",
+  "positions/purpose_personal",
+  "positions/purpose_social"
+ ],
+ "russian_primary_query_in_articles": [],
+ "russian_primary_query_in_registry": [],
+ "russian_primary_query_in_registry_count": 0,
+ "suggested_but_not_ours": [
+  "destiny matrix",
+  "destiny matrix 10 15 5",
+  "destiny matrix 10 center",
+  "destiny matrix 10 under heart",
+  "destiny matrix 11 6 22",
+  "destiny matrix 11 center",
+  "destiny matrix 11 love line",
+  "destiny matrix 12 18 6",
+  "destiny matrix 12 center",
+  "destiny matrix 12 love line",
+  "destiny matrix 13 18 5",
+  "destiny matrix 13 8 21",
+  "destiny matrix 13 center",
+  "destiny matrix 14 19 5",
+  "destiny matrix 15 18 3",
+  "destiny matrix 16 7 9",
+  "destiny matrix 16 love line",
+  "destiny matrix 17 love line",
+  "destiny matrix 18 11 11",
+  "destiny matrix 18 5 5",
+  "destiny matrix 18 love line",
+  "destiny matrix 19 love line",
+  "destiny matrix 19 money line",
+  "destiny matrix 19 under heart",
+  "destiny matrix 20 love line",
+  "destiny matrix 20 under heart",
+  "destiny matrix 2026",
+  "destiny matrix 2026 predictions",
+  "destiny matrix 21 love line",
+  "destiny matrix 21 under heart",
+  "destiny matrix 22 love line",
+  "destiny matrix 22 yearly energy",
+  "destiny matrix 3 15 12",
+  "destiny matrix 3 16 13",
+  "destiny matrix 3 center",
+  "destiny matrix 3 love line",
+  "destiny matrix 4 17 13",
+  "destiny matrix 4 8 12",
+  "destiny matrix 4 center",
+  "destiny matrix 4 love line",
+  "destiny matrix 5 10 15",
+  "destiny matrix 5 10 15 meaning",
+  "destiny matrix 5 center",
+  "destiny matrix 5 love line",
+  "destiny matrix 6 12 18",
+  "destiny matrix 6 center",
+  "destiny matrix 7 center",
+  "destiny matrix 7 love line",
+  "destiny matrix 8 center",
+  "destiny matrix 8 love line",
+  "destiny matrix 8 under heart",
+  "destiny matrix 9 7 16",
+  "destiny matrix 9 center",
+  "destiny matrix 9 love line",
+  "destiny matrix a reading by decades up to 80",
+  "destiny matrix ai",
+  "destiny matrix ai chat",
+  "destiny matrix arcanas",
+  "destiny matrix arcanas explained",
+  "destiny matrix calculate",
+  "destiny matrix calculate free",
+  "destiny matrix calculator",
+  "destiny matrix calculator chart",
+  "destiny matrix calculator free",
+  "destiny matrix calculator free online",
+  "destiny matrix calculator free reading",
+  "destiny matrix calculator maya",
+  "destiny matrix calculator reddit",
+  "destiny matrix calculator with birth time",
+  "destiny matrix calculator with explanation",
+  "destiny matrix center 10",
+  "destiny matrix center 13",
+  "destiny matrix center 3",
+  "destiny matrix center 5",
+  "destiny matrix center 6",
+  "destiny matrix center 7",
+  "destiny matrix center 9",
+  "destiny matrix center number 10",
+  "destiny matrix center number 11",
+  "destiny matrix center number 13",
+  "destiny matrix center number 3",
+  "destiny matrix center number 4",
+  "destiny matrix center number 5",
+  "destiny matrix center number 6",
+  "destiny matrix center number 7",
+  "destiny matrix center number 8",
+  "destiny matrix center number 9",
+  "destiny matrix chakras",
+  "destiny matrix chart",
+  "destiny matrix chart 10 center",
+  "destiny matrix chart 3 center",
+  "destiny matrix chart 5 center",
+  "destiny matrix chart 6 center",
+  "destiny matrix chart 7 center",
+  "destiny matrix chart 8 center",
+  "destiny matrix chart ai",
+  "destiny matrix chart and explanation",
+  "destiny matrix chart arcanas",
+  "destiny matrix chart calculate",
+  "destiny matrix chart calculator",
+  "destiny matrix chart calculator astro seek",
+  "destiny matrix chart calculator free",
+  "destiny matrix chart calculator indonesia",
+  "destiny matrix chart calculator maya",
+  "destiny matrix chart calculator online",
+  "destiny matrix chart calculator reddit",
+  "destiny matrix chart calculator with birth time",
+  "destiny matrix chart calculator with explanation",
+  "destiny matrix chart free",
+  "destiny matrix chart free analysis",
+  "destiny matrix chart free calculator",
+  "destiny matrix chart free interpretation",
+  "destiny matrix chart free no sign up",
+  "destiny matrix chart free online",
+  "destiny matrix chart free reading",
+  "destiny matrix chart free reddit",
+  "destiny matrix chart free report",
+  "destiny matrix chart online",
+  "destiny matrix chart online calculator",
+  "destiny matrix chart online free"
+ ],
+ "suggested_but_not_ours_count": 279,
+ "query_conflicts": {},
+ "recommended": {
+  "brand:root": {
+   "kind": "brand",
+   "id": "root",
+   "primary": "destiny matrix",
+   "queries": [
+    "destiny matrix",
+    "destiny matrix 2026",
+    "destiny matrix 2026 predictions",
+    "destiny matrix a reading by decades up to 80",
+    "destiny matrix ai",
+    "destiny matrix ai chat",
+    "destiny matrix arcana",
+    "destiny matrix arcana calculator"
+   ],
+   "roots": [
+    "destiny matrix"
+   ],
+   "dead": false
+  },
+  "brand:alias": {
+   "kind": "brand",
+   "id": "alias",
+   "primary": "destiny matrix by date of birth",
+   "queries": [
+    "destiny matrix by date of birth",
+    "destiny matrix chart wheel of fortune",
+    "destiny matrix code of inner strength",
+    "destiny matrix meaning of each number",
+    "destiny matrix meaning of numbers",
+    "destiny matrix spiritual tasks and lessons of the soul",
+    "destiny matrix tasks of past incarnations",
+    "destiny matrix the centre of the matrix"
+   ],
+   "roots": [
+    "matrix of destiny"
+   ],
+   "dead": false
+  },
+  "arcanum:1": {
+   "kind": "arcanum",
+   "id": "1",
+   "primary": "destiny matrix 1",
+   "queries": [
+    "destiny matrix 1",
+    "destiny matrix the magician"
+   ],
+   "roots": [
+    "destiny matrix 1",
+    "destiny matrix the magician"
+   ],
+   "dead": false
+  },
+  "arcanum:2": {
+   "kind": "arcanum",
+   "id": "2",
+   "primary": "destiny matrix 2",
+   "queries": [
+    "destiny matrix 2",
+    "destiny matrix the high priestess"
+   ],
+   "roots": [
+    "destiny matrix 2",
+    "destiny matrix the high priestess"
+   ],
+   "dead": false
+  },
+  "arcanum:3": {
+   "kind": "arcanum",
+   "id": "3",
+   "primary": "destiny matrix 3",
+   "queries": [
+    "destiny matrix 3",
+    "destiny matrix 3 arcana",
+    "destiny matrix 3 meaning",
+    "destiny matrix chart 3 arcanas",
+    "destiny matrix chart arcana 3",
+    "destiny matrix chart calculator 3 arcanas",
+    "destiny matrix chart calculator online 3 arcanas",
+    "destiny matrix purpose 3"
+   ],
+   "roots": [
+    "destiny matrix 3",
+    "destiny matrix the empress"
+   ],
+   "dead": false
+  },
+  "arcanum:4": {
+   "kind": "arcanum",
+   "id": "4",
+   "primary": "destiny matrix 4",
+   "queries": [
+    "destiny matrix 4",
+    "destiny matrix 4 arcana",
+    "destiny matrix 4 energy",
+    "destiny matrix 4 love",
+    "destiny matrix 4 meaning",
+    "destiny matrix chart the emperor",
+    "destiny matrix the emperor"
+   ],
+   "roots": [
+    "destiny matrix 4",
+    "destiny matrix the emperor"
+   ],
+   "dead": false
+  },
+  "arcanum:5": {
+   "kind": "arcanum",
+   "id": "5",
+   "primary": "destiny matrix 5",
+   "queries": [
+    "destiny matrix 5",
+    "destiny matrix 5 arcana",
+    "destiny matrix 5 love",
+    "destiny matrix 5 meaning",
+    "destiny matrix arcana 5",
+    "destiny matrix arcana 5 meaning",
+    "destiny matrix chart arcana 5",
+    "destiny matrix the hierophant"
+   ],
+   "roots": [
+    "destiny matrix 5",
+    "destiny matrix the hierophant"
+   ],
+   "dead": false
+  },
+  "arcanum:6": {
+   "kind": "arcanum",
+   "id": "6",
+   "primary": "destiny matrix 6",
+   "queries": [
+    "destiny matrix 6",
+    "destiny matrix 6 arcana",
+    "destiny matrix 6 meaning",
+    "destiny matrix chart arcana 6",
+    "destiny matrix purpose 6",
+    "destiny matrix the lovers"
+   ],
+   "roots": [
+    "destiny matrix 6",
+    "destiny matrix the lovers"
+   ],
+   "dead": false
+  },
+  "arcanum:7": {
+   "kind": "arcanum",
+   "id": "7",
+   "primary": "destiny matrix 7",
+   "queries": [
+    "destiny matrix 7",
+    "destiny matrix 7 arcana",
+    "destiny matrix 7 energy",
+    "destiny matrix 7 meaning",
+    "destiny matrix arcana 7",
+    "destiny matrix arcana 7 meaning",
+    "destiny matrix chart arcana 7",
+    "destiny matrix the chariot"
+   ],
+   "roots": [
+    "destiny matrix 7",
+    "destiny matrix the chariot"
+   ],
+   "dead": false
+  },
+  "arcanum:8": {
+   "kind": "arcanum",
+   "id": "8",
+   "primary": "destiny matrix 8",
+   "queries": [
+    "destiny matrix 8",
+    "destiny matrix 8 arcana",
+    "destiny matrix 8 arcana meaning",
+    "destiny matrix 8 heart",
+    "destiny matrix 8 meaning",
+    "destiny matrix arcana 8",
+    "destiny matrix chart 8 arcana",
+    "destiny matrix chart 8 meaning"
+   ],
+   "roots": [
+    "destiny matrix 8",
+    "destiny matrix strength"
+   ],
+   "dead": false
+  },
+  "arcanum:9": {
+   "kind": "arcanum",
+   "id": "9",
+   "primary": "destiny matrix 9",
+   "queries": [
+    "destiny matrix 9",
+    "destiny matrix 9 arcana",
+    "destiny matrix 9 love",
+    "destiny matrix 9 meaning",
+    "destiny matrix arcana 9",
+    "destiny matrix arcana 9 meaning",
+    "destiny matrix chart 9 meaning",
+    "destiny matrix chart arcana 9"
+   ],
+   "roots": [
+    "destiny matrix 9",
+    "destiny matrix the hermit"
+   ],
+   "dead": false
+  },
+  "arcanum:10": {
+   "kind": "arcanum",
+   "id": "10",
+   "primary": "destiny matrix 10",
+   "queries": [
+    "destiny matrix 10",
+    "destiny matrix 10 arcana",
+    "destiny matrix 10 meaning",
+    "destiny matrix chart arcana 10",
+    "destiny matrix the wheel"
+   ],
+   "roots": [
+    "destiny matrix 10",
+    "destiny matrix the wheel"
+   ],
+   "dead": false
+  },
+  "arcanum:11": {
+   "kind": "arcanum",
+   "id": "11",
+   "primary": "destiny matrix 11",
+   "queries": [
+    "destiny matrix 11",
+    "destiny matrix 11 arcana",
+    "destiny matrix 11 meaning",
+    "destiny matrix arcana 11",
+    "destiny matrix chart arcana 11",
+    "destiny matrix justice"
+   ],
+   "roots": [
+    "destiny matrix 11",
+    "destiny matrix justice"
+   ],
+   "dead": false
+  },
+  "arcanum:12": {
+   "kind": "arcanum",
+   "id": "12",
+   "primary": "destiny matrix 12",
+   "queries": [
+    "destiny matrix 12",
+    "destiny matrix 12 arcana",
+    "destiny matrix 12 meaning",
+    "destiny matrix the hanged man"
+   ],
+   "roots": [
+    "destiny matrix 12",
+    "destiny matrix the hanged man"
+   ],
+   "dead": false
+  },
+  "arcanum:13": {
+   "kind": "arcanum",
+   "id": "13",
+   "primary": "destiny matrix 13",
+   "queries": [
+    "destiny matrix 13",
+    "destiny matrix 13 arcana",
+    "destiny matrix 13 meaning",
+    "destiny matrix calculator death",
+    "destiny matrix chart death",
+    "destiny matrix chart death date",
+    "destiny matrix death",
+    "destiny matrix death age"
+   ],
+   "roots": [
+    "destiny matrix 13",
+    "destiny matrix death"
+   ],
+   "dead": false
+  },
+  "arcanum:14": {
+   "kind": "arcanum",
+   "id": "14",
+   "primary": "destiny matrix 14",
+   "queries": [
+    "destiny matrix 14",
+    "destiny matrix 14 arcana",
+    "destiny matrix 14 energy",
+    "destiny matrix 14 love",
+    "destiny matrix 14 meaning",
+    "destiny matrix temperance"
+   ],
+   "roots": [
+    "destiny matrix 14",
+    "destiny matrix temperance"
+   ],
+   "dead": false
+  },
+  "arcanum:15": {
+   "kind": "arcanum",
+   "id": "15",
+   "primary": "destiny matrix 15",
+   "queries": [
+    "destiny matrix 15",
+    "destiny matrix 15 arcana",
+    "destiny matrix 15 meaning",
+    "destiny matrix the devil"
+   ],
+   "roots": [
+    "destiny matrix 15",
+    "destiny matrix the devil"
+   ],
+   "dead": false
+  },
+  "arcanum:16": {
+   "kind": "arcanum",
+   "id": "16",
+   "primary": "destiny matrix 16",
+   "queries": [
+    "destiny matrix 16",
+    "destiny matrix 16 arcana",
+    "destiny matrix 16 meaning",
+    "destiny matrix the tower"
+   ],
+   "roots": [
+    "destiny matrix 16",
+    "destiny matrix the tower"
+   ],
+   "dead": false
+  },
+  "arcanum:17": {
+   "kind": "arcanum",
+   "id": "17",
+   "primary": "destiny matrix 17",
+   "queries": [
+    "destiny matrix 17",
+    "destiny matrix 17 arcana",
+    "destiny matrix 17 energy",
+    "destiny matrix 17 meaning",
+    "matrix of destiny 17",
+    "matrix of destiny 17 love",
+    "matrix of destiny 17 meaning",
+    "destiny matrix the star"
+   ],
+   "roots": [
+    "destiny matrix 17",
+    "destiny matrix the star"
+   ],
+   "dead": false
+  },
+  "arcanum:18": {
+   "kind": "arcanum",
+   "id": "18",
+   "primary": "destiny matrix 18",
+   "queries": [
+    "destiny matrix 18",
+    "destiny matrix 18 arcana",
+    "destiny matrix 18 meaning",
+    "destiny matrix the moon"
+   ],
+   "roots": [
+    "destiny matrix 18",
+    "destiny matrix the moon"
+   ],
+   "dead": false
+  },
+  "arcanum:19": {
+   "kind": "arcanum",
+   "id": "19",
+   "primary": "destiny matrix 19",
+   "queries": [
+    "destiny matrix 19",
+    "destiny matrix 19 arcana",
+    "destiny matrix 19 meaning",
+    "destiny matrix 19 money",
+    "matrix of destiny 19",
+    "matrix of destiny 19 meaning",
+    "destiny matrix the sun"
+   ],
+   "roots": [
+    "destiny matrix 19",
+    "destiny matrix the sun"
+   ],
+   "dead": false
+  },
+  "arcanum:20": {
+   "kind": "arcanum",
+   "id": "20",
+   "primary": "destiny matrix 20",
+   "queries": [
+    "destiny matrix 20",
+    "destiny matrix 20 arcana",
+    "destiny matrix 20 love",
+    "destiny matrix 20 meaning",
+    "destiny matrix judgement"
+   ],
+   "roots": [
+    "destiny matrix 20",
+    "destiny matrix judgement"
+   ],
+   "dead": false
+  },
+  "arcanum:21": {
+   "kind": "arcanum",
+   "id": "21",
+   "primary": "destiny matrix 21",
+   "queries": [
+    "destiny matrix 21",
+    "destiny matrix 21 arcana",
+    "destiny matrix 21 energy",
+    "destiny matrix 21 meaning",
+    "destiny matrix the world"
+   ],
+   "roots": [
+    "destiny matrix 21",
+    "destiny matrix the world"
+   ],
+   "dead": false
+  },
+  "arcanum:22": {
+   "kind": "arcanum",
+   "id": "22",
+   "primary": "destiny matrix 22",
+   "queries": [
+    "destiny matrix 22",
+    "destiny matrix 22 arcana",
+    "destiny matrix 22 arcana calculator",
+    "destiny matrix 22 calculator",
+    "destiny matrix 22 energy",
+    "destiny matrix 22 love",
+    "destiny matrix 22 meaning",
+    "matrix of destiny 22"
+   ],
+   "roots": [
+    "destiny matrix 22",
+    "destiny matrix the fool"
+   ],
+   "dead": false
+  },
+  "position:ancestry": {
+   "kind": "position",
+   "id": "ancestry",
+   "primary": "destiny matrix family line",
+   "queries": [
+    "destiny matrix family line",
+    "destiny matrix family line tasks down to the seventh generation",
+    "destiny matrix the female family line",
+    "destiny matrix the support and gifts of your family line"
+   ],
+   "roots": [
+    "destiny matrix family line"
+   ],
+   "dead": false
+  },
+  "position:body_resource": {
+   "kind": "position",
+   "id": "body_resource",
+   "primary": "destiny matrix health",
+   "queries": [
+    "destiny matrix health",
+    "destiny matrix health card",
+    "destiny matrix health card calculator",
+    "destiny matrix health card meaning",
+    "destiny matrix health chart",
+    "destiny matrix health chart meaning",
+    "destiny matrix health line"
+   ],
+   "roots": [
+    "destiny matrix health"
+   ],
+   "dead": false
+  },
+  "position:center": {
+   "kind": "position",
+   "id": "center",
+   "primary": "destiny matrix center",
+   "queries": [
+    "destiny matrix center",
+    "destiny matrix center number"
+   ],
+   "roots": [
+    "destiny matrix center"
+   ],
+   "dead": false
+  },
+  "chakra:hub": {
+   "kind": "chakra",
+   "id": "hub",
+   "primary": "destiny matrix chakras",
+   "queries": [
+    "destiny matrix chakras"
+   ],
+   "roots": [
+    "destiny matrix chakras"
+   ],
+   "dead": false
+  },
+  "position:comfort": {
+   "kind": "position",
+   "id": "comfort",
+   "primary": "destiny matrix comfort zone",
+   "queries": [
+    "destiny matrix comfort zone"
+   ],
+   "roots": [
+    "destiny matrix comfort zone"
+   ],
+   "dead": false
+  },
+  "position:comfort_south": {
+   "kind": "position",
+   "id": "comfort_south",
+   "primary": "destiny matrix relationship line",
+   "queries": [
+    "destiny matrix relationship line"
+   ],
+   "roots": [
+    "destiny matrix relationship line"
+   ],
+   "dead": false
+  },
+  "position:descendants": {
+   "kind": "position",
+   "id": "descendants",
+   "primary": "destiny matrix male line",
+   "queries": [
+    "destiny matrix male line",
+    "destiny matrix the material male line — point h",
+    "destiny matrix the spiritual male line — point f"
+   ],
+   "roots": [
+    "destiny matrix male line"
+   ],
+   "dead": false
+  },
+  "position:family_gifts": {
+   "kind": "position",
+   "id": "family_gifts",
+   "primary": "destiny matrix family gifts",
+   "queries": [
+    "destiny matrix family gifts",
+    "destiny matrix the support and gifts of your family line"
+   ],
+   "roots": [
+    "destiny matrix family gifts"
+   ],
+   "dead": false
+  },
+  "position:father_line": {
+   "kind": "position",
+   "id": "father_line",
+   "primary": "destiny matrix father line",
+   "queries": [
+    "destiny matrix father line"
+   ],
+   "roots": [
+    "destiny matrix father line"
+   ],
+   "dead": false
+  },
+  "position:karma40": {
+   "kind": "position",
+   "id": "karma40",
+   "primary": "destiny matrix karma",
+   "queries": [
+    "destiny matrix karma",
+    "destiny matrix the karma of relationships with parents and children"
+   ],
+   "roots": [
+    "destiny matrix karma"
+   ],
+   "dead": false
+  },
+  "hub:programs": {
+   "kind": "hub",
+   "id": "programs",
+   "primary": "destiny matrix programs",
+   "queries": [
+    "destiny matrix programs",
+    "destiny matrix programs calculator",
+    "destiny matrix programs codes",
+    "destiny matrix programs explained",
+    "destiny matrix programs list",
+    "destiny matrix programs meaning",
+    "destiny matrix programs tumblr"
+   ],
+   "roots": [
+    "destiny matrix programs"
+   ],
+   "dead": false
+  },
+  "position:love_middle": {
+   "kind": "position",
+   "id": "love_middle",
+   "primary": "destiny matrix love line",
+   "queries": [
+    "destiny matrix how to read love line",
+    "destiny matrix love line",
+    "destiny matrix love line meaning",
+    "destiny matrix love line numbers",
+    "destiny matrix love line numbers meaning"
+   ],
+   "roots": [
+    "destiny matrix love line"
+   ],
+   "dead": false
+  },
+  "position:money": {
+   "kind": "position",
+   "id": "money",
+   "primary": "destiny matrix money",
+   "queries": [
+    "destiny matrix how money changes after 40",
+    "destiny matrix money",
+    "destiny matrix money after 40",
+    "destiny matrix money line"
+   ],
+   "roots": [
+    "destiny matrix money"
+   ],
+   "dead": false
+  },
+  "position:money40": {
+   "kind": "position",
+   "id": "money40",
+   "primary": "destiny matrix money after 40",
+   "queries": [
+    "destiny matrix how money changes after 40",
+    "destiny matrix money after 40"
+   ],
+   "roots": [
+    "destiny matrix money after 40"
+   ],
+   "dead": false
+  },
+  "position:mother_line": {
+   "kind": "position",
+   "id": "mother_line",
+   "primary": "destiny matrix mother line",
+   "queries": [
+    "destiny matrix mother line"
+   ],
+   "roots": [
+    "destiny matrix mother line"
+   ],
+   "dead": false
+  },
+  "position:parents_children": {
+   "kind": "position",
+   "id": "parents_children",
+   "primary": "destiny matrix parents and children",
+   "queries": [
+    "destiny matrix parents and children",
+    "destiny matrix the karma of relationships with parents and children"
+   ],
+   "roots": [
+    "destiny matrix parents and children"
+   ],
+   "dead": false
+  },
+  "position:past_lives": {
+   "kind": "position",
+   "id": "past_lives",
+   "primary": "destiny matrix past lives",
+   "queries": [
+    "destiny matrix past lives"
+   ],
+   "roots": [
+    "destiny matrix past lives"
+   ],
+   "dead": false
+  },
+  "position:profession": {
+   "kind": "position",
+   "id": "profession",
+   "primary": "destiny matrix profession",
+   "queries": [
+    "destiny matrix profession",
+    "destiny matrix profession and work you love"
+   ],
+   "roots": [
+    "destiny matrix profession"
+   ],
+   "dead": false
+  },
+  "position:purpose": {
+   "kind": "position",
+   "id": "purpose",
+   "primary": "destiny matrix purpose",
+   "queries": [
+    "destiny matrix personal purpose",
+    "destiny matrix purpose",
+    "destiny matrix social purpose",
+    "destiny matrix your purpose"
+   ],
+   "roots": [
+    "destiny matrix purpose"
+   ],
+   "dead": false
+  },
+  "position:purpose_personal": {
+   "kind": "position",
+   "id": "purpose_personal",
+   "primary": "destiny matrix personal purpose",
+   "queries": [
+    "destiny matrix personal purpose"
+   ],
+   "roots": [
+    "destiny matrix personal purpose"
+   ],
+   "dead": false
+  },
+  "position:purpose_social": {
+   "kind": "position",
+   "id": "purpose_social",
+   "primary": "destiny matrix social purpose",
+   "queries": [
+    "destiny matrix social purpose"
+   ],
+   "roots": [
+    "destiny matrix social purpose"
+   ],
+   "dead": false
+  },
+  "position:realisation": {
+   "kind": "position",
+   "id": "realisation",
+   "primary": "destiny matrix self realisation",
+   "queries": [
+    "destiny matrix self realisation"
+   ],
+   "roots": [
+    "destiny matrix self realisation"
+   ],
+   "dead": false
+  },
+  "position:relations": {
+   "kind": "position",
+   "id": "relations",
+   "primary": "destiny matrix relationships",
+   "queries": [
+    "destiny matrix relationships",
+    "destiny matrix the entry into relationships and the karmic tail — point m",
+    "destiny matrix the karma of relationships with parents and children"
+   ],
+   "roots": [
+    "destiny matrix relationships"
+   ],
+   "dead": false
+  },
+  "position:resources": {
+   "kind": "position",
+   "id": "resources",
+   "primary": "destiny matrix resources",
+   "queries": [
+    "destiny matrix resources"
+   ],
+   "roots": [
+    "destiny matrix resources"
+   ],
+   "dead": false
+  },
+  "position:rest": {
+   "kind": "position",
+   "id": "rest",
+   "primary": "destiny matrix rest",
+   "queries": [
+    "destiny matrix rest",
+    "destiny matrix your ideal way to rest"
+   ],
+   "roots": [
+    "destiny matrix rest"
+   ],
+   "dead": false
+  },
+  "position:soul_tasks": {
+   "kind": "position",
+   "id": "soul_tasks",
+   "primary": "destiny matrix soul tasks",
+   "queries": [
+    "destiny matrix soul tasks",
+    "destiny matrix spiritual tasks and lessons of the soul"
+   ],
+   "roots": [
+    "destiny matrix soul tasks"
+   ],
+   "dead": false
+  },
+  "position:years": {
+   "kind": "position",
+   "id": "years",
+   "primary": "destiny matrix years",
+   "queries": [
+    "destiny matrix years",
+    "destiny matrix years for marriage",
+    "destiny matrix years meaning"
+   ],
+   "roots": [
+    "destiny matrix years"
+   ],
+   "dead": false
+  },
+  "year:1": {
+   "kind": "year",
+   "id": "1",
+   "primary": "destiny matrix year 1",
+   "queries": [
+    "destiny matrix year 1"
+   ],
+   "roots": [
+    "destiny matrix year 1"
+   ],
+   "dead": false
+  },
+  "year:10": {
+   "kind": "year",
+   "id": "10",
+   "primary": "destiny matrix 10 year",
+   "queries": [
+    "destiny matrix 10 arcana year",
+    "destiny matrix 10 year",
+    "destiny matrix 10 year energy",
+    "destiny matrix 10 year meaning",
+    "destiny matrix year 10",
+    "destiny matrix year 10 meaning",
+    "destiny matrix year energy 10"
+   ],
+   "roots": [
+    "destiny matrix year 10"
+   ],
+   "dead": false
+  },
+  "year:11": {
+   "kind": "year",
+   "id": "11",
+   "primary": "destiny matrix 11 year",
+   "queries": [
+    "destiny matrix 11 arcana year",
+    "destiny matrix 11 year",
+    "destiny matrix 11 year energy",
+    "destiny matrix 11 year meaning",
+    "destiny matrix year 11",
+    "destiny matrix year 11 energy",
+    "destiny matrix year 11 meaning",
+    "destiny matrix year 11 reddit"
+   ],
+   "roots": [
+    "destiny matrix year 11"
+   ],
+   "dead": false
+  },
+  "year:12": {
+   "kind": "year",
+   "id": "12",
+   "primary": "destiny matrix 12 year",
+   "queries": [
+    "destiny matrix 12 year",
+    "destiny matrix 12 year meaning",
+    "destiny matrix year 12",
+    "destiny matrix year 12 energy",
+    "destiny matrix year 12 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 12"
+   ],
+   "dead": false
+  },
+  "year:13": {
+   "kind": "year",
+   "id": "13",
+   "primary": "destiny matrix 13 year",
+   "queries": [
+    "destiny matrix 13 year",
+    "destiny matrix 13 year energy",
+    "destiny matrix 13 year meaning",
+    "destiny matrix year 13",
+    "destiny matrix year 13 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 13"
+   ],
+   "dead": false
+  },
+  "year:14": {
+   "kind": "year",
+   "id": "14",
+   "primary": "destiny matrix 14 year",
+   "queries": [
+    "destiny matrix 14 year",
+    "destiny matrix 14 year meaning",
+    "destiny matrix year 14",
+    "destiny matrix year 14 meaning",
+    "destiny matrix year energy 14"
+   ],
+   "roots": [
+    "destiny matrix year 14"
+   ],
+   "dead": false
+  },
+  "year:15": {
+   "kind": "year",
+   "id": "15",
+   "primary": "destiny matrix 15 year",
+   "queries": [
+    "destiny matrix 15 year",
+    "destiny matrix 15 year energy",
+    "destiny matrix 15 year meaning",
+    "destiny matrix year 15",
+    "destiny matrix year 15 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 15"
+   ],
+   "dead": false
+  },
+  "year:16": {
+   "kind": "year",
+   "id": "16",
+   "primary": "destiny matrix 16 year",
+   "queries": [
+    "destiny matrix 16 year",
+    "destiny matrix 16 year energy",
+    "destiny matrix 16 year meaning",
+    "destiny matrix year 16",
+    "destiny matrix year 16 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 16"
+   ],
+   "dead": false
+  },
+  "year:17": {
+   "kind": "year",
+   "id": "17",
+   "primary": "destiny matrix 17 year",
+   "queries": [
+    "destiny matrix 17 year",
+    "destiny matrix 17 year energy",
+    "destiny matrix 17 year meaning",
+    "destiny matrix year 17",
+    "destiny matrix year 17 meaning",
+    "matrix of destiny 17 year"
+   ],
+   "roots": [
+    "destiny matrix year 17"
+   ],
+   "dead": false
+  },
+  "year:18": {
+   "kind": "year",
+   "id": "18",
+   "primary": "destiny matrix year 18",
+   "queries": [
+    "destiny matrix 18 year energy",
+    "destiny matrix year 18",
+    "destiny matrix year 18 meaning",
+    "destiny matrix year energy 18"
+   ],
+   "roots": [
+    "destiny matrix year 18"
+   ],
+   "dead": false
+  },
+  "year:19": {
+   "kind": "year",
+   "id": "19",
+   "primary": "destiny matrix 19 year",
+   "queries": [
+    "destiny matrix 19 year",
+    "destiny matrix 19 year meaning",
+    "destiny matrix year 19",
+    "destiny matrix year 19 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 19"
+   ],
+   "dead": false
+  },
+  "year:2": {
+   "kind": "year",
+   "id": "2",
+   "primary": "destiny matrix year 2",
+   "queries": [
+    "destiny matrix year 2"
+   ],
+   "roots": [
+    "destiny matrix year 2"
+   ],
+   "dead": false
+  },
+  "year:20": {
+   "kind": "year",
+   "id": "20",
+   "primary": "destiny matrix 20 year",
+   "queries": [
+    "destiny matrix 20 arcana year",
+    "destiny matrix 20 year",
+    "destiny matrix 20 year energy",
+    "destiny matrix 20 year meaning",
+    "destiny matrix year 20",
+    "destiny matrix year 20 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 20"
+   ],
+   "dead": false
+  },
+  "year:2026": {
+   "kind": "year",
+   "id": "2026",
+   "primary": "destiny matrix year 2026",
+   "queries": [
+    "destiny matrix year 2026"
+   ],
+   "roots": [
+    "destiny matrix year 2026"
+   ],
+   "dead": false
+  },
+  "year:21": {
+   "kind": "year",
+   "id": "21",
+   "primary": "destiny matrix 21 year",
+   "queries": [
+    "destiny matrix 21 year",
+    "destiny matrix 21 year energy",
+    "destiny matrix 21 year meaning",
+    "destiny matrix year 21",
+    "destiny matrix year 21 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 21"
+   ],
+   "dead": false
+  },
+  "year:22": {
+   "kind": "year",
+   "id": "22",
+   "primary": "destiny matrix 22 year",
+   "queries": [
+    "destiny matrix 22 year",
+    "destiny matrix 22 year meaning",
+    "destiny matrix year 22",
+    "destiny matrix year 22 meaning",
+    "destiny matrix year energy 22",
+    "matrix of destiny 22 year"
+   ],
+   "roots": [
+    "destiny matrix year 22"
+   ],
+   "dead": false
+  },
+  "year:3": {
+   "kind": "year",
+   "id": "3",
+   "primary": "destiny matrix 3 year",
+   "queries": [
+    "destiny matrix 3 year",
+    "destiny matrix year 3",
+    "destiny matrix year 3 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 3"
+   ],
+   "dead": false
+  },
+  "year:4": {
+   "kind": "year",
+   "id": "4",
+   "primary": "destiny matrix 4 year",
+   "queries": [
+    "destiny matrix 4 year",
+    "destiny matrix 4 year meaning",
+    "destiny matrix year 4",
+    "destiny matrix year 4 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 4"
+   ],
+   "dead": false
+  },
+  "year:5": {
+   "kind": "year",
+   "id": "5",
+   "primary": "destiny matrix 5 year",
+   "queries": [
+    "destiny matrix 5 year",
+    "destiny matrix 5 year energy",
+    "destiny matrix 5 year meaning",
+    "destiny matrix year 5",
+    "destiny matrix year 5 energy",
+    "destiny matrix year 5 meaning",
+    "destiny matrix year energy 5"
+   ],
+   "roots": [
+    "destiny matrix year 5"
+   ],
+   "dead": false
+  },
+  "year:6": {
+   "kind": "year",
+   "id": "6",
+   "primary": "destiny matrix 6 year",
+   "queries": [
+    "destiny matrix 6 arcana year",
+    "destiny matrix 6 year",
+    "destiny matrix 6 year energy",
+    "destiny matrix 6 year meaning",
+    "destiny matrix year 6",
+    "destiny matrix year 6 meaning",
+    "destiny matrix year 6 reddit",
+    "destiny matrix year energy 6"
+   ],
+   "roots": [
+    "destiny matrix year 6"
+   ],
+   "dead": false
+  },
+  "year:7": {
+   "kind": "year",
+   "id": "7",
+   "primary": "destiny matrix 7 year",
+   "queries": [
+    "destiny matrix 7 year",
+    "destiny matrix 7 year energy",
+    "destiny matrix 7 year meaning",
+    "destiny matrix chart 7 year",
+    "destiny matrix year 7",
+    "destiny matrix year 7 meaning",
+    "destiny matrix year energy 7"
+   ],
+   "roots": [
+    "destiny matrix year 7"
+   ],
+   "dead": false
+  },
+  "year:8": {
+   "kind": "year",
+   "id": "8",
+   "primary": "destiny matrix 8 year",
+   "queries": [
+    "destiny matrix 8 year",
+    "destiny matrix 8 year energy",
+    "destiny matrix 8 year meaning",
+    "destiny matrix arcana 8 year",
+    "destiny matrix chart 8 year",
+    "destiny matrix year 8",
+    "destiny matrix year 8 energy",
+    "destiny matrix year 8 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 8"
+   ],
+   "dead": false
+  },
+  "year:9": {
+   "kind": "year",
+   "id": "9",
+   "primary": "destiny matrix year 9",
+   "queries": [
+    "destiny matrix year 9",
+    "destiny matrix year 9 meaning"
+   ],
+   "roots": [
+    "destiny matrix year 9"
+   ],
+   "dead": false
+  },
+  "year:hub": {
+   "kind": "year",
+   "id": "hub",
+   "primary": "destiny matrix year forecast",
+   "queries": [
+    "destiny matrix year forecast"
+   ],
+   "roots": [
+    "destiny matrix year forecast"
+   ],
+   "dead": false
+  },
+  "hub:by-birth-date": {
+   "kind": "hub",
+   "id": "by-birth-date",
+   "primary": "destiny matrix by date of birth",
+   "queries": [
+    "destiny matrix by date of birth"
+   ],
+   "roots": [
+    "destiny matrix by date of birth"
+   ],
+   "dead": false
+  },
+  "hub:decoding": {
+   "kind": "hub",
+   "id": "decoding",
+   "primary": "destiny matrix decoding",
+   "queries": [
+    "destiny matrix decoding"
+   ],
+   "roots": [
+    "destiny matrix decoding"
+   ],
+   "dead": false
+  },
+  "hub:energies": {
+   "kind": "hub",
+   "id": "energies",
+   "primary": "destiny matrix energies",
+   "queries": [
+    "destiny matrix energies",
+    "destiny matrix yearly energies"
+   ],
+   "roots": [
+    "destiny matrix energies"
+   ],
+   "dead": false
+  },
+  "hub:full-reading": {
+   "kind": "hub",
+   "id": "full-reading",
+   "primary": "destiny matrix full reading",
+   "queries": [
+    "destiny matrix full reading"
+   ],
+   "roots": [
+    "destiny matrix full reading"
+   ],
+   "dead": false
+  },
+  "hub:how-to-read": {
+   "kind": "hub",
+   "id": "how-to-read",
+   "primary": "destiny matrix how to read",
+   "queries": [
+    "destiny matrix compatibility chart how to read",
+    "destiny matrix how to read",
+    "destiny matrix how to read chart",
+    "destiny matrix how to read love line",
+    "destiny matrix how to read numbers",
+    "matrix of destiny chart how to read"
+   ],
+   "roots": [
+    "destiny matrix how to read"
+   ],
+   "dead": false
+  },
+  "hub:karmic-matrix": {
+   "kind": "hub",
+   "id": "karmic-matrix",
+   "primary": "destiny matrix karmic tail",
+   "queries": [
+    "destiny matrix emperor karmic tail",
+    "destiny matrix karmic matrix",
+    "destiny matrix karmic tail",
+    "destiny matrix karmic tail calculator",
+    "destiny matrix the entry into relationships and the karmic tail — point m",
+    "destiny matrix the karmic task before 40"
+   ],
+   "roots": [
+    "destiny matrix karmic matrix"
+   ],
+   "dead": false
+  },
+  "hub:meaning": {
+   "kind": "hub",
+   "id": "meaning",
+   "primary": "destiny matrix arcana meaning",
+   "queries": [
+    "destiny matrix arcana meaning",
+    "destiny matrix arcanas meaning",
+    "destiny matrix chart arcana meaning",
+    "destiny matrix compatibility chart meaning",
+    "destiny matrix health card meaning",
+    "destiny matrix health chart meaning",
+    "destiny matrix love line meaning",
+    "destiny matrix love line numbers meaning"
+   ],
+   "roots": [
+    "destiny matrix meaning"
+   ],
+   "dead": false
+  },
+  "hub:method": {
+   "kind": "hub",
+   "id": "method",
+   "primary": "destiny matrix method",
+   "queries": [
+    "destiny matrix chart наталья ладини method",
+    "destiny matrix method"
+   ],
+   "roots": [
+    "destiny matrix method"
+   ],
+   "dead": false
+  },
+  "category:arcanum": {
+   "kind": "category",
+   "id": "arcanum",
+   "primary": "destiny matrix arcana",
+   "queries": [
+    "destiny matrix arcana",
+    "destiny matrix arcana calculator",
+    "destiny matrix arcana chart",
+    "destiny matrix arcana meaning",
+    "destiny matrix chart arcana calculator",
+    "destiny matrix chart arcana meaning",
+    "destiny matrix chart arcana number"
+   ],
+   "roots": [
+    "destiny matrix arcana"
+   ],
+   "dead": false
+  },
+  "tail:hub": {
+   "kind": "tail",
+   "id": "hub",
+   "primary": "destiny matrix karmic tail",
+   "queries": [
+    "destiny matrix emperor karmic tail",
+    "destiny matrix karmic tail",
+    "destiny matrix karmic tail calculator",
+    "destiny matrix the entry into relationships and the karmic tail — point m"
+   ],
+   "roots": [
+    "destiny matrix karmic tail"
+   ],
+   "dead": false
+  },
+  "category:position": {
+   "kind": "category",
+   "id": "position",
+   "primary": "destiny matrix positions",
+   "queries": [
+    "destiny matrix positions",
+    "destiny matrix positions explained"
+   ],
+   "roots": [
+    "destiny matrix positions"
+   ],
+   "dead": false
+  },
+  "category:year": {
+   "kind": "category",
+   "id": "year",
+   "primary": "destiny matrix year",
+   "queries": [
+    "destiny matrix tower year",
+    "destiny matrix year",
+    "destiny matrix year energy",
+    "destiny matrix year forecast"
+   ],
+   "roots": [
+    "destiny matrix year"
+   ],
+   "dead": false
+  },
+  "category:combination": {
+   "kind": "category",
+   "id": "combination",
+   "primary": "destiny matrix combinations",
+   "queries": [
+    "destiny matrix combinations"
+   ],
+   "roots": [
+    "destiny matrix combinations"
+   ],
+   "dead": false
+  },
+  "foreign:compatibility": {
+   "kind": "foreign",
+   "id": "compatibility",
+   "primary": "destiny matrix 11 compatibility",
+   "queries": [
+    "destiny matrix 10 center compatibility",
+    "destiny matrix 11 compatibility",
+    "destiny matrix 12 compatibility",
+    "destiny matrix 13 compatibility",
+    "destiny matrix 14 compatibility",
+    "destiny matrix 15 arcana compatibility",
+    "destiny matrix 15 compatibility",
+    "destiny matrix 16 compatibility"
+   ],
+   "roots": [
+    "destiny matrix compatibility"
+   ],
+   "dead": false
+  },
+  "gap:calculator": {
+   "kind": "gap",
+   "id": "calculator",
+   "primary": "destiny matrix calculator",
+   "queries": [
+    "destiny matrix 22 arcana calculator",
+    "destiny matrix 22 calculator",
+    "destiny matrix arcana calculator",
+    "destiny matrix calculator",
+    "destiny matrix calculator chart",
+    "destiny matrix calculator compatibility",
+    "destiny matrix calculator compatibility free",
+    "destiny matrix calculator death"
+   ],
+   "roots": [
+    "destiny matrix calculator"
+   ],
+   "dead": false
+  }
+ },
+ "crossings": {
+  "past_lives/3": {
+   "primary_query": "destiny matrix karmic tail 3",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 3"
+  },
+  "past_lives/4": {
+   "primary_query": "destiny matrix karmic tail 4",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 4"
+  },
+  "past_lives/5": {
+   "primary_query": "destiny matrix karmic tail 5",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 5"
+  },
+  "past_lives/6": {
+   "primary_query": "destiny matrix karmic tail 6",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 6"
+  },
+  "past_lives/7": {
+   "primary_query": "destiny matrix karmic tail 7",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 7"
+  },
+  "past_lives/8": {
+   "primary_query": "destiny matrix karmic tail 8",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 8"
+  },
+  "past_lives/9": {
+   "primary_query": "destiny matrix karmic tail 9",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 9"
+  },
+  "past_lives/10": {
+   "primary_query": "destiny matrix karmic tail 10",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 10"
+  },
+  "past_lives/11": {
+   "primary_query": "destiny matrix karmic tail 11",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 11"
+  },
+  "past_lives/15": {
+   "primary_query": "destiny matrix karmic tail 15",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 15"
+  },
+  "past_lives/16": {
+   "primary_query": "destiny matrix karmic tail 16",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 16"
+  },
+  "past_lives/18": {
+   "primary_query": "destiny matrix karmic tail 18",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 18"
+  },
+  "past_lives/19": {
+   "primary_query": "destiny matrix karmic tail 19",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 19"
+  },
+  "past_lives/20": {
+   "primary_query": "destiny matrix karmic tail 20",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 20"
+  },
+  "past_lives/21": {
+   "primary_query": "destiny matrix karmic tail 21",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 21"
+  },
+  "past_lives/22": {
+   "primary_query": "destiny matrix karmic tail 22",
+   "confirmed": false,
+   "was": "destiny matrix karmic tail 22"
+  },
+  "center/3": {
+   "primary_query": "destiny matrix center 3",
+   "confirmed": true,
+   "was": "destiny matrix center 3"
+  },
+  "center/4": {
+   "primary_query": "destiny matrix center 4",
+   "confirmed": true,
+   "was": "destiny matrix center 4"
+  },
+  "center/5": {
+   "primary_query": "destiny matrix center 5",
+   "confirmed": true,
+   "was": "destiny matrix center 5"
+  },
+  "center/6": {
+   "primary_query": "destiny matrix center 6",
+   "confirmed": true,
+   "was": "destiny matrix center 6"
+  },
+  "center/7": {
+   "primary_query": "destiny matrix center 7",
+   "confirmed": true,
+   "was": "destiny matrix center 7"
+  },
+  "center/8": {
+   "primary_query": "destiny matrix center 8",
+   "confirmed": true,
+   "was": "destiny matrix center 8"
+  },
+  "center/9": {
+   "primary_query": "destiny matrix center 9",
+   "confirmed": true,
+   "was": "destiny matrix center 9"
+  },
+  "center/10": {
+   "primary_query": "destiny matrix center 10",
+   "confirmed": true,
+   "was": "destiny matrix center 10"
+  },
+  "center/11": {
+   "primary_query": "destiny matrix center 11",
+   "confirmed": true,
+   "was": "destiny matrix center 11"
+  },
+  "center/12": {
+   "primary_query": "destiny matrix center 12",
+   "confirmed": true,
+   "was": "destiny matrix center 12"
+  },
+  "center/13": {
+   "primary_query": "destiny matrix center 13",
+   "confirmed": true,
+   "was": "destiny matrix center 13"
+  },
+  "center/14": {
+   "primary_query": "destiny matrix center 14",
+   "confirmed": false,
+   "was": "destiny matrix center 14"
+  },
+  "center/16": {
+   "primary_query": "destiny matrix center 16",
+   "confirmed": false,
+   "was": "destiny matrix center 16"
+  },
+  "center/18": {
+   "primary_query": "destiny matrix center 18",
+   "confirmed": false,
+   "was": "destiny matrix center 18"
+  },
+  "center/20": {
+   "primary_query": "destiny matrix center 20",
+   "confirmed": false,
+   "was": "destiny matrix center 20"
+  },
+  "center/22": {
+   "primary_query": "destiny matrix center 22",
+   "confirmed": false,
+   "was": "destiny matrix center 22"
+  },
+  "relations/3": {
+   "primary_query": "destiny matrix relationships 3",
+   "confirmed": false,
+   "was": "destiny matrix relationships 3"
+  },
+  "relations/4": {
+   "primary_query": "destiny matrix relationships 4",
+   "confirmed": false,
+   "was": "destiny matrix relationships 4"
+  },
+  "relations/5": {
+   "primary_query": "destiny matrix relationships 5",
+   "confirmed": false,
+   "was": "destiny matrix relationships 5"
+  },
+  "relations/6": {
+   "primary_query": "destiny matrix relationships 6",
+   "confirmed": false,
+   "was": "destiny matrix relationships 6"
+  },
+  "relations/7": {
+   "primary_query": "destiny matrix relationships 7",
+   "confirmed": false,
+   "was": "destiny matrix relationships 7"
+  },
+  "relations/8": {
+   "primary_query": "destiny matrix relationships 8",
+   "confirmed": false,
+   "was": "destiny matrix relationships 8"
+  },
+  "relations/9": {
+   "primary_query": "destiny matrix relationships 9",
+   "confirmed": false,
+   "was": "destiny matrix relationships 9"
+  },
+  "relations/10": {
+   "primary_query": "destiny matrix relationships 10",
+   "confirmed": false,
+   "was": "destiny matrix relationships 10"
+  },
+  "relations/11": {
+   "primary_query": "destiny matrix relationships 11",
+   "confirmed": false,
+   "was": "destiny matrix relationships 11"
+  },
+  "relations/15": {
+   "primary_query": "destiny matrix relationships 15",
+   "confirmed": false,
+   "was": "destiny matrix relationships 15"
+  },
+  "relations/17": {
+   "primary_query": "destiny matrix relationships 17",
+   "confirmed": false,
+   "was": "destiny matrix relationships 17"
+  },
+  "relations/18": {
+   "primary_query": "destiny matrix relationships 18",
+   "confirmed": false,
+   "was": "destiny matrix relationships 18"
+  },
+  "relations/19": {
+   "primary_query": "destiny matrix relationships 19",
+   "confirmed": false,
+   "was": "destiny matrix relationships 19"
+  },
+  "relations/20": {
+   "primary_query": "destiny matrix relationships 20",
+   "confirmed": false,
+   "was": "destiny matrix relationships 20"
+  },
+  "relations/21": {
+   "primary_query": "destiny matrix relationships 21",
+   "confirmed": false,
+   "was": "destiny matrix relationships 21"
+  },
+  "relations/22": {
+   "primary_query": "destiny matrix relationships 22",
+   "confirmed": false,
+   "was": "destiny matrix relationships 22"
+  },
+  "money/5": {
+   "primary_query": "destiny matrix money line 5",
+   "confirmed": false,
+   "was": "destiny matrix money line 5"
+  },
+  "money/6": {
+   "primary_query": "destiny matrix money line 6",
+   "confirmed": false,
+   "was": "destiny matrix money line 6"
+  },
+  "money/7": {
+   "primary_query": "destiny matrix money line 7",
+   "confirmed": true,
+   "was": "destiny matrix money line 7"
+  },
+  "money/8": {
+   "primary_query": "destiny matrix money line 8",
+   "confirmed": true,
+   "was": "destiny matrix money line 8"
+  },
+  "money/9": {
+   "primary_query": "destiny matrix money line 9",
+   "confirmed": false,
+   "was": "destiny matrix money line 9"
+  },
+  "money/10": {
+   "primary_query": "destiny matrix money line 10",
+   "confirmed": true,
+   "was": "destiny matrix money line 10"
+  },
+  "money/18": {
+   "primary_query": "destiny matrix money line 18",
+   "confirmed": true,
+   "was": "destiny matrix money line 18"
+  },
+  "money/19": {
+   "primary_query": "destiny matrix money line 19",
+   "confirmed": true,
+   "was": "destiny matrix money line 19"
+  },
+  "money/20": {
+   "primary_query": "destiny matrix money line 20",
+   "confirmed": false,
+   "was": "destiny matrix money line 20"
+  },
+  "money/21": {
+   "primary_query": "destiny matrix money line 21",
+   "confirmed": false,
+   "was": "destiny matrix money line 21"
+  },
+  "money/22": {
+   "primary_query": "destiny matrix money line 22",
+   "confirmed": false,
+   "was": "destiny matrix money line 22"
+  },
+  "love_middle/3": {
+   "primary_query": "destiny matrix love line 3",
+   "confirmed": true,
+   "was": "destiny matrix love line 3"
+  },
+  "love_middle/4": {
+   "primary_query": "destiny matrix love line 4",
+   "confirmed": true,
+   "was": "destiny matrix love line 4"
+  },
+  "love_middle/5": {
+   "primary_query": "destiny matrix love line 5",
+   "confirmed": true,
+   "was": "destiny matrix love line 5"
+  },
+  "love_middle/6": {
+   "primary_query": "destiny matrix love line 6",
+   "confirmed": false,
+   "was": "destiny matrix love line 6"
+  },
+  "love_middle/7": {
+   "primary_query": "destiny matrix love line 7",
+   "confirmed": true,
+   "was": "destiny matrix love line 7"
+  },
+  "love_middle/8": {
+   "primary_query": "destiny matrix love line 8",
+   "confirmed": true,
+   "was": "destiny matrix love line 8"
+  },
+  "love_middle/9": {
+   "primary_query": "destiny matrix love line 9",
+   "confirmed": true,
+   "was": "destiny matrix love line 9"
+  },
+  "love_middle/10": {
+   "primary_query": "destiny matrix love line 10",
+   "confirmed": false,
+   "was": "destiny matrix love line 10"
+  },
+  "love_middle/11": {
+   "primary_query": "destiny matrix love line 11",
+   "confirmed": true,
+   "was": "destiny matrix love line 11"
+  },
+  "love_middle/12": {
+   "primary_query": "destiny matrix love line 12",
+   "confirmed": true,
+   "was": "destiny matrix love line 12"
+  },
+  "love_middle/13": {
+   "primary_query": "destiny matrix love line 13",
+   "confirmed": false,
+   "was": "destiny matrix love line 13"
+  },
+  "love_middle/14": {
+   "primary_query": "destiny matrix love line 14",
+   "confirmed": false,
+   "was": "destiny matrix love line 14"
+  },
+  "love_middle/15": {
+   "primary_query": "destiny matrix love line 15",
+   "confirmed": false,
+   "was": "destiny matrix love line 15"
+  },
+  "love_middle/16": {
+   "primary_query": "destiny matrix love line 16",
+   "confirmed": true,
+   "was": "destiny matrix love line 16"
+  },
+  "love_middle/17": {
+   "primary_query": "destiny matrix love line 17",
+   "confirmed": true,
+   "was": "destiny matrix love line 17"
+  },
+  "love_middle/18": {
+   "primary_query": "destiny matrix love line 18",
+   "confirmed": true,
+   "was": "destiny matrix love line 18"
+  },
+  "love_middle/19": {
+   "primary_query": "destiny matrix love line 19",
+   "confirmed": true,
+   "was": "destiny matrix love line 19"
+  },
+  "love_middle/20": {
+   "primary_query": "destiny matrix love line 20",
+   "confirmed": true,
+   "was": "destiny matrix love line 20"
+  },
+  "love_middle/21": {
+   "primary_query": "destiny matrix love line 21",
+   "confirmed": true,
+   "was": "destiny matrix love line 21"
+  },
+  "love_middle/22": {
+   "primary_query": "destiny matrix love line 22",
+   "confirmed": true,
+   "was": "destiny matrix love line 22"
+  },
+  "profession/4": {
+   "primary_query": "destiny matrix profession 4",
+   "confirmed": false,
+   "was": "destiny matrix profession 4"
+  },
+  "profession/5": {
+   "primary_query": "destiny matrix profession 5",
+   "confirmed": false,
+   "was": "destiny matrix profession 5"
+  },
+  "profession/6": {
+   "primary_query": "destiny matrix profession 6",
+   "confirmed": false,
+   "was": "destiny matrix profession 6"
+  },
+  "profession/7": {
+   "primary_query": "destiny matrix profession 7",
+   "confirmed": false,
+   "was": "destiny matrix profession 7"
+  },
+  "profession/8": {
+   "primary_query": "destiny matrix profession 8",
+   "confirmed": false,
+   "was": "destiny matrix profession 8"
+  },
+  "profession/9": {
+   "primary_query": "destiny matrix profession 9",
+   "confirmed": false,
+   "was": "destiny matrix profession 9"
+  },
+  "profession/11": {
+   "primary_query": "destiny matrix profession 11",
+   "confirmed": false,
+   "was": "destiny matrix profession 11"
+  },
+  "profession/12": {
+   "primary_query": "destiny matrix profession 12",
+   "confirmed": false,
+   "was": "destiny matrix profession 12"
+  },
+  "profession/18": {
+   "primary_query": "destiny matrix profession 18",
+   "confirmed": false,
+   "was": "destiny matrix profession 18"
+  },
+  "day/10": {
+   "primary_query": "destiny matrix day 10",
+   "confirmed": false,
+   "was": "destiny matrix day 10"
+  },
+  "day/11": {
+   "primary_query": "destiny matrix day 11",
+   "confirmed": false,
+   "was": "destiny matrix day 11"
+  }
+ },
+ "pages": [
+  {
+   "kind": "arcana",
+   "page": "1",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 1",
+    "destiny matrix the magician"
+   ],
+   "unconfirmed": [
+    "1 in the destiny matrix",
+    "arcanum 1 in the destiny matrix",
+    "arcanum 1 meaning",
+    "what does arcanum 1 mean",
+    "meaning of arcanum 1 in the destiny matrix",
+    "what arcanum 1 stands for in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "10",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 10",
+    "destiny matrix 10 arcana",
+    "destiny matrix 10 meaning",
+    "destiny matrix chart arcana 10",
+    "destiny matrix the wheel"
+   ],
+   "unconfirmed": [
+    "10 in the destiny matrix",
+    "arcanum 10 in the destiny matrix",
+    "arcanum 10 meaning"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "11",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 11",
+    "destiny matrix 11 arcana",
+    "destiny matrix 11 meaning",
+    "destiny matrix arcana 11",
+    "destiny matrix chart arcana 11",
+    "destiny matrix justice"
+   ],
+   "unconfirmed": [
+    "11 in the destiny matrix",
+    "arcanum 11 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "12",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 12",
+    "destiny matrix 12 arcana",
+    "destiny matrix 12 meaning",
+    "destiny matrix the hanged man"
+   ],
+   "unconfirmed": [
+    "12 in destiny matrix",
+    "arcanum 12 in destiny matrix",
+    "arcanum 12 meaning",
+    "what does arcanum 12 mean"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "13",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 13",
+    "destiny matrix 13 arcana",
+    "destiny matrix 13 meaning",
+    "destiny matrix calculator death",
+    "destiny matrix chart death",
+    "destiny matrix chart death date",
+    "destiny matrix death",
+    "destiny matrix death age"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "14",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 14",
+    "destiny matrix 14 arcana",
+    "destiny matrix 14 energy",
+    "destiny matrix 14 love",
+    "destiny matrix 14 meaning",
+    "destiny matrix temperance"
+   ],
+   "unconfirmed": [
+    "14 in destiny matrix",
+    "arcanum 14 in destiny matrix"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "15",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 15",
+    "destiny matrix 15 arcana",
+    "destiny matrix 15 meaning",
+    "destiny matrix the devil"
+   ],
+   "unconfirmed": [
+    "15 in destiny matrix",
+    "15 arcanum in destiny matrix",
+    "arcanum 15 meaning",
+    "what does arcanum 15 mean"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "16",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 16",
+    "destiny matrix 16 arcana",
+    "destiny matrix 16 meaning",
+    "destiny matrix the tower"
+   ],
+   "unconfirmed": [
+    "16 in destiny matrix",
+    "16 arcanum in destiny matrix",
+    "arcanum 16 meaning",
+    "what does arcanum 16 mean"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "17",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 17",
+    "destiny matrix 17 arcana",
+    "destiny matrix 17 energy",
+    "destiny matrix 17 meaning",
+    "matrix of destiny 17",
+    "matrix of destiny 17 love",
+    "matrix of destiny 17 meaning",
+    "destiny matrix the star"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "18",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 18",
+    "destiny matrix 18 arcana",
+    "destiny matrix 18 meaning",
+    "destiny matrix the moon"
+   ],
+   "unconfirmed": [
+    "18 in destiny matrix",
+    "arcanum 18 in destiny matrix",
+    "18 arcanum meaning",
+    "what does arcanum 18 mean"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "19",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 19",
+    "destiny matrix 19 arcana",
+    "destiny matrix 19 meaning",
+    "destiny matrix 19 money",
+    "matrix of destiny 19",
+    "matrix of destiny 19 meaning",
+    "destiny matrix the sun"
+   ],
+   "unconfirmed": [
+    "19 in destiny matrix"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "2",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 2",
+    "destiny matrix the high priestess"
+   ],
+   "unconfirmed": [
+    "2 in destiny matrix",
+    "arcanum 2 in destiny matrix",
+    "2 arcanum meaning",
+    "what does 2 mean in destiny matrix",
+    "meaning of arcanum 2 in the destiny matrix",
+    "high priestess destiny matrix meaning"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "20",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 20",
+    "destiny matrix 20 arcana",
+    "destiny matrix 20 love",
+    "destiny matrix 20 meaning",
+    "destiny matrix judgement"
+   ],
+   "unconfirmed": [
+    "20 in the destiny matrix",
+    "arcanum 20 in the destiny matrix",
+    "arcanum 20 meaning"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "21",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 21",
+    "destiny matrix 21 arcana",
+    "destiny matrix 21 energy",
+    "destiny matrix 21 meaning",
+    "destiny matrix the world"
+   ],
+   "unconfirmed": [
+    "21 in the destiny matrix",
+    "arcanum 21 in the destiny matrix",
+    "arcanum 21 meaning"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "22",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 22",
+    "destiny matrix 22 arcana",
+    "destiny matrix 22 arcana calculator",
+    "destiny matrix 22 calculator",
+    "destiny matrix 22 energy",
+    "destiny matrix 22 love",
+    "destiny matrix 22 meaning",
+    "matrix of destiny 22"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "3",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 3",
+    "destiny matrix 3 arcana",
+    "destiny matrix 3 meaning",
+    "destiny matrix chart 3 arcanas",
+    "destiny matrix chart arcana 3",
+    "destiny matrix chart calculator 3 arcanas",
+    "destiny matrix chart calculator online 3 arcanas",
+    "destiny matrix purpose 3"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "4",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 4",
+    "destiny matrix 4 arcana",
+    "destiny matrix 4 energy",
+    "destiny matrix 4 love",
+    "destiny matrix 4 meaning",
+    "destiny matrix chart the emperor",
+    "destiny matrix the emperor"
+   ],
+   "unconfirmed": [
+    "arcanum 4 destiny matrix"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "5",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 5",
+    "destiny matrix 5 arcana",
+    "destiny matrix 5 love",
+    "destiny matrix 5 meaning",
+    "destiny matrix arcana 5",
+    "destiny matrix arcana 5 meaning",
+    "destiny matrix chart arcana 5",
+    "destiny matrix the hierophant"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "6",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 6",
+    "destiny matrix 6 arcana",
+    "destiny matrix 6 meaning",
+    "destiny matrix chart arcana 6",
+    "destiny matrix purpose 6",
+    "destiny matrix the lovers"
+   ],
+   "unconfirmed": [
+    "6 in the destiny matrix",
+    "6 arcanum in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "arcana",
+   "page": "7",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 7",
+    "destiny matrix 7 arcana",
+    "destiny matrix 7 energy",
+    "destiny matrix 7 meaning",
+    "destiny matrix arcana 7",
+    "destiny matrix arcana 7 meaning",
+    "destiny matrix chart arcana 7",
+    "destiny matrix the chariot"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "8",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 8",
+    "destiny matrix 8 arcana",
+    "destiny matrix 8 arcana meaning",
+    "destiny matrix 8 heart",
+    "destiny matrix 8 meaning",
+    "destiny matrix arcana 8",
+    "destiny matrix chart 8 arcana",
+    "destiny matrix chart 8 meaning",
+    "destiny matrix strength"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "arcana",
+   "page": "9",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 9",
+    "destiny matrix 9 arcana",
+    "destiny matrix 9 love",
+    "destiny matrix 9 meaning",
+    "destiny matrix arcana 9",
+    "destiny matrix arcana 9 meaning",
+    "destiny matrix chart 9 meaning",
+    "destiny matrix chart arcana 9"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "category-hubs",
+   "page": "arcanum",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix arcana",
+    "destiny matrix arcana calculator",
+    "destiny matrix arcana chart",
+    "destiny matrix arcana meaning",
+    "destiny matrix chart arcana calculator",
+    "destiny matrix chart arcana meaning",
+    "destiny matrix chart arcana number"
+   ],
+   "unconfirmed": [
+    "arcana meaning in destiny matrix"
+   ]
+  },
+  {
+   "kind": "category-hubs",
+   "page": "chakra",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "chakras in the destiny matrix",
+    "destiny matrix chakra arcana",
+    "what do the chakras mean in the destiny matrix",
+    "destiny matrix chakra table explained",
+    "destiny matrix chakras meaning"
+   ]
+  },
+  {
+   "kind": "category-hubs",
+   "page": "combination",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix combinations",
+    "destiny matrix compatibility"
+   ],
+   "unconfirmed": [
+    "arcana compatibility in the destiny matrix",
+    "destiny matrix compatibility arcanum",
+    "calculate destiny matrix compatibility",
+    "destiny matrix compatibility free"
+   ]
+  },
+  {
+   "kind": "category-hubs",
+   "page": "karmic-tail",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "tails in the destiny matrix",
+    "karmic tail in the destiny matrix",
+    "what is the karmic tail in the destiny matrix",
+    "karmic tails meaning explained",
+    "how to read the karmic tail"
+   ]
+  },
+  {
+   "kind": "category-hubs",
+   "page": "position",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix positions",
+    "destiny matrix positions explained"
+   ],
+   "unconfirmed": [
+    "lines in the destiny matrix",
+    "points in the destiny matrix",
+    "positions in the destiny matrix",
+    "arcana positions in the destiny matrix",
+    "what the points in the destiny matrix mean"
+   ]
+  },
+  {
+   "kind": "category-hubs",
+   "page": "year",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix tower year",
+    "destiny matrix year",
+    "destiny matrix year energy",
+    "destiny matrix year forecast"
+   ],
+   "unconfirmed": [
+    "destiny matrix for the year",
+    "arcana for the year in the destiny matrix meaning",
+    "destiny matrix forecast",
+    "how to calculate the matrix for the year"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "author",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "arcana sense author",
+    "arcana sense about the author",
+    "who writes destiny matrix readings",
+    "arcana sense who runs it"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "by-birth-date",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix by date of birth"
+   ],
+   "unconfirmed": [
+    "destiny matrix by birth date reading",
+    "destiny matrix birth date decoded",
+    "free destiny matrix reading by date of birth"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "decoding",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix decoding"
+   ],
+   "unconfirmed": [
+    "destiny matrix numbers meaning",
+    "how to read a destiny matrix chart",
+    "destiny matrix with full decoding"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "energies",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix energies",
+    "destiny matrix yearly energies"
+   ],
+   "unconfirmed": [
+    "energies in the destiny matrix",
+    "what are energies in the destiny matrix",
+    "destiny matrix energy of the year",
+    "destiny matrix centre energy",
+    "types of energies in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "full-reading",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix full reading",
+    "full destiny matrix reading"
+   ],
+   "unconfirmed": [
+    "destiny matrix full decoding",
+    "destiny matrix decoding in full"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "how-to-read",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix compatibility chart how to read",
+    "destiny matrix how to read",
+    "destiny matrix how to read chart",
+    "destiny matrix how to read love line",
+    "destiny matrix how to read numbers",
+    "matrix of destiny chart how to read"
+   ],
+   "unconfirmed": [
+    "how to read a destiny matrix",
+    "how to understand your destiny matrix"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "karmic-matrix",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix emperor karmic tail",
+    "destiny matrix karmic matrix",
+    "destiny matrix karmic tail",
+    "destiny matrix karmic tail calculator",
+    "destiny matrix the entry into relationships and the karmic tail — point m",
+    "destiny matrix the karmic task before 40",
+    "karmic destiny matrix"
+   ],
+   "unconfirmed": [
+    "karmic destiny matrix reading"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "meaning",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix arcanas meaning",
+    "destiny matrix compatibility chart meaning",
+    "destiny matrix health card meaning",
+    "destiny matrix health chart meaning",
+    "destiny matrix love line meaning",
+    "destiny matrix love line numbers meaning"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "hubs",
+   "page": "method",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix chart наталья ладини method",
+    "destiny matrix method"
+   ],
+   "unconfirmed": [
+    "destiny matrix ladini",
+    "destiny matrix ladini method",
+    "natalia ladini destiny matrix",
+    "natalia ladini method destiny matrix",
+    "destiny matrix ladini system",
+    "how to calculate the destiny matrix ladini",
+    "how does the destiny matrix work"
+   ]
+  },
+  {
+   "kind": "hubs",
+   "page": "programs",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix programs",
+    "destiny matrix programs calculator",
+    "destiny matrix programs codes",
+    "destiny matrix programs explained",
+    "destiny matrix programs list",
+    "destiny matrix programs meaning",
+    "destiny matrix programs tumblr"
+   ],
+   "unconfirmed": [
+    "what are programs in destiny matrix"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "12-16-4",
+   "primary": "destiny matrix karmic tail 12 16 4",
+   "confirmed": [
+    "destiny matrix karmic tail 12 16 4",
+    "destiny matrix 12 16 4"
+   ],
+   "unconfirmed": [
+    "karmic tail 12 16 4",
+    "12 16 4 destiny matrix tail",
+    "what does 12 16 4 mean",
+    "12 16 4 arcana explained"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "12-19-7",
+   "primary": "destiny matrix karmic tail 12 19 7",
+   "confirmed": [
+    "destiny matrix karmic tail 12 19 7",
+    "destiny matrix 12 19 7"
+   ],
+   "unconfirmed": [
+    "karmic tail 12 19 7",
+    "12 19 7 destiny matrix tail",
+    "what does 12 19 7 mean",
+    "12 19 7 arcana explained"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "15-20-5",
+   "primary": "destiny matrix karmic tail 15 20 5",
+   "confirmed": [
+    "destiny matrix karmic tail 15 20 5",
+    "destiny matrix 15 20 5"
+   ],
+   "unconfirmed": [
+    "karmic tail 15 20 5",
+    "15 20 5 destiny matrix tail",
+    "what does 15 20 5 mean",
+    "15 20 5 arcana explained"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "15-5-8",
+   "primary": "destiny matrix karmic tail 15 5 8",
+   "confirmed": [
+    "destiny matrix karmic tail 15 5 8"
+   ],
+   "unconfirmed": [
+    "15 5 8 destiny matrix",
+    "karmic tail 15 5 8",
+    "15 5 8 in the destiny matrix",
+    "15 5 8 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "15-8-11",
+   "primary": "destiny matrix 15 8 11",
+   "confirmed": [],
+   "unconfirmed": [
+    "destiny matrix 15 8 11",
+    "karmic tail 15 8 11",
+    "15 8 11 in the destiny matrix",
+    "15 8 11 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "18-3-12",
+   "primary": "destiny matrix karmic tail 18 3 12",
+   "confirmed": [
+    "destiny matrix karmic tail 18 3 12",
+    "destiny matrix money line 18 3 12"
+   ],
+   "unconfirmed": [
+    "18 3 12 destiny matrix karmic",
+    "karmic tail 18 3 12",
+    "18 3 12 in the destiny matrix",
+    "18 3 12 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "18-6-15",
+   "primary": "destiny matrix 18 6 15",
+   "confirmed": [
+    "destiny matrix 18 6 15",
+    "destiny matrix money line 18 6 15"
+   ],
+   "unconfirmed": [
+    "karmic tail 18 6 15",
+    "18 6 15 in the destiny matrix",
+    "18 6 15 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "18-6-6",
+   "primary": "destiny matrix 18 6 6",
+   "confirmed": [
+    "destiny matrix 18 6 6",
+    "18 6 6 destiny matrix"
+   ],
+   "unconfirmed": [
+    "karmic tail 18 6 6",
+    "18 6 6 in the destiny matrix",
+    "18 6 6 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "18-9-9",
+   "primary": "destiny matrix 18 9 9 karmic tail",
+   "confirmed": [
+    "destiny matrix 18 9 9 karmic tail",
+    "destiny matrix 18 9 9",
+    "destiny matrix 18 9 9 love line",
+    "destiny matrix money line 18 9 9"
+   ],
+   "unconfirmed": [
+    "karmic tail 18 9 9",
+    "18 9 9 in the destiny matrix",
+    "18 9 9 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "21-10-16",
+   "primary": "21 10 16 destiny matrix",
+   "confirmed": [],
+   "unconfirmed": [
+    "21 10 16 destiny matrix",
+    "karmic tail 21 10 16 explained",
+    "what does 21 10 16 mean",
+    "21 10 16 arcana reading"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "21-10-7",
+   "primary": "destiny matrix 21 10 7",
+   "confirmed": [],
+   "unconfirmed": [
+    "destiny matrix 21 10 7",
+    "destiny matrix karmic tail 21 10 7",
+    "karmic tail 21 10 7",
+    "21 10 7 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "21-4-10",
+   "primary": "destiny matrix karmic tail 21 4 10",
+   "confirmed": [
+    "destiny matrix karmic tail 21 4 10",
+    "destiny matrix 21 4 10",
+    "21 4 10 destiny matrix",
+    "destiny matrix love line 21 4 10"
+   ],
+   "unconfirmed": [
+    "karmic tail 21 4 10 meaning",
+    "what does 21 4 10 mean",
+    "21 4 10 arcana reading"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "21-7-13",
+   "primary": "destiny matrix 21 7 13",
+   "confirmed": [
+    "destiny matrix 21 7 13"
+   ],
+   "unconfirmed": [
+    "karmic tail 21 7 13",
+    "21 7 13 in the destiny matrix",
+    "21 7 13 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "3-13-10",
+   "primary": "destiny matrix 3 13 10",
+   "confirmed": [],
+   "unconfirmed": [
+    "destiny matrix 3 13 10",
+    "destiny matrix karmic tail 3 13 10",
+    "karmic tail 3 13 10",
+    "3 13 10 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "3-22-19",
+   "primary": "destiny matrix 3 22 19 karmic tail",
+   "confirmed": [
+    "destiny matrix 3 22 19 karmic tail",
+    "destiny matrix 3 22 19",
+    "destiny matrix love line 3 22 19"
+   ],
+   "unconfirmed": [
+    "karmic tail 3 22 19",
+    "3 22 19 in the destiny matrix",
+    "3 22 19 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "3-7-22",
+   "primary": "3 7 22 destiny matrix",
+   "confirmed": [],
+   "unconfirmed": [
+    "3 7 22 destiny matrix",
+    "karmic tail 3 7 22",
+    "3 7 22 in the destiny matrix",
+    "3 7 22 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "6-14-8",
+   "primary": "destiny matrix 6 14 8",
+   "confirmed": [],
+   "unconfirmed": [
+    "destiny matrix 6 14 8",
+    "destiny matrix karmic tail 6 14 8",
+    "karmic tail 6 14 8",
+    "6 14 8 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "6-17-11",
+   "primary": "destiny matrix karmic tail 6 17 11",
+   "confirmed": [
+    "destiny matrix karmic tail 6 17 11"
+   ],
+   "unconfirmed": [
+    "destiny matrix 6 17 11",
+    "karmic tail 6 17 11",
+    "6 17 11 in the destiny matrix",
+    "6 17 11 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "6-20-14",
+   "primary": "6 20 14 destiny matrix",
+   "confirmed": [
+    "6 20 14 destiny matrix"
+   ],
+   "unconfirmed": [
+    "karmic tail 6 20 14",
+    "what 6 20 14 means in the destiny matrix",
+    "decoding the 6-20-14 tail"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "6-5-17",
+   "primary": "destiny matrix 6 5 17",
+   "confirmed": [],
+   "unconfirmed": [
+    "destiny matrix 6 5 17",
+    "karmic tail 6 5 17",
+    "6 5 17 in the destiny matrix",
+    "6 5 17 tail meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "6-8-20",
+   "primary": "destiny matrix 6 8 20",
+   "confirmed": [],
+   "unconfirmed": [
+    "destiny matrix 6 8 20",
+    "karmic tail 6 8 20",
+    "6 8 20 in the destiny matrix",
+    "6 8 20 tail explained"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "9-12-3",
+   "primary": "destiny matrix 9 12 3 karmic tail",
+   "confirmed": [
+    "destiny matrix 9 12 3 karmic tail",
+    "destiny matrix karmic tail 9 12 3",
+    "destiny matrix 9 12 3"
+   ],
+   "unconfirmed": [
+    "karmic tail 9 12 3",
+    "9 12 3 destiny matrix tail",
+    "what 9 12 3 means in the matrix",
+    "9 12 3 arcana explained"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "9-15-6",
+   "primary": "karmic tail 9 15 6",
+   "confirmed": [
+    "destiny matrix love line 9 15 6"
+   ],
+   "unconfirmed": [
+    "karmic tail 9 15 6",
+    "9 15 6 destiny matrix tail",
+    "what 9 15 6 means in the matrix",
+    "9 15 6 arcana explained"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "9-18-9",
+   "primary": "destiny matrix 9 18 9",
+   "confirmed": [
+    "destiny matrix 9 18 9",
+    "destiny matrix karmic tail 9 18 9"
+   ],
+   "unconfirmed": [
+    "karmic tail 9 18 9",
+    "9 18 9 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "9-3-21",
+   "primary": "destiny matrix 9 3 21",
+   "confirmed": [
+    "destiny matrix love line 9 3 21"
+   ],
+   "unconfirmed": [
+    "destiny matrix 9 3 21",
+    "karmic tail 9 3 21",
+    "9 3 21 in the destiny matrix",
+    "9 3 21 meaning"
+   ]
+  },
+  {
+   "kind": "karmic-tails",
+   "page": "9-9-18",
+   "primary": "9 9 18 in the destiny matrix",
+   "confirmed": [],
+   "unconfirmed": [
+    "9 9 18 in the destiny matrix",
+    "karmic tail 9 9 18",
+    "9 9 18 meaning"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "ancestry",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix family line",
+    "destiny matrix family line tasks down to the seventh generation",
+    "destiny matrix the female family line",
+    "destiny matrix the support and gifts of your family line"
+   ],
+   "unconfirmed": [
+    "family line tasks destiny matrix",
+    "seventh generation in destiny matrix",
+    "family tasks to the seventh generation",
+    "ancestral tasks destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "body_resource",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix health",
+    "destiny matrix health card",
+    "destiny matrix health card calculator",
+    "destiny matrix health chart",
+    "destiny matrix health line"
+   ],
+   "unconfirmed": [
+    "body resource destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "center",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix center",
+    "destiny matrix center number"
+   ],
+   "unconfirmed": [
+    "centre in the destiny matrix",
+    "arcanum in the centre of the destiny matrix",
+    "destiny matrix heart of the chart",
+    "meaning of the centre in the destiny matrix",
+    "what the centre in the destiny matrix means",
+    "which arcanum stands in the centre"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "chakras",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "energy map in the destiny matrix",
+    "destiny matrix energy map",
+    "chakras in the destiny matrix meaning",
+    "destiny matrix chakra energy map"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "comfort",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix comfort zone"
+   ],
+   "unconfirmed": [
+    "comfort zone in the destiny matrix",
+    "comfort in the destiny matrix",
+    "destiny matrix comfort",
+    "arcanum of the comfort zone in the destiny matrix",
+    "what gives you inner comfort in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "comfort_south",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix relationship line"
+   ],
+   "unconfirmed": [
+    "point m in the destiny matrix",
+    "southern point of the destiny matrix",
+    "entry to the relationship line destiny matrix",
+    "destiny matrix point m meaning",
+    "destiny matrix lower inner point"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "descendants",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix male line",
+    "destiny matrix the material male line — point h",
+    "destiny matrix the spiritual male line — point f"
+   ],
+   "unconfirmed": [
+    "material male line destiny matrix",
+    "point h destiny matrix",
+    "father material line destiny matrix",
+    "material family square",
+    "point h meaning destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "family_gifts",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix family gifts"
+   ],
+   "unconfirmed": [
+    "family line in the destiny matrix",
+    "what are family gifts in the destiny matrix",
+    "family support destiny matrix",
+    "support and gifts of your family line destiny matrix",
+    "ancestral gifts in the destiny matrix",
+    "family gifts by date of birth"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "father_line",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix father line"
+   ],
+   "unconfirmed": [
+    "male line in the destiny matrix",
+    "ancestral line in the destiny matrix",
+    "male family line destiny matrix",
+    "father line in the destiny matrix",
+    "father arcanum",
+    "paternal line by date of birth"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "karma40",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix karma",
+    "destiny matrix the karma of relationships with parents and children"
+   ],
+   "unconfirmed": [
+    "karmic task before 40",
+    "tasks before 40 destiny matrix",
+    "karma before 40 by date of birth",
+    "arcanum of the karmic task",
+    "karmic task before 40 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "loops",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "repeating life scenarios by date of birth",
+    "how to remove a program destiny matrix",
+    "how to work through a program in the destiny matrix",
+    "programs: what keeps coming round in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "love_middle",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix love line",
+    "destiny matrix love line numbers"
+   ],
+   "unconfirmed": [
+    "arcanum under the heart",
+    "arcanum under the heart in the destiny matrix",
+    "destiny matrix under the heart"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "money",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix how money changes after 40",
+    "destiny matrix money",
+    "destiny matrix money after 40",
+    "destiny matrix money line"
+   ],
+   "unconfirmed": [
+    "money in the destiny matrix",
+    "money channel in the destiny matrix",
+    "arcanum of money in the destiny matrix",
+    "destiny matrix money by date of birth"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "money40",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "money after 40 in the destiny matrix",
+    "destiny matrix money after 40 years",
+    "how money changes after 40 in the destiny matrix",
+    "income after 40 by date of birth",
+    "second half of life destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "mother_line",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix mother line"
+   ],
+   "unconfirmed": [
+    "spiritual female line destiny matrix",
+    "point g destiny matrix",
+    "mother line in the destiny matrix",
+    "maternal line by date of birth",
+    "arcanum of the female family line"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "parents_children",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix parents and children"
+   ],
+   "unconfirmed": [
+    "karma with parents destiny matrix",
+    "arcanum of children in the destiny matrix",
+    "karma of relationships with parents and children destiny matrix",
+    "relationship with parents by date of birth"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "past_lives",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix past lives",
+    "tasks of past incarnations destiny matrix",
+    "past lives destiny matrix"
+   ],
+   "unconfirmed": [
+    "past incarnations in the destiny matrix",
+    "karmic tail meaning by date of birth",
+    "karmic tasks of past lives destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "profession",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix profession",
+    "destiny matrix profession and work you love"
+   ],
+   "unconfirmed": [
+    "profession in destiny matrix",
+    "talents in the destiny matrix",
+    "arcanum of profession destiny matrix",
+    "talent line in the destiny matrix",
+    "work you love destiny matrix",
+    "profession by destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "purpose",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix personal purpose",
+    "destiny matrix purpose",
+    "destiny matrix social purpose",
+    "destiny matrix your purpose"
+   ],
+   "unconfirmed": [
+    "purpose in the destiny matrix",
+    "your purpose in the destiny matrix",
+    "how to calculate purpose in the destiny matrix",
+    "personal and social purpose"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "purpose_personal",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "personal purpose in the destiny matrix",
+    "arcanum of personal purpose",
+    "personal purpose by date of birth",
+    "purpose for yourself destiny matrix",
+    "first level of purpose"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "purpose_social",
+   "primary": "",
+   "confirmed": [],
+   "unconfirmed": [
+    "social purpose in the destiny matrix",
+    "arcanum of social purpose",
+    "social level of purpose",
+    "second level of purpose",
+    "what am I useful for by date of birth"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "realisation",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix self realisation",
+    "self realisation destiny matrix"
+   ],
+   "unconfirmed": [
+    "path of self-realisation in the destiny matrix",
+    "destiny matrix purpose by date of birth",
+    "how to find your self-realisation path"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "relations",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix relationships"
+   ],
+   "unconfirmed": [
+    "destiny matrix love arcana list",
+    "love line in the destiny matrix",
+    "arcana of relationships by birth date",
+    "relationship line destiny matrix points",
+    "what the M point means in relationships"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "resources",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix resources"
+   ],
+   "unconfirmed": [
+    "what opens good things destiny matrix",
+    "resource channel destiny matrix",
+    "resource by date of birth",
+    "arcanum of good things",
+    "destiny matrix point L and R2 meaning"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "rest",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix rest",
+    "destiny matrix your ideal way to rest"
+   ],
+   "unconfirmed": [
+    "ideal rest by destiny matrix",
+    "how to rest by date of birth",
+    "arcanum of rest",
+    "destiny matrix rest and energy",
+    "your ideal way to rest in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "soul_tasks",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix soul tasks",
+    "destiny matrix spiritual tasks and lessons of the soul"
+   ],
+   "unconfirmed": [
+    "soul tasks in destiny matrix",
+    "soul matrix",
+    "spiritual tasks in destiny matrix",
+    "soul lessons in destiny matrix",
+    "spiritual tasks and soul lessons in the destiny matrix",
+    "soul tasks by date of birth"
+   ]
+  },
+  {
+   "kind": "positions",
+   "page": "years",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix years",
+    "destiny matrix years for marriage",
+    "destiny matrix years meaning"
+   ],
+   "unconfirmed": [
+    "destiny matrix by years",
+    "reading by years destiny matrix",
+    "destiny matrix by years of life",
+    "age scale of the destiny matrix",
+    "reading by years up to 80 in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "1",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix year 1"
+   ],
+   "unconfirmed": [
+    "arcanum 1 for the year destiny matrix",
+    "year of the magician meaning",
+    "1 year arcanum destiny matrix",
+    "what does arcanum 1 mean for the year",
+    "the magician year new start"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "10",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 10 arcana year",
+    "destiny matrix 10 year",
+    "destiny matrix 10 year energy",
+    "destiny matrix 10 year meaning",
+    "destiny matrix year 10",
+    "destiny matrix year 10 meaning",
+    "destiny matrix year energy 10"
+   ],
+   "unconfirmed": [
+    "arcanum 10 for the year destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "11",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 11 arcana year",
+    "destiny matrix 11 year",
+    "destiny matrix 11 year energy",
+    "destiny matrix 11 year meaning",
+    "destiny matrix year 11",
+    "destiny matrix year 11 energy",
+    "destiny matrix year 11 meaning",
+    "destiny matrix year 11 reddit"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "year-arcana",
+   "page": "12",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 12 year",
+    "destiny matrix 12 year meaning",
+    "destiny matrix year 12",
+    "destiny matrix year 12 energy",
+    "destiny matrix year 12 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 12 for the year destiny matrix",
+    "hanged man year meaning",
+    "12 for the year destiny matrix meaning"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "13",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 13 year",
+    "destiny matrix 13 year energy",
+    "destiny matrix 13 year meaning",
+    "destiny matrix year 13",
+    "destiny matrix year 13 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 13 for the year destiny matrix",
+    "13 arcanum for the year",
+    "13 for the year destiny matrix meaning"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "14",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 14 year",
+    "destiny matrix 14 year meaning",
+    "destiny matrix year 14",
+    "destiny matrix year 14 meaning",
+    "destiny matrix year energy 14"
+   ],
+   "unconfirmed": [
+    "arcanum 14 for the year destiny matrix",
+    "14 arcanum for the year",
+    "14 for the year destiny matrix meaning"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "15",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 15 year",
+    "destiny matrix 15 year energy",
+    "destiny matrix 15 year meaning",
+    "destiny matrix year 15",
+    "destiny matrix year 15 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 15 for the year destiny matrix",
+    "15 arcanum year meaning",
+    "year under arcanum 15"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "16",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 16 year",
+    "destiny matrix 16 year energy",
+    "destiny matrix 16 year meaning",
+    "destiny matrix year 16",
+    "destiny matrix year 16 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 16 for the year destiny matrix",
+    "16 arcanum year meaning",
+    "destiny matrix year 16 tower"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "17",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 17 year",
+    "destiny matrix 17 year energy",
+    "destiny matrix 17 year meaning",
+    "destiny matrix year 17",
+    "destiny matrix year 17 meaning",
+    "matrix of destiny 17 year"
+   ],
+   "unconfirmed": [
+    "arcanum 17 for the year destiny matrix",
+    "17 arcanum year meaning"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "18",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 18 year energy",
+    "destiny matrix year 18",
+    "destiny matrix year 18 meaning",
+    "destiny matrix year energy 18"
+   ],
+   "unconfirmed": [
+    "arcanum 18 for the year destiny matrix",
+    "18 arcanum year meaning",
+    "destiny matrix 18 for the year",
+    "moon year in destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "19",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 19 year",
+    "destiny matrix 19 year meaning",
+    "destiny matrix year 19",
+    "destiny matrix year 19 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 19 for the year destiny matrix",
+    "19 arcanum year meaning",
+    "destiny matrix 19 for the year",
+    "sun year in destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "2",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix year 2"
+   ],
+   "unconfirmed": [
+    "arcanum 2 for the year destiny matrix",
+    "2 arcanum year meaning",
+    "destiny matrix 2 for the year",
+    "high priestess year destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "20",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 20 arcana year",
+    "destiny matrix 20 year",
+    "destiny matrix 20 year energy",
+    "destiny matrix 20 year meaning",
+    "destiny matrix year 20",
+    "destiny matrix year 20 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 20 for the year destiny matrix",
+    "20 arcanum year meaning"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "2026",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix year 2026",
+    "destiny matrix 2026 year"
+   ],
+   "unconfirmed": [
+    "destiny matrix for 2026",
+    "arcanum of 2026",
+    "destiny matrix forecast for 2026",
+    "what arcanum rules 2026"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "21",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 21 year",
+    "destiny matrix 21 year energy",
+    "destiny matrix 21 year meaning",
+    "destiny matrix year 21",
+    "destiny matrix year 21 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 21 for the year destiny matrix",
+    "21 arcanum year meaning",
+    "destiny matrix 21 for the year"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "22",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 22 year",
+    "destiny matrix 22 year meaning",
+    "destiny matrix year 22",
+    "destiny matrix year 22 meaning",
+    "destiny matrix year energy 22",
+    "matrix of destiny 22 year"
+   ],
+   "unconfirmed": [
+    "arcanum 22 for the year",
+    "the fool year in the destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "3",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 3 year",
+    "destiny matrix year 3",
+    "destiny matrix year 3 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 3 for the year",
+    "the empress year in the destiny matrix",
+    "3 year arcanum meaning",
+    "year under the empress arcanum",
+    "destiny matrix year of the empress"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "4",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 4 year",
+    "destiny matrix 4 year meaning",
+    "destiny matrix year 4",
+    "destiny matrix year 4 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 4 for the year",
+    "the emperor year in the destiny matrix",
+    "4 year arcanum meaning",
+    "year under the emperor arcanum"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "5",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 5 year",
+    "destiny matrix 5 year energy",
+    "destiny matrix 5 year meaning",
+    "destiny matrix year 5",
+    "destiny matrix year 5 energy",
+    "destiny matrix year 5 meaning",
+    "destiny matrix year energy 5"
+   ],
+   "unconfirmed": [
+    "arcanum 5 for the year destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "6",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 6 arcana year",
+    "destiny matrix 6 year",
+    "destiny matrix 6 year energy",
+    "destiny matrix 6 year meaning",
+    "destiny matrix year 6",
+    "destiny matrix year 6 meaning",
+    "destiny matrix year 6 reddit",
+    "destiny matrix year energy 6"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "year-arcana",
+   "page": "7",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 7 year",
+    "destiny matrix 7 year energy",
+    "destiny matrix 7 year meaning",
+    "destiny matrix chart 7 year",
+    "destiny matrix year 7",
+    "destiny matrix year 7 meaning",
+    "destiny matrix year energy 7"
+   ],
+   "unconfirmed": [
+    "arcanum 7 for the year destiny matrix"
+   ]
+  },
+  {
+   "kind": "year-arcana",
+   "page": "8",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix 8 year",
+    "destiny matrix 8 year energy",
+    "destiny matrix 8 year meaning",
+    "destiny matrix arcana 8 year",
+    "destiny matrix chart 8 year",
+    "destiny matrix year 8",
+    "destiny matrix year 8 energy",
+    "destiny matrix year 8 meaning"
+   ],
+   "unconfirmed": []
+  },
+  {
+   "kind": "year-arcana",
+   "page": "9",
+   "primary": "",
+   "confirmed": [
+    "destiny matrix year 9",
+    "destiny matrix year 9 meaning"
+   ],
+   "unconfirmed": [
+    "arcanum 9 for the year destiny matrix",
+    "9 year arcanum meaning",
+    "hermit year destiny matrix",
+    "what does 9 mean for the year"
+   ]
+  }
+ ]
+}

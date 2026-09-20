@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { ReadingRoleParts as RoleParts } from "@/lib/readingTypes";
 import { sentence } from "@/lib/text";
 
@@ -6,16 +7,16 @@ export default function CharacterRoleParts({ role }: { role: RoleParts }) {
   return (
     <div className="character-role-parts">
       <p>
-        <strong>Суть.</strong> {sentence(role.essence)}
+        <strong>{D.sheet.essence[L]}</strong> {sentence(role.essence)}
       </p>
       <p>
-        <strong>Сила.</strong> {sentence(role.strength)}
+        <strong>{D.sheet.strength[L]}</strong> {sentence(role.strength)}
       </p>
       <p>
-        <strong>Риск.</strong> {sentence(role.risk)}
+        <strong>{D.sheet.risk[L]}</strong> {sentence(role.risk)}
       </p>
       <p>
-        <strong>Действие.</strong> {sentence(role.action)}
+        <strong>{D.sheet.action[L]}</strong> {sentence(role.action)}
       </p>
     </div>
   );

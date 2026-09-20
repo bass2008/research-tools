@@ -1,5 +1,6 @@
 "use client";
 
+import { D, L } from "@/lib/i18n";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
@@ -72,7 +73,7 @@ export default function EncFrame({
 
   return (
     <div className="enc-layout">
-        <nav className="enc-nav" ref={nav} aria-label="Разделы справочника">
+        <nav className="enc-nav" ref={nav} aria-label={D.octagram.encNavAria[L]}>
           {sections.map((s) =>
             standalone ? (
               <Link

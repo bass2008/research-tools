@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { D, L } from "@/lib/i18n";
+import { columnTitle } from "@/lib/i18n/publicLabels";
 import type { Matrix } from "@/lib/matrix";
 import { publicHref } from "@/lib/site";
 
@@ -41,15 +43,15 @@ export default function ChakraTable({
 
   return (
     <div className="panel">
-      <Heading>Карта энергий по чакрам</Heading>
-      <div className="cap">Семь уровней в трёх колонках: материя, энергия и чувства</div>
+      <Heading>{D.report.chakraTitle[L]}</Heading>
+      <div className="cap">{D.report.chakraHint[L]}</div>
       <table className="chak">
         <thead>
           <tr>
-            <th>Уровень</th>
-            <th>Физика</th>
-            <th>Энергия</th>
-            <th>Эмоции</th>
+            <th>{D.report.chakraLevel[L]}</th>
+            <th>{columnTitle("physics")}</th>
+            <th>{columnTitle("energy")}</th>
+            <th>{columnTitle("emotions")}</th>
           </tr>
         </thead>
         <tbody>
@@ -66,7 +68,7 @@ export default function ChakraTable({
             </tr>
           ))}
           <tr className="tot">
-            <td>Итого</td>
+            <td>{D.report.chakraTotal[L]}</td>
             <td>{m.chakra_totals.physics}</td>
             <td>{m.chakra_totals.energy}</td>
             <td>{m.chakra_totals.emotions}</td>

@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import parity from "./__fixtures__/parity-digests.json";
+import { numeric } from "./__fixtures__/shape";
 import { calculate, type Sex } from "./matrix";
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
@@ -49,7 +50,9 @@ describe("полный паритет TypeScript с Python", () => {
         let count = 0;
         for (let birth = `${year}-01-01`; birth <= end; birth = nextDay(birth)) {
           for (const sex of parity.sex_order as Sex[]) {
-            const row = `${stable(calculate(birth, sex) as unknown as Json)}\n`;
+            // Дайджест считается по числовой части: подписи у двух реализаций свои —
+            // Python знает их по-русски, фронт по языку сборки.
+            const row = `${stable(numeric(calculate(birth, sex)) as unknown as Json)}\n`;
             digest.update(row, "utf8");
             overall.update(row, "utf8");
             count += 1;

@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
@@ -33,7 +34,7 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionHub("chk")).toBe("/encyclopedia/chakra");
     expect(encyclopediaSectionHub("cmb")).toBe("/encyclopedia/combination");
     expect(encyclopediaSectionHub("tls")).toBe("/encyclopedia/karmic-tail");
-    expect(encyclopediaSectionHub("yer")).toBe("/na-god");
+    expect(encyclopediaSectionHub("yer")).toBe("/year");
   });
 
   // «Разделы отчёта» и «Позиции карты» — один роут `position/[key]`, поэтому и одна шапка.
@@ -65,7 +66,8 @@ describe("единый реестр навигации энциклопедии"
   // `item` в BreadcrumbList обязателен у всех звеньев, кроме последнего, поэтому крошка
   // статей несёт якорь оглавления — нового адреса он не создаёт, в отличие от `?sec=`.
   it("ведёт крошку статей на якорь оглавления", () => {
-    expect(encyclopediaSectionCrumb("art")).toEqual({ name: "Статьи", path: "/encyclopedia#stati" });
+    expect(encyclopediaSectionCrumb("art"))
+      .toEqual({ name: D.enc.articles[L], path: "/encyclopedia#stati" });
     expect(encyclopediaSectionCrumb("cmb").path).toBe("/encyclopedia/combination");
   });
 
@@ -75,13 +77,13 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionFromSegment("combination")).toBe("cmb");
     expect(encyclopediaSectionFromSegment("karmic-tail")).toBe("tls");
     expect(encyclopediaSectionFromSegment("unknown")).toBeNull();
-    expect(encyclopediaSectionFromExternalRoot("na-god")).toBe("yer");
+    expect(encyclopediaSectionFromExternalRoot("year")).toBe("yer");
     expect(encyclopediaSectionFromExternalRoot("unknown")).toBeNull();
   });
 
   it("выбирает раздел для всех форм маршрутов без отдельных таблиц в компонентах", () => {
     const positions = { character: "sec", day: "pts" } as const;
-    const articles = ["/encyclopedia/karmic-tail", "/na-god", "/o-metode"];
+    const articles = ["/encyclopedia/karmic-tail", "/year", "/method"];
     expect(encyclopediaSectionFromPath("/encyclopedia", positions, articles)).toBeNull();
     expect(encyclopediaSectionFromPath("/encyclopedia/arcanum/15", positions, articles)).toBe("arc");
     expect(encyclopediaSectionFromPath("/encyclopedia/position/character", positions, articles)).toBe("sec");
@@ -98,10 +100,10 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionFromPath("/encyclopedia/chakra", positions, articles)).toBe("chk");
     expect(encyclopediaSectionFromPath("/encyclopedia/combination", positions, articles)).toBe("cmb");
     expect(encyclopediaSectionFromPath("/encyclopedia/position", positions, articles)).toBe("pts");
-    expect(encyclopediaSectionFromPath("/na-god/2026", positions, articles)).toBe("yer");
-    expect(encyclopediaSectionFromPath("/na-god", positions, articles)).toBe("yer");
+    expect(encyclopediaSectionFromPath("/year/2026", positions, articles)).toBe("yer");
+    expect(encyclopediaSectionFromPath("/year", positions, articles)).toBe("yer");
     // Настоящая статья — адрес первого уровня без своей ветки: она остаётся в «Статьях».
-    expect(encyclopediaSectionFromPath("/o-metode", positions, articles)).toBe("art");
+    expect(encyclopediaSectionFromPath("/method", positions, articles)).toBe("art");
   });
 
   // Адрес раздела зашивали в карусель первого экрана и в подвал листа позиции, и после переезда

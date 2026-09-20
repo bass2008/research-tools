@@ -13,7 +13,7 @@ STAMP=$(date '+%Y%m%d-%H%M%S')
 
 echo "== отправка на $IP"
 scp -q -o StrictHostKeyChecking=accept-new \
-  nginx/arcana-selectel.conf nginx/arcana-test-selectel.conf \
+  nginx/arcana-selectel.conf nginx/arcana-test-selectel.conf nginx/arcana-test-en-selectel.conf \
   nginx/conf.d/arcana-tuning.conf nginx/conf.d/arcana-filters.conf \
   nginx/snippets/arcana-filters.inc \
   "$SSH_USER@$IP:/tmp/"
@@ -24,18 +24,20 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "bash -s" <<REMOTE
 set -euo pipefail
 BACKUP=/etc/nginx/backup-$STAMP
 mkdir -p "\$BACKUP" /etc/nginx/snippets
-for f in sites-available/arcana.conf sites-available/arcana-test.conf \
+for f in sites-available/arcana.conf sites-available/arcana-test.conf sites-available/arcana-test-en.conf \
          conf.d/arcana-tuning.conf conf.d/arcana-filters.conf snippets/arcana-filters.inc; do
     [ -f "/etc/nginx/\$f" ] && install -D "/etc/nginx/\$f" "\$BACKUP/\$f" || true
 done
 
 install -m 644 /tmp/arcana-selectel.conf      /etc/nginx/sites-available/arcana.conf
 install -m 644 /tmp/arcana-test-selectel.conf /etc/nginx/sites-available/arcana-test.conf
+install -m 644 /tmp/arcana-test-en-selectel.conf /etc/nginx/sites-available/arcana-test-en.conf
 install -m 644 /tmp/arcana-tuning.conf        /etc/nginx/conf.d/arcana-tuning.conf
 install -m 644 /tmp/arcana-filters.conf       /etc/nginx/conf.d/arcana-filters.conf
 install -m 644 /tmp/arcana-filters.inc        /etc/nginx/snippets/arcana-filters.inc
 ln -sf /etc/nginx/sites-available/arcana.conf      /etc/nginx/sites-enabled/arcana.conf
 ln -sf /etc/nginx/sites-available/arcana-test.conf /etc/nginx/sites-enabled/arcana-test.conf
+ln -sf /etc/nginx/sites-available/arcana-test-en.conf /etc/nginx/sites-enabled/arcana-test-en.conf
 
 if ! nginx -t; then
     echo "== конфиг не прошёл проверку, возвращаю прежний"
@@ -56,8 +58,10 @@ echo "== проверка"
 for u in "https://arcana-sense.ru/" "https://arcana-sense.ru/robots.txt" "https://arcana-sense.com/"; do
   printf '  %-42s %s\n' "$u" "$(curl -s -o /dev/null -m 15 -w '%{http_code}' "$u")"
 done
-printf '  %-42s %s\n' "тест без пароля (ожидается 401)" \
-  "$(curl -s -o /dev/null -m 15 -w '%{http_code}' https://test.arcana-sense.ru/)"
+for u in https://test.arcana-sense.ru/ https://test.arcana-sense.com/; do
+  printf '  %-42s %s\n' "$u без пароля (ожидается 401)" \
+    "$(curl -s -o /dev/null -m 15 -w '%{http_code}' "$u")"
+done
 printf '  %-42s %s\n' "ловушка сканера (ожидается 000)" \
   "$(curl -s -o /dev/null -m 15 -w '%{http_code}' https://arcana-sense.ru/wp-admin/install.php || true)"
 echo "готово"

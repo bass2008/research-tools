@@ -11,8 +11,9 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[2]
 ROOT = PROJECT.parents[1]
 AUDIT = ROOT / "tools" / "seo" / "audit"
-TAILS = ROOT / "tools" / "seo" / "content" / "karmic-tails"
-WEB = PROJECT / "web" / "content"
+TAILS = ROOT / "tools" / "seo" / "content" / "ru" / "karmic-tails"
+# Реестр и карточки аудита построены по русскому спросу — проверяются на русском корпусе.
+WEB = PROJECT / "web" / "content" / "ru"
 
 
 def load(path: Path):
@@ -95,8 +96,12 @@ def _ngrams(item: dict, n: int = 5) -> set[tuple[str, ...]]:
 
 
 def test_indexed_tails_have_unique_metadata_query_and_no_near_copy():
-    indexed = [row for row in items(WEB / "karmic-tails.json") if row["publication"]["index"]]
-    assert len(indexed) == 22
+    rows = items(WEB / "karmic-tails.json")
+    indexed = [row for row in rows if row["publication"]["index"]]
+    # Порога спроса у хвостов нет: метод даёт ровно 26 достижимых троек, статьи написаны на все,
+    # и закрывать готовую страницу по частоте, которой Вордстат для редкой формы не отдаёт,
+    # значит доверять отсутствию данных больше, чем тексту.
+    assert len(indexed) == len(rows) == 26
     assert len({row["title"] for row in indexed}) == len(indexed)
     assert len({row["seo"]["title"] for row in indexed}) == len(indexed)
     assert len({row["seo"]["description"] for row in indexed}) == len(indexed)
@@ -145,16 +150,14 @@ def test_position_arcanum_registry_matches_the_public_url_map():
              if row["entity"].startswith("position_arcanum:")}
     assert cards == {f"position_arcanum:{i['position']}/{i['arcanum']}" for i in registry["items"]}
 
-    # Порогов два: `threshold` решает, писать ли текст руками, `show_threshold` — показывать ли
-    # уже написанное. Ниже порога показа запись живёт только вне индекса; между порогами страница
-    # написана и показывается — довод «стоит дороже, чем приносит» к готовому тексту не относится.
-    show = registry["show_threshold"]
-    assert 0 < show < registry["threshold"], show
-    below = [i for i in registry["items"] if i["frequency"] < show]
-    assert all(not i["publication"]["index"] for i in below), below
+    # Порог остался один: `threshold` решает, писать ли текст руками. Порога показа больше нет —
+    # написанная страница показывается всегда, потому что показ не стоит ничего, а закрытая
+    # страница гарантированно не приносит ничего.
+    assert registry["show_threshold"] == 0
+    assert registry["threshold"] > 0
+    assert all(i["publication"]["index"] for i in registry["items"]), "закрытая запись в реестре"
     assert all(i["publication"]["index"] == bool(i["publication"]["primary_query"])
                for i in registry["items"]), "индекс и головной запрос разошлись"
-    assert all(i["publication"]["index"] for i in registry["items"] if i not in below)
     assert all(i["publication"]["follow"] for i in registry["items"])
 
 
@@ -175,7 +178,7 @@ def test_position_arcanum_pages_exist_only_for_arcana_the_method_produces():
     method = load(PROJECT / "spec" / "method.json")
     reachable = {key: set(values) for key, values in method["reachable_arcana"].items()}
     by_section: dict[str, set[int]] = {}
-    for point in load(PROJECT / "content" / "data" / "points.json"):
+    for point in load(PROJECT / "content" / "data" / "ru" / "points.json"):
         for section in point["sections"]:
             by_section.setdefault(section, set()).update(reachable[point["key"]])
     for item in load(WEB / "position-arcanum.json")["items"]:

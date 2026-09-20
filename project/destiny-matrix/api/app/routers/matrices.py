@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from engine.matrix import calculate
 
+from ..i18n import say
 from .. import access, tariffs
 from ..config import settings
 from ..db import get_db
@@ -28,10 +29,10 @@ def _needs_storage_right(db: Session, used: int) -> HTTPException:
     single = next((t for t in tariffs.public_tariffs(db) if access.ALL not in t.scopes()), None)
     # Про «оплаченные даты» говорить нельзя: чаще всего человек ещё ничего не покупал, и такой
     # текст читается как отказ в том, за что он уже заплатил.
-    offer = f" «{single.name}» добавит ещё одно место." if single else ""
+    offer = say("matrix.slots_offer", name=single.name) if single else ""
     return HTTPException(
         status.HTTP_402_PAYMENT_REQUIRED,
-        detail=f"Мест для хранения дат больше нет: занято {used}.{offer}",
+        detail=say("matrix.no_slots", used=used, offer=offer),
     )
 
 
@@ -58,7 +59,7 @@ def create(payload: MatrixIn, user: User = Depends(current_user),
         if used >= settings.matrices_hard_cap:
             raise HTTPException(
                 status.HTTP_402_PAYMENT_REQUIRED,
-                detail=f"Достигнут предохранитель в {settings.matrices_hard_cap} матриц")
+                detail=say("matrix.hard_cap", cap=settings.matrices_hard_cap))
         if not access.can_save_more(db, user):
             raise _needs_storage_right(db, used)
         try:
@@ -93,7 +94,7 @@ def one(matrix_id: int, user: User = Depends(current_user),
     row = db.get(SavedMatrix, matrix_id)
     # чужая матрица отдаёт 404, а не 403: существование чужих записей знать незачем
     if row is None or row.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
     return one_body(db, user, row)
 
 
@@ -103,7 +104,7 @@ def rename(matrix_id: int, payload: MatrixTitleIn, user: User = Depends(current_
     """Подписать матрицу. Кроме имени менять нечего: дата и пол — это и есть сама матрица."""
     row = db.get(SavedMatrix, matrix_id)
     if row is None or row.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
     title = (payload.title or "").strip()
     row.title = title or default_title(row.birth)
     db.commit()

@@ -1,3 +1,5 @@
+import { D, L } from "./i18n";
+
 /** Обрезка по границе слова: `slice` рубил описания карточек посередине — «для давно отло…». */
 export function clip(text: string, limit: number): string {
   const value = text.trim();
@@ -32,19 +34,22 @@ export function sentence(text: string): string {
 export function cubeClause(cube: string): string {
   const value = cube.trim();
   if (!value) return value;
-  return /^[А-ЯЁ]/.test(value) ? value[0].toLowerCase() + value.slice(1) : `человек ${value}`;
+  return D.clause.upper[L].test(value)
+    ? value[0].toLowerCase() + value.slice(1)
+    : `${D.clause.subject[L]} ${value}`;
 }
 
 /** Две роли одного вида — восемь десятилетий, колонка чакр — несут одну и ту же рамку, и во
  *  фразе связи она печаталась дважды подряд. Общий зачин сворачивается до подлежащего. */
 export function pairCubes(left: string, right: string): [string, string] {
-  const mark = /,\s+когда человек\s+/;
+  const mark = D.clause.mark[L];
   const a = mark.exec(left);
   const b = mark.exec(right);
   if (a && b && left.slice(0, a.index) === right.slice(0, b.index)) {
+    const subject = D.clause.subject[L];
     return [
-      `человек ${left.slice(a.index + a[0].length)}`,
-      `человек ${right.slice(b.index + b[0].length)}`,
+      `${subject} ${left.slice(a.index + a[0].length)}`,
+      `${subject} ${right.slice(b.index + b[0].length)}`,
     ];
   }
   return [cubeClause(left), cubeClause(right)];

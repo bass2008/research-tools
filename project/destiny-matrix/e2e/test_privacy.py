@@ -66,7 +66,7 @@ def test_contract_describes_work_not_a_service(page):
     """Патент выдан на разработку ПО, включая адаптацию и модификацию (пп. 62 п. 2 ст. 346.43 НК РФ),
     поэтому предмет договора — работы по адаптации web-страницы. Язык «информационных услуг» и
     «доступа к материалам» этому виду деятельности не соответствует и возвращаться не должен."""
-    page.goto(f"{BASE}/oferta", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/terms", wait_until="domcontentloaded")
     page.wait_for_timeout(400)
     text = page.inner_text("main")
 
@@ -96,8 +96,8 @@ def test_documents_do_not_contradict_each_other(page):
         page.wait_for_timeout(300)
         return page.inner_text("main")
 
-    privacy, oferta, refund, contacts = (text_of(p) for p in
-                                         ("/privacy", "/oferta", "/refund", "/contacts"))
+    privacy, terms, refund, contacts = (text_of(p) for p in
+                                         ("/privacy", "/terms", "/refund", "/contacts"))
 
     # дата рождения попадает на сервер не только по кнопке в кабинете, но и при оплате
     assert "оплатили разбор" in privacy, "политика умалчивает, что покупка отправляет дату на сервер"
@@ -106,11 +106,11 @@ def test_documents_do_not_contradict_each_other(page):
     assert "момента передачи результата" in refund, refund[:200]
 
     # сроки ответа: 10 рабочих дней по претензиям в обоих документах
-    assert "10 рабочих дней" in oferta and "10 рабочих дней" in contacts
+    assert "10 рабочих дней" in terms and "10 рабочих дней" in contacts
 
     # состав договора читается и на телефоне: третья колонка таблицы тарифа не скрывается
     page.set_viewport_size({"width": 390, "height": 900})
-    page.goto(f"{BASE}/oferta", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/terms", wait_until="domcontentloaded")
     page.wait_for_timeout(400)
     head = page.locator("table.postab th").nth(2)
     assert head.is_visible(), "на телефоне из договора исчезла колонка «Что входит в результат»"

@@ -17,6 +17,8 @@
 // Проверено сборкой: с прежними именами «Партнёрская точка», «Денежное направление»,
 // «Пересечение денег и отношений» и «Средняя точка таланта» сторож даёт четыре провала.
 
+import { D, L } from "./i18n";
+
 export const MAP_SIZE = 620;
 export const MAP_CENTER = 310;
 const R_OUT = 248;
@@ -37,36 +39,36 @@ export interface MapPoint {
 
 export const MAP_POINTS: MapPoint[] = [
   // внешние восемь: четыре грани личного квадрата и четыре угла родового
-  { key: "day", symbol: "A", label: "Портрет личности", angle: 180, radius: R_OUT, size: "big" },
-  { key: "month", symbol: "B", label: "Духовная задача", angle: -90, radius: R_OUT, size: "big" },
-  { key: "year", symbol: "C", label: "Материальная задача", angle: 0, radius: R_OUT, size: "big" },
-  { key: "mission", symbol: "D", label: "Кармическая задача", angle: 90, radius: R_OUT, size: "big" },
-  { key: "father_line", symbol: "F", label: "Духовная мужская линия рода", angle: 225, radius: R_OUT, size: "mid" },
-  { key: "mother_line", symbol: "G", label: "Духовная женская линия рода", angle: -45, radius: R_OUT, size: "mid" },
-  { key: "descendants", symbol: "H", label: "Материальная мужская линия рода", angle: 45, radius: R_OUT, size: "mid" },
-  { key: "inheritance", symbol: "I", label: "Материальная женская линия рода", angle: 135, radius: R_OUT, size: "mid" },
+  { key: "day", symbol: "A", label: D.mapPoints.day[L], angle: 180, radius: R_OUT, size: "big" },
+  { key: "month", symbol: "B", label: D.mapPoints.month[L], angle: -90, radius: R_OUT, size: "big" },
+  { key: "year", symbol: "C", label: D.mapPoints.year[L], angle: 0, radius: R_OUT, size: "big" },
+  { key: "mission", symbol: "D", label: D.mapPoints.mission[L], angle: 90, radius: R_OUT, size: "big" },
+  { key: "father_line", symbol: "F", label: D.mapPoints.father_line[L], angle: 225, radius: R_OUT, size: "mid" },
+  { key: "mother_line", symbol: "G", label: D.mapPoints.mother_line[L], angle: -45, radius: R_OUT, size: "mid" },
+  { key: "descendants", symbol: "H", label: D.mapPoints.descendants[L], angle: 45, radius: R_OUT, size: "mid" },
+  { key: "inheritance", symbol: "I", label: D.mapPoints.inheritance[L], angle: 135, radius: R_OUT, size: "mid" },
 
   // внутренние четыре
-  { key: "comfort_west", symbol: "J", label: "Внутренняя левая точка", angle: 180, radius: R_IN, size: "mid" },
-  { key: "comfort_north", symbol: "K", label: "Внутренняя точка таланта", angle: -90, radius: R_IN, size: "mid" },
-  { key: "comfort_east", symbol: "L", label: "Вход денежной линии", angle: 0, radius: R_IN, size: "mid" },
-  { key: "comfort_south", symbol: "M", label: "Вход отношений и хвоста", angle: 90, radius: R_IN, size: "mid" },
+  { key: "comfort_west", symbol: "J", label: D.mapPoints.comfort_west[L], angle: 180, radius: R_IN, size: "mid" },
+  { key: "comfort_north", symbol: "K", label: D.mapPoints.comfort_north[L], angle: -90, radius: R_IN, size: "mid" },
+  { key: "comfort_east", symbol: "L", label: D.mapPoints.comfort_east[L], angle: 0, radius: R_IN, size: "mid" },
+  { key: "comfort_south", symbol: "M", label: D.mapPoints.comfort_south[L], angle: 90, radius: R_IN, size: "mid" },
 
   // середины между внешней и внутренней точкой одного луча: N = D + M, O = A + J, P = B + K
-  { key: "karmic_tail_middle", symbol: "N", label: "Середина кармического хвоста", angle: 90, radius: R_MID, size: "small" },
-  { key: "ajna_physics", symbol: "O", label: "Аджна, физика", angle: 180, radius: R_MID, size: "small" },
-  { key: "ajna_energy", symbol: "P", label: "Аджна, энергия", angle: -90, radius: R_MID, size: "small" },
+  { key: "karmic_tail_middle", symbol: "N", label: D.mapPoints.karmic_tail_middle[L], angle: 90, radius: R_MID, size: "small" },
+  { key: "ajna_physics", symbol: "O", label: D.mapPoints.ajna_physics[L], angle: 180, radius: R_MID, size: "small" },
+  { key: "ajna_energy", symbol: "P", label: D.mapPoints.ajna_energy[L], angle: -90, radius: R_MID, size: "small" },
 
   // середины между внутренней точкой и центром: S = J + E, T = K + E
-  { key: "anahata_physics", symbol: "S", label: "Анахата, физика", angle: 180, radius: R_HALF, size: "small" },
-  { key: "anahata_energy", symbol: "T", label: "Анахата, энергия", angle: -90, radius: R_HALF, size: "small" },
+  { key: "anahata_physics", symbol: "S", label: D.mapPoints.anahata_physics[L], angle: 180, radius: R_HALF, size: "small" },
+  { key: "anahata_energy", symbol: "T", label: D.mapPoints.anahata_energy[L], angle: -90, radius: R_HALF, size: "small" },
 
   // нижний правый сектор: R между L и M, R1 между M и R, R2 между L и R
-  { key: "money_love_crossing", symbol: "R", label: "Скрещение линий", angle: 45, radius: R_IN, size: "small" },
-  { key: "love_middle", symbol: "R1", label: "Под сердцем", angle: 67.5, radius: R_IN, size: "small" },
-  { key: "money_middle", symbol: "R2", label: "Середина денежной линии", angle: 22.5, radius: R_IN, size: "small" },
+  { key: "money_love_crossing", symbol: "R", label: D.mapPoints.money_love_crossing[L], angle: 45, radius: R_IN, size: "small" },
+  { key: "love_middle", symbol: "R1", label: D.mapPoints.love_middle[L], angle: 67.5, radius: R_IN, size: "small" },
+  { key: "money_middle", symbol: "R2", label: D.mapPoints.money_middle[L], angle: 22.5, radius: R_IN, size: "small" },
 
-  { key: "center", symbol: "E", label: "Центр карты", angle: 0, radius: 0, size: "big" },
+  { key: "center", symbol: "E", label: D.mapPoints.center[L], angle: 0, radius: 0, size: "big" },
 ];
 
 const BY_KEY = new Map(MAP_POINTS.map((p) => [p.key, p]));

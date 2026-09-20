@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -71,8 +72,8 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb(place?.kind === "section" ? "sec" : "pts"),
           { name: reading.positionTitle, path: reading.positionHref },
           { name: reading.title },
@@ -89,17 +90,19 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
       <PositionMap
         highlight={spots}
         caption={spots.length === 1
-          ? `Где стоит эта точка: ${spots[0]!.label} · ${spots[0]!.symbol}`
-          : `Где стоят точки раздела: ${spots.map((x) => `${x.label} · ${x.symbol}`).join(", ")}`}
+          ? D.encPosition.whereOnePoint[L](`${spots[0]!.label} · ${spots[0]!.symbol}`)
+          : D.encPosition.whereSeveralPoints[L](
+              spots.map((x) => `${x.label} · ${x.symbol}`).join(", "),
+            )}
       />
 
       <Sections items={reading.sections} />
 
       {reading.tails.length ? (
         <div className="panel section-gap">
-          <h2>Тройки с этим арканом</h2>
+          <h2>{D.encLinks.triplesWith[L]}</h2>
           <div className="cap">
-            {reading.tails.length} хвостов с разбором, где стоит аркан {reading.arcanum}
+            {D.encLinks.triplesWithHint[L](reading.tails.length, reading.arcanum)}
           </div>
           <div className="cardgrid">
             {reading.tails.map((tail) => (
@@ -114,8 +117,8 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
 
       <div className="section-gap">
         <CalcPromo
-          title="Узнать свой аркан на этой позиции"
-          lead="Карта по дате рождения строится бесплатно и без регистрации: после расчёта видно, какой аркан стоит у вас именно здесь."
+          title={D.encLinks.promoCrossTitle[L]}
+          lead={D.encLinks.promoCrossLead[L]}
           place="position-arcanum"
         />
       </div>
@@ -123,8 +126,8 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
       <Faq items={reading.faq} />
 
       <div className="panel section-gap">
-        <h3>Рядом</h3>
-        <div className="cap">Та же энергия в других ролях и сама позиция</div>
+        <h3>{D.encLinks.nearby[L]}</h3>
+        <div className="cap">{D.encLinks.nearbyHint[L]}</div>
         <div className="taglist">
           <Link href={reading.positionHref}>{reading.positionTitle}</Link>
           <Link href={arcanumHref(reading.arcanum)}>

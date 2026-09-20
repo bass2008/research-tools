@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { D, L } from "@/lib/i18n";
 import PersonalSectionArticle from "@/components/matrix/PersonalSectionArticle";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
@@ -33,9 +34,9 @@ function data(key: PersonalSectionKey, params: Params, search: Search) {
   // `birthLabel("")` давал «для даты undefined undefined 0» в трёх метатегах и в JSON-LD
   // на всех 5 544 адресах раздела.
   const subject = key === "years" && matrix.birth
-    ? `результата ${params.slug} для даты ${birthLabel(matrix.birth)}`
-    : `рассчитанного результата ${params.slug}`;
-  const description = `${section.title}: персональный связный разбор ${subject}, ролей, переходов и практического шага.`;
+    ? D.encCharacter.subjectWithDate[L](params.slug, birthLabel(matrix.birth))
+    : D.encCharacter.subjectPlain[L](params.slug);
+  const description = D.encCharacter.personalDescription[L](section.title, subject);
   return { key, section, reading, path, description };
 }
 
@@ -74,8 +75,8 @@ export function personalReadingPage(key: PersonalSectionKey) {
       <>
         <CrumbsLd
           trail={[
-            { name: "Главная", path: "/" },
-            { name: "Энциклопедия", path: "/encyclopedia" },
+            { name: D.nav.home[L], path: "/" },
+            { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
             encyclopediaSectionCrumb("sec"),
             { name: value.section.title, path: positionHref(value.key) },
             { name: value.reading.slug },

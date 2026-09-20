@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { D, L } from "@/lib/i18n";
+import { sectionLabels } from "@/lib/i18n/methodLabels";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
@@ -25,8 +27,7 @@ function data(triple: string) {
   const reading = buildCharacterReading(item.matrix);
   const path = `/encyclopedia/character/${triple}`;
   const description =
-    `Персональный разбор характера для матрицы ${triple}: портрет личности, духовная и ` +
-    `материальная задачи, связи трёх арканов, сильная сторона и практический шаг.`;
+    D.encCharacter.description[L](triple);
   return { item, reading, path, description };
 }
 
@@ -52,36 +53,35 @@ export default async function CharacterPage({ params }: { params: Promise<Params
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb("sec"),
-          { name: "Характер и личные качества", path: positionHref("character") },
+          { name: sectionLabels("character").title, path: positionHref("character") },
           { name: item.slug },
         ]}
       />
       <JsonLd data={articleLd({ headline: reading.title, description, path })} />
 
-      <p className="eyebrow">Персональный раздел матрицы {item.slug}</p>
+      <p className="eyebrow">{D.encCharacter.personalSection[L](item.slug)}</p>
       <h1>{reading.title}</h1>
       <p className="dim prose">{reading.lead}</p>
 
       <CharacterReadingView reading={reading} />
 
       <div className="allbox">
-        <h2>Что означают точки A, B и C</h2>
+        <h2>{D.encCharacter.pointsTitle[L]}</h2>
         <p>
-          Общая статья объясняет метод чтения раздела, а эта страница применяет его к вашей
-          тройке {item.slug}.
+          {D.encCharacter.pointsText[L](item.slug)}
         </p>
         <div className="btnrow center">
           <Link className="btn" href={positionHref("character")}>
-            Открыть статью о разделе
+            {D.sheet.openSectionArticle[L]}
           </Link>
           <Link className="btn ghost" href={`/matrix/${item.slug}`}>
-            Вернуться к матрице
+            {D.encCharacter.backToMatrix[L]}
           </Link>
           <Link className="btn ghost" href="/#calc">
-            Рассчитать другую дату
+            {D.sheet.otherDate[L]}
           </Link>
         </div>
       </div>

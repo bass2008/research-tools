@@ -6,8 +6,7 @@ import { useMemo } from "react";
 import { calculate } from "@/lib/matrix";
 import { useHydrated } from "@/lib/hydrated";
 import { useBirth } from "@/lib/useBirth";
-import { money } from "@/lib/tariffs";
-import { counted, plural } from "@/lib/plural";
+import { priceLabel } from "@/lib/tariffs";
 
 import LockIcon from "@/components/ui/LockIcon";
 import MatrixResult, { birthLabel } from "@/components/matrix/MatrixResult";
@@ -17,7 +16,10 @@ import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import { useSession } from "@/components/account/useSession";
 import UnlockCta from "@/components/pay/UnlockCta";
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import { buildFree, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
+import { useFullSections } from "@/lib/useFullSections";
 import type { SavedMatrix } from "@/app/_lib/access";
 
 /**
@@ -53,56 +55,60 @@ export default function ReportView({
       return null;
     }
   }, [birth]);
+  // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
+  const full = useFullSections(matrix);
 
   if (!hydrated) {
-    return <p className="skeleton">Собираем отчёт…</p>;
+    return <p className="skeleton">{D.unlockBox.buildingReport[L]}</p>;
   }
 
   if (!matrix) {
     return (
       <div className="panel narrow">
-        <h1>Дата не выбрана</h1>
+        <h1>{D.unlockBox.noDateTitle[L]}</h1>
         {/* Купленный разбор живёт в аккаунте: по ссылке из письма человек приходит без сессии, и
             без этой подсказки экран выглядел так, будто покупки не было. */}
         {/* вошедшему советовать вход бессмысленно: он уже здесь. Ему нужен путь к своим
             датам, а не повтор того, что он сделал */}
         {session.status === "user" ? (
           <p className="dim">
-            Вы вошли как {session.email}. Сохранённые даты открываются из{" "}
-            <Link href="/account">кабинета</Link>, а новую можно посчитать здесь.
+            {D.unlockBox.signedInNoDate[L](session.email ?? "")}{" "}
+            <Link href="/account">{D.unlockBox.accountWord[L]}</Link>
+            {D.unlockBox.noDateTail[L]}
+          </p>
+        ) : ALL_FREE ? (
+          <p className="dim">
+            {D.unlockBox.savedEarlier[L]} <Link href="/login">{D.unlockBox.signIn[L]}</Link>{" "}
+            {D.unlockBox.accountHasList[L]}
           </p>
         ) : (
           <p className="dim">
-            Если разбор оплачен, <Link href="/login">войдите</Link> — он привязан к аккаунту, а не к
-            браузеру.
+            {D.unlockBox.paidNoSession[L]} <Link href="/login">{D.unlockBox.signIn[L]}</Link>{" "}
+            {D.unlockBox.paidNoSessionTail[L]}
           </p>
         )}
-        <p className="dim">
-          Отчёт строится в браузере по вашей дате рождения — на сервер она не уходит, поэтому и здесь
-          её нет, пока вы не укажете дату. По той же причине расчёт не переносится в новую вкладку:
-          он остаётся в той, где вы его сделали.
-        </p>
+        <p className="dim">{D.unlockBox.browserOnly[L]}</p>
         <Link className="btn wide" href="/#calc">
-          Указать дату рождения
+          {D.unlockBox.setDate[L]}
         </Link>
       </div>
     );
   }
 
-  const sections = buildFree(matrix, texts, articles);
+  const sections = full ?? buildFree(matrix, texts, articles);
   const locked = sections.filter((s) => !s.positions.length);
   const currentSaved = saved.find((row) => row.birth === matrix.birth && row.sex === matrix.sex);
 
   return (
     <>
       <p className="crumbs">
-        <Link href="/">Главная</Link> <span>/</span> <span>Мой разбор</span>
+        <Link href="/">{D.nav.home[L]}</Link> <span>/</span> <span>{D.nav.myReading[L]}</span>
       </p>
-      <h1>Разбор матрицы судьбы</h1>
+      <h1>{D.unlockBox.readingTitle[L]}</h1>
       <p className="dim">
-        {birthLabel(matrix.birth)} · {matrix.sex === "f" ? "женская карта" : "мужская карта"} ·{" "}
-        {counted(sections.filter((s) => s.positions.length).length, "раздел", "раздела", "разделов")}{" "}
-        открыто
+        {birthLabel(matrix.birth)} ·{" "}
+        {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]} ·{" "}
+        {D.unlockBox.sectionsOpen[L](sections.filter((s) => s.positions.length).length)}
       </p>
 
       <div className="section-gap">
@@ -111,32 +117,38 @@ export default function ReportView({
 
       <ReportSections sections={sections} />
 
-      {granted ? (
+      {ALL_FREE ? (
         <div className="allbox">
-          <h3>Полный разбор по этой дате собирает сервер</h3>
-          <p>
-            Тариф оплачен, но толкования платных разделов в браузер не приходят: их печатает сервер по
-            сохранённой матрице. Сохраните эту дату в кабинет — и {locked.length} разделов откроются на
-            странице разбора.
-          </p>
+          <h3>{D.unlockBox.openTitleFree[L]}</h3>
+          <p>{D.unlockBox.reportOpenFree[L]}</p>
           <SaveMatrixButton
             birth={matrix.birth}
             sex={matrix.sex}
-            label="Сохранить дату и открыть полный разбор"
+            label={D.unlockBox.saveDate[L]}
+          />
+        </div>
+      ) : granted ? (
+        <div className="allbox">
+          <h3>{D.unlockBox.grantedTitle[L]}</h3>
+          <p>{D.unlockBox.grantedText[L](locked.length)}</p>
+          <SaveMatrixButton
+            birth={matrix.birth}
+            sex={matrix.sex}
+            label={D.unlockBox.saveAndOpen[L]}
           />
           <p className="small" style={{ marginTop: 10 }}>
-            Уже сохраняли раньше? <Link href="/account">Кабинет</Link> — там список ваших матриц.
+            {D.unlockBox.savedEarlier[L]} <Link href="/account">{D.nav.account[L]}</Link>{" "}
+            {D.unlockBox.accountHasList[L]}
           </p>
         </div>
       ) : (
         <div className="allbox">
-          <h3>Осталось {locked.length} разделов под замком</h3>
+          <h3>{D.unlockBox.lockedLeft[L](locked.length)}</h3>
           <p>
-            Полный разбор открывает деньги, отношения, родовые задачи, программы и разбор по десятилетиям до 80
-            лет.{" "}
+            {D.unlockBox.lockedLead[L]}{" "}
             {priceKnown && lead
-              ? `${money(lead.price)} ₽ — один платёж, без подписки: разбор открыт в аккаунте и скачивается в PDF.`
-              : "Цена уточняется."}
+              ? D.unlockBox.onePaymentPdf[L](priceLabel(lead))
+              : D.unlockBox.priceUnknown[L]}
           </p>
           <div className="alllist">
             {locked.map((s) => (
@@ -146,24 +158,24 @@ export default function ReportView({
             ))}
           </div>
           <UnlockCta place="report_bottom" testId="unlock-cta" matrixId={currentSaved?.id}>
-            Купить
+            {D.nav.buy[L]}
           </UnlockCta>
           {/* вошедшему предлагать вход бессмысленно: он уже здесь, и подпись читалась как
               «мы вас не узнали» */}
           {session.status === "user" ? (
             <p className="small" style={{ marginTop: 10 }}>
-              Вы вошли как {session.email}: покупка откроет разделы в этом аккаунте.
+              {D.unlockBox.signedInAs[L](session.email ?? "")}
             </p>
           ) : (
             <p className="small" style={{ marginTop: 10 }}>
-              Уже оплачивали? <Link href="/login">Войдите</Link> — доступ привязан к аккаунту, а не к
-              браузеру.
+              {D.unlockBox.alreadyBought[L]} <Link href="/login">{D.unlockBox.signIn[L]}</Link>{" "}
+              {D.unlockBox.signInTailAccount[L]}
             </p>
           )}
         </div>
       )}
 
-      {locked.length ? <Plans place="report" /> : null}
+      {!ALL_FREE && locked.length ? <Plans place="report" /> : null}
     </>
   );
 }

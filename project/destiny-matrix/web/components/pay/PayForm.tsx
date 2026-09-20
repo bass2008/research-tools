@@ -7,10 +7,11 @@ import { useEffect, useState } from "react";
 
 import { ApiError, api, type MatrixListItem } from "@/lib/api";
 import { track } from "@/lib/analytics";
+import { D, L } from "@/lib/i18n";
 import { emailError, normalizeEmail } from "@/lib/email";
 import { needsOwnerPassword, reduce, START, type PayEvent, type Stage } from "@/lib/payStage";
 import { useBirth } from "@/lib/useBirth";
-import { byId, capLabel, money, periodLabel, type Tariff } from "@/lib/tariffs";
+import { byId, capLabel, money, periodLabel, priceLabel, type Tariff } from "@/lib/tariffs";
 
 import { birthLabel } from "@/components/matrix/MatrixResult";
 import PayReceipt from "./PayReceipt";
@@ -23,13 +24,13 @@ const MIN_PASSWORD = 3;
 
 /** Что даёт тариф — выводим из scope, а не из списка в разметке: тариф правят в базе. */
 function optionNote(t: Tariff): string {
-  const parts = [t.scope.includes("all") ? "любое число дат" : "одна дата"];
-  if (t.scope.includes("matrix")) parts.push("матрицы хранятся в кабинете");
+  const parts = [t.scope.includes("all") ? D.payForm.anyDates[L] : D.payForm.oneDate[L]];
+  if (t.scope.includes("matrix")) parts.push(D.payForm.storedInAccount[L]);
   // «навсегда» на витрине спорило с офертой («не менее 12 месяцев»): обещаем то, что
   // выполняем — доступ без подписки и файл, который остаётся у человека
   parts.push(t.period_days === null
-    ? "без подписки: открыт в аккаунте и скачивается в PDF"
-    : `открыто ${periodLabel(t)}, потом закрывается`);
+    ? D.payForm.noSubscription[L]
+    : D.payForm.openedUntil[L](periodLabel(t)));
   return parts.join(" · ");
 }
 
@@ -82,7 +83,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
         );
         if (!hit) {
           const back = res.items.find((x) => x.external_id === receipt && x.refunded_at);
-          if (back) setError("Этот платёж возвращён: доступ по нему закрыт.");
+          if (back) setError(D.payForm.errors.refunded[L]);
           send({ type: "receipt-missing" });
           return;
         }
@@ -150,22 +151,21 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
     const mail = normalizeEmail(email);
     const wrongMail = emailError(email);
     if (wrongMail) return setError(wrongMail);
-    if (!agreed) return setError("Нужно согласие на обработку персональных данных.");
+    if (!agreed) return setError(D.payForm.errors.consent[L]);
     // Про чужую почту говорим раньше, чем про пароль: вошедшему человеку бессмысленно требовать
     // пароль от аккаунта, которым он не пользуется.
     if (session.status === "user" && session.email && session.email !== mail) {
       return setError(
-        `Вы вошли как ${session.email}: тариф начислится этому аккаунту. Чтобы оплатить на другую ` +
-          "почту, сначала выйдите из аккаунта.",
+        D.payForm.errors.otherAccount[L](session.email ?? ""),
       );
     }
     const typed = password;
     if (!signedIn && typed.length < MIN_PASSWORD) {
-      return setError(`Пароль для входа — не короче ${MIN_PASSWORD} знаков.`);
+      return setError(D.payForm.errors.shortPassword[L](MIN_PASSWORD));
     }
     const forAll = tariff.scope.includes("all");
     if (!forAll && target === null) {
-      return setError("Сначала введите дату рождения — платёж открывает конкретную дату.");
+      return setError(D.payForm.errors.noDate[L]);
     }
 
     setBusy(true);
@@ -173,8 +173,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       const live = session.status === "loading" ? await refreshSession() : session;
       if (live.status === "user" && live.email && live.email !== mail) {
         setError(
-          `Вы вошли как ${live.email}: тариф начислится этому аккаунту. Чтобы оплатить на другую ` +
-            "почту, сначала выйдите из аккаунта.",
+          D.payForm.errors.otherAccount[L](live.email ?? ""),
         );
         return;
       }
@@ -200,9 +199,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             if (loginErr instanceof ApiError && loginErr.status === 401) {
               send({ type: "password-needed", email: mail });
               setError(
-                "На эту почту уже есть аккаунт, и этот пароль к нему не подошёл. Введите пароль " +
-                  "аккаунта или восстановите его — ссылка «Восстановить пароль» под формой. " +
-                  "Тариф начислится этому аккаунту.",
+                D.payForm.errors.wrongPassword[L],
               );
               return;
             }
@@ -221,7 +218,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
               ? { birth: birth.birth, sex: birth.sex }
               : undefined;
       if (!forAll && !aim) {
-        setError("Сначала введите дату рождения — платёж открывает конкретную дату.");
+        setError(D.payForm.errors.noDate[L]);
         return;
       }
       const res = await api.payStart(tariff.id, mail, aim);
@@ -238,10 +235,10 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {
-        const tail = " Платёж не прошёл — деньги не списаны.";
+        const tail = D.payForm.errors.notCharged[L];
         if (err.status === 401) {
           send({ type: "password-needed", email: mail });
-          setError("Сессия истекла — введите пароль аккаунта ещё раз." + tail);
+          setError(D.payForm.errors.sessionExpired[L] + tail);
           return;
         }
         // 409 — не отказ платежа, а отказ повторной покупки: про деньги здесь говорить нечего
@@ -254,12 +251,11 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
           // ответ не дошёл — значит про деньги мы ничего не знаем: платёж мог пройти,
           // и обещание «не списаны» оказывалось ложью
           err.status === 0
-            ? "Ответ от сервера не дошёл. Если платёж всё же прошёл, разбор уже открыт — " +
-              "обновите страницу; второй раз за ту же дату списать не получится."
+            ? D.payForm.errors.noAnswer[L]
             : err.message.replace(/[.!…]?$/, ".") + tail,
         );
       } else {
-        setError("Что-то пошло не так. Попробуйте ещё раз.");
+        setError(D.payForm.errors.generic[L]);
       }
     } finally {
       setBusy(false);
@@ -289,18 +285,15 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
     // копипаста получал отказ без объяснения.
     <form method="post" className="panel paybox" data-testid="pay-modal" onSubmit={submit}
           noValidate>
-      <h3>Что покупаем</h3>
+      <h3>{D.payForm.whatWeBuy[L]}</h3>
       <div className="cap">
-        {tariffs.length > 1
-          ? "Все 20 разделов разбора открывает любой из тарифов — разница в числе дат и сроке."
-          : `Все 20 разделов разбора по одной дате рождения. Стоимость — ${money(tariff.price)} ₽, ` +
-            "один платёж без подписки; разбор скачивается в PDF."}
+        {tariffs.length > 1 ? D.payForm.manyPlans[L] : D.payForm.onePlan[L](priceLabel(tariff))}
       </div>
 
       {/* выбор не рисуем вовсе, пока продаём один тариф: скрытый стилями блок оставлял бы
           в разметке подписи вроде «Подписка» и «Одна дата» */}
       {tariffs.length > 1 ? (
-      <div className="tchoice" role="radiogroup" aria-label="Тариф" data-testid="tariff-choice">
+      <div className="tchoice" role="radiogroup" aria-label={D.payForm.planGroup[L]} data-testid="tariff-choice">
         {tariffs.map((t) => (
           <label className={t.id === tariff.id ? "topt on" : "topt"} key={t.id}>
             <input
@@ -321,7 +314,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
               <span className="tsub">{optionNote(t)}</span>
             </span>
             <span className="tprice">
-              {`${money(t.price)} ₽`}
+              {priceLabel(t)}
               <s>{capLabel(t)}</s>
             </span>
           </label>
@@ -331,7 +324,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
 
       {!tariff.scope.includes("all") ? (
         <div className="paytarget">
-          <label htmlFor="paytarget">Платёж откроет</label>
+          <label htmlFor="paytarget">{D.payForm.paymentOpens[L]}</label>
           <select
             id="paytarget"
             data-testid="pay-target"
@@ -340,7 +333,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             onChange={(e) => aimAt.choose(e.target.value)}
           >
             {target === null ? (
-              <option value="none">{targetLoading ? "Проверяем дату…" : "Дата не выбрана"}</option>
+              <option value="none">{targetLoading ? D.payForm.checkingDate[L] : D.payForm.noDateChosen[L]}</option>
             ) : null}
             {choices.map((option) => (
               <option key={option.value} value={option.value}>
@@ -351,32 +344,33 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
           <p className="hint" style={{ textAlign: "left" }}>
             {targetLoading ? (
               <span className="skeleton" data-testid="pay-target-loading">
-                Проверяем дату из ссылки в вашем кабинете…
+                {D.payForm.checkingLink[L]}
               </span>
             ) : needsLogin && target === null ? (
               <span data-testid="pay-login-note">
-                Эта дата сохранена в аккаунте — <Link href="/login">войдите</Link>, чтобы открыть
-                именно её. Другую дату можно <Link href="/">посчитать на главной</Link>.
+                {D.payForm.loginForDate[L]}{" "}
+                <Link href="/login">{D.unlockBox.signIn[L].toLowerCase()}</Link>
+                {D.payForm.loginForDateTail[L]}{" "}
+                <Link href="/">{D.payForm.calcOnHome[L]}</Link>.
               </span>
             ) : target === null && opened ? (
               <span data-testid="pay-open-note">
-                Разбор «{opened.title ?? birthLabel(opened.birth)}» уже открыт
-                — второй раз платить не нужно.{" "}
-                <Link href={`/report?m=${opened.id}`}>Открыть разбор</Link>. Другую дату можно{" "}
-                <Link href="/">посчитать на главной</Link>.
+                {D.payForm.alreadyOpen[L](opened.title ?? birthLabel(opened.birth))}{" "}
+                <Link href={`/report?m=${opened.id}`}>{D.payForm.openReading[L]}</Link>.{" "}
+                {D.payForm.anotherDate[L]} <Link href="/">{D.payForm.calcOnHome[L]}</Link>.
               </span>
             ) : target === null && missing ? (
               <span data-testid="pay-missing-note">
-                Даты из ссылки в вашем кабинете нет: платёж за неё не пройдёт. Выберите дату из
-                списка или <Link href="/">посчитайте её на главной</Link>.
+                {D.payForm.missingDate[L]}{" "}
+                <Link href="/">{D.payForm.calcItOnHome[L]}</Link>.
               </span>
             ) : target === null ? (
               <>
-                Дата не выбрана: платёж открывает конкретную дату.{" "}
-                <Link href="/">Введите её на главной</Link> — расчёт бесплатный.
+                {D.payForm.noDateChosenHint[L]}{" "}
+                <Link href="/">{D.payForm.enterOnHome[L]}</Link> {D.payForm.freeCalc[L]}
               </>
             ) : (
-              `Откроется «${chosenLabel}». Платёжному провайдеру дата не передаётся.`
+              D.payForm.willOpen[L](chosenLabel ?? "")
             )}
           </p>
         </div>
@@ -385,7 +379,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       {signedIn ? (
         <>
           <label htmlFor="payemail" style={{ marginTop: 16 }}>
-            Почта для доступа
+            {D.payForm.emailLabel[L]}
           </label>
           <input
         disabled={!hydrated}
@@ -402,7 +396,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             }}
             placeholder="you@mail.ru"
           />
-          <p className="hint">Вы вошли как {session.email}: тариф начислится этому аккаунту.</p>
+          <p className="hint">{D.payForm.signedInAs[L](session.email ?? "")}</p>
         </>
       ) : (
         <>
@@ -410,7 +404,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
               устройства без пароля нельзя. */}
           <div className="payfields">
             <div>
-              <label htmlFor="payemail">Почта для доступа</label>
+              <label htmlFor="payemail">{D.payForm.emailLabel[L]}</label>
               <input
         disabled={!hydrated}
                 id="payemail"
@@ -429,7 +423,9 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
               />
             </div>
             <div>
-              <label htmlFor="paypass">{known ? "Пароль этого аккаунта" : "Пароль для входа"}</label>
+              <label htmlFor="paypass">
+                {known ? D.payForm.passwordKnown[L] : D.payForm.passwordNew[L]}
+              </label>
               <input
         disabled={!hydrated}
                 id="paypass"
@@ -443,7 +439,9 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
                   setError(null);
                   setPassword(e.target.value);
                 }}
-                placeholder={known ? "ваш пароль" : `не короче ${MIN_PASSWORD} знаков`}
+                placeholder={known
+                  ? D.payForm.passwordPlaceholderKnown[L]
+                  : D.payForm.passwordPlaceholderNew[L](MIN_PASSWORD)}
               />
             </div>
           </div>
@@ -451,11 +449,11 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             {known
               ? (
                 <>
-                  На эту почту уже есть аккаунт — нужен его пароль. Забыли?{" "}
-                  <Link href="/forgot">Восстановить пароль</Link>.
+                  {D.payForm.accountExists[L]}{" "}
+                  <Link href="/forgot">{D.payForm.restorePassword[L]}</Link>.
                 </>
               )
-              : "С этой парой вход работает с любого устройства. На эту почту придёт письмо о покупке."}
+              : D.payForm.newPairHint[L]}
           </p>
         </>
       )}
@@ -471,9 +469,12 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
           }}
         />
         <span>
-          Согласен(на) на обработку персональных данных на условиях{" "}
-          <Link href="/privacy" target="_blank" rel="noopener">политики</Link>, принимаю <Link href="/oferta" target="_blank" rel="noopener">оферту</Link> и{" "}
-          <Link href="/refund" target="_blank" rel="noopener">условия возврата</Link>.
+          {D.payForm.consentHead[L]}{" "}
+          <Link href="/privacy" target="_blank" rel="noopener">{D.payForm.consentPolicy[L]}</Link>
+          {D.payForm.consentAccept[L]}{" "}
+          <Link href="/terms" target="_blank" rel="noopener">{D.payForm.consentTerms[L]}</Link>{" "}
+          {D.payForm.consentAnd[L]}{" "}
+          <Link href="/refund" target="_blank" rel="noopener">{D.payForm.consentRefund[L]}</Link>.
         </span>
       </label>
 
@@ -485,25 +486,22 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
         disabled={busy || (!tariff.scope.includes("all") && target === null) || !hydrated}
       >
         {!hydrated
-          ? "Готовим форму…"
+          ? D.payForm.preparing[L]
           : busy
-          ? "Проводим платёж…"
-          : `Оплатить ${money(tariff.price)} ₽${
-              tariff.scope.includes("all") || chosenLabel === null ? "" : ` · ${chosenLabel}`
-            }`}
+          ? D.payForm.processing[L]
+          : D.payForm.payButton[L](
+              priceLabel(tariff),
+              tariff.scope.includes("all") || chosenLabel === null ? "" : ` · ${chosenLabel}`,
+            )}
       </button>
 
       {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}
       {signedInto ? (
         <p className="hint" data-testid="signed-into" style={{ textAlign: "left" }}>
-          Аккаунт на {signedInto} уже был — мы вошли в него, новый не создавали. Тариф начислен ему,
-          поэтому в кабинете видны прежние матрицы и платежи.
+          {D.payForm.signedIntoExisting[L](signedInto)}
         </p>
       ) : null}
-      <p className="hint">
-        Платёжному провайдеру дата рождения не передаётся: в ссылку оплаты она не попадает. Выбранная
-        дата сохраняется в ваш кабинет — по ней сервер печатает платные разделы.
-      </p>
+      <p className="hint">{D.pay.privacyNote[L]}</p>
     </form>
   );
 }

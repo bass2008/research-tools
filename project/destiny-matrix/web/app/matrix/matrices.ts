@@ -2,20 +2,16 @@
 // реальных дат рождения дают 5544 разные карты — 22 x 12 x 21. Список троек считает engine/precompute.py
 // и кладёт в content/matrices.json; здесь только разбор слага и соседи для перелинковки.
 import { matrixSlugs } from "@/lib/content";
+import { D, L, monthInDate, monthName } from "@/lib/i18n";
 import { fold, foldYear, isRealDate } from "@/lib/matrix";
 
 export const DAY_KEYS: number[] = Array.from({ length: 22 }, (_, i) => i + 1);
 export const MONTH_KEYS: number[] = Array.from({ length: 12 }, (_, i) => i + 1);
 
-export const MONTHS_NOM = [
-  "январь", "февраль", "март", "апрель", "май", "июнь",
-  "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь",
-];
+/** Месяц в именительном («июнь») и в дате («14 июня»): у английского обе формы совпадают. */
+export const MONTHS_NOM = Array.from({ length: 12 }, (_, index) => monthName(index + 1));
 
-export const MONTHS_GEN = [
-  "января", "февраля", "марта", "апреля", "мая", "июня",
-  "июля", "августа", "сентября", "октября", "ноября", "декабря",
-];
+export const MONTHS_GEN = Array.from({ length: 12 }, (_, index) => monthInDate(index + 1));
 
 export interface MatrixKey {
   day: number;
@@ -91,7 +87,7 @@ export interface Neighbour {
 export function sameDayMonth(k: MatrixKey): Neighbour[] {
   return yearKeys()
     .filter((year) => year !== k.year)
-    .map((year) => ({ slug: slugOf({ ...k, year }), label: `год ${year}` }));
+    .map((year) => ({ slug: slugOf({ ...k, year }), label: D.matrixPages.yearLabel[L](year) }));
 }
 
 export function sameDayYear(k: MatrixKey): Neighbour[] {
@@ -104,7 +100,7 @@ export function sameDayYear(k: MatrixKey): Neighbour[] {
 export function sameMonthYear(k: MatrixKey): Neighbour[] {
   return DAY_KEYS.filter((day) => day !== k.day).map((day) => ({
     slug: slugOf({ ...k, day }),
-    label: `день ${day}`,
+    label: D.matrixPages.dayLabelShort[L](day),
   }));
 }
 

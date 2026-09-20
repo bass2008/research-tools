@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 import { arcanumTitle } from "./arcana";
 import {
   KARMIC_TAIL_HUB,
@@ -21,7 +22,7 @@ import { positionArcanumHref, positionArcanumLabel, registryItem } from "./posit
 
 /**
  * Связи между статьями автор ставит односторонне и указателем, а не адресом: `arcanum/7`,
- * `position/center`, `na-god/8`, `tail/18-9-9`, `9-6-9` или слаг хаба. Здесь указатель
+ * `position/center`, `year/8`, `tail/18-9-9`, `9-6-9` или слаг хаба. Здесь указатель
  * превращается в ссылку, а обратное направление строится само — требование «перелинковка в обе
  * стороны» иначе заставляло бы править уже сданные статьи каждый раз, когда появляется новая.
  */
@@ -85,14 +86,14 @@ export function resolveRef(ref: string): RelatedLink | null {
     const [a, b] = pair as [number, number];
     return {
       href: combinationHref(a, b),
-      title: `${a} и ${b}: ${arcanumTitle(a)} и ${arcanumTitle(b)}`,
+      title: D.relatedLinks.combination[L](a, b, arcanumTitle(a), arcanumTitle(b)),
     };
   }
 
   if (kind === "arcanum") {
     const n = Number(rest);
     if (!Number.isInteger(n) || n < 1 || n > 22) return null;
-    return { href: arcanumHref(n), title: `${n} в матрице судьбы: ${arcanumTitle(n)}` };
+    return { href: arcanumHref(n), title: D.relatedLinks.arcanum[L](n, arcanumTitle(n)) };
   }
   if (kind === "position") {
     const p = positionByKey(rest);
@@ -103,10 +104,10 @@ export function resolveRef(ref: string): RelatedLink | null {
     return c ? { href: chakraHref(c.key), title: c.title } : null;
   }
   if (kind === "tail") return tailLink(rest);
-  if (kind === "na-god") {
+  if (kind === "year") {
     if (!rest) {
-      const item = categoryHub("na-god");
-      if (!item) throw new Error("нет канонического материала хаба na-god");
+      const item = categoryHub("year");
+      if (!item) throw new Error("нет канонического материала хаба year");
       return { href: YEAR_HUB, title: item.title };
     }
     return yearLink(rest);
@@ -159,7 +160,7 @@ function sources(): Source[] {
   }
   for (const [key, path] of [
     ["karmic-tail", KARMIC_TAIL_HUB],
-    ["na-god", YEAR_HUB],
+    ["year", YEAR_HUB],
   ] as const) {
     const item = categoryHub(key);
     if (item) out.push({ path, title: item.title, related: item.related });

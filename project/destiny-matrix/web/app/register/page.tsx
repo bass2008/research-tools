@@ -1,11 +1,12 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 
 import AuthForm from "@/components/account/AuthForm";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
-  title: "Регистрация",
-  description: "Создание аккаунта: хранение сохранённых матриц и доступ к платным разделам.",
+  title: D.pages.registerTitle[L],
+  description: D.pages.registerDescription[L],
   path: "/register",
   noindex: true,
 });

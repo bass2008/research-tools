@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { D, L } from "@/lib/i18n";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
@@ -34,8 +35,8 @@ export default function CombinationHubPage() {
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           { name: encyclopediaSection("cmb").title },
         ]}
       />
@@ -47,10 +48,9 @@ export default function CombinationHubPage() {
       <p className="dim prose">{hub.short}</p>
 
       <div className="panel section-gap">
-        <h2>Все сочетания</h2>
+        <h2>{D.enc.allCombinations[L]}</h2>
         <div className="cap">
-          {encyclopediaSection("cmb").hint} · {pairs.length}. Выберите свой аркан отношений в строке и
-          аркан партнёра в столбце — порядок значения не имеет.
+          {encyclopediaSection("cmb").hint} · {pairs.length}. {D.enc.combinationsLead[L]}
         </div>
         <CombinationMatrix />
       </div>
@@ -59,8 +59,8 @@ export default function CombinationHubPage() {
 
       <div className="section-gap">
         <CalcPromo
-          title="Узнать свой аркан отношений"
-          lead="Карта по дате рождения строится бесплатно. Пара складывается из арканов отношений двоих, поэтому нужны две даты."
+          title={D.enc.promoCombinationTitle[L]}
+          lead={D.enc.promoCombinationLead[L]}
           place="combination-hub"
         />
       </div>

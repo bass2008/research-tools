@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 // Клиент к BFF (`web/app/api/**`), а не к api напрямую. Адрес всегда свой origin:
 // токен лежит в httpOnly-куке, поэтому кросс-доменный базовый адрес её бы не отправил, а
 // адрес апстрима в браузер не попадает вовсе.
@@ -33,9 +34,10 @@ export interface MeResponse {
   is_admin: boolean;
 }
 
-/** Как открыта матрица: куплена бессрочно, выдана без оплаты, открыта подпиской или закрыта.
- * `granted` отличается от `forever` намеренно: знак купленного владения подарку не принадлежит. */
-export type MatrixAccess = "forever" | "granted" | "subscription" | "locked";
+/** Как открыта матрица: витриной без оплаты, куплена бессрочно, выдана без оплаты, открыта
+ * подпиской или закрыта. `granted` отличается от `forever` намеренно: знак купленного владения
+ * подарку не принадлежит, а `open` не принадлежит никому — он снимается вместе с флагом. */
+export type MatrixAccess = "open" | "forever" | "granted" | "subscription" | "locked";
 
 export interface MatrixListItem {
   id: number;
@@ -188,7 +190,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { ...headers, ...init?.headers },
     });
   } catch {
-    throw new ApiError("Сервер не отвечает. Попробуйте позже.", 0);
+    throw new ApiError(D.apiErrors.offline[L], 0);
   }
   // Тело может быть не JSON: пока api не поднят, на /api/* приходит HTML-страница 404.
   // Ронять здесь исключение нельзя — иначе вызывающий не отличит отказ сервера от своей ошибки
@@ -208,11 +210,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       parsed && data && typeof data === "object" && "detail" in data
         ? String((data as { detail: unknown }).detail)
         : res.status === 404
-          ? "Сервис пока недоступен."
-          : `Сервер ответил ошибкой ${res.status}.`;
+          ? D.apiErrors.missing[L]
+          : D.apiErrors.status[L](res.status);
     throw new ApiError(detail, res.status);
   }
-  if (!parsed) throw new ApiError("Сервер ответил в неожиданном формате.", res.status);
+  if (!parsed) throw new ApiError(D.apiErrors.unexpected[L], res.status);
   return data as T;
 }
 

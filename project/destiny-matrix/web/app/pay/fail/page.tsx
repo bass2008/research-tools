@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 import PayResult from "@/components/pay/PayResult";
+import { D, L } from "@/lib/i18n";
 import { pageMeta } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMeta({
-  title: "Платёж не прошёл",
-  description: "Возврат с платёжной формы: платёж не состоялся.",
+  title: D.payResult.failPageTitle[L],
+  description: D.payResult.failPageDescription[L],
   path: "/pay/fail",
   noindex: true,
 });

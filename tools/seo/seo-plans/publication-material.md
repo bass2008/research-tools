@@ -203,8 +203,7 @@
 - квота переобхода 150 адресов в сутки, сбрасывается **в полночь по Москве, не по UTC** (проверено:
   по московским суткам ложится ровно 150/150/150, по UTC на 13.09 приходилось 300 задач).
 
-**Зацепка:** `project/destiny-matrix/docs/yandex-recrawl-plan.md`, журнал
-`tools/seo/audit/recrawl-log.csv`.
+**Зацепка:** журнал `tools/seo/audit/recrawl-log.csv`.
 
 ### 2.8. Googlebot обходит втрое активнее, но приводит меньше
 
@@ -274,7 +273,7 @@ CTR 0,63% против 1,3%.
 | реестр «аркан × позиция», пороги | `tools/seo/build-position-arcanum.py`, `project/destiny-matrix/web/content/position-arcanum.json` |
 | журнал SEO-итераций, опровергнутые гипотезы | `tools/seo/seo-plans/seo-long-plan.md` |
 | разбор «под сердцем», что сделано в релизах 15.09, даты замеров | `tools/seo/seo-plans/seo-long-plan.md`, итерации 8–10 |
-| переобход: план, квоты, журнал | `project/destiny-matrix/docs/yandex-recrawl-plan.md`, `tools/seo/audit/recrawl-log.csv` |
+| переобход: квоты, журнал отправленного | `tools/seo/yandex-recrawl.py`, `tools/seo/audit/recrawl-log.csv` |
 | спрос, выдачи, стоп-слова | `semcore.db`: `node` (186 574 фразы), `serp` (494 выдачи), `stopword`; **открывать только `mode=ro`** |
 | редиректы | `project/destiny-matrix/web/lib/redirects.ts`, `tools/seo/recrawl-301.csv` |
 

@@ -17,9 +17,9 @@ pytestmark = pytest.mark.bug
     (
         (320, "/encyclopedia/combination/1-2"),
         (320, "/encyclopedia/karmic-tail/6-14-8"),
-        (320, "/na-god/2026"),
-        (360, "/na-god/11"),
-        (390, "/na-god/2026"),
+        (320, "/year/2026"),
+        (360, "/year/11"),
+        (390, "/year/2026"),
     ),
 )
 def test_active_encyclopedia_category_is_fully_visible(page: Page, width: int, path: str):

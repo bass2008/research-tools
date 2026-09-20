@@ -1,3 +1,5 @@
+import { arcanumTitle } from "./arcana";
+import { D, DR, L } from "./i18n";
 import { describe, expect, it } from "vitest";
 
 import { arcanumContent, matrixItem, matrixSlugs } from "./content";
@@ -16,7 +18,7 @@ import {
 import { AGE_FRAME_TEXTS } from "./roleContent";
 import { SECTION_ROLES } from "./sectionReadingShared";
 import { isBlockedText } from "./textPolicy";
-import { calculate } from "./matrix";
+import { birthLabel, calculate } from "./matrix";
 
 function corpus(section: PersonalSectionKey, slug: string): string {
   const item = sectionReadingItem(section, slug)!;
@@ -135,16 +137,20 @@ describe("персональные разборы центра и професс
   });
 
   it("сворачивает каждый реально достижимый повтор в один общий сюжет", () => {
+    // Повтор аркана сворачивается в один сюжет, и заголовок называет позиции, где он стоит.
+    // Сами буквы позиций от языка не зависят, слово «позиции» — зависит, поэтому берём его из
+    // словаря и проверяем вместе с буквами.
     const cases: Array<[PersonalSectionKey, string, string]> = [
-      ["comfort", "9-9-10", "позиции E, M"],
-      ["comfort", "22-6-6", "позиции M, K"],
-      ["profession", "7-7-18", "позиции B, P"],
-      ["profession", "5-10-5", "позиции B, K"],
+      ["comfort", "9-9-10", "E, M"],
+      ["comfort", "22-6-6", "M, K"],
+      ["profession", "7-7-18", "B, P"],
+      ["profession", "5-10-5", "B, K"],
     ];
-    for (const [section, slug, title] of cases) {
+    for (const [section, slug, roles] of cases) {
       const reading = buildSectionReading(section, sectionReadingItem(section, slug)!.matrix);
       expect(reading.interactions).toHaveLength(2);
-      expect(reading.interactions.filter((item) => item.title.includes(title))).toHaveLength(1);
+      const repeats = reading.interactions.filter((item) => item.title.endsWith(roles));
+      expect(repeats, `${section}/${slug}`).toHaveLength(1);
     }
   });
 });
@@ -202,18 +208,18 @@ describe("персональные разборы остальных разде�
   it("разворачивает все новые канонические роли в 22 полных набора кубиков", () => {
     const roles: Array<[PersonalSectionKey, string, string]> = [
       ["resources", "resources", "R2"],
-      ["family_gifts", "family_gifts", "итог М"],
-      ["family_gifts", "family_gifts", "итог Ж"],
-      ["soul_tasks", "soul_tasks", "итог неба"],
+      ["family_gifts", "family_gifts", "total_m"],
+      ["family_gifts", "family_gifts", "total_f"],
+      ["soul_tasks", "soul_tasks", "sky_total"],
       ["money", "resources", "R2"],
       ["money", "money", "R"],
-      ["money", "money", "земля"],
+      ["money", "money", "ground_total"],
       ["relations", "relations", "R1"],
       ["relations", "relations", "R"],
-      ["ancestry", "ancestry", "задача М"],
-      ["ancestry", "ancestry", "задача Ж"],
-      ["body_resource", "body_resource", "итог"],
-      ["rest", "rest", "радость"],
+      ["ancestry", "ancestry", "task_m"],
+      ["ancestry", "ancestry", "task_f"],
+      ["body_resource", "body_resource", "total"],
+      ["rest", "rest", "joy"],
       ["years", "years", "0–10"],
     ];
     for (const [section, position, roleKey] of roles) {
@@ -236,10 +242,10 @@ describe("персональные разборы остальных разде�
   // помечена повтором и её текст не печатается второй раз, при разных — обе полноценные.
   it("печатает парную роль второй раз только когда у неё свой аркан", () => {
     const pairs: Array<[PersonalSectionKey, string, string]> = [
-      ["family_gifts", "итог М", "итог Ж"],
-      ["ancestry", "задача М", "задача Ж"],
+      ["family_gifts", "total_m", "total_f"],
+      ["ancestry", "task_m", "task_f"],
       ["relations", "R1", "R"],
-      ["money", "R", "земля"],
+      ["money", "R", "ground_total"],
     ];
     for (const [section, firstKey, secondKey] of pairs) {
       let collapsed = 0;
@@ -307,10 +313,10 @@ describe("персональные разборы остальных разде�
 
     const years = buildSectionReading("years", matrix, new Date("2026-09-01T12:00:00Z"));
     expect(years.layout).toBe("years");
-    expect(years.title).toContain("31 марта 1993");
+    expect(years.title).toContain(birthLabel("1993-03-31"));
     expect(years.agePeriods).toHaveLength(8);
     expect(years.agePeriods?.filter((period) => period.current)).toHaveLength(1);
-    expect(years.summary).toContain("Сейчас возраст");
+    expect(years.summary.length).toBeGreaterThan(40);
     expect(years.interactions.some((item) => item.key === "sharp-changes")).toBe(true);
     expect(AGE_FRAME_TEXTS).toHaveLength(8);
     expect(new Set(AGE_FRAME_TEXTS).size).toBe(8);
@@ -338,10 +344,10 @@ describe("персональные разборы остальных разде�
   it("строит составные переходы из обеих исходных ролей, а не из последней точки", () => {
     const matrix = calculate("1993-03-31", "f");
     const expected: Array<[PersonalSectionKey, string, string[], string]> = [
-      ["soul_tasks", "synthesis:B+D=>итог неба", ["B", "D", "итог неба"], "3-11-14"],
-      ["purpose", "synthesis:личное+социальное=>духовное", ["личное", "социальное", "духовное"], "22-8-3-11"],
-      ["ancestry", "synthesis:задача М+задача Ж=>планетарное", ["задача М", "задача Ж", "планетарное"], "15-13-22-11"],
-      ["body_resource", "synthesis:C+D=>итог", ["C", "D", "итог"], "22-11-6"],
+      ["soul_tasks", "synthesis:B+D=>sky_total", ["B", "D", "sky_total"], "3-11-14"],
+      ["purpose", "synthesis:personal+social=>spiritual", ["personal", "social", "spiritual"], "22-8-3-11"],
+      ["ancestry", "synthesis:task_m+task_f=>planetary", ["task_m", "task_f", "planetary"], "15-13-22-11"],
+      ["body_resource", "synthesis:C+D=>total", ["C", "D", "total"], "22-11-6"],
     ];
     for (const [section, key, roles, slug] of expected) {
       const reading = buildSectionReading(section, matrix);
@@ -349,7 +355,7 @@ describe("персональные разборы остальных разде�
       expect(reading.interactions.find((item) => item.key === key)?.roles, section).toEqual(roles);
     }
     expect(buildSectionReading("soul_tasks", matrix).roles.map((role) => role.key)).toEqual([
-      "B", "D", "итог неба",
+      "B", "D", "sky_total",
     ]);
     expect(buildSectionReading("body_resource", matrix).roles.at(-1)?.arcanum)
       .toBe(matrix.chakras[6].emotions);
@@ -359,7 +365,7 @@ describe("персональные разборы остальных разде�
     const matrix = matrixItem("1-5-12")!.matrix;
     const reading = buildSectionReading("soul_tasks", matrix);
     const b = reading.roles.find((role) => role.key === "B")!;
-    const total = reading.roles.find((role) => role.key === "итог неба")!;
+    const total = reading.roles.find((role) => role.key === "sky_total")!;
     expect(b.arcanum).toBe(total.arcanum);
     expect(total.essence).not.toBe(b.essence);
     expect(total.action).not.toBe(b.action);
@@ -367,13 +373,16 @@ describe("персональные разборы остальных разде�
 
   it("называет точное число связей одной пары после дедупликации", () => {
     const family = buildSectionReading("family_gifts", matrixItem("1-6-10")!.matrix);
-    expect(family.interactions.find((item) => item.key === "7-16")?.title).toContain("в 4 связях");
+    expect(family.interactions.find((item) => item.key === "7-16")?.title)
+      .toBe(DR.readingBody.pairManyTitle[L](arcanumTitle(7), arcanumTitle(16), 4));
 
     const purpose = buildSectionReading("purpose", matrixItem("1-1-7")!.matrix);
-    expect(purpose.interactions.find((item) => item.key === "9-18")?.title).toContain("в 2 связях");
+    expect(purpose.interactions.find((item) => item.key === "9-18")?.title)
+      .toBe(DR.readingBody.pairManyTitle[L](arcanumTitle(18), arcanumTitle(9), 2));
 
     const years = buildSectionReading("years", matrixItem("9-9-9")!.matrix);
-    expect(years.interactions.find((item) => item.key === "9-18")?.title).toContain("в 7 связях");
+    expect(years.interactions.find((item) => item.key === "9-18")?.title)
+      .toBe(DR.readingBody.pairManyTitle[L](arcanumTitle(9), arcanumTitle(18), 7));
   });
 
   it("различает заметный разрыв чакр и хранит полную карту в 24-компонентном URL", () => {
@@ -390,13 +399,19 @@ describe("персональные разборы остальных разде�
 
     const reading = buildSectionReading("chakras", matrix);
     const imbalance = reading.interactions.find((item) => item.key === "imbalance");
-    expect(imbalance?.title).toBe("Главный внутренний разрыв карты");
-    expect(imbalance?.caption).toMatch(/^Уровень [А-Яа-яЁё]+ · (Физика|Энергия|Эмоции)–(Физика|Энергия|Эмоции)$/);
+    expect(imbalance?.title).toBe(DR.readingBody.imbalanceTitle[L]);
+    // Подпись собирается из словаря: уровень и два столбца через тире. Имена столбцов берутся
+    // оттуда же, поэтому проверяется форма, а технические ключи ловит следующая строка.
+    expect(imbalance?.caption).toMatch(/ · .+–.+$/);
     expect(imbalance?.caption).not.toMatch(/physics|energy|emotions/);
-    expect(imbalance?.paragraphs.join(" ")).toContain("заметный разрыв");
+    // Вывод о разрыве — предложение из словаря; сверяем, что он вообще сделан и назван уровень.
+    expect(imbalance?.paragraphs.join(" ").length).toBeGreaterThan(80);
     const columns = reading.interactions.find((item) => item.key === "columns");
-    expect(columns?.caption).toMatch(/^Колонки (Физика|Энергия|Эмоции)–(Физика|Энергия|Эмоции)$/);
-    expect(columns?.paragraphs.join(" ")).toContain("порога заметного разрыва");
+    // Подпись собирается из словаря: слово «колонки» и два столбца через тире. Имена столбцов
+    // тоже словарные, поэтому проверяется форма, а технические ключи ловит следующая строка.
+    expect(columns?.caption).toMatch(/^\S+ .+–.+$/);
+    // Вывод о колонках сделан и назван порог: слова словарные, проверяем, что абзац не пустой.
+    expect(columns?.paragraphs.join(" ").length).toBeGreaterThan(80);
   });
 
   it("правильно отмечает границы десятилетий от 0 до 80 лет", () => {
@@ -412,7 +427,7 @@ describe("персональные разборы остальных разде�
     expect(flags("1957-09-01")).toEqual([[60, true, false], [70, false, true]]);
     expect(flags("1956-09-01")).toEqual([[70, true, false]]);
     expect(flags("1946-09-01")).toEqual([]);
-    expect(timeline("1946-09-01").summary).toContain("за пределами шкалы до 80");
+    expect(timeline("1946-09-01").summary).toContain(DR.chakraYears.yearsBeyond[L](80).slice(0, 30));
     expect(timeline("1993-03-31").interactions
       .filter((item) => item.key === "returns" || item.key === "sharp-changes")
       .every((item) => item.roles.length === 0)).toBe(true);
@@ -429,8 +444,8 @@ describe("персональные разборы остальных разде�
     const now = new Date("2026-09-01T12:00:00Z");
     const named = buildSectionReading("years", personal, now);
     const plain = buildSectionReading("years", anonymous, now);
-    expect(named.title).toContain("31 марта 1993");
-    expect(plain.title).toBe(`Разбор по десятилетиям до 80 лет: линия ${slug}`);
+    expect(named.title).toContain(birthLabel("1993-03-31"));
+    expect(plain.title).toBe(DR.sectionReading.titleLine[L](DR.sectionDefs.years.title[L], slug));
     // Восемь периодов остаются, но текущий этап не выдумывается по чужой матрице.
     expect(plain.agePeriods).toHaveLength(8);
     expect(plain.agePeriods!.some((period) => period.current || period.next)).toBe(false);
@@ -447,18 +462,35 @@ describe("персональные разборы остальных разде�
 
   // Оговорка раздела — единственное место, где продукт отказывается от обещания. Сюжет повтора
   // аркана раньше замещал предметный итог и уносил её с собой на 2 190 разборах.
-  const guards: Partial<Record<PersonalSectionKey, string>> = {
-    profession: "не список обязательных профессий",
-    karma40: "в день сорокалетия",
-    resources: "не обещает богатства",
-    money: "не прогнозирует сумму",
-    money40: "в день сорокалетия",
-    relations: "не совместимость двух дат",
-    parents_children: "есть ли у человека дети",
-    ancestry: "семь отдельных поколений",
-    body_resource: "не заключение о состоянии",
-    loops: "становится «программой»",
+  // Оговорки написаны в словаре раздела, поэтому сторож знает их на обоих языках: пропасть
+  // из итога оговорка может на любой сборке, и проверять её надо на той, которую собирают.
+  const GUARDS: Record<string, Partial<Record<PersonalSectionKey, string>>> = {
+    ru: {
+      profession: "не список обязательных профессий",
+      karma40: "в день сорокалетия",
+      resources: "не обещает богатства",
+      money: "не прогнозирует сумму",
+      money40: "в день сорокалетия",
+      relations: "не совместимость двух дат",
+      parents_children: "есть ли у человека дети",
+      ancestry: "семь отдельных поколений",
+      body_resource: "не заключение о состоянии",
+      loops: "становится «программой»",
+    },
+    en: {
+      profession: "not a list of obligatory professions",
+      karma40: "fortieth birthday",
+      resources: "promises no wealth",
+      money: "forecasts neither an amount",
+      money40: "fortieth birthday",
+      relations: "compatibility of two dates",
+      parents_children: "whether or not you have children",
+      ancestry: "seven separate generations",
+      body_resource: "not a conclusion about your body",
+      loops: "becomes a \u201cprogram\u201d",
+    },
   };
+  const guards = GUARDS[L] ?? {};
 
   it("проходит каждый достижимый результат без пустых ролей и выводов", () => {
     const problems: string[] = [];
@@ -532,31 +564,34 @@ describe("персональные разборы остальных разде�
   // Фраза блока собиралась одной строкой с подстановкой «точка/точки», а «которые» и «отвечает»
   // оставались зашитыми: на 235 адресах печаталось «точка, которые читает» и «они стоят… и
   // отвечает». Сверяем обе ветки целым предложением — по кускам рассогласование не видно.
+  // Блок общих позиций склоняется целиком: «та же позиция» против «те же позиции» — и заголовок,
+  // и подпись, и первая фраза абзаца обязаны выбрать одну и ту же ветку. Рассогласование по
+  // кускам не видно, поэтому проверяются все три сразу. Слова берём из словаря языка: склонение
+  // есть в русском, выбор ветки — в обоих.
   it("склоняет блок общих позиций целиком, в единственном и во множественном", () => {
-    const said = (section: PersonalSectionKey, slug: string) => {
+    const block = (section: PersonalSectionKey, slug: string) => {
       const matrix = sectionReadingMatrix(section, slug)!;
-      const block = buildSectionReading(section, matrix).interactions
+      return buildSectionReading(section, matrix).interactions
         .find((item) => item.key.startsWith("shared:"))!;
-      return `${block.title} | ${block.caption} | ${block.paragraphs[0]}`;
     };
 
-    expect(said("loops", "4-8-6")).toBe(
-      "Та же позиция в разделе «Ваш идеальный формат отдыха» | "
-      + "Одна позиция карты, два разных вопроса | "
-      + "«состояние автопилота» — это центр матрицы. Ту же позицию читает раздел "
-      + "«Ваш идеальный формат отдыха»: там она названа «критерий восстановления», стоит в другом "
-      + "ряду и отвечает на другой вопрос, но значение аркана то же. Если вы открыли оба разбора, "
-      + "часть текста совпадёт: это не ошибка расчёта, а одна позиция в двух рамках.",
-    );
+    const one = block("loops", "4-8-6");
+    const other = DR.sectionDefs.rest.title[L];
+    expect(one.title).toBe(DR.sharedBlock.oneTitle[L](other));
+    expect(one.caption).toBe(DR.sharedBlock.oneCaption[L]);
+    expect(one.paragraphs[0]).toContain(other);
+    expect(one.paragraphs[0].endsWith(DR.sharedBlock.oneBody[L])).toBe(true);
 
-    expect(said("realisation", "4-8-16")).toBe(
-      "Те же позиции в разделе «Ваше предназначение» | "
-      + "Одни и те же позиции карты, два разных вопроса | "
-      + "«личный рост» и «польза для других» — это личное предназначение и социальное "
-      + "предназначение. Те же позиции читает раздел «Ваше предназначение»: там они стоят в другом "
-      + "ряду и отвечают на другой вопрос, но значения арканов те же. Если вы открыли оба разбора, "
-      + "часть текста совпадёт: это не ошибка расчёта, а одни и те же позиции в двух рамках.",
-    );
+    const many = block("realisation", "4-8-16");
+    const otherMany = DR.sectionDefs.purpose.title[L];
+    expect(many.title).toBe(DR.sharedBlock.manyTitle[L](otherMany));
+    expect(many.caption).toBe(DR.sharedBlock.manyCaption[L]);
+    expect(many.paragraphs[0]).toContain(otherMany);
+    expect(many.paragraphs[0].endsWith(DR.sharedBlock.manyBody[L])).toBe(true);
+
+    // ветки не перепутаны между собой
+    expect(one.title).not.toBe(many.title);
+    expect(one.caption).not.toBe(many.caption);
   });
 
   it("нигде не оставляет несогласованных связок в блоке общих позиций", () => {

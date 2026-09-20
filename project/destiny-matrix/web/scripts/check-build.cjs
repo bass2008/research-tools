@@ -10,7 +10,9 @@ const { spawn } = require("child_process");
 
 const ROOT = ".next/server/app";
 const PORT = Number(process.env.CHECK_PORT ?? 3131);
-const ON_DEMAND = ["/", "/oferta", "/pay", "/pay/single"];
+// Витрина без оплаты: кассы нет, страницы оплаты отвечают 404 — забирать и проверять нечего.
+const ALL_FREE = process.env.NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT === "1";
+const ON_DEMAND = ALL_FREE ? ["/", "/terms"] : ["/", "/terms", "/pay", "/pay/single"];
 
 const diskFiles = [];
 (function walk(dir) {
@@ -97,7 +99,7 @@ async function loadOnDemand() {
   const proc = await serve();
   let price = null;
   try {
-    price = await priceList();
+    if (!ALL_FREE) price = await priceList();
     for (const r of ON_DEMAND) {
       const res = await fetch(`http://127.0.0.1:${PORT}${r}`);
       if (!res.ok) {
@@ -114,7 +116,9 @@ async function loadOnDemand() {
 
 // Единственный список запретных выражений собирается из content/data/text-policy.json в
 // web/content/text-policy.json. Здесь остаётся только JS-адаптер для проверки готового HTML.
-const textPolicy = JSON.parse(fs.readFileSync("content/text-policy.json", "utf8"));
+// Корпус языка развёртки: приёмка проверяет ту же сборку, что поедет на домен.
+const CORPUS_DIR = `content/${process.env.NEXT_PUBLIC_SITE_LANG || "ru"}`;
+const textPolicy = JSON.parse(fs.readFileSync(`${CORPUS_DIR}/text-policy.json`, "utf8"));
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const TEXT_RULES = textPolicy.blocked.filter((group) => group.scopes.includes("html")).flatMap((group) => [
   ...group.prefixes.map((prefix) => ({
@@ -299,22 +303,34 @@ for (const p of prices.all) {
 // гейты не бывают. Правила: ⟨…⟩ = заглушка, внутри обязательно словесное описание (цифры в
 // скобках читались бы как настоящий ИНН); без скобок — форма реквизита; полузаполненное
 // состояние запрещено; явные подделки запрещены всегда.
-const REQUISITES = {
-  // метка без значения (проза «укажите ИНН») реквизитом не считается — иначе гейт падал бы на формулировках
-  ИНН: { find: /ИНН[\s:]*(⟨[^⟩]*⟩|\d[\d\s-]*)/, digits: [10, 12], human: "10 или 12 цифр" },
-  ОГРНИП: { find: /ОГРНИП[\s:]*(⟨[^⟩]*⟩|\d[\d\s-]*)/, digits: [15], human: "15 цифр" },
-  // наименование ищется по форме, а не по метке: «ИП» встречается и в прозе
-  наименование: {
-    find: /(⟨ИП[^⟩]*⟩|ИП\s+[А-ЯЁ][а-яё-]+\s+[А-ЯЁ]\.\s?[А-ЯЁ]\.)/,
-    real: /^ИП\s+[А-ЯЁ][а-яё-]+\s+[А-ЯЁ]\.\s?[А-ЯЁ]\.$/,
-    human: "ИП Фамилия И. О.",
+const REQUISITES_BY_LANG = {
+  ru: {
+    // метка без значения (проза «укажите ИНН») реквизитом не считается — иначе гейт падал бы на формулировках
+    ИНН: { find: /ИНН[\s:]*(⟨[^⟩]*⟩|\d[\d\s-]*)/, digits: [10, 12], human: "10 или 12 цифр" },
+    ОГРНИП: { find: /ОГРНИП[\s:]*(⟨[^⟩]*⟩|\d[\d\s-]*)/, digits: [15], human: "15 цифр" },
+    // наименование ищется по форме, а не по метке: «ИП» встречается и в прозе
+    наименование: {
+      find: /(⟨ИП[^⟩]*⟩|ИП\s+[А-ЯЁ][а-яё-]+\s+[А-ЯЁ]\.\s?[А-ЯЁ]\.)/,
+      real: /^ИП\s+[А-ЯЁ][а-яё-]+\s+[А-ЯЁ]\.\s?[А-ЯЁ]\.$/,
+      human: "ИП Фамилия И. О.",
+    },
+  },
+  // У английского домена продавец ещё не выбран (docs/foreign-acquiring.md): обязателен не
+  // реквизит, а честная заглушка — «⟨…⟩» со словесным описанием того, что сюда встанет.
+  en: {
+    "company name": { find: /(⟨company name[^⟩]*⟩|Registered as [^.\n]{4,80})/, human: "⟨company name …⟩" },
+    "registration number": {
+      find: /[Rr]egistration number[\s:]*(⟨[^⟩]*⟩|[A-Z0-9][A-Z0-9 -]{4,})/,
+      human: "⟨registration number …⟩",
+    },
   },
 };
+const REQUISITES = REQUISITES_BY_LANG[process.env.NEXT_PUBLIC_SITE_LANG || "ru"];
 const FAKES = ["example.com", "example.ru", "example.org", "lorem ipsum"];
 const legalState = {};
 
 function checkLegal() {
-for (const legal of ["/oferta", "/privacy", "/refund"]) {
+for (const legal of ["/terms", "/privacy", "/refund"]) {
   const html = pages.get(legal) ?? "";
   if (!html) {
     fail(`${legal}: страница не получена — реквизиты проверять нечем`);
@@ -336,7 +352,7 @@ for (const legal of ["/oferta", "/privacy", "/refund"]) {
     const value = m[1].trim();
     if (value.startsWith("⟨")) {
       kinds.add("заглушка");
-      if (!/[А-Яа-яЁё]/.test(value.replace(/[⟨⟩]/g, "")))
+      if (!/[A-Za-zА-Яа-яЁё]/.test(value.replace(/[⟨⟩]/g, "")))
         fail(`${legal}: заглушка ${name} без описания — «${value}»: цифры в скобках читаются как реквизит`);
       continue;
     }
@@ -373,20 +389,37 @@ console.log(`реквизиты: ${[...states].join(", ")} (заглушки д�
 // это окажется в видимом чанке. Здесь это ловится по собранным файлам.
 const privateSections = JSON.parse(fs.readFileSync("lib/__fixtures__/sections.json", "utf8")).sections ?? [];
 const paidRows = privateSections.filter((section) => section.access === "paid");
-const paidTexts = paidRows.flatMap((section) => [
-  section.lead,
-  ...section.positions.map((position) => position.label).filter(Boolean),
-]);
+// Снимок спецификации — контракт, и подписи в нём русские. Сторожу нужны слова того языка,
+// которым собран сайт: иначе на английской сборке он сравнивает русские подписи с английским
+// каталогом точек, не находит совпадений и объявляет секретом каждую из них.
+const LABELS = JSON.parse(fs.readFileSync(
+  `lib/__fixtures__/labels/${process.env.NEXT_PUBLIC_SITE_LANG || "ru"}.json`, "utf8"));
+const paidTexts = paidRows.flatMap((section) => {
+  const words = LABELS.sections?.[section.key] ?? {};
+  return [
+    words.lead ?? section.lead,
+    ...(words.positions ?? section.positions.map((position) => position.label)).filter(Boolean),
+  ];
+});
 // подписи, которые есть и в публичной части (например «Денежный канал» в главных точках),
 // секретом не являются — сторож смотрит только на то, что бывает лишь в платном разборе
 const publicSrc = ["lib/publicSpec.ts", "components/matrix/MatrixResult.tsx"]
   .map((f) => fs.readFileSync(f, "utf8"))
   .join("\n");
-const publicPointLabels = (JSON.parse(fs.readFileSync("content/points-catalog.json", "utf8")).items ?? [])
+const publicPointLabels = (JSON.parse(fs.readFileSync(`${CORPUS_DIR}/points-catalog.json`, "utf8")).items ?? [])
   .map((point) => point.report_label)
   .filter((label) => typeof label === "string");
+// Подписи двух бесплатных разделов публичны по определению: их видит каждый, кто посчитал карту.
+// Совпадение с подписью позиции платного раздела секретом не делает её — «Центр карты» стоит
+// и там, и там.
+const freeLabels = Object.values(
+  JSON.parse(fs.readFileSync(
+    `lib/__fixtures__/labels-public/${process.env.NEXT_PUBLIC_SITE_LANG || "ru"}.json`, "utf8"),
+  ).sections ?? {},
+).flatMap((section) => [section.title, section.lead, ...(section.positions ?? [])]);
 const paidOnly = [...new Set(paidTexts)].filter((t) =>
-  !publicSrc.includes(t) && !publicPointLabels.some((label) => label.includes(t)));
+  !publicSrc.includes(t) && !freeLabels.includes(t)
+  && !publicPointLabels.some((label) => label.includes(t)));
 if (paidOnly.length < 30) {
   fail(`сторож пейволла ослеп: платных текстов для проверки всего ${paidOnly.length} (ждём ≥30)`);
 }
@@ -410,11 +443,11 @@ for (const f of chunks) {
 // бандл они попасть не должны: браузер получает только тексты двух бесплатных разделов.
 // Каталог генерируется из канонического engine/sections.py. Парсить формат TypeScript здесь
 // нельзя: после перехода publicSpec на JSON сторож молча увидел ноль разделов.
-const paidKeys = (JSON.parse(fs.readFileSync("content/sections.json", "utf8")).items ?? [])
+const paidKeys = (JSON.parse(fs.readFileSync(`${CORPUS_DIR}/sections.json`, "utf8")).items ?? [])
   .filter((s) => s.access === "paid")
   .map((s) => s.key);
 if (paidKeys.length < 15) fail(`сторож толкований ослеп: платных разделов найдено ${paidKeys.length}`);
-const corpus = JSON.parse(fs.readFileSync("content/arcana.json", "utf8")).items ?? [];
+const corpus = JSON.parse(fs.readFileSync(`${CORPUS_DIR}/arcana.json`, "utf8")).items ?? [];
 const paidReadings = [];
 for (const a of corpus) {
   for (const key of paidKeys) {
@@ -495,7 +528,7 @@ function checkCorpusChunks() {
   checkPages();
   checkSitemap();
   checkCorpusChunks();
-  checkPrice(price);
+  if (!ALL_FREE) checkPrice(price);
   checkLegal();
   finish();
 })().catch((err) => {

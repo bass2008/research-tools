@@ -63,6 +63,9 @@ for env in ~/.config/arcana/reports.env ~/.config/arcana/smtp.env; do
   if [ -f "$env" ]; then set -a; . "$env"; set +a; fi
 done
 export PAYMENT_PROVIDER=mock MAIL_TO_LOG=1 UNIFIED_RELEASE_ARTIFACT_DIR="$ARTIFACTS"
+# Язык развёртки обязателен и умолчания не имеет (compose падает без него). Гейт гоняет
+# русский контур: английский проверяется своим прогоном (`e2e/test_locale_en.py`).
+export SITE_LANG=ru ALL_FREE_WITHOUT_PAYMENT=0
 docker network inspect arcana-print >/dev/null 2>&1 || docker network create arcana-print >/dev/null
 if (cd compose && docker compose up -d --build --wait) >"$LOGS/tests-stand.log" 2>&1; then
   docker compose -f compose/docker-compose.yml ps

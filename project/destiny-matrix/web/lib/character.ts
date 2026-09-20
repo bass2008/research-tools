@@ -1,3 +1,4 @@
+import { D, DR, L } from "./i18n";
 import {
   arcanumContent,
   combinationContent,
@@ -54,22 +55,22 @@ const EDGES: EdgeDefinition[] = [
   {
     left: "A",
     right: "B",
-    title: "Внешний образ и внутренняя задача",
-    question: "Эта связь показывает, совпадает ли первое впечатление с тем, что движет человеком изнутри.",
+    title: DR.characterLinks.abTitle[L],
+    question: DR.characterLinks.abQuestion[L],
     context: "A-B",
   },
   {
     left: "B",
     right: "C",
-    title: "От внутреннего качества к поступку",
-    question: "Эта связь показывает, насколько естественно внутренняя задача превращается в практическое действие.",
+    title: DR.characterLinks.bcTitle[L],
+    question: DR.characterLinks.bcQuestion[L],
     context: "B-C",
   },
   {
     left: "A",
     right: "C",
-    title: "Обещание образа и реальное поведение",
-    question: "Эта связь сверяет то, чего люди ждут по первому впечатлению, с тем, как человек действует на деле.",
+    title: DR.characterLinks.acTitle[L],
+    question: DR.characterLinks.acQuestion[L],
     context: "A-C",
   },
 ];
@@ -152,13 +153,13 @@ function interactionGroups(items: CharacterRoleReading[]): CharacterInteractionR
       return {
         key,
         title: allThree
-          ? `${content.title} во всех трёх ролях`
-          : `${content.title} повторяется: позиции ${where}`,
+          ? DR.characterLinks.repeatAll[L](content.title)
+          : DR.characterLinks.repeatSome[L](content.title, where),
         roles: roleKeys,
         paragraphs: [
           allThree
-            ? `Один и тот же ${left.arcanum} аркан задаёт внешний образ, внутреннюю и материальную задачи. Характер получается собранным вокруг одной темы: разные части личности не спорят о направлении, но усиливают цену любого перекоса.`
-            : `Один и тот же ${left.arcanum} аркан стоит в позициях ${where}. Повтор не добавляет второй независимый сюжет: он делает одну тему заметнее и переносит её сразу между несколькими слоями характера.`,
+            ? DR.characterLinks.repeatAllText[L](left.arcanum)
+            : DR.characterLinks.repeatSomeText[L](left.arcanum, where),
           `${contexts.join(" ")} ${content.repeat}`,
         ],
       };
@@ -174,18 +175,18 @@ function interactionGroups(items: CharacterRoleReading[]): CharacterInteractionR
     return {
       key,
       title: repeatedContext
-        ? `${left.title} и ${right.title} сразу в двух связях`
+        ? DR.characterLinks.pairTwice[L](left.title, right.title)
         : first.title,
       roles: roleKeys,
       paragraphs: [
         ...(repeatedContext
-          ? [`Одна и та же пара ${left.arcanum}–${right.arcanum} связывает сразу несколько ролей. Общий сюжет пары читается один раз, а позиционные варианты ниже показывают каждый переход отдельно.`]
+          ? [DR.characterLinks.pairTwiceText[L](left.arcanum, right.arcanum)]
           : []),
         ...contextual.flatMap((context) => context.paragraphs),
         ...content.meaning,
       ],
       href: `/encyclopedia/combination/${key}`,
-      linkLabel: `Подробнее про сочетание ${key.replace("-", " и ")} аркана в энциклопедии →`,
+      linkLabel: DR.characterLinks.pairLink[L](key.replace("-", ` ${D.encArcanum.and[L]} `)),
     };
   });
 }
@@ -196,14 +197,14 @@ export function buildCharacterReading(matrix: Matrix): CharacterReading {
   const slug = characterSlug(matrix);
   return {
     slug,
-    title: `Характер ${slug}: ${a.title}, ${b.title} и ${c.title}`,
-    lead: `Персональный разбор трёх исходных точек матрицы: A отвечает за портрет личности, B — за духовную задачу, C — за материальное проявление характера.`,
-    rolesTitle: "Три слоя характера",
+    title: DR.characterLinks.title[L](slug, a.title, b.title, c.title),
+    lead: DR.characterLinks.lead[L],
+    rolesTitle: DR.characterLinks.rolesTitle[L],
     rolesLead:
-      "Каждая точка отвечает на свой вопрос. Поэтому один аркан нельзя назначить «главным», а остальные считать дополнениями: внешний образ, внутренний мотив и действие работают одновременно.",
-    interactionsTitle: "Как арканы работают вместе",
+      DR.characterLinks.rolesLead[L],
+    interactionsTitle: DR.characterLinks.interactionsTitle[L],
     interactionsLead:
-      "Сначала читаются три роли, затем связи между ними. Если числовая пара повторяется, её смысл не дублируется: один сюжет рассматривается сразу в нескольких переходах.",
+      DR.characterLinks.interactionsLead[L],
     testId: "character-reading",
     roles: roleItems,
     interactions: interactionGroups(roleItems),

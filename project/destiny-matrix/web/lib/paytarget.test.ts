@@ -1,3 +1,5 @@
+import { D, L } from "./i18n";
+import { birthLabel, sexLabel } from "./matrix";
 import { describe, expect, it } from "vitest";
 
 import { options, paymentTargetLabel, pickTarget, stillValid, targetLabel } from "./paytarget";
@@ -53,11 +55,16 @@ describe("цель платежа", () => {
 
   it("пол печатает только когда на одну дату две записи", () => {
     const alone = [row(1, "1985-05-05", "f")];
-    expect(options(alone, null)[0].label).toBe("5 мая 1985 · кабинет");
+    expect(options(alone, null)[0].label)
+      .toBe(`${birthLabel("1985-05-05")} · ${D.payTarget.fromAccount[L]}`);
     const twins = [row(1, "1985-05-05", "f"), row(2, "1985-05-05", "m")];
     expect(options(twins, null).map((o) => o.label))
-      .toEqual(["5 мая 1985 (ж) · кабинет", "5 мая 1985 (м) · кабинет"]);
-    expect(targetLabel({ kind: "matrix", id: 2 }, twins, null)).toBe("5 мая 1985 (м)");
+      .toEqual([
+        `${birthLabel("1985-05-05")} (${D.payTarget.female[L]}) · ${D.payTarget.fromAccount[L]}`,
+        `${birthLabel("1985-05-05")} (${D.payTarget.male[L]}) · ${D.payTarget.fromAccount[L]}`,
+      ]);
+    expect(targetLabel({ kind: "matrix", id: 2 }, twins, null))
+      .toBe(`${birthLabel("1985-05-05")} (${D.payTarget.male[L]})`);
   });
 
   it("различает две карты на одну дату, даже если сервер прислал им одинаковые названия", () => {
@@ -66,15 +73,16 @@ describe("цель платежа", () => {
       { ...row(2, "1985-05-05", "m"), title: "Матрица 5 мая 1985" },
     ];
     expect(options(twins, null).map((o) => o.label)).toEqual([
-      "Матрица 5 мая 1985 (ж) · кабинет",
-      "Матрица 5 мая 1985 (м) · кабинет",
+      `Матрица 5 мая 1985 (${D.payTarget.female[L]}) · ${D.payTarget.fromAccount[L]}`,
+      `Матрица 5 мая 1985 (${D.payTarget.male[L]}) · ${D.payTarget.fromAccount[L]}`,
     ]);
-    expect(targetLabel({ kind: "matrix", id: 2 }, twins, null)).toBe("Матрица 5 мая 1985 (м)");
+    expect(targetLabel({ kind: "matrix", id: 2 }, twins, null))
+      .toBe(`Матрица 5 мая 1985 (${D.payTarget.male[L]})`);
   });
 
   it("в админке печатает дату платежа, а не номер записи", () => {
     expect(paymentTargetLabel({ matrix: { birth: "1993-03-14", sex: "f", title: null }, matrix_id: 7 }))
-      .toBe("14 марта 1993, женская");
+      .toBe(`${birthLabel("1993-03-14")}, ${sexLabel("f")}`);
     expect(paymentTargetLabel({ matrix: null, matrix_id: null })).toBe("—");
   });
 });

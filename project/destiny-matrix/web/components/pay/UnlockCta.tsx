@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { track } from "@/lib/analytics";
+import { D, L } from "@/lib/i18n";
 
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 
@@ -33,7 +34,7 @@ export default function UnlockCta({
   if (!known || !lead) {
     return (
       <button className={className} data-testid={testId} type="button" disabled>
-        {children ?? "Купить"}
+        {children ?? D.nav.buy[L]}
       </button>
     );
   }
@@ -44,7 +45,7 @@ export default function UnlockCta({
       href={matrixId ? `/pay?m=${matrixId}` : "/pay"}
       onClick={() => track("buy_click", { tariff: lead.id, place, ...(section ? { section } : {}) })}
     >
-      {children ?? "Купить"}
+      {children ?? D.nav.buy[L]}
     </Link>
   );
 }

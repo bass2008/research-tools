@@ -1,0 +1,62 @@
+{
+  "lang": "en",
+  "chakras": {
+    "sahasrara": {
+      "title": "Sahasrara",
+      "hint": "connection to a larger plan"
+    },
+    "ajna": {
+      "title": "Ajna",
+      "hint": "vision and intuition"
+    },
+    "vishuddha": {
+      "title": "Vishuddha",
+      "hint": "word, honesty, destiny"
+    },
+    "anahata": {
+      "title": "Anahata",
+      "hint": "love and relationships"
+    },
+    "manipura": {
+      "title": "Manipura",
+      "hint": "status, will, money"
+    },
+    "svadhisthana": {
+      "title": "Svadhisthana",
+      "hint": "joy, children, creativity"
+    },
+    "muladhara": {
+      "title": "Muladhara",
+      "hint": "body, support, matter"
+    }
+  },
+  "chakra_columns": {
+    "physics": "Physics",
+    "energy": "Energy",
+    "emotions": "Emotions"
+  },
+  "expansions": {
+    "chakra_physics": "{chakra} · physics",
+    "age_scale": "{from}–{to} years"
+  },
+  "sections": {
+    "character": {
+      "title": "Character and personal qualities",
+      "lead": "How you are built and what people see in you at first glance.",
+      "positions": [
+        "Personality portrait",
+        "Spiritual task",
+        "Material task"
+      ]
+    },
+    "comfort": {
+      "title": "The centre and the inner points",
+      "lead": "Centre E and the two inner channel points on the vertical axis.",
+      "positions": [
+        "Centre of the chart",
+        "Entry of the relationship line and the tail",
+        "Inner point of talent"
+      ]
+    }
+  }
+}

@@ -5,6 +5,8 @@
 // Отвергаем ровно то, что отвергнет `EmailStr` (email-validator) на сервере: правила ниже —
 // его поведение, снятое прогоном, а не догадка. Проверка идёт по нормализованному значению.
 
+import { D, L } from "./i18n";
+
 export type EmailProblem =
   | "empty"
   | "no-at"
@@ -42,27 +44,27 @@ const MAX_LENGTH = 254;
 const MAX_LABEL = 63;
 
 const MESSAGES: Record<EmailProblem, string> = {
-  empty: "Введите почту.",
-  "no-at": "В адресе нет @ — почта выглядит так: you@mail.ru.",
-  "many-at": "В адресе больше одной @.",
-  space: "В адресе есть пробел — уберите его.",
-  "local-empty": "Перед @ ничего нет — например, you@mail.ru.",
-  "local-quoted": "Кавычки в адресе не поддерживаются.",
-  "local-dot-start": "Адрес не может начинаться с точки — уберите её.",
-  "local-dot-end": "Перед @ стоит точка — уберите её: you@mail.ru.",
-  "local-dot-double": "В адресе две точки подряд — оставьте одну.",
-  "local-bad-char": "В части до @ недопустимый символ.",
-  "domain-empty": "После @ ничего нет — например, you@mail.ru.",
-  "domain-no-dot": "В домене после @ нет точки — например, mail.ru.",
-  "domain-dot-edge": "Домен не может начинаться или заканчиваться точкой.",
-  "domain-dot-double": "В домене две точки подряд.",
-  "domain-hyphen-edge": "Часть домена не может начинаться или заканчиваться дефисом.",
-  "domain-numeric-tld": "После последней точки должны быть буквы — например, mail.ru.",
-  "domain-tld-end": "Домен заканчивается не буквой — проверьте хвост адреса: mail.ru, а не mail.ru2.",
-  "domain-special-use": "На такой домен письма не доходят — нужен обычный адрес вроде you@mail.ru.",
-  "domain-bad-char": "В домене после @ недопустимый символ.",
-  "label-too-long": "Часть домена длиннее 63 знаков.",
-  "too-long": "Адрес длиннее 254 знаков.",
+  empty: D.emailErrors["empty"][L],
+  "no-at": D.emailErrors["no-at"][L],
+  "many-at": D.emailErrors["many-at"][L],
+  space: D.emailErrors["space"][L],
+  "local-empty": D.emailErrors["local-empty"][L],
+  "local-quoted": D.emailErrors["local-quoted"][L],
+  "local-dot-start": D.emailErrors["local-dot-start"][L],
+  "local-dot-end": D.emailErrors["local-dot-end"][L],
+  "local-dot-double": D.emailErrors["local-dot-double"][L],
+  "local-bad-char": D.emailErrors["local-bad-char"][L],
+  "domain-empty": D.emailErrors["domain-empty"][L],
+  "domain-no-dot": D.emailErrors["domain-no-dot"][L],
+  "domain-dot-edge": D.emailErrors["domain-dot-edge"][L],
+  "domain-dot-double": D.emailErrors["domain-dot-double"][L],
+  "domain-hyphen-edge": D.emailErrors["domain-hyphen-edge"][L],
+  "domain-numeric-tld": D.emailErrors["domain-numeric-tld"][L],
+  "domain-tld-end": D.emailErrors["domain-tld-end"][L],
+  "domain-special-use": D.emailErrors["domain-special-use"][L],
+  "domain-bad-char": D.emailErrors["domain-bad-char"][L],
+  "label-too-long": D.emailErrors["label-too-long"][L],
+  "too-long": D.emailErrors["too-long"][L],
 };
 
 export function normalizeEmail(raw: string): string {

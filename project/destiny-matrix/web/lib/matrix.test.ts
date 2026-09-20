@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import golden from "./__fixtures__/golden.json";
+import labelsGolden from "./__fixtures__/golden-labels-ru.json";
+import { numeric, texts } from "./__fixtures__/shape";
+import { D, L } from "./i18n";
 import {
   ARCANA_MAX,
   CHAKRAS,
@@ -17,6 +20,9 @@ import { FREE_KEYS, PAID_KEYS, build, referencedArcana } from "./sections";
 
 // golden.json снят запуском Python-движка:
 //   conda run -n research3.12 python scripts/make-golden.py
+// Подписей в нём нет: движок на Python знает их только по-русски, и на английской сборке
+// сравнение падало бы на каждом случае, хотя расчёт совпадает. Числа и состав разделов —
+// общий контракт двух реализаций, подписи проверяются ниже и только для своего языка.
 type GoldenCase = {
   birth: string;
   sex: string;
@@ -37,7 +43,7 @@ describe("эталон из engine/matrix.py", () => {
 
   for (const c of CASES) {
     it(`${c.birth} / ${c.sex} — матрица совпадает с Python`, () => {
-      expect(calculate(c.birth, c.sex as Sex)).toEqual(c.matrix);
+      expect(numeric(calculate(c.birth, c.sex as Sex))).toEqual(c.matrix);
     });
   }
 
@@ -53,10 +59,46 @@ describe("эталон из engine/matrix.py", () => {
   for (const c of CASES) {
     it(`${c.birth} / ${c.sex} — разделы совпадают с Python`, () => {
       const m = calculate(c.birth, c.sex as Sex);
-      expect(withoutText(build(m, false))).toEqual(c.sections_locked);
-      expect(withoutText(build(m, true))).toEqual(c.sections_unlocked);
+      expect(numeric(withoutText(build(m, false)))).toEqual(c.sections_locked);
+      expect(numeric(withoutText(build(m, true)))).toEqual(c.sections_unlocked);
     });
   }
+
+  // Подписи: их источник — словарь языка, а не Python-движок, поэтому сверка с русским
+  // эталоном идёт только на русской сборке. На любой другой проверяется то, что от языка не
+  // зависит: подписей столько же и ни одна не пустая — так ловится незаполненный перевод,
+  // который иначе дошёл бы до страницы пустой строкой.
+  const labelCases = (labelsGolden as { cases: { birth: string; sex: string; texts: string[] }[] })
+    .cases;
+  // Сбор подписей по всем случаям занимает секунды: считается один раз на файл, иначе каждый
+  // тест повторял ту же работу и на общем прогоне упирался в таймаут.
+  const wanted = new Map(labelCases.map((x) => [`${x.birth}/${x.sex}`, x.texts]));
+  const collected = CASES.map((c) => {
+    const m = calculate(c.birth, c.sex as Sex);
+    return {
+      key: `${c.birth}/${c.sex}`,
+      got: texts({
+        matrix: m,
+        sections_locked: withoutText(build(m, false)),
+        sections_unlocked: withoutText(build(m, true)),
+      }),
+    };
+  });
+
+  it("подписей столько же, сколько в эталоне, и ни одна не пустая", () => {
+    for (const { key, got } of collected) {
+      const want = wanted.get(key);
+      expect(want, `нет эталона подписей для ${key}`).toBeTruthy();
+      expect(got.length, key).toBe(want!.length);
+      expect(got.filter((t) => !t.trim()), `пустые подписи в ${key}`).toEqual([]);
+    }
+  });
+
+  it.runIf(L === "ru")("подписи совпадают с русским эталоном", () => {
+    for (const { key, got } of collected) {
+      expect(got, key).toEqual(wanted.get(key));
+    }
+  });
 
   it("в разборе у каждой позиции есть толкование под этот блок", () => {
     const m = calculate("1987-06-14", "m");
@@ -127,24 +169,24 @@ describe("валидация", () => {
     const iso = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(
       t.getDate(),
     ).padStart(2, "0")}`;
-    expect(() => calculate(iso)).toThrow(/будущем/);
+    expect(() => calculate(iso)).toThrow(D.calc.errors.future[L]);
   });
 
   it("до 1900 отклонено", () => {
-    expect(() => calculate("1899-12-31")).toThrow(/1900/);
+    expect(() => calculate("1899-12-31")).toThrow(D.calc.errors.tooOld[L]);
   });
 
   it("несуществующая дата отклонена", () => {
-    expect(() => calculate("2001-02-29")).toThrow(/нет в календаре/);
-    expect(() => calculate("2001-13-01")).toThrow(/нет в календаре/);
+    expect(() => calculate("2001-02-29")).toThrow(D.calc.errors.unreal[L]);
+    expect(() => calculate("2001-13-01")).toThrow(D.calc.errors.unreal[L]);
   });
 
   it("плохой формат отклонён", () => {
-    expect(() => calculate("14.06.1987")).toThrow(/YYYY-MM-DD/);
+    expect(() => calculate("14.06.1987")).toThrow(D.calc.errors.format[L]);
   });
 
   it("плохой пол отклонён", () => {
-    expect(() => calculate("1987-06-14", "x" as Sex)).toThrow(/Выберите пол/);
+    expect(() => calculate("1987-06-14", "x" as Sex)).toThrow(D.calc.errors.sex[L]);
   });
 
   it("строка и части дают одно и то же", () => {
@@ -154,7 +196,7 @@ describe("валидация", () => {
   it("29 февраля существует только в високосный год", () => {
     expect(daysInMonth(2000, 2)).toBe(29);
     expect(daysInMonth(1900, 2)).toBe(28);
-    expect(() => calculate("1900-02-29")).toThrow(/нет в календаре/);
+    expect(() => calculate("1900-02-29")).toThrow(D.calc.errors.unreal[L]);
     expect(calculate("2000-02-29").day).toBe(11);
   });
 });
@@ -276,7 +318,10 @@ describe("разделы", () => {
     for (const s of build(m, false)) {
       if (s.access === "paid") {
         expect(s.positions).toEqual([]);
-        expect(s.teaser).toMatch(/позиций в полном разборе/);
+        // Анонс собирается из словаря языка; сколько позиций он обещает, знает только
+        // разблокированный разбор того же раздела.
+        const full = build(m, true).find((x) => x.key === s.key)!;
+        expect(s.teaser).toBe(D.report.positionsInFull[L](full.positions.length));
       } else {
         expect(s.positions.length).toBeGreaterThan(0);
       }

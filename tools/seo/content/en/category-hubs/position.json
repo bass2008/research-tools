@@ -1,0 +1,94 @@
+{
+ "key": "position",
+ "crumb": "Chart positions",
+ "title": "Chart positions in the destiny matrix: points, lines and the parts of a reading",
+ "seo": {
+  "title": "Positions in the destiny matrix: points and lines",
+  "description": "What the positions of the destiny matrix mean: outer points and the centre, family lines, money and relationships, and how a position completes an arcanum.",
+  "queries": [
+   "destiny matrix positions",
+   "destiny matrix positions explained",
+   "lines in the destiny matrix",
+   "points in the destiny matrix",
+   "positions in the destiny matrix",
+   "arcana positions in the destiny matrix",
+   "what the points in the destiny matrix mean"
+  ]
+ },
+ "short": "A position is the place in the chart where an arcanum stands, and it is what turns a number into a concrete answer. The same energy in the centre of the chart, on the money line and in the zone of relationships says three different things.",
+ "sections": [
+  {
+   "h2": "Why positions are needed",
+   "paragraphs": [
+    "An arcanum answers the question of what kind of energy this is. A position answers the question of where that energy works. Without a position the meaning stays a general description of character and fits far too many people equally well; without an arcanum a position stays an empty frame.",
+    "That is why a reading is built as a crossing: first you find the arcanum of the point, then you read what this number does in that particular role. Every page in this section describes the second half — the role itself and the way it is assembled from other points."
+   ]
+  },
+  {
+   "h2": "The outer points and the centre",
+   "paragraphs": [
+    "Four outer points come almost straight from the date: A from the day, B from the month, C from the sum of the digits of the year, D from reducing their sum. The centre E is the reduction of all four, and it describes the state a person counts as their own normal.",
+    "These five numbers are the foundation of the chart. Everything else is built from them in pairs, so a mistake in any one outer point changes the whole chart rather than a single line of the reading."
+   ]
+  },
+  {
+   "h2": "Family lines and material lines",
+   "paragraphs": [
+    "Four lines join the outer points to each other: the spiritual male line F, the spiritual female line G, the material male line H and the material female line I. They describe not the life stories of relatives but an inherited way of handling a task — what a person takes for granted because they have seen it since childhood.",
+    "It makes sense to read a line together with the two points it came from: a line is the sum of those two, and its character is explained by exactly which of them were added together."
+   ]
+  },
+  {
+   "h2": "Inner points, money and relationships",
+   "paragraphs": [
+    "The inner points J, K, L and M are made from the outer points together with the centre, and they describe what happens closer to the core: where a person gets their strength back, where an automatic reaction switches on, how resources arrive and what happens in closeness.",
+    "From the points L and M two more lines grow — the money line and the line of relationships — through the intermediate points R, R1 and R2. That is exactly why money and relationships are linked in this scheme: both lines meet at one crossing point."
+   ]
+  },
+  {
+   "h2": "How to use this section",
+   "paragraphs": [
+    "Build the chart from your date of birth — that part is free, and once the calculation is done, every point on the chart becomes a link to its own position with the arcanum already filled in.",
+    "The reading order that works best is this: the centre, then the four outer points, then whichever line interests you most right now. There is no need to read all 38 positions one after another, because they are not equally important.",
+    "When you need to understand the number itself rather than the role it works in, open the page of the arcanum: the two sections complete each other and deliberately avoid repeating the same content."
+   ]
+  },
+  {
+   "h2": "Myths and common mistakes",
+   "paragraphs": [
+    "“The position matters more than the arcanum” — or the other way round. Neither is true: the answer appears only where the two of them cross, and both halves are needed in equal measure.",
+    "“The family line describes particular relatives.” It describes an inherited way of acting, not events inside the family. Checking it against the life stories of your own relatives is a common mistake in reading.",
+    "“There are only eight points, as many as the corners of the octagram.” There are eight corners, but thirty-seven positions in a reading: besides the outer points there is the centre, the inner points, the family lines, two lines inside the chart and the intermediate points between them."
+   ]
+  }
+ ],
+ "faq": [
+  {
+   "q": "What do positions in the destiny matrix mean?",
+   "a": "The position is the role an arcanum works in: the centre of the chart, a family line, the entry of money, the zone of relationships. The same number in different positions describes one energy in different areas of life."
+  },
+  {
+   "q": "How many positions are there in the destiny matrix?",
+   "a": "In an Arcana Sense reading there are thirty-seven of them: four outer points and the centre, four family lines, the inner points, the money and relationship lines, and the intermediate points between them."
+  },
+  {
+   "q": "What do the lines in the destiny matrix show?",
+   "a": "A line is the sum of two points after reducing the number. Family lines describe an inherited way of handling a task, while the money and relationship lines describe how resources arrive and what happens in closeness."
+  },
+  {
+   "q": "Where is the centre in the chart and what does it mean?",
+   "a": "The centre E comes from reducing the four outer points and stands in the middle of the octagram. It describes the state a person counts as normal for themselves and returns to by default."
+  },
+  {
+   "q": "Where should you start reading the positions?",
+   "a": "With the centre, then the four outer points, then the line you care about. You do not need to read all thirty-seven positions in a row: they are not equally important, and some of them only refine what you have already read."
+  }
+ ],
+ "related": [
+  "position/center",
+  "position/relations",
+  "position/money",
+  "arcanum/8",
+  "method"
+ ]
+}

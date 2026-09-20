@@ -503,3 +503,32 @@ def test_needs_build_refuses_a_branch_that_is_not_loaded(client, snap_con):
     assert r.status_code == 422 and SNAP["NEW"] in r.json()["detail"]
     assert snap_con.execute("SELECT COUNT(*) FROM task WHERE type = 'needs_build'").fetchone()[0] == 0
     assert client.post("/api/needs/build", json={"phrases": []}).status_code == 422
+
+
+# ---------------------------------------------------------------- подсказки
+
+def test_suggest_returns_what_is_cached_and_names_empty(client, snap_con):
+    """Ручка подсказок отдаёт сохранённое без единого платного вызова и отдельно называет
+    корни, по которым не подсказывают ничего: это результат замера, а не ошибка."""
+    wscore.save_suggest(snap_con, "google", "2840",
+                        {"destiny matrix": ["destiny matrix calculator"],
+                         "arcanum 7 destiny matrix": []})
+
+    r = client.post("/api/suggest", json={"phrases": ["destiny matrix", "arcanum 7 destiny matrix"]})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["suggests"]["destiny matrix"] == ["destiny matrix calculator"]
+    assert body["empty"] == ["arcanum 7 destiny matrix"]
+
+
+def test_suggest_rejects_empty_list_and_unknown_source(client):
+    assert client.post("/api/suggest", json={"phrases": ["  "]}).status_code == 422
+    assert client.post("/api/suggest",
+                       json={"phrases": ["x"], "source": "bing"}).status_code == 422
+
+
+def test_suggest_does_not_buy_in_cache_only(client, snap_con):
+    """Промах в режиме «только кэш» — это 502 с объяснением, а не тихая покупка."""
+    r = client.post("/api/suggest", json={"phrases": ["чего в базе нет"]})
+    assert r.status_code == 502
+    assert "только кэш" in r.json()["detail"]

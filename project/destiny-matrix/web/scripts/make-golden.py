@@ -27,6 +27,12 @@ from engine.sections import build  # noqa: E402
 METHOD_FILE = SPEC / "method.json"
 GOLDEN_FILE = SPEC / "golden.json"
 WEB_GOLDEN_FILE = WEB / "lib" / "__fixtures__" / "golden.json"
+# Подписи вынесены из эталона: движок на Python знает их только по-русски, а фронт собирается
+# под язык развёртки. Числа и состав разделов — общий контракт двух реализаций, подписи —
+# контракт одного языка, и сверяются они отдельным файлом только там, где язык совпадает.
+LABELS_GOLDEN_FILE = SPEC / "golden-labels-ru.json"
+WEB_LABELS_GOLDEN_FILE = WEB / "lib" / "__fixtures__" / "golden-labels-ru.json"
+TEXT_KEYS = ("hint", "label", "lead", "teaser", "title")
 PARITY_FILE = SPEC / "parity-digests.json"
 WEB_PARITY_FILE = WEB / "lib" / "__fixtures__" / "parity-digests.json"
 WEB_METHOD_FILE = WEB / "lib" / "__fixtures__" / "method.json"
@@ -36,6 +42,38 @@ WEB_METHOD_FILE = WEB / "lib" / "__fixtures__" / "method.json"
 WEB_CHAKRAS_FILE = WEB / "lib" / "__fixtures__" / "chakras.json"
 SECTIONS_FILE = SPEC / "sections.json"
 WEB_SECTIONS_FILE = WEB / "lib" / "__fixtures__" / "sections.json"
+# Слова метода на каждом языке: контракт (селекторы, формулы, порядок) один, подписи разные.
+# Фронт читает их копию — каталог `spec` вне контекста сборки образа.
+LABELS_DIR = SPEC / "i18n"
+WEB_LABELS_DIR = WEB / "lib" / "__fixtures__" / "labels"
+# Публичная половина тех же слов. Полный словарь несёт вводки и подписи восемнадцати платных
+# разделов, и один импорт из кода, который работает в браузере, увозит их в видимый чанк —
+# ровно та же ловушка, из-за которой отдельно живёт срез чакр.
+WEB_PUBLIC_LABELS_DIR = WEB / "lib" / "__fixtures__" / "labels-public"
+
+
+def numeric(value):
+    """То же значение без подписей: остаются числа, ключи, адреса и признак доступа."""
+    if isinstance(value, dict):
+        return {k: numeric(v) for k, v in value.items() if k not in TEXT_KEYS}
+    if isinstance(value, list):
+        return [numeric(v) for v in value]
+    return value
+
+
+def texts(value) -> list[str]:
+    """Подписи в порядке обхода с сортировкой ключей — одинаковом в Python и TypeScript."""
+    out: list[str] = []
+    if isinstance(value, dict):
+        for k in sorted(value):
+            if k in TEXT_KEYS:
+                out.append(value[k])
+            else:
+                out.extend(texts(value[k]))
+    elif isinstance(value, list):
+        for v in value:
+            out.extend(texts(v))
+    return out
 
 
 def canonical(value: object) -> bytes:
@@ -93,7 +131,7 @@ def parity_digests() -> dict:
         count = 0
         while cursor <= end:
             for sex in ("f", "m"):
-                row = canonical(calculate(cursor, sex).to_dict()) + b"\n"
+                row = canonical(numeric(calculate(cursor, sex).to_dict())) + b"\n"
                 digest.update(row)
                 overall.update(row)
                 count += 1
@@ -119,8 +157,14 @@ def write_json(path: Path, value: object) -> None:
 def main() -> None:
     method = json.loads(METHOD_FILE.read_text())
     cases = [golden_case(*row) for row in selected_inputs(method)]
-    write_json(GOLDEN_FILE, cases)
+    write_json(GOLDEN_FILE, [numeric(case) for case in cases])
     shutil.copyfile(GOLDEN_FILE, WEB_GOLDEN_FILE)
+    write_json(LABELS_GOLDEN_FILE, {
+        "lang": "ru",
+        "keys": list(TEXT_KEYS),
+        "cases": [{"birth": c["birth"], "sex": c["sex"], "texts": texts(c)} for c in cases],
+    })
+    shutil.copyfile(LABELS_GOLDEN_FILE, WEB_LABELS_GOLDEN_FILE)
 
     digests = parity_digests()
     write_json(PARITY_FILE, digests)
@@ -128,11 +172,27 @@ def main() -> None:
     shutil.copyfile(METHOD_FILE, WEB_METHOD_FILE)
     write_json(WEB_CHAKRAS_FILE, json.loads(METHOD_FILE.read_text("utf-8"))["chakras"])
     shutil.copyfile(SECTIONS_FILE, WEB_SECTIONS_FILE)
+    WEB_LABELS_DIR.mkdir(parents=True, exist_ok=True)
+    WEB_PUBLIC_LABELS_DIR.mkdir(parents=True, exist_ok=True)
+    spec_sections = json.loads(SECTIONS_FILE.read_text("utf-8"))
+    spec_rows = spec_sections["sections"] if isinstance(spec_sections, dict) else spec_sections
+    free_keys = [row["key"] for row in spec_rows if row.get("access") != "paid"]
+    for source in sorted(LABELS_DIR.glob("*.json")):
+        shutil.copyfile(source, WEB_LABELS_DIR / source.name)
+        words = json.loads(source.read_text("utf-8"))
+        write_json(WEB_PUBLIC_LABELS_DIR / source.name, {
+            "lang": words["lang"],
+            "chakras": words["chakras"],
+            "chakra_columns": words["chakra_columns"],
+            "expansions": words["expansions"],
+            "sections": {key: words["sections"][key] for key in free_keys if key in words["sections"]},
+        })
 
     free = sum(1 for section in cases[0]["sections_locked"] if section["access"] == "free")
     print(
         f"golden: {len(cases)} случаев, {len(cases[0]['sections_locked'])} разделов, "
-        f"бесплатных {free}; parity: {digests['cases']} расчёта до {digests['through']}"
+        f"бесплатных {free}; подписей на случай {len(texts(cases[0]))}; "
+        f"parity: {digests['cases']} расчёта до {digests['through']}"
     )
 
 

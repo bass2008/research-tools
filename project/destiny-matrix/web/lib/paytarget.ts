@@ -1,3 +1,4 @@
+import { D, L } from "./i18n";
 // Цель платежа — одно значение на всю форму: из него печатаются список, надпись на кнопке,
 // подсказка и тело запроса. Пока это считалось в трёх местах, они расходились: список показывал
 // одну дату, кнопка другую, а платёж уходил за третью.
@@ -9,7 +10,7 @@ export interface TargetRow {
   birth: string;
   sex: Sex;
   title: string | null;
-  access: "forever" | "granted" | "subscription" | "locked";
+  access: "open" | "forever" | "granted" | "subscription" | "locked";
 }
 
 export interface LocalBirth {
@@ -44,7 +45,7 @@ export function label(birth: string, sex: Sex, title?: string | null): string {
 function nameOf(birth: string, sex: Sex, title: string | null, rows: TargetRow[]): string {
   const twins = rows.filter((r) => r.birth === birth).length > 1;
   const base = title || birthLabel(birth);
-  return base + (twins ? ` (${sex === "f" ? "ж" : "м"})` : "");
+  return base + (twins ? ` (${sex === "f" ? D.payTarget.female[L] : D.payTarget.male[L]})` : "");
 }
 
 function withBirth(rows: TargetRow[], birth: LocalBirth | null): TargetRow[] {
@@ -58,14 +59,14 @@ export function options(rows: TargetRow[], birth: LocalBirth | null): TargetOpti
   if (birth && canPickLocal(rows, birth)) {
     out.push({
       value: "local",
-      label: `${nameOf(birth.birth, birth.sex, null, all)} · браузер`,
+      label: `${nameOf(birth.birth, birth.sex, null, all)} · ${D.payTarget.fromBrowser[L]}`,
       target: { kind: "local" },
     });
   }
   for (const row of rows.filter((r) => r.access === "locked")) {
     out.push({
       value: String(row.id),
-      label: `${nameOf(row.birth, row.sex, row.title, all)} · кабинет`,
+      label: `${nameOf(row.birth, row.sex, row.title, all)} · ${D.payTarget.fromAccount[L]}`,
       target: { kind: "matrix", id: row.id },
     });
   }
@@ -144,5 +145,5 @@ export function paymentTargetLabel(payment: {
     const short = title.length > 40 ? `${title.slice(0, 39)}…` : title;
     return `${base} · ${short}`;
   }
-  return payment.matrix_id === null ? "—" : `запись ${payment.matrix_id} удалена`;
+  return payment.matrix_id === null ? D.common.dash[L] : D.payTarget.removed[L](payment.matrix_id);
 }

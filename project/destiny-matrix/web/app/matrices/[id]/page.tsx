@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,14 +18,14 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   return pageMeta({
-    title: "Сохранённая матрица",
-    description: "Разбор сохранённой матрицы: октаграмма, позиции карты и разделы вашего тарифа.",
+    title: D.pages.savedMatrixTitle[L],
+    description: D.pages.savedMatrixDescription[L],
     path: `/matrices/${encodeURIComponent(id)}`,
     noindex: true,
   });
 }
 
-const OTHER = <Link href="/report">Мой разбор</Link>;
+const OTHER = <Link href="/report">{D.nav.myReading[L]}</Link>;
 
 export default async function SavedMatrixPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -35,17 +36,18 @@ export default async function SavedMatrixPage({ params }: { params: Promise<{ id
       <Sheet other={OTHER}>
         <div className="panel narrow">
           {/* заголовок страницы, а не подзаголовок панели: у гостя это единственный экран */}
-          <h1 className="panel-h1">Нужен вход</h1>
+          <h1 className="panel-h1">{D.account.needSignIn[L]}</h1>
           <p className="dim">
             {access.offline
-              ? "Сервер не ответил, поэтому доступ не подтверждён. Обновите страницу."
-              : "Сохранённые матрицы открываются только владельцу аккаунта: дата рождения не отдаётся никому, кроме него."}
+              ? D.pages.savedMatrixOffline[L]
+              : D.pages.savedMatrixOwnerOnly[L]}
           </p>
           <Link className="btn wide" href="/login">
-            Войти
+            {D.auth.signIn[L]}
           </Link>
           <p className="hint">
-            Считать матрицу без регистрации можно и так — <Link href="/#calc">расчёт в браузере</Link>.
+            {D.pages.calcWithoutSignup[L]}{" "}
+            <Link href="/#calc">{D.pages.calcInBrowser[L]}</Link>.
           </p>
         </div>
       </Sheet>

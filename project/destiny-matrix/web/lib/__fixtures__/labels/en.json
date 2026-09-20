@@ -1,0 +1,322 @@
+{
+ "lang": "en",
+ "sections": {
+  "character": {
+   "title": "Character and personal qualities",
+   "lead": "How you are built and what people see in you at first glance.",
+   "positions": [
+    "Personality portrait",
+    "Spiritual task",
+    "Material task"
+   ]
+  },
+  "comfort": {
+   "title": "The centre and the inner points",
+   "lead": "Centre E and the two inner channel points on the vertical axis.",
+   "positions": [
+    "Centre of the chart",
+    "Entry of the relationship line and the tail",
+    "Inner point of talent"
+   ]
+  },
+  "profession": {
+   "title": "Profession and work you love",
+   "lead": "Which kind of work turns your energy into a result.",
+   "positions": [
+    "Spiritual task",
+    "Middle point of talent",
+    "Inner point of talent"
+   ]
+  },
+  "realisation": {
+   "title": "The path of self-realisation",
+   "lead": "Where your line leads when you stop resisting it.",
+   "positions": [
+    "Karmic task",
+    "Personal purpose",
+    "Social purpose"
+   ]
+  },
+  "karma40": {
+   "title": "Karmic task before 40",
+   "lead": "An age view of points I and J, without switching the formula automatically.",
+   "positions": [
+    "Material female family line",
+    "Inner left point"
+   ]
+  },
+  "resources": {
+   "title": "What opens wealth and resource for you",
+   "lead": "The channel through which abundance comes into your life.",
+   "positions": [
+    "Entry of the money line",
+    "Money direction"
+   ]
+  },
+  "family_gifts": {
+   "title": "Support and gifts of your family line",
+   "lead": "What your family line passed on to you as strength.",
+   "positions": [
+    "Spiritual male family line",
+    "Spiritual female family line",
+    "Total of the male branch",
+    "Total of the female branch"
+   ]
+  },
+  "soul_tasks": {
+   "title": "Spiritual tasks and lessons of the soul",
+   "lead": "The work that is visible only from the inside.",
+   "positions": [
+    "First task of the sky",
+    "Second task of the sky",
+    "Total of the sky"
+   ]
+  },
+  "past_lives": {
+   "title": "Tasks of past lives",
+   "lead": "The karmic tail: what came here together with you.",
+   "positions": [
+    "Entry of the relationship line and the tail",
+    "Middle point of the tail",
+    "Karmic task"
+   ]
+  },
+  "purpose": {
+   "title": "Your purpose",
+   "lead": "Four levels: personal, social, spiritual and planetary.",
+   "positions": [
+    "Personal purpose",
+    "Social purpose",
+    "Spiritual purpose",
+    "Planetary purpose"
+   ]
+  },
+  "money": {
+   "title": "Money in the destiny matrix",
+   "lead": "Where money comes easily and where the channel is blocked.",
+   "positions": [
+    "Entry of the money line",
+    "Money direction",
+    "Crossing of money and relationships",
+    "Total of the earth"
+   ]
+  },
+  "money40": {
+   "title": "How money changes after 40",
+   "lead": "How to re-read R2 and L through accumulated experience, without waiting for the arcana to change with age.",
+   "positions": [
+    "Money direction",
+    "Entry of the money line"
+   ]
+  },
+  "relations": {
+   "title": "Relationships in the destiny matrix",
+   "lead": "What you bring into a couple and what you look for in the other person.",
+   "positions": [
+    "Entry of the relationship line and the tail",
+    "Partner point",
+    "Crossing of money and relationships",
+    "Inner point of talent"
+   ]
+  },
+  "parents_children": {
+   "title": "Karma of relationships with parents and children",
+   "lead": "Which family rules you received and which habits you pass on.",
+   "positions": [
+    "Spiritual male family line",
+    "Spiritual female family line",
+    "Material male family line"
+   ]
+  },
+  "ancestry": {
+   "title": "Family tasks down to the seventh generation",
+   "lead": "A wide family view, without literally counting seven generations.",
+   "positions": [
+    "Material female family line",
+    "Total of the male branch",
+    "Total of the female branch",
+    "Planetary purpose"
+   ]
+  },
+  "body_resource": {
+   "title": "Body resource and recovery",
+   "lead": "How you refill and where you lose strength. This is not medical advice.",
+   "positions": [
+    "Support of the body",
+    "Energy of the support",
+    "Total of the body support"
+   ]
+  },
+  "chakras": {
+   "title": "Energy map: reading the seven levels",
+   "lead": "Seven levels in three columns: matter, energy and feelings.",
+   "positions": [
+    "",
+    "Total of physics",
+    "Total of energy",
+    "Total of emotions"
+   ]
+  },
+  "rest": {
+   "title": "Your ideal way to rest",
+   "lead": "What truly restores you.",
+   "positions": [
+    "Joy and creativity",
+    "Centre of the chart"
+   ]
+  },
+  "loops": {
+   "title": "Programs: what repeats in circles",
+   "lead": "Storylines that come back until they are lived through.",
+   "positions": [
+    "Karmic task",
+    "Centre of the chart",
+    "Spiritual purpose"
+   ]
+  },
+  "years": {
+   "title": "Reading by decades up to 80",
+   "lead": "Which energy leads you through each decade.",
+   "positions": [
+    ""
+   ]
+  }
+ },
+ "chakras": {
+  "sahasrara": {
+   "title": "Sahasrara",
+   "hint": "connection to a larger plan"
+  },
+  "ajna": {
+   "title": "Ajna",
+   "hint": "vision and intuition"
+  },
+  "vishuddha": {
+   "title": "Vishuddha",
+   "hint": "word, honesty, destiny"
+  },
+  "anahata": {
+   "title": "Anahata",
+   "hint": "love and relationships"
+  },
+  "manipura": {
+   "title": "Manipura",
+   "hint": "status, will, money"
+  },
+  "svadhisthana": {
+   "title": "Svadhisthana",
+   "hint": "joy, children, creativity"
+  },
+  "muladhara": {
+   "title": "Muladhara",
+   "hint": "body, support, matter"
+  }
+ },
+ "chakra_columns": {
+  "physics": "Physics",
+  "energy": "Energy",
+  "emotions": "Emotions"
+ },
+ "expansions": {
+  "chakra_physics": "{chakra} · physics",
+  "age_scale": "{from}–{to} years"
+ },
+ "seo": {
+  "arcanum_title": "Arcanum {n} — {title}: meaning in the destiny matrix",
+  "arcanum_queries": [
+   "arcanum {n}",
+   "{n} arcanum meaning",
+   "arcanum {n} in the destiny matrix",
+   "arcanum {n} {low}",
+   "{low} arcanum meaning",
+   "arcanum {n} in relationships",
+   "arcanum {n} money",
+   "arcanum {n} purpose",
+   "arcanum {n} in the centre of the matrix",
+   "arcanum {n} strengths and weaknesses",
+   "what does arcanum {n} mean"
+  ],
+  "combination_title": "Arcana {a} and {b} together — {a_title} and {b_title}",
+  "combination_queries": [
+   "combination of arcana {a} and {b}",
+   "{a} and {b} arcanum",
+   "arcana {a} and {b} destiny matrix",
+   "{a} {b} arcanum compatibility",
+   "arcana {a} and {b} together",
+   "{a_low} and {b_low} in the destiny matrix",
+   "arcanum {a} with arcanum {b}"
+  ],
+  "chakra_title": "The {title} chakra in the destiny matrix — {hint}",
+  "chakra_queries": [
+   "{low} in the destiny matrix",
+   "{low} chakra in the destiny matrix",
+   "{low} chakra destiny matrix",
+   "{low} arcanum",
+   "{low} chakra meaning",
+   "{low} chakra by date of birth"
+  ],
+  "section_query": "{low} in the destiny matrix",
+  "point_query": "{low} destiny matrix",
+  "stop_tail": [
+   "a",
+   "an",
+   "the",
+   "and",
+   "or",
+   "but",
+   "if",
+   "so",
+   "that",
+   "which",
+   "who",
+   "whom",
+   "whose",
+   "what",
+   "when",
+   "while",
+   "of",
+   "in",
+   "on",
+   "at",
+   "to",
+   "into",
+   "for",
+   "with",
+   "without",
+   "from",
+   "by",
+   "about",
+   "over",
+   "under",
+   "through",
+   "after",
+   "before",
+   "as",
+   "is",
+   "are",
+   "was",
+   "were",
+   "be",
+   "been",
+   "it",
+   "its",
+   "this",
+   "these",
+   "those",
+   "your",
+   "their",
+   "his",
+   "her",
+   "not",
+   "no",
+   "than",
+   "then",
+   "there",
+   "here",
+   "too",
+   "very",
+   "also",
+   "still"
+  ]
+ }
+}

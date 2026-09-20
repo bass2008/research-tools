@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 
 import ForgotForm from "@/components/account/ForgotForm";
@@ -6,8 +7,8 @@ import { pageMeta } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMeta({
-  title: "Восстановление пароля",
-  description: "Пришлём ссылку для смены пароля на почту, указанную при оплате.",
+  title: D.pages.forgotTitle[L],
+  description: D.pages.forgotDescription[L],
   path: "/forgot",
   noindex: true,
 });

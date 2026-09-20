@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { ALL_FREE } from "@/lib/access";
 import { ApiError, api } from "@/lib/api";
+import { D, L } from "@/lib/i18n";
 import { emailError, normalizeEmail } from "@/lib/email";
 
 import { refreshSession } from "@/components/account/useSession";
@@ -38,12 +40,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
     if (password.length < 3) {
-      setError("Пароль — не короче трёх знаков.");
+      setError(D.auth.shortPassword[L]);
       passwordInput.current?.focus();
       return;
     }
     if (isRegister && !agreed) {
-      setError("Нужно согласие на обработку персональных данных.");
+      setError(D.auth.consentRequired[L]);
       consentInput.current?.focus();
       return;
     }
@@ -57,7 +59,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
       router.replace("/account");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не получилось. Попробуйте ещё раз.");
+      setError(err instanceof ApiError ? err.message : D.auth.generic[L]);
       // Ошибка остаётся объявленной через role=alert, но набор продолжается в поле, которое
       // человек может исправить, а не в нефокусируемом тексте сообщения.
       (isRegister ? emailInput.current : passwordInput.current)?.focus();
@@ -68,14 +70,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   return (
     <form method="post" className="form narrow" onSubmit={submit} noValidate>
-      <h1>{isRegister ? "Регистрация" : "Вход"}</h1>
+      <h1>{isRegister ? D.auth.registerTitle[L] : D.auth.loginTitle[L]}</h1>
       <div className="sub">
-        {isRegister
-          ? "Аккаунт нужен, чтобы хранить сохранённые матрицы и доступ к разделам."
-          : "Введите почту и пароль, которые указывали при покупке."}
+        {isRegister ? D.auth.registerLead[L] : D.auth.loginLead[L]}
       </div>
 
-      <label htmlFor="email">Почта</label>
+      <label htmlFor="email">{D.auth.email[L]}</label>
       <input
         ref={emailInput}
         disabled={!hydrated}
@@ -94,7 +94,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       />
 
       <label htmlFor="password" style={{ marginTop: 12 }}>
-        Пароль
+        {D.auth.password[L]}
       </label>
       <input
         ref={passwordInput}
@@ -110,7 +110,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           clear();
           setPassword(e.target.value);
         }}
-        placeholder="не короче 3 знаков"
+        placeholder={D.auth.passwordPlaceholder[L]}
       />
 
       {isRegister ? (
@@ -126,15 +126,22 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             }}
           />
           <span>
-            Согласен(на) на обработку персональных данных на условиях{" "}
-            <Link href="/privacy" target="_blank" rel="noopener">политики обработки персональных данных</Link> и принимаю{" "}
-            <Link href="/oferta" target="_blank" rel="noopener">публичную оферту</Link>.
+            {D.auth.consentHead[L]}{" "}
+            <Link href="/privacy" target="_blank" rel="noopener">{D.auth.consentPolicy[L]}</Link>{" "}
+            {D.auth.consentAnd[L]}{" "}
+            <Link href="/terms" target="_blank" rel="noopener">{D.auth.consentTerms[L]}</Link>.
           </span>
         </label>
       ) : null}
 
       <button className="btn wide" data-testid="auth-submit" style={{ marginTop: 14 }} disabled={busy || !hydrated}>
-        {!hydrated ? "Готовим форму…" : busy ? "Отправляем…" : isRegister ? "Создать аккаунт" : "Войти"}
+        {!hydrated
+          ? D.auth.preparing[L]
+          : busy
+            ? D.auth.sending[L]
+            : isRegister
+              ? D.auth.createAccount[L]
+              : D.auth.signIn[L]}
       </button>
 
       {error ? (
@@ -146,12 +153,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       <p className="hint">
         {isRegister ? (
           <>
-            Уже есть аккаунт? <Link href="/login">Войти</Link>
+            {D.auth.haveAccount[L]} <Link href="/login">{D.auth.signIn[L]}</Link>
           </>
         ) : (
           <>
-            Нет аккаунта? <Link href="/register">Зарегистрироваться</Link> · забыли пароль?{" "}
-            <Link href="/forgot">Восстановить</Link>
+            {D.auth.noAccount[L]} <Link href="/register">{D.auth.register[L]}</Link>{" "}
+            {D.auth.forgotQuestion[L]} <Link href="/forgot">{D.auth.restore[L]}</Link>
           </>
         )}
       </p>

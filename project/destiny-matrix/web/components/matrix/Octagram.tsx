@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import { arcanumTitle } from "@/lib/arcana";
 import { mapPoint } from "@/lib/matrixMap";
 import { publicHref } from "@/lib/site";
@@ -43,21 +44,21 @@ export default function Octagram({
   printing?: boolean;
 }) {
   const outer: NodeSpec[] = [
-    { angle: 180, value: m.day, label: "Портрет личности · A", color: CHAKRA_COLORS[2], big: true },
-    { angle: 225, value: m.father_line, label: "Духовная мужская линия · F", color: CHAKRA_COLORS[5] },
-    { angle: -90, value: m.month, label: "Духовная задача · B", color: CHAKRA_COLORS[6], big: true },
-    { angle: -45, value: m.mother_line, label: "Духовная женская линия · G", color: CHAKRA_COLORS[5] },
-    { angle: 0, value: m.year, label: "Материальная задача · C", color: CHAKRA_COLORS[4], big: true },
-    { angle: 45, value: m.descendants, label: "Материальная мужская линия · H", color: CHAKRA_COLORS[3] },
-    { angle: 90, value: m.mission, label: "Кармическая задача · D", color: CHAKRA_COLORS[0], big: true },
-    { angle: 135, value: m.inheritance, label: "Материальная женская линия · I", color: CHAKRA_COLORS[1] },
+    { angle: 180, value: m.day, label: D.octagram.portrait[L], color: CHAKRA_COLORS[2], big: true },
+    { angle: 225, value: m.father_line, label: D.octagram.fatherLine[L], color: CHAKRA_COLORS[5] },
+    { angle: -90, value: m.month, label: D.octagram.spiritualTask[L], color: CHAKRA_COLORS[6], big: true },
+    { angle: -45, value: m.mother_line, label: D.octagram.motherLine[L], color: CHAKRA_COLORS[5] },
+    { angle: 0, value: m.year, label: D.octagram.materialTask[L], color: CHAKRA_COLORS[4], big: true },
+    { angle: 45, value: m.descendants, label: D.octagram.descendants[L], color: CHAKRA_COLORS[3] },
+    { angle: 90, value: m.mission, label: D.octagram.karmicTask[L], color: CHAKRA_COLORS[0], big: true },
+    { angle: 135, value: m.inheritance, label: D.octagram.inheritance[L], color: CHAKRA_COLORS[1] },
   ];
 
   const inner: NodeSpec[] = [
-    { angle: 180, value: m.comfort_west, label: "Внутренняя левая · J", color: "#7d92a1" },
-    { angle: -90, value: m.comfort_north, label: "Точка таланта · K", color: "#7d92a1" },
-    { angle: 0, value: m.comfort_east, label: "Вход денег · L", color: "#7d92a1" },
-    { angle: 90, value: m.comfort_south, label: "Вход отношений и хвоста · M", color: "#7d92a1" },
+    { angle: 180, value: m.comfort_west, label: D.octagram.innerLeft[L], color: "#7d92a1" },
+    { angle: -90, value: m.comfort_north, label: D.octagram.talentPoint[L], color: "#7d92a1" },
+    { angle: 0, value: m.comfort_east, label: D.octagram.moneyEntry[L], color: "#7d92a1" },
+    { angle: 90, value: m.comfort_south, label: D.octagram.loveEntry[L], color: "#7d92a1" },
   ];
 
   // Точки второго порядка — те, что метод считает из внутренних: середины линий любви, денег,
@@ -119,7 +120,7 @@ export default function Octagram({
 
   const node = (spec: NodeSpec, radius: number, size: number, font: number, key: string, small = false) => {
     const [x, y] = pt(spec.angle, spec.radius ?? radius);
-    const title = `${spec.label}: аркан ${spec.value} — ${arcanumTitle(spec.value)}`;
+    const title = D.octagram.nodeTitle[L](spec.label, spec.value, arcanumTitle(spec.value));
     const body = (
       <>
         <title>{title}</title>
@@ -155,7 +156,7 @@ export default function Octagram({
       className="oct"
       viewBox="0 0 620 620"
       role="img"
-      aria-label="Октаграмма матрицы судьбы: восемь внешних позиций, четыре точки комфорта, центр и восемь точек второго порядка — середины линий любви, денег, кармического хвоста и таланта"
+      aria-label={D.octagram.diagramAria[L]}
     >
       <circle className="ring" cx={C} cy={C} r={R + 38} />
       <circle className="ring" cx={C} cy={C} r={R + 22} />
@@ -171,22 +172,22 @@ export default function Octagram({
       {/* небо — вертикальная ось точек комфорта, земля — горизонтальная. Подписи «небо» стоят
           внутри квадрата: снаружи, на радиусе 195, теперь сидят точки P и N. */}
       <text className="lbl" x={C} y={C - RIN + 30}>
-        небо
+        {D.octagram.sky[L]}
       </text>
       <text className="lbl" x={C} y={C + RIN - 30}>
-        небо
+        {D.octagram.sky[L]}
       </text>
       <text className="lbl" x={C - RIN + 4} y={C - 30}>
-        земля
+        {D.octagram.earth[L]}
       </text>
       <text className="lbl" x={C + RIN - 4} y={C - 30}>
-        земля
+        {D.octagram.earth[L]}
       </text>
       {derived.map((s, i) => node(s, RIN, 13, 11, `d${i}`, true))}
       {inner.map((s, i) => node(s, RIN, 15, 13, `i${i}`))}
       {outer.map((s, i) => node(s, R, s.big ? 24 : 19, s.big ? 19 : 15.5, `o${i}`))}
       {node(
-        { angle: 0, value: m.center, label: "Центр карты · зона комфорта", color: "#0e8f88" },
+        { angle: 0, value: m.center, label: D.octagram.centre[L], color: "#0e8f88" },
         0,
         31,
         23,

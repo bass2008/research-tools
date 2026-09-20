@@ -6,7 +6,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-scripts/assert-release-candidate.sh
+# Тест выкладывается и из грязного дерева: его смысл — быстро посмотреть правку живьём, а
+# коммит делается перед прод-релизом. Незакоммиченное видно по тегу: к нему дописывается время
+# сборки, поэтому образ из рабочего дерева нельзя спутать с образом коммита.
+if [ -n "$(git status --porcelain -- . ../../tools/seo)" ]; then
+  echo "== дерево не чистое: образ будет помечен временем сборки"
+fi
+
+# Юнит-тесты того языка, который собираем: красные тесты сборки не выкладываются.
+scripts/assert-unit-tests.sh ru
 
 SITE=https://test.arcana-sense.ru
 IP="${ARCANA_PROD_IP:-45.80.130.166}"
@@ -68,5 +76,11 @@ echo "== проверка"
 until "${TEST_CURL[@]}" -o /dev/null "$SITE/"; do sleep 3; done
 "${TEST_CURL[@]}" "$SITE/version/current.txt"
 mkdir -p ../reports/unified
-git rev-parse HEAD > ../reports/unified/tested-commit.txt
+# Свидетельство для прод-релиза пишется только из чистого дерева: выкладка правок, которых нет
+# в коммите, ничего не говорит о самом коммите, а прод сверяет именно его.
+if [ -n "$(git status --porcelain -- . ../../tools/seo)" ]; then
+  echo "== дерево не чистое: свидетельство для прода не обновлено"
+else
+  git rev-parse HEAD > ../reports/unified/tested-commit.txt
+fi
 echo "готово: $SITE"

@@ -7,30 +7,31 @@
 // признаком `access` платных разделов. Срез пишет `scripts/make-golden.py` из того же
 // `spec/method.json`, поэтому источник истины один.
 import chakraLevels from "./__fixtures__/chakras.json";
+import { D, L, monthInDate, monthName } from "./i18n";
+import { chakraHint, chakraTitle } from "./i18n/publicLabels";
 
 export const ARCANA_MAX = 22;
 
 export type Sex = "m" | "f";
 
-const MONTHS = [
-  "января", "февраля", "марта", "апреля", "мая", "июня",
-  "июля", "августа", "сентября", "октября", "ноября", "декабря",
-];
-
-/** Те же месяцы для выпадающего списка формы: «12 Декабря». */
-export const MONTHS_ACC: readonly string[] = MONTHS.map((m) => m[0].toUpperCase() + m.slice(1));
+/** Месяцы для выпадающего списка формы: у русского — именительный, у английского тот же. */
+export const MONTHS_ACC: readonly string[] = Array.from({ length: 12 }, (_, index) => {
+  const name = monthName(index + 1);
+  return name[0].toUpperCase() + name.slice(1);
+});
 
 export function birthLabel(birth: string): string {
   const [y, m, d] = birth.split("-").map(Number);
-  return `${d} ${MONTHS[m - 1]} ${y}`;
+  return `${d} ${monthInDate(m)} ${y}`;
 }
 
 export function sexLabel(sex: Sex): string {
-  return sex === "f" ? "женская" : "мужская";
+  return sex === "f" ? D.calc.femaleChart[L] : D.calc.maleChart[L];
 }
 
+// Ключи и порядок — из контракта, названия и подсказки — из словаря языка сборки.
 export const CHAKRAS: ReadonlyArray<readonly [string, string, string]> = chakraLevels.map(
-  ({ key, title, hint }) => [key, title, hint] as const,
+  ({ key }) => [key, chakraTitle(key), chakraHint(key)] as const,
 );
 
 
@@ -132,7 +133,7 @@ const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 export function parseBirth(birth: string | BirthParts): BirthParts {
   if (typeof birth !== "string") return birth;
   const m = ISO.exec(birth);
-  if (!m) throw new MatrixError("дата должна быть в формате YYYY-MM-DD");
+  if (!m) throw new MatrixError(D.calc.errors.format[L]);
   return { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
 }
 
@@ -207,12 +208,12 @@ function chakras(m: Matrix): { rows: ChakraRow[]; totals: ChakraTotals } {
 /** Полный расчёт. sex хранит идентичность карты, но не влияет ни на одно число. */
 export function calculate(birth: string | BirthParts, sex: Sex = "f"): Matrix {
   const parts = parseBirth(birth);
-  if (sex !== "m" && sex !== "f") throw new MatrixError("Выберите пол для однозначного названия карты.");
+  if (sex !== "m" && sex !== "f") throw new MatrixError(D.calc.errors.sex[L]);
   if (!Number.isInteger(parts.year) || !Number.isInteger(parts.month) || !Number.isInteger(parts.day))
-    throw new MatrixError("Проверьте дату: день, месяц и год — числами.");
-  if (!isRealDate(parts)) throw new MatrixError("Такой даты нет в календаре — проверьте число и месяц.");
-  if (isAfter(parts, todayParts())) throw new MatrixError("Дата рождения не может быть в будущем — выберите прошедший день.");
-  if (parts.year < 1900) throw new MatrixError("Считаем даты рождения начиная с 1900 года.");
+    throw new MatrixError(D.calc.errors.parts[L]);
+  if (!isRealDate(parts)) throw new MatrixError(D.calc.errors.unreal[L]);
+  if (isAfter(parts, todayParts())) throw new MatrixError(D.calc.errors.future[L]);
+  if (parts.year < 1900) throw new MatrixError(D.calc.errors.tooOld[L]);
 
   const m = { birth: toIso(parts), sex } as Matrix;
 

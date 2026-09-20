@@ -9,6 +9,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
+from .i18n import say
 
 
 def utcnow() -> dt.datetime:
@@ -85,12 +86,16 @@ class User(Base):
         return {"id": self.id, "email": self.email, "created_at": iso(self.created_at)}
 
 
-MONTHS = ("января", "февраля", "марта", "апреля", "мая", "июня",
-          "июля", "августа", "сентября", "октября", "ноября", "декабря")
-
-
 def default_title(birth: dt.date) -> str:
-    return f"Матрица {birth.day} {MONTHS[birth.month - 1]} {birth.year}"
+    """Подпись сохранённой матрицы на языке контура.
+
+    Заголовок видит человек — в кабинете и в имени скачанного PDF, — поэтому он идёт через
+    словарь. Русский заголовок на английском сайте держался здесь дольше всего именно потому,
+    что строка выглядела служебной.
+    """
+    months = say("matrix.months").split()
+    return say("matrix.default_title", day=birth.day, month=months[birth.month - 1],
+               year=birth.year)
 
 
 class SavedMatrix(Base):

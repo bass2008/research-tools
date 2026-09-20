@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from ..i18n import say
 from .. import access, mail, payments, printing, tariffs
 from ..config import settings
 from ..db import get_db
@@ -27,7 +28,7 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
     if payload.matrix_id is not None:
         row = db.get(SavedMatrix, payload.matrix_id)
         if row is None or row.user_id != user.id:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Матрица не найдена")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
     elif payload.birth is not None:
         # та же дата второй раз — та же запись: платёж не должен плодить дубли
         row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
@@ -45,12 +46,11 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
         found = next((r for r in rows if not access.unlocked_matrix(db, user, r.id)), None)
         if found is None:
             raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                detail="Укажите дату, за которую платите: доступ к одной дате "
-                                       "нельзя купить впрок")
+                                detail=say("pay.target_required"))
         row = found
     if access.unlocked_matrix(db, user, row.id):
         raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail="Эта дата уже открыта — второй раз платить не нужно")
+                            detail=say("pay.already_open"))
     return row
 
 
@@ -67,7 +67,7 @@ def _buyer(db: Session, email: str) -> tuple[User, bool]:
         user = db.scalar(select(User).where(User.email == email))
         if user is None:
             raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                detail="Не удалось создать пользователя") from None
+                                detail=say("pay.user_failed")) from None
         return user, False
     return user, True
 
@@ -81,7 +81,7 @@ def _target(db: Session, user: User, payload: PaymentIn, tariff) -> SavedMatrix 
 def _tariff(db: Session, code: str):
     tariff = tariffs.get(db, code)
     if tariff is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Такого тарифа нет")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.no_tariff"))
     return tariff
 
 
@@ -181,7 +181,7 @@ def _provider_of(payment: Payment) -> payments.Provider:
     provider = payments.get(payment.provider)
     if provider is None or not provider.enabled():
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail="Этот способ оплаты сейчас недоступен")
+                            detail=say("pay.provider_down"))
     return provider
 
 
@@ -243,6 +243,11 @@ def _body(db: Session, payment: Payment, user: User, matrix: SavedMatrix | None,
 def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     """Один путь для всех способов оплаты: покупатель, дата, платёж, обращение к провайдеру и
     применение исхода. Права выдаёт только apply(), поэтому мок и живой банк не расходятся."""
+    # Витрина без оплаты: продавать нечего, разбор и так открыт. Проверка стоит в общей точке,
+    # а не в маршрутах, — иначе мок и живой банк разошлись бы поведением.
+    if settings.all_free_without_payment:
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            detail=say("pay.all_free"))
     tariff = _tariff(db, payload.tariff)
     user, autoregistered = _buyer(db, payload.email)
     matrix = _target(db, user, payload, tariff)
@@ -252,7 +257,7 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     # быстрый терминал закрывают платёж сразу.
     if matrix is not None and access.unlocked_matrix(db, user, matrix.id):
         raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail="Разбор этой даты уже открыт — платить второй раз не нужно.")
+                            detail=say("pay.already_open_dot"))
 
     started_earlier = _reusable(db, user, matrix, provider)
     if started_earlier is not None:
@@ -285,7 +290,7 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     except AlreadyGranted as exc:
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail="Разбор этой даты уже открыт — платить второй раз не нужно.") \
+                            detail=say("pay.already_open_dot")) \
             from exc
     db.refresh(user)
 
@@ -296,7 +301,7 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
 def start(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
     provider = payments.active()
     if provider is None:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail="Оплата не настроена")
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=say("pay.not_configured"))
     return _open(db, payload, provider)
 
 
@@ -305,14 +310,14 @@ def notify(provider_name: str, payload: dict, db: Session = Depends(get_db)) -> 
     """Уведомление провайдера. Подлинность проверяет он сам: без неё доступ открывал бы любой."""
     provider = payments.get(provider_name)
     if provider is None or not provider.enabled():
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Нет такого способа оплаты")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.no_method"))
     try:
         update = provider.read_notification(payload)
     except payments.PaymentError as exc:
         raise HTTPException(status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     payment = _find(db, update.external_id, update.order_id)
     if payment is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.not_found"))
     try:
         apply(db, payment, update)
     except AlreadyGranted:
@@ -337,7 +342,7 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
     """Спросить провайдера о статусе: на возвращении с формы уведомление могло не дойти."""
     payment = _find(db, None, payload.order_id)
     if payment is None or payment.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.not_found"))
     provider = payments.get(payment.provider)
     if provider is not None and provider.enabled():
         try:
@@ -371,7 +376,7 @@ def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
     """Оплата без денег для стенда и тестов. Идёт тем же путём, что живая, только провайдер мок."""
     provider = payments.get("mock")
     if provider is None or not provider.enabled():
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail="Мок-оплата отключена")
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=say("pay.mock_off"))
     return {**_open(db, payload, provider), "mock": True}
 
 

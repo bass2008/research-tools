@@ -1,3 +1,4 @@
+import { ALL_FREE } from "./access";
 import { apiUpstream } from "./settings/server";
 import type { Tariff } from "./tariffs";
 
@@ -17,8 +18,12 @@ export async function testPayments(): Promise<boolean> {
   }
 }
 
-/** Прайс с сервера. Пустой список — «цены нет»: API молчит или витрина пуста. */
+/** Прайс с сервера. Пустой список — «цены нет»: API молчит или витрина пуста.
+ *
+ *  На витрине без оплаты кассы нет вовсе, и прайс не запрашивается: иначе названия тарифов
+ *  из базы приезжали бы на страницу чужим языком — платить по ним всё равно негде. */
 export async function getTariffs(): Promise<Tariff[]> {
+  if (ALL_FREE) return [];
   const base = apiUpstream();
   try {
     const res = await fetch(`${base}/api/tariffs`, { cache: "no-store" });

@@ -1,3 +1,4 @@
+import { D, DR, L } from "./i18n";
 import {
   arcanumContent,
   indexedKarmicTailKeys,
@@ -46,46 +47,46 @@ const NAMES: Record<string, Naming> = {
   // объёмы почти совпадают (49 385 против 47 573). Одна страница отвечает на оба, иначе два
   // почти одинаковых набора делят одну выдачу.
   tail: {
-    h1: (n) => `${n} аркан в кармическом хвосте`,
-    seo: (n) => `${n} аркан в кармическом хвосте`,
-    inside: "на позиции кармического хвоста",
-    alias: "программа",
+    h1: (n) => DR.crossing.tailH1[L](n),
+    seo: (n) => DR.crossing.tailH1[L](n),
+    inside: DR.crossing.tailInside[L],
+    alias: DR.crossing.tailAlias[L],
   },
   program: {
-    h1: (n) => `Программа ${n} в матрице судьбы`,
-    seo: (n) => `Программа ${n} в матрице судьбы`,
-    inside: "на позиции кармического хвоста",
-    alias: "кармический хвост",
+    h1: (n) => DR.crossing.programH1[L](n),
+    seo: (n) => DR.crossing.programH1[L](n),
+    inside: DR.crossing.tailInside[L],
+    alias: DR.crossing.programAlias[L],
   },
   center: {
-    h1: (n) => `${n} аркан в центре матрицы судьбы`,
-    seo: (n) => `${n} аркан в центре матрицы`,
-    inside: "в центре карты",
+    h1: (n) => DR.crossing.centerH1[L](n),
+    seo: (n) => DR.crossing.centerSeo[L](n),
+    inside: DR.crossing.centerInside[L],
   },
   relations: {
-    h1: (n) => `${n} аркан в отношениях`,
-    seo: (n) => `${n} аркан в отношениях`,
-    inside: "в зоне отношений",
+    h1: (n) => DR.crossing.relationsH1[L](n),
+    seo: (n) => DR.crossing.relationsH1[L](n),
+    inside: DR.crossing.relationsInside[L],
   },
   money: {
-    h1: (n) => `${n} аркан в деньгах`,
-    seo: (n) => `${n} аркан в деньгах`,
-    inside: "на денежной линии",
+    h1: (n) => DR.crossing.moneyH1[L](n),
+    seo: (n) => DR.crossing.moneyH1[L](n),
+    inside: DR.crossing.moneyInside[L],
   },
   heart: {
-    h1: (n) => `${n} аркан под сердцем`,
-    seo: (n) => `${n} аркан под сердцем`,
-    inside: "в точке под сердцем",
+    h1: (n) => DR.crossing.heartH1[L](n),
+    seo: (n) => DR.crossing.heartH1[L](n),
+    inside: DR.crossing.heartInside[L],
   },
   talent: {
-    h1: (n) => `${n} аркан в талантах`,
-    seo: (n) => `${n} аркан в талантах`,
-    inside: "на линии таланта",
+    h1: (n) => DR.crossing.talentH1[L](n),
+    seo: (n) => DR.crossing.talentH1[L](n),
+    inside: DR.crossing.talentInside[L],
   },
   card: {
-    h1: (n) => `${n} аркан в визитке`,
-    seo: (n) => `${n} аркан в визитке`,
-    inside: "в визитке — аркане дня рождения",
+    h1: (n) => DR.crossing.cardH1[L](n),
+    seo: (n) => DR.crossing.cardH1[L](n),
+    inside: DR.crossing.cardInside[L],
   },
 };
 
@@ -98,7 +99,7 @@ interface Role {
 
 // Служебный префикс корпуса: позиционные тексты частью начинаются с «Аркан «Имя» · E ·». На
 // странице он читается как мусор, и `roleContent` его тоже снимает.
-const CORPUS_PREFIX = /^Аркан «[^»]+» · [^·]+ ·\s*/;
+const CORPUS_PREFIX = D.clause.corpusPrefix[L];
 
 /** Фраза для склейки: с заглавной и с точкой на конце. Куски корпуса написаны по-разному —
  *  часть без завершающей точки, часть со строчной, — и без этого получалось «значение.
@@ -138,8 +139,8 @@ function role(text: string, plus: string, minus: string): Role {
   );
   return {
     essence: sentence(parts[0]!),
-    strength: middle[0] ? inline(middle[0]) : `человек ${inline(plus)}`,
-    risk: middle[1] ? inline(middle[1]) : `человек ${inline(minus)}`,
+    strength: middle[0] ? inline(middle[0]) : `${D.clause.subject[L]} ${inline(plus)}`,
+    risk: middle[1] ? inline(middle[1]) : `${D.clause.subject[L]} ${inline(minus)}`,
     action: sentence(parts.at(-1)!),
   };
 }
@@ -207,8 +208,8 @@ export function buildPositionArcanum(position: string, arcanum: number): Positio
   if (!text) throw new Error(`[position-arcanum] нет трактовки аркана ${arcanum} в позиции ${position}`);
   const read = role(
     text,
-    content.plus[0] ?? "действует по своей сильной стороне",
-    content.minus[0] ?? "уходит в привычную реакцию",
+    content.plus[0] ?? D.clause.fallbackStrength[L],
+    content.minus[0] ?? D.clause.fallbackRisk[L],
   );
 
   const published = new Set(indexedKarmicTailKeys());
@@ -243,32 +244,32 @@ export function buildPositionArcanum(position: string, arcanum: number): Positio
     // суть написана в три слова («Дар видеть иначе.»): абзацем такая строка не работает, и к
     // ней возвращается описание аркана, даже ценой повтора первого экрана.
     {
-      h2: `Что означает ${arcanum} аркан ${name.inside}`,
+      h2: DR.crossing.meaningH2[L](arcanum, name.inside),
       paragraphs: [
         read.essence.length >= 60
           ? read.essence
-          : `${read.essence} Это ${content.title}: ${inline(clip(content.short, 150))}.`,
+          : DR.crossing.meaningFallback[L](read.essence, content.title, inline(clip(content.short, 150))),
       ],
     },
     {
-      h2: "Когда работает, а когда идёт по кругу",
+      h2: DR.crossing.worksH2[L],
       paragraphs: [
-        `${sentence(read.strength)} Вообще в плюсе этот аркан — про человека, который ${listing(content.plus, read.strength)}.`,
-        `Если тема вытеснена, ${read.risk}. В общем виде это выглядит так: человек ${listing(content.minus, read.risk)}.`,
+        DR.crossing.worksPlus[L](sentence(read.strength), listing(content.plus, read.strength)),
+        DR.crossing.worksMinus[L](read.risk, listing(content.minus, read.risk)),
       ],
     },
     {
-      h2: "Что с этим делать",
+      h2: DR.crossing.actionH2[L],
       paragraphs: [read.action + (content.repeat ? ` ${sentence(content.repeat)}` : "")],
     },
   ];
 
   if (contrasts.length) {
     sections.push({
-      h2: `Чем это отличается от ${arcanum} аркана на других позициях`,
+      h2: DR.crossing.differsH2[L](arcanum),
       paragraphs: [
-        `Аркан отвечает «какая это энергия», позиция — «где она работает», и ответ меняется вместе с позицией. У аркана ${arcanum} разобрано ещё ${contrasts.length} ${plural(contrasts.length, "позиция")}: ${contrasts.join("; ")}.`,
-        `Сравнивать их полезнее, чем читать по одной: одно и то же качество ${name.inside} и на любой из этих точек решает разные задачи, и путать их — обычная ошибка чтения карты.`,
+        DR.crossing.differsFirst[L](arcanum, contrasts.length, contrasts.join("; ")),
+        DR.crossing.differsSecond[L](name.inside),
       ],
     });
   }
@@ -278,43 +279,41 @@ export function buildPositionArcanum(position: string, arcanum: number): Positio
   // страницу с остальными страницами этой же позиции, в отличие от объяснения самой позиции.
   if (!contrasts.length && content.meaning[0]) {
     sections.push({
-      h2: `Что это за энергия вообще`,
+      h2: DR.crossing.energyH2[L],
       paragraphs: [content.meaning[0], ...(content.meaning[1] ? [content.meaning[1]] : [])],
     });
   }
 
   if (tails.length) {
     sections.push({
-      h2: `В каких тройках стоит ${arcanum} аркан`,
+      h2: DR.crossing.triplesH2[L](arcanum),
       paragraphs: [
-        `Хвост — всегда тройка M–N–D, отдельного «хвоста ${arcanum}» не существует. С разбором аркан ${arcanum} стоит в ${tails.length} ${plural(tails.length, "хвост")}: ${tails.map((t) => t.key).join(", ")} — каждая тройка уточняет сценарий, но роль самого аркана в ней остаётся той же.`,
+        DR.crossing.triplesText[L](arcanum, tails.length, tails.map((t) => t.key).join(", ")),
       ],
     });
   }
 
-  const alias = name.alias
-    ? ` В нише этот же вопрос задают словом «${name.alias}»: речь об одной и той же позиции карты.`
-    : "";
+  const alias = name.alias ? DR.crossing.aliasNote[L](name.alias) : "";
 
   const faq: Array<{ q: string; a: string }> = [
-    { q: `Что означает ${inline(name.h1(arcanum))}?`, a: `${read.essence}${alias}` },
+    { q: DR.crossing.faqMeaning[L](inline(name.h1(arcanum))), a: `${read.essence}${alias}` },
     {
-      q: `Как понять, что ${arcanum} аркан здесь в минусе?`,
-      a: `${sentence(read.risk)} В общем виде это выглядит так: человек ${listing(content.minus, read.risk)}.`,
+      q: DR.crossing.faqMinus[L](arcanum),
+      a: DR.crossing.faqMinusAnswer[L](sentence(read.risk), listing(content.minus, read.risk)),
     },
   ];
 
   if (contrasts[0]) {
     faq.push({
-      q: `Меняется ли значение ${arcanum} аркана в других позициях?`,
-      a: `Да. Например, ${contrasts[0]}. Это та же энергия в другой роли, и переносить вывод с одной точки на другую нельзя.`,
+      q: DR.crossing.faqOther[L](arcanum),
+      a: DR.crossing.faqOtherAnswer[L](contrasts[0]),
     });
   }
 
   if (tails.length) {
     faq.push({
-      q: `Существует ли кармический хвост ${arcanum}?`,
-      a: `Нет: хвост — тройка арканов, а не одно число. С разбором аркан ${arcanum} встречается в ${tails.length} ${plural(tails.length, "хвост")}: ${tails.map((t) => t.key).join(", ")}.`,
+      q: DR.crossing.faqTail[L](arcanum),
+      a: DR.crossing.faqTailAnswer[L](arcanum, tails.length, tails.map((t) => t.key).join(", ")),
     });
   }
 
@@ -323,7 +322,7 @@ export function buildPositionArcanum(position: string, arcanum: number): Positio
     arcanum,
     title: name.h1(arcanum),
     seo: {
-      title: `${name.seo(arcanum)}: значение`,
+      title: DR.crossing.seoTitle[L](name.seo(arcanum)),
       description: describe(name.h1(arcanum), read),
       queries: buildQueries(item, arcanum, name),
     },
@@ -348,8 +347,8 @@ function buildQueries(item: RegistryItem, arcanum: number, name: Naming): string
   const out = [item.primaryQuery];
   const head = inline(name.h1(arcanum));
   const extras = [
-    /матриц/i.test(head) ? head : `${head} матрица судьбы`,
-    name.alias ? `${name.alias} ${arcanum} матрица судьбы` : "",
+    DR.crossing.matrixWord[L].test(head) ? head : DR.crossing.queryMatrix[L](head),
+    name.alias ? DR.crossing.queryAlias[L](name.alias, arcanum) : "",
   ];
   for (const extra of extras) {
     const value = extra.trim();
@@ -365,14 +364,14 @@ function shortLead(head: string, title: string, short: string, read: Role): stri
   // Точка, а не двоеточие: у девятнадцати арканов из двадцати двух своё двоеточие уже стоит
   // внутри короткого описания («глубина и поиск смысла: доходит до сути»), и подводка читалась
   // с двумя двоеточиями подряд.
-  const base = `${head} — это ${title}. ${sentence(clip(short, 150))}`;
+  const base = DR.crossing.shortLead[L](head, title, sentence(clip(short, 150)));
   return base.length >= 80 ? base : `${base} ${sentence(read.essence)}`;
 }
 
 /** Описание для выдачи: 160 знаков, обрыв посреди слова там читается как брак. Действие
  *  добавляется только целиком. */
 function describe(head: string, read: Role): string {
-  const base = clip(`${head} — ${inline(read.essence)}.`, 160);
+  const base = clip(DR.crossing.describe[L](head, inline(read.essence)), 160);
   // Суть бывает в три слова («Дар видеть иначе.»), и тогда одного её мало: приёмка проекта
   // требует описание не короче 40 знаков, а обрыв посреди слова в выдаче читается как брак.
   // Поэтому добавляем следующие фразы, пока влезают целиком, и только в крайнем случае режем.
@@ -428,15 +427,7 @@ function listing(items: string[], said = ""): string {
     .filter((x) => x && !(spoken && (spoken.includes(x) || x.includes(spoken))))
     .filter((x) => ![...chains(x)].some((c) => spokenChains.has(c)))
     .slice(0, 3);
-  if (!parts.length) return "действует по своей сильной стороне";
+  if (!parts.length) return D.clause.fallbackStrength[L];
   if (parts.length === 1) return parts[0]!;
-  return `${parts.slice(0, -1).join(", ")} и ${parts.at(-1)}`;
-}
-
-function plural(count: number, word: "хвост" | "позиция"): string {
-  const teen = count % 100 >= 11 && count % 100 <= 14;
-  const last = count % 10;
-  if (word === "хвост") return teen || last !== 1 ? "хвостах" : "хвосте";
-  if (teen || last === 0 || last >= 5) return "позиций";
-  return last === 1 ? "позиция" : "позиции";
+  return `${parts.slice(0, -1).join(", ")} ${D.clause.and[L]} ${parts.at(-1)}`;
 }

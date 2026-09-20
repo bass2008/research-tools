@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { D, L } from "@/lib/i18n";
 import PositionMap from "./PositionMap";
 import { MAP_POINTS, mapPointsFor, mapPointsForSection } from "@/lib/matrixMap";
 
@@ -42,11 +43,13 @@ describe("схема карты на странице", () => {
   it("помечает подсвеченную точку и только её", () => {
     expect(html.match(/class="spot on"/g)?.length).toBe(1);
     expect(html.match(/class="halo"/g)?.length).toBe(1);
-    expect(html).toContain("Под сердцем · R1");
+    expect(html).toContain(`${D.mapPoints.love_middle[L]} · R1`);
   });
 
   it("называет подсвеченное в подписи для чтеца экрана", () => {
-    expect(html).toContain('aria-label="Схема матрицы судьбы, отмечено: Под сердцем · R1"');
+    expect(html).toContain(
+      `aria-label="${D.octagram.mapAria[L](`${D.mapPoints.love_middle[L]} · R1`)}"`,
+    );
     expect(html).toContain("<figcaption>подпись</figcaption>");
   });
 
@@ -55,7 +58,13 @@ describe("схема карты на странице", () => {
       <PositionMap highlight={mapPointsForSection("past_lives", [])} caption="линия" />,
     );
     expect(line.match(/class="spot on"/g)?.length).toBe(3);
-    expect(line).toMatch(/отмечено:[^"]*· M,[^"]*· N,[^"]*· D/);
+    // Линия хвоста — три точки схемы: M, N и D. Их подписи приходят из словаря языка, поэтому
+    // ожидание собирается из того же источника, что и разметка.
+    expect(line).toContain(D.octagram.mapAria[L](
+      mapPointsForSection("past_lives", [])
+        .map((point) => `${point.label} · ${point.symbol}`)
+        .join(", "),
+    ));
   });
 
   // Шести позициям корпуса точки на октаграмме не положено — у них схемы быть не должно вовсе,

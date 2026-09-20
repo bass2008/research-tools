@@ -1,3 +1,5 @@
+import { D, L } from "./i18n";
+
 /** Экран возврата из формы оплаты. */
 
 export type PayStage = "checking" | "paid" | "refunded" | "pending" | "failed" | "error";
@@ -10,16 +12,16 @@ export type PayStage = "checking" | "paid" | "refunded" | "pending" | "failed" |
 export function resultTitle(stage: PayStage): string {
   switch (stage) {
     case "paid":
-      return "Оплата прошла";
+      return D.payResult.stagePaid[L];
     case "refunded":
-      return "Платёж возвращён";
+      return D.payResult.stageRefunded[L];
     case "failed":
-      return "Платёж не прошёл";
+      return D.payResult.stageFailed[L];
     case "pending":
-      return "Платёж ещё в обработке";
+      return D.payResult.stagePending[L];
     case "error":
-      return "Не удалось проверить платёж";
+      return D.payResult.stageUnknown[L];
     default:
-      return "Проверяем платёж";
+      return D.payResult.stageChecking[L];
   }
 }

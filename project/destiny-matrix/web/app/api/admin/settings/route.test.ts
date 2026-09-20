@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { cookieGet } = vi.hoisted(() => ({ cookieGet: vi.fn() }));
@@ -17,7 +18,7 @@ describe("единый BFF-снимок настроек", () => {
   it("не показывает frontend-настройки без подтверждённой admin-сессии", async () => {
     const response = await GET();
     expect(response.status).toBe(401);
-    expect(await response.json()).toEqual({ detail: "Нужен вход: сессии нет" });
+    expect(await response.json()).toEqual({ detail: D.bffErrors.noSession[L] });
   });
 
   it("объединяет frontend и backend только после ответа API", async () => {

@@ -6,11 +6,13 @@ import CalcPromo from "@/components/matrix/CalcPromo";
 import Faq from "@/components/ui/Faq";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
-import Price from "@/components/pay/Price";
+import Price, { PriceOrFree } from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
 import PositionMap from "@/components/enc/PositionMap";
 import Sections from "@/components/enc/Sections";
 
+import { D, L } from "@/lib/i18n";
+import { ALL_FREE } from "@/lib/access";
 import { ARCANA } from "@/lib/arcana";
 import { POSITIONS, arcanumHref, positionByKey, positionHref } from "@/lib/encyclopedia";
 import { arcanumInPosition, positionArcanumRows, positionContent } from "@/lib/content";
@@ -90,15 +92,15 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   // Роли и арканы примера у каждого раздела свои, поэтому подпись собирается из них.
   const exampleText = personalKey
     ? sectionExampleNote(personalKey, exampleMatrix)
-    : `Общая статья объясняет порядок и границы метода. Рассчитанный хвост ${exampleCode} показывает, как эти правила читаются на одном результате.`;
+    : D.encPosition.personalExampleLead[L](exampleCode ?? "");
 
   return (
     <>
 
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           encyclopediaSectionCrumb(p.kind === "section" ? "sec" : "pts"),
           { name: p.title },
         ]}
@@ -117,25 +119,27 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         <PositionMap
           highlight={spots}
           caption={spots.length === 1
-            ? `Где стоит эта точка: ${spots[0]!.label} · ${spots[0]!.symbol}`
-            : `Где стоят точки раздела: ${spots.map((x) => `${x.label} · ${x.symbol}`).join(", ")}`}
+            ? D.encPosition.whereOnePoint[L](`${spots[0]!.label} · ${spots[0]!.symbol}`)
+            : D.encPosition.whereSeveralPoints[L](
+                spots.map((x) => `${x.label} · ${x.symbol}`).join(", "),
+              )}
         />
 
         <div className="panel section-gap">
-          <h2>Как считается</h2>
-          <div className="cap">Формула позиции в методике</div>
+          <h2>{D.encPosition.howCounted[L]}</h2>
+          <div className="cap">{D.encPosition.howCountedHint[L]}</div>
           <p style={{ margin: 0 }}>{extra.formula}</p>
           {section ? (
             <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
-              Раздел в отчёте{" "}
-              {isFree ? (
-                "открыт бесплатно, без регистрации."
+              {D.encPosition.sectionInReport[L]}{" "}
+              {isFree || ALL_FREE ? (
+                D.encPosition.openFree[L]
               ) : (
                 <>
-                  открывается в полном разборе за <Price />.
+                  {D.encPosition.opensInFull[L]} <Price />.
                 </>
               )}{" "}
-              <Link href="/report">Посмотреть свой отчёт</Link>
+              <Link href="/report">{D.encPosition.seeYourReport[L]}</Link>
             </p>
           ) : null}
         </div>
@@ -151,22 +155,19 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         {p.key === "day" ? (
           <p className="encref">
             <Link href={positionHref("character")}>
-              Подробнее о полном разделе «Характер и личные качества» →
+              {D.encPosition.moreAboutCharacter[L]}
             </Link>
           </p>
         ) : null}
 
         {p.key === "character" ? (
           <div className="panel section-gap">
-            <h2>Пример полного персонального разбора</h2>
-            <div className="cap">Тройка 4–3–22: три роли, три связи и общий вывод</div>
-            <p>
-              В статье выше показан метод. На персональной странице видно, как те же правила
-              собирают отдельные значения Императора, Императрицы и Шута в один связный текст.
-            </p>
+            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+            <div className="cap">{D.encPosition.characterExampleHint[L]}</div>
+            <p>{D.encPosition.characterExampleText[L]}</p>
             <p className="encref">
               <Link href="/encyclopedia/character/4-3-22">
-                Посмотреть разбор 4–3–22 в энциклопедии →
+                {D.encPosition.characterExampleLink[L]}
               </Link>
             </p>
           </div>
@@ -174,15 +175,12 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
         {p.key === "comfort" ? (
           <div className="panel section-gap">
-            <h2>Пример полного персонального разбора</h2>
-            <div className="cap">Тройка 4–15–7: центр, реакция и возвращающий талант</div>
-            <p>
-              Общая статья объясняет точки E, M и K. В персональном разборе видно, как их
-              отдельные значения и три связи складываются в один внутренний цикл.
-            </p>
+            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+            <div className="cap">{D.encPosition.comfortExampleHint[L]}</div>
+            <p>{D.encPosition.comfortExampleText[L]}</p>
             <p className="encref">
               <Link href="/encyclopedia/comfort/4-15-7">
-                Посмотреть разбор 4–15–7 в энциклопедии →
+                {D.encPosition.comfortExampleLink[L]}
               </Link>
             </p>
           </div>
@@ -190,15 +188,12 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
         {p.key === "profession" ? (
           <div className="panel section-gap">
-            <h2>Пример полного персонального разбора</h2>
-            <div className="cap">Линия 3–10–7: дар, форма работы и внутренний результат</div>
-            <p>
-              Общая статья объясняет порядок B→P→K. Персональная страница показывает, как
-              значения трёх арканов образуют связный сценарий профессиональной реализации.
-            </p>
+            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+            <div className="cap">{D.encPosition.professionExampleHint[L]}</div>
+            <p>{D.encPosition.professionExampleText[L]}</p>
             <p className="encref">
               <Link href="/encyclopedia/profession/3-10-7">
-                Посмотреть разбор 3–10–7 в энциклопедии →
+                {D.encPosition.professionExampleLink[L]}
               </Link>
             </p>
           </div>
@@ -206,18 +201,18 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
         {exampleHref && exampleCode && !["character", "comfort", "profession"].includes(p.key) ? (
           <div className="panel section-gap">
-            <h2>Пример полного персонального разбора</h2>
+            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
             <div className="cap">
               {p.key === "chakras"
-                ? "Карта энергий для контрольной матрицы 4–3–22"
+                ? D.encPosition.chakraExampleHint[L]
                 : p.key === "years"
-                  ? "Возрастная линия для контрольной матрицы 4–3–22"
-                  : `Рассчитанный результат ${exampleCode}`}
+                  ? D.encPosition.yearsExampleHint[L]
+                  : D.encPosition.calculatedResult[L](exampleCode)}
             </div>
             <p>{exampleText}</p>
             <p className="encref">
               <Link href={exampleHref}>
-                Посмотреть персональный пример в энциклопедии →
+                {D.encPosition.personalExampleLink[L]}
               </Link>
             </p>
           </div>
@@ -225,21 +220,21 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
         {extra.reading ? (
           <div className="panel">
-            <h3>Как читать позицию</h3>
-            <div className="cap">Порядок, в котором смотрят на арканы</div>
+            <h3>{D.encPosition.howToRead[L]}</h3>
+            <div className="cap">{D.encPosition.howToReadHint[L]}</div>
             <p style={{ margin: 0 }}>{extra.reading}</p>
           </div>
         ) : null}
 
         <div className="section-gap">
           <CalcPromo
-            title="Построить свою карту"
+            title={D.enc.buildYourChart[L]}
             // Бесплатны только два раздела разбора («характер» и «зона комфорта»): обещать
             // бесплатный результат на остальных восемнадцати нельзя.
             lead={
-              isFree
-                ? `Что стоит у вас в позиции «${p.title}» — покажет расчёт по дате рождения. Бесплатно, без регистрации.`
-                : `Карта по дате рождения строится бесплатно и без регистрации. Позицию «${p.title}» открывает полный разбор.`
+              isFree || ALL_FREE
+                ? D.encPosition.promoFreeLead[L](p.title)
+                : D.encPosition.promoPaidLead[L](p.title)
             }
             place="position"
           />
@@ -250,10 +245,8 @@ export default async function PositionPage({ params }: { params: Promise<Params>
             есть, а входящих ссылок нет ни одной. */}
         {crossings.length ? (
           <div className="panel section-gap">
-            <h2>Отдельные арканы на этой позиции</h2>
-            <div className="cap">
-              {crossings.length} разбора: что означает конкретный аркан именно здесь
-            </div>
+            <h2>{D.encPosition.crossingsTitle[L]}</h2>
+            <div className="cap">{D.encPosition.crossingsHint[L](crossings.length)}</div>
             <div className="taglist">
               {crossings.map((item) => (
                 <Link
@@ -275,8 +268,8 @@ export default async function PositionPage({ params }: { params: Promise<Params>
             входящие ссылки только с корня энциклопедии и с noindex-карты. */}
         {p.kind === "section" && extra.links?.length ? (
           <div className="panel section-gap">
-            <h2>Уровни карты по отдельности</h2>
-            <div className="cap">Каждый уровень разобран своей статьёй</div>
+            <h2>{D.encPosition.levelsTitle[L]}</h2>
+            <div className="cap">{D.encPosition.levelsHint[L]}</div>
             <div className="taglist">
               {extra.links.map((link) => (
                 <Link key={link.href} href={link.href}>
@@ -290,8 +283,8 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         {p.kind === "section" ? (
           extra.points.length ? (
             <div className="panel section-gap">
-              <h2>Позиции этого раздела</h2>
-              <div className="cap">У каждой точки — своё значение аркана</div>
+              <h2>{D.encPosition.sectionPositions[L]}</h2>
+              <div className="cap">{D.encPosition.sectionPositionsHint[L]}</div>
               <div className="taglist">
                 {extra.points.map((point) => (
                   <Link key={point.key} href={positionHref(point.key)}>
@@ -303,12 +296,12 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           ) : null
         ) : (
           <div className="panel section-gap">
-            <h2>Все 22 аркана в этой позиции</h2>
-            <div className="cap">Откройте аркан, который стоит у вас в этой точке карты</div>
+            <h2>{D.encPosition.allArcanaHere[L]}</h2>
+            <div className="cap">{D.encPosition.allArcanaHereHint[L]}</div>
             <div className="cardgrid">
               {ARCANA.map((a) => (
                 <Link className="ecard" key={a.n} href={arcanumHref(a.n)}>
-                  <div className="num">{a.n} аркан</div>
+                  <div className="num">{D.encPosition.arcanumNumber[L](a.n)}</div>
                   <div className="nm">{a.title}</div>
                   <div className="ds">{arcanumInPosition(a.n, p.key)}</div>
                 </Link>
@@ -320,13 +313,15 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         <Related
           path={positionHref(p.key)}
           refs={[]}
-          title="Где ещё разбирается эта позиция"
-          hint="Статьи, которые ссылаются на эту страницу"
+          title={D.encPosition.relatedTitle[L]}
+          hint={D.encPosition.relatedHint[L]}
         />
 
         <div className="panel section-gap">
-          <h2>Рядом в карте</h2>
-          <div className="cap">{p.kind === "section" ? "Другие разделы разбора" : "Другие позиции матрицы"}</div>
+          <h2>{D.encPosition.nearby[L]}</h2>
+          <div className="cap">
+            {p.kind === "section" ? D.encPosition.otherSections[L] : D.encPosition.otherPositions[L]}
+          </div>
           <div className="taglist">
             {siblings.map((s) => (
               <Link key={s.key} href={positionHref(s.key)}>
@@ -334,19 +329,16 @@ export default async function PositionPage({ params }: { params: Promise<Params>
               </Link>
             ))}
             <Link href={encyclopediaSectionHref(p.kind === "section" ? "sec" : "pts")}>
-              {p.kind === "section" ? "Все разделы отчёта" : "Все позиции карты"}
+              {p.kind === "section" ? D.encPosition.allSections[L] : D.encPosition.allPositions[L]}
             </Link>
           </div>
         </div>
 
         <div className="allbox">
-          <h2>Посмотреть эту позицию в своей карте</h2>
-          <p>
-            Расчёт бесплатный и идёт в браузере: дата рождения не уходит на сервер. Карта и два
-            раздела открываются сразу, полный разбор — <Price />.
-          </p>
+          <h2>{D.encPosition.seeInYourChart[L]}</h2>
+          <p>{D.encPosition.seeInYourChartText[L]}</p>
           <Link className="btn" href="/#calc">
-            Рассчитать матрицу
+            {D.matrixPages.calcMatrix[L]}
           </Link>
         </div>
     </>

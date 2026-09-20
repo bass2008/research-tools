@@ -16,7 +16,7 @@ import {
 } from "./positionArcanum";
 
 const REGISTRY = JSON.parse(
-  readFileSync(path.join(__dirname, "..", "content", "position-arcanum.json"), "utf8"),
+  readFileSync(path.join(__dirname, "..", "content", process.env.NEXT_PUBLIC_SITE_LANG ?? "ru", "position-arcanum.json"), "utf8"),
 ) as { threshold: number; show_threshold: number; count: number; items: unknown[] };
 
 const readings = registryItems().map((item) => ({
@@ -38,13 +38,14 @@ describe("реестр пересечений", () => {
   // относится только к первому: у готовой страницы показ не стоит ничего. Плоские 22 × 38
   // адресов в выдаче по-прежнему запрещены, но не порогом спроса, а методом — существование
   // записи решает `reachable_arcana`.
-  it("в индекс не пускает записи ниже порога показа", () => {
-    const show = REGISTRY.show_threshold;
-    expect(show).toBeGreaterThan(0);
-    expect(show).toBeLessThan(REGISTRY.threshold);
-    expect(registryItems().filter((i) => i.frequency < show && i.publication.index)).toEqual([]);
-    expect(indexedRegistryItems().filter((i) => i.frequency < show)).toEqual([]);
-    expect(indexedRegistryItems().length).toBeLessThanOrEqual(registryItems().length);
+  // Порог показа снят: страница написана, показ не стоит ничего, а закрывать её по частоте,
+  // которую Вордстат для редкой формы просто не отдаёт, значит доверять отсутствию данных
+  // больше, чем самому тексту. Порог заведения остался — он про то, писать ли текст вообще.
+  it("показывает все заведённые страницы", () => {
+    expect(REGISTRY.show_threshold).toBe(0);
+    expect(REGISTRY.threshold).toBeGreaterThan(0);
+    expect(indexedRegistryItems().length).toBe(registryItems().length);
+    expect(registryItems().filter((i) => !i.publication.index)).toEqual([]);
   });
 
   // Головной запрос — обещание «эта страница отвечает на эту фразу». У страницы вне индекса его

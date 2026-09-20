@@ -1,3 +1,4 @@
+import { DR, L } from "./i18n";
 import type { Matrix } from "./matrix";
 import type { ReadingConclusion, ReadingRole } from "./readingTypes";
 import { cubeClause, withRepeat } from "./text";
@@ -11,18 +12,18 @@ export const COMFORT_ROLE_META: Record<
 > = {
   center: {
     key: "E",
-    label: "Базовое состояние",
-    question: "В каком состоянии человеку проще чувствовать себя собой и сохранять опору",
+    label: DR.comfort.centerLabel[L],
+    question: DR.comfort.centerQuestion[L],
   },
   comfort_south: {
     key: "M",
-    label: "Автоматическая реакция",
-    question: "Что включается первым в отношениях, напряжении и знакомых повторяющихся сюжетах",
+    label: DR.comfort.reactionLabel[L],
+    question: DR.comfort.reactionQuestion[L],
   },
   comfort_north: {
     key: "K",
-    label: "Талант, возвращающий управление",
-    question: "Какое качество помогает выйти из автоматической реакции и снова действовать осознанно",
+    label: DR.comfort.talentLabel[L],
+    question: DR.comfort.talentQuestion[L],
   },
 };
 
@@ -38,7 +39,7 @@ export function repeatedSummary(items: ReadingRole[]): string | null {
   const unique = new Set(items.map((role) => role.arcanum));
   const slug = items.map((role) => role.arcanum).join("–");
   if (unique.size === 1) {
-    return `В последовательности ${slug} один аркан проходит через все роли раздела. Это делает тему цельной и заметной, но особенно усиливает риск действовать одним способом там, где вопросы у точек разные.`;
+    return DR.comfort.sameAll[L](slug);
   }
   if (unique.size < items.length) {
     const counts = new Map<number, number>();
@@ -46,7 +47,12 @@ export function repeatedSummary(items: ReadingRole[]): string | null {
     const [number, count] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
     const repeated = items.find((role) => role.arcanum === number)!;
     const contrast = items.find((role) => role.arcanum !== number);
-    return `В последовательности ${slug} тема ${repeated.title} звучит ${count} раза и становится привычным способом проходить раздел. ${contrast ? `${contrast.title} показывает место, где этот способ нужно дополнить другим качеством, а не повторить ещё раз.` : "Роли всё равно отвечают на разные вопросы и не сливаются в одну."}`;
+    return DR.comfort.repeated[L](
+      slug,
+      repeated.title,
+      count,
+      contrast ? DR.comfort.contrastWith[L](contrast.title) : DR.comfort.contrastNone[L],
+    );
   }
   return null;
 }
@@ -56,17 +62,16 @@ export function buildComfortConclusion(items: ReadingRole[]): ReadingConclusion 
   if (!first || !middle || !last) throw new Error("[comfort-reading] нужны три роли");
   return {
     summary: withRepeat(
-      `Тройка ${first.arcanum}–${middle.arcanum}–${last.arcanum} описывает внутренний цикл: ${first.title} задаёт базовое состояние, ${middle.title} включается как первая реакция, а ${last.title} показывает качество, через которое проще вернуть управление.`,
+      DR.comfort.summary[L](
+        first.arcanum, middle.arcanum, last.arcanum, first.title, middle.title, last.title,
+      ),
       repeatedSummary(items),
     ),
     strength:
-      `Опора тройки появляется, когда в базовом состоянии ${cubeClause(first.strength)}, ` +
-      `в первой реакции ${middle.strength}, а для возвращения к себе ${last.strength}.`,
+      DR.comfort.strength[L](cubeClause(first.strength), middle.strength, last.strength),
     tension:
-      `Цикл уводит от центра, когда ${cubeClause(first.risk)}; затем автоматически ${middle.risk}; ` +
-      `а попытка восстановиться закрепляет перекос, если он ${last.risk}. Эти признаки полезно проверять по одной реальной ситуации, а не принимать за постоянные качества.`,
+      DR.comfort.tension[L](cubeClause(first.risk), middle.risk, last.risk),
     practice:
-      `При следующей сильной реакции сделайте короткую паузу и назовите три вещи: что было моей опорой до события, что я сделал автоматически и какое действие позиции K вернёт управление. ` +
-      `Начните с подсказки: ${last.action}`,
+      DR.comfort.practice[L](last.action),
   };
 }

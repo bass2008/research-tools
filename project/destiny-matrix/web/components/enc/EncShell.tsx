@@ -51,7 +51,7 @@ export function articleList(): { href: string; title: string; crumb: string; sho
   });
   const cats = [
     { key: "karmic-tail", href: KARMIC_TAIL_HUB },
-    { key: "na-god", href: YEAR_HUB },
+    { key: "year", href: YEAR_HUB },
   ].map(({ key, href }) => {
     const item = categoryHub(key);
     if (!item?.crumb) throw new Error(`нет канонического материала или crumb хаба ${key}`);

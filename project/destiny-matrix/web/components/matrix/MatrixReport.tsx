@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 
 import { calculate } from "@/lib/matrix";
-import { money } from "@/lib/tariffs";
+import { priceLabel } from "@/lib/tariffs";
 import { exampleDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
 
@@ -24,7 +24,10 @@ import ReportSections from "@/components/matrix/ReportSections";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import UnlockCta from "@/components/pay/UnlockCta";
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import { buildFree, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
+import { useFullSections } from "@/lib/useFullSections";
 import { useSession } from "@/components/account/useSession";
 import { useOwnDates } from "@/components/matrix/CalculationProvider";
 
@@ -54,10 +57,12 @@ export default function MatrixReport(
       return null;
     }
   }, [birth, seed]);
+  // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
+  const full = useFullSections(matrix);
 
   if (!matrix) return <div id="result" />;
 
-  const sections = buildFree(matrix, texts, articles);
+  const sections = full ?? buildFree(matrix, texts, articles);
   const locked = sections.filter((s) => !s.positions.length);
   const anyDate = session.status === "user" && session.unlimited;
   // Право ищем по дате, а не по паре «дата + пол». Пол не меняет в карте ни одного числа
@@ -78,19 +83,32 @@ export default function MatrixReport(
         <MatrixResult m={matrix} example={example} />
         <ReportSections sections={sections} place="landing" />
 
+        {ALL_FREE ? (
+          <div className="allbox">
+            <h3>{example ? D.unlockBox.exampleTitleFree[L] : D.unlockBox.openTitleFree[L]}</h3>
+            <p>
+              {example ? D.unlockBox.exampleLeadFree[L] : D.unlockBox.openLeadFree[L]}
+              {D.unlockBox.saveForPdf[L]}
+            </p>
+            {example ? null : (
+              <SaveMatrixButton
+                birth={matrix.birth}
+                sex={matrix.sex}
+                label={D.unlockBox.saveDate[L]}
+              />
+            )}
+          </div>
+        ) : (
         <div className="allbox" id={thisDatePaid || anyDate ? "plans" : undefined}>
-          <h3>{example ? "Что покажет полный разбор" : "Открыть полный разбор"}</h3>
+          <h3>{example ? D.unlockBox.exampleTitle[L] : D.unlockBox.openTitle[L]}</h3>
           <p>
-            {example
-              ? "Это карта-пример. Выберите свою дату выше — и те же 20 разделов пересчитаются по ней: "
-              : "Все 20 разделов по вашей дате: "}
-            деньги, отношения, род до седьмого колена, толкование карты энергий и разбор по
-            десятилетиям до 80 лет.{" "}
+            {example ? D.unlockBox.exampleLead[L] : D.unlockBox.openLead[L]}
+            {D.unlockBox.contents[L]}{" "}
             {thisDatePaid || anyDate
               ? null
               : priceKnown && lead
-                ? `${money(lead.price)} ₽ — один платёж, без подписки.`
-                : "Цена уточняется."}
+                ? D.unlockBox.onePayment[L](priceLabel(lead))
+                : D.unlockBox.priceUnknown[L]}
           </p>
           <div className="alllist">
             {locked.map((s) => (
@@ -102,24 +120,18 @@ export default function MatrixReport(
 
           {thisDatePaid && !anyDate ? (
             <>
-              <p className="small">
-                Разбор уже оплачен. Толкования печатает сервер, поэтому дата открывается на
-                отдельной странице.
-              </p>
+              <p className="small">{D.unlockBox.alreadyPaid[L]}</p>
               <Link className="btn wide" href={`/report?m=${thisDate!.id}`}>
-                Открыть полный разбор
+                {D.unlockBox.openTitle[L]}
               </Link>
             </>
           ) : anyDate ? (
             <>
-              <p className="small">
-                Ваш тариф открывает любые даты. Толкования печатает сервер, поэтому сохраните эту
-                дату в кабинет — разбор откроется на отдельной странице.
-              </p>
+              <p className="small">{D.unlockBox.unlimitedPlan[L]}</p>
               <SaveMatrixButton
                 birth={matrix.birth}
                 sex={matrix.sex}
-                label="Сохранить дату и открыть полный разбор"
+                label={D.unlockBox.saveAndOpen[L]}
               />
             </>
           ) : (
@@ -129,21 +141,23 @@ export default function MatrixReport(
                 testId="unlock-cta"
                 matrixId={thisDateSaved?.access === "locked" ? thisDateSaved.id : undefined}
               >
-                Купить
+                {D.nav.buy[L]}
               </UnlockCta>
               {session.status === "guest" ? (
                 <p className="small" style={{ marginTop: 10 }}>
-                  Уже оплачивали? <Link href="/login">Войдите</Link> — доступ живёт в аккаунте, а не
-                  в браузере.
+                  {D.unlockBox.alreadyBought[L]}{" "}
+                  <Link href="/login">{D.unlockBox.signIn[L]}</Link> {D.unlockBox.signInTail[L]}
                 </p>
               ) : null}
             </>
           )}
         </div>
 
+        )}
+
         {/* тарифы не показываем тому, у кого эта дата уже открыта: на /report блок тоже
             скрыт при полном доступе, а здесь предлагал купить купленное */}
-        {thisDatePaid || anyDate ? null : <Plans place="landing" />}
+        {ALL_FREE || thisDatePaid || anyDate ? null : <Plans place="landing" />}
       </section>
     </div>
   );

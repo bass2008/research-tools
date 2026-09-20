@@ -24,8 +24,11 @@ ROOT = Path(__file__).resolve().parents[2]
 PROJECT = ROOT / "project" / "destiny-matrix"
 RAW = ROOT / "logs" / "needs-lab" / "матрица-судьбы-dd5dcc98" / "params.json"
 METHOD = PROJECT / "spec" / "method.json"
-WEB_CONTENT = PROJECT / "web" / "content"
-TAIL_SOURCE = ROOT / "tools" / "seo" / "content" / "karmic-tails"
+# Семантика замерена по русскому рынку: реестр запросов, классификация и карточки аудита
+# строятся только для русского корпуса. Английский получает те же адреса, но своего замера
+# спроса у него пока нет (docs/eng-ver.md §13).
+WEB_CONTENT = PROJECT / "web" / "content" / "ru"
+TAIL_SOURCE = ROOT / "tools" / "seo" / "content" / "ru" / "karmic-tails"
 AUDIT = ROOT / "tools" / "seo" / "audit"
 
 TODAY = "2026-08-30"
@@ -48,8 +51,8 @@ STATIC_INDEXED = {
     "/encyclopedia/position": "position_hub",
     "/encyclopedia/chakra": "chakra_hub",
     "/encyclopedia/combination": "combination_hub",
-    "/encyclopedia/karmic-tail": "tail_hub", "/na-god": "year_hub",
-    "/contacts": "legal", "/oferta": "legal", "/privacy": "legal", "/refund": "legal",
+    "/encyclopedia/karmic-tail": "tail_hub", "/year": "year_hub",
+    "/contacts": "legal", "/terms": "legal", "/privacy": "legal", "/refund": "legal",
 }
 # Публичная страница вне индекса — не то же, что личная. Каталог матриц остаётся путём человека
 # к конкретной карте, но спроса на список всех матриц нет (ноль показов за первые дни индексации
@@ -117,7 +120,10 @@ def tail_sources(reachable: list[dict], stats: dict[str, dict[str, int]]) -> lis
     for key in sorted(expected_keys, key=lambda value: tuple(map(int, value.split("-")))):
         item = read_json(source_paths[key])
         expected_arcana = list(map(int, key.split("-")))
-        expected_index = stats[key]["exact_frequency"] >= 800
+        # Порога спроса у хвостов больше нет: метод даёт ровно 26 достижимых троек, статьи
+        # написаны на все, и закрывать готовую страницу из-за того, что Вордстат не показал по
+        # ней частоту, значит доверять отсутствию данных больше, чем самому тексту.
+        expected_index = True
         # Формулировка головного запроса — редакторское решение и живёт в самой статье: замер
         # показал, что «кармический хвост A B C» не спрашивает никто, а спрос идёт на «A B C
         # матрица судьбы». Реестр проверяет не шаблон, а согласованность: у индексируемого
@@ -167,7 +173,7 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
         evidence.append("явный маркер совместимости")
     elif re.search(r"\b(?:19|20)\d{2}\b", low) or " на год" in low:
         intent = "year"
-        landing = "/na-god"
+        landing = "/year"
         evidence.append("явный годовой интент")
     elif "хвост" in low or "кармическ" in low:
         intent = "tail"
@@ -181,7 +187,7 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
     elif "программ" in low:
         intent = "program"
         context = "loops"
-        landing = "/programmy"
+        landing = "/programs"
         entity = f"occurrence:loops:{key}"
         evidence.append("явное слово программа; это не делает тройку хвостом")
     else:
@@ -262,7 +268,9 @@ def semantic_artifacts(nodes: list[dict], valid: set[str], indexed: set[str]) ->
 
 
 def item_list(name: str) -> list[dict]:
-    payload = read_json(WEB_CONTENT / name)
+    # Предрасчёт матриц один на все языки и лежит уровнем выше языкового каталога.
+    root = WEB_CONTENT.parent if name == "matrices.json" else WEB_CONTENT
+    payload = read_json(root / name)
     return payload.get("items", payload)
 
 
@@ -319,7 +327,7 @@ def url_registry(tails: list[dict]) -> list[dict]:
             bool(item["publication"]["index"]),
             "ordered-хвост метода; индексируется только после demand gate")
     for item in item_list("year-arcana.json"):
-        add(f"/na-god/{item['n']}", "year", "keep", True, "каноническая годовая статья")
+        add(f"/year/{item['n']}", "year", "keep", True, "каноническая годовая статья")
     for item in item_list("matrices.json"):
         add(f"/matrix/{item['slug']}", "calculated_matrix", "noindex", False,
             "производный продуктовый результат, не SEO landing")
@@ -339,7 +347,7 @@ def review_cards(tails: list[dict], urls: list[dict]) -> list[dict]:
             key = str(item[keyfield])
             seo = item.get("seo", {})
             cards.append({
-                "entity": f"{entity}:{key}", "source": f"web/content/{filename}",
+                "entity": f"{entity}:{key}", "source": f"web/content/ru/{filename}",
                 "primary_query": (seo.get("queries") or [None])[0],
                 "search_intent": entity, "formula_verified": entity in {"position", "chakra"},
                 "position_context_verified": entity in {"position", "chakra", "combination"},
@@ -366,7 +374,7 @@ def review_cards(tails: list[dict], urls: list[dict]) -> list[dict]:
     for item in read_json(WEB_CONTENT / "position-arcanum.json")["items"]:
         cards.append({
             "entity": f"position_arcanum:{item['position']}/{item['arcanum']}",
-            "source": "web/content/position-arcanum.json",
+            "source": "web/content/ru/position-arcanum.json",
             "primary_query": item["primary_query"], "search_intent": "position_arcanum",
             "formula_verified": True, "position_context_verified": True,
             "claims_reviewed": "automated contract/safety audit",

@@ -1,22 +1,24 @@
 import BuyButton from "@/components/ui/BuyButton";
+import { ALL_FREE } from "@/lib/access";
 import SiteLink from "@/components/ui/SiteLink";
 import Logo from "@/components/ui/Logo";
 import SessionBadge from "@/components/account/SessionBadge";
+import { D, L } from "@/lib/i18n";
 
 export default function Header({ plain }: { plain?: boolean }) {
   return (
     <header className="site-header">
       <a className="skip" href="#content">
-        Перейти к содержимому
+        {D.nav.skip[L]}
       </a>
       <div className="wrap hrow">
-        <SiteLink plain={plain} className="logo" href="/" aria-label="Arcana Sense — на главную">
+        <SiteLink plain={plain} className="logo" href="/" aria-label={D.nav.homeAria[L]}>
           <Logo height={54} />
           <Logo compact height={38} />
         </SiteLink>
         <nav className="hnav">
-          <SiteLink plain={plain} href="/report">Мой разбор</SiteLink>
-          <SiteLink plain={plain} href="/encyclopedia">Энциклопедия</SiteLink>
+          <SiteLink plain={plain} href="/report">{D.nav.myReading[L]}</SiteLink>
+          <SiteLink plain={plain} href="/encyclopedia">{D.nav.encyclopedia[L]}</SiteLink>
         </nav>
         <span className="hspacer">
           <SessionBadge plain={plain} />
@@ -24,10 +26,10 @@ export default function Header({ plain }: { plain?: boolean }) {
         {/* Кабинет стоит рядом с «Выйти», а не в общем меню: это личные страницы, и вместе с
             почтой и выходом они читаются как один блок. */}
         <SiteLink plain={plain} className="btn ghost sm" data-testid="nav-account" href="/account">
-          Кабинет
+          {D.nav.account[L]}
         </SiteLink>
         {/* Цену в кнопку не пишем: тарифов два, и цена выбирается на странице оплаты. */}
-        <BuyButton plain={plain} />
+        {ALL_FREE ? null : <BuyButton plain={plain} />}
       </div>
     </header>
   );

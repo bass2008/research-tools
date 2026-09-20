@@ -37,17 +37,23 @@ describe("октаграмма", () => {
   });
 
   it("берёт значения из линий движка, а не пересчитывает по-своему", () => {
-    const shown = (label: string) =>
-      Number(new RegExp(`<title>${label}[^<]*: аркан (\\d+)`).exec(html)?.[1]);
-    expect(shown("Под сердцем · R1")).toBe(M.love[1]);
-    expect(shown("Скрещение линий · R")).toBe(M.love[2]);
-    expect(shown("Середина денежной линии · R2")).toBe(M.money[1]);
-    expect(shown("Середина кармического хвоста · N")).toBe(M.karmic_tail[1]);
-    expect(shown("Аджна, энергия · P")).toBe(M.talent[1]);
+    // Подпись узла собирает словарь языка, поэтому и ожидание собирается им же: берём подпись
+    // точки схемы и читаем номер аркана из того же заголовка.
+    const shown = (key: string) => {
+      const point = MAP_POINTS.find((p) => p.key === key)!;
+      const label = `${point.label} · ${point.symbol}`;
+      const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return Number(new RegExp(`<title>${escaped}[^<]*?(\\d+)`).exec(html)?.[1]);
+    };
+    expect(shown("love_middle")).toBe(M.love[1]);
+    expect(shown("money_love_crossing")).toBe(M.love[2]);
+    expect(shown("money_middle")).toBe(M.money[1]);
+    expect(shown("karmic_tail_middle")).toBe(M.karmic_tail[1]);
+    expect(shown("ajna_energy")).toBe(M.talent[1]);
     const anahata = M.chakras.find((c) => c.key === "anahata")!;
-    expect(shown("Анахата, физика · S")).toBe(anahata.physics);
-    expect(shown("Анахата, энергия · T")).toBe(anahata.energy);
-    expect(shown("Аджна, физика · O")).toBe(M.chakras.find((c) => c.key === "ajna")!.physics);
+    expect(shown("anahata_physics")).toBe(anahata.physics);
+    expect(shown("anahata_energy")).toBe(anahata.energy);
+    expect(shown("ajna_physics")).toBe(M.chakras.find((c) => c.key === "ajna")!.physics);
   });
 
   // Восемь новых кружков втиснуты между уже стоявшими: R1 отходит от R всего на 55 единиц

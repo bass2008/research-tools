@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { ARCANA } from "@/lib/arcana";
 import { hubKeys, indexedKarmicTailKeys, yearKeys } from "@/lib/content";
 import { indexedRegistryItems, positionArcanumHref } from "@/lib/positionArcanum";
+import { SERVICE_PAGES, servicePages } from "@/lib/servicePages";
 import {
   ARCANUM_HUB,
   CHAKRA_HUB,
@@ -21,6 +22,7 @@ import {
   positionHref,
   yearHref,
 } from "@/lib/encyclopedia";
+import { L, SITE_HOSTS } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -35,7 +37,7 @@ export const dynamic = "force-static";
 // в robots.txt и печатаются на запрос.
 // Боевой адрес: с любого другого контура карта сайта не отдаётся вовсе. Иначе тест, закрытый и
 // robots.txt, и паролем, сам сдавал бы поиску полный список своих адресов.
-const PRODUCTION = "https://arcana-sense.ru";
+const PRODUCTION = SITE_HOSTS[L];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (SITE.url !== PRODUCTION) return [];
@@ -46,7 +48,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // accurate», и перестаёт верить сайту целиком, если это не так; в справке Яндекса про этот
   // элемент не сказано ничего. Пустое поле честнее неверного: робот решает сам.
 
-  return [
+  // Один адрес — одна запись. Источников у карты несколько (хабы, реестр служебных страниц,
+  // разделы), и «О методе» попал в неё дважды: он одновременно хаб и служебная страница.
+  // Дубль в карте — сигнал поиску, что сайт сам не знает своих адресов.
+  return unique([
     { url: abs("/"), priority: 1 },
     { url: abs("/encyclopedia"), priority: 0.9 },
     // Шапки разделов: у каждой свой текст и свой головной запрос. Приоритет выше листьев —
@@ -87,9 +92,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...hubKeys()
       .filter(hasHubRoute)
       .map((key) => ({ url: abs(hubHref(key)), priority: 0.8 })),
-    { url: abs("/contacts"), priority: 0.3 },
-    { url: abs("/oferta"), priority: 0.3 },
-    { url: abs("/privacy"), priority: 0.3 },
-    { url: abs("/refund"), priority: 0.3 },
-  ];
+    // Служебные страницы берутся из реестра: на языке, где страницы нет, её не должно быть и в
+    // карте — иначе поиск идёт по адресу, который отвечает 404.
+    ...servicePages().map((key) => ({
+      url: abs(SERVICE_PAGES[key].path),
+      priority: SERVICE_PAGES[key].priority,
+    })),
+  ]);
+}
+
+function unique(rows: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
+  const seen = new Set<string>();
+  return rows.filter((row) => (seen.has(row.url) ? false : seen.add(row.url) && true));
 }

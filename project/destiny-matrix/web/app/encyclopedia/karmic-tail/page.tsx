@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { D, L } from "@/lib/i18n";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import Faq from "@/components/ui/Faq";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
-import Price from "@/components/pay/Price";
+import Price, { PriceOrFree } from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
 
@@ -46,8 +47,8 @@ export default function KarmicTailHubPage() {
 
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           { name: encyclopediaSection("tls").title },
         ]}
       />
@@ -72,9 +73,9 @@ export default function KarmicTailHubPage() {
 
         {items.length ? (
           <div className="panel section-gap">
-            <h2>Разобранные тройки</h2>
+            <h2>{D.enc.tailsAnalysed[L]}</h2>
             <div className="cap">
-              {items.length === 1 ? "Пока одна тройка" : `${items.length} троек с разбором`}
+              {items.length === 1 ? D.enc.tailsOne[L] : D.enc.tailsMany[L](items.length)}
             </div>
             <div className="cardgrid">
               {items.map((t) => (
@@ -96,8 +97,8 @@ export default function KarmicTailHubPage() {
 
         <div className="section-gap">
           <CalcPromo
-            title="Построить свою карту"
-            lead="Карта по дате рождения строится бесплатно и без регистрации. Свою тройку с толкованием открывает полный разбор."
+            title={D.enc.promoTailTitle[L]}
+            lead={D.enc.promoTailLead[L]}
             place="karmic-tail-hub"
           />
         </div>
@@ -107,8 +108,8 @@ export default function KarmicTailHubPage() {
         <Related path={KARMIC_TAIL_HUB} refs={hub.related} />
 
         <div className="panel section-gap">
-          <h3>Арканы тройки</h3>
-          <div className="cap">22 значения, из которых складывается любой хвост</div>
+          <h3>{D.enc.tailArcana[L]}</h3>
+          <div className="cap">{D.enc.tailArcanaHint[L]}</div>
           <div className="taglist">
             {Array.from({ length: 22 }, (_, i) => i + 1).map((n) => (
               <Link key={n} href={arcanumHref(n)}>
@@ -119,13 +120,12 @@ export default function KarmicTailHubPage() {
         </div>
 
         <div className="allbox">
-          <h3>Построить свою карту</h3>
+          <h3>{D.enc.buildYourChart[L]}</h3>
           <p>
-            Хвост — одна из позиций октаграммы. Сама карта по дате рождения строится бесплатно, а
-            тройка с разбором входит в раздел «Задачи прошлых воплощений» — <Price />.
+            {D.enc.tailBuildText[L]} <PriceOrFree />.
           </p>
           <Link className="btn" href="/#calc">
-            Рассчитать матрицу бесплатно
+            {D.matrixPages.calcFree[L]}
           </Link>
         </div>
     </>

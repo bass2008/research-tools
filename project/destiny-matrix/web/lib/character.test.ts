@@ -1,3 +1,5 @@
+import { D, DR, L } from "./i18n";
+import { arcanumTitle } from "./arcana";
 import { describe, expect, it } from "vitest";
 
 import { matrixItem, matrixSlugs } from "./content";
@@ -12,15 +14,15 @@ describe("персональный разбор характера", () => {
 
     expect(reading.slug).toBe("4-3-22");
     expect(reading.roles.map((role) => [role.key, role.arcanum, role.title])).toEqual([
-      ["A", 4, "Император"],
-      ["B", 3, "Императрица"],
-      ["C", 22, "Шут"],
+      ["A", 4, arcanumTitle(4)],
+      ["B", 3, arcanumTitle(3)],
+      ["C", 22, arcanumTitle(22)],
     ]);
     expect(reading.interactions).toHaveLength(3);
     expect(reading.interactions.map((item) => item.key)).toEqual(["3-4", "3-22", "4-22"]);
     expect(reading.interactions[0]).toMatchObject({
       href: "/encyclopedia/combination/3-4",
-      linkLabel: "Подробнее про сочетание 3 и 4 аркана в энциклопедии →",
+      linkLabel: DR.characterLinks.pairLink[L](`3 ${D.encArcanum.and[L]} 4`),
     });
     expect(characterHref(matrix)).toBe("/encyclopedia/character/4-3-22");
     expect(

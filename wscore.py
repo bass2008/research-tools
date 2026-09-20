@@ -66,6 +66,12 @@ TERMINALS = ("CATEGORY", "INFORMATIONAL", "NAVIGATIONAL", "LOW_SCORED", "ANALYZE
 KIND_STATUS = {"transactional": "TRANSACTIONAL", "category": "CATEGORY",
                "informational": "INFORMATIONAL", "navigational": "NAVIGATIONAL"}
 SERP_ENGINES = ("yandex", "google")
+# Подсказки поисковой строки. URL отдельный от выдачи и от пула: у провайдера это свой режим
+# (`setab=tips`), POST со списком фраз, и платится КАЖДАЯ фраза пакета, а не запрос.
+SUGGEST_URL = "http://xmlriver.com/search/xml"
+SUGGEST_BATCH = 50          # потолок провайдера на одну отправку
+SUGGEST_SOURCES = ("google", "yandex")
+SUGGEST_REGIONS = {"us": "2840", "uk": "2826", "ru": "225"}
 
 _client = httpx.Client(timeout=30)
 _net_lock = threading.Lock()
@@ -180,6 +186,18 @@ _SQL_SERP = """CREATE TABLE IF NOT EXISTS serp (
     docs_json TEXT NOT NULL,                         -- [{rank,url,title,snippet}]
     fetched_at INTEGER NOT NULL, PRIMARY KEY (phrase, engine))"""
 
+# Подсказки поисковой строки: что люди набирают по этому корню. Отдельная таблица, а не
+# `cache`: там ключ — голая фраза, и чужой ответ затёр бы оплаченный пул Вордстата, а
+# `rebuild_model_from_cache` разобрал бы его как пул и завёл из него узлы дерева.
+# Регион в ключе обязателен — подсказки зависят от гео; порядок подсказок хранится как есть:
+# он и есть сигнал популярности.
+_SQL_SUGGEST = """CREATE TABLE IF NOT EXISTS suggest (
+    phrase TEXT NOT NULL, source TEXT NOT NULL,      -- 'google' | 'yandex'
+    region TEXT NOT NULL,                            -- geo target источника: '2840', 'ru'
+    items_json TEXT NOT NULL,                        -- ["destiny matrix calculator", ...]
+    fetched_at INTEGER NOT NULL,
+    PRIMARY KEY (phrase, source, region))"""
+
 _SQL_TASK = """CREATE TABLE IF NOT EXISTS task (
     id TEXT PRIMARY KEY, type TEXT NOT NULL,         -- load|full_load|classify|search|score|analyze|drill
     status TEXT NOT NULL,                            -- QUEUED|RUNNING|DONE|FAILED
@@ -243,7 +261,8 @@ def connect(db_path=None, backfill=True):
         con.execute("DROP TABLE IF EXISTS node")
     _migrate_stopword_scope(con)
     for sql in (_SQL_NODE, _SQL_EDGE, _SQL_DOMAIN, _SQL_DOMAIN_MEMBER, _SQL_SERP, _SQL_TASK,
-                _SQL_REPORT, _SQL_HISTORY, _SQL_PROBE, _SQL_STOPWORD, *_SQL_INDEXES):
+                _SQL_REPORT, _SQL_HISTORY, _SQL_PROBE, _SQL_STOPWORD, _SQL_SUGGEST,
+                *_SQL_INDEXES):
         con.execute(sql)
     _add_missing_cols(con)
     con.commit()
@@ -386,9 +405,16 @@ def is_error_response(data):
 
 
 def is_transient(data):
-    """Отказ, который источник просит повторить (а не наша ошибка в параметрах)."""
-    return (isinstance(data, dict)
-            and data.get("code") in XMLRIVER_TRANSIENT_CODES)
+    """Отказ, который источник просит повторить (а не наша ошибка в параметрах).
+
+    Код приводится к числу: в режиме подсказок тот же провайдер присылает `"code": "500"`
+    строкой, и сравнение с числом молча считало транзиентный отказ фатальным."""
+    if not isinstance(data, dict):
+        return False
+    code = data.get("code")
+    if isinstance(code, str) and code.strip().isdigit():
+        code = int(code)
+    return code in XMLRIVER_TRANSIENT_CODES
 
 
 def fetch_wordstat(query, con=None):
@@ -1112,6 +1138,126 @@ def save_serp(con, phrase, serps):
         con.rollback()
         raise
     return len(rows)
+
+
+# ---------- подсказки поисковой строки (suggest) ----------
+
+def save_suggest(con, source, region, by_phrase):
+    """Записать подсказки: by_phrase = {фраза: [подсказка, ...]}.
+
+    Порядок подсказок сохраняется как есть — он и есть сигнал популярности. Пустой список
+    тоже пишется: «по этому корню не подсказывают ничего» — это результат замера, а не
+    промах, и повторно платить за него незачем."""
+    now = int(time.time())
+    rows = [(normalize(phrase), source, str(region), json.dumps(items, ensure_ascii=False), now)
+            for phrase, items in by_phrase.items()]
+    if not rows:
+        return 0
+    try:
+        con.executemany("INSERT OR REPLACE INTO suggest(phrase, source, region, items_json, "
+                        "fetched_at) VALUES (?, ?, ?, ?, ?)", rows)
+        con.commit()
+    except Exception:
+        con.rollback()
+        raise
+    return len(rows)
+
+
+def load_suggest(con, phrases, source="google", region="2840"):
+    """Сохранённые подсказки: {фраза: [подсказка, ...]}; чего нет — того нет в ответе."""
+    out = {}
+    for chunk in _chunks([normalize(p) for p in phrases], 400):
+        marks = ",".join("?" * len(chunk))
+        rows = con.execute(
+            f"SELECT phrase, items_json FROM suggest WHERE source = ? AND region = ? "
+            f"AND phrase IN ({marks})", (source, str(region), *chunk))
+        for phrase, items in rows:
+            out[phrase] = json.loads(items)
+    return out
+
+
+def missing_suggests(con, phrases, source="google", region="2840"):
+    """Каких фраз ещё нет в таблице — только за них придётся платить."""
+    have = load_suggest(con, phrases, source, region)
+    seen, out = set(), []
+    for p in phrases:
+        n = normalize(p)
+        if n and n not in have and n not in seen:
+            seen.add(n)
+            out.append(n)
+    return out
+
+
+def _suggest_request(phrases, source, region):
+    """Одна отправка пакета в XMLRiver. Повтор — только на транзиентном отказе, как у пула.
+
+    Провайдер отдаёт плоский список по всем фразам пакета сразу, без разбивки по исходной
+    фразе; раскладываем обратно по префиксу — подсказка всегда начинается с того корня,
+    к которому её предложили."""
+    global _net_calls
+    params = {"setab": "tips", "user": os.environ["XMLRIVER_USER"],
+              "key": os.environ["XMLRIVER_KEY"], "loc" if source == "google" else "lr": region}
+    last = None
+    for attempt in range(len(RETRY_DELAYS) + 1):
+        if attempt:
+            time.sleep(RETRY_DELAYS[attempt - 1])
+        with _net_lock:
+            _net_calls += len(phrases)            # платится каждая фраза пакета, не запрос
+        try:
+            r = _client.post(SUGGEST_URL, params=params, json={"phrases": list(phrases)},
+                             timeout=120)
+            r.raise_for_status()
+            data = r.json()
+        except (httpx.TransportError, httpx.HTTPStatusError, json.JSONDecodeError) as e:
+            last = e
+            continue
+        if is_transient(data):
+            last = XmlRiverError(f"code={data.get('code')}: {data.get('error')}")
+            continue
+        _check_xmlriver(data, ", ".join(phrases[:3]))
+        return data.get("phrases") or []
+    raise XmlRiverError(f"подсказки не получены за {len(RETRY_DELAYS) + 1} попыток: {last}")
+
+
+def _split_suggests(phrases, items):
+    """Плоский ответ -> {фраза: [подсказки]}. Подсказка относится к самому длинному корню,
+    с которого она начинается: «destiny matrix» и «destiny matrix money» оба префиксы, и без
+    выбора длиннейшего весь хвост уехал бы к короткому.
+
+    Граница слова обязательна: «destiny matrix 2026» начинается с «destiny matrix 20», и голый
+    `startswith` отдавал запрос про год странице двадцатого аркана."""
+    roots = sorted({normalize(p) for p in phrases}, key=len, reverse=True)
+    out = {r: [] for r in roots}
+    for raw in items:
+        item = normalize(raw)
+        for root in roots:
+            if item == root or item.startswith(root + " "):
+                out[root].append(raw)
+                break
+    return out
+
+
+def fetch_suggests(phrases, source="google", region="2840", db_path=None, max_phrases=None):
+    """Подсказки по списку фраз. Кэш первым: платим только за то, чего нет в таблице.
+
+    `max_phrases` — потолок платных фраз за один вызов: пакет берётся целиком, поэтому
+    ограничение считается по фразам, а не по запросам."""
+    con = _cache_con(db_path)
+    try:
+        con.execute(_SQL_SUGGEST)
+        order = [normalize(p) for p in phrases if normalize(p)]
+        need = missing_suggests(con, order, source, region)
+        if need and cache_only():
+            raise RuntimeError(f"режим только кэш: подсказок нет для {len(need)} фраз")
+        if max_phrases is not None:
+            need = need[:max_phrases]
+        for batch in _chunks(need, SUGGEST_BATCH):
+            items = _suggest_request(batch, source, region)
+            save_suggest(con, source, region, _split_suggests(batch, items))
+        have = load_suggest(con, order, source, region)
+    finally:
+        con.close()
+    return {p: have.get(p, []) for p in order}
 
 
 def load_serp(con, phrase):

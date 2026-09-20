@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from ..i18n import say
 from .. import access, audit
 from ..config import settings
 from ..db import get_db
@@ -24,7 +25,7 @@ def register(payload: Credentials, request: Request, db: Session = Depends(get_d
     exists = db.scalar(select(User).where(User.email == payload.email))
     if exists:
         audit.record("register", "failed", email=payload.email, ip=ip)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Эта почта уже зарегистрирована")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=say("auth.email_taken"))
     user = User(email=payload.email, password_hash=hash_password(payload.password))
     db.add(user)
     try:
@@ -33,7 +34,7 @@ def register(payload: Credentials, request: Request, db: Session = Depends(get_d
         db.rollback()
         audit.record("register", "failed", email=payload.email, ip=ip)
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail="Эта почта уже зарегистрирована") from None
+                            detail=say("auth.email_taken")) from None
     db.refresh(user)
     mail.welcome(user.email)
     audit.record("register", "success", email=user.email, ip=ip)
@@ -47,7 +48,7 @@ def login(payload: Credentials, request: Request, db: Session = Depends(get_db))
     audit.record("login", "success" if ok else "failed", email=payload.email,
                  ip=audit.client_ip(request))
     if not ok:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Неверная почта или пароль")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("auth.bad_credentials"))
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}
 
 
@@ -92,13 +93,13 @@ def reset_apply(payload: ResetApply, db: Session = Depends(get_db)) -> dict:
     read = read_reset_token(payload.token)
     if read is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail="Ссылка недействительна или просрочена")
+                            detail=say("auth.link_invalid"))
     user_id, fingerprint = read
     user = db.get(User, user_id)
     # отпечаток старого пароля в подписи: ссылкой нельзя воспользоваться дважды
     if user is None or password_fingerprint(user.password_hash) != fingerprint:
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail="Ссылка уже использована — запросите новую")
+                            detail=say("auth.link_used"))
     user.password_hash = hash_password(payload.password)
     db.commit()
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}

@@ -5,6 +5,7 @@ import {
   sectionEntityLink,
   type SectionOut,
 } from "@/lib/publicSpec";
+import { D, L } from "@/lib/i18n";
 import { publicHref } from "@/lib/site";
 
 export default function SectionEncyclopediaLinks({
@@ -35,7 +36,7 @@ export default function SectionEncyclopediaLinks({
   return (
     <div className="encref character-encrefs" data-testid={`${section.key}-encyclopedia-links`}>
       <div className="character-encref-group">
-        <span className="character-encref-label">По вашей матрице</span>
+        <span className="character-encref-label">{D.sheet.byYourMatrix[L]}</span>
         <Link
           href={href(entity.href)}
           data-entity-type={entity.entityType}
@@ -48,9 +49,9 @@ export default function SectionEncyclopediaLinks({
       </div>
       <span className="character-encref-separator" aria-hidden="true" />
       <div className="character-encref-group">
-        <span className="character-encref-label">О методе</span>
+        <span className="character-encref-label">{D.sheet.aboutMethod[L]}</span>
         <Link href={href(positionHref(section.key))}>
-          Как читать раздел «{section.title}» →
+          {D.sheet.howToRead[L](section.title)}
         </Link>
       </div>
     </div>

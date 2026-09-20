@@ -139,6 +139,7 @@ def env_and_no_network():
         raise AssertionError("тест попытался уйти в сеть — это платный вызов XMLRiver")
 
     mp.setattr(wscore._client, "get", forbidden)
+    mp.setattr(wscore._client, "post", forbidden)   # подсказки шлются POST-ом
     mp.setattr(tasks._serp_client, "get", forbidden)
 
     # предохранитель: боевой semcore.db можно открывать только на чтение (cache оплачен).

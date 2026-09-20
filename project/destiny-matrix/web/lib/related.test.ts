@@ -1,15 +1,17 @@
+import { D, L } from "./i18n";
+import { arcanumTitle } from "./arcana";
 import { describe, expect, it } from "vitest";
 
 import { backlinks, relatedBoth, resolveRef, resolveRefs } from "./related";
 import { KARMIC_TAIL_HUB, YEAR_HUB, yearHref } from "./encyclopedia";
 
-// Автор ставит связи указателем и в одну сторону: «arcanum/7», «position/center», «na-god/8».
+// Автор ставит связи указателем и в одну сторону: «arcanum/7», «position/center», «year/8».
 // Адрес и заголовок собирает код, обратную ссылку — тоже он.
 describe("указатель → ссылка", () => {
   it("аркан", () => {
     expect(resolveRef("arcanum/7")).toEqual({
       href: "/encyclopedia/arcanum/7",
-      title: "7 в матрице судьбы: Колесница",
+      title: D.relatedLinks.arcanum[L](7, arcanumTitle(7)),
     });
   });
 
@@ -19,11 +21,11 @@ describe("указатель → ссылка", () => {
 
   it("шапки категорий", () => {
     expect(resolveRef("karmic-tail")?.href).toBe(KARMIC_TAIL_HUB);
-    expect(resolveRef("na-god")?.href).toBe(YEAR_HUB);
+    expect(resolveRef("year")?.href).toBe(YEAR_HUB);
   });
 
-  it("аркан года — и полной формой, и через na-god/N", () => {
-    expect(resolveRef("na-god/7")?.href).toBe(yearHref("7"));
+  it("аркан года — и полной формой, и через year/N", () => {
+    expect(resolveRef("year/7")?.href).toBe(yearHref("7"));
   });
 
   it("тройка хвоста — обе формы", () => {
@@ -55,7 +57,7 @@ describe("обратная сторона связи", () => {
   });
 
   it("связи страницы собираются в обе стороны и без самой страницы", () => {
-    const links = relatedBoth(yearHref("7"), ["arcanum/7", "na-god"]);
+    const links = relatedBoth(yearHref("7"), ["arcanum/7", "year"]);
     const hrefs = links.map((l) => l.href);
     expect(hrefs).toContain("/encyclopedia/arcanum/7");
     expect(hrefs).toContain(YEAR_HUB);

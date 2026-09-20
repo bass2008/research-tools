@@ -10,6 +10,7 @@ import datetime as dt
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .config import settings
 from .models import Entitlement, Payment, SavedMatrix, Tariff, User, iso, utcnow
 
 # виды доступа
@@ -40,7 +41,11 @@ def unlocked_matrix(db: Session, user: User | None, matrix_id: int | None,
     """Открыт ли полный разбор конкретной матрицы.
 
     Право со `all` открывает любую; право с `single` — только ту, к которой привязано.
+    Витрина без оплаты открывает все даты сразу — прав для этого не заводим: флаг снимается,
+    и доступ возвращается к оплаченному, а раздача прав осталась бы навсегда.
     """
+    if settings.all_free_without_payment:
+        return True
     for right in active_rights(db, user, now):
         kinds = right.scopes()
         if ALL in kinds:
@@ -53,6 +58,7 @@ def unlocked_matrix(db: Session, user: User | None, matrix_id: int | None,
 def matrix_state(rights: list[Entitlement], matrix_id: int) -> dict:
     """Как открыта конкретная матрица — для списка в кабинете.
 
+    `open` — витрина без оплаты: открыта всем, пока включён флаг, и владением не является.
     `forever` — куплена бессрочным правом и останется; `granted` — открыта тем же бессрочным
     правом, но выданным без денег (админ, промо, компенсация); `subscription` — открыта, пока
     действует срочное право (с датой окончания); `locked` — закрыта, разбор можно выкупить.
@@ -61,6 +67,8 @@ def matrix_state(rights: list[Entitlement], matrix_id: int) -> dict:
     отметкой, и выдавать её за подарок нельзя. Права передаются списком, а не считаются заново на
     каждую строку: иначе список кабинета — запрос на матрицу.
     """
+    if settings.all_free_without_payment:
+        return {"access": "open", "access_until": None}
     ends: list[dt.datetime] = []
     granted = False
     for right in rights:
@@ -117,7 +125,7 @@ def matrices_limit(db: Session, user: User, now: dt.datetime | None = None) -> i
     Одна бесплатная, чтобы вход имел смысл, плюс по одной за каждое купленное разовое право:
     иначе второй платёж не смог бы открыть вторую дату. Право `matrix` снимает счёт совсем.
     """
-    if MATRIX in scopes(db, user, now):
+    if settings.all_free_without_payment or MATRIX in scopes(db, user, now):
         return None
     return 1 + single_slots(db, user, now)
 
@@ -145,14 +153,18 @@ def summary(db: Session, user: User | None, now: dt.datetime | None = None) -> d
     """Что показать в кабинете: какие виды доступа есть и до какого числа."""
     rights = active_rights(db, user, now)
     kinds = sorted({k for r in rights for k in r.scopes()})
+    free = settings.all_free_without_payment
     ends = [r.expires_at for r in rights if r.expires_at is not None]
     singles = [r for r in rights if SINGLE in r.scopes() and ALL not in r.scopes()]
     return {
         "scopes": kinds,
-        "unlimited_matrices": ALL in kinds,
-        "can_store": MATRIX in kinds,
+        # витрина без оплаты открывает любые даты и снимает счёт мест, но купленным это не
+        # становится: `scopes` остаётся пустым, и в кабинете нет строки о покупке, которой не было
+        "all_free": free,
+        "unlimited_matrices": free or ALL in kinds,
+        "can_store": free or MATRIX in kinds,
         # None — без ограничения; иначе бесплатная плюс по одной за каждое разовое право
-        "matrices_limit": None if MATRIX in kinds else 1 + len(singles),
+        "matrices_limit": None if free or MATRIX in kinds else 1 + len(singles),
         # сколько дат куплено бессрочно: покупка и подписка живут одновременно, и кабинет
         # обязан показывать обе — раньше одна затирала другую. Выданные без денег сюда не входят:
         # «куплено 2 даты» там, где заплатили за одну, — ложь и покупателю, и админке

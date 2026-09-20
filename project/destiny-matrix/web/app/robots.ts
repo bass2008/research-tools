@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { PERSONAL_SECTION_KEYS } from "@/lib/sectionReadingShared";
+import { L, SITE_HOSTS } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 
 // Отдаёт node-сервер по /robots.txt. Закрыты личные адреса: разбор и кабинет печатаются на
@@ -28,9 +29,10 @@ const COMPUTED = [
   ...[...PERSONAL_SECTION_KEYS, "character"].map((section) => `/encyclopedia/${section}/`),
 ];
 
-// Боевой адрес: на любом другом контуре тот же текст — дубль, который поиск сравнивает
-// с основным сайтом. Поэтому тест закрыт целиком, а не выборочно.
-const PRODUCTION = "https://arcana-sense.ru";
+// Боевой адрес своего языка: на любом другом контуре тот же текст — дубль, который поиск
+// сравнивает с основным сайтом. Поэтому тест закрыт целиком, а не выборочно. Адрес берётся
+// по языку развёртки: на `.com` прежняя константа `.ru` закрыла бы весь английский сайт.
+const PRODUCTION = SITE_HOSTS[L];
 
 export default function robots(): MetadataRoute.Robots {
   if (SITE.url !== PRODUCTION) {

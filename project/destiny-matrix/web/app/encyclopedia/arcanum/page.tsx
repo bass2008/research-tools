@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { D, L } from "@/lib/i18n";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
@@ -34,8 +35,8 @@ export default function ArcanumHubPage() {
     <>
       <CrumbsLd
         trail={[
-          { name: "Главная", path: "/" },
-          { name: "Энциклопедия", path: "/encyclopedia" },
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
           { name: encyclopediaSection("arc").title },
         ]}
       />
@@ -54,7 +55,7 @@ export default function ArcanumHubPage() {
       <p className="dim prose">{hub.short}</p>
 
       <div className="panel section-gap">
-        <h2>Все 22 аркана</h2>
+        <h2>{D.enc.allArcana[L]}</h2>
         <div className="cap">{encyclopediaSection("arc").hint} · {ARCANA.length}</div>
         <ArcanaDeck />
       </div>
@@ -63,8 +64,8 @@ export default function ArcanumHubPage() {
 
       <div className="section-gap">
         <CalcPromo
-          title="Узнать свои арканы"
-          lead="Карта по дате рождения строится бесплатно и без регистрации: после расчёта каждое число становится ссылкой на своё значение."
+          title={D.enc.promoArcanaTitle[L]}
+          lead={D.enc.promoArcanaLead[L]}
           place="arcanum-hub"
         />
       </div>

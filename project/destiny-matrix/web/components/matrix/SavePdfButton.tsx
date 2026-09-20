@@ -9,13 +9,14 @@
 import { useEffect, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { D, L } from "@/lib/i18n";
 import { track } from "@/lib/analytics";
 
 type State = "idle" | "busy" | "ready" | "failed";
 
 export default function SavePdfButton({
   matrixId,
-  label = "Сохранить как PDF",
+  label = D.report.savePdf[L],
   hint,
 }: {
   matrixId: number;
@@ -68,7 +69,7 @@ export default function SavePdfButton({
       setNote(
         err instanceof ApiError
           ? err.message
-          : "Не получилось напечатать PDF. Попробуйте ещё раз.",
+          : D.report.pdfFailed[L],
       );
     }
   };
@@ -79,8 +80,8 @@ export default function SavePdfButton({
         type="button"
         className={state === "busy" ? "btn ghost sm pdfbtn working" : "btn ghost sm pdfbtn"}
         data-testid="save-pdf"
-        title={hint ? `Скачать разбор за ${hint}` : undefined}
-        aria-label={hint ? `Скачать PDF разбора за ${hint}` : undefined}
+        title={hint ? D.report.pdfTitle[L](hint) : undefined}
+        aria-label={hint ? D.report.pdfAria[L](hint) : undefined}
         onClick={click}
         disabled={!ready || state === "busy"}
         aria-busy={state === "busy"}
@@ -99,11 +100,11 @@ export default function SavePdfButton({
           <path d="M9.4 15.4h5.2M9.4 17.6h3.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         </svg>
         {state === "busy"
-          ? "Готовим PDF"
+          ? D.report.pdfPreparing[L]
           : state === "ready"
-            ? "Открыть PDF"
+            ? D.report.pdfOpen[L]
             : warm
-              ? "Скачать PDF"
+              ? D.report.pdfDownload[L]
               : label}
       </button>
       {note ? (

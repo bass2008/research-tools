@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ApiError, api } from "@/lib/api";
+import { D, L } from "@/lib/i18n";
 import { resultTitle } from "@/lib/payresult";
 
 import { refreshSession } from "@/components/account/useSession";
@@ -43,7 +44,7 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
           // и страница поздравляла с покупкой при каждой перезагрузке, хотя деньги уже вернулись.
           if (res.state === "abandoned") {
             setStage("failed");
-            setNote("Счёт больше не действует — оплату можно начать заново.");
+            setNote(D.payResult.invoiceGone[L]);
             return;
           }
           if (res.state === "refunded") {
@@ -67,11 +68,11 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
         } catch (err) {
           if (err instanceof ApiError && err.status === 401) {
             setStage("pending");
-            setNote("Войдите в аккаунт, на который оформляли платёж, — состояние платежа видно только владельцу.");
+            setNote(D.payResult.ownerOnly[L]);
             return;
           }
           setStage("error");
-          setNote(err instanceof ApiError ? err.message : "Сервер не ответил.");
+          setNote(err instanceof ApiError ? err.message : D.payResult.noServer[L]);
           return;
         }
       }
@@ -85,13 +86,13 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
   if (stage === "paid") {
     return (
       <div className="panel paybox">
-        <h1>Доступ открыт</h1>
-        <p className="dim">Платёж прошёл, разбор сохранён в кабинете.</p>
+        <h1>{D.payResult.accessOpen[L]}</h1>
+        <p className="dim">{D.payResult.paidSaved[L]}</p>
         <Link className="btn wide" href={matrixId ? `/report?m=${matrixId}` : "/report"}>
-          Открыть полный разбор
+          {D.payResult.openFull[L]}
         </Link>
         <p className="hint">
-          <Link href="/account">Кабинет</Link>
+          <Link href="/account">{D.nav.account[L]}</Link>
         </p>
       </div>
     );
@@ -100,16 +101,15 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
   if (stage === "refunded") {
     return (
       <div className="panel paybox">
-        <h1>Платёж возвращён</h1>
+        <h1>{D.payResult.refundedTitle[L]}</h1>
         <p className="dim">
-          Деньги вернулись тем же способом, которым платили. Разбор закрыт, сохранённая дата осталась
-          в кабинете — при желании можно оплатить снова.
+          {D.payResult.refundedText[L]}
         </p>
         <Link className="btn wide" href={matrixId ? `/pay?m=${matrixId}` : "/pay"}>
-          Оплатить снова
+          {D.payResult.payAgain[L]}
         </Link>
         <Link className="btn ghost wide" href="/account" style={{ marginTop: 8 }}>
-          Кабинет
+          {D.nav.account[L]}
         </Link>
       </div>
     );
@@ -118,10 +118,10 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
   if (stage === "failed") {
     return (
       <div className="panel paybox">
-        <h1>Платёж не прошёл</h1>
-        <p className="dim">Деньги не списаны. Можно попробовать ещё раз — другой картой или позже.</p>
+        <h1>{D.payResult.failedTitle[L]}</h1>
+        <p className="dim">{D.payResult.failedText[L]}</p>
         <Link className="btn wide" href="/pay">
-          Вернуться к оплате
+          {D.payResult.backToPay[L]}
         </Link>
       </div>
     );
@@ -130,22 +130,21 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
   if (stage === "checking") {
     return (
       <div className="panel paybox">
-        <h1>Проверяем платёж</h1>
-        <p className="dim">Спрашиваем банк о результате — это занимает пару секунд.</p>
+        <h1>{D.payResult.checkingTitle[L]}</h1>
+        <p className="dim">{D.payResult.checkingText[L]}</p>
       </div>
     );
   }
 
   return (
     <div className="panel paybox">
-      <h1>{stage === "error" ? "Не удалось проверить платёж" : "Платёж ещё обрабатывается"}</h1>
+      <h1>{stage === "error" ? D.payResult.unknownTitle[L] : D.payResult.pendingTitle[L]}</h1>
       <p className="dim">
         {note ??
-          "Банк пока не подтвердил оплату. Как только подтвердит, доступ откроется сам — " +
-            "обновите кабинет через минуту."}
+          D.payResult.pendingText[L]}
       </p>
       <Link className="btn wide" href="/account">
-        В кабинет
+        {D.payResult.toAccount[L]}
       </Link>
     </div>
   );

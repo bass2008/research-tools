@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 
+import { ALL_FREE } from "@/lib/access";
+import { D, L } from "@/lib/i18n";
 import { track } from "@/lib/analytics";
-import { type Tariff, capLabel, money, periodLabel } from "@/lib/tariffs";
+import { type Tariff, capLabel, periodLabel, priceLabel } from "@/lib/tariffs";
 
 import { useTariffs } from "@/components/pay/TariffsProvider";
 
@@ -12,17 +14,19 @@ import { useTariffs } from "@/components/pay/TariffsProvider";
 function features(t: Tariff): string[] {
   const unlimited = t.scope.includes("all");
   return [
-    "Все 20 разделов разбора",
-    unlimited ? "Любое число дат рождения" : "Одна дата рождения",
-    ...(t.scope.includes("matrix") ? ["Матрицы хранятся в кабинете"] : []),
+    D.pay.allSections[L],
+    unlimited ? D.pay.unlimitedDates[L] : D.pay.singleDate[L],
+    ...(t.scope.includes("matrix") ? [D.pay.storedInAccount[L]] : []),
     ...(t.period_days === null
-      ? ["Один платёж, без подписки", "Открывается сразу после оплаты", "Скачивается в PDF и остаётся у вас"]
-      : [`Открыто ${periodLabel(t)}, дальше закрывается`, "Без автосписаний: продление вручную"]),
+      ? [D.pay.noSubscription[L], D.pay.opensAtOnce[L], D.pay.downloadsAsPdf[L]]
+      : [D.pay.openedFor[L](periodLabel(t)), D.pay.manualRenewal[L]]),
   ];
 }
 
 export default function Plans({ place = "plans" }: { place?: string }) {
   const tariffs = useTariffs();
+  // на витрине без оплаты кассы нет: тариф показывать нечем и незачем
+  if (ALL_FREE) return null;
   // цена ещё не подтверждена базой: показывать блок с ценой из кода нельзя — по ней всё равно
   // не купить, платёж идёт в тот же API
   if (!tariffs.length) return null;
@@ -40,7 +44,7 @@ export default function Plans({ place = "plans" }: { place?: string }) {
           <div className="in">
             <h3>{t.name}</h3>
             <div className="price">
-              {money(t.price)} ₽ <s>{periodLabel(t)}</s>
+              {priceLabel(t)} <s>{periodLabel(t)}</s>
             </div>
             <ul>
               {features(t).map((f) => (
@@ -52,7 +56,7 @@ export default function Plans({ place = "plans" }: { place?: string }) {
               href={`/pay/${t.id}`}
               onClick={() => track("buy_click", { tariff: t.id, place })}
             >
-              Купить за {money(t.price)} ₽
+              {D.pay.buyFor[L](priceLabel(t))}
             </Link>
           </div>
         </div>

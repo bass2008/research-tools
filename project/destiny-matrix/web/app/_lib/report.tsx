@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -18,7 +19,7 @@ export function Sheet({ children, other }: { children: React.ReactNode; other: R
       <div className="wrap">
         {children}
         <p className="small center" style={{ marginTop: 18 }}>
-          <Link href="/account">Кабинет</Link> · <Link href="/#calc">Новый расчёт</Link> · {other}
+          <Link href="/account">{D.nav.account[L]}</Link> · <Link href="/#calc">{D.nav.newCalculation[L]}</Link> · {other}
         </p>
       </div>
     </main>

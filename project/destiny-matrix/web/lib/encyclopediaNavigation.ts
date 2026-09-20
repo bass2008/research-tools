@@ -4,15 +4,17 @@
 // отчёта» и «Позиции карты» делят один хаб: их листья лежат в одном роуте `position/[key]`, и
 // разводит их только `anchor` внутри страницы. У «Статей» хаба нет — это набор адресов первого
 // уровня, а не ветка справочника.
+import { D, L } from "./i18n";
+
 export const ENCYCLOPEDIA_SECTIONS = [
-  { key: "arc", title: "22 аркана", hint: "значение каждого числа", segment: "arcanum", hub: "/encyclopedia/arcanum" },
-  { key: "sec", title: "Разделы отчёта", hint: "что показывает полный разбор", hub: "/encyclopedia/position", anchor: "razdely" },
-  { key: "pts", title: "Позиции карты", hint: "точки октаграммы и линии рода", hub: "/encyclopedia/position", anchor: "tochki" },
-  { key: "chk", title: "Семь чакр", hint: "карта энергий по уровням", segment: "chakra", hub: "/encyclopedia/chakra" },
-  { key: "tls", title: "Кармические хвосты", hint: "тройки нижнего угла карты", segment: "karmic-tail", hub: "/encyclopedia/karmic-tail" },
-  { key: "yer", title: "Матрица судьбы на год", hint: "аркан в рамке персонального года", externalRoot: "na-god", hub: "/na-god" },
-  { key: "cmb", title: "Сочетания арканов", hint: "пары арканов рядом", segment: "combination", hub: "/encyclopedia/combination" },
-  { key: "art", title: "Статьи", hint: "разборы понятий целиком", anchor: "stati" },
+  { key: "arc", title: D.encSections.arc.title[L], hint: D.encSections.arc.hint[L], segment: "arcanum", hub: "/encyclopedia/arcanum" },
+  { key: "sec", title: D.encSections.sec.title[L], hint: D.encSections.sec.hint[L], hub: "/encyclopedia/position", anchor: "razdely" },
+  { key: "pts", title: D.encSections.pts.title[L], hint: D.encSections.pts.hint[L], hub: "/encyclopedia/position", anchor: "tochki" },
+  { key: "chk", title: D.encSections.chk.title[L], hint: D.encSections.chk.hint[L], segment: "chakra", hub: "/encyclopedia/chakra" },
+  { key: "tls", title: D.encSections.tls.title[L], hint: D.encSections.tls.hint[L], segment: "karmic-tail", hub: "/encyclopedia/karmic-tail" },
+  { key: "yer", title: D.encSections.yer.title[L], hint: D.encSections.yer.hint[L], externalRoot: "year", hub: "/year" },
+  { key: "cmb", title: D.encSections.cmb.title[L], hint: D.encSections.cmb.hint[L], segment: "combination", hub: "/encyclopedia/combination" },
+  { key: "art", title: D.encSections.art.title[L], hint: D.encSections.art.hint[L], anchor: "stati" },
 ] as const;
 
 export type EncyclopediaSectionKey = (typeof ENCYCLOPEDIA_SECTIONS)[number]["key"];
@@ -85,7 +87,7 @@ export function encyclopediaSectionFromPath(
   articlePaths: readonly string[],
 ): EncyclopediaSectionKey | null {
   // Шапка раздела — не статья, а голова своей ветки: раньше `/encyclopedia/karmic-tail` и
-  // `/na-god` попадали в «Статьи», и меню утверждало, что человек в статьях, пока рядом стоял
+  // `/year` попадали в «Статьи», и меню утверждало, что человек в статьях, пока рядом стоял
   // неподсвеченным пункт его собственного раздела. Четыре новые шапки такого поведения не
   // унаследовали, и разъезд был виден только на этих двух.
   if (articlePaths.includes(path) && !HUB_PATHS.has(path)) return "art";

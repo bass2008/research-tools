@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 /**
  * Логотип: круглая печать с монограммой AS и начертание рядом. Вектором и на переменных темы —
  * тогда он одинаков в шапке, подвале и на печати, а цвета правятся в одном месте.
@@ -51,7 +52,7 @@ export default function Logo({
       )}
       {caption && !compact ? (
         <text x="61" y="39" fontFamily="var(--sans)" fontSize="8" fill="var(--dim2)" letterSpacing="2.1">
-          НАЙДИ СВОЙ СМЫСЛ
+          {D.common.logoCaption[L]}
         </text>
       ) : null}
     </svg>

@@ -17,12 +17,18 @@ from pathlib import Path
 
 from engine.matrix import CHAKRAS as CHAKRA_ROWS, COLUMNS
 from engine.sections import SPEC
-from .source import POINTS
-from .text_policy import STYLE_PATTERNS, blocked_match
+from .labels import DEFAULT_LANG, labels
+from .source import corpus
+from .text_policy import style_patterns, blocked_match
+
+LANG = os.environ.get("ENCYCLOPEDIA_LANG", DEFAULT_LANG)
+POINTS = corpus(LANG).points
+LABELS = labels(LANG)
+STYLE_PATTERNS = style_patterns(LANG)
 
 CONTENT_DIR = Path(os.environ.get(
     "ENCYCLOPEDIA_CONTENT_DIR",
-    Path(__file__).resolve().parents[1] / "web" / "content"))
+    Path(__file__).resolve().parents[1] / "web" / "content" / LANG))
 FILES = ("arcana.json", "combinations.json", "positions.json", "chakras.json")
 
 SECTION_KEYS = [key for key, *_ in SPEC]
@@ -166,7 +172,10 @@ def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]
               f"набор ключей позиций не совпадает: "
               f"нет {sorted((set(SECTION_KEYS) | set(POINT_KEYS)) - set(by_key))}, "
               f"лишние {sorted(set(by_key) - set(SECTION_KEYS) - set(POINT_KEYS))}")
-    spec_by_key = {key: (title, lead, access) for key, title, lead, access, _fn in SPEC}
+    # Заголовок и вводка сверяются с языковым словарём подписей, а доступ — с движком:
+    # слова у каждого языка свои, состав и цена разделов общие.
+    spec_by_key = {key: (LABELS.section_title(key), LABELS.section_lead(key), access)
+                   for key, _title, _lead, access, _fn in SPEC}
     for item in items:
         who = f"позиция {item['key']}"
         rep.check(bool(item["meaning"]), f"{who}: нет текста")
@@ -262,7 +271,11 @@ def check_examples(rep: Report, items: list[dict]) -> None:
     from engine.matrix import calculate
     from engine.sections import SPEC
 
-    matrices = json.loads((CONTENT_DIR / "matrices.json").read_text(encoding="utf-8"))
+    # Предрасчёт матриц один на все языки и лежит уровнем выше языкового каталога; в копии
+    # для self-теста он попадает рядом.
+    local = CONTENT_DIR / "matrices.json"
+    source = local if local.exists() else CONTENT_DIR.parent / "matrices.json"
+    matrices = json.loads(source.read_text(encoding="utf-8"))
     birth = next(m["matrix"]["birth"] for m in matrices["items"] if m["slug"] == CONTROL_SLUG)
     control = calculate(birth, "f")
     by_key = {spec[0]: spec for spec in SPEC}
@@ -288,6 +301,8 @@ def check_chakras(rep: Report, items: list[dict], prose: list[tuple[str, str]]) 
     rep.check(len(items) == 7, f"чакр {len(items)}, а нужно 7")
     rep.check([c["key"] for c in items] == [k for k, _t, _h in CHAKRA_ROWS],
               "порядок или ключи чакр не совпадают с engine.matrix.CHAKRAS")
+    rep.check([c["title"] for c in items] == [LABELS.chakra_title(k) for k, _t, _h in CHAKRA_ROWS],
+              "названия чакр не совпадают со словарём подписей языка")
     col_keys = [k for k, _t in COLUMNS]
     for c in items:
         who = f"чакра {c['key']}"
@@ -391,7 +406,7 @@ def check_texts(rep: Report, prose: list[tuple[str, str]]) -> None:
             found = pattern.search(text)
             if found:
                 rep.fail(f"канцелярит «{found.group()}» в {where}")
-        blocked = blocked_match(text)
+        blocked = blocked_match(text, "content", LANG)
         if blocked:
             rep.fail(f"запрещённая лексика ({blocked.category}) «{blocked.matched}» в {where}")
 

@@ -22,7 +22,7 @@ CRUMB_PAGES = (
     "/encyclopedia",
     "/matrix",
     "/contacts",
-    "/oferta",
+    "/terms",
     "/privacy",
     "/refund",
 )
@@ -34,7 +34,7 @@ INFO_PAGES = (
     "/encyclopedia/combination/7-18",
     "/encyclopedia/karmic-tail",
     "/encyclopedia/karmic-tail/18-9-9",
-    "/na-god",
+    "/year",
 )
 
 
@@ -64,7 +64,7 @@ def _types(html: str) -> set[str]:
 
 
 def _hubs() -> list[dict]:
-    path = pathlib.Path(__file__).resolve().parents[1] / "web/content/hubs.json"
+    path = pathlib.Path(__file__).resolve().parents[1] / "web/content/ru/hubs.json"
     return json.loads(path.read_text())["items"]
 
 
@@ -120,10 +120,10 @@ def test_arcanum_links_back_to_its_karmic_tails():
     "page_path,expected",
     (
         # автор ставит связь односторонне и указателем; обратную сторону строит рендер
-        ("/na-god/7", "/encyclopedia/arcanum/7"),
-        ("/encyclopedia/arcanum/7", "/na-god/7"),
-        ("/programmy", "/encyclopedia/position/loops"),
-        ("/encyclopedia/position/loops", "/programmy"),
+        ("/year/7", "/encyclopedia/arcanum/7"),
+        ("/encyclopedia/arcanum/7", "/year/7"),
+        ("/programs", "/encyclopedia/position/loops"),
+        ("/encyclopedia/position/loops", "/programs"),
     ),
 )
 def test_related_works_both_ways(page_path, expected):
@@ -138,7 +138,7 @@ def test_related_never_points_at_a_missing_page():
     written = {
         item["key"]
         for item in json.loads(
-            (pathlib.Path(__file__).resolve().parents[1] / "web/content/karmic-tails.json").read_text()
+            (pathlib.Path(__file__).resolve().parents[1] / "web/content/ru/karmic-tails.json").read_text()
         )["items"]
     }
     html = _html("/encyclopedia/karmic-tail/18-9-9")
@@ -228,13 +228,22 @@ def test_unknown_tail_is_a_real_404_not_a_soft_redirect():
     assert "location" not in r.headers
 
 
-def test_product_tail_without_demand_is_noindex_and_absent_from_sitemap():
-    path = "/encyclopedia/karmic-tail/9-18-9"
-    html = _html(path)
-    robots = re.search(r'<meta name="robots" content="([^"]+)"', html).group(1)
-    assert "noindex" in robots and "nofollow" not in robots, robots
+def test_every_product_tail_is_open_and_in_the_sitemap():
+    """Порога показа у хвостов больше нет: спрос решает, что писать, а не что открывать.
+
+    Раньше хвост без замеренного спроса закрывался `noindex` и не попадал в карту. Порог убран
+    вместе с порогом заведения: закрытая страница не набирает спрос, по которому её открыли бы.
+    """
+    # Карта сайта на стенде пуста намеренно: её печатает только сборка с боевым адресом, и
+    # прежняя проверка «адреса нет в карте» проходила на пустом файле, ничего не проверяя.
     sitemap = requests.get(f"{BASE}/sitemap.xml", timeout=30).text
-    assert path not in sitemap
+    live = "<loc>" in sitemap
+    for path in ("/encyclopedia/karmic-tail/9-18-9", "/encyclopedia/karmic-tail/18-9-9"):
+        html = _html(path)
+        robots = re.search(r'<meta name="robots" content="([^"]+)"', html)
+        assert robots is None or "noindex" not in robots.group(1), f"{path}: {robots.group(1)}"
+        if live:
+            assert path in sitemap, f"{path}: нет в карте сайта"
 
 
 def test_tail_page_does_not_promise_a_triple_the_engine_cannot_give():
@@ -255,9 +264,9 @@ def test_faq_markup_appears_only_with_visible_questions():
 @pytest.mark.parametrize(
     "path,target",
     (
-        ("/programmy", "/encyclopedia/position/loops"),
-        ("/energii", "/encyclopedia/position/chakras"),
-        ("/karmicheskaya-matrica", "/encyclopedia/karmic-tail"),
+        ("/programs", "/encyclopedia/position/loops"),
+        ("/energies", "/encyclopedia/position/chakras"),
+        ("/karmic-matrix", "/encyclopedia/karmic-tail"),
     ),
 )
 def test_hub_serves_a_page_or_leads_somewhere_useful(path, target):
@@ -284,7 +293,7 @@ CONDITIONAL_PAGES = (
     "/encyclopedia/combination/7-18",
     "/encyclopedia/position/comfort",
     "/encyclopedia/karmic-tail/18-9-9",
-    "/na-god/13",
+    "/year/13",
     "/matrix",
 )
 
@@ -355,7 +364,7 @@ SECTION_HUBS = (
     ("/encyclopedia/chakra", "Семь чакр"),
     ("/encyclopedia/combination", "Сочетания арканов"),
     ("/encyclopedia/karmic-tail", "Кармические хвосты"),
-    ("/na-god", "Матрица судьбы на год"),
+    ("/year", "Матрица судьбы на год"),
 )
 
 # Лист → шапка, которую он обязан объявить родителем.
@@ -366,7 +375,7 @@ LEAF_PARENTS = (
     ("/encyclopedia/position/center", "/encyclopedia/position"),
     ("/encyclopedia/position/character", "/encyclopedia/position"),
     ("/encyclopedia/karmic-tail/18-9-9", "/encyclopedia/karmic-tail"),
-    ("/na-god/13", "/na-god"),
+    ("/year/13", "/year"),
 )
 
 
@@ -404,7 +413,7 @@ def test_encyclopedia_is_a_table_of_contents_not_a_flat_list():
     body = re.sub(r"(?is)<script.*?</script>", "", html)
     hrefs = {m.group(1).split("#")[0].rstrip("/") or "/" for m in re.finditer(r'<a\b[^>]*href="(/[^"?]*)"', body)}
     assert len(hrefs) < 40, f"страница снова раздаёт {len(hrefs)} ссылок"
-    leaves = [h for h in hrefs if re.match(r"^/(encyclopedia/[a-z_-]+/.+|na-god/.+)$", h)]
+    leaves = [h for h in hrefs if re.match(r"^/(encyclopedia/[a-z_-]+/.+|year/.+)$", h)]
     assert leaves == [], f"на оглавлении снова листья: {leaves[:5]}"
     for hub, _ in SECTION_HUBS:
         assert hub in hrefs, f"оглавление не ведёт к шапке {hub}"
@@ -416,7 +425,7 @@ def test_section_address_comes_only_from_the_registry():
     `/encyclopedia` и складывал его в исключённые — 889 страниц сборки на один лишний адрес.
     Теперь раздел без своей ветки ведёт на якорь оглавления. Сам адрес с параметром продолжает
     открываться: по нему приходят из выдачи и из закладок."""
-    for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/o-metode"):
+    for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/method"):
         body = re.sub(r"(?is)<script.*?</script>", "", _html(path))
         found = set(re.findall(r'href="(/encyclopedia\?sec=[a-z]+)"', body))
         assert found == set(), (path, found)
@@ -425,7 +434,7 @@ def test_section_address_comes_only_from_the_registry():
 def test_articles_section_leads_to_the_anchor_of_the_index():
     """«Статьи» — единственный раздел без своей шапки, и ведёт он на свой блок в оглавлении.
     Якорь нового адреса поиску не создаёт, в отличие от параметра."""
-    body = re.sub(r"(?is)<script.*?</script>", "", _html("/o-metode"))
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/method"))
     assert 'href="/encyclopedia#stati"' in body, "ссылка на блок статей пропала"
     assert 'id="stati"' in _html("/encyclopedia"), "на оглавлении нет якоря блока статей"
 
@@ -435,7 +444,7 @@ def test_articles_section_leads_to_the_anchor_of_the_index():
 # ответ, но ответом не является: медиана позиции у каталогов 33–42, у раздела, где адрес
 # повторяет запрос, — 5.
 def _registry() -> list[dict]:
-    path = pathlib.Path(__file__).resolve().parents[1] / "web" / "content" / "position-arcanum.json"
+    path = pathlib.Path(__file__).resolve().parents[1] / "web" / "content" / "ru" / "position-arcanum.json"
     return json.loads(path.read_text(encoding="utf-8"))["items"]
 
 
@@ -505,11 +514,11 @@ def test_crossings_are_reachable_without_the_sitemap():
 # на руках хочет её прочитанной. Топ-10 по головному запросу до этого держали страницы расчёта,
 # ювелирный магазин и медиа «Столото» — то есть отвечали не на тот вопрос.
 DECODING_PAGES = (
-    "/rasshifrovka",
-    "/rasshifrovka-po-date",
-    "/rasshifrovka-znachenie",
-    "/kak-chitat-matricu",
-    "/polnaya-rasshifrovka",
+    "/decoding",
+    "/by-birth-date",
+    "/meaning",
+    "/how-to-read",
+    "/full-reading",
 )
 
 
@@ -530,9 +539,9 @@ def test_decoding_page_is_an_article(path):
 def test_decoding_hub_leads_to_its_variants():
     """Хаб и варианты связаны: иначе пять страниц конкурируют между собой вместо того, чтобы
     делить кластер."""
-    body = re.sub(r"(?is)<script.*?</script>", "", _html("/rasshifrovka"))
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/decoding"))
     linked = set(re.findall(r'href="(/[a-z-]+)"', body))
-    missing = [p for p in DECODING_PAGES if p != "/rasshifrovka" and p not in linked]
+    missing = [p for p in DECODING_PAGES if p != "/decoding" and p not in linked]
     assert missing == [], missing
 
 

@@ -1,3 +1,4 @@
+import { D, L } from "@/lib/i18n";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -12,7 +13,7 @@ import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
-import Price from "@/components/pay/Price";
+import Price, { PriceOrFree } from "@/components/pay/Price";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
 
@@ -49,8 +50,8 @@ export default function HubArticle({ item }: { item: ArticleContent }) {
 
       <CrumbsLd
       trail={[
-        { name: "Главная", path: "/" },
-        { name: "Энциклопедия", path: "/encyclopedia" },
+        { name: D.nav.home[L], path: "/" },
+        { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
         encyclopediaSectionCrumb("art"),
         { name: hubCrumb(item.key) },
       ]}
@@ -63,8 +64,8 @@ export default function HubArticle({ item }: { item: ArticleContent }) {
 
       <div className="section-gap">
         <CalcPromo
-          title="Посмотреть это в своей карте"
-          lead="Расчёт по дате рождения бесплатный и идёт в браузере, без регистрации."
+          title={D.octagram.hubPromoTitle[L]}
+          lead={D.octagram.hubPromoLead[L]}
           place={`hub-${item.key}`}
         />
       </div>
@@ -74,12 +75,12 @@ export default function HubArticle({ item }: { item: ArticleContent }) {
       <Related path={path} refs={item.related} />
 
       <div className="panel section-gap">
-        <h3>Куда дальше</h3>
-        <div className="cap">Справочник и полный разбор</div>
+        <h3>{D.octagram.hubWhereNext[L]}</h3>
+        <div className="cap">{D.octagram.hubWhereNextHint[L]}</div>
         <div className="taglist">
-          <Link href="/encyclopedia">Энциклопедия матрицы судьбы</Link>
-          <Link href="/encyclopedia/karmic-tail">Кармический хвост</Link>
-          <Link href="/na-god">Матрица судьбы на год</Link>
+          <Link href="/encyclopedia">{D.octagram.encTitle[L]}</Link>
+          <Link href="/encyclopedia/karmic-tail">{D.octagram.karmicTail[L]}</Link>
+          <Link href="/year">{D.octagram.matrixForYear[L]}</Link>
           {hubKeys()
             .filter((key) => key !== item.key)
             .map((key) => (
@@ -91,13 +92,12 @@ export default function HubArticle({ item }: { item: ArticleContent }) {
       </div>
 
       <div className="allbox">
-        <h3>Построить свою карту</h3>
+        <h3>{D.enc.buildYourChart[L]}</h3>
         <p>
-          Расчёт бесплатный и идёт в браузере: дата рождения не уходит на сервер. Полный разбор всех
-          20 разделов — <Price />.
+          {D.octagram.calcFreeLead[L]} {D.octagram.fullReadingAll[L]} <PriceOrFree />.
         </p>
         <Link className="btn" href="/#calc">
-          Рассчитать матрицу бесплатно
+          {D.matrixPages.calcFree[L]}
         </Link>
       </div>
     </>
