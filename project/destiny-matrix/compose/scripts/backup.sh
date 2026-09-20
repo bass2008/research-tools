@@ -7,7 +7,9 @@ IP="${ARCANA_PROD_IP:-45.80.130.166}"
 SSH_USER="${ARCANA_SSH_USER:-root}"
 BUCKET=db-backups-hjb4rfs
 PREFIX=destiny-matrix
-CONTAINER=${ARCANA_API_CONTAINER:-arcana-ru-api-1}
+# Имя контейнера api меняется вместе с именем сервиса, а копия снимается до выкладки — когда
+# на машине ещё прежние имена. Ищем работающий контейнер по метке compose, а не по имени.
+CONTAINER="${ARCANA_API_CONTAINER:-}"
 
 STAMP="$(TZ=Europe/Moscow date '+%Y%m%d-%H%M')"
 NAME="api-$STAMP.db.gz"
@@ -17,14 +19,16 @@ trap 'rm -rf "$(dirname "$LOCAL")"' EXIT
 echo "== копия на $IP"
 # база в WAL: файловая копия без -wal — устаревший снимок, поэтому только sqlite backup
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "set -e
-  docker exec $CONTAINER python -c \"
+  CONTAINER='$CONTAINER'
+  [ -n \"\$CONTAINER\" ] || CONTAINER=\$(docker ps --filter 'label=com.docker.compose.project=arcana' --format '{{.Names}}' | grep -E 'api' | head -1)
+  docker exec \$CONTAINER python -c \"
 import sqlite3
 src = sqlite3.connect('/srv/api/var/api.db')
 dst = sqlite3.connect('/tmp/dump.db')
 src.backup(dst)
 dst.close(); src.close()\"
-  docker cp $CONTAINER:/tmp/dump.db /tmp/$STAMP.db >/dev/null
-  docker exec $CONTAINER rm -f /tmp/dump.db
+  docker cp \$CONTAINER:/tmp/dump.db /tmp/$STAMP.db >/dev/null
+  docker exec \$CONTAINER rm -f /tmp/dump.db
   gzip -f /tmp/$STAMP.db"
 scp -q "$SSH_USER@$IP:/tmp/$STAMP.db.gz" "$LOCAL"
 ssh "$SSH_USER@$IP" "rm -f /tmp/$STAMP.db.gz"
