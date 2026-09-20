@@ -64,7 +64,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-prod-en -f docker-compose.prod-en.yml pull -q \
-  && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-prod-en -f docker-compose.prod-en.yml up -d --wait \
+  && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-prod-en -f docker-compose.prod-en.yml up -d --wait --remove-orphans \
   && docker image prune -a -f --filter until=24h >/dev/null"
 
 echo "== проверка"

@@ -73,7 +73,8 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && printf 'REGISTRY=%s\nTAG=%s\nBUILD_COMMIT=%s\nSITE_LANG=ru\nALL_FREE_WITHOUT_PAYMENT=0\n' '$REGISTRY' '$TAG' '$TAG' >> .env \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
-  && docker compose pull -q && systemctl restart arcana \
+  && docker compose pull -q \
+  && docker compose up -d --wait --remove-orphans \
   && mv -f .env.rollback.candidate .env.previous.tag \
   && docker image prune -a -f --filter until=24h >/dev/null"
 # Тег для отката переносится только после удачного перезапуска. Пока он писался сразу, упавшая
