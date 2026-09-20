@@ -75,13 +75,6 @@ TimeoutStartSec=600
 WantedBy=multi-user.target
 UNIT
 
-cat > /etc/cron.d/arcana-sweep <<'CRON'
-# Досверка платежей: уведомление банка могло не дойти, тогда исход подтянет опрос.
-# Задача в очереди создаётся только когда есть что опрашивать.
-*/5 * * * * root cd /srv/arcana && /usr/bin/docker compose exec -T api python -m app.sweep >> /var/log/arcana-sweep.log 2>&1
-CRON
-chmod 644 /etc/cron.d/arcana-sweep
-
 cat > /etc/nginx/conf.d/arcana-tuning.conf <<'TUNE'
 server_tokens off;
 client_max_body_size 2m;
@@ -126,6 +119,9 @@ ln -sfn /etc/nginx/sites-available/arcana.conf /etc/nginx/sites-enabled/arcana.c
 nginx -t >/dev/null && systemctl enable --now nginx >/dev/null 2>&1 && systemctl reload nginx
 systemctl daemon-reload && systemctl enable arcana >/dev/null 2>&1
 EOS
+
+echo "== расписание досверки"
+./apply-cron.sh "$IP"
 
 echo "== образы и запуск"
 ssh "root@$IP" "cd $APP && docker compose pull -q && systemctl restart arcana && sleep 5 && docker compose ps --format '  {{.Name}} {{.State}}'"

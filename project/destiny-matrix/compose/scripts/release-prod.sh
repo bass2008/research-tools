@@ -77,6 +77,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && docker compose up -d --wait --remove-orphans \
   && mv -f .env.rollback.candidate .env.previous.tag \
   && docker image prune -a -f --filter until=24h >/dev/null"
+../infra/apply-cron.sh "$IP"
 # Тег для отката переносится только после удачного перезапуска. Пока он писался сразу, упавшая
 # попытка релиза затирала им же настоящую работавшую версию: после двух заходов в файле лежал
 # тег сегодняшней сборки, и откат по нему вернул бы тот же код.

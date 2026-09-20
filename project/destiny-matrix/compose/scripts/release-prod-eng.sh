@@ -76,5 +76,9 @@ curl -s "$SITE/" | grep -q '<html lang="en"' || { echo "!! страница не
 curl -s -o /dev/null -w '%{http_code}' "$SITE/pay" | grep -q 404 || { echo "!! /pay отвечает: витрина обещает оплату, которой нет" >&2; exit 1; }
 # Сайт обязан быть открыт для обхода: на боевом адресе своего языка robots.ts печатает запреты
 # по разделам, а не «Disallow: /».
-curl -s "$SITE/robots.txt" | grep -q '^Disallow: /$' && { echo "!! robots закрывает весь сайт" >&2; exit 1; }
+# Смотреть только секцию `User-Agent: *`: `Disallow: /` ниже стоит у GPTBot и прочих сборщиков
+# текста намеренно, и поиск по всему файлу принимал это за закрытый сайт.
+curl -s "$SITE/robots.txt" \
+  | awk 'BEGIN{IGNORECASE=1} /^User-?Agent:[[:space:]]*\*/{on=1;next} /^User-?Agent:/{on=0} on' \
+  | grep -q '^Disallow: /$' && { echo "!! robots закрывает весь сайт" >&2; exit 1; }
 echo "готово: $SITE"

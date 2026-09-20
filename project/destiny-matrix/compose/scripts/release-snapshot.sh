@@ -6,7 +6,7 @@ IP="${ARCANA_PROD_IP:-45.80.130.166}"
 SSH_USER="${ARCANA_SSH_USER:-root}"
 
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
-  "cd /srv/arcana && docker compose exec -T api python -" <<'PY'
+  "cd /srv/arcana && docker compose exec -T ru-api python -" <<'PY'
 from __future__ import annotations
 
 import datetime as dt

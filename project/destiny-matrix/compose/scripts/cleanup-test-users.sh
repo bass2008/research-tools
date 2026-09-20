@@ -9,7 +9,7 @@ APPLY="${APPLY:-0}"
 
 # python едет на машину по stdin: так не приходится экранировать кавычки в ssh-команде
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
-  "cd /srv/arcana && docker compose exec -T -e APPLY='$APPLY' api python -" <<'PY'
+  "cd /srv/arcana && docker compose exec -T -e APPLY='$APPLY' ru-api python -" <<'PY'
 import os, sqlite3
 
 MASKS = ("night-%@example.ru", "warm-%@example.ru", "prod-%@example.ru", "tls-%@example.ru",
