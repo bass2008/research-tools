@@ -165,7 +165,7 @@ BAD_CARD = "4300000000000785"
 
 def pay_on_bank_form(page: Page, card: str) -> None:
     """Заполнить форму банка. Поля с маской: ввод идёт одним потоком, фокус переходит сам."""
-    page.wait_for_url(re.compile(r"pay\.tbank\.ru|securepay"), timeout=60_000)
+    page.wait_for_url(re.compile(r"pay\.tbank|securepay"), timeout=60_000)
     page.wait_for_timeout(2500)
     page.click("input[automation-id='tui-input-card-group__card']")
     page.keyboard.type(card, delay=55)

@@ -35,7 +35,7 @@ services:
       PRINT_WARMUP: 0
       PRINT_SLOTS: 1
       BROWSER_URL: http://browser:3001
-      WEB_INTERNAL_URL: http://en-web:3000
+      WEB_INTERNAL_URL: http://prod-en-web:3000
       MONITORING_FOLDER: ""
       BUILD_COMMIT: ${TAG:-prod-en}
     volumes:
@@ -44,8 +44,10 @@ services:
       # их можно единственным способом — прочитать лог.
       - ${NGINX_LOG_DIR:-/var/log/nginx}:/var/log/nginx:ro
     networks:
-      - default
-      - print
+      default: {}
+      print:
+        aliases:
+          - prod-en-api
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
       interval: 10s
@@ -57,7 +59,7 @@ services:
   en-web:
     image: ${REGISTRY:-arcana}/web:${TAG:-prod-en}
     environment:
-      API_INTERNAL_URL: http://en-api:8010
+      API_INTERNAL_URL: http://prod-en-api:8010
       # язык и витрина вшиты в образ на сборке; здесь они нужны приёмке и логам
       NEXT_PUBLIC_SITE_LANG: en
       NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: 1
@@ -69,8 +71,10 @@ services:
       - ${PROD_EN_STATIC_DIR:-/srv/arcana/static-prod-en}:/static-out
     command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
     networks:
-      - default
-      - print
+      default: {}
+      print:
+        aliases:
+          - prod-en-web
     depends_on:
       en-api:
         condition: service_healthy

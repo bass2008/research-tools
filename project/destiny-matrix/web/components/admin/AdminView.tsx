@@ -57,11 +57,27 @@ export default function AdminView() {
   // Ссылка на файл подписана и живёт час, поэтому запрашиваем её в момент нажатия, а не держим
   // в таблице: открытая полдня админка иначе отдавала бы просроченные ссылки.
   const [downloading, setDownloading] = useState<number | null>(null);
+  const [rebuilding, setRebuilding] = useState<number | null>(null);
 
   const reloadUsers = () => {
     void api.admin.users(usersPage, usersSize)
       .then((u) => { setUsers(u.items); setUsersTotal(u.total); })
       .catch(() => undefined);
+  };
+
+  // Готовый файл живёт в хранилище и сам не обновляется: если в нём оказалось не то, заменить
+  // его можно только новой печатью.
+  const rebuild = async (job: AdminReportJob) => {
+    setRebuilding(job.id);
+    setError(null);
+    try {
+      await api.admin.reportRebuild(job.id);
+      await loadReports();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Пересоздать не вышло.");
+    } finally {
+      setRebuilding(null);
+    }
   };
 
   const download = async (job: AdminReportJob) => {
@@ -136,7 +152,11 @@ export default function AdminView() {
 
   // Очередь печати тоже страницами: сводка «в работе / с ошибкой» приходит по всей очереди.
   useEffect(() => {
-    void api.admin.reports(jobsPage, jobsSize)
+    void loadReports();
+  }, [jobsPage, jobsSize]);
+
+  function loadReports() {
+    return api.admin.reports(jobsPage, jobsSize)
       .then((r) => {
         setJobs(r.items);
         setJobsTotal(r.total);
@@ -148,7 +168,7 @@ export default function AdminView() {
         if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err.message);
         else setError((was) => was ?? "Очередь печати не пришла.");
       });
-  }, [jobsPage, jobsSize]);
+  }
 
   // Список людей перезапрашивается при смене страницы и размера — остальные таблицы не трогаем.
   useEffect(() => {
@@ -436,6 +456,16 @@ export default function AdminView() {
                       ) : (
                         <span className="dim">—</span>
                       )}
+                      <button
+                        type="button"
+                        className="btn ghost sm"
+                        data-testid="report-rebuild"
+                        title="Напечатать этот разбор заново"
+                        disabled={rebuilding === j.id || j.status === "running"}
+                        onClick={() => rebuild(j)}
+                      >
+                        {rebuilding === j.id ? "Печатаем…" : "Пересоздать"}
+                      </button>
                     </td>
                   </tr>
                 ))

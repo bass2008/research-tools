@@ -27,9 +27,11 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123}
       MATRICES_HARD_CAP: ${MATRICES_HARD_CAP:-2000}
       SITE_URL: ${SITE_URL:-https://arcana-sense.ru}
-      # печать PDF: браузер отдельным сервисом, готовые файлы — в Object Storage
-      BROWSER_URL: ${BROWSER_URL:-http://browser:3001}
-      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://ru-web:3000}
+      # печать PDF: браузер отдельным сервисом, готовые файлы — в Object Storage.
+      # Свой браузер зовётся именем сервиса: алиас `browser` живёт только в сети печати, куда
+      # ходят соседние контуры, а этот api сидит в своей сети — по `browser` он не резолвился.
+      BROWSER_URL: ${BROWSER_URL:-http://ru-browser:3001}
+      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://prod-ru-web:3000}
       # мониторинг: свои метрики уезжают в Yandex Cloud, токен берётся из метаданных машины.
       # Пусто — метрики собираются только для админки и никуда не отправляются (так на стенде).
       MONITORING_FOLDER: ${MONITORING_FOLDER:-}
@@ -86,6 +88,12 @@ services:
 
   ru-web:
     image: ${REGISTRY:-arcana}/web:${TAG:-dev}
+    # Имя сервиса в сети печати занимает соседний контур — там же живёт тестовый `ru-web`, и
+    # браузер печатал его страницы вместо боевых. Печать ходит по имени, уникальному на машине.
+    networks:
+      default:
+        aliases:
+          - prod-ru-web
     environment:
       # BFF ходит в api по имени сервиса — наружу этот адрес не попадает
       API_INTERNAL_URL: http://ru-api:8010

@@ -250,6 +250,26 @@ def report_link(job_id: int, _: User = Depends(admin_user), db: Session = Depend
     return {"url": report_store.link(job.object_key, name)}
 
 
+@router.post("/reports/{job_id}/rebuild")
+def report_rebuild(job_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Напечатать разбор заново. Готовый файл отдаётся из хранилища и сам не обновляется: если в
+    нём оказалось не то — печать шла не с того контура, разбор с тех пор поправили, — заменить его
+    было нечем, кроме как руками на машине."""
+    job = db.get(ReportJob, job_id)
+    if job is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Задача печати не найдена")
+    try:
+        fresh = printing.run(db, job.user_id, job.matrix_id)
+    except printing.Busy as exc:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail="Все места печати заняты, попробуйте позже") from exc
+    except Exception as exc:                       # noqa: BLE001
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY,
+                            detail=f"Печать не удалась: {exc}") from exc
+    return {"job_id": fresh.id, "status": fresh.status, "size_bytes": fresh.size_bytes,
+            "seconds": fresh.seconds()}
+
+
 @router.get("/pulse")
 def pulse(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     """Состояние машины и продукта сейчас. Нужна отдельно от облачного мониторинга: когда до

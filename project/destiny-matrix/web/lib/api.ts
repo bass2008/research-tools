@@ -372,6 +372,10 @@ export const api = {
     reportLink: (jobId: number) =>
       request<{ url: string }>(`/admin/report-link?job=${jobId}`),
 
+    reportRebuild: (jobId: number) =>
+      request<{ job_id: number; status: string; size_bytes: number | null; seconds: number | null }>(
+        `/admin/report-rebuild?job=${jobId}`, { method: "POST" }),
+
     securityAudit: (category: AuditCategory, page: number, pageSize: number) => {
       const q = new URLSearchParams({
         category,

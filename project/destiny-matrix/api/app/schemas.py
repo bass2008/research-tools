@@ -64,6 +64,8 @@ class PaymentIn(BaseModel):
 
 class ReportRequest(BaseModel):
     matrix_id: int
+    # печать заново поверх готового файла: нужна, когда в отчёте оказалось не то
+    fresh: bool = False
 
 
 class PaymentRef(BaseModel):

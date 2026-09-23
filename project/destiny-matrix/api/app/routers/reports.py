@@ -74,7 +74,7 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
         raise HTTPException(status.HTTP_402_PAYMENT_REQUIRED,
                             detail=say("report.not_paid"))
 
-    done = printing.ready(db, user.id, row.id)
+    done = None if payload.fresh else printing.ready(db, user.id, row.id)
     if done is not None and done.object_key:
         # тот же файл, а не новая печать: повторное нажатие не должно ни ждать, ни платить CPU
         return {"job_id": done.id, "status": "done", "cached": True,
