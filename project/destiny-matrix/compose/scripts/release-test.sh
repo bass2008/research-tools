@@ -60,6 +60,8 @@ docker buildx build --push -f web.Dockerfile \
 
 echo "== запуск на $IP"
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.test.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.test.yml"
+scp -q -o StrictHostKeyChecking=accept-new ../infra/prune-images.sh "$SSH_USER@$IP:/usr/local/bin/arcana-prune-images"
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "chmod 755 /usr/local/bin/arcana-prune-images"
 # Браузер печати тестовый контур берёт у прода, поэтому свой образ browser ему нужен только как
 # запас — сервис в docker-compose.test.yml не поднимается. Чистка сразу после старта: на тесте
 # откатываться незачем, а сборок в день бывает несколько, и диск машины 20 ГБ.
@@ -70,7 +72,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && /usr/local/bin/arcana-registry-login \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml pull -q \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml up -d --wait --remove-orphans \
-  && docker image prune -a -f >/dev/null"
+  && /usr/local/bin/arcana-prune-images prune"
 
 echo "== проверка"
 until "${TEST_CURL[@]}" -o /dev/null "$SITE/"; do sleep 3; done

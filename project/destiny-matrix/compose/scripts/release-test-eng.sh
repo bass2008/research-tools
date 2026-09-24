@@ -58,13 +58,15 @@ docker buildx build --push -f web.Dockerfile \
 
 echo "== запуск на $IP"
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.test-en.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.test-en.yml"
+scp -q -o StrictHostKeyChecking=accept-new ../infra/prune-images.sh "$SSH_USER@$IP:/usr/local/bin/arcana-prune-images"
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "chmod 755 /usr/local/bin/arcana-prune-images"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && printf 'REGISTRY=%s\nTAG=%s\n' '$REGISTRY' '$TAG' > .env.test-en.tag \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test-en -f docker-compose.test-en.yml pull -q \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test-en -f docker-compose.test-en.yml up -d --wait --remove-orphans \
-  && docker image prune -a -f >/dev/null"
+  && /usr/local/bin/arcana-prune-images prune"
 
 echo "== проверка"
 until "${TEST_CURL[@]}" -o /dev/null "$SITE/"; do sleep 3; done

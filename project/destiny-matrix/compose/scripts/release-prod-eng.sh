@@ -59,13 +59,16 @@ docker buildx build --push -f web.Dockerfile \
 
 echo "== запуск на $IP"
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.prod-en.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.prod-en.yml"
+scp -q -o StrictHostKeyChecking=accept-new ../infra/prune-images.sh "$SSH_USER@$IP:/usr/local/bin/arcana-prune-images"
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "chmod 755 /usr/local/bin/arcana-prune-images"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && printf 'REGISTRY=%s\nTAG=%s\n' '$REGISTRY' '$TAG' > .env.prod-en.tag \
+  && /usr/local/bin/arcana-prune-images remember arcana-prod-en \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-prod-en -f docker-compose.prod-en.yml pull -q \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-prod-en -f docker-compose.prod-en.yml up -d --wait --remove-orphans \
-  && docker image prune -a -f --filter until=24h >/dev/null"
+  && /usr/local/bin/arcana-prune-images prune"
 
 echo "== проверка"
 until curl -sf -o /dev/null "$SITE/"; do sleep 3; done
