@@ -1,26 +1,36 @@
 "use client";
 
+import type { SavedMatrix } from "@/app/_lib/access";
+import { useSession } from "@/components/account/useSession";
+import MatrixResult, { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import ReportSections from "@/components/matrix/ReportSections";
+import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
+import Plans from "@/components/pay/Plans";
+import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
+import UnlockCta from "@/components/pay/UnlockCta";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import LockIcon from "@/components/ui/LockIcon";
+import { ALL_FREE } from "@/lib/access";
+import { useHydrated } from "@/lib/hydrated";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
+import { forLocale as localizedPublicSpec, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
+import { forLocale as localizedTariffs } from "@/lib/tariffs";
+import { useBirth } from "@/lib/useBirth";
+import { useFullSections } from "@/lib/useFullSections";
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { calculate } from "@/lib/matrix";
-import { useHydrated } from "@/lib/hydrated";
-import { useBirth } from "@/lib/useBirth";
-import { priceLabel } from "@/lib/tariffs";
+export const forLocale = localized((L: Locale) => {
+  const { calculate } = localizedMatrix(L);
+  const { priceLabel } = localizedTariffs(L);
+  const { birthLabel } = localizedMatrixResult(L);
+  const { buildFree } = localizedPublicSpec(L);
 
-import LockIcon from "@/components/ui/LockIcon";
-import MatrixResult, { birthLabel } from "@/components/matrix/MatrixResult";
-import Plans from "@/components/pay/Plans";
-import ReportSections from "@/components/matrix/ReportSections";
-import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
-import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
-import { useSession } from "@/components/account/useSession";
-import UnlockCta from "@/components/pay/UnlockCta";
-import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
-import { buildFree, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
-import { useFullSections } from "@/lib/useFullSections";
-import type { SavedMatrix } from "@/app/_lib/access";
+  return { calculate, priceLabel, birthLabel, buildFree };
+});
 
 /**
  * Разбор по дате из этого браузера: два бесплатных раздела и восемнадцать имён под замком.
@@ -29,17 +39,22 @@ import type { SavedMatrix } from "@/app/_lib/access";
  * когда кука подтверждает тариф. Признак доступа приходит пропсом от серверной страницы, а не
  * из браузера: локальному состоянию открывать разделы нечем.
  */
-export default function ReportView({
-  granted = false,
-  texts,
-  articles,
-  saved = [],
-}: {
+export default function ReportView({ locale: requestedLocale, ...localeProps }: ({
   granted?: boolean;
   texts?: PositionTexts;
   articles?: PositionArticles;
   saved?: SavedMatrix[];
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    granted = false,
+    texts,
+    articles,
+    saved = [],
+  } = localeProps;
+  const { calculate, priceLabel, birthLabel, buildFree } = forLocale(L);
+
   const lead = useLead();
   const priceKnown = usePriceKnown();
   const session = useSession();
@@ -54,7 +69,7 @@ export default function ReportView({
     } catch {
       return null;
     }
-  }, [birth]);
+  }, [birth, L]);
   // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
   const full = useFullSections(matrix);
 
@@ -112,16 +127,16 @@ export default function ReportView({
       </p>
 
       <div className="section-gap">
-        <MatrixResult m={matrix} />
+        <MatrixResult locale={L} m={matrix} />
       </div>
 
-      <ReportSections sections={sections} />
+      <ReportSections locale={L} sections={sections} />
 
       {ALL_FREE ? (
         <div className="allbox">
           <h3>{D.unlockBox.openTitleFree[L]}</h3>
           <p>{D.unlockBox.reportOpenFree[L]}</p>
-          <SaveMatrixButton
+          <SaveMatrixButton locale={L}
             birth={matrix.birth}
             sex={matrix.sex}
             label={D.unlockBox.saveDate[L]}
@@ -131,7 +146,7 @@ export default function ReportView({
         <div className="allbox">
           <h3>{D.unlockBox.grantedTitle[L]}</h3>
           <p>{D.unlockBox.grantedText[L](locked.length)}</p>
-          <SaveMatrixButton
+          <SaveMatrixButton locale={L}
             birth={matrix.birth}
             sex={matrix.sex}
             label={D.unlockBox.saveAndOpen[L]}
@@ -153,11 +168,11 @@ export default function ReportView({
           <div className="alllist">
             {locked.map((s) => (
               <span key={s.key}>
-                  <LockIcon /> {s.title}
-                </span>
+                <LockIcon /> {s.title}
+              </span>
             ))}
           </div>
-          <UnlockCta place="report_bottom" testId="unlock-cta" matrixId={currentSaved?.id}>
+          <UnlockCta locale={L} place="report_bottom" testId="unlock-cta" matrixId={currentSaved?.id}>
             {D.nav.buy[L]}
           </UnlockCta>
           {/* вошедшему предлагать вход бессмысленно: он уже здесь, и подпись читалась как
@@ -175,7 +190,7 @@ export default function ReportView({
         </div>
       )}
 
-      {!ALL_FREE && locked.length ? <Plans place="report" /> : null}
+      {!ALL_FREE && locked.length ? <Plans locale={L} place="report" /> : null}
     </>
   );
 }

@@ -50,6 +50,7 @@ class ResetApply(BaseModel):
 
 
 class PaymentIn(BaseModel):
+    provider: str | None = Field(default=None, pattern=r"^[a-z][a-z0-9_-]{0,31}$")
     tariff: TariffId
     email: EmailStr
     # разовый тариф привязывается к матрице: либо она уже сохранена, либо сервер создаст её сам

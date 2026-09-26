@@ -5,8 +5,14 @@ set -euo pipefail
 IP="${ARCANA_PROD_IP:-45.80.130.166}"
 SSH_USER="${ARCANA_SSH_USER:-root}"
 
+# До первого релиза с нейтральными именами на сервере ещё лежит старый compose.
+# Снимок нужен и до его замены, и после; выбираем сервис из текущей серверной конфигурации.
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
-  "cd /srv/arcana && docker compose exec -T ru-api python -" <<'PY'
+  "cd /srv/arcana \
+   && api_service=api \
+   && services=\$(docker compose config --services) \
+   && { printf '%s\\n' \"\$services\" | grep -qx api || api_service=ru-api; } \
+   && docker compose exec -T \"\$api_service\" python -" <<'PY'
 from __future__ import annotations
 
 import datetime as dt

@@ -7,6 +7,8 @@
 """
 from __future__ import annotations
 
+from . import sites
+
 import urllib.parse
 from pathlib import Path
 from typing import Protocol
@@ -107,7 +109,7 @@ class LocalStore:
 
     def link(self, key: str, filename: str | None = None) -> str:
         token = create_file_token(key, filename)
-        base = settings.site_url.rstrip("/")
+        base = sites.current().origin.rstrip("/")
         return f"{base}/api/reports/file?token={urllib.parse.quote(token)}"
 
 

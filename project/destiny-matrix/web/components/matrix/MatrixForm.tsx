@@ -1,17 +1,18 @@
 "use client";
 
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { track } from "@/lib/analytics";
+import { useHydrated } from "@/lib/hydrated";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
+import { forLocale as localizedMatrix, MatrixError, type Sex } from "@/lib/matrix";
+import { saveBirth } from "@/lib/storage";
+import { browserDay, exampleDay } from "@/lib/today";
+import { useBirth } from "@/lib/useBirth";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-
-import { track } from "@/lib/analytics";
-import { D, L } from "@/lib/i18n";
-import { useHydrated } from "@/lib/hydrated";
-import { browserDay, exampleDay } from "@/lib/today";
-import { MatrixError, MONTHS_ACC, calculate, daysInMonth, toIso, type Sex } from "@/lib/matrix";
-import { saveBirth } from "@/lib/storage";
-import { useBirth } from "@/lib/useBirth";
-
-const MIN_YEAR = 1900;
 
 /**
  * Что происходит после расчёта. Дата в любом случае уже в браузере, различается только то,
@@ -21,6 +22,13 @@ export type Finish =
   | { kind: "here" }
   | { kind: "go"; href: string };
 
+export const forLocale = localized((L: Locale) => {
+  const { MONTHS_ACC, calculate, daysInMonth, toIso } = localizedMatrix(L);
+
+  const MIN_YEAR = 1900;
+  return { MONTHS_ACC, calculate, daysInMonth, toIso, MIN_YEAR };
+});
+
 /**
  * Единственная форма ввода даты на сайте. Раньше их было две — на главной и в блоке-приглашении
  * справочника, — и правки доезжали до одной из них.
@@ -28,20 +36,25 @@ export type Finish =
  * `name` разводит два экземпляра на одной странице: у полей должны быть разные id, иначе
  * `<label for>` указывает на чужое поле.
  */
-export default function MatrixForm({
-  name = "calc",
-  title = D.calc.formTitle[L],
-  lead = D.calc.formLead[L],
-  finish = { kind: "here" },
-  place = "landing",
-}: {
+export default function MatrixForm({ locale: requestedLocale, ...localeProps }: ({
   name?: "calc" | "promo";
   title?: string;
   lead?: string;
   finish?: Finish;
   /** метка для аналитики: откуда считали */
   place?: string;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    name = "calc",
+    title = D.calc.formTitle[L],
+    lead = D.calc.formLead[L],
+    finish = { kind: "here" },
+    place = "landing",
+  } = localeProps;
+  const { MONTHS_ACC, calculate, daysInMonth, toIso, MIN_YEAR } = forLocale(L);
+
   const promo = name === "promo";
   const fieldId = (short: string) => (promo ? `p${short}` : short);
   const testId = (what: string) => (promo ? `promo-${what}` : what);
@@ -59,7 +72,7 @@ export default function MatrixForm({
   // с января и до первого релиза года выбрать новый год было бы нечем.
   const [maxYear, setMaxYear] = useState(seed.year);
   const [sex, setSex] = useState<Sex>("f");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useMessage(L);
   // Поля показывают дату, которую человек уже вводил: иначе «Рассчитать» во второй форме
   // страницы перетирало свежий выбор значением по умолчанию.
   useEffect(() => {
@@ -97,7 +110,7 @@ export default function MatrixForm({
   const submit = () => {
     const maxDay = daysInMonth(year, month);
     if (day > maxDay) {
-      setError(D.calc.tooManyDays[L](maxDay));
+      setError((locale) => D.calc.tooManyDays[locale](maxDay));
       return;
     }
     try {
@@ -115,7 +128,7 @@ export default function MatrixForm({
         document.getElementById("result")?.scrollIntoView({ block: "start", behavior: "smooth" });
       });
     } catch (e) {
-      setError(e instanceof MatrixError ? e.message : D.calc.genericError[L]);
+      setError((locale) => e instanceof MatrixError ? e.messageFor(locale) : D.calc.genericError[locale]);
     }
   };
 

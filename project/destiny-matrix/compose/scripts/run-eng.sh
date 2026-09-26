@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-# Английская раскладка в докере: тот же состав, другой язык и витрина без оплаты.
+# Совместимость: один фронтенд/API/БД для RU и COM.
 set -euo pipefail
-exec "$(dirname "$0")/run.sh" en
+exec "$(dirname "$0")/run.sh" "$@"

@@ -1,36 +1,34 @@
+import { cache } from "react";
 import { ALL_FREE } from "./access";
+import { requestLocale } from "./i18n/request";
 import { apiUpstream } from "./settings/server";
-import type { Tariff } from "./tariffs";
+import { requestSiteHeaders } from "./siteProfile.server";
+import type { PaymentProvider, Tariff } from "./tariffs";
 
-// Лендинг, оплата и оферта рендерятся на запрос и берут прайс здесь. Серверный модуль отделён
-// от общих функций форматирования: API_INTERNAL_URL никогда не попадает в клиентский граф.
-
-/** Чем принимаются деньги: true — мок, деньги ненастоящие. */
-export async function testPayments(): Promise<boolean> {
-  const base = apiUpstream();
+// cache дедуплицирует только внутри серверного рендера, не между доменами/запросами.
+export const getBilling = cache(async (): Promise<{
+  items: Tariff[]; providers: PaymentProvider[] | null; test: boolean;
+}> => {
+  const unknown = { items: [], providers: null, test: false };
+  if (ALL_FREE) return unknown;
   try {
-    const res = await fetch(`${base}/api/tariffs`, { cache: "no-store" });
-    if (!res.ok) return false;
-    const body = (await res.json()) as { test_payments?: boolean };
-    return body.test_payments === true;
+    const res = await fetch(`${apiUpstream()}/api/tariffs`, {
+      cache: "no-store",
+      headers: { "Accept-Language": await requestLocale(), ...await requestSiteHeaders() },
+    });
+    if (!res.ok) return unknown;
+    const body = await res.json();
+    return {
+      items: Array.isArray(body.items) ? body.items : [],
+      // null = ошибка/неизвестно; [] = API подтвердил отсутствие способов оплаты.
+      providers: Array.isArray(body.payment_providers) ? body.payment_providers : null,
+      test: body.test_payments === true,
+    };
   } catch {
-    return false;
+    return unknown;
   }
-}
+});
 
-/** Прайс с сервера. Пустой список — «цены нет»: API молчит или витрина пуста.
- *
- *  На витрине без оплаты кассы нет вовсе, и прайс не запрашивается: иначе названия тарифов
- *  из базы приезжали бы на страницу чужим языком — платить по ним всё равно негде. */
 export async function getTariffs(): Promise<Tariff[]> {
-  if (ALL_FREE) return [];
-  const base = apiUpstream();
-  try {
-    const res = await fetch(`${base}/api/tariffs`, { cache: "no-store" });
-    if (!res.ok) return [];
-    const body = (await res.json()) as { items?: Tariff[] };
-    return Array.isArray(body.items) ? body.items : [];
-  } catch {
-    return [];
-  }
+  return (await getBilling()).items;
 }

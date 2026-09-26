@@ -1,13 +1,22 @@
 "use client";
 
+import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { ApiError, forLocale as localizedApi } from "@/lib/api";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
+import type { Sex } from "@/lib/matrix";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ApiError, api } from "@/lib/api";
-import { D, L } from "@/lib/i18n";
-import type { Sex } from "@/lib/matrix";
+export const forLocale = localized((L: Locale) => {
+  const { api } = localizedApi(L);
+  const { birthLabel } = localizedMatrixResult(L);
 
-import { birthLabel } from "@/components/matrix/MatrixResult";
+  return { api, birthLabel };
+});
 
 /**
  * Сохранить матрицу из браузера в кабинет и открыть по ней полный разбор.
@@ -17,25 +26,30 @@ import { birthLabel } from "@/components/matrix/MatrixResult";
  * отдельным крючком `limit-message`: раньше 402 оседал в безымянном блоке ошибки, и человек
  * видел «что-то не так» вместо причины.
  */
-export default function SaveMatrixButton({
-  birth,
-  sex,
-  label = D.report.saveMatrix[L],
-  done = D.report.savedToAccount[L],
-  openReport = true,
-  onSaved,
-}: {
+export default function SaveMatrixButton({ locale: requestedLocale, ...localeProps }: ({
   birth: string;
   sex: Sex;
   label?: string;
   done?: string;
   openReport?: boolean;
   onSaved?: (id: number) => void | Promise<void>;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    birth,
+    sex,
+    label = D.report.saveMatrix[L],
+    done = D.report.savedToAccount[L],
+    openReport = true,
+    onSaved,
+  } = localeProps;
+  const { api, birthLabel } = forLocale(L);
+
   const router = useRouter();
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
-  const [limit, setLimit] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [limit, setLimit] = useMessage(L);
+  const [error, setError] = useMessage(L);
 
   const save = async () => {
     setState("busy");
@@ -51,15 +65,15 @@ export default function SaveMatrixButton({
       setState("idle");
       if (err instanceof ApiError && err.status === 402) {
         // без даты в тексте: она специальная категория ПД и в сообщения не попадает
-        setLimit(`${err.message} ${D.report.limitTail[L]}`);
+        setLimit((locale) => `${err.messageFor(locale)} ${D.report.limitTail[locale]}`);
         return;
       }
       setError(
-        err instanceof ApiError && err.status === 401
-          ? D.report.needLogin[L]
+        (locale) => err instanceof ApiError && err.status === 401
+          ? D.report.needLogin[locale]
           : err instanceof ApiError
-            ? err.message
-            : D.report.saveFailed[L],
+            ? err.messageFor(locale)
+            : D.report.saveFailed[locale],
       );
     }
   };

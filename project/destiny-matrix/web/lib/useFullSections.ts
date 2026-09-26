@@ -1,7 +1,7 @@
 "use client";
 
+import { useLocale } from "@/components/ui/LocaleProvider";
 import { useEffect, useState } from "react";
-
 import { ALL_FREE } from "./access";
 import type { Matrix } from "./matrix";
 import type { SectionOut } from "./publicSpec";
@@ -14,6 +14,8 @@ import type { SectionOut } from "./publicSpec";
  * числа, по которым дата рождения не восстанавливается.
  */
 export function useFullSections(matrix: Matrix | null): SectionOut[] | null {
+  const L = useLocale();
+
   const [sections, setSections] = useState<SectionOut[] | null>(null);
   const slug = matrix ? `${matrix.day}-${matrix.month}-${matrix.year}` : "";
 
@@ -21,7 +23,7 @@ export function useFullSections(matrix: Matrix | null): SectionOut[] | null {
     if (!ALL_FREE || !slug) return;
     let alive = true;
     setSections(null);
-    fetch(`/api/sections?slug=${encodeURIComponent(slug)}`)
+    fetch(`/api/sections?slug=${encodeURIComponent(slug)}`, { headers: { "Accept-Language": L } })
       .then((response) => (response.ok ? response.json() : null))
       .then((body) => {
         if (alive && body?.sections) setSections(body.sections as SectionOut[]);
@@ -30,7 +32,7 @@ export function useFullSections(matrix: Matrix | null): SectionOut[] | null {
     return () => {
       alive = false;
     };
-  }, [slug]);
+  }, [slug, L]);
 
   return sections;
 }

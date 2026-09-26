@@ -11,7 +11,15 @@ from typing import Protocol, runtime_checkable
 
 
 class PaymentError(RuntimeError):
-    pass
+    """Keep provider diagnostics for logs; expose a locale-bound public explanation."""
+    def __init__(self, message: str, *, key: str = "pay.gateway_failed", **params):
+        super().__init__(message)
+        self.key = key
+        self.params = params
+
+    def public_message(self) -> str:
+        from ..i18n import say
+        return say(self.key, **self.params)
 
 
 class Outcome(enum.StrEnum):
@@ -22,6 +30,13 @@ class Outcome(enum.StrEnum):
     # Отмена — это либо снятие холда до списания, либо полный возврат после него. Что именно
     # произошло, знает не провайдер, а наша запись платежа, поэтому исход остаётся отдельным.
     CANCELED = "canceled"
+
+
+@dataclass(frozen=True)
+class PaymentUrls:
+    success: str
+    fail: str
+    notification: str
 
 
 @dataclass(frozen=True)
@@ -47,7 +62,7 @@ class Provider(Protocol):
 
     def enabled(self) -> bool: ...
 
-    def start(self, order_id: str, amount: int, title: str, email: str | None) -> Started: ...
+    def start(self, order_id: str, amount: int, title: str, email: str | None, *, urls: PaymentUrls) -> Started: ...
 
     def state(self, external_id: str) -> Update: ...
 

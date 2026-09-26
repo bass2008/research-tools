@@ -14,17 +14,26 @@ def get(name: str) -> Provider | None:
     return PROVIDERS.get(name)
 
 
-def active() -> Provider | None:
-    """Кем принимаем оплату сейчас: заданным в настройках, иначе живым эквайрингом, иначе моком."""
-    from ..config import settings
+def available():
+    from .. import sites
+    return tuple(c for c in sites.current().payments
+                 if (provider := get(c.provider)) is not None and provider.enabled())
 
-    chosen = PROVIDERS.get(settings.payment_provider) if settings.payment_provider else None
-    if chosen is not None and chosen.enabled():
-        return chosen
-    for provider in PROVIDERS.values():
-        if provider.enabled():
-            return provider
-    return None
+
+def select_connection(identifier: str | None = None):
+    from ..http_errors import LocalizedHTTPException
+    from ..i18n import say
+    connections = available()
+    connection = next((c for c in connections if c.id == identifier), None) if identifier else next(iter(connections), None)
+    if connection is None:
+        raise LocalizedHTTPException(403, detail=lambda: say("pay.region_unavailable"))
+    return connection
+
+
+def for_payment(payment):
+    from ..sites import payment_connection
+    connection = payment_connection(payment)
+    return get(connection.provider) if connection else None
 
 
 def order_id(payment_id: int) -> str:
@@ -41,5 +50,5 @@ def payment_id_of(order: str | None) -> int | None:
     return int(head) if head.isdigit() else None
 
 
-__all__ = ["Outcome", "PaymentError", "Provider", "Started", "Update", "PROVIDERS", "active",
+__all__ = ["Outcome", "PaymentError", "Provider", "Started", "Update", "PROVIDERS", "available", "select_connection", "for_payment",
            "get", "order_id", "payment_id_of"]

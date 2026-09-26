@@ -60,7 +60,7 @@ def test_password_reset_lets_you_in(page, mail, api_log):
     page.get_by_test_id("forgot-submit").click()
     expect(page.get_by_test_id("forgot-sent")).to_be_visible()
 
-    token = flows.token_from(api_log("/reset?token="))
+    token = flows.token_from(api_log("/reset?"))
     assert token, "ссылки на сброс нет в логе api"
 
     page.goto(f"{BASE}/reset?token={token}", wait_until="domcontentloaded")

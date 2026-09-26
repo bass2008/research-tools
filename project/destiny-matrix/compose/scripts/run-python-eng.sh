@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-# Английский стенд без докера: uvicorn и собранный английский фронт на node.
+# Совместимость: один фронтенд/API/БД для RU и COM.
 set -euo pipefail
-exec "$(dirname "$0")/run-python.sh" en
+exec "$(dirname "$0")/run-python.sh" "$@"

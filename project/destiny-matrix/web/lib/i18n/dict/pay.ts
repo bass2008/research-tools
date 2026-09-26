@@ -1,11 +1,18 @@
 import type { Phrase, PhraseFn } from "./index";
 
 export const pay = {
-  /** Валюта витрины: рубли на `.ru`, доллары на `.com` — продавец у рынков разный. */
-  currency: { ru: "₽", en: "$" } satisfies Phrase,
+  regionUnavailable: {
+    ru: "На данный момент нет доступной оплаты для вашего региона",
+    en: "There are currently no payment methods available for your region",
+  } satisfies Phrase,
+  paymentMethod: { ru: "Способ оплаты", en: "Payment method" } satisfies Phrase,
+  tbank: { ru: "Т-Банк", en: "T-Bank" } satisfies Phrase,
+  mock: { ru: "Тестовая оплата", en: "Test payment" } satisfies Phrase,
+  /** Общий API сейчас считает цены в копейках. Переключение языка не меняет валюту. */
+  currency: { ru: "₽", en: "₽" } satisfies Phrase,
   priceFormat: {
     ru: (amount: string) => `${amount} ₽`,
-    en: (amount: string) => `$${amount}`,
+    en: (amount: string) => `${amount} ₽`,
   } satisfies PhraseFn<[string]>,
   forever: { ru: "навсегда", en: "forever" } satisfies Phrase,
   forMonth: { ru: "на месяц", en: "for a month" } satisfies Phrase,

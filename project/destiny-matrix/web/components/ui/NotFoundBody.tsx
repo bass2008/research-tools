@@ -1,4 +1,5 @@
-import { D, L } from "@/lib/i18n";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 
 /** Текст и выходы страницы 404: он одинаков и для маршрутного not-found, и для глобального.
  *
@@ -6,7 +7,9 @@ import { D, L } from "@/lib/i18n";
  *  и клиентский роутер в нём не совпадает с деревом маршрутов: переход менял адрес и заголовок
  *  вкладки, а на экране оставалось «Такой страницы нет». Полная перезагрузка здесь ничего не
  *  стоит и уводит гарантированно. */
-export default function NotFoundBody() {
+export default function NotFoundBody({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const L = requestedLocale ?? defaultLocale;
+
   return (
     <div className="wrap prose">
       <h1>{D.nav.notFoundTitle[L]}</h1>

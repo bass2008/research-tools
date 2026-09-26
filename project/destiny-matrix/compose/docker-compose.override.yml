@@ -1,7 +1,10 @@
+x-site-profiles: &site-profiles >-
+  [{"origin":"http://localhost:${WEB_PORT:-3000}","hosts":["localhost:${WEB_PORT:-3000}","ru.localhost:${WEB_PORT:-3000}"],"defaultLocale":"ru","locales":["ru"],"payments":[{"id":"${PAYMENT_PROVIDER:-mock}","provider":"${PAYMENT_PROVIDER:-mock}","notificationUrl":"http://localhost:${WEB_PORT:-3000}/api/payments/notify/${PAYMENT_PROVIDER:-mock}"}]},{"origin":"http://127.0.0.1:${WEB_PORT:-3000}","hosts":["127.0.0.1:${WEB_PORT:-3000}","com.localhost:${WEB_PORT:-3000}","web:3000","prod-web:3000"],"defaultLocale":"en","locales":["en","ru"],"payments":[]}]
+
 # Локальная надстройка: compose подхватывает её сам, без флагов. На боевую машину едет только
 # база, поэтому сборка из исходников и dev-секреты туда не попадают.
 services:
-  ru-api:
+  api:
     build:
       context: ..
       dockerfile: compose/api.Dockerfile
@@ -18,9 +21,8 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       # локальная разработка платит игрушечными деньгами
       MOCK_PAYMENTS: ${MOCK_PAYMENTS:-1}
-      SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
+      SITE_PROFILES: *site-profiles
       # локально платим моком и читаем письма из логов; живой банк — PAYMENT_PROVIDER=tbank
-      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock}
       # отчёты остаются в контейнере: раньше прогоны e2e складывали PDF в боевой бакет
       REPORTS_STORE: ${REPORTS_STORE:-local}
       MAIL_TO_LOG: ${MAIL_TO_LOG:-1}
@@ -32,7 +34,7 @@ services:
       # api наружу — только для отладки: браузер ходит во фронт
       - "127.0.0.1:${API_PORT:-8010}:8010"
 
-  ru-browser:
+  browser:
     build:
       context: .
       dockerfile: browser.Dockerfile
@@ -41,13 +43,13 @@ services:
       - path: ${HOME}/.config/arcana/reports.env
         required: false
 
-  ru-web:
+  web:
     build:
       context: ../web
       dockerfile: ../compose/web.Dockerfile
       args:
         NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
-        # язык корпуса и словарей вшивается на сборке: страницы печатаются заранее
+        # Резервный язык; язык запроса выбирается профилем домена ниже.
         NEXT_PUBLIC_SITE_LANG: ${SITE_LANG:-ru}
         NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
         # локально счётчик выключен: включить — METRIKA_ID=111856670 scripts/run.sh
@@ -59,8 +61,11 @@ services:
         BUILD_ISO: ${BUILD_ISO:-}
     environment:
       NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
+      SITE_PROFILES: *site-profiles
       # по http кука с secure не ставится и вход не работает
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-0}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://web:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
     ports: !override
       - "${WEB_PORT:-3000}:3000"
     # статику локально раздаёт сам node: nginx впереди нет, каталог хоста не нужен

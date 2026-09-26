@@ -9,31 +9,44 @@
  * будто предыдущая осталась на месте. Теперь отчёт стоит там, где его поставили, а форма
  * только собирает дату.
  */
+import { useSession } from "@/components/account/useSession";
+import { useOwnDates } from "@/components/matrix/CalculationProvider";
+import MatrixResult from "@/components/matrix/MatrixResult";
+import ReportSections from "@/components/matrix/ReportSections";
+import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
+import Plans from "@/components/pay/Plans";
+import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
+import UnlockCta from "@/components/pay/UnlockCta";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import LockIcon from "@/components/ui/LockIcon";
+import { ALL_FREE } from "@/lib/access";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
+import { forLocale as localizedPublicSpec, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
+import { forLocale as localizedTariffs } from "@/lib/tariffs";
+import { exampleDay } from "@/lib/today";
+import { useBirth } from "@/lib/useBirth";
+import { useFullSections } from "@/lib/useFullSections";
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { calculate } from "@/lib/matrix";
-import { priceLabel } from "@/lib/tariffs";
-import { exampleDay } from "@/lib/today";
-import { useBirth } from "@/lib/useBirth";
+export const forLocale = localized((L: Locale) => {
+  const { calculate } = localizedMatrix(L);
+  const { priceLabel } = localizedTariffs(L);
+  const { buildFree } = localizedPublicSpec(L);
 
-import LockIcon from "@/components/ui/LockIcon";
-import MatrixResult from "@/components/matrix/MatrixResult";
-import Plans from "@/components/pay/Plans";
-import ReportSections from "@/components/matrix/ReportSections";
-import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
-import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
-import UnlockCta from "@/components/pay/UnlockCta";
-import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
-import { buildFree, type PositionArticles, type PositionTexts } from "@/lib/publicSpec";
-import { useFullSections } from "@/lib/useFullSections";
-import { useSession } from "@/components/account/useSession";
-import { useOwnDates } from "@/components/matrix/CalculationProvider";
+  return { calculate, priceLabel, buildFree };
+});
 
-export default function MatrixReport(
-  { texts, articles }: { texts?: PositionTexts; articles?: PositionArticles },
+export default function MatrixReport({ locale: requestedLocale, ...localeProps }: ({ texts?: PositionTexts; articles?: PositionArticles }) & { locale?: Locale }
 ) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { texts, articles } = localeProps;
+  const { calculate, priceLabel, buildFree } = forLocale(L);
+
   const lead = useLead();
   // цену из кода не печатаем: она видна ровно тогда, когда API недоступен и купить нельзя
   const priceKnown = usePriceKnown();
@@ -56,7 +69,7 @@ export default function MatrixReport(
     } catch {
       return null;
     }
-  }, [birth, seed]);
+  }, [birth, seed, L]);
   // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
   const full = useFullSections(matrix);
 
@@ -80,8 +93,8 @@ export default function MatrixReport(
   return (
     <div id="result">
       <section className="wrap section-gap" style={{ padding: 0 }}>
-        <MatrixResult m={matrix} example={example} />
-        <ReportSections sections={sections} place="landing" />
+        <MatrixResult locale={L} m={matrix} example={example} />
+        <ReportSections locale={L} sections={sections} place="landing" />
 
         {ALL_FREE ? (
           <div className="allbox">
@@ -91,7 +104,7 @@ export default function MatrixReport(
               {D.unlockBox.saveForPdf[L]}
             </p>
             {example ? null : (
-              <SaveMatrixButton
+              <SaveMatrixButton locale={L}
                 birth={matrix.birth}
                 sex={matrix.sex}
                 label={D.unlockBox.saveDate[L]}
@@ -99,65 +112,65 @@ export default function MatrixReport(
             )}
           </div>
         ) : (
-        <div className="allbox" id={thisDatePaid || anyDate ? "plans" : undefined}>
-          <h3>{example ? D.unlockBox.exampleTitle[L] : D.unlockBox.openTitle[L]}</h3>
-          <p>
-            {example ? D.unlockBox.exampleLead[L] : D.unlockBox.openLead[L]}
-            {D.unlockBox.contents[L]}{" "}
-            {thisDatePaid || anyDate
-              ? null
-              : priceKnown && lead
-                ? D.unlockBox.onePayment[L](priceLabel(lead))
-                : D.unlockBox.priceUnknown[L]}
-          </p>
-          <div className="alllist">
-            {locked.map((s) => (
-              <span key={s.key}>
-                <LockIcon /> {s.title}
-              </span>
-            ))}
-          </div>
+          <div className="allbox" id={thisDatePaid || anyDate ? "plans" : undefined}>
+            <h3>{example ? D.unlockBox.exampleTitle[L] : D.unlockBox.openTitle[L]}</h3>
+            <p>
+              {example ? D.unlockBox.exampleLead[L] : D.unlockBox.openLead[L]}
+              {D.unlockBox.contents[L]}{" "}
+              {thisDatePaid || anyDate
+                ? null
+                : priceKnown && lead
+                  ? D.unlockBox.onePayment[L](priceLabel(lead))
+                  : D.unlockBox.priceUnknown[L]}
+            </p>
+            <div className="alllist">
+              {locked.map((s) => (
+                <span key={s.key}>
+                  <LockIcon /> {s.title}
+                </span>
+              ))}
+            </div>
 
-          {thisDatePaid && !anyDate ? (
-            <>
-              <p className="small">{D.unlockBox.alreadyPaid[L]}</p>
-              <Link className="btn wide" href={`/report?m=${thisDate!.id}`}>
-                {D.unlockBox.openTitle[L]}
-              </Link>
-            </>
-          ) : anyDate ? (
-            <>
-              <p className="small">{D.unlockBox.unlimitedPlan[L]}</p>
-              <SaveMatrixButton
-                birth={matrix.birth}
-                sex={matrix.sex}
-                label={D.unlockBox.saveAndOpen[L]}
-              />
-            </>
-          ) : (
-            <>
-              <UnlockCta
-                place="allbox"
-                testId="unlock-cta"
-                matrixId={thisDateSaved?.access === "locked" ? thisDateSaved.id : undefined}
-              >
-                {D.nav.buy[L]}
-              </UnlockCta>
-              {session.status === "guest" ? (
-                <p className="small" style={{ marginTop: 10 }}>
-                  {D.unlockBox.alreadyBought[L]}{" "}
-                  <Link href="/login">{D.unlockBox.signIn[L]}</Link> {D.unlockBox.signInTail[L]}
-                </p>
-              ) : null}
-            </>
-          )}
-        </div>
+            {thisDatePaid && !anyDate ? (
+              <>
+                <p className="small">{D.unlockBox.alreadyPaid[L]}</p>
+                <Link className="btn wide" href={`/report?m=${thisDate!.id}`}>
+                  {D.unlockBox.openTitle[L]}
+                </Link>
+              </>
+            ) : anyDate ? (
+              <>
+                <p className="small">{D.unlockBox.unlimitedPlan[L]}</p>
+                <SaveMatrixButton locale={L}
+                  birth={matrix.birth}
+                  sex={matrix.sex}
+                  label={D.unlockBox.saveAndOpen[L]}
+                />
+              </>
+            ) : (
+              <>
+                <UnlockCta locale={L}
+                  place="allbox"
+                  testId="unlock-cta"
+                  matrixId={thisDateSaved?.access === "locked" ? thisDateSaved.id : undefined}
+                >
+                  {D.nav.buy[L]}
+                </UnlockCta>
+                {session.status === "guest" ? (
+                  <p className="small" style={{ marginTop: 10 }}>
+                    {D.unlockBox.alreadyBought[L]}{" "}
+                    <Link href="/login">{D.unlockBox.signIn[L]}</Link> {D.unlockBox.signInTail[L]}
+                  </p>
+                ) : null}
+              </>
+            )}
+          </div>
 
         )}
 
         {/* тарифы не показываем тому, у кого эта дата уже открыта: на /report блок тоже
             скрыт при полном доступе, а здесь предлагал купить купленное */}
-        {ALL_FREE || thisDatePaid || anyDate ? null : <Plans place="landing" />}
+        {ALL_FREE || thisDatePaid || anyDate ? null : <Plans locale={L} place="landing" />}
       </section>
     </div>
   );

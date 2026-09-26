@@ -1,20 +1,32 @@
+import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import {
+  forLocale as localizedPublicSpec,
+  type SectionOut
+} from "@/lib/publicSpec";
+import { forLocale as localizedSite } from "@/lib/site";
 import Link from "next/link";
 
-import {
-  positionHref,
-  sectionEntityLink,
-  type SectionOut,
-} from "@/lib/publicSpec";
-import { D, L } from "@/lib/i18n";
-import { publicHref } from "@/lib/site";
+export const forLocale = localized((L: Locale, site) => {
+  const { positionHref, sectionEntityLink } = localizedPublicSpec(L);
+  const { publicHref } = localizedSite(L, site);
 
-export default function SectionEncyclopediaLinks({
-  section,
-  printing = false,
-}: {
+  return { positionHref, sectionEntityLink, publicHref };
+});
+
+export default function SectionEncyclopediaLinks({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
   section: SectionOut;
   printing?: boolean;
-}) {
+}) & { locale?: Locale; site?: SiteProfile }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    section,
+    printing = false,
+  } = localeProps;
+  const { positionHref, sectionEntityLink, publicHref } = forLocale(L, site);
+
   const entity = sectionEntityLink(section);
   const href = (path: string) => (printing ? publicHref(path) : path);
 

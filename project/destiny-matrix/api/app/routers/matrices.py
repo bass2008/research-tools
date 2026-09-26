@@ -6,12 +6,13 @@ from sqlalchemy.orm import Session
 
 from engine.matrix import calculate
 
-from ..i18n import say
+from ..i18n import say, validation_message
 from .. import access, tariffs
+from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import SavedMatrix, User, default_title
+from ..models import SavedMatrix, User
 from ..schemas import MatrixIn, MatrixTitleIn
 
 router = APIRouter(prefix="/matrices", tags=["matrices"])
@@ -29,10 +30,10 @@ def _needs_storage_right(db: Session, used: int) -> HTTPException:
     single = next((t for t in tariffs.public_tariffs(db) if access.ALL not in t.scopes()), None)
     # Про «оплаченные даты» говорить нельзя: чаще всего человек ещё ничего не покупал, и такой
     # текст читается как отказ в том, за что он уже заплатил.
-    offer = say("matrix.slots_offer", name=single.name) if single else ""
-    return HTTPException(
+    return LocalizedHTTPException(
         status.HTTP_402_PAYMENT_REQUIRED,
-        detail=say("matrix.no_slots", used=used, offer=offer),
+        detail=lambda: say("matrix.no_slots", used=used,
+                           offer=say("matrix.slots_offer", name=single.public()["name"]) if single else ""),
     )
 
 
@@ -57,18 +58,18 @@ def create(payload: MatrixIn, user: User = Depends(current_user),
                                              SavedMatrix.sex == payload.sex))
     if row is None:
         if used >= settings.matrices_hard_cap:
-            raise HTTPException(
+            raise LocalizedHTTPException(
                 status.HTTP_402_PAYMENT_REQUIRED,
-                detail=say("matrix.hard_cap", cap=settings.matrices_hard_cap))
+                detail=lambda: say("matrix.hard_cap", cap=settings.matrices_hard_cap))
         if not access.can_save_more(db, user):
             raise _needs_storage_right(db, used)
         try:
             # движок решает, бывает ли такая дата вообще: будущее и годы до 1900 он не считает
             calculate(payload.birth, payload.sex)
         except ValueError as exc:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+            raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST, detail=lambda: validation_message(exc)) from exc
         row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
-                          title=(payload.title or default_title(payload.birth)))
+                          title=(payload.title or None))
 
         db.add(row)
         db.commit()
@@ -94,7 +95,7 @@ def one(matrix_id: int, user: User = Depends(current_user),
     row = db.get(SavedMatrix, matrix_id)
     # чужая матрица отдаёт 404, а не 403: существование чужих записей знать незачем
     if row is None or row.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
     return one_body(db, user, row)
 
 
@@ -104,9 +105,9 @@ def rename(matrix_id: int, payload: MatrixTitleIn, user: User = Depends(current_
     """Подписать матрицу. Кроме имени менять нечего: дата и пол — это и есть сама матрица."""
     row = db.get(SavedMatrix, matrix_id)
     if row is None or row.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
     title = (payload.title or "").strip()
-    row.title = title or default_title(row.birth)
+    row.title = title or None
     db.commit()
     db.refresh(row)
     return {**row.item(), **access.matrix_state(access.active_rights(db, user), row.id)}

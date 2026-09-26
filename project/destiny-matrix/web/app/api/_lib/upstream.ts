@@ -1,13 +1,14 @@
+import { requestSiteHeaders } from "@/lib/siteProfile.server";
+import { requestLocale } from "@/lib/i18n/request";
 // BFF: единственный путь браузера к api. Адрес апстрима — серверная переменная
 // API_INTERNAL_URL (в бандл не попадает, префикса NEXT_PUBLIC_ у неё нет намеренно), токен
 // живёт в httpOnly-куке и в JS недоступен.
-import { D, L } from "@/lib/i18n";
-import { isIP } from "node:net";
-
+import { D } from "@/lib/i18n";
+import type { Lang } from "@/lib/i18n/hosts";
+import { apiUpstream, serverSettings } from "@/lib/settings/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-import { apiUpstream, serverSettings } from "@/lib/settings/server";
+import { isIP } from "node:net";
 
 export const SESSION_COOKIE = serverSettings.get("sessionCookieName");
 
@@ -43,6 +44,12 @@ export function json(body: unknown, status = 200): NextResponse {
     status,
     headers: { "Cache-Control": "no-store, private" },
   });
+}
+
+/** Keep the current detail compatible; messages let an open form switch language later. */
+export function jsonError(message: Record<Lang, string> | ((locale: Lang) => string), locale: Lang, status: number): NextResponse {
+  const messages = typeof message === "function" ? { ru: message("ru"), en: message("en") } : message;
+  return json({ detail: messages[locale], messages }, status);
 }
 
 function setSession(res: NextResponse, token: string): void {
@@ -96,15 +103,16 @@ export function trustedClientIp(req: Request): string | null {
 
 /** Проксировать запрос в api. Тело всегда JSON, ошибки — в форме контракта `{detail}`. */
 export async function forward(path: string, opts: ForwardOptions = {}): Promise<NextResponse> {
+  const L = await requestLocale(opts.source);
   const method = opts.method ?? "GET";
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = { Accept: "application/json", "Accept-Language": L, ...await requestSiteHeaders(opts.source) };
 
   const clientIp = opts.source ? trustedClientIp(opts.source) : null;
   if (clientIp) headers["X-Real-IP"] = clientIp;
 
   if (opts.auth || opts.optionalAuth) {
     const token = await sessionToken();
-    if (!token && opts.auth) return json({ detail: D.bffErrors.noSession[L] }, 401);
+    if (!token && opts.auth) return jsonError(D.bffErrors.noSession, L, 401);
     if (token) headers.Authorization = `Bearer ${token}`;
   }
   // User-Agent пробрасываем только там, где он нужен: по нему api отличает роботов от людей
@@ -120,7 +128,7 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
   try {
     res = await fetch(upstreamUrl(path), { method, headers, body: payload, cache: "no-store" });
   } catch {
-    return json({ detail: D.bffErrors.upstreamDown[L] }, 502);
+    return jsonError(D.bffErrors.upstreamDown, L, 502);
   }
 
   // апстрим может ответить не-JSON (HTML 404 прокси, 502 балансировщика) — наверх всё равно
@@ -131,10 +139,8 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
     try {
       data = JSON.parse(text);
     } catch {
-      return json(
-        { detail: res.ok ? D.apiErrors.unexpected[L] : D.apiErrors.status[L](res.status) },
-        res.ok ? 502 : res.status,
-      );
+      return jsonError((locale) => res.ok ? D.apiErrors.unexpected[locale] : D.apiErrors.status[locale](res.status),
+        L, res.ok ? 502 : res.status);
     }
   }
 

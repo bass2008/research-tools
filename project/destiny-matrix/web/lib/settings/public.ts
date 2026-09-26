@@ -7,6 +7,7 @@ interface PublicSettings extends Record<string, string | number | boolean> {
   googleVerification: string;
   allFree: boolean;
   siteLang: string;
+  supportedLocales: string;
 }
 
 const DEFAULT_LANG = "ru";
@@ -21,13 +22,12 @@ const buildDefinitions = (lang?: string): SettingDefinitions<PublicSettings> => 
   siteUrl: { env: "NEXT_PUBLIC_SITE_URL", fallback: defaultSiteUrl(lang) },
   yandexVerification: { env: "NEXT_PUBLIC_YANDEX_VERIFICATION", fallback: "" },
   googleVerification: { env: "NEXT_PUBLIC_GOOGLE_VERIFICATION", fallback: "" },
-  // Витрина без оплаты. Переменная сборки, а не настройка на запрос: страницы матриц и
-  // энциклопедии печатаются заранее, и решать это в рантайме им негде. Парная переменная
-  // `ALL_FREE_WITHOUT_PAYMENT` у api задаётся тем же значением — их ставит развёртка.
+  // Витрина без оплаты. Этот флаг не зависит от языка. Парная переменная
+  // `ALL_FREE_WITHOUT_PAYMENT` у общего API задаётся тем же значением.
   allFree: { env: "NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT", fallback: false, parse: parseBoolean },
-  // Язык развёртки. Значения по умолчанию нет намеренно: язык выбирает раскладка, а тихий
-  // русский на английском домене заметили бы уже посетители.
+  // Язык по умолчанию; доступные языки задаются отдельно для каждой витрины.
   siteLang: { env: "NEXT_PUBLIC_SITE_LANG", fallback: DEFAULT_LANG },
+  supportedLocales: { env: "NEXT_PUBLIC_SUPPORTED_LOCALES", fallback: "ru,en" },
 });
 
 export interface PublicSettingInput {
@@ -36,6 +36,7 @@ export interface PublicSettingInput {
   NEXT_PUBLIC_GOOGLE_VERIFICATION?: string;
   NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT?: string;
   NEXT_PUBLIC_SITE_LANG?: string;
+  NEXT_PUBLIC_SUPPORTED_LOCALES?: string;
 }
 
 export function createPublicSettings(input: PublicSettingInput): SettingManager<PublicSettings> {
@@ -55,4 +56,5 @@ export const publicSettings = createPublicSettings({
   NEXT_PUBLIC_GOOGLE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: process.env.NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT,
   NEXT_PUBLIC_SITE_LANG: process.env.NEXT_PUBLIC_SITE_LANG,
+  NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
 });

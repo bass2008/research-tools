@@ -39,9 +39,10 @@ cd e2e && SSL_CERT_FILE=~/.config/arcana/ca-bundle.pem \
 Остальные браузерные наборы на таком стенде не гонять: они начнут создавать платежи в банке.
 Обратно на мок — `bash compose/scripts/run.sh` без переменной.
 
-## test.arcana-sense.ru
+## Общий тестовый сайт: .ru и .com
 
-Тестовый контур на той же машине, что прод, но со своей базой (том `test-api-var`), тестовым
+Оба тестовых домена обслуживает один frontend и один API. Тестовый контур на той же машине,
+что прод, но со своей базой (том `arcana-test_test-api-var`), тестовым
 терминалом (`PAYMENT_PROVIDER=tbank`), письмами в лог и без счётчика Метрики.
 Релиз — `compose/scripts/release-test.sh`.
 
@@ -49,9 +50,16 @@ cd e2e && SSL_CERT_FILE=~/.config/arcana/ca-bundle.pem \
 репозитория. Оттуда их читают `infra/bootstrap-machine.sh` (раскладывает хеш в
 `/etc/nginx/.htpasswd-test` на машине) и `e2e/conftest.py`.
 
-Пароль стоит от ботов и сканеров, а не от людей: `infra/nginx/arcana-test.conf`, там же
-`X-Robots-Tag: noindex, nofollow`. Без пароля открыты только `/api/payments/notify` (вебхук банка)
-и `/api/health`.
+Пароль задаётся nginx: `infra/nginx/arcana-test-selectel.conf` для `.ru` и
+`infra/nginx/arcana-test-en-selectel.conf` для `.com`; на обоих стоит запрет индексации.
+На `.ru` без пароля открыты `/api/payments/notify` и `/api/health`.
+На `.com` исключение для callback пока отсутствует: запрос без Basic Auth получает 401,
+хотя общий API формирует `NotificationURL` именно на `.com`. Это известная проблема;
+успешное открытие формы банка не подтверждает доставку уведомления.
+
+Общие правила языка, аккаунта и известная проблема возврата между доменами —
+[runtime-localization.md](runtime-localization.md).
 
 Ходить на `test` — когда есть реальная необходимость. Единственное, чего нельзя получить локально, —
-уведомление банка приходит по настоящему адресу.
+проверка доставки уведомления банка по публичному адресу. Текущую блокировку callback на
+`.com` нужно устранить до такой приёмки.

@@ -1,15 +1,12 @@
 "use client";
 
+import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { when } from "@/lib/moment";
-import { ApiError, api, type AdminUserCard } from "@/lib/api";
-import { money } from "@/lib/tariffs";
-import { paymentTargetLabel } from "@/lib/paytarget";
-import { counted, plural } from "@/lib/plural";
+import { ApiError, type AdminUserCard } from "@/lib/api";
 
-import { birthLabel } from "@/components/matrix/MatrixResult";
 
 const ACCESS: Record<string, string> = {
   forever: "куплена навсегда",
@@ -19,86 +16,85 @@ const ACCESS: Record<string, string> = {
 };
 
 export default function AdminUserView({ id }: { id: number }) {
+  const { t, api, when, money, paymentTargetLabel, counted, birthLabel } = useAdminLocale();
   const [card, setCard] = useState<AdminUserCard | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useAdminMessage();
 
   useEffect(() => {
     void api.admin
       .user(id)
       .then(setCard)
-      .catch((err) => setError(err instanceof ApiError ? err.message : "Не удалось открыть."));
-  }, [id]);
+      .catch((err) => setError(err instanceof ApiError ? err : "Не удалось открыть."));
+  }, [id, api]);
 
   if (error) {
     return (
       <div className="panel narrow">
-        <h3>Не открылось</h3>
+        <h3>{t("Не открылось")}</h3>
         <p className="dim">{error}</p>
         <Link className="btn wide" href="/admin">
-          К списку
-        </Link>
+          {t("К списку")}</Link>
       </div>
     );
   }
-  if (!card) return <p className="skeleton">Загружаем…</p>;
+  if (!card) return <p className="skeleton">{t("Загружаем…")}</p>;
 
   const u = card.user;
   return (
     <>
       <p className="crumbs">
-        <Link href="/admin">Админка</Link> <span>/</span> <span>{u.email}</span>
+        <Link href="/admin">{t("Админка")}</Link> <span>/</span> <span>{u.email}</span>
       </p>
       <h1>{u.email}</h1>
 
       <div className="panel">
-        <h3>Профиль</h3>
+        <h3>{t("Профиль")}</h3>
         <dl className="kv">
-          <dt>Зарегистрирован</dt>
+          <dt>{t("Зарегистрирован")}</dt>
           <dd>{when(u.created_at)}</dd>
-          <dt>Последнее появление</dt>
+          <dt>{t("Последнее появление")}</dt>
           <dd>{when(u.last_seen_at)}</dd>
-          <dt>Куплено навсегда</dt>
+          <dt>{t("Куплено навсегда")}</dt>
           <dd>{u.owned}</dd>
-          <dt>Подписка</dt>
-          <dd>{u.scopes.includes("all") ? (u.until ? `до ${when(u.until)}` : "активна") : "нет"}</dd>
-          <dt>Уплачено</dt>
+          <dt>{t("Подписка")}</dt>
+          <dd>{u.scopes.includes("all") ? (u.until ? t("до {0}", when(u.until)) : t("активна")) : t("нет")}</dd>
+          <dt>{t("Уплачено")}</dt>
           <dd>
-            {money(u.spent)} ₽ за {counted(u.payments, "платёж", "платежа", "платежей")}
+            {money(u.spent)} {t(" ₽ за ")}{counted(u.payments, "платёж", "платежа", "платежей")}
           </dd>
-          <dt>Действующих прав</dt>
+          <dt>{t("Действующих прав")}</dt>
           <dd>{u.rights}</dd>
         </dl>
       </div>
 
       <div className="panel section-gap">
-        <h3>Матрицы ({card.matrices.length})</h3>
+        <h3>{t("Матрицы (")}{card.matrices.length})</h3>
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-user-matrices">
             <thead>
               <tr>
-                <th>Имя</th>
-                <th>Дата</th>
-                <th>Карта</th>
-                <th>Доступ</th>
-                <th>Сохранена</th>
+                <th>{t("Имя")}</th>
+                <th>{t("Дата")}</th>
+                <th>{t("Карта")}</th>
+                <th>{t("Доступ")}</th>
+                <th>{t("Сохранена")}</th>
               </tr>
             </thead>
             <tbody>
               {card.matrices.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="dim">
-                    Матриц нет.
-                  </td>
+                    {t("Матриц нет.")}</td>
                 </tr>
               ) : (
                 card.matrices.map((m) => (
                   <tr key={m.id}>
                     <td>{m.title ?? birthLabel(m.birth)}</td>
                     <td>{birthLabel(m.birth)}</td>
-                    <td>{m.sex === "f" ? "женская" : "мужская"}</td>
+                    <td>{m.sex === "f" ? t("женская") : t("мужская")}</td>
                     <td>
-                      {ACCESS[m.access] ?? m.access}
-                      {m.access_until ? ` · до ${when(m.access_until)}` : ""}
+                      {t(ACCESS[m.access] ?? m.access)}
+                      {m.access_until ? t(" · до {0}", when(m.access_until)) : ""}
                     </td>
                     <td className="small">{when(m.created_at)}</td>
                   </tr>
@@ -113,41 +109,40 @@ export default function AdminUserView({ id }: { id: number }) {
         {/* Заголовок называет все записи, включая возвращённые и незавершённые: в сводке
             выше стоит «Уплачено 0 ₽ за 0 платежей», и без уточнения два числа на одном
             экране читались как противоречие. */}
-        <h3>Платежи и возвраты ({card.payments.length})</h3>
+        <h3>{t("Платежи и возвраты (")}{card.payments.length})</h3>
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-user-payments">
             <thead>
               <tr>
-                <th>Когда</th>
-                <th>Тариф</th>
-                <th>Сумма</th>
-                <th>Статус</th>
-                <th>За какую дату</th>
-                <th>Номер</th>
+                <th>{t("Когда")}</th>
+                <th>{t("Тариф")}</th>
+                <th>{t("Сумма")}</th>
+                <th>{t("Статус")}</th>
+                <th>{t("За какую дату")}</th>
+                <th>{t("Номер")}</th>
               </tr>
             </thead>
             <tbody>
               {card.payments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="dim">
-                    Платежей нет.
-                  </td>
+                    {t("Платежей нет.")}</td>
                 </tr>
               ) : (
                 card.payments.map((p) => (
                   <tr key={p.id}>
                     <td className="small">{when(p.paid_at ?? p.created_at)}</td>
-                    <td>{p.tariff.name ?? "—"}</td>
+                    <td>{p.tariff.display_name ?? p.tariff.name ?? "—"}</td>
                     <td className="num">{money(p.amount)} ₽</td>
                     <td>{p.state === "refunded"
-                        ? "возвращён"
+                        ? t("возвращён")
                         : p.state === "paid"
-                          ? "оплачен"
+                          ? t("оплачен")
                           : p.state === "abandoned"
-                            ? "брошен"
+                            ? t("брошен")
                             : p.state === "failed"
-                              ? "не прошёл"
-                              : "не оплачен"}</td>
+                              ? t("не прошёл")
+                              : t("не оплачен")}</td>
                     <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
                   </tr>

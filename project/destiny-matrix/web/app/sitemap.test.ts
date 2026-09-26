@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import sitemap from "./sitemap";
+import { sitemapForSite as sitemap } from "@/lib/sitemapEntries";
 import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
 import { SPEC } from "@/lib/sections";
 import {
@@ -144,7 +144,7 @@ describe("карта сайта вне боевого контура", () => {
   it("на тесте не отдаётся вовсе", async () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://test.arcana-sense.ru");
     vi.resetModules();
-    const { default: onTest } = await import("./sitemap");
+    const { sitemapForSite: onTest } = await import("@/lib/sitemapEntries");
     expect(onTest()).toEqual([]);
     vi.unstubAllEnvs();
     vi.resetModules();

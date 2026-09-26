@@ -1,4 +1,4 @@
-import { D, L } from "@/lib/i18n";
+import { D, L, SITE_HOSTS } from "@/lib/i18n";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -28,10 +28,10 @@ const CORPUS: Corpus = JSON.parse(
 let upstream: ReturnType<typeof vi.fn>;
 
 function post(body: unknown): Request {
-  return new Request("https://arcana-sense.ru/api/auth/register", {
+  return new Request(`${SITE_HOSTS[L]}/api/auth/register`, {
     method: "POST",
     body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Accept-Language": L },
   });
 }
 
@@ -69,7 +69,7 @@ describe("BFF: регистрация и вход", () => {
     it(`не пускает в апстрим ${JSON.stringify(value.slice(0, 30))}`, async () => {
       const res = await credentials(post({ email: value, password: "secret" }), "register");
       expect(res.status).toBe(422);
-      expect(await res.json()).toEqual({ detail: emailProblemMessage(problem) });
+      expect(await res.json()).toEqual({ detail: emailProblemMessage(problem), messages: D.emailErrors[problem] });
       expect(upstream).not.toHaveBeenCalled();
     });
   }
@@ -95,6 +95,7 @@ describe("BFF: регистрация и вход", () => {
     const res = await credentials(post({ email: "user.@mail.ru", password: "1" }), "register");
     expect(await res.json()).toEqual({
       detail: D.emailErrors["local-dot-end"][L],
+      messages: D.emailErrors["local-dot-end"],
     });
   });
 
@@ -110,7 +111,7 @@ describe("BFF: регистрация и вход", () => {
   it("почты нет вовсе — просит ввести", async () => {
     const res = await credentials(post({ password: "secret" }), "register");
     expect(res.status).toBe(422);
-    expect(await res.json()).toEqual({ detail: D.emailErrors.empty[L] });
+    expect(await res.json()).toEqual({ detail: D.emailErrors.empty[L], messages: D.emailErrors.empty });
     expect(upstream).not.toHaveBeenCalled();
   });
 });
@@ -128,7 +129,7 @@ describe("BFF: платёж", () => {
     it(`деньги не начинаются на ${JSON.stringify(value.slice(0, 30))}`, async () => {
       const res = await payment(post({ ...good, email: value }), "/payments/start");
       expect(res.status).toBe(422);
-      expect(await res.json()).toEqual({ detail: emailProblemMessage(problem) });
+      expect(await res.json()).toEqual({ detail: emailProblemMessage(problem), messages: D.emailErrors[problem] });
       expect(upstream).not.toHaveBeenCalled();
     });
   }
@@ -143,6 +144,7 @@ describe("BFF: платёж", () => {
                               "/payments/start");
     expect(await res.json()).toEqual({
       detail: D.emailErrors["local-dot-end"][L],
+      messages: D.emailErrors["local-dot-end"],
     });
   });
 });

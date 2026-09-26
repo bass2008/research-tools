@@ -1,51 +1,52 @@
+import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 // Разметка разделов. Без "use client" и без своих данных намеренно: этот же компонент
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
 // пропсами и в браузерный чанк не попадают) и клиентский разбор в браузере, где платных
 // разделов нет вовсе.
-import { ALL_FREE } from "@/lib/access";
-import Link from "next/link";
-
-import { arcanumTitle } from "@/lib/arcana";
-import { D, L } from "@/lib/i18n";
-
-import type { SectionOut } from "@/lib/publicSpec";
-import { publicHref } from "@/lib/site";
+import Sections from "@/components/enc/Sections";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CharacterConclusionView from "@/components/matrix/CharacterConclusionView";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CharacterRoleParts from "@/components/matrix/CharacterRoleParts";
-import Sections from "@/components/enc/Sections";
-import Faq from "@/components/ui/Faq";
 import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
-import LockIcon from "@/components/ui/LockIcon";
 import UnlockCta from "@/components/pay/UnlockCta";
+import Faq from "@/components/ui/Faq";
+import LockIcon from "@/components/ui/LockIcon";
+import { ALL_FREE } from "@/lib/access";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import type { SectionOut } from "@/lib/publicSpec";
+import { forLocale as localizedSite } from "@/lib/site";
+import Link from "next/link";
 
-/**
- * Число колонок для позиций раздела. CSS считать элементы не умеет, а auto-fit ставит по три
- * в ряд: четвёртая карта оставалась одна в пустой строке. Четыре кладём 2×2 — как в разделах
- * из двух позиций; десять — по четыре, иначе последний ряд снова с одной картой.
- * undefined — раскладку выбирает auto-fit по ширине панели.
- */
-function gridColumns(n: number): 2 | 4 | undefined {
-  if (n === 4) return 2;
-  if (n % 3 === 1) return 4;
-  return undefined;
-}
+export const forLocale = localized((L: Locale, site) => {
+  const { arcanumTitle } = localizedArcana(L);
+  const { publicHref } = localizedSite(L, site);
 
-/** Подпись итога зависит от числа ролей: «тройка» стояла и над парой, и над четырьмя ролями. */
-function conclusionLabel(roles: number | undefined): string {
-  if (roles === 2) return D.report.pairSummary[L];
-  if (roles && roles > 3) return D.report.rolesSummary[L];
-  return D.report.tripleSummary[L];
-}
+  /**
+   * Число колонок для позиций раздела. CSS считать элементы не умеет, а auto-fit ставит по три
+   * в ряд: четвёртая карта оставалась одна в пустой строке. Четыре кладём 2×2 — как в разделах
+   * из двух позиций; десять — по четыре, иначе последний ряд снова с одной картой.
+   * undefined — раскладку выбирает auto-fit по ширине панели.
+   */
+  function gridColumns(n: number): 2 | 4 | undefined {
+    if (n === 4) return 2;
+    if (n % 3 === 1) return 4;
+    return undefined;
+  }
 
-export default function ReportSections({
-  sections,
-  checking = false,
-  place = "report",
-  matrixId,
-  printing = false,
-}: {
+  /** Подпись итога зависит от числа ролей: «тройка» стояла и над парой, и над четырьмя ролями. */
+  function conclusionLabel(roles: number | undefined): string {
+    if (roles === 2) return D.report.pairSummary[L];
+    if (roles && roles > 3) return D.report.rolesSummary[L];
+    return D.report.tripleSummary[L];
+  }
+  return { arcanumTitle, publicHref, gridColumns, conclusionLabel };
+});
+
+export default function ReportSections({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
   sections: SectionOut[];
   /** сервер ещё не ответил про доступ: замок показываем, но продавать нечего */
   checking?: boolean;
@@ -53,7 +54,17 @@ export default function ReportSections({
   matrixId?: number | null;
   /** печать в PDF: разделы раскрыты, кнопок покупки нет */
   printing?: boolean;
-}) {
+}) & { locale?: Locale; site?: SiteProfile }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    sections,
+    checking = false,
+    place = "report",
+    matrixId,
+    printing = false,
+  } = localeProps;
+  const { arcanumTitle, publicHref, gridColumns, conclusionLabel } = forLocale(L, site);
+
   const open = sections.filter((s) => s.positions.length > 0).length;
   const locked = sections.length - open;
 
@@ -96,7 +107,7 @@ export default function ReportSections({
                     >
                       <a className="poscard" href={printing ? publicHref(p.href) : p.href}>
                         <span className="who">{p.label}</span>
-                        <ArcanumCard n={p.arcanum} size="grid" decorative half={printing} />
+                        <ArcanumCard locale={L} n={p.arcanum} size="grid" decorative half={printing} />
                         <span className="lb">
                           <span className="nm">
                             <span className="rn">{p.arcanum}</span> {arcanumTitle(p.arcanum)}
@@ -104,7 +115,7 @@ export default function ReportSections({
                         </span>
                       </a>
                       {readingRole ? (
-                        <CharacterRoleParts role={readingRole} />
+                        <CharacterRoleParts locale={L} role={readingRole} />
                       ) : p.text && !s.fullArticle ? (
                         <p className="postext">{p.text}</p>
                       ) : null}
@@ -130,18 +141,18 @@ export default function ReportSections({
                 <article className="section-gap" data-testid="past-lives-full-article">
                   <p className="dim prose">{s.fullArticle.short}</p>
                   <Sections items={s.fullArticle.sections} />
-                  <Faq items={s.fullArticle.faq} />
+                  <Faq locale={L} items={s.fullArticle.faq} />
                 </article>
               ) : printing && s.longform ? (
-                <CharacterReadingView reading={s.longform} printing showRoles={false} />
+                <CharacterReadingView site={site} locale={L} reading={s.longform} printing showRoles={false} />
               ) : s.conclusion || s.longform ? (
-                <CharacterConclusionView
+                <CharacterConclusionView locale={L}
                   reading={s.conclusion ?? s.longform!}
                   label={conclusionLabel(s.longform?.roles.length)}
                   idPrefix={`${s.key}-reading`}
                 />
               ) : null}
-              <SectionEncyclopediaLinks section={s} printing={printing} />
+              <SectionEncyclopediaLinks site={site} locale={L} section={s} printing={printing} />
             </div>
           </details>
         ) : (
@@ -159,7 +170,7 @@ export default function ReportSections({
                 </span>
               </span>
             ) : (
-              <UnlockCta className="head" place={place} section={s.key} matrixId={matrixId}>
+              <UnlockCta locale={L} className="head" place={place} section={s.key} matrixId={matrixId}>
                 {s.title}
                 <span className="unlock">
                   <LockIcon /> {D.report.unlock[L]}

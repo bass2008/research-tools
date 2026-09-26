@@ -9,14 +9,17 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from ..i18n import say
-from .. import access, mail, payments, printing, tariffs
+from ..i18n import say, current_locale, using_locale
+from .. import access, mail, payments, printing, sites, tariffs
+from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import (Entitlement, Payment, SavedMatrix, User, as_utc, default_title,
+from ..models import (Entitlement, Payment, SavedMatrix, User, as_utc,
                       utcnow)
 from ..schemas import PaymentIn, PaymentRef
+from ..payments.base import PaymentUrls
+from urllib.parse import urlencode
 from ..security import create_token, hash_password, random_password
 
 router = APIRouter(prefix="/payments", tags=["payments"])
@@ -28,7 +31,7 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
     if payload.matrix_id is not None:
         row = db.get(SavedMatrix, payload.matrix_id)
         if row is None or row.user_id != user.id:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
+            raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
     elif payload.birth is not None:
         # та же дата второй раз — та же запись: платёж не должен плодить дубли
         row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
@@ -36,7 +39,7 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
                                                  SavedMatrix.sex == (payload.sex or "f")))
         if row is None:
             row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex or "f",
-                              title=default_title(payload.birth))
+                              title=None)
             db.add(row)
             db.flush()
     else:
@@ -45,12 +48,12 @@ def _matrix_for(db: Session, user: User, payload: PaymentIn) -> SavedMatrix:
                           .order_by(SavedMatrix.id.desc())).all()
         found = next((r for r in rows if not access.unlocked_matrix(db, user, r.id)), None)
         if found is None:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                detail=say("pay.target_required"))
+            raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
+                                detail=lambda: say("pay.target_required"))
         row = found
     if access.unlocked_matrix(db, user, row.id):
-        raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail=say("pay.already_open"))
+        raise LocalizedHTTPException(status.HTTP_409_CONFLICT,
+                            detail=lambda: say("pay.already_open"))
     return row
 
 
@@ -66,8 +69,8 @@ def _buyer(db: Session, email: str) -> tuple[User, bool]:
         db.rollback()
         user = db.scalar(select(User).where(User.email == email))
         if user is None:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                                detail=say("pay.user_failed")) from None
+            raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
+                                detail=lambda: say("pay.user_failed")) from None
         return user, False
     return user, True
 
@@ -81,7 +84,7 @@ def _target(db: Session, user: User, payload: PaymentIn, tariff) -> SavedMatrix 
 def _tariff(db: Session, code: str):
     tariff = tariffs.get(db, code)
     if tariff is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.no_tariff"))
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.no_tariff"))
     return tariff
 
 
@@ -156,12 +159,14 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
         fresh = right.starts_at == now
         db.commit()
         if fresh:
-            mail.purchase(payment.user.email, payment.body()["name"], payment.external_id,
-                          matrix_id=payment.matrix_id)
+            with using_locale(payment.body().get("locale", "ru")), sites.using_site(sites.payment_site(payment)):
+                mail.purchase(payment.user.email, payment.body().get("display_name", payment.body()["name"]),
+                              payment.external_id, matrix_id=payment.matrix_id)
             # печать начинается сразу, не дожидаясь нажатия: на слабой машине она идёт десятки
             # секунд, и человеку незачем их ждать. Нажал раньше времени — запрос дождётся этой же
             # печати, второго рендера не будет.
-            printing.warm(payment.user_id, payment.matrix_id)
+            with using_locale(payment.body().get("locale", settings.site_lang)):
+                printing.warm(payment.user_id, payment.matrix_id)
     elif outcome is payments.Outcome.REFUNDED:
         first = payment.refunded_at is None
         payment.refunded_at = payment.refunded_at or now
@@ -170,7 +175,8 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
             right.revoked_at = right.revoked_at or now
         db.commit()
         if first and payment.paid_at is not None:
-            mail.refund(payment.user.email, payment.body()["name"], payment.external_id)
+            with using_locale(payment.body().get("locale", settings.site_lang)):
+                mail.refund(payment.user.email, payment.body().get("display_name", payment.body()["name"]), payment.external_id)
     else:
         db.commit()
     db.refresh(payment)
@@ -178,15 +184,15 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
 
 
 def _provider_of(payment: Payment) -> payments.Provider:
-    provider = payments.get(payment.provider)
+    provider = payments.for_payment(payment)
     if provider is None or not provider.enabled():
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail=say("pay.provider_down"))
+        raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail=lambda: say("pay.provider_down"))
     return provider
 
 
 def _reusable(db: Session, user: User, matrix: SavedMatrix | None,
-              provider: payments.Provider) -> Payment | None:
+              provider: payments.Provider, connection: sites.Connection) -> Payment | None:
     """Начатый, но не доведённый платёж за ту же дату. Две открытые страницы оплаты — это два
     независимых источника события, и без этой проверки каждая выставляла свой счёт: на живом
     терминале выходило два платежа по одной дате."""
@@ -200,6 +206,10 @@ def _reusable(db: Session, user: User, matrix: SavedMatrix | None,
         .order_by(Payment.id.desc()).limit(5)
     ).all()
     for row in rows:
+        if (sites.payment_connection(row) != connection
+                or sites.payment_site(row) != sites.current()
+                or row.body().get("locale", "ru") != current_locale()):
+            continue
         if (utcnow() - as_utc(row.created_at)).total_seconds() > settings.payment_reuse_seconds:
             continue
         # какие статусы ещё позволяют доплатить, знает провайдер, а не роутер
@@ -240,14 +250,16 @@ def _body(db: Session, payment: Payment, user: User, matrix: SavedMatrix | None,
     return body
 
 
-def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
+def _open(db: Session, payload: PaymentIn, connection: sites.Connection) -> dict:
     """Один путь для всех способов оплаты: покупатель, дата, платёж, обращение к провайдеру и
     применение исхода. Права выдаёт только apply(), поэтому мок и живой банк не расходятся."""
     # Витрина без оплаты: продавать нечего, разбор и так открыт. Проверка стоит в общей точке,
     # а не в маршрутах, — иначе мок и живой банк разошлись бы поведением.
     if settings.all_free_without_payment:
-        raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail=say("pay.all_free"))
+        raise LocalizedHTTPException(status.HTTP_409_CONFLICT,
+                            detail=lambda: say("pay.all_free"))
+    site = sites.current()
+    provider = payments.get(connection.provider)
     tariff = _tariff(db, payload.tariff)
     user, autoregistered = _buyer(db, payload.email)
     matrix = _target(db, user, payload, tariff)
@@ -256,16 +268,18 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     # прошедших платежа за одну дату: `_reusable` ловит только НЕоплаченные счета, а мок и
     # быстрый терминал закрывают платёж сразу.
     if matrix is not None and access.unlocked_matrix(db, user, matrix.id):
-        raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail=say("pay.already_open_dot"))
+        raise LocalizedHTTPException(status.HTTP_409_CONFLICT,
+                            detail=lambda: say("pay.already_open_dot"))
 
-    started_earlier = _reusable(db, user, matrix, provider)
+    started_earlier = _reusable(db, user, matrix, provider, connection)
     if started_earlier is not None:
         db.commit()
         return _body(db, started_earlier, user, matrix, tariff, started_earlier.order_id or "",
                      autoregistered)
 
-    payment = Payment(user_id=user.id, tariff_body=json.dumps(tariff.body(), ensure_ascii=False),
+    payment = Payment(user_id=user.id, tariff_body=json.dumps({**tariff.body(), "locale": current_locale(),
+                                            "display_name": tariff.public()["name"],
+                                            "site_origin": site.origin, "connection_id": connection.id}, ensure_ascii=False),
                       amount=tariff.price, matrix_id=matrix.id if matrix else None,
                       external_id=f"new-{uuid.uuid4().hex[:24]}", provider=provider.name,
                       status="NEW")
@@ -273,11 +287,15 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
     db.flush()
 
     order = payments.order_id(payment.id)
+    query = urlencode({"order": order, "lang": current_locale()})
+    urls = PaymentUrls(success=f"{site.origin}/pay/done?{query}",
+                       fail=f"{site.origin}/pay/fail?{query}",
+                       notification=connection.notification_url)
     try:
-        started = provider.start(order, tariff.price, tariff.name, user.email)
+        started = provider.start(order, tariff.price, tariff.name, user.email, urls=urls)
     except payments.PaymentError as exc:
         db.rollback()
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+        raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
 
     payment.external_id = started.external_id
     payment.pay_url = started.pay_url
@@ -289,8 +307,8 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
                                            outcome=started.outcome, status=started.status))
     except AlreadyGranted as exc:
         db.rollback()
-        raise HTTPException(status.HTTP_409_CONFLICT,
-                            detail=say("pay.already_open_dot")) \
+        raise LocalizedHTTPException(status.HTTP_409_CONFLICT,
+                            detail=lambda: say("pay.already_open_dot")) \
             from exc
     db.refresh(user)
 
@@ -299,25 +317,29 @@ def _open(db: Session, payload: PaymentIn, provider: payments.Provider) -> dict:
 
 @router.post("/start")
 def start(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
-    provider = payments.active()
-    if provider is None:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=say("pay.not_configured"))
-    return _open(db, payload, provider)
+    return _open(db, payload, payments.select_connection(payload.provider))
 
 
 @router.post("/notify/{provider_name}")
 def notify(provider_name: str, payload: dict, db: Session = Depends(get_db)) -> dict:
     """Уведомление провайдера. Подлинность проверяет он сам: без неё доступ открывал бы любой."""
-    provider = payments.get(provider_name)
+    connection = sites.connection_by_id(provider_name)
+    site = sites.current()
+    if (connection is None or connection not in site.payments
+            or connection.notification_url != f"{site.origin}/api/payments/notify/{provider_name}"):
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.no_method"))
+    provider = payments.get(connection.provider)
     if provider is None or not provider.enabled():
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.no_method"))
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.no_method"))
     try:
         update = provider.read_notification(payload)
     except payments.PaymentError as exc:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+        raise LocalizedHTTPException(status.HTTP_403_FORBIDDEN, detail=exc.public_message) from exc
     payment = _find(db, update.external_id, update.order_id)
-    if payment is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.not_found"))
+    if (payment is None or sites.payment_connection(payment) != connection
+            or (update.external_id and update.external_id != payment.external_id)
+            or (update.order_id and update.order_id != payment.order_id)):
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
     try:
         apply(db, payment, update)
     except AlreadyGranted:
@@ -342,13 +364,14 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
     """Спросить провайдера о статусе: на возвращении с формы уведомление могло не дойти."""
     payment = _find(db, None, payload.order_id)
     if payment is None or payment.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("pay.not_found"))
-    provider = payments.get(payment.provider)
-    if provider is not None and provider.enabled():
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
+    provider = payments.for_payment(payment)
+    if (provider is not None and provider.enabled()
+            and sites.payment_connection(payment) in sites.current().payments):
         try:
             apply(db, payment, provider.state(payment.external_id))
         except payments.PaymentError as exc:
-            raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+            raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
         except AlreadyGranted:
             # Доступ у человека есть, спрашивал он именно про него: это не ошибка, а ответ.
             db.rollback()
@@ -367,17 +390,16 @@ def _find(db: Session, external_id: str | None, order_id: str | None) -> Payment
         found = db.scalar(select(Payment).where(Payment.external_id == str(external_id)))
         if found is not None:
             return found
-    payment_id = payments.payment_id_of(order_id)
-    return db.get(Payment, payment_id) if payment_id else None
+    return None
 
 
 @router.post("/mock")
 def pay_mock(payload: PaymentIn, db: Session = Depends(get_db)) -> dict:
     """Оплата без денег для стенда и тестов. Идёт тем же путём, что живая, только провайдер мок."""
-    provider = payments.get("mock")
-    if provider is None or not provider.enabled():
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=say("pay.mock_off"))
-    return {**_open(db, payload, provider), "mock": True}
+    connection = payments.select_connection(payload.provider or "mock")
+    if connection.provider != "mock":
+        raise LocalizedHTTPException(status.HTTP_403_FORBIDDEN, detail=lambda: say("pay.mock_off"))
+    return {**_open(db, payload, connection), "mock": True}
 
 
 @router.get("")

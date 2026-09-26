@@ -1,16 +1,33 @@
-import { Fragment } from "react";
-import Link from "next/link";
-
-import Crumbs from "@/components/ui/Crumbs";
-import Price from "@/components/pay/Price";
+import { requestSite } from "@/lib/siteProfile.server";
+import type { SiteProfile } from "@/lib/siteProfile";
 import TariffScope from "@/components/legal/TariffScope";
+import Price from "@/components/pay/Price";
+import Crumbs from "@/components/ui/Crumbs";
 import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
 import type { Block, Chunk, LegalDoc } from "@/lib/legal/types";
-import { DISCLAIMER, LEGAL, SUPPORT_BOT } from "@/lib/site";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Tariff } from "@/lib/tariffs";
+import Link from "next/link";
+import { Fragment } from "react";
 
-function Piece({ chunk }: { chunk: Chunk }) {
+export const forLocale = localized((L: Locale, site) => {
+  const { DISCLAIMER, LEGAL, SUPPORT_BOT } = localizedSite(L, site);
+
+  function shown(block: Block): boolean {
+    if (!block.only) return true;
+    return block.only === (ALL_FREE ? "free" : "paid");
+  }
+  return { DISCLAIMER, LEGAL, SUPPORT_BOT, shown };
+});
+
+function Piece({ site, locale: requestedLocale, ...localeProps }: ({ chunk: Chunk; site: SiteProfile }) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const { chunk } = localeProps;
+  const { DISCLAIMER, LEGAL, SUPPORT_BOT } = forLocale(L, site);
+
   if (typeof chunk === "string") return <>{chunk}</>;
   if ("b" in chunk) return <b>{chunk.b}</b>;
   if ("legal" in chunk) return <span className="placeholder">{LEGAL[chunk.legal]}</span>;
@@ -22,49 +39,51 @@ function Piece({ chunk }: { chunk: Chunk }) {
       <a href={`https://t.me/${SUPPORT_BOT}`} target="_blank" rel="noopener">@{SUPPORT_BOT}</a>
     );
   }
-  if ("price" in chunk) return <Price />;
-  if ("paid" in chunk) return ALL_FREE ? null : <Line chunks={chunk.paid} />;
-  if ("free" in chunk) return ALL_FREE ? <Line chunks={chunk.free} /> : null;
+  if ("price" in chunk) return <Price locale={L} />;
+  if ("paid" in chunk) return ALL_FREE ? null : <Line site={site} locale={L} chunks={chunk.paid} />;
+  if ("free" in chunk) return ALL_FREE ? <Line site={site} locale={L} chunks={chunk.free} /> : null;
   return <>{DISCLAIMER}</>;
 }
 
-function Line({ chunks }: { chunks: Chunk[] }) {
+function Line({ site, locale: requestedLocale, ...localeProps }: ({ chunks: Chunk[]; site: SiteProfile }) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const { chunks } = localeProps;
+
   return (
     <>
       {chunks.map((chunk, i) => (
         <Fragment key={i}>
-          <Piece chunk={chunk} />
+          <Piece site={site} locale={L} chunk={chunk} />
         </Fragment>
       ))}
     </>
   );
 }
 
-function shown(block: Block): boolean {
-  if (!block.only) return true;
-  return block.only === (ALL_FREE ? "free" : "paid");
-}
-
-export default function LegalDocView(
-  { doc, crumb, tariffs = [] }: { doc: LegalDoc; crumb: string; tariffs?: Tariff[] },
+export default async function LegalDocView({ locale: requestedLocale, ...localeProps }: ({ doc: LegalDoc; crumb: string; tariffs?: Tariff[] }) & { locale?: Locale }
 ) {
+  const L = requestedLocale ?? defaultLocale;
+  const { doc, crumb, tariffs = [] } = localeProps;
+  const site = await requestSite();
+  const { shown } = forLocale(L, site);
+
   return (
     <main id="content" className="page">
       <div className="wrap prose">
-        <Crumbs trail={[{ name: D.nav.home[L], path: "/" }, { name: crumb }]} />
+        <Crumbs locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: crumb }]} />
         <h1>{doc.h1}</h1>
-        {doc.lead ? <p className="updated"><Line chunks={doc.lead} /></p> : null}
+        {doc.lead ? <p className="updated"><Line site={site} locale={L} chunks={doc.lead} /></p> : null}
         {doc.blocks.filter(shown).map((block, i) => {
           if ("h2" in block) return <h2 key={i}>{block.h2}</h2>;
-          if ("p" in block) return <p key={i}><Line chunks={block.p} /></p>;
+          if ("p" in block) return <p key={i}><Line site={site} locale={L} chunks={block.p} /></p>;
           if ("ul" in block) {
             return (
               <ul key={i}>
-                {block.ul.map((item, j) => <li key={j}><Line chunks={item} /></li>)}
+                {block.ul.map((item, j) => <li key={j}><Line site={site} locale={L} chunks={item} /></li>)}
               </ul>
             );
           }
-          return <TariffScope key={i} as={block.tariffs} tariffs={tariffs} />;
+          return <TariffScope locale={L} key={i} as={block.tariffs} tariffs={tariffs} />;
         })}
       </div>
     </main>

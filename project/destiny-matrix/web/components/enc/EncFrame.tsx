@@ -1,18 +1,19 @@
 "use client";
 
-import { D, L } from "@/lib/i18n";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import {
+  forLocale as localizedEncyclopediaNavigation,
+  type EncyclopediaSectionKey,
+  type EncyclopediaSectionMeta,
+  type PositionSectionKey
+} from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useUrlParam } from "@/lib/useUrlParam";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
-
-import { useUrlParam } from "@/lib/useUrlParam";
-import {
-  encyclopediaSectionFromPath,
-  encyclopediaSectionHref,
-  type EncyclopediaSectionKey,
-  type EncyclopediaSectionMeta,
-  type PositionSectionKey,
-} from "@/lib/encyclopediaNavigation";
 
 // Каркас справочника: карусель и меню разделов стоят на месте, меняется только рабочая область.
 // Раздел на самой /encyclopedia переключается здесь же, на детальных страницах он выводится
@@ -21,19 +22,30 @@ export interface EncSectionMeta extends EncyclopediaSectionMeta {
   count: number;
 }
 
-export default function EncFrame({
-  sections,
-  positionKinds,
-  articlePaths = [],
-  children,
-}: {
+export const forLocale = localized((L: Locale) => {
+  const { encyclopediaSectionFromPath, encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
+
+  return { encyclopediaSectionFromPath, encyclopediaSectionHref };
+});
+
+export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
   sections: EncSectionMeta[];
   /** ключ позиции → раздел: «Разделы отчёта» и «Позиции карты» лежат в одном роуте */
   positionKinds: Record<string, PositionSectionKey>;
   /** адреса статей-хабов: они вне /encyclopedia, но принадлежат разделу «Статьи» */
   articlePaths?: string[];
   children: ReactNode;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    sections,
+    positionKinds,
+    articlePaths = [],
+    children,
+  } = localeProps;
+  const { encyclopediaSectionFromPath, encyclopediaSectionHref } = forLocale(L);
+
   const path = usePathname();
   const fromPath = useMemo(
     () => encyclopediaSectionFromPath(path, positionKinds, articlePaths),
@@ -69,34 +81,36 @@ export default function EncFrame({
     const wanted = relativeLeft - (bar.clientWidth - elRect.width) / 2;
     const max = Math.max(0, bar.scrollWidth - bar.clientWidth);
     bar.scrollLeft = Math.min(max, Math.max(0, wanted));
-  }, [active]);
+    // A translation changes the widths of the preceding items while the active
+    // section stays the same. Re-center it after switching language as well.
+  }, [active, L]);
 
   return (
     <div className="enc-layout">
-        <nav className="enc-nav" ref={nav} aria-label={D.octagram.encNavAria[L]}>
-          {sections.map((s) =>
-            standalone ? (
-              <Link
-                key={s.key}
-                className={s.key === active ? "enc-navi on" : "enc-navi"}
-                href={encyclopediaSectionHref(s.key)}
-              >
-                {s.title}
-                <i>{s.count}</i>
-              </Link>
-            ) : (
-              <a
-                key={s.key}
-                className={s.key === active ? "enc-navi on" : "enc-navi"}
-                aria-current={s.key === active}
-                href={encyclopediaSectionHref(s.key)}
-              >
-                {s.title}
-                <i>{s.count}</i>
-              </a>
-            ),
-          )}
-        </nav>
+      <nav className="enc-nav" ref={nav} aria-label={D.octagram.encNavAria[L]}>
+        {sections.map((s) =>
+          standalone ? (
+            <Link
+              key={s.key}
+              className={s.key === active ? "enc-navi on" : "enc-navi"}
+              href={encyclopediaSectionHref(s.key)}
+            >
+              {s.title}
+              <i>{s.count}</i>
+            </Link>
+          ) : (
+            <a
+              key={s.key}
+              className={s.key === active ? "enc-navi on" : "enc-navi"}
+              aria-current={s.key === active}
+              href={encyclopediaSectionHref(s.key)}
+            >
+              {s.title}
+              <i>{s.count}</i>
+            </a>
+          ),
+        )}
+      </nav>
 
       <div className="enc-panes">{children}</div>
     </div>

@@ -1,30 +1,26 @@
-import { D, L } from "@/lib/i18n";
-import type { Metadata } from "next";
-import Link from "next/link";
-
+import { requestSite } from "@/lib/siteProfile.server";
+import PositionMap from "@/components/enc/PositionMap";
+import Sections from "@/components/enc/Sections";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
-import PositionMap from "@/components/enc/PositionMap";
-import Sections from "@/components/enc/Sections";
-
-import { arcanumTitle } from "@/lib/arcana";
-import { arcanumHref, positionByKey } from "@/lib/encyclopedia";
-import {
-  buildPositionArcanum,
-  positionArcanumHref,
-  positionArcanumLabel,
-  positionArcanumSiblings,
-  registryItem,
-  registryItems,
-} from "@/lib/positionArcanum";
-import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
-import { articleLd, faqLd } from "@/lib/schema";
-import { NOT_FOUND_META } from "@/lib/seo";
-import { mapPointsFor } from "@/lib/matrixMap";
-import { pageMeta } from "@/lib/site";
-import { clip } from "@/lib/text";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
+import { forLocale as localizedPositionArcanum } from "@/lib/positionArcanum";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSeo } from "@/lib/seo";
+import { forLocale as localizedSite } from "@/lib/site";
+import { forLocale as localizedText } from "@/lib/text";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 type Params = { key: string; n: string };
 
@@ -33,18 +29,37 @@ type Params = { key: string; n: string };
 // который уже дал 76 страниц хвостов на один показ за шесть дней.
 export const dynamicParams = false;
 
+const forLocale = localized((L: Locale, site) => {
+  const { arcanumTitle } = localizedArcana(L);
+  const { arcanumHref, positionByKey } = localizedEncyclopedia(L);
+  const { buildPositionArcanum, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, registryItem, registryItems } = localizedPositionArcanum(L);
+  const { encyclopediaSectionCrumb } = localizedEncyclopediaNavigation(L);
+  const { articleLd, faqLd } = localizedSchema(L, site);
+  const { NOT_FOUND_META } = localizedSeo(L, site);
+  const { mapPointsFor } = localizedMatrixMap(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { clip } = localizedText(L);
+
+  function data(params: Params) {
+    const arcanum = Number(params.n);
+    if (!Number.isInteger(arcanum)) return null;
+    if (!registryItem(params.key, arcanum)) return null;
+    return buildPositionArcanum(params.key, arcanum);
+  }
+  return { arcanumTitle, arcanumHref, positionByKey, buildPositionArcanum, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, registryItem, registryItems, encyclopediaSectionCrumb, articleLd, faqLd, NOT_FOUND_META, mapPointsFor, pageMeta, clip, data };
+});
+
 export function generateStaticParams(): Params[] {
+  const L = defaultLocale;
+  const { registryItems } = forLocale(L);
+
   return registryItems().map((item) => ({ key: item.position, n: String(item.arcanum) }));
 }
 
-function data(params: Params) {
-  const arcanum = Number(params.n);
-  if (!Number.isInteger(arcanum)) return null;
-  if (!registryItem(params.key, arcanum)) return null;
-  return buildPositionArcanum(params.key, arcanum);
-}
-
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const L = await publicLocale();
+  const { positionArcanumHref, registryItem, NOT_FOUND_META, pageMeta, data } = forLocale(L, await requestSite());
+
   const resolved = await params;
   const reading = data(resolved);
   if (!reading) return NOT_FOUND_META;
@@ -60,8 +75,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function PositionArcanumPage({ params }: { params: Promise<Params> }) {
+  const L = await requestLocale();
+  const { arcanumTitle, arcanumHref, positionByKey, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, encyclopediaSectionCrumb, articleLd, faqLd, mapPointsFor, clip, data } = forLocale(L, await requestSite());
+
   const reading = data(await params);
-  if (!reading) return null;
+  if (!reading) notFound();
   const place = positionByKey(reading.position);
   const path = positionArcanumHref(reading.position, reading.arcanum);
   const siblings = positionArcanumSiblings(reading.position, reading.arcanum);
@@ -70,7 +88,7 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
 
   return (
     <>
-      <CrumbsLd
+      <CrumbsLd locale={L}
         trail={[
           { name: D.nav.home[L], path: "/" },
           { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
@@ -87,13 +105,13 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
       <h1>{reading.title}</h1>
       <p className="dim prose">{reading.short}</p>
 
-      <PositionMap
+      <PositionMap locale={L}
         highlight={spots}
         caption={spots.length === 1
           ? D.encPosition.whereOnePoint[L](`${spots[0]!.label} · ${spots[0]!.symbol}`)
           : D.encPosition.whereSeveralPoints[L](
-              spots.map((x) => `${x.label} · ${x.symbol}`).join(", "),
-            )}
+            spots.map((x) => `${x.label} · ${x.symbol}`).join(", "),
+          )}
       />
 
       <Sections items={reading.sections} />
@@ -116,14 +134,14 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
       ) : null}
 
       <div className="section-gap">
-        <CalcPromo
+        <CalcPromo locale={L}
           title={D.encLinks.promoCrossTitle[L]}
           lead={D.encLinks.promoCrossLead[L]}
           place="position-arcanum"
         />
       </div>
 
-      <Faq items={reading.faq} />
+      <Faq locale={L} items={reading.faq} />
 
       <div className="panel section-gap">
         <h3>{D.encLinks.nearby[L]}</h3>

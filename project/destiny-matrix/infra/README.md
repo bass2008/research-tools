@@ -1,13 +1,16 @@
-# infra — инфраструктура и деплой arcana-sense.ru
+# infra — инфраструктура и деплой Arcana Sense
+
+Оба production-домена обслуживает одно приложение; оба test-домена — другое окружение
+того же приложения. Языковые правила — [runtime-localization.md](../docs/runtime-localization.md).
 
 Сайт отдают **три контейнера на одной машине**: node-сервер Next.js (`web`), FastAPI (`api`) и
 Chromium для печати PDF (`browser`); nginx — единая точка входа с TLS. На хосте нет ни node, ни
 python. База — файл в томе `api-var`, он переживает пересборку образа. Статику `_next/static`
 web-контейнер выкладывает при старте в `/srv/arcana/static`, откуда её отдаёт nginx с диска.
-Решение и его причины — `docs/api-contract.md`, раздел «Раскладка деплоя — решено».
+Запуск и тома БД — [compose/README.md](../compose/README.md).
 
-**Релиз живёт не здесь, а в `compose/scripts/`:** `release-test.sh` — на тестовый домен,
-`release-prod.sh` — на прод. Оба собирают образы, отправляют их в реестр Selectel (CRaaS) и на
+**Релиз живёт не здесь, а в `compose/scripts/`:** `release-test.sh` — на оба тестовых домена,
+`release-prod.sh` — на оба production-домена. Оба собирают образы, отправляют их в реестр Selectel (CRaaS) и на
 машине делают только `docker compose pull` и рестарт `arcana.service`. Здесь, в `infra/`, остаётся то,
 что живёт вне образов: nginx, машина, приёмка.
 
@@ -22,9 +25,9 @@ infra/
   deploy-nginx.sh          разложить конфиги nginx: бэкап → nginx -t → reload, при ошибке откат
   arcana-registry-login    вход машины в CRaaS: токен лежит в /root/.craas
   nginx/                   источник правды для nginx
-    arcana-selectel.conf       прод и лендинг: статика с диска, таймаут печати, путь ACME
+    arcana-selectel.conf       prod .ru/.com и лендинг: статика, таймаут печати, путь ACME
     arcana-test-selectel.conf  тестовый домен: пароль, noindex, открытые вебхук банка и health
-    arcana-test-en-selectel.conf  английский тест: тот же пароль, свой порт 3300, вебхука банка нет
+    arcana-test-en-selectel.conf  test .com: порт 3300 того же web; Т-Банк не разрешён, callback идёт на .ru
     arcana.conf, arcana-test.conf  прежняя раскладка в Yandex Cloud, остались для истории
     conf.d/                настройки уровня http: сжатие, лимиты, формат лога, карты фильтров
     snippets/              правила отсечения сканеров, подключаются в оба server-блока
@@ -105,9 +108,12 @@ cd ../../compose && scripts/release-prod.sh
 
 | скрипт | куда | тег образов | чем отличается |
 |---|---|---|---|
-| `release-test.sh` | `test.arcana-sense.ru` | `test-<sha>` | своя база, тестовый терминал банка, Метрика в сборку не попадает, домен под Basic Auth |
-| `release-test-eng.sh` | `test.arcana-sense.com` | `test-en-<sha>` | язык `en` вшит в образ, витрина без оплаты, своя база, кассы нет вовсе |
-| `release-prod.sh` | `arcana-sense.ru` | `<sha>` | требует `REQUIRE_TEST_EVIDENCE=1`: тот же коммит обязан был пройти на тесте |
+| `release-test.sh` | `test.arcana-sense.ru` и `.com` | `test-<sha>` | одна тестовая БД, тестовый банк, Метрика выключена, Basic Auth |
+| `release-prod.sh` | `arcana-sense.ru` и `.com` | `<sha>` | общая БД, приёмка того же commit на test, счётчики по доменам |
+
+`release-*-eng.sh` — совместимые обёртки общего релиза, а не второй этап выкладки.
+Bootstrap выводит по одному вызову каждого общего релиза. Последовательность проверок —
+в [процессе релиза](../docs/release-process.md).
 
 Что важно знать про механику:
 
@@ -117,7 +123,8 @@ cd ../../compose && scripts/release-prod.sh
 - **откат.** Прошлый тег лежит на машине в `/srv/arcana/.env.previous.tag`: вернуть его в `.env`
   и `systemctl restart arcana` (готовый сценарий — `compose/scripts/rollback-prod.sh`). Образы прошлого релиза чистятся не раньше суток
   (`docker image prune --filter until=24h`), поэтому pull за ними не пойдёт.
-- **статика.** Web-контейнер при старте копирует `_next/static` в `/srv/arcana/static`, и nginx
+- **статика.** Один web-контейнер копирует одинаковую `_next/static` в каталоги обоих доменов
+  (`static`/`static-prod-en` на prod, `static-test`/`static-test-en` на test), и nginx
   отдаёт её с диска. Вкладка, открытая до релиза, догрузит свои чанки, пока каталог не
   перезаписан следующим релизом.
 - **схема базы.** Отдельного шага миграций нет: контейнер API при старте вызывает
@@ -137,3 +144,12 @@ cd ../../compose && scripts/release-prod.sh
 `destiny_session`. Прямого пути к FastAPI снаружи нет: `api.` отвечает 301 на сайт, порт 8010
 слушает только localhost. `check.sh` проверяет и это: `/api/auth/me` без куки обязан отдать 401,
 а имя куки не должно встречаться в HTML.
+
+## Почтовый домен
+
+Для обоих доменов приложения используется почта `arcana-sense.com`:
+приём `hello@arcana-sense.com` через ImprovMX (`mx1/mx2.improvmx.com`),
+отправка `noreply@arcana-sense.com` через Yandex Postbox с DKIM.
+В сохранённой конфигурации SPF — `v=spf1 include:spf.improvmx.com include:_spf.yandex.net -all`,
+DMARC — `p=reject`. Это описание существующей настройки, не инструкция менять DNS
+при добавлении языка. Текущие DNS-записи перед эксплуатационными изменениями проверяются отдельно.

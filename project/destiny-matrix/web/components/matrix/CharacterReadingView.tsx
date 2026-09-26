@@ -1,28 +1,44 @@
-import Link from "next/link";
-
-import { arcanumTitle } from "@/lib/arcana";
-import { D, L } from "@/lib/i18n";
-import { columnTitle } from "@/lib/i18n/publicLabels";
+import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedPublicLabels } from "@/lib/i18n/publicLabels";
+import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
 import type { LongformReading } from "@/lib/readingTypes";
-import { arcanumHref } from "@/lib/publicSpec";
-import { publicHref } from "@/lib/site";
-
+import { readingRoleReference, readingRoleSymbol } from "@/lib/readingRoleLabel";
+import { forLocale as localizedSite } from "@/lib/site";
+import Link from "next/link";
 import ArcanumCard from "./ArcanumCard";
 import CharacterConclusionView from "./CharacterConclusionView";
 import CharacterRoleParts from "./CharacterRoleParts";
 
-export default function CharacterReadingView({
-  reading,
-  printing = false,
-  showRoles = true,
-}: {
+export const forLocale = localized((L: Locale, site) => {
+  const { arcanumTitle } = localizedArcana(L);
+  const { columnTitle } = localizedPublicLabels(L);
+  const { arcanumHref } = localizedPublicSpec(L);
+  const { publicHref } = localizedSite(L, site);
+
+  return { arcanumTitle, columnTitle, arcanumHref, publicHref };
+});
+
+export default function CharacterReadingView({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
   reading: LongformReading;
   printing?: boolean;
   showRoles?: boolean;
-}) {
+}) & { locale?: Locale; site?: SiteProfile }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    reading,
+    printing = false,
+    showRoles = true,
+  } = localeProps;
+  const { arcanumTitle, columnTitle, arcanumHref, publicHref } = forLocale(L, site);
+
   const href = (path: string) => (printing ? publicHref(path) : path);
   const rolesTitleId = `${reading.testId}-roles-title`;
   const interactionsTitleId = `${reading.testId}-interactions-title`;
+  const roleReferences = new Map(reading.roles.map((role) => [role.key, readingRoleReference(role)]));
 
   return (
     <article className="character-reading" data-testid={reading.testId}>
@@ -91,7 +107,7 @@ export default function CharacterReadingView({
                     {period.arcanum} · {period.title}
                   </Link>
                 </h3>
-                <CharacterRoleParts role={period} />
+                <CharacterRoleParts locale={L} role={period} />
               </div>
             ))}
           </div>
@@ -105,9 +121,9 @@ export default function CharacterReadingView({
               <div className="character-role panel" key={role.key} data-role={role.key}>
                 <Link className="poscard" href={href(arcanumHref(role.arcanum))}>
                   <span className="who">
-                    {role.key} · {role.label}
+                    {readingRoleSymbol(role) ? `${readingRoleSymbol(role)} · ` : ""}{role.label}
                   </span>
-                  <ArcanumCard n={role.arcanum} size="grid" decorative half={printing} />
+                  <ArcanumCard locale={L} n={role.arcanum} size="grid" decorative half={printing} />
                   <span className="lb">
                     <span className="nm">
                       <span className="rn">{role.arcanum}</span> {role.title}
@@ -120,7 +136,7 @@ export default function CharacterReadingView({
                     {D.sheet.sameAsRole[L](role.sameAs.label)}
                   </p>
                 ) : (
-                  <CharacterRoleParts role={role} />
+                  <CharacterRoleParts locale={L} role={role} />
                 )}
               </div>
             ))}
@@ -136,7 +152,7 @@ export default function CharacterReadingView({
             {interaction.caption ? (
               <p className="cap">{interaction.caption}</p>
             ) : interaction.roles.length ? (
-              <p className="cap">{D.sheet.interactionRoles[L](interaction.roles.join("–"))}</p>
+              <p className="cap">{D.sheet.interactionRoles[L](interaction.roles.map((key) => roleReferences.get(key) ?? key).join("–"))}</p>
             ) : null}
             <h3>{interaction.title}</h3>
             {interaction.paragraphs.map((paragraph, index) => (
@@ -151,7 +167,7 @@ export default function CharacterReadingView({
         ))}
       </section>
 
-      <CharacterConclusionView
+      <CharacterConclusionView locale={L}
         reading={reading}
         showSummary={false}
         idPrefix={reading.testId}

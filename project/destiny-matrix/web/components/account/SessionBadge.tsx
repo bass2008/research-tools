@@ -3,33 +3,43 @@
 import { useState } from "react";
 
 // Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
+import { useSession } from "@/components/account/useSession";
+import { useLocale } from "@/components/ui/LocaleProvider";
 import SiteLink from "@/components/ui/SiteLink";
-import { D, L } from "@/lib/i18n";
-
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
 import { personVisible } from "@/lib/session";
 
-import { useSession } from "@/components/account/useSession";
+export const forLocale = localized((L: Locale) => {
 
-const ROW: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 10,
-  font: "600 13px var(--sans)",
-  color: "var(--dim)",
-  whiteSpace: "nowrap",
-};
+  const ROW: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    font: "600 13px var(--sans)",
+    color: "var(--dim)",
+    whiteSpace: "nowrap",
+  };
 
-const BTN: React.CSSProperties = {
-  background: "none",
-  border: "none",
-  padding: 0,
-  font: "inherit",
-  color: "inherit",
-  cursor: "pointer",
-  width: "auto",
-};
+  const BTN: React.CSSProperties = {
+    background: "none",
+    border: "none",
+    padding: 0,
+    font: "inherit",
+    color: "inherit",
+    cursor: "pointer",
+    width: "auto",
+  };
+  return { ROW, BTN };
+});
 
-export default function SessionBadge({ plain }: { plain?: boolean }) {
+export default function SessionBadge({ locale: requestedLocale, ...localeProps }: ({ plain?: boolean }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { plain } = localeProps;
+  const { ROW, BTN } = forLocale(L);
+
   const session = useSession();
   // сервер не подтвердил выход: кука жива, и человек должен это знать
   const [failed, setFailed] = useState(false);

@@ -1,5 +1,7 @@
 import type { PaymentResponse } from "./api";
-import { normalizeEmail } from "./email";
+import { forLocale as localizedEmail } from "./email";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
+import { localized } from "./i18n/localized";
 
 /**
  * Экран оплаты как конечный автомат.
@@ -31,35 +33,44 @@ export type PayEvent =
   | { type: "receipt-unreachable" }
   | { type: "restart" };
 
-export const START: Stage = { kind: "form" };
+/** A locale-bound view; safe to use alongside other languages. */
+export const forLocale = localized((L: Locale) => {
+  const { normalizeEmail } = localizedEmail(L);
 
-export function reduce(stage: Stage, event: PayEvent): Stage {
-  switch (event.type) {
-    case "paid":
-      return {
-        kind: "paid",
-        paymentId: event.paymentId,
-        email: event.email,
-        matrix: event.matrix,
-      };
-    case "password-needed":
-      return { kind: "login-needed", email: event.email };
-    case "email-changed":
-      // требование пароля привязано к своей почте: сменили её — требование снято
-      return stage.kind === "login-needed" && stage.email !== normalizeEmail(event.email)
-        ? START
-        : stage;
-    case "receipt-missing":
-      // платёж по адресу не найден или возвращён: чек не показываем
-      return stage.kind === "paid" ? stage : START;
-    case "receipt-unreachable":
-      return stage.kind === "paid" ? stage : { kind: "unchecked" };
-    case "restart":
-      return START;
+  const START: Stage = { kind: "form" };
+
+  function reduce(stage: Stage, event: PayEvent): Stage {
+    switch (event.type) {
+      case "paid":
+        return {
+          kind: "paid",
+          paymentId: event.paymentId,
+          email: event.email,
+          matrix: event.matrix,
+        };
+      case "password-needed":
+        return { kind: "login-needed", email: event.email };
+      case "email-changed":
+        // требование пароля привязано к своей почте: сменили её — требование снято
+        return stage.kind === "login-needed" && stage.email !== normalizeEmail(event.email)
+          ? START
+          : stage;
+      case "receipt-missing":
+        // платёж по адресу не найден или возвращён: чек не показываем
+        return stage.kind === "paid" ? stage : START;
+      case "receipt-unreachable":
+        return stage.kind === "paid" ? stage : { kind: "unchecked" };
+      case "restart":
+        return START;
+    }
   }
-}
 
-/** Требуется ли пароль владельца именно для этой почты. */
-export function needsOwnerPassword(stage: Stage, email: string): boolean {
-  return stage.kind === "login-needed" && stage.email === normalizeEmail(email);
-}
+  /** Требуется ли пароль владельца именно для этой почты. */
+  function needsOwnerPassword(stage: Stage, email: string): boolean {
+    return stage.kind === "login-needed" && stage.email === normalizeEmail(email);
+  }
+  return { START, reduce, needsOwnerPassword };
+});
+
+// Compatibility for callers that explicitly use the deployment default.
+export const { START, reduce, needsOwnerPassword } = forLocale(defaultLocale);

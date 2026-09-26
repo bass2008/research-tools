@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from .. import sites
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from ..i18n import say
+from ..i18n import say, current_locale
 from .. import access, audit
+from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
@@ -21,11 +24,12 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register")
 def register(payload: Credentials, request: Request, db: Session = Depends(get_db)) -> dict:
+    sites.current()  # Проверяем контекст до записи пользователя и отправки письма.
     ip = audit.client_ip(request)
     exists = db.scalar(select(User).where(User.email == payload.email))
     if exists:
         audit.record("register", "failed", email=payload.email, ip=ip)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=say("auth.email_taken"))
+        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST, detail=lambda: say("auth.email_taken"))
     user = User(email=payload.email, password_hash=hash_password(payload.password))
     db.add(user)
     try:
@@ -33,8 +37,8 @@ def register(payload: Credentials, request: Request, db: Session = Depends(get_d
     except IntegrityError:
         db.rollback()
         audit.record("register", "failed", email=payload.email, ip=ip)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail=say("auth.email_taken")) from None
+        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
+                            detail=lambda: say("auth.email_taken")) from None
     db.refresh(user)
     mail.welcome(user.email)
     audit.record("register", "success", email=user.email, ip=ip)
@@ -48,7 +52,7 @@ def login(payload: Credentials, request: Request, db: Session = Depends(get_db))
     audit.record("login", "success" if ok else "failed", email=payload.email,
                  ip=audit.client_ip(request))
     if not ok:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("auth.bad_credentials"))
+        raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("auth.bad_credentials"))
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}
 
 
@@ -78,10 +82,11 @@ def me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dic
 def reset_request(payload: ResetRequest, request: Request, db: Session = Depends(get_db)) -> dict:
     """Просьба о сбросе. Ответ одинаков и для существующей почты, и для чужой: иначе форма
     превращается в проверку, зарегистрирован ли адрес."""
+    sites.current()
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is not None:
         token = create_reset_token(user.id, user.password_hash)
-        mail.reset(user.email, f"{settings.site_url}/reset?token={token}", settings.reset_ttl_hours)
+        mail.reset(user.email, f"{sites.current().origin}/reset?lang={current_locale()}&token={token}", settings.reset_ttl_hours)
     # исход журналируется внутренне; наружу ответ по-прежнему одинаков (без утечки перечисления)
     audit.record("reset", "success" if user is not None else "failed", email=payload.email,
                  ip=audit.client_ip(request))
@@ -92,14 +97,14 @@ def reset_request(payload: ResetRequest, request: Request, db: Session = Depends
 def reset_apply(payload: ResetApply, db: Session = Depends(get_db)) -> dict:
     read = read_reset_token(payload.token)
     if read is None:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail=say("auth.link_invalid"))
+        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
+                            detail=lambda: say("auth.link_invalid"))
     user_id, fingerprint = read
     user = db.get(User, user_id)
     # отпечаток старого пароля в подписи: ссылкой нельзя воспользоваться дважды
     if user is None or password_fingerprint(user.password_hash) != fingerprint:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail=say("auth.link_used"))
+        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
+                            detail=lambda: say("auth.link_used"))
     user.password_hash = hash_password(payload.password)
     db.commit()
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}

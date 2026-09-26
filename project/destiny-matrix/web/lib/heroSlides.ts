@@ -1,5 +1,7 @@
-import { encyclopediaSectionHref } from "./encyclopediaNavigation";
-import { D, L } from "./i18n";
+import { forLocale as localizedEncyclopediaNavigation } from "./encyclopediaNavigation";
+import { D } from "./i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
+import { localized } from "./i18n/localized";
 
 export interface HeroSlide {
   eyebrow: string;
@@ -8,32 +10,41 @@ export interface HeroSlide {
   link: { label: string; href: string };
 }
 
-// Тексты слайдов живут в словаре языка, адреса — здесь: путь у всех языков один.
-const LANDING_HREFS = [
-  "/#plans",
-  encyclopediaSectionHref("pts"),
-  encyclopediaSectionHref("arc"),
-  "/year",
-  "/matrix",
-];
+/** A locale-bound view; safe to use alongside other languages. */
+export const forLocale = localized((L: Locale) => {
+  const { encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
 
-const ENCYCLOPEDIA_HREFS = [
-  "/#plans",
-  encyclopediaSectionHref("pts"),
-  encyclopediaSectionHref("arc"),
-  "/year",
-  encyclopediaSectionHref("sec"),
-];
+  // Тексты слайдов живут в словаре языка, адреса — здесь: путь у всех языков один.
+  const LANDING_HREFS = [
+    "/#plans",
+    encyclopediaSectionHref("pts"),
+    encyclopediaSectionHref("arc"),
+    "/year",
+    "/matrix",
+  ];
 
-function slides(rows: typeof D.slides.landing, hrefs: string[]): HeroSlide[] {
-  return rows.map((row, index) => ({
-    eyebrow: row.eyebrow[L],
-    heading: row.heading[L],
-    link: { label: row.link[L], href: hrefs[index] },
-  }));
-}
+  const ENCYCLOPEDIA_HREFS = [
+    "/#plans",
+    encyclopediaSectionHref("pts"),
+    encyclopediaSectionHref("arc"),
+    "/year",
+    encyclopediaSectionHref("sec"),
+  ];
 
-// Порядок совпадает с порядком композиций в CalcHero: веер, кольцо, триптих, лента, мозаика.
-export const LANDING_SLIDES: HeroSlide[] = slides(D.slides.landing, LANDING_HREFS);
+  function slides(rows: typeof D.slides.landing, hrefs: string[]): HeroSlide[] {
+    return rows.map((row, index) => ({
+      eyebrow: row.eyebrow[L],
+      heading: row.heading[L],
+      link: { label: row.link[L], href: hrefs[index] },
+    }));
+  }
 
-export const ENCYCLOPEDIA_SLIDES: HeroSlide[] = slides(D.slides.encyclopedia, ENCYCLOPEDIA_HREFS);
+  // Порядок совпадает с порядком композиций в CalcHero: веер, кольцо, триптих, лента, мозаика.
+  const LANDING_SLIDES: HeroSlide[] = slides(D.slides.landing, LANDING_HREFS);
+
+  const ENCYCLOPEDIA_SLIDES: HeroSlide[] = slides(D.slides.encyclopedia, ENCYCLOPEDIA_HREFS);
+  return { LANDING_SLIDES, ENCYCLOPEDIA_SLIDES };
+});
+
+// Compatibility for callers that explicitly use the deployment default.
+export const { LANDING_SLIDES, ENCYCLOPEDIA_SLIDES } = forLocale(defaultLocale);

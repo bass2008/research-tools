@@ -234,7 +234,7 @@ def test_a9_buy_button_after_payment_opens_the_form(page, mail):
         "на /pay остался чек, формы оплаты нет"
 
 
-def test_a11_pdf_keeps_the_footer(page, mail):
+def test_a11_pdf_keeps_the_footer(page, mail, print_site):
     """A11. Подпись внизу разбора должна попадать в файл: лист упирался в предел формата."""
     flows.buy(page, mail, 14, 3, 1990, sex="f")
     page.get_by_role("link", name="Открыть полный разбор").click()
@@ -246,14 +246,19 @@ def test_a11_pdf_keeps_the_footer(page, mail):
         lambda r: "/api/reports/pdf" in r.url and r.status == 200, timeout=180_000
     ) as caught:
         button.click()
-    with urllib.request.urlopen(caught.value.json()["url"], timeout=90) as file:
+    url = caught.value.json()["url"]
+    from urllib.parse import urlsplit
+    if urlsplit(url).path == "/api/reports/file":
+        assert urlsplit(url).netloc == urlsplit(BASE).netloc, "скачивание ушло на другой домен"
+    with urllib.request.urlopen(url, timeout=90) as file:
         pdf = file.read()
 
     # Извлекаем pypdf, а не pdftotext: на этих шрифтах у части листа ломается ToUnicode,
     # и pdftotext не находит подпись, которая в файле есть. Проверяем продукт, а не извлекатель.
     pages = pypdf.PdfReader(io.BytesIO(pdf)).pages
     words = "".join(page.extract_text() or "" for page in pages)
-    assert "arcana-sense.ru" in words, "подписи «Arcana Sense · arcana-sense.ru» в файле нет"
+    from urllib.parse import urlsplit
+    assert "Arcana Sense" in words and urlsplit(print_site).netloc in words, "подписи сервиса внизу PDF нет"
 
 
 def test_a13_consent_links_open_in_a_new_tab(page, mail):

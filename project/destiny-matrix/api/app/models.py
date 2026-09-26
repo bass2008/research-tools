@@ -9,7 +9,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
-from .i18n import say
+from .i18n import say, current_locale
 
 
 def utcnow() -> dt.datetime:
@@ -60,7 +60,8 @@ class Tariff(Base):
                 "scope": self.scopes(), "period_days": self.period_days}
 
     def public(self) -> dict:
-        return self.body()
+        from .tariffs import display_name
+        return {**self.body(), "name": display_name(self.id, self.name)}
 
 
 class User(Base):
@@ -114,7 +115,7 @@ class SavedMatrix(Base):
 
     def item(self) -> dict:
         return {"id": self.id, "birth": self.birth.isoformat(), "sex": self.sex,
-                "title": self.title, "created_at": iso(self.created_at)}
+                "title": self.title or default_title(self.birth), "created_at": iso(self.created_at)}
 
 
 class Payment(Base):
@@ -163,7 +164,11 @@ class Payment(Base):
         return "new"
 
     def item(self) -> dict:
-        return {"id": self.id, "amount": self.amount, "tariff": self.body(),
+        from .tariffs import display_name
+        tariff = self.body()
+        if isinstance(tariff.get("name"), str):
+            tariff["display_name"] = display_name(tariff.get("id", ""), tariff["name"])
+        return {"id": self.id, "amount": self.amount, "tariff": tariff,
                 "matrix_id": self.matrix_id, "external_id": self.external_id,
                 "provider": self.provider, "status": self.status, "state": self.state(),
                 "created_at": iso(self.created_at), "paid_at": iso(self.paid_at),
@@ -227,6 +232,7 @@ class ReportJob(Base):
     matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id", ondelete="CASCADE"),
                                            index=True, nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="running")
+    locale: Mapped[str] = mapped_column(String(16), nullable=False, default=current_locale)
     object_key: Mapped[str | None] = mapped_column(String(300))
     size_bytes: Mapped[int | None] = mapped_column(Integer)
     error: Mapped[str | None] = mapped_column(String(300))
@@ -244,7 +250,7 @@ class ReportJob(Base):
         return round((as_utc(self.finished_at) - as_utc(self.started_at)).total_seconds(), 1)
 
     def item(self) -> dict:
-        return {"id": self.id, "matrix_id": self.matrix_id, "status": self.status,
+        return {"id": self.id, "matrix_id": self.matrix_id, "status": self.status, "locale": self.locale,
                 "created_at": iso(self.created_at), "started_at": iso(self.started_at),
                 "finished_at": iso(self.finished_at), "seconds": self.seconds(),
                 "size_bytes": self.size_bytes, "error": self.error}

@@ -1,39 +1,63 @@
 "use client";
 
+import { useSession } from "@/components/account/useSession";
+import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
+import { useTariffs } from "@/components/pay/TariffsProvider";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { ALL_FREE } from "@/lib/access";
+import { ApiError, forLocale as localizedApi, type MatrixListItem, type PaymentItem } from "@/lib/api";
+import { D, forLocale as localizedI18n } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage, type Message } from "@/lib/i18n/useMessage";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
+import { forLocale as localizedTariffs } from "@/lib/tariffs";
+import { useBirth } from "@/lib/useBirth";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { ALL_FREE } from "@/lib/access";
-import { D, L, dateTimeLabel, dayLabel } from "@/lib/i18n";
-import { ApiError, api, type MatrixListItem, type PaymentItem } from "@/lib/api";
-import { calculate } from "@/lib/matrix";
-import { useBirth } from "@/lib/useBirth";
-import { money, priceLabel } from "@/lib/tariffs";
+export const forLocale = localized((L: Locale) => {
+  const { dateTimeLabel, dayLabel } = localizedI18n(L);
+  const { api } = localizedApi(L);
+  const { calculate } = localizedMatrix(L);
+  const { money, priceLabel } = localizedTariffs(L);
+  const { birthLabel } = localizedMatrixResult(L);
 
-import { birthLabel } from "@/components/matrix/MatrixResult";
-import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
-import { useTariffs } from "@/components/pay/TariffsProvider";
-import { useSession } from "@/components/account/useSession";
+  const dateCount = (n: number) => D.account.datesCount[L](n);
 
-const dateCount = (n: number) => D.account.datesCount[L](n);
+  function safeCenter(birth: string, sex: "m" | "f"): string {
+    try {
+      return String(calculate(birth, sex).center);
+    } catch {
+      return "—";
+    }
+  }
+  return { dateTimeLabel, dayLabel, api, calculate, money, priceLabel, birthLabel, dateCount, safeCenter };
+});
 
 /**
  * Подпись матрицы прямо в строке списка: имя, а рядом карандаш. Имя нужно, чтобы список из
  * нескольких дат читался — «Матрица 31 марта 1993» не говорит, чья она.
  */
-function MatrixName({
-  item,
-  onSave,
-}: {
+function MatrixName({ locale: requestedLocale, ...localeProps }: ({
   item: MatrixListItem;
-  onSave: (title: string) => Promise<string | null>;
-}) {
+  onSave: (title: string) => Promise<Message | null>;
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    item,
+    onSave,
+  } = localeProps;
+  const { birthLabel } = forLocale(L);
+
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(item.title ?? "");
   const [busy, setBusy] = useState(false);
   // отказ печатался внизу панели — на телефоне за краем экрана, а поле при этом закрывалось
   // и выбрасывало набранное имя
-  const [failed, setFailed] = useState<string | null>(null);
+  const [failed, setFailed] = useMessage(L);
 
   const save = async () => {
     if (busy) return;
@@ -66,7 +90,7 @@ function MatrixName({
         >
           ✎
         </button>
-        <AccessBadge item={item} />
+        <AccessBadge locale={L} item={item} />
       </span>
     );
   }
@@ -115,7 +139,12 @@ function MatrixName({
  * пожизненного владения — ∞ в золотом круге: понятен без подписи и не спорит с текстом бейджа.
  * Выданная админом открыта так же, но золота не получает: подарок — не покупка.
  */
-function AccessBadge({ item }: { item: MatrixListItem }) {
+function AccessBadge({ locale: requestedLocale, ...localeProps }: ({ item: MatrixListItem }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { item } = localeProps;
+  const { dayLabel } = forLocale(L);
+
   if (item.access === "forever") {
     return (
       <span className="badge own" data-testid="access-badge">
@@ -157,15 +186,18 @@ function AccessBadge({ item }: { item: MatrixListItem }) {
   );
 }
 
-export default function AccountView() {
+export default function AccountView({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { dayLabel, api, priceLabel, birthLabel, dateCount, safeCenter } = forLocale(L);
+
   const tariffs = useTariffs();
   const session = useSession();
   const [items, setItems] = useState<MatrixListItem[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
+  const [error, setError] = useMessage(L);
+  const [note, setNote] = useMessage(L);
   // дата из браузера — общим хуком: своё чтение при монтировании не замечало смену даты
   const local = useBirth();
-
 
   const reload = useCallback(async () => {
     try {
@@ -173,9 +205,9 @@ export default function AccountView() {
       setItems(res.items);
       setError(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : D.account.unavailable[L]);
+      setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.account.unavailable[locale]);
     }
-  }, []);
+  }, [L]);
 
   useEffect(() => {
     if (session.status !== "user") return;
@@ -190,15 +222,15 @@ export default function AccountView() {
   }, [note]);
 
   /** Возвращает текст отказа: строка сама решает, что показать рядом с полем. */
-  const rename = async (id: number, title: string): Promise<string | null> => {
+  const rename = async (id: number, title: string): Promise<Message | null> => {
     try {
       const row = await api.renameMatrix(id, title);
       setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, title: row.title } : x)) ?? prev);
-      setNote(D.account.renamed[L]);
+      setNote((locale) => D.account.renamed[locale]);
       setError(null);
       return null;
     } catch (err) {
-      return err instanceof ApiError ? err.message : D.account.renameFailed[L];
+      return (locale) => err instanceof ApiError ? err.messageFor(locale) : D.account.renameFailed[locale];
     }
   };
 
@@ -350,7 +382,7 @@ export default function AccountView() {
                 data-access={it.access}
               >
                 <div>
-                  <MatrixName item={it} onSave={(title) => rename(it.id, title)} />
+                  <MatrixName locale={L} item={it} onSave={(title) => rename(it.id, title)} />
                   <div className="small">
                     {birthLabel(it.birth)} ·{" "}
                     {it.sex === "f" ? D.calc.femaleChart[L] : D.calc.maleChart[L]}{" "}
@@ -388,7 +420,7 @@ export default function AccountView() {
             <p className="small">
               {D.account.localCalc[L](birthLabel(local.birth))}
             </p>
-            <SaveMatrixButton
+            <SaveMatrixButton locale={L}
               birth={local.birth}
               sex={local.sex}
               label={D.account.saveCurrent[L]}
@@ -409,7 +441,7 @@ export default function AccountView() {
       </div>
 
       {/* платить негде: истории платежей на витрине без кассы не бывает */}
-      {ALL_FREE ? null : <PaymentsPanel />}
+      {ALL_FREE ? null : <PaymentsPanel locale={L} />}
     </>
   );
 }
@@ -418,16 +450,20 @@ export default function AccountView() {
  * История платежей. Отдельным запросом и отдельной панелью: список матриц нужен на каждом
  * открытии кабинета, а платежи — справка, и грузить их вместе смысла нет.
  */
-function PaymentsPanel() {
+function PaymentsPanel({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { dateTimeLabel, api, money } = forLocale(L);
+
   const [rows, setRows] = useState<PaymentItem[] | null>(null);
-  const [failed, setFailed] = useState<string | null>(null);
+  const [failed, setFailed] = useMessage(L);
 
   useEffect(() => {
     api
       .payments()
-      .then((res) => setRows(res.items))
-      .catch((err) => setFailed(err instanceof ApiError ? err.message : D.account.paymentsUnavailable[L]));
-  }, []);
+      .then((res) => { setRows(res.items); setFailed(null); })
+      .catch((err) => setFailed((locale) => err instanceof ApiError ? err.messageFor(locale) : D.account.paymentsUnavailable[locale]));
+  }, [L]);
 
   return (
     <div className="panel section-gap" data-testid="payments-panel">
@@ -443,7 +479,7 @@ function PaymentsPanel() {
             return (
               <li key={p.id} data-testid="payment-row">
                 <span className="pw">
-                  <b>{p.tariff.name ?? D.account.planWord[L]}</b>
+                  <b>{p.tariff.display_name ?? p.tariff.name ?? D.account.planWord[L]}</b>
                   <span className="small">
                     {dateTimeLabel(p.created_at)} · {p.external_id}
                   </span>
@@ -452,14 +488,14 @@ function PaymentsPanel() {
                   {D.pay.priceFormat[L](money(p.amount))}
                   <span className="small">
                     {p.state === "refunded"
-                        ? D.account.stateRefunded[L]
-                        : p.state === "paid"
-                          ? D.account.statePaid[L]
-                          : p.state === "abandoned"
-                            ? D.account.stateAbandoned[L]
-                            : p.state === "failed"
-                              ? D.account.stateFailed[L]
-                              : D.account.stateUnpaid[L]}
+                      ? D.account.stateRefunded[L]
+                      : p.state === "paid"
+                        ? D.account.statePaid[L]
+                        : p.state === "abandoned"
+                          ? D.account.stateAbandoned[L]
+                          : p.state === "failed"
+                            ? D.account.stateFailed[L]
+                            : D.account.stateUnpaid[L]}
                   </span>
                 </span>
               </li>
@@ -469,12 +505,4 @@ function PaymentsPanel() {
       ) : null}
     </div>
   );
-}
-
-function safeCenter(birth: string, sex: "m" | "f"): string {
-  try {
-    return String(calculate(birth, sex).center);
-  } catch {
-    return "—";
-  }
 }

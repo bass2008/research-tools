@@ -1,0 +1,69 @@
+x-site-profiles: &site-profiles >-
+  [{"origin":"http://localhost:3000","hosts":["localhost:3000","ru.localhost:3000"],"defaultLocale":"ru","locales":["ru"],"payments":[{"id":"mock","provider":"mock","notificationUrl":"http://localhost:3000/api/payments/notify/mock"}]},{"origin":"http://127.0.0.1:3000","hosts":["127.0.0.1:3000","com.localhost:3000","web:3000"],"defaultLocale":"en","locales":["en","ru"],"payments":[]},{"origin":"https://arcana-sense.ru","defaultLocale":"ru","locales":["ru"],"payments":[{"id":"mock","provider":"mock","notificationUrl":"http://localhost:3000/api/payments/notify/mock"}]},{"origin":"https://arcana-sense.com","defaultLocale":"en","locales":["en","ru"],"payments":[]}]
+
+# Production Host profiles above are loopback-only acceptance targets, with mock payments.
+# Local acceptance environment: one frontend for two hosts, one API and one isolated database.
+# docker compose -f docker-compose.localized.yml up --build -d
+name: arcana-localized
+
+x-web: &web
+  environment:
+    API_INTERNAL_URL: http://api:8010
+    SESSION_COOKIE_SECURE: 0
+    SITE_PROFILES: *site-profiles
+  depends_on:
+    api:
+      condition: service_healthy
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: compose/api.Dockerfile
+    environment:
+      APP_ENV: dev
+      SITE_LANG: ru
+      ALL_FREE_WITHOUT_PAYMENT: 0
+      MOCK_PAYMENTS: 1
+      MAIL_TO_LOG: 1
+      REPORTS_STORE: local
+      JWT_SECRET: local-multilingual-development-secret-000
+      BROWSER_URL: http://browser:3001
+      BROWSER_SECRET: local-multilingual-browser
+      WEB_INTERNAL_URL: http://web:3000
+      SITE_PROFILES: *site-profiles
+    volumes:
+      - api-var:/srv/api/var
+    ports:
+      - "127.0.0.1:8010:8010"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  web:
+    <<: *web
+    build:
+      context: ../web
+      dockerfile: ../compose/web.Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+        NEXT_PUBLIC_SITE_LANG: ru
+        NEXT_PUBLIC_SUPPORTED_LOCALES: ru,en
+        NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: 0
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  browser:
+    build:
+      context: .
+      dockerfile: browser.Dockerfile
+    environment:
+      BROWSER_SECRET: local-multilingual-browser
+      MAX_JOBS: 50
+      MAX_RSS_MB: 400
+    mem_limit: 512m
+
+volumes:
+  api-var:

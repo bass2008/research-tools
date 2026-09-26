@@ -1,10 +1,11 @@
-import { D, L } from "./i18n";
+import { D } from "./i18n";
+
 // Клиент к BFF (`web/app/api/**`), а не к api напрямую. Адрес всегда свой origin:
 // токен лежит в httpOnly-куке, поэтому кросс-доменный базовый адрес её бы не отправил, а
 // адрес апстрима в браузер не попадает вовсе.
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
+import { localized } from "./i18n/localized";
 import type { Sex } from "./matrix";
-
-export const API_BASE = "/api";
 
 export interface User {
   id: number;
@@ -59,7 +60,7 @@ export interface MatrixCard extends MatrixListItem {
 export interface PaymentItem {
   id: number;
   amount: number;
-  tariff: { id?: string; name?: string; price?: number; scope?: string[]; period_days?: number | null };
+  tariff: { id?: string; name?: string; display_name?: string; price?: number; scope?: string[]; period_days?: number | null };
   matrix_id: number | null;
   /** какую дату открыл платёж: номер записи админу ничего не говорит */
   matrix?: MatrixListItem | null;
@@ -95,7 +96,8 @@ export interface AdminUser {
 export interface ReportJobItem {
   id: number;
   matrix_id: number;
-  status: "running" | "done" | "failed";
+  locale: Locale;
+  status: "running" | "done" | "failed" | "expired";
   created_at: string;
   started_at: string | null;
   finished_at: string | null;
@@ -119,8 +121,10 @@ export interface SweepRun {
   started_at: string;
   finished_at: string | null;
   error: string | null;
-  log: Array<{ payment: number; email: string; was: string; now?: string; paid?: boolean;
-               error?: string }>;
+  log: Array<{
+    payment: number; email: string; was: string; now?: string; paid?: boolean;
+    error?: string
+  }>;
 }
 
 export interface AdminPayment extends PaymentItem {
@@ -174,55 +178,16 @@ export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    readonly locale: Locale = defaultLocale,
+    readonly messages: Partial<Record<Locale, string>> = {},
   ) {
     super(message);
   }
-}
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers: Record<string, string> = { Accept: "application/json" };
-  if (init?.body) headers["Content-Type"] = "application/json";
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE}${path}`, {
-      ...init,
-      credentials: "same-origin",
-      headers: { ...headers, ...init?.headers },
-    });
-  } catch {
-    throw new ApiError(D.apiErrors.offline[L], 0);
+  messageFor(locale: Locale): string {
+    return this.messages[locale] ?? (locale === this.locale ? this.message : D.apiErrors.status[locale](this.status));
   }
-  // Тело может быть не JSON: пока api не поднят, на /api/* приходит HTML-страница 404.
-  // Ронять здесь исключение нельзя — иначе вызывающий не отличит отказ сервера от своей ошибки
-  // и потеряет уже собранную почту.
-  const text = await res.text();
-  let data: unknown = null;
-  let parsed = true;
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      parsed = false;
-    }
-  }
-  if (!res.ok) {
-    const detail =
-      parsed && data && typeof data === "object" && "detail" in data
-        ? String((data as { detail: unknown }).detail)
-        : res.status === 404
-          ? D.apiErrors.missing[L]
-          : D.apiErrors.status[L](res.status);
-    throw new ApiError(detail, res.status);
-  }
-  if (!parsed) throw new ApiError(D.apiErrors.unexpected[L], res.status);
-  return data as T;
 }
-
-function scopeList(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === "string" && v.length > 0);
-}
-
 
 export interface Pulse {
   at: string;
@@ -281,152 +246,199 @@ export interface SecurityAuditPage {
   page_size: number;
 }
 
-export const api = {
-  register: (email: string, password: string) =>
-    request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
+/** A locale-bound view; safe to use alongside other languages. */
+export const forLocale = localized((L: Locale) => {
 
-  login: (email: string, password: string) =>
-    request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+  const API_BASE = "/api";
 
-  logout: () => request<{ ok: true }>("/auth/logout", { method: "POST" }),
-
-  /** Ответ одинаков для существующей и неизвестной почты: форма не должна работать проверкой адресов. */
-  resetRequest: (email: string) =>
-    request<{ ok: true; sent: boolean }>("/auth/reset/request", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    }),
-
-  resetApply: (token: string, password: string) =>
-    request<AuthResponse>("/auth/reset/apply", {
-      method: "POST",
-      body: JSON.stringify({ token, password }),
-    }),
-
-  // Признак доступа берётся только отсюда: в localStorage он не хранится, а лишь кешируется
-  // для мгновенной отрисовки (см. lib/storage.ts).
-  me: async (): Promise<MeResponse> => {
-    const raw = await request<Record<string, unknown>>("/auth/me");
-    const rights = (raw.access ?? {}) as Record<string, unknown>;
-    return {
-      user: raw.user as User,
-      scopes: scopeList(rights.scopes),
-      can_store: raw.can_store === true,
-      unlimited: raw.unlimited === true,
-      until: typeof raw.until === "string" ? raw.until : null,
-      matrices_used: Number(raw.matrices_used ?? 0),
-      matrices_limit: raw.matrices_limit === null || raw.matrices_limit === undefined
-        ? null
-        : Number(raw.matrices_limit),
-      owned: Number(raw.owned ?? 0),
-      is_admin: raw.is_admin === true,
-    };
-  },
-
-  matrices: () => request<{ items: MatrixListItem[] }>("/matrices"),
-
-  payments: () => request<{ items: PaymentItem[] }>("/payments"),
-
-  admin: {
-    users: (page = 1, pageSize = 10) => {
-      const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
-      return request<{ items: AdminUser[]; total: number; page: number; page_size: number }>(
-        `/admin/users?${q.toString()}`,
-      );
-    },
-    payments: () => request<{ items: AdminPayment[] }>("/admin/payments"),
-    user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
-    reports: (page = 1, pageSize = 10) => {
-      const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
-      return request<{ items: AdminReportJob[]; running: number; failed: number;
-                       avg_seconds: number | null; total: number }>(
-        `/admin/reports?${q.toString()}`,
-      );
-    },
-    sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
-    pulse: () => request<Pulse>("/admin/pulse"),
-    settings: () => request<ApplicationSettings>("/admin/settings"),
-    /** Вернуть платёж: снимает право, закрывает разбор и пишет покупателю письмо. */
-    refund: (id: number) =>
-      request<{ ok: true; status: string; refunded_at: string | null }>(
-        `/admin/payments/${id}/refund`,
-        { method: "POST" },
-      ),
-    errors: () => request<{ items: ErrorRow[]; hour: number }>("/admin/errors"),
-
-    /** Войти под пользователем: кука сессии меняется на его, админ становится обычным посетителем. */
-    impersonate: (userId: number) =>
-      request<{ user: User; authenticated: boolean }>("/admin/impersonate", {
-        method: "POST",
-        body: JSON.stringify({ user_id: userId }),
-      }),
-
-    /** Выдать матрицу без оплаты: в кабинете она открыта, но помечена как выданная. */
-    addMatrix: (userId: number, birth: string, sex: Sex) =>
-      request<MatrixListItem>("/admin/matrices", {
-        method: "POST",
-        body: JSON.stringify({ user_id: userId, birth, sex }),
-      }),
-
-    /** Подписанная ссылка на чужой готовый PDF — проверить, что человек получил нужный файл. */
-    reportLink: (jobId: number) =>
-      request<{ url: string }>(`/admin/report-link?job=${jobId}`),
-
-    reportRebuild: (jobId: number) =>
-      request<{ job_id: number; status: string; size_bytes: number | null; seconds: number | null }>(
-        `/admin/report-rebuild?job=${jobId}`, { method: "POST" }),
-
-    securityAudit: (category: AuditCategory, page: number, pageSize: number) => {
-      const q = new URLSearchParams({
-        category,
-        page: String(page),
-        page_size: String(pageSize),
+  async function request<T>(path: string, init?: RequestInit): Promise<T> {
+    const headers: Record<string, string> = { Accept: "application/json", "Accept-Language": L };
+    if (init?.body) headers["Content-Type"] = "application/json";
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE}${path}`, {
+        ...init,
+        credentials: "same-origin",
+        headers: { ...headers, ...init?.headers },
       });
-      return request<SecurityAuditPage>(`/admin/security-audit?${q.toString()}`);
-    },
-    clearSecurityAudit: () =>
-      request<{ removed: number }>("/admin/security-audit", { method: "DELETE" }),
-  },
+    } catch {
+      throw new ApiError(D.apiErrors.offline[L], 0, L, D.apiErrors.offline);
+    }
+    // Тело может быть не JSON: пока api не поднят, на /api/* приходит HTML-страница 404.
+    // Ронять здесь исключение нельзя — иначе вызывающий не отличит отказ сервера от своей ошибки
+    // и потеряет уже собранную почту.
+    const text = await res.text();
+    let data: unknown = null;
+    let parsed = true;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        parsed = false;
+      }
+    }
+    if (!res.ok) {
+      const detail =
+        parsed && data && typeof data === "object" && "detail" in data
+          ? String((data as { detail: unknown }).detail)
+          : res.status === 404
+            ? D.apiErrors.missing[L]
+            : D.apiErrors.status[L](res.status);
+      const supplied = data && typeof data === "object" && "messages" in data ? data.messages : null;
+      const messages: Partial<Record<Locale, string>> = {};
+      if (supplied && typeof supplied === "object") {
+        for (const locale of ["ru", "en"] as const) {
+          const value = (supplied as Record<string, unknown>)[locale];
+          if (typeof value === "string") messages[locale] = value;
+        }
+      }
+      if (!parsed) {
+        for (const locale of ["ru", "en"] as const) {
+          messages[locale] = res.status === 404 ? D.apiErrors.missing[locale] : D.apiErrors.status[locale](res.status);
+        }
+      }
+      throw new ApiError(detail, res.status, L, messages);
+    }
+    if (!parsed) throw new ApiError(D.apiErrors.unexpected[L], res.status, L, D.apiErrors.unexpected);
+    return data as T;
+  }
 
-  // Дата уходит на сервер только по явному действию авторизованного пользователя:
-  // «сохранить матрицу в кабинет». Анонимный расчёт остаётся в браузере.
-  saveMatrix: (birth: string, sex: Sex, title?: string) =>
-    request<MatrixCard>("/matrices", {
-      method: "POST",
-      body: JSON.stringify({ birth, sex, title }),
-    }),
+  function scopeList(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter((v): v is string => typeof v === "string" && v.length > 0);
+  }
 
-  /** Подписать матрицу. Пустое имя возвращает подпись по умолчанию — дату. */
-  renameMatrix: (id: number, title: string) =>
-    request<MatrixListItem>(`/matrices/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ title }),
-    }),
+  const api = {
+    register: (email: string, password: string) =>
+      request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
 
-  /** `matrixId` — какую сохранённую дату открыть; без него право ждёт следующую сохранённую. */
-  payMock: (
-    tariff: string,
-    email: string,
-    target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
-  ) =>
-    request<PaymentResponse>("/payments/mock", {
-      method: "POST",
-      body: JSON.stringify({
-        tariff,
-        email,
-        ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
-        ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
+    login: (email: string, password: string) =>
+      request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+
+    logout: () => request<{ ok: true }>("/auth/logout", { method: "POST" }),
+
+    /** Ответ одинаков для существующей и неизвестной почты: форма не должна работать проверкой адресов. */
+    resetRequest: (email: string) =>
+      request<{ ok: true; sent: boolean }>("/auth/reset/request", {
+        method: "POST",
+        body: JSON.stringify({ email }),
       }),
-    }),
 
-  payStart: (
-    tariff: string,
-    email: string,
-    target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
-  ) =>
-    request<PaymentResponse & { order_id: string; payment_url: string | null; status: string }>(
-      "/payments/start",
-      {
+    resetApply: (token: string, password: string) =>
+      request<AuthResponse>("/auth/reset/apply", {
+        method: "POST",
+        body: JSON.stringify({ token, password }),
+      }),
+
+    // Признак доступа берётся только отсюда: в localStorage он не хранится, а лишь кешируется
+    // для мгновенной отрисовки (см. lib/storage.ts).
+    me: async (): Promise<MeResponse> => {
+      const raw = await request<Record<string, unknown>>("/auth/me");
+      const rights = (raw.access ?? {}) as Record<string, unknown>;
+      return {
+        user: raw.user as User,
+        scopes: scopeList(rights.scopes),
+        can_store: raw.can_store === true,
+        unlimited: raw.unlimited === true,
+        until: typeof raw.until === "string" ? raw.until : null,
+        matrices_used: Number(raw.matrices_used ?? 0),
+        matrices_limit: raw.matrices_limit === null || raw.matrices_limit === undefined
+          ? null
+          : Number(raw.matrices_limit),
+        owned: Number(raw.owned ?? 0),
+        is_admin: raw.is_admin === true,
+      };
+    },
+
+    matrices: () => request<{ items: MatrixListItem[] }>("/matrices"),
+
+    payments: () => request<{ items: PaymentItem[] }>("/payments"),
+
+    admin: {
+      users: (page = 1, pageSize = 10) => {
+        const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+        return request<{ items: AdminUser[]; total: number; page: number; page_size: number }>(
+          `/admin/users?${q.toString()}`,
+        );
+      },
+      payments: () => request<{ items: AdminPayment[] }>("/admin/payments"),
+      user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
+      reports: (page = 1, pageSize = 10) => {
+        const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+        return request<{
+          items: AdminReportJob[]; running: number; failed: number;
+          avg_seconds: number | null; total: number
+        }>(
+          `/admin/reports?${q.toString()}`,
+        );
+      },
+      sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
+      pulse: () => request<Pulse>("/admin/pulse"),
+      settings: () => request<ApplicationSettings>("/admin/settings"),
+      /** Вернуть платёж: снимает право, закрывает разбор и пишет покупателю письмо. */
+      refund: (id: number) =>
+        request<{ ok: true; status: string; refunded_at: string | null }>(
+          `/admin/payments/${id}/refund`,
+          { method: "POST" },
+        ),
+      errors: () => request<{ items: ErrorRow[]; hour: number }>("/admin/errors"),
+
+      /** Войти под пользователем: кука сессии меняется на его, админ становится обычным посетителем. */
+      impersonate: (userId: number) =>
+        request<{ user: User; authenticated: boolean }>("/admin/impersonate", {
+          method: "POST",
+          body: JSON.stringify({ user_id: userId }),
+        }),
+
+      /** Выдать матрицу без оплаты: в кабинете она открыта, но помечена как выданная. */
+      addMatrix: (userId: number, birth: string, sex: Sex) =>
+        request<MatrixListItem>("/admin/matrices", {
+          method: "POST",
+          body: JSON.stringify({ user_id: userId, birth, sex }),
+        }),
+
+      /** Подписанная ссылка на чужой готовый PDF — проверить, что человек получил нужный файл. */
+      reportLink: (jobId: number) =>
+        request<{ url: string }>(`/admin/report-link?job=${jobId}`),
+
+      reportRebuild: (jobId: number) =>
+        request<{ job_id: number; status: string; size_bytes: number | null; seconds: number | null }>(
+          `/admin/report-rebuild?job=${jobId}`, { method: "POST" }),
+
+      securityAudit: (category: AuditCategory, page: number, pageSize: number) => {
+        const q = new URLSearchParams({
+          category,
+          page: String(page),
+          page_size: String(pageSize),
+        });
+        return request<SecurityAuditPage>(`/admin/security-audit?${q.toString()}`);
+      },
+      clearSecurityAudit: () =>
+        request<{ removed: number }>("/admin/security-audit", { method: "DELETE" }),
+    },
+
+    // Дата уходит на сервер только по явному действию авторизованного пользователя:
+    // «сохранить матрицу в кабинет». Анонимный расчёт остаётся в браузере.
+    saveMatrix: (birth: string, sex: Sex, title?: string) =>
+      request<MatrixCard>("/matrices", {
+        method: "POST",
+        body: JSON.stringify({ birth, sex, title }),
+      }),
+
+    /** Подписать матрицу. Пустое имя возвращает подпись по умолчанию — дату. */
+    renameMatrix: (id: number, title: string) =>
+      request<MatrixListItem>(`/matrices/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title }),
+      }),
+
+    /** `matrixId` — какую сохранённую дату открыть; без него право ждёт следующую сохранённую. */
+    payMock: (
+      tariff: string,
+      email: string,
+      target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
+    ) =>
+      request<PaymentResponse>("/payments/mock", {
         method: "POST",
         body: JSON.stringify({
           tariff,
@@ -434,28 +446,60 @@ export const api = {
           ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
           ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
         }),
-      },
-    ),
+      }),
 
-  paySync: (orderId: string) =>
-    request<{ ok: true; status: string;
-              /** состояние, решённое сервером: экраны его не пересчитывают */
-              state: "new" | "paid" | "refunded" | "failed" | "abandoned";
-              paid: boolean; matrix_id: number | null;
-              payment_id: string }>("/payments/sync", {
-      method: "POST",
-      body: JSON.stringify({ order_id: orderId }),
-    }),
+    payStart: (
+      tariff: string,
+      email: string,
+      target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
+      provider?: string,
+    ) =>
+      request<PaymentResponse & { order_id: string; payment_url: string | null; status: string }>(
+        "/payments/start",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            tariff,
+            provider,
+            email,
+            ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
+            ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
+          }),
+        },
+      ),
 
-  reportJobs: () =>
-    request<{ items: Array<{ id: number; matrix_id: number; status: string;
-                             size_bytes: number | null; seconds: number | null }> }>("/reports"),
+    paySync: (orderId: string) =>
+      request<{
+        ok: true; status: string;
+        /** состояние, решённое сервером: экраны его не пересчитывают */
+        state: "new" | "paid" | "refunded" | "failed" | "abandoned";
+        paid: boolean; matrix_id: number | null;
+        payment_id: string
+      }>("/payments/sync", {
+        method: "POST",
+        body: JSON.stringify({ order_id: orderId }),
+      }),
 
-  reportPdf: (matrixId: number) =>
-    request<{ job_id: number; status: string; cached: boolean; url: string; size_bytes: number | null;
-              seconds: number | null }>("/reports/pdf", {
-      method: "POST",
-      body: JSON.stringify({ matrix_id: matrixId }),
-    }),
+    reportJobs: () =>
+      request<{
+        items: Array<{
+          id: number; matrix_id: number; locale: Locale; status: string;
+          size_bytes: number | null; seconds: number | null
+        }>
+      }>("/reports"),
 
-};
+    reportPdf: (matrixId: number) =>
+      request<{
+        job_id: number; status: string; cached: boolean; url: string; size_bytes: number | null;
+        seconds: number | null
+      }>("/reports/pdf", {
+        method: "POST",
+        body: JSON.stringify({ matrix_id: matrixId }),
+      }),
+
+  };
+  return { API_BASE, api };
+});
+
+// Compatibility for callers that explicitly use the deployment default.
+export const { API_BASE, api } = forLocale(defaultLocale);

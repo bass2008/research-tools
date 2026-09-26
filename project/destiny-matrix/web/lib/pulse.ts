@@ -1,3 +1,5 @@
+import { forLocale } from "./adminLocale";
+import type { Lang } from "./i18n/lang";
 import type { Pulse } from "./api";
 
 export type Level = "ok" | "warn" | "bad";
@@ -14,17 +16,18 @@ export function level(percent: number, warn = WARN, bad = BAD): Level {
 }
 
 /** Что сейчас не так — человеческими словами, в порядке важности. */
-export function troubles(p: Pulse): string[] {
+export function troubles(p: Pulse, locale: Lang = "ru"): string[] {
+  const { t } = forLocale(locale);
   const out: string[] = [];
-  if (p.disk.percent >= BAD) out.push(`диск занят на ${p.disk.percent}%`);
+  if (p.disk.percent >= BAD) out.push(t("диск занят на {0}%", p.disk.percent));
   if (p.data_disk.percent >= BAD && p.data_disk.path !== p.disk.path)
-    out.push(`том с базой занят на ${p.data_disk.percent}%`);
-  if (p.memory.percent >= BAD) out.push(`память занята на ${p.memory.percent}%`);
-  if (p.cpu.percent >= BAD) out.push(`процессор загружен на ${p.cpu.percent}%`);
+    out.push(t("том с базой занят на {0}%", p.data_disk.percent));
+  if (p.memory.percent >= BAD) out.push(t("память занята на {0}%", p.memory.percent));
+  if (p.cpu.percent >= BAD) out.push(t("процессор загружен на {0}%", p.cpu.percent));
   if (p.print.failures_hour > 0)
-    out.push(`печать падала ${p.print.failures_hour} раз за час`);
-  if (p.payments.stuck > 0) out.push(`платежей застряло: ${p.payments.stuck}`);
-  if (p.errors.last10min > 5) out.push(`ошибок за 10 минут: ${p.errors.last10min}`);
+    out.push(t("печать падала {0} раз за час", p.print.failures_hour));
+  if (p.payments.stuck > 0) out.push(t("платежей застряло: {0}", p.payments.stuck));
+  if (p.errors.last10min > 5) out.push(t("ошибок за 10 минут: {0}", p.errors.last10min));
   return out;
 }
 

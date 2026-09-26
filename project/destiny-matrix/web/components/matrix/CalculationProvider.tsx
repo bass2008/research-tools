@@ -1,5 +1,18 @@
 "use client";
 
+import { useSession } from "@/components/account/useSession";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { forLocale as localizedApi, type MatrixListItem } from "@/lib/api";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { openedFor } from "@/lib/openedDate";
+import {
+  BIRTH_EVENT,
+  alignBirth,
+  takeCalculationRequest,
+  type StoredBirth,
+} from "@/lib/storage";
+import { useBirth } from "@/lib/useBirth";
 import { useRouter } from "next/navigation";
 import {
   createContext,
@@ -9,20 +22,17 @@ import {
   type ReactNode,
 } from "react";
 
-import { useSession } from "@/components/account/useSession";
-import { api, type MatrixListItem } from "@/lib/api";
-import { openedFor } from "@/lib/openedDate";
-import { useBirth } from "@/lib/useBirth";
-import {
-  BIRTH_EVENT,
-  alignBirth,
-  takeCalculationRequest,
-  type StoredBirth,
-} from "@/lib/storage";
-
 const OwnDates = createContext<MatrixListItem[]>([]);
 
+export const forLocale = localized((L: Locale) => {
+  const { api } = localizedApi(L);
+
+  return { api };
+});
+
 export function useOwnDates(): MatrixListItem[] {
+  const L = useLocale();
+
   return useContext(OwnDates);
 }
 
@@ -31,7 +41,12 @@ export function useOwnDates(): MatrixListItem[] {
  * навигации после «Рассчитать». В двух независимых эффектах запросы расходились по времени:
  * один уже видел покупку, пока второй ещё показывал замки.
  */
-export default function CalculationProvider({ children }: { children: ReactNode }) {
+export default function CalculationProvider({ locale: requestedLocale, ...localeProps }: ({ children: ReactNode }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { children } = localeProps;
+  const { api } = forLocale(L);
+
   const router = useRouter();
   const session = useSession();
   const [ownDates, setOwnDates] = useState<MatrixListItem[]>([]);
@@ -88,7 +103,7 @@ export default function CalculationProvider({ children }: { children: ReactNode 
     return () => {
       alive = false;
     };
-  }, [session.status]);
+  }, [session.status, api]);
 
   // Пол показывается по купленной записи всегда, а не только сразу после «Рассчитать»: дату
   // могли купить из кабинета, а в браузере остался прежний выбор пола — тогда форма и подпись

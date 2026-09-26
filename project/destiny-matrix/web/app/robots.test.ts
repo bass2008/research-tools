@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import robots from "./robots";
-import sitemap from "./sitemap";
+import { robotsForSite as robots } from "@/lib/robotsPolicy";
+import { sitemapForSite as sitemap } from "@/lib/sitemapEntries";
 import { PERSONAL_SECTION_KEYS } from "@/lib/sectionReadingShared";
 import { verification } from "@/lib/seo";
 
@@ -48,7 +48,7 @@ describe("robots.txt", () => {
   // в исключённые: по одному `?sec=` с каждой страницы справочника и по два `?tab=` с каждой
   // страницы пары. `Clean-param` запрещает их обход, а не индексацию.
   it("запрещает обход адресов с параметрами интерфейса", () => {
-    expect(groupFor("*")?.other?.["Clean-param"]).toBe("tab&sec");
+    expect(groupFor("*")?.other?.["Clean-param"]).toBe("tab&sec&lang");
   });
 
   // Хаб `/matrix` — обычная страница корпуса и стоит в карте сайта: закрыть его префиксом
@@ -60,7 +60,7 @@ describe("robots.txt", () => {
   it("на тестовом контуре закрывает сайт целиком", async () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://test.arcana-sense.ru");
     vi.resetModules();
-    const { default: onTest } = await import("./robots");
+    const { robotsForSite: onTest } = await import("@/lib/robotsPolicy");
     expect([onTest().rules].flat()).toEqual([{ userAgent: "*", disallow: "/" }]);
     vi.unstubAllEnvs();
     vi.resetModules();

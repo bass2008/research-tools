@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const cookieGet = vi.fn();
 
 vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ host: `arcana-sense.${process.env.NEXT_PUBLIC_SITE_LANG === "en" ? "com" : "ru"}`, "x-arcana-path": "/api/test" }),
   cookies: async () => ({ get: cookieGet, set: vi.fn() }),
 }));
 

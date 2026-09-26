@@ -1,36 +1,34 @@
 "use client";
 
+import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
+
 // Админка: только чтение. Права проверяет апстрим по списку почт в своём конфиге, поэтому
 // «спрятать ссылку» здесь — вопрос удобства, а не безопасности: без админской куки BFF отдаст 404.
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ApiError, api, type AdminPayment, type AdminReportJob, type AdminUser,
+import { ApiError, type AdminPayment, type AdminReportJob, type AdminUser,
          type SweepRun } from "@/lib/api";
-import { when } from "@/lib/moment";
-import { money } from "@/lib/tariffs";
 import { buildInfo } from "@/lib/version";
-import { paymentTargetLabel } from "@/lib/paytarget";
-import { counted, plural } from "@/lib/plural";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
 import AdminSettings from "@/components/admin/AdminSettings";
 import UserActions from "@/components/admin/UserActions";
 
-const day = (iso: string) => new Date(iso).toLocaleDateString("ru-RU");
-
-/** Что у пользователя открыто — одной строкой: покупки и подписка живут одновременно. */
-function accessLine(u: AdminUser): string {
-  const parts: string[] = [];
-  if (u.owned > 0) parts.push(`куплено ${u.owned} навсегда`);
-  if (u.granted > 0) parts.push(`выдано ${u.granted}`);
-  if (u.scopes.includes("all")) parts.push(u.until ? `подписка до ${day(u.until)}` : "подписка");
-  return parts.length ? parts.join(" · ") : "нет прав";
-}
-
 const USER_SIZES = [10, 25, 50, 100];
 
 export default function AdminView() {
+  const { t, api, when, day, money, paymentTargetLabel, counted } = useAdminLocale();
+/** Что у пользователя открыто — одной строкой: покупки и подписка живут одновременно. */
+function accessLine(u: AdminUser): string {
+  const parts: string[] = [];
+  if (u.owned > 0) parts.push(t("куплено {0} навсегда", u.owned));
+  if (u.granted > 0) parts.push(t("выдано {0}", u.granted));
+  if (u.scopes.includes("all")) parts.push(u.until ? t("подписка до {0}", day(u.until)) : t("подписка"));
+  return parts.length ? parts.join(" · ") : t("нет прав");
+}
+
+
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   // Список растёт, а в каждой строке считаются права и покупки: отдаём страницами, новые сверху.
   const [usersTotal, setUsersTotal] = useState(0);
@@ -45,14 +43,14 @@ export default function AdminView() {
   const [jobsSize, setJobsSize] = useState(10);
   const [sweeps, setSweeps] = useState<SweepRun[] | null>(null);
   const [avgSeconds, setAvgSeconds] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useAdminMessage();
   // доступ закрыт: экран заменяется целиком, частичной админки для постороннего не бывает
-  const [denied, setDenied] = useState<string | null>(null);
+  const [denied, setDenied] = useAdminMessage();
   const [refunding, setRefunding] = useState<number | null>(null);
   // Отказ возврата живёт отдельно от общей ошибки: раньше он уходил в setError, и вместо сообщения
   // у строки админка целиком подменялась экраном «Админка недоступна» — проверить, прошли ли
   // деньги, становилось нечем.
-  const [refundError, setRefundError] = useState<string | null>(null);
+  const [refundError, setRefundError] = useAdminMessage();
 
   // Ссылка на файл подписана и живёт час, поэтому запрашиваем её в момент нажатия, а не держим
   // в таблице: открытая полдня админка иначе отдавала бы просроченные ссылки.
@@ -74,7 +72,7 @@ export default function AdminView() {
       await api.admin.reportRebuild(job.id);
       await loadReports();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Пересоздать не вышло.");
+      setError(err instanceof ApiError ? err : "Пересоздать не вышло.");
     } finally {
       setRebuilding(null);
     }
@@ -87,7 +85,8 @@ export default function AdminView() {
       const { url } = await api.admin.reportLink(job.id);
       window.open(url, "_blank", "noopener");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Файл не отдался.");
+      setError(err instanceof ApiError ? err : "Файл не отдался.");
+      await loadReports();
     } finally {
       setDownloading(null);
     }
@@ -97,9 +96,9 @@ export default function AdminView() {
   // у покупателя с двумя оплатами сумма и почта совпадают, и по ним строки не различить.
   const refund = async (p: AdminPayment) => {
     const ok = window.confirm(
-      `Вернуть ${money(p.amount)} ₽ покупателю ${p.email}?\n` +
-        `Платёж ${p.external_id}, ${paymentTargetLabel(p)}.\n` +
-        "Разбор закроется, покупателю уйдёт письмо. Отменить возврат нельзя.",
+      t("Вернуть {0} ₽ покупателю {1}?\n", money(p.amount), p.email) +
+        t("Платёж {0}, {1}.\n", p.external_id, paymentTargetLabel(p)) +
+        t("Разбор закроется, покупателю уйдёт письмо. Отменить возврат нельзя."),
     );
     if (!ok) return;
     setRefunding(p.id);
@@ -126,7 +125,7 @@ export default function AdminView() {
         if (freshPayments.status === "fulfilled") setPayments(freshPayments.value.items);
       });
     } catch (err) {
-      setRefundError(err instanceof ApiError ? err.message : "Возврат не прошёл.");
+      setRefundError(err instanceof ApiError ? err : "Возврат не прошёл.");
     } finally {
       setRefunding(null);
     }
@@ -140,20 +139,20 @@ export default function AdminView() {
       // одной таблицы, даже пустой. Апстрим отвечает 404, а не 403: существование админки
       // он не подтверждает.
       if (err instanceof ApiError && [401, 403, 404].includes(err.status)) {
-        setDenied(err.message);
+        setDenied(err);
         return;
       }
-      setError((was) => was ?? (err instanceof ApiError ? err.message : "Часть данных не пришла."));
+      setError((was) => was ?? (err instanceof ApiError ? err : "Часть данных не пришла."));
     };
     void api.admin.payments().then((p) => setPayments(p.items)).catch(fail);
 
     void api.admin.sweeps().then((s) => setSweeps(s.items)).catch(fail);
-  }, []);
+  }, [api]);
 
   // Очередь печати тоже страницами: сводка «в работе / с ошибкой» приходит по всей очереди.
   useEffect(() => {
     void loadReports();
-  }, [jobsPage, jobsSize]);
+  }, [jobsPage, jobsSize, api]);
 
   function loadReports() {
     return api.admin.reports(jobsPage, jobsSize)
@@ -165,7 +164,7 @@ export default function AdminView() {
         setAvgSeconds(r.avg_seconds);
       })
       .catch((err: unknown) => {
-        if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err.message);
+        if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err);
         else setError((was) => was ?? "Очередь печати не пришла.");
       });
   }
@@ -175,10 +174,10 @@ export default function AdminView() {
     void api.admin.users(usersPage, usersSize)
       .then((u) => { setUsers(u.items); setUsersTotal(u.total); })
       .catch((err: unknown) => {
-        if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err.message);
+        if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err);
         else setError((was) => was ?? "Список людей не пришёл.");
       });
-  }, [usersPage, usersSize]);
+  }, [usersPage, usersSize, api]);
 
   const settled = (payments ?? []).filter((p) => p.state === "paid");
   const paidTotal = settled.reduce((sum, p) => sum + p.amount, 0);
@@ -188,11 +187,10 @@ export default function AdminView() {
   if (denied) {
     return (
       <div className="panel narrow">
-        <h3>Админка недоступна</h3>
+        <h3>{t("Админка недоступна")}</h3>
         <p className="dim">{denied}</p>
         <Link className="btn wide" href="/account">
-          В кабинет
-        </Link>
+          {t("В кабинет")}</Link>
       </div>
     );
   }
@@ -201,8 +199,7 @@ export default function AdminView() {
     <>
       {error ? (
         <div className="err" role="alert" aria-live="assertive" data-testid="admin-partial-error">
-          Часть данных не пришла: {error} Обновите страницу — остальное на экране настоящее.
-        </div>
+          {t("Часть данных не пришла: ")}{error} {t(" Обновите страницу — остальное на экране настоящее.")}</div>
       ) : null}
 
       <AdminPulse />
@@ -210,16 +207,16 @@ export default function AdminView() {
       <AdminSecurityAudit />
 
       <div className="panel">
-        <h3>Версия на сервере</h3>
-        <div className="cap">Вшита в образ на сборке — совпадает с тем, что реально запущено</div>
+        <h3>{t("Версия на сервере")}</h3>
+        <div className="cap">{t("Вшита в образ на сборке — совпадает с тем, что реально запущено")}</div>
         <dl className="kv">
-          <dt>Коммит</dt>
+          <dt>{t("Коммит")}</dt>
           <dd data-testid="build-commit">
             {build.commit} · {build.branch}
           </dd>
-          <dt>Собрано</dt>
+          <dt>{t("Собрано")}</dt>
           <dd>{build.builtAt}</dd>
-          <dt>Проверить снаружи</dt>
+          <dt>{t("Проверить снаружи")}</dt>
           <dd>
             <a href="/version/current.txt" target="_blank" rel="noreferrer">
               /version/current.txt
@@ -229,13 +226,13 @@ export default function AdminView() {
       </div>
 
       <div className="panel section-gap">
-        <h3>Пользователи</h3>
+        <h3>{t("Пользователи")}</h3>
         <div className="cap">
-          {users ? `${counted(usersTotal, "человек", "человека", "человек")} всего` : "загружаем…"}
+          {users ? t("{0} всего", counted(usersTotal, "человек", "человека", "человек")) : t("загружаем…")}
           {payments
-            ? ` · оплачено ${money(paidTotal)} ₽ за ` +
+            ? t(" · оплачено {0} ₽ за ", money(paidTotal)) +
               `${counted(settled.length, "платёж", "платежа", "платежей")}` +
-              ` · всего ${counted(payments.length, "заявка", "заявки", "заявок")}`
+              t(" · всего {0}", counted(payments.length, "заявка", "заявки", "заявок"))
             : ""}
         </div>
         <div className="tablewrap">
@@ -243,22 +240,21 @@ export default function AdminView() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Почта</th>
-                <th>Матриц</th>
-                <th>Платежей</th>
-                <th>Уплачено</th>
-                <th>Доступ</th>
-                <th>Последнее появление</th>
-                <th>Зарегистрирован</th>
-                <th className="act">Действия</th>
+                <th>{t("Почта")}</th>
+                <th>{t("Матриц")}</th>
+                <th>{t("Платежей")}</th>
+                <th>{t("Уплачено")}</th>
+                <th>{t("Доступ")}</th>
+                <th>{t("Последнее появление")}</th>
+                <th>{t("Зарегистрирован")}</th>
+                <th className="act">{t("Действия")}</th>
               </tr>
             </thead>
             <tbody>
               {users === null ? (
                 <tr>
                   <td colSpan={9} className="skeleton">
-                    Загружаем…
-                  </td>
+                    {t("Загружаем…")}</td>
                 </tr>
               ) : (
                 users.map((u) => (
@@ -266,7 +262,7 @@ export default function AdminView() {
                     <td className="num">{u.id}</td>
                     <td>
                       <Link href={`/admin/users/${u.id}`}>{u.email}</Link>
-                      {u.is_admin ? <span className="badge sub">админ</span> : null}
+                      {u.is_admin ? <span className="badge sub">{t("админ")}</span> : null}
                     </td>
                     <td>{u.matrices}</td>
                     <td>{u.payments}</td>
@@ -291,19 +287,17 @@ export default function AdminView() {
           <button type="button" className="btn ghost sm" disabled={usersPage <= 1}
                   data-testid="users-prev"
                   onClick={() => setUsersPage((p) => Math.max(1, p - 1))}>
-            Назад
-          </button>
+            {t("Назад")}</button>
           <span className="dim">
-            Стр. {usersPage} из {Math.max(1, Math.ceil(usersTotal / usersSize))}
+            {t("Стр. ")}{usersPage} {t(" из ")}{Math.max(1, Math.ceil(usersTotal / usersSize))}
           </span>
           <button type="button" className="btn ghost sm"
                   disabled={usersPage >= Math.ceil(usersTotal / usersSize)}
                   data-testid="users-next"
                   onClick={() => setUsersPage((p) => p + 1)}>
-            Вперёд
-          </button>
+            {t("Вперёд")}</button>
           <label className="dim">
-            На странице:{" "}
+            {t("На странице:")}{" "}
             <select value={usersSize} data-testid="users-size"
                     onChange={(e) => { setUsersSize(Number(e.target.value)); setUsersPage(1); }}>
               {USER_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -313,39 +307,36 @@ export default function AdminView() {
       </div>
 
       <div className="panel section-gap">
-        <h3>Все платежи</h3>
-        <div className="cap">Цена в строке — снимок тарифа на момент покупки</div>
+        <h3>{t("Все платежи")}</h3>
+        <div className="cap">{t("Цена в строке — снимок тарифа на момент покупки")}</div>
         {refundError ? (
           <p className="err" data-testid="refund-error" role="status">
-            Возврат не прошёл: {refundError}. Деньги могли не уйти — проверьте строку платежа.
-          </p>
+            {t("Возврат не прошёл: ")}{refundError}{t(". Деньги могли не уйти — проверьте строку платежа.")}</p>
         ) : null}
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-payments">
             <thead>
               <tr>
-                <th>Когда</th>
-                <th>Почта</th>
-                <th>Тариф</th>
-                <th>Сумма</th>
-                <th>Статус</th>
-                <th>За какую дату</th>
-                <th>Номер</th>
-                <th aria-label="Действия" />
+                <th>{t("Когда")}</th>
+                <th>{t("Почта")}</th>
+                <th>{t("Тариф")}</th>
+                <th>{t("Сумма")}</th>
+                <th>{t("Статус")}</th>
+                <th>{t("За какую дату")}</th>
+                <th>{t("Номер")}</th>
+                <th aria-label={t("Действия")} />
               </tr>
             </thead>
             <tbody>
               {payments === null ? (
                 <tr>
                   <td colSpan={8} className="skeleton">
-                    Загружаем…
-                  </td>
+                    {t("Загружаем…")}</td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="dim">
-                    Платежей нет.
-                  </td>
+                    {t("Платежей нет.")}</td>
                 </tr>
               ) : (
                 payments.map((p) => (
@@ -354,20 +345,20 @@ export default function AdminView() {
                     <td>
                       <Link href={`/admin/users/${p.user_id}`}>{p.email}</Link>
                     </td>
-                    <td>{p.tariff.name ?? "—"}</td>
+                    <td>{p.tariff.display_name ?? p.tariff.name ?? "—"}</td>
                     <td className="num">{money(p.amount)} ₽</td>
                     {/* состояние ещё и атрибутом: по тексту проверять ненадёжно — «не оплачен»
                         содержит «оплачен» как подстроку */}
                     <td data-paid={p.state === "paid" ? "1" : "0"}>
                       {p.state === "refunded"
-                        ? "возвращён"
+                        ? t("возвращён")
                         : p.state === "paid"
-                          ? "оплачен"
+                          ? t("оплачен")
                           : p.state === "abandoned"
-                            ? "брошен"
+                            ? t("брошен")
                             : p.state === "failed"
-                              ? "не прошёл"
-                              : "не оплачен"}
+                              ? t("не прошёл")
+                              : t("не оплачен")}
                     </td>
                     <td className="small">{paymentTargetLabel(p)}</td>
                     <td className="small">{p.external_id}</td>
@@ -380,7 +371,7 @@ export default function AdminView() {
                           disabled={refunding === p.id}
                           onClick={() => refund(p)}
                         >
-                          {refunding === p.id ? "Возвращаем…" : "Вернуть"}
+                          {refunding === p.id ? t("Возвращаем…") : t("Вернуть")}
                         </button>
                       ) : null}
                     </td>
@@ -393,39 +384,37 @@ export default function AdminView() {
       </div>
 
       <div className="panel section-gap">
-        <h3>Очередь отчётов</h3>
+        <h3>{t("Очередь отчётов")}</h3>
         <div className="cap">
           {jobs === null
-            ? "Печать PDF: что запрашивали и сколько это заняло"
-            : `Печатей: ${jobsTotal} · в работе: ${jobsRunning}` +
-              ` · с ошибкой: ${jobsFailed}` +
-              (avgSeconds ? ` · в среднем ${avgSeconds} с` : "")}
+            ? t("Печать PDF: что запрашивали и сколько это заняло")
+            : t("Печатей: {0} · в работе: {1}", jobsTotal, jobsRunning) +
+              t(" · с ошибкой: {0}", jobsFailed) +
+              (avgSeconds ? t(" · в среднем {0} с", avgSeconds) : "")}
         </div>
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-reports">
             <thead>
               <tr>
-                <th>Начало</th>
-                <th>Почта</th>
-                <th>Матрица</th>
-                <th>Статус</th>
-                <th>Заняло</th>
-                <th>Размер</th>
-                <th className="act">Файл</th>
+                <th>{t("Начало")}</th>
+                <th>{t("Почта")}</th>
+                <th>{t("Матрица")}</th>
+                <th>{t("Статус")}</th>
+                <th>{t("Заняло")}</th>
+                <th>{t("Размер")}</th>
+                <th className="act">{t("Файл")}</th>
               </tr>
             </thead>
             <tbody>
               {jobs === null ? (
                 <tr>
                   <td colSpan={7} className="skeleton">
-                    Загружаем…
-                  </td>
+                    {t("Загружаем…")}</td>
                 </tr>
               ) : jobs.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="dim">
-                    PDF ещё никто не печатал.
-                  </td>
+                    {t("PDF ещё никто не печатал.")}</td>
                 </tr>
               ) : (
                 jobs.map((j) => (
@@ -436,11 +425,11 @@ export default function AdminView() {
                     </td>
                     <td className="num">{j.matrix_id}</td>
                     <td title={j.error ?? undefined}>
-                      {j.status === "done" ? "готов" : j.status === "running" ? "печатается" : "ошибка"}
+                      {j.status === "done" ? t("готов") : j.status === "running" ? t("печатается") : j.status === "expired" ? t("файл больше не хранится") : t("ошибка")}
                     </td>
-                    <td className="num">{j.seconds === null ? "—" : `${j.seconds} с`}</td>
+                    <td className="num">{j.seconds === null ? "—" : t("{0} с", j.seconds)}</td>
                     <td className="num">
-                      {j.size_bytes === null ? "—" : `${Math.round(j.size_bytes / 1024)} КБ`}
+                      {j.size_bytes === null ? "—" : t("{0} КБ", Math.round(j.size_bytes / 1024))}
                     </td>
                     <td className="act">
                       {j.status === "done" ? (
@@ -451,7 +440,7 @@ export default function AdminView() {
                           disabled={downloading === j.id}
                           onClick={() => download(j)}
                         >
-                          {downloading === j.id ? "Готовим…" : "Скачать"}
+                          {downloading === j.id ? t("Готовим…") : t("Скачать")}
                         </button>
                       ) : (
                         <span className="dim">—</span>
@@ -460,11 +449,11 @@ export default function AdminView() {
                         type="button"
                         className="btn ghost sm"
                         data-testid="report-rebuild"
-                        title="Напечатать этот разбор заново"
+                        title={t("Напечатать этот разбор заново")}
                         disabled={rebuilding === j.id || j.status === "running"}
                         onClick={() => rebuild(j)}
                       >
-                        {rebuilding === j.id ? "Печатаем…" : "Пересоздать"}
+                        {rebuilding === j.id ? t("Печатаем…") : t("Пересоздать")}
                       </button>
                     </td>
                   </tr>
@@ -481,19 +470,17 @@ export default function AdminView() {
           <button type="button" className="btn ghost sm" disabled={jobsPage <= 1}
                   data-testid="reports-prev"
                   onClick={() => setJobsPage((p) => Math.max(1, p - 1))}>
-            Назад
-          </button>
+            {t("Назад")}</button>
           <span className="dim">
-            Стр. {jobsPage} из {Math.max(1, Math.ceil(jobsTotal / jobsSize))}
+            {t("Стр. ")}{jobsPage} {t(" из ")}{Math.max(1, Math.ceil(jobsTotal / jobsSize))}
           </span>
           <button type="button" className="btn ghost sm"
                   disabled={jobsPage >= Math.ceil(jobsTotal / jobsSize)}
                   data-testid="reports-next"
                   onClick={() => setJobsPage((p) => p + 1)}>
-            Вперёд
-          </button>
+            {t("Вперёд")}</button>
           <label className="dim">
-            На странице:{" "}
+            {t("На странице:")}{" "}
             <select value={jobsSize} data-testid="reports-size"
                     onChange={(e) => { setJobsSize(Number(e.target.value)); setJobsPage(1); }}>
               {USER_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -503,48 +490,46 @@ export default function AdminView() {
       </div>
 
       <div className="panel section-gap">
-        <h3>Досверка платежей</h3>
+        <h3>{t("Досверка платежей")}</h3>
         <div className="cap">
           {sweeps === null
-            ? "Опрос провайдера по платежам, о которых не пришло уведомление"
+            ? t("Опрос провайдера по платежам, о которых не пришло уведомление")
             : sweeps.length === 0
-              ? "Прогонов не было: незакрытых платежей не появлялось"
-              : `Прогонов: ${sweeps.length} · последний опросил ${sweeps[0].checked}, ` +
-                `изменилось ${sweeps[0].changed}`}
+              ? t("Прогонов не было: незакрытых платежей не появлялось")
+              : t("Прогонов: {0} · последний опросил {1}, ", sweeps.length, sweeps[0].checked) +
+                t("изменилось {0}", sweeps[0].changed)}
         </div>
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-sweeps">
             <thead>
               <tr>
-                <th>Начало</th>
-                <th>Статус</th>
-                <th>Опрошено</th>
-                <th>Изменилось</th>
-                <th>Заняло</th>
-                <th>Заявки</th>
+                <th>{t("Начало")}</th>
+                <th>{t("Статус")}</th>
+                <th>{t("Опрошено")}</th>
+                <th>{t("Изменилось")}</th>
+                <th>{t("Заняло")}</th>
+                <th>{t("Заявки")}</th>
               </tr>
             </thead>
             <tbody>
               {sweeps === null ? (
                 <tr>
                   <td colSpan={7} className="skeleton">
-                    Загружаем…
-                  </td>
+                    {t("Загружаем…")}</td>
                 </tr>
               ) : sweeps.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="dim">
-                    Пока нечего было досверять.
-                  </td>
+                    {t("Пока нечего было досверять.")}</td>
                 </tr>
               ) : (
                 sweeps.map((s) => (
                   <tr key={s.id} data-testid="admin-sweep-row">
                     <td className="small">{when(s.started_at)}</td>
-                    <td title={s.error ?? undefined}>{s.status === "done" ? "готов" : "идёт"}</td>
+                    <td title={s.error ?? undefined}>{s.status === "done" ? t("готов") : t("идёт")}</td>
                     <td className="num">{s.checked}</td>
                     <td className="num">{s.changed}</td>
-                    <td className="num">{s.seconds === null ? "—" : `${s.seconds} с`}</td>
+                    <td className="num">{s.seconds === null ? "—" : t("{0} с", s.seconds)}</td>
                     <td className="small">
                       {s.log.length === 0
                         ? "—"

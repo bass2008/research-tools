@@ -37,8 +37,8 @@ describe("реестр служебных страниц", () => {
   // лежал в трёх местах и разъехался — подвал английского сайта вёл на «Условия возврата»
   // там, где платить негде.
   it("подвал и карта сайта строятся из реестра, а не своими списками", () => {
-    const footer = read("components/ui/Footer.tsx");
-    const sitemap = read("app/sitemap.ts");
+    const footer = read("components/ui/FooterContent.tsx");
+    const sitemap = read("lib/sitemapEntries.ts");
     expect(footer).toContain("servicePagesOf");
     expect(sitemap).toContain("servicePages()");
     for (const key of KEYS) {
@@ -85,10 +85,10 @@ describe("реквизиты", () => {
       "lib/legal/refund.ts",
       "lib/legal/support.ts",
       "components/ui/Footer.tsx",
+      "components/ui/FooterContent.tsx",
     ];
     for (const file of files) {
       expect(read(file), file).not.toContain("⟨");
     }
   });
 });
-

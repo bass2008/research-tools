@@ -60,3 +60,14 @@ def seed(db: Session, force: bool = False) -> list[Tariff]:
             existing.period_days = row["period_days"]
     db.commit()
     return all_tariffs(db)
+
+
+def display_name(tariff_id: str, stored_name: str) -> str:
+    """Translate the built-in labels; preserve names explicitly edited by the owner."""
+    from .i18n import current_locale
+    labels = {
+        "single": {"ru": "Полный разбор одной даты", "en": "Full reading for one date"},
+        "month": {"ru": "Три месяца без ограничений", "en": "Three months without limits"},
+    }
+    translated = labels.get(tariff_id, {})
+    return translated.get(current_locale(), stored_name) if stored_name in translated.values() else stored_name

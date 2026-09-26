@@ -1,4 +1,6 @@
-import { D, L } from "@/lib/i18n";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+
 /**
  * Логотип: круглая печать с монограммой AS и начертание рядом. Вектором и на переменных темы —
  * тогда он одинаков в шапке, подвале и на печати, а цвета правятся в одном месте.
@@ -6,15 +8,18 @@ import { D, L } from "@/lib/i18n";
  * Шрифт берётся из той же переменной, что и заголовки сайта (--ser): начертание логотипа и
  * заголовков обязано совпадать, иначе логотип выглядит вставленным из чужого макета.
  */
-export default function Logo({
-  caption = true,
-  height = 44,
-  compact = false,
-}: {
+export default function Logo({ locale: requestedLocale, ...localeProps }: ({
   caption?: boolean;
   height?: number;
   compact?: boolean;
-}) {
+}) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    caption = true,
+    height = 44,
+    compact = false,
+  } = localeProps;
+
   return (
     <svg
       viewBox={compact ? "0 0 52 52" : "0 0 214 52"}

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import threading
+from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
 
 from sqlalchemy import select
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from . import access, reports
 from .config import settings
+from .i18n import current_locale, using_locale
 from .db import SessionLocal
 from .models import ReportJob, SavedMatrix, User, as_utc, utcnow
 from .store import store
@@ -25,8 +27,37 @@ log = logging.getLogger("arcana.printing")
 
 # один поток на весь процесс: прогрев сериализуется и не спорит с запросами человека за память
 _pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="print")
-_started: set[tuple[int, int]] = set()
+_started: set[tuple[int, int, str]] = set()
 _lock = threading.Lock()
+_report_locks: dict[tuple[int, int, str], tuple[threading.Lock, int]] = {}
+
+# Older cached PDFs contain links from the internal print Host, including COM links in RU.
+# Reprint on the next owner download without deleting historical objects or changing the DB schema.
+PDF_REVISION = "v2"
+
+
+@contextmanager
+def exclusive(user_id: int, matrix_id: int):
+    """One report operation across HTTP threads and the warmup thread of this API process."""
+    key = (user_id, matrix_id, current_locale())
+    with _lock:
+        mutex, users = _report_locks.get(key, (threading.Lock(), 0))
+        _report_locks[key] = (mutex, users + 1)
+    acquired = False
+    try:
+        acquired = mutex.acquire(timeout=settings.print_wait_seconds)
+        if not acquired:
+            raise Busy("эта печать ещё не завершилась")
+        yield
+    finally:
+        if acquired:
+            mutex.release()
+        with _lock:
+            _, users = _report_locks[key]
+            if users == 1:
+                del _report_locks[key]
+            else:
+                _report_locks[key] = (mutex, users - 1)
 
 # Нажатия людей идут каждое в своём запросе, и без общего ограничения десяток «Сохранить как PDF»
 # кладёт браузерный контейнер по памяти. Лишние ждут очереди: медленнее — лучше, чем убитый браузер.
@@ -44,16 +75,28 @@ _active = 0
 _waiting = 0
 
 
+def available(db: Session, row: ReportJob) -> bool:
+    """Reconcile the stored status with the file before offering a download."""
+    if row.status != "done":
+        return False
+    if row.object_key and store().exists(row.object_key):
+        return True
+    row.status = "expired"
+    row.object_key = None
+    db.commit()
+    return False
+
+
 def ready(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
     """Готовый файл, если он и правда существует. Хранилище чистит отчёты по сроку, а запись
     остаётся `done` — без этой проверки кнопка отдала бы ссылку на удалённый объект."""
     row = db.scalars(select(ReportJob)
-                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
+                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id, ReportJob.locale == current_locale(),
                             ReportJob.status == "done")
                      .order_by(ReportJob.id.desc())).first()
-    if row is None or not row.object_key:
-        return row
-    if store().exists(row.object_key):
+    if row is None:
+        return None
+    if row.object_key and row.object_key.startswith(f"{PDF_REVISION}/") and available(db, row):
         return row
     row.status = "expired"
     row.object_key = None
@@ -88,7 +131,7 @@ def running(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
     браузер мог умереть, и ждать её бессмысленно."""
     expire_stale(db)
     row = db.scalars(select(ReportJob)
-                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
+                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id, ReportJob.locale == current_locale(),
                             ReportJob.status == "running")
                      .order_by(ReportJob.id.desc())).first()
     return row
@@ -109,15 +152,15 @@ def run(db: Session, user_id: int, matrix_id: int) -> ReportJob:
         raise Busy("все места печати заняты")
     with _lock:
         _active += 1
-    job = ReportJob(user_id=user_id, matrix_id=matrix_id, status="running", started_at=utcnow())
+    job = ReportJob(user_id=user_id, matrix_id=matrix_id, locale=current_locale(), status="running", started_at=utcnow())
     db.add(job)
     db.commit()
     db.refresh(job)
     try:
         token = create_print_token(matrix_id, user_id)
-        url = f"{settings.web_internal_url.rstrip('/')}/print/report?m={matrix_id}&t={token}"
+        url = f"{settings.web_internal_url.rstrip('/')}/print/report?m={matrix_id}&t={token}&lang={current_locale()}"
         pdf = reports.render(url)
-        key = f"{user_id}/{matrix_id}/{job.id}.pdf"
+        key = f"{PDF_REVISION}/{user_id}/{matrix_id}/{current_locale()}/{job.id}.pdf"
         reports.upload(key, pdf)
     except Exception as exc:                       # noqa: BLE001
         job.status = "failed"
@@ -138,20 +181,21 @@ def run(db: Session, user_id: int, matrix_id: int) -> ReportJob:
     return job
 
 
-def _warm(user_id: int, matrix_id: int) -> None:
-    with SessionLocal() as db:
+def _warm(user_id: int, matrix_id: int, locale: str) -> None:
+    with using_locale(locale), SessionLocal() as db:
         try:
-            user = db.get(User, user_id)
-            row = db.get(SavedMatrix, matrix_id)
-            if user is None or row is None or row.user_id != user_id:
-                return
-            if not access.unlocked_matrix(db, user, matrix_id):
-                return
-            if ready(db, user_id, matrix_id) is not None:
-                return
-            if running(db, user_id, matrix_id) is not None:
-                return
-            job = run(db, user_id, matrix_id)
+            with exclusive(user_id, matrix_id):
+                user = db.get(User, user_id)
+                row = db.get(SavedMatrix, matrix_id)
+                if user is None or row is None or row.user_id != user_id:
+                    return
+                if not access.unlocked_matrix(db, user, matrix_id):
+                    return
+                if ready(db, user_id, matrix_id) is not None:
+                    return
+                if running(db, user_id, matrix_id) is not None:
+                    return
+                job = run(db, user_id, matrix_id)
             log.info("прогрет разбор матрицы %s: %s Б за %s c", matrix_id, job.size_bytes,
                      job.seconds())
         except Exception as exc:                   # noqa: BLE001
@@ -159,7 +203,7 @@ def _warm(user_id: int, matrix_id: int) -> None:
             log.warning("прогрев разбора матрицы %s не удался: %s", matrix_id, exc)
         finally:
             with _lock:
-                _started.discard((user_id, matrix_id))
+                _started.discard((user_id, matrix_id, locale))
 
 
 def pending() -> int:
@@ -187,9 +231,10 @@ def warm(user_id: int, matrix_id: int | None) -> bool:
     """Поставить печать в фон сразу после оплаты. Возвращает, взялись ли за работу."""
     if matrix_id is None or not settings.print_warmup or not settings.pdf_enabled:
         return False
+    locale = current_locale()
     with _lock:
-        if (user_id, matrix_id) in _started:
+        if (user_id, matrix_id, locale) in _started:
             return False
-        _started.add((user_id, matrix_id))
-    _pool.submit(_warm, user_id, matrix_id)
+        _started.add((user_id, matrix_id, locale))
+    _pool.submit(_warm, user_id, matrix_id, locale)
     return True

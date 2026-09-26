@@ -76,7 +76,8 @@ def test_d5_password_reset_works_while_another_session_is_alive(page, mail, api_
     page.get_by_test_id("forgot-email").fill(mail)
     page.get_by_test_id("forgot-submit").click()
     page.wait_for_timeout(2500)
-    link = flows.token_from(api_log("/reset?token="))
+    # The URL also carries an explicit locale; query parameter order is immaterial.
+    link = flows.token_from(api_log("/reset?"))
     assert link, "ссылки восстановления нет в логе"
 
     page.goto(f"{BASE}/reset?token={link}", wait_until="networkidle")

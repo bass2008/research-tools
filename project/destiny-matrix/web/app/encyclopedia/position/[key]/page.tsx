@@ -1,32 +1,34 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import PositionMap from "@/components/enc/PositionMap";
+import Related from "@/components/enc/Related";
+import Sections from "@/components/enc/Sections";
+import CalcPromo from "@/components/matrix/CalcPromo";
+import Price from "@/components/pay/Price";
+import CrumbsLd from "@/components/ui/CrumbsLd";
+import Faq from "@/components/ui/Faq";
+import JsonLd from "@/components/ui/JsonLd";
+import { ALL_FREE } from "@/lib/access";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedContent } from "@/lib/content";
+import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
+import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
+import { forLocale as localizedPositionArcanum } from "@/lib/positionArcanum";
+import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSectionReadings } from "@/lib/sectionReadings";
+import { forLocale as localizedSectionReadingShared, type PersonalSectionKey } from "@/lib/sectionReadingShared";
+import { forLocale as localizedSections } from "@/lib/sections";
+import { forLocale as localizedSeo } from "@/lib/seo";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import CalcPromo from "@/components/matrix/CalcPromo";
-import Faq from "@/components/ui/Faq";
-import CrumbsLd from "@/components/ui/CrumbsLd";
-import JsonLd from "@/components/ui/JsonLd";
-import Price, { PriceOrFree } from "@/components/pay/Price";
-import Related from "@/components/enc/Related";
-import PositionMap from "@/components/enc/PositionMap";
-import Sections from "@/components/enc/Sections";
-
-import { D, L } from "@/lib/i18n";
-import { ALL_FREE } from "@/lib/access";
-import { ARCANA } from "@/lib/arcana";
-import { POSITIONS, arcanumHref, positionByKey, positionHref } from "@/lib/encyclopedia";
-import { arcanumInPosition, positionArcanumRows, positionContent } from "@/lib/content";
-import { positionArcanumHref, positionArcanumLabel } from "@/lib/positionArcanum";
-import { calculate } from "@/lib/matrix";
-import { mapPointsFor, mapPointsForSection } from "@/lib/matrixMap";
-import { pageMeta } from "@/lib/site";
-import { articleLd } from "@/lib/schema";
-import { sectionByKey } from "@/lib/sections";
-import { FREE_POSITION_KEYS } from "@/lib/publicSpec";
-import { NOT_FOUND_META } from "@/lib/seo";
-import { encyclopediaSectionCrumb, encyclopediaSectionHref } from "@/lib/encyclopediaNavigation";
-import { PERSONAL_SECTION_KEYS, type PersonalSectionKey } from "@/lib/sectionReadingShared";
-import { sectionExampleNote, sectionReadingHref, sectionReadingSlug } from "@/lib/sectionReadings";
 
 type Params = { key: string };
 
@@ -34,11 +36,36 @@ type Params = { key: string };
 // динамическим рендером — у того пустое тело и заголовок главной.
 export const dynamicParams = false;
 
+const forLocale = localized((L: Locale, site) => {
+  const { ARCANA } = localizedArcana(L);
+  const { POSITIONS, arcanumHref, positionByKey, positionHref } = localizedEncyclopedia(L);
+  const { arcanumInPosition, positionArcanumRows, positionContent } = localizedContent(L);
+  const { positionArcanumHref, positionArcanumLabel } = localizedPositionArcanum(L);
+  const { calculate } = localizedMatrix(L);
+  const { mapPointsFor, mapPointsForSection } = localizedMatrixMap(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { articleLd } = localizedSchema(L, site);
+  const { sectionByKey } = localizedSections(L);
+  const { FREE_POSITION_KEYS } = localizedPublicSpec(L);
+  const { NOT_FOUND_META } = localizedSeo(L, site);
+  const { encyclopediaSectionCrumb, encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
+  const { PERSONAL_SECTION_KEYS } = localizedSectionReadingShared(L);
+  const { sectionExampleNote, sectionReadingHref, sectionReadingSlug } = localizedSectionReadings(L);
+
+  return { ARCANA, POSITIONS, arcanumHref, positionByKey, positionHref, arcanumInPosition, positionArcanumRows, positionContent, positionArcanumHref, positionArcanumLabel, calculate, mapPointsFor, mapPointsForSection, pageMeta, articleLd, sectionByKey, FREE_POSITION_KEYS, NOT_FOUND_META, encyclopediaSectionCrumb, encyclopediaSectionHref, PERSONAL_SECTION_KEYS, sectionExampleNote, sectionReadingHref, sectionReadingSlug };
+});
+
 export function generateStaticParams(): Params[] {
+  const L = defaultLocale;
+  const { POSITIONS } = forLocale(L);
+
   return POSITIONS.map((p) => ({ key: p.key }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const L = await publicLocale();
+  const { positionByKey, positionHref, positionContent, pageMeta, NOT_FOUND_META } = forLocale(L, await requestSite());
+
   const p = positionByKey((await params).key);
   // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
   // несуществующая страница выглядела как главная.
@@ -54,6 +81,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function PositionPage({ params }: { params: Promise<Params> }) {
+  const L = await requestLocale();
+  const { ARCANA, POSITIONS, arcanumHref, positionByKey, positionHref, arcanumInPosition, positionArcanumRows, positionContent, positionArcanumHref, positionArcanumLabel, calculate, mapPointsFor, mapPointsForSection, articleLd, sectionByKey, FREE_POSITION_KEYS, encyclopediaSectionCrumb, encyclopediaSectionHref, PERSONAL_SECTION_KEYS, sectionExampleNote, sectionReadingHref, sectionReadingSlug } = forLocale(L, await requestSite());
+
   const p = positionByKey((await params).key);
   if (!p) notFound();
 
@@ -79,10 +109,10 @@ export default async function PositionPage({ params }: { params: Promise<Params>
     ? p.key as PersonalSectionKey
     : null;
   const exampleHref = p.key === "past_lives"
-      ? `/encyclopedia/karmic-tail/${exampleMatrix.karmic_tail.join("-")}`
-      : personalKey
-        ? sectionReadingHref(personalKey, exampleMatrix)
-        : null;
+    ? `/encyclopedia/karmic-tail/${exampleMatrix.karmic_tail.join("-")}`
+    : personalKey
+      ? sectionReadingHref(personalKey, exampleMatrix)
+      : null;
   const exampleCode = personalKey
     ? sectionReadingSlug(personalKey, exampleMatrix)
     : p.key === "past_lives"
@@ -97,7 +127,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   return (
     <>
 
-      <CrumbsLd
+      <CrumbsLd locale={L}
         trail={[
           { name: D.nav.home[L], path: "/" },
           { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
@@ -105,242 +135,242 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           { name: p.title },
         ]}
       />
-        <JsonLd
-          data={articleLd({
-            headline: extra.seo.title,
-            description: extra.seo.description,
-            path: positionHref(p.key),
-          })}
-        />
+      <JsonLd
+        data={articleLd({
+          headline: extra.seo.title,
+          description: extra.seo.description,
+          path: positionHref(p.key),
+        })}
+      />
 
-        <h1>{p.title}</h1>
-        <p className="dim prose">{lead}</p>
+      <h1>{p.title}</h1>
+      <p className="dim prose">{lead}</p>
 
-        <PositionMap
-          highlight={spots}
-          caption={spots.length === 1
-            ? D.encPosition.whereOnePoint[L](`${spots[0]!.label} · ${spots[0]!.symbol}`)
-            : D.encPosition.whereSeveralPoints[L](
-                spots.map((x) => `${x.label} · ${x.symbol}`).join(", "),
-              )}
-        />
+      <PositionMap locale={L}
+        highlight={spots}
+        caption={spots.length === 1
+          ? D.encPosition.whereOnePoint[L](`${spots[0]!.label} · ${spots[0]!.symbol}`)
+          : D.encPosition.whereSeveralPoints[L](
+            spots.map((x) => `${x.label} · ${x.symbol}`).join(", "),
+          )}
+      />
 
-        <div className="panel section-gap">
-          <h2>{D.encPosition.howCounted[L]}</h2>
-          <div className="cap">{D.encPosition.howCountedHint[L]}</div>
-          <p style={{ margin: 0 }}>{extra.formula}</p>
-          {section ? (
-            <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
-              {D.encPosition.sectionInReport[L]}{" "}
-              {isFree || ALL_FREE ? (
-                D.encPosition.openFree[L]
-              ) : (
-                <>
-                  {D.encPosition.opensInFull[L]} <Price />.
-                </>
-              )}{" "}
-              <Link href="/report">{D.encPosition.seeYourReport[L]}</Link>
-            </p>
-          ) : null}
-        </div>
-
-        <div className="prose section-gap">
-          {paragraphs.map((text, i) => (
-            <p key={i}>{text}</p>
-          ))}
-        </div>
-
-        <Sections items={extra.sections} />
-
-        {p.key === "day" ? (
-          <p className="encref">
-            <Link href={positionHref("character")}>
-              {D.encPosition.moreAboutCharacter[L]}
-            </Link>
+      <div className="panel section-gap">
+        <h2>{D.encPosition.howCounted[L]}</h2>
+        <div className="cap">{D.encPosition.howCountedHint[L]}</div>
+        <p style={{ margin: 0 }}>{extra.formula}</p>
+        {section ? (
+          <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
+            {D.encPosition.sectionInReport[L]}{" "}
+            {isFree || ALL_FREE ? (
+              D.encPosition.openFree[L]
+            ) : (
+              <>
+                {D.encPosition.opensInFull[L]} <Price locale={L} />.
+              </>
+            )}{" "}
+            <Link href="/report">{D.encPosition.seeYourReport[L]}</Link>
           </p>
         ) : null}
+      </div>
 
-        {p.key === "character" ? (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
-            <div className="cap">{D.encPosition.characterExampleHint[L]}</div>
-            <p>{D.encPosition.characterExampleText[L]}</p>
-            <p className="encref">
-              <Link href="/encyclopedia/character/4-3-22">
-                {D.encPosition.characterExampleLink[L]}
-              </Link>
-            </p>
-          </div>
-        ) : null}
+      <div className="prose section-gap">
+        {paragraphs.map((text, i) => (
+          <p key={i}>{text}</p>
+        ))}
+      </div>
 
-        {p.key === "comfort" ? (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
-            <div className="cap">{D.encPosition.comfortExampleHint[L]}</div>
-            <p>{D.encPosition.comfortExampleText[L]}</p>
-            <p className="encref">
-              <Link href="/encyclopedia/comfort/4-15-7">
-                {D.encPosition.comfortExampleLink[L]}
-              </Link>
-            </p>
-          </div>
-        ) : null}
+      <Sections items={extra.sections} />
 
-        {p.key === "profession" ? (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
-            <div className="cap">{D.encPosition.professionExampleHint[L]}</div>
-            <p>{D.encPosition.professionExampleText[L]}</p>
-            <p className="encref">
-              <Link href="/encyclopedia/profession/3-10-7">
-                {D.encPosition.professionExampleLink[L]}
-              </Link>
-            </p>
-          </div>
-        ) : null}
+      {p.key === "day" ? (
+        <p className="encref">
+          <Link href={positionHref("character")}>
+            {D.encPosition.moreAboutCharacter[L]}
+          </Link>
+        </p>
+      ) : null}
 
-        {exampleHref && exampleCode && !["character", "comfort", "profession"].includes(p.key) ? (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.personalExampleTitle[L]}</h2>
-            <div className="cap">
-              {p.key === "chakras"
-                ? D.encPosition.chakraExampleHint[L]
-                : p.key === "years"
-                  ? D.encPosition.yearsExampleHint[L]
-                  : D.encPosition.calculatedResult[L](exampleCode)}
-            </div>
-            <p>{exampleText}</p>
-            <p className="encref">
-              <Link href={exampleHref}>
-                {D.encPosition.personalExampleLink[L]}
-              </Link>
-            </p>
-          </div>
-        ) : null}
-
-        {extra.reading ? (
-          <div className="panel">
-            <h3>{D.encPosition.howToRead[L]}</h3>
-            <div className="cap">{D.encPosition.howToReadHint[L]}</div>
-            <p style={{ margin: 0 }}>{extra.reading}</p>
-          </div>
-        ) : null}
-
-        <div className="section-gap">
-          <CalcPromo
-            title={D.enc.buildYourChart[L]}
-            // Бесплатны только два раздела разбора («характер» и «зона комфорта»): обещать
-            // бесплатный результат на остальных восемнадцати нельзя.
-            lead={
-              isFree || ALL_FREE
-                ? D.encPosition.promoFreeLead[L](p.title)
-                : D.encPosition.promoPaidLead[L](p.title)
-            }
-            place="position"
-          />
+      {p.key === "character" ? (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <div className="cap">{D.encPosition.characterExampleHint[L]}</div>
+          <p>{D.encPosition.characterExampleText[L]}</p>
+          <p className="encref">
+            <Link href="/encyclopedia/character/4-3-22">
+              {D.encPosition.characterExampleLink[L]}
+            </Link>
+          </p>
         </div>
+      ) : null}
 
-        {/* Пересечения этой позиции: спрашивают именно их — «8 аркан профессии», «6 в центре
+      {p.key === "comfort" ? (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <div className="cap">{D.encPosition.comfortExampleHint[L]}</div>
+          <p>{D.encPosition.comfortExampleText[L]}</p>
+          <p className="encref">
+            <Link href="/encyclopedia/comfort/4-15-7">
+              {D.encPosition.comfortExampleLink[L]}
+            </Link>
+          </p>
+        </div>
+      ) : null}
+
+      {p.key === "profession" ? (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <div className="cap">{D.encPosition.professionExampleHint[L]}</div>
+          <p>{D.encPosition.professionExampleText[L]}</p>
+          <p className="encref">
+            <Link href="/encyclopedia/profession/3-10-7">
+              {D.encPosition.professionExampleLink[L]}
+            </Link>
+          </p>
+        </div>
+      ) : null}
+
+      {exampleHref && exampleCode && !["character", "comfort", "profession"].includes(p.key) ? (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <div className="cap">
+            {p.key === "chakras"
+              ? D.encPosition.chakraExampleHint[L]
+              : p.key === "years"
+                ? D.encPosition.yearsExampleHint[L]
+                : D.encPosition.calculatedResult[L](exampleCode)}
+          </div>
+          <p>{exampleText}</p>
+          <p className="encref">
+            <Link href={exampleHref}>
+              {D.encPosition.personalExampleLink[L]}
+            </Link>
+          </p>
+        </div>
+      ) : null}
+
+      {extra.reading ? (
+        <div className="panel">
+          <h3>{D.encPosition.howToRead[L]}</h3>
+          <div className="cap">{D.encPosition.howToReadHint[L]}</div>
+          <p style={{ margin: 0 }}>{extra.reading}</p>
+        </div>
+      ) : null}
+
+      <div className="section-gap">
+        <CalcPromo locale={L}
+          title={D.enc.buildYourChart[L]}
+          // Бесплатны только два раздела разбора («характер» и «зона комфорта»): обещать
+          // бесплатный результат на остальных восемнадцати нельзя.
+          lead={
+            isFree || ALL_FREE
+              ? D.encPosition.promoFreeLead[L](p.title)
+              : D.encPosition.promoPaidLead[L](p.title)
+          }
+          place="position"
+        />
+      </div>
+
+      {/* Пересечения этой позиции: спрашивают именно их — «8 аркан профессии», «6 в центре
             матрицы». Без этих ссылок 80 страниц реестра оставались бы сиротами: в карте сайта
             есть, а входящих ссылок нет ни одной. */}
-        {crossings.length ? (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.crossingsTitle[L]}</h2>
-            <div className="cap">{D.encPosition.crossingsHint[L](crossings.length)}</div>
-            <div className="taglist">
-              {crossings.map((item) => (
-                <Link
-                  key={item.arcanum}
-                  href={positionArcanumHref(item.position, item.arcanum)}
-                  prefetch={false}
-                >
-                  {positionArcanumLabel(item)}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <Faq items={extra.faq} />
-
-        {/* У «Карты энергий» связанные материалы — не точки матрицы, а семь статей уровней.
-            Поле `links` было заполнено, но на странице не выводилось: дочерние статьи получали
-            входящие ссылки только с корня энциклопедии и с noindex-карты. */}
-        {p.kind === "section" && extra.links?.length ? (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.levelsTitle[L]}</h2>
-            <div className="cap">{D.encPosition.levelsHint[L]}</div>
-            <div className="taglist">
-              {extra.links.map((link) => (
-                <Link key={link.href} href={link.href}>
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {p.kind === "section" ? (
-          extra.points.length ? (
-            <div className="panel section-gap">
-              <h2>{D.encPosition.sectionPositions[L]}</h2>
-              <div className="cap">{D.encPosition.sectionPositionsHint[L]}</div>
-              <div className="taglist">
-                {extra.points.map((point) => (
-                  <Link key={point.key} href={positionHref(point.key)}>
-                    {point.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ) : null
-        ) : (
-          <div className="panel section-gap">
-            <h2>{D.encPosition.allArcanaHere[L]}</h2>
-            <div className="cap">{D.encPosition.allArcanaHereHint[L]}</div>
-            <div className="cardgrid">
-              {ARCANA.map((a) => (
-                <Link className="ecard" key={a.n} href={arcanumHref(a.n)}>
-                  <div className="num">{D.encPosition.arcanumNumber[L](a.n)}</div>
-                  <div className="nm">{a.title}</div>
-                  <div className="ds">{arcanumInPosition(a.n, p.key)}</div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <Related
-          path={positionHref(p.key)}
-          refs={[]}
-          title={D.encPosition.relatedTitle[L]}
-          hint={D.encPosition.relatedHint[L]}
-        />
-
+      {crossings.length ? (
         <div className="panel section-gap">
-          <h2>{D.encPosition.nearby[L]}</h2>
-          <div className="cap">
-            {p.kind === "section" ? D.encPosition.otherSections[L] : D.encPosition.otherPositions[L]}
-          </div>
+          <h2>{D.encPosition.crossingsTitle[L]}</h2>
+          <div className="cap">{D.encPosition.crossingsHint[L](crossings.length)}</div>
           <div className="taglist">
-            {siblings.map((s) => (
-              <Link key={s.key} href={positionHref(s.key)}>
-                {s.title}
+            {crossings.map((item) => (
+              <Link
+                key={item.arcanum}
+                href={positionArcanumHref(item.position, item.arcanum)}
+                prefetch={false}
+              >
+                {positionArcanumLabel(item)}
               </Link>
             ))}
-            <Link href={encyclopediaSectionHref(p.kind === "section" ? "sec" : "pts")}>
-              {p.kind === "section" ? D.encPosition.allSections[L] : D.encPosition.allPositions[L]}
-            </Link>
           </div>
         </div>
+      ) : null}
 
-        <div className="allbox">
-          <h2>{D.encPosition.seeInYourChart[L]}</h2>
-          <p>{D.encPosition.seeInYourChartText[L]}</p>
-          <Link className="btn" href="/#calc">
-            {D.matrixPages.calcMatrix[L]}
+      <Faq locale={L} items={extra.faq} />
+
+      {/* У «Карты энергий» связанные материалы — не точки матрицы, а семь статей уровней.
+            Поле `links` было заполнено, но на странице не выводилось: дочерние статьи получали
+            входящие ссылки только с корня энциклопедии и с noindex-карты. */}
+      {p.kind === "section" && extra.links?.length ? (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.levelsTitle[L]}</h2>
+          <div className="cap">{D.encPosition.levelsHint[L]}</div>
+          <div className="taglist">
+            {extra.links.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {p.kind === "section" ? (
+        extra.points.length ? (
+          <div className="panel section-gap">
+            <h2>{D.encPosition.sectionPositions[L]}</h2>
+            <div className="cap">{D.encPosition.sectionPositionsHint[L]}</div>
+            <div className="taglist">
+              {extra.points.map((point) => (
+                <Link key={point.key} href={positionHref(point.key)}>
+                  {point.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null
+      ) : (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.allArcanaHere[L]}</h2>
+          <div className="cap">{D.encPosition.allArcanaHereHint[L]}</div>
+          <div className="cardgrid">
+            {ARCANA.map((a) => (
+              <Link className="ecard" key={a.n} href={arcanumHref(a.n)}>
+                <div className="num">{D.encPosition.arcanumNumber[L](a.n)}</div>
+                <div className="nm">{a.title}</div>
+                <div className="ds">{arcanumInPosition(a.n, p.key)}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Related locale={L}
+        path={positionHref(p.key)}
+        refs={[]}
+        title={D.encPosition.relatedTitle[L]}
+        hint={D.encPosition.relatedHint[L]}
+      />
+
+      <div className="panel section-gap">
+        <h2>{D.encPosition.nearby[L]}</h2>
+        <div className="cap">
+          {p.kind === "section" ? D.encPosition.otherSections[L] : D.encPosition.otherPositions[L]}
+        </div>
+        <div className="taglist">
+          {siblings.map((s) => (
+            <Link key={s.key} href={positionHref(s.key)}>
+              {s.title}
+            </Link>
+          ))}
+          <Link href={encyclopediaSectionHref(p.kind === "section" ? "sec" : "pts")}>
+            {p.kind === "section" ? D.encPosition.allSections[L] : D.encPosition.allPositions[L]}
           </Link>
         </div>
+      </div>
+
+      <div className="allbox">
+        <h2>{D.encPosition.seeInYourChart[L]}</h2>
+        <p>{D.encPosition.seeInYourChartText[L]}</p>
+        <Link className="btn" href="/#calc">
+          {D.matrixPages.calcMatrix[L]}
+        </Link>
+      </div>
     </>
   );
 }

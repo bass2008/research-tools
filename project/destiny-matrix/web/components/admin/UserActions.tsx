@@ -1,12 +1,14 @@
 "use client";
 
+import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
+
 // Действия над чужим аккаунтом. Списком, а не рядом кнопок: их уже два, и в строке таблицы
 // каждая новая кнопка съедает колонку с данными.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { ApiError, api, type AdminUser } from "@/lib/api";
-import { MONTHS_ACC, daysInMonth, toIso, type Sex } from "@/lib/matrix";
+import { ApiError, type AdminUser } from "@/lib/api";
+import { type Sex } from "@/lib/matrix";
 import { exampleDay } from "@/lib/today";
 
 // Дата собирается тремя списками и переключателем пола — как в калькуляторе на сайте. Ввод датой
@@ -23,11 +25,13 @@ export default function UserActions({ user, onGranted }: {
   user: AdminUser;
   onGranted?: () => void;
 }) {
+  const { t, api, MONTHS_ACC, daysInMonth, toIso } = useAdminLocale();
   const [open, setOpen] = useState(false);
   const [granting, setGranting] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<string | null>(null);
+  const [error, setError] = useAdminMessage();
+  const [doneBirth, setDone] = useState<string | null>(null);
+  const done = doneBirth ? t("Матрица {0} добавлена и открыта", doneBirth) : null;
   const [day, setDay] = useState(1);
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(1990);
@@ -85,9 +89,9 @@ export default function UserActions({ user, onGranted }: {
   const enter = async () => {
     setOpen(false);
     const ok = window.confirm(
-      `Войти под ${user.email}?\n` +
-        "Ваша админская сессия закроется — вернуться можно только своим входом.\n" +
-        "Вход будет записан в журнал безопасности.",
+      t("Войти под {0}?\n", user.email) +
+        t("Ваша админская сессия закроется — вернуться можно только своим входом.\n") +
+        t("Вход будет записан в журнал безопасности."),
     );
     if (!ok) return;
     setBusy(true);
@@ -99,7 +103,7 @@ export default function UserActions({ user, onGranted }: {
       window.location.href = "/account";
     } catch (err) {
       setBusy(false);
-      setError(err instanceof ApiError ? err.message : "Войти не удалось.");
+      setError(err instanceof ApiError ? err : "Войти не удалось.");
     }
   };
 
@@ -110,11 +114,11 @@ export default function UserActions({ user, onGranted }: {
     setDone(null);
     try {
       const row = await api.admin.addMatrix(user.id, toIso({ day, month, year }), sex);
-      setDone(`Матрица ${row.birth} добавлена и открыта`);
+      setDone(row.birth);
       setGranting(false);
       onGranted?.();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось добавить матрицу.");
+      setError(err instanceof ApiError ? err : "Не удалось добавить матрицу.");
     } finally {
       setBusy(false);
     }
@@ -135,13 +139,11 @@ export default function UserActions({ user, onGranted }: {
           setOpen((was) => !was);
         }}
       >
-        Действия ▾
-      </button>
+        {t("Действия ▾")}</button>
       {open && mounted && at ? createPortal(
         <div className="actions-menu" role="menu" style={{ top: at.top, right: at.right }}>
           <button type="button" role="menuitem" data-testid="action-impersonate" onClick={enter}>
-            Войти
-          </button>
+            {t("Войти")}</button>
           <button
             type="button"
             role="menuitem"
@@ -152,8 +154,7 @@ export default function UserActions({ user, onGranted }: {
               setGranting(true);
             }}
           >
-            Добавить матрицу
-          </button>
+            {t("Добавить матрицу")}</button>
         </div>,
         document.body,
       ) : null}
@@ -166,11 +167,11 @@ export default function UserActions({ user, onGranted }: {
             onMouseDown={(event) => event.stopPropagation()}
             onSubmit={grant}
           >
-            <h4>Матрица для {user.email}</h4>
-            <p className="cap">Откроется сразу и без оплаты — в кабинете она будет помечена как выданная.</p>
+            <h4>{t("Матрица для ")}{user.email}</h4>
+            <p className="cap">{t("Откроется сразу и без оплаты — в кабинете она будет помечена как выданная.")}</p>
             <div className="fields">
               <div>
-                <label htmlFor="grant-d">Число</label>
+                <label htmlFor="grant-d">{t("Число")}</label>
                 <select id="grant-d" data-testid="grant-day" value={day}
                         onChange={(e) => setDay(Number(e.target.value))}>
                   {/* дней ровно столько, сколько в выбранном месяце: 31 февраля выбрать нельзя,
@@ -181,7 +182,7 @@ export default function UserActions({ user, onGranted }: {
                 </select>
               </div>
               <div>
-                <label htmlFor="grant-m">Месяц</label>
+                <label htmlFor="grant-m">{t("Месяц")}</label>
                 <select id="grant-m" data-testid="grant-month" value={month}
                         onChange={(e) => {
                           const next = Number(e.target.value);
@@ -194,7 +195,7 @@ export default function UserActions({ user, onGranted }: {
                 </select>
               </div>
               <div>
-                <label htmlFor="grant-y">Год</label>
+                <label htmlFor="grant-y">{t("Год")}</label>
                 <select id="grant-y" data-testid="grant-year" value={year}
                         onChange={(e) => {
                           const next = Number(e.target.value);
@@ -207,26 +208,23 @@ export default function UserActions({ user, onGranted }: {
                 </select>
               </div>
             </div>
-            <div className="sexrow" role="group" aria-label="Пол">
+            <div className="sexrow" role="group" aria-label={t("Пол")}>
               <button type="button" data-testid="grant-sex-f" data-sex="f"
                       aria-pressed={sex === "f"} className={sex === "f" ? "on" : ""}
                       onClick={() => setSex("f")}>
-                Женский
-              </button>
+                {t("Женский")}</button>
               <button type="button" data-testid="grant-sex-m" data-sex="m"
                       aria-pressed={sex === "m"} className={sex === "m" ? "on" : ""}
                       onClick={() => setSex("m")}>
-                Мужской
-              </button>
+                {t("Мужской")}</button>
             </div>
             {error ? <p className="err" role="status">{error}</p> : null}
             <button type="submit" className="btn wide" disabled={busy} data-testid="grant-submit"
                     style={{ marginTop: 12 }}>
-              {busy ? "Добавляем…" : "Добавить матрицу"}
+              {busy ? t("Добавляем…") : t("Добавить матрицу")}
             </button>
             <button type="button" className="btn ghost sm" onClick={() => setGranting(false)}>
-              Отмена
-            </button>
+              {t("Отмена")}</button>
           </form>
         </div>,
         document.body,

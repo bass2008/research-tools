@@ -7,13 +7,17 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shlex
 import subprocess
 import uuid
 
 import pytest
 from playwright.sync_api import Page, sync_playwright
+from target import is_remote
+from urllib.parse import urlsplit
 
-BASE = os.environ.get("E2E_URL", "http://127.0.0.1:3000")
+BASE = os.environ.get("E2E_URL", "http://localhost:3000")
+REMOTE = is_remote(BASE)
 ADMIN = (os.environ.get("E2E_ADMIN", "snborodaenko@mail.ru"), os.environ.get("E2E_ADMIN_PASSWORD", "123"))
 
 # Тестовый контур закрыт паролем на уровне nginx: боты и посторонние получают 401 вместо страниц.
@@ -26,7 +30,7 @@ def _gate() -> tuple[str, str] | None:
     user = os.environ.get("E2E_BASIC_USER")
     if user:
         return user, os.environ.get("E2E_BASIC_PASSWORD", "")
-    if "127.0.0.1" in BASE or "localhost" in BASE or not CREDENTIALS_FILE.exists():
+    if not REMOTE or not CREDENTIALS_FILE.exists():
         return None
     values: dict[str, str] = {}
     for line in CREDENTIALS_FILE.read_text().splitlines():
@@ -86,16 +90,36 @@ def mail() -> str:
 # Тестовый контур живёт на боевой машине отдельным проектом compose: те же прогоны гоняются
 # против него, и тогда логи и служебные команды берутся по ssh, а не у локального docker.
 REMOTE_HOST = os.environ.get("E2E_SSH_HOST", "root@45.80.130.166")
-REMOTE_API = os.environ.get("E2E_REMOTE_API", "arcana-test-ru-api-1")
-REMOTE = "arcana-sense.ru" in BASE
+REMOTE_API = os.environ.get("E2E_REMOTE_API", "arcana-test-api-1")
 
 
 def _api_command(args: list[str]) -> subprocess.CompletedProcess:
     if REMOTE:
-        return subprocess.run(["ssh", "-n", REMOTE_HOST, "docker", "exec", REMOTE_API, *args],
+        return subprocess.run(["ssh", "-n", REMOTE_HOST, shlex.join(["docker", "exec", REMOTE_API, *args])],
                               capture_output=True, text=True)
-    container = os.environ.get("E2E_API_CONTAINER", "arcana-ru-api-1")
+    container = os.environ.get("E2E_API_CONTAINER", "arcana-api-1")
     return subprocess.run(["docker", "exec", container, *args], capture_output=True, text=True)
+
+
+@pytest.fixture
+def print_site() -> str:
+    """Подпись общего PDF берётся из профиля внутреннего Host печати.
+
+    Это не адрес скачивания: ссылка локального файла отдельно сохраняет origin запроса.
+    Сам готовый PDF общий для аккаунта, матрицы и языка на обоих доменах.
+    """
+    script = """
+import json
+from urllib.parse import urlsplit
+from app.config import settings
+host = urlsplit(settings.web_internal_url).netloc
+profiles = json.loads(settings.site_profiles)
+print(next(p['origin'] for p in profiles
+           if host in p.get('hosts', [urlsplit(p['origin']).netloc])))
+"""
+    result = _api_command(["python", "-c", script])
+    assert result.returncode == 0, result.stderr
+    return result.stdout.strip()
 
 
 @pytest.fixture
@@ -104,7 +128,7 @@ def api_log():
 
     # Читаем контейнер по имени, а не через compose: файл стенда требует SITE_LANG и имя
     # проекта, и без них команда возвращала пустоту — тест падал не потому, что письмо не ушло.
-    container = os.environ.get("E2E_API_CONTAINER", "arcana-ru-api-1")
+    container = os.environ.get("E2E_API_CONTAINER", "arcana-api-1")
 
     def read(pattern: str) -> str | None:
         host = [REMOTE_HOST] if REMOTE else []
@@ -126,3 +150,16 @@ def api_notify():
         assert done.returncode == 0, done.stderr or done.stdout
         return done.stdout.strip()
     return send
+
+
+@pytest.fixture
+def multilingual_checkout(page):
+    """Тесты формы применимы к профилю с оплатой; текущий COM её не предлагает.
+
+    Сохраняем регрессии формы для локальных профилей с подключённым провайдером.
+    Отсутствие оплаты в обычном COM отдельно проверяет test_payment_regions.py.
+    """
+    response = page.request.get(BASE + "/api/tariffs")
+    assert response.ok, response.text()
+    if not response.json()["payment_providers"]:
+        pytest.skip("У этого профиля нет провайдеров: форма оплаты недоступна")

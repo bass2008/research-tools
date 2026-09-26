@@ -20,11 +20,12 @@ ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 ARG NEXT_PUBLIC_METRIKA_ID=""
 ENV NEXT_PUBLIC_METRIKA_ID=${NEXT_PUBLIC_METRIKA_ID}
 
-# Язык развёртки: от него зависят корпус, словари и адрес другой языковой версии. Значение
-# вшивается в сборку — страницы печатаются заранее и сменить язык на запрос не могут.
+# Язык по умолчанию и доступные переводы витрины. Текущий язык выбирается на запрос.
 ARG NEXT_PUBLIC_SITE_LANG=ru
 ENV NEXT_PUBLIC_SITE_LANG=${NEXT_PUBLIC_SITE_LANG}
-# Витрина без оплаты: на английском домене кассы пока нет, разбор открыт всем.
+ARG NEXT_PUBLIC_SUPPORTED_LOCALES=ru,en
+ENV NEXT_PUBLIC_SUPPORTED_LOCALES=${NEXT_PUBLIC_SUPPORTED_LOCALES}
+# Общий режим доступа для обоих доменов; язык не меняет платность.
 ARG NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT=0
 ENV NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT=${NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT}
 
@@ -46,7 +47,7 @@ ENV NEXT_PUBLIC_BUILD_COMMIT=${BUILD_COMMIT} \
     NEXT_PUBLIC_BUILD_ISO=${BUILD_ISO}
 # Кеш Next переживает пересборку слоя: правка одного компонента не заставляет печатать
 # 5 544 страницы заново. Кеш живёт в докере, в образ не попадает.
-# sharing=locked: русская и английская сборки идут одновременно (docker-compose.full.yml) и
+# sharing=locked: параллельные локальные сборки используют общий кеш и
 # делят один кеш Next. Без замка вторая входит в тот же каталог и роняет первую паникой
 # внутри rust-части сборщика.
 RUN --mount=type=cache,target=/app/.next/cache,sharing=locked npm run build

@@ -1,21 +1,32 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import { forLocale as localizedEncShell } from "@/components/enc/EncShell";
+import CrumbsLd from "@/components/ui/CrumbsLd";
+import JsonLd from "@/components/ui/JsonLd";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSite } from "@/lib/site";
+import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { D, L } from "@/lib/i18n";
-import CrumbsLd from "@/components/ui/CrumbsLd";
-import { articleList, encSections } from "@/components/enc/EncShell";
+const forLocale = localized((L: Locale, site) => {
+  const { articleList, encSections } = localizedEncShell(L);
+  const { itemListLd } = localizedSchema(L, site);
+  const { pageMeta } = localizedSite(L, site);
+  const { clip } = localizedText(L);
+  const { encyclopediaSectionHref, encyclopediaSectionHub } = localizedEncyclopediaNavigation(L);
 
-import { itemListLd } from "@/lib/schema";
-import { pageMeta } from "@/lib/site";
-import { clip } from "@/lib/text";
-import JsonLd from "@/components/ui/JsonLd";
-import { encyclopediaSectionHref, encyclopediaSectionHub } from "@/lib/encyclopediaNavigation";
-
-export const metadata: Metadata = pageMeta({
-  title: D.enc.title[L],
-  description:
-    D.enc.description[L],
-  path: "/encyclopedia",
+  const metadata: Metadata = pageMeta({
+    title: D.enc.title[L],
+    description:
+      D.enc.description[L],
+    path: "/encyclopedia",
+  });
+  return { articleList, encSections, itemListLd, pageMeta, clip, encyclopediaSectionHref, encyclopediaSectionHub, metadata };
 });
 
 // Оглавление, а не список всего. Раньше здесь лежали тела всех восьми разделов сразу, и страница
@@ -23,14 +34,17 @@ export const metadata: Metadata = pageMeta({
 // поиск читал справочник как один каталог однотипного. Теперь каждый раздел живёт на своей шапке
 // со своим текстом и своим запросом, а эта страница ведёт к шапкам. «Статьи» остаются здесь
 // списком: это адреса первого уровня, ветки справочника у них нет.
-export default function EncyclopediaIndexPage() {
+export default async function EncyclopediaIndexPage() {
+  const L = await requestLocale();
+  const { articleList, encSections, itemListLd, clip, encyclopediaSectionHref, encyclopediaSectionHub } = forLocale(L, await requestSite());
+
   const sections = encSections();
   const articles = articleList();
   const withHub = sections.filter((s) => encyclopediaSectionHub(s.key) !== null);
 
   return (
     <>
-      <CrumbsLd trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.encyclopedia[L] }]} />
+      <CrumbsLd locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.encyclopedia[L] }]} />
       <JsonLd
         data={itemListLd({
           name: D.enc.sectionsName[L],
@@ -70,4 +84,7 @@ export default function EncyclopediaIndexPage() {
       </div>
     </>
   );
+}
+export async function generateMetadata() {
+  return forLocale(await publicLocale(), await requestSite()).metadata;
 }

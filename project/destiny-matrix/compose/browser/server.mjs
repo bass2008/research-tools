@@ -126,6 +126,10 @@ async function printPage(url) {
   const marks = [];
   const mark = (name, from) => marks.push(`${name} ${((Date.now() - from) / 1000).toFixed(1)} с`);
   try {
+    const locale = new URL(url).searchParams.get("lang");
+    if (locale && /^[a-z]{2}(?:-[A-Z]{2})?$/.test(locale)) {
+      await page.setExtraHTTPHeaders({ "Accept-Language": locale });
+    }
     await page.setViewport({ width: 1280, height: 1200, deviceScaleFactor: SCALE });
     // Чужие домены отрезаны: аналитика и внешние ресурсы не должны ни задерживать печать, ни
     // попадать в файл — на них уходило всё окно ожидания сети.
@@ -136,7 +140,17 @@ async function printPage(url) {
       else req.abort().catch(() => {});
     });
     let t = Date.now();
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: PAGE_TIMEOUT });
+    const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: PAGE_TIMEOUT });
+    if (!response?.ok()) {
+      throw new Error(`страница печати ответила HTTP ${response?.status() ?? "без ответа"}`);
+    }
+    // Next can also stream an error inside an HTTP 200 response. A valid PDF header alone
+    // cannot distinguish that page from a paid reading.
+    // Use the existing report markup so browser/web can roll out in either order.
+    await page.waitForSelector('main.printmode [data-testid="report"] .poslist', { timeout: 5000 });
+    if (await page.$('main.printmode [data-locked="true"]')) {
+      throw new Error("страница печати содержит закрытые разделы");
+    }
     mark("страница", t);
     // Разделы разбора живут в <details>: закрытые попали бы в файл одними заголовками. Карты
     // арканов помечены loading="lazy", поэтому страницу надо ещё и прокрутить — иначе картинки

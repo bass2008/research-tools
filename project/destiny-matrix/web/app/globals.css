@@ -1670,3 +1670,8 @@ table.mx td.self { background: var(--card2); }
 
 /* заголовок на служебных экранах остаётся прежнего кегля, но становится h1 страницы */
 .paybox h1, .payresult h1, .panel h1 { font-size: clamp(19px, 2vw, 23px); margin-bottom: 8px; }
+
+/* The language control follows the existing text-link style. */
+.language-switch { border: 0; padding: 0; background: none; color: var(--gold); font: inherit; cursor: pointer; }
+.language-switch:hover { text-decoration: underline; }
+.language-switch:disabled { cursor: wait; opacity: .6; }

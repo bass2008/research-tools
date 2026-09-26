@@ -1,10 +1,11 @@
+import { forLocale as emailForLocale } from "@/lib/email";
+import { requestLocale } from "@/lib/i18n/request";
 // Общие обработчики BFF. Пути статические (без динамических сегментов) намеренно: rewrites из
 // next.config проверяются после файловых маршрутов, но до динамических, и динамический
 // `/api/auth/[action]` при заданном API_ORIGIN уехал бы мимо BFF прямо в api.
-import { D, L } from "@/lib/i18n";
-import { emailError, normalizeEmail } from "@/lib/email";
-
-import { forward, json, readJson } from "./upstream";
+import { normalizeEmail } from "@/lib/email";
+import { D } from "@/lib/i18n";
+import { forward, jsonError, readJson } from "./upstream";
 
 function email(body: Record<string, unknown>): string {
   return normalizeEmail(String(body.email ?? ""));
@@ -12,14 +13,16 @@ function email(body: Record<string, unknown>): string {
 
 /** Вход и регистрация: наружу уходит только `authenticated`, токен — в куку. */
 export async function credentials(req: Request, action: "login" | "register") {
+  const L = await requestLocale(req);
+  const { emailError } = emailForLocale(L);
   const body = await readJson(req);
   const mail = email(body);
   const password = String(body.password ?? "");
   // 422, а не 400: 400 на регистрации означает «почта занята», и экран оплаты по нему уходит
   // пробовать вход. Отказ по формату поля обязан отличаться от занятой почты.
   const wrong = emailError(mail);
-  if (wrong) return json({ detail: wrong }, 422);
-  if (password.length < 3) return json({ detail: D.bffErrors.shortPassword[L] }, 422);
+  if (wrong) return jsonError((locale) => emailForLocale(locale).emailError(mail)!, L, 422);
+  if (password.length < 3) return jsonError(D.bffErrors.shortPassword, L, 422);
   return forward(`/auth/${action}`, {
     method: "POST",
     body: { email: mail, password },
@@ -29,33 +32,37 @@ export async function credentials(req: Request, action: "login" | "register") {
 }
 
 export async function payment(req: Request, path = "/payments/mock") {
+  const L = await requestLocale(req);
+  const { emailError } = emailForLocale(L);
   const body = await readJson(req);
   const mail = email(body);
   const tariff = String(body.tariff ?? "");
   const wrong = emailError(mail);
-  if (wrong) return json({ detail: wrong }, 422);
+  if (wrong) return jsonError((locale) => emailForLocale(locale).emailError(mail)!, L, 422);
   // сам список тарифов живёт в базе: здесь проверяем только форму кода, существование — апстрим
-  if (!/^[a-z][a-z0-9_-]{0,15}$/.test(tariff)) return json({ detail: D.bffErrors.unknownTariff[L] }, 400);
+  if (!/^[a-z][a-z0-9_-]{0,15}$/.test(tariff)) return jsonError(D.bffErrors.unknownTariff, L, 400);
   // Цель платежа: либо номер уже сохранённой матрицы, либо дата, которую сервер сохранит сам.
   // Без цели апстрим откажет — разовый тариф впрок не продаётся. Платёжному провайдеру дата
   // не уходит: он видит только сумму и почту.
   const raw = body.matrix_id;
   const matrixId = raw === undefined || raw === null || raw === "" ? undefined : Number(raw);
   if (matrixId !== undefined && (!Number.isInteger(matrixId) || matrixId <= 0)) {
-    return json({ detail: D.bffErrors.badMatrix[L] }, 400);
+    return jsonError(D.bffErrors.badMatrix, L, 400);
   }
   const birth = body.birth === undefined || body.birth === null || body.birth === ""
     ? undefined
     : String(body.birth);
   const sex = body.sex === undefined || body.sex === null || body.sex === "" ? undefined : String(body.sex);
   if (birth !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(birth)) {
-    return json({ detail: D.bffErrors.badDate[L] }, 400);
+    return jsonError(D.bffErrors.badDate, L, 400);
   }
-  if (sex !== undefined && sex !== "m" && sex !== "f") return json({ detail: D.bffErrors.badSex[L] }, 400);
+  if (sex !== undefined && sex !== "m" && sex !== "f") return jsonError(D.bffErrors.badSex, L, 400);
   return forward(path, {
+    source: req,
     method: "POST",
     body: {
       tariff,
+      provider: body.provider,
       email: mail,
       ...(matrixId === undefined ? {} : { matrix_id: matrixId }),
       ...(birth === undefined ? {} : { birth }),
@@ -66,11 +73,13 @@ export async function payment(req: Request, path = "/payments/mock") {
 }
 
 export async function saveMatrix(req: Request) {
+  const L = await requestLocale(req);
+  const { emailError } = emailForLocale(L);
   const body = await readJson(req);
   const birth = String(body.birth ?? "");
   const sex = String(body.sex ?? "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return json({ detail: D.bffErrors.badDate[L] }, 400);
-  if (sex !== "m" && sex !== "f") return json({ detail: D.bffErrors.badSex[L] }, 400);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return jsonError(D.bffErrors.badDate, L, 400);
+  if (sex !== "m" && sex !== "f") return jsonError(D.bffErrors.badSex, L, 400);
   const title = body.title === undefined || body.title === null ? undefined : String(body.title).slice(0, 200);
-  return forward("/matrices", { method: "POST", auth: true, body: { birth, sex, title } });
+  return forward("/matrices", { source: req, method: "POST", auth: true, body: { birth, sex, title } });
 }

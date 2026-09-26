@@ -1,3 +1,6 @@
+x-site-profiles: &site-profiles >-
+  [{"origin":"https://arcana-sense.ru","hosts":["arcana-sense.ru"],"defaultLocale":"ru","locales":["ru"],"payments":[{"id":"tbank","provider":"tbank","notificationUrl":"https://arcana-sense.ru/api/payments/notify/tbank"}],"metrikaId":${METRIKA_ID:-111856670},"verification":{"yandex":"${YANDEX_VERIFICATION:-}","google":"${GOOGLE_VERIFICATION:-}"}},{"origin":"https://arcana-sense.com","hosts":["arcana-sense.com","prod-web:3000","web:3000","127.0.0.1:3000"],"defaultLocale":"en","locales":["en","ru"],"payments":[],"metrikaId":${METRIKA_ID_EN:-112840069},"verification":{"google":"${GOOGLE_VERIFICATION_EN:-}"}}]
+
 # Состав продукта — один раз и для всех раскладок: FastAPI, node-сервер Next.js и Chromium для
 # печати PDF. Браузер ходит только во фронт, фронт своим BFF — в api по внутренней сети.
 #
@@ -8,7 +11,7 @@
 name: arcana
 
 services:
-  ru-api:
+  api:
     image: ${REGISTRY:-arcana}/api:${TAG:-dev}
     # Секреты — только файлом, и ни одной строкой в environment: явное значение в compose имеет
     # приоритет над env_file, поэтому `S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}` затирал бы ключ из файла
@@ -19,19 +22,17 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-prod}
       MOCK_PAYMENTS: ${MOCK_PAYMENTS:-0}
-      # Витрина без оплаты: открыта на английском контуре, закрыта на русском. Значение задаёт
-      # раскладка (scripts/run.sh, release-*.sh) — общее для api и сборки фронта.
+      # Единые правила доступа для всех языков. Флаг не зависит от домена.
       ALL_FREE_WITHOUT_PAYMENT: "${ALL_FREE_WITHOUT_PAYMENT:?режим витрины задаётся раскладкой}"
       SITE_LANG: "${SITE_LANG:?язык развёртки обязателен, ru или en}"
       ADMIN_EMAILS: ${ADMIN_EMAILS:-snborodaenko@mail.ru}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123}
       MATRICES_HARD_CAP: ${MATRICES_HARD_CAP:-2000}
-      SITE_URL: ${SITE_URL:-https://arcana-sense.ru}
+      SITE_PROFILES: *site-profiles
       # печать PDF: браузер отдельным сервисом, готовые файлы — в Object Storage.
-      # Свой браузер зовётся именем сервиса: алиас `browser` живёт только в сети печати, куда
-      # ходят соседние контуры, а этот api сидит в своей сети — по `browser` он не резолвился.
-      BROWSER_URL: ${BROWSER_URL:-http://ru-browser:3001}
-      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://prod-ru-web:3000}
+      # Свой browser доступен в сети проекта; тест использует его через общую сеть печати.
+      BROWSER_URL: ${BROWSER_URL:-http://browser:3001}
+      WEB_INTERNAL_URL: ${WEB_INTERNAL_URL:-http://prod-web:3000}
       # мониторинг: свои метрики уезжают в Yandex Cloud, токен берётся из метаданных машины.
       # Пусто — метрики собираются только для админки и никуда не отправляются (так на стенде).
       MONITORING_FOLDER: ${MONITORING_FOLDER:-}
@@ -59,11 +60,11 @@ services:
 
   # Chromium для печати PDF. Отдельный контейнер: повышенные права и 300+ МБ памяти на печать
   # не должны жить рядом с сайтом, а зависший браузер лечится перезапуском одного сервиса.
-  ru-browser:
+  browser:
     image: ${REGISTRY:-arcana}/browser:${TAG:-dev}
     # печать одна на машину: браузер держит до 350 МБ, второй такой в 2 ГБ не влезает. Тестовый
     # контур ходит сюда же через сеть arcana-print, а предел одновременных печатей — внутри сервиса.
-    # Алиас `browser` оставлен: по этому имени в сеть печати ходят все три соседних контура.
+    # По имени `browser` тестовый API обращается к общей службе печати.
     networks:
       default: {}
       print:
@@ -86,30 +87,34 @@ services:
       start_period: 5s
     restart: unless-stopped
 
-  ru-web:
+  web:
     image: ${REGISTRY:-arcana}/web:${TAG:-dev}
-    # Имя сервиса в сети печати занимает соседний контур — там же живёт тестовый `ru-web`, и
-    # браузер печатал его страницы вместо боевых. Печать ходит по имени, уникальному на машине.
+    # В общей сети печати есть тестовый web. Для PDF используем уникальное имя prod-web,
+    # чтобы браузер всегда открывал страницу того сайта, который заказал отчёт.
     networks:
       default:
         aliases:
-          - prod-ru-web
+          - prod-web
     environment:
       # BFF ходит в api по имени сервиса — наружу этот адрес не попадает
-      API_INTERNAL_URL: http://ru-api:8010
-      # язык и витрина вшиты в сборку образа; здесь они нужны приёмке и логам
+      API_INTERNAL_URL: http://api:8010
+      # Один фронтенд для обоих доменов. Внутренний PDF-host поддерживает оба языка.
+      SITE_PROFILES: *site-profiles
+      # Язык запросов задаётся профилем; флаг доступа един для API и фронтенда.
       NEXT_PUBLIC_SITE_LANG: "${SITE_LANG:?язык развёртки обязателен, ru или en}"
       NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-1}
     ports:
       # наружу смотрит nginx хоста, поэтому node слушает только localhost
       - "127.0.0.1:${WEB_PORT:-3000}:3000"
+      - "127.0.0.1:${EN_WEB_PORT:-3400}:3000"
     volumes:
       # статику отдаёт nginx хоста, поэтому контейнер выкладывает её в общий каталог
       - ${STATIC_DIR:-/srv/arcana/static}:/static-out
-    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
+      - ${EN_STATIC_DIR:-/srv/arcana/static-prod-en}:/static-en-out
+    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && rm -rf /static-en-out/* && cp -a /app/.next/static/. /static-en-out/ && exec node server.js"
     depends_on:
-      ru-api:
+      api:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]

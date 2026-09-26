@@ -108,7 +108,7 @@ write_files:
     content: |
       # Досверка платежей: уведомление могло не дойти, тогда исход подтянет опрос.
       # Задача в очереди создаётся только когда есть что опрашивать.
-      */5 * * * * root cd ${app_dir} && /usr/bin/docker compose exec -T ru-api python -m app.sweep >> /var/log/arcana-sweep.log 2>&1
+      */5 * * * * root cd ${app_dir} && /usr/bin/docker compose exec -T api python -m app.sweep >> /var/log/arcana-sweep.log 2>&1
 
 runcmd:
   - [ bash, -c, "fallocate -l ${swap_size_mb}M /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab" ]

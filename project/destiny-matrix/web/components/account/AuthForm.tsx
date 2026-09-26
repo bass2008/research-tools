@@ -1,23 +1,37 @@
 "use client";
 
+import { forLocale as localizedUseSession } from "@/components/account/useSession";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { ApiError, forLocale as localizedApi } from "@/lib/api";
+import { forLocale as localizedEmail } from "@/lib/email";
 import { useHydrated } from "@/lib/hydrated";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import { ALL_FREE } from "@/lib/access";
-import { ApiError, api } from "@/lib/api";
-import { D, L } from "@/lib/i18n";
-import { emailError, normalizeEmail } from "@/lib/email";
+export const forLocale = localized((L: Locale) => {
+  const { api } = localizedApi(L);
+  const { emailError, normalizeEmail } = localizedEmail(L);
+  const { refreshSession } = localizedUseSession(L);
 
-import { refreshSession } from "@/components/account/useSession";
+  return { api, emailError, normalizeEmail, refreshSession };
+});
 
-export default function AuthForm({ mode }: { mode: "login" | "register" }) {
+export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({ mode: "login" | "register" }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { mode } = localeProps;
+  const { api, emailError, normalizeEmail, refreshSession } = forLocale(L);
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useMessage(L);
   const emailInput = useRef<HTMLInputElement | null>(null);
   const passwordInput = useRef<HTMLInputElement | null>(null);
   const consentInput = useRef<HTMLInputElement | null>(null);
@@ -35,17 +49,17 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     const mail = normalizeEmail(email);
     const wrong = emailError(email);
     if (wrong) {
-      setError(wrong);
+      setError((locale) => localizedEmail(locale).emailError(email));
       emailInput.current?.focus();
       return;
     }
     if (password.length < 3) {
-      setError(D.auth.shortPassword[L]);
+      setError((locale) => D.auth.shortPassword[locale]);
       passwordInput.current?.focus();
       return;
     }
     if (isRegister && !agreed) {
-      setError(D.auth.consentRequired[L]);
+      setError((locale) => D.auth.consentRequired[locale]);
       consentInput.current?.focus();
       return;
     }
@@ -59,7 +73,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
       router.replace("/account");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : D.auth.generic[L]);
+      setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
       // Ошибка остаётся объявленной через role=alert, но набор продолжается в поле, которое
       // человек может исправить, а не в нефокусируемом тексте сообщения.
       (isRegister ? emailInput.current : passwordInput.current)?.focus();

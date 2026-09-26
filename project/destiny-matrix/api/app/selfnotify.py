@@ -13,7 +13,7 @@ import urllib.request
 
 from sqlalchemy import select
 
-from . import payments
+from . import payments, sites
 from .config import settings
 from .db import SessionLocal
 from .models import Payment
@@ -25,18 +25,20 @@ def send(payment_id: int, status: str = "CONFIRMED") -> int:
             select(Payment).where(Payment.external_id == str(payment_id)))
         if payment is None:
             raise SystemExit(f"платежа {payment_id} нет")
-        provider = payments.get(payment.provider)
+        provider = payments.for_payment(payment)
         if provider is None or not hasattr(provider, "token"):
             raise SystemExit(f"провайдер {payment.provider} уведомлений не подписывает")
-        body = {"TerminalKey": settings.tbank_terminal_key, "OrderId": payments.order_id(payment.id),
+        body = {"TerminalKey": settings.tbank_terminal_key, "OrderId": payment.order_id,
                 "Success": True, "Status": status, "PaymentId": payment.external_id,
                 "Amount": payment.amount}
         body["Token"] = provider.token(body)
+        connection = sites.payment_connection(payment)
+        origin = connection.notification_url.split("/api/")[0]
 
     request = urllib.request.Request(f"http://127.0.0.1:8010{settings.api_prefix}/payments/notify/"
-                                     f"{payment.provider}",
+                                     f"{connection.id}",
                                      data=json.dumps(body).encode(),
-                                     headers={"Content-Type": "application/json"})
+                                     headers={"Content-Type": "application/json", sites.HEADER: origin})
     with urllib.request.urlopen(request, timeout=30) as answer:
         print(f"уведомление доставлено: {answer.status} {answer.read().decode()[:120]}")
         return answer.status

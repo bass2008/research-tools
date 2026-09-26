@@ -21,11 +21,7 @@
     <text y="10" font-family="DejaVu Sans" font-size="28" font-weight="bold" fill="#fff" text-anchor="middle">22</text>
   </g>
   <text x="80" y="180" font-family="DejaVu Serif" font-size="66" font-weight="bold" fill="#16283c">Матрица судьбы</text>
-  <text x="80" y="250" font-family="DejaVu Sans" font-size="30" fill="#5a6d7d">Разбор по дате рождения: октаграмма,</text>
-  <text x="80" y="294" font-family="DejaVu Sans" font-size="30" fill="#5a6d7d">карта энергий и 20 разделов</text>
-  <rect x="80" y="348" width="480" height="84" rx="16" fill="#ffffff" stroke="#0e8f88" stroke-width="2"/>
-  <text x="104" y="402" font-family="DejaVu Sans" font-size="38" font-weight="bold" fill="#16283c">1 990 ₽</text>
-  <text x="330" y="382" font-family="DejaVu Sans" font-size="19" fill="#5a6d7d">полный разбор</text>
-  <text x="330" y="412" font-family="DejaVu Sans" font-size="19" fill="#0b7a74">6 разделов бесплатно</text>
-  <text x="80" y="500" font-family="DejaVu Sans" font-size="22" fill="#8395a3">Дата рождения не покидает браузер</text>
+  <text x="80" y="250" font-family="DejaVu Sans" font-size="30" fill="#5a6d7d">Разбор по дате рождения</text>
+  <text x="80" y="294" font-family="DejaVu Sans" font-size="30" fill="#5a6d7d">Персональная карта энергий</text>
+  <text x="80" y="500" font-family="DejaVu Sans" font-size="22" fill="#8395a3">Arcana Sense · arcana-sense.ru</text>
 </svg>

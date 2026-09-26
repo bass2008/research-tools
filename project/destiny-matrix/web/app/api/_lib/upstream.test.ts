@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const { cookieGet } = vi.hoisted(() => ({ cookieGet: vi.fn() }));
 
 vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ host: `arcana-sense.${process.env.NEXT_PUBLIC_SITE_LANG === "en" ? "com" : "ru"}`, "x-arcana-path": "/api/test" }),
   cookies: async () => ({ get: cookieGet }),
 }));
 
@@ -26,6 +27,31 @@ afterEach(() => {
 });
 
 describe("доверенный IP в цепочке nginx → BFF → API", () => {
+  it("replaces a forged RU context with the COM Host, even when Russian is selected", async () => {
+    const spy = stubUpstream();
+    const source = new Request("https://arcana-sense.com/api/payments/start", {
+      headers: {
+        "Accept-Language": "ru",
+        "X-Arcana-Site-Origin": "https://arcana-sense.ru",
+        "X-Forwarded-Host": "arcana-sense.ru",
+      },
+    });
+    await forward("/payments/start", { source });
+    const headers = new Headers(spy.mock.calls[0][1]?.headers);
+    expect(headers.get("X-Arcana-Site-Origin")).toBe("https://arcana-sense.com");
+    expect(headers.get("Accept-Language")).toBe("ru");
+    expect(headers.get("X-Forwarded-Host")).toBeNull();
+  });
+
+  it("forwards a supported request language independently of the session", async () => {
+    const spy = stubUpstream();
+    const source = new Request("https://arcana-sense.com/api/tariffs", {
+      headers: { "Accept-Language": "de-DE,en-US;q=0.8,ru;q=0.5" },
+    });
+    await forward("/tariffs", { source });
+    expect(new Headers(spy.mock.calls[0][1]?.headers).get("accept-language")).toBe("en");
+  });
+
   it("передаёт X-Real-IP от nginx и не переносит поддельный X-Forwarded-For", async () => {
     const spy = stubUpstream();
     const source = new Request("https://arcana-sense.ru/api/auth/login", {

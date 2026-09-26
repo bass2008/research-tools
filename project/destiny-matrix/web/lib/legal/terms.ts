@@ -164,8 +164,8 @@ export const TERMS: LegalDocs = {
       },
       { h2: "4. Your account" },
       {
-        p: ["An account is optional: the chart and the reading work without one. An account keeps "
-          + "your saved charts and is protected by the password you choose — keep it to yourself."],
+        p: ["The calculator and free sections are available without an account. An account is required "
+          + "to save charts and access purchased readings. It is protected by the password you choose — keep it to yourself."],
       },
       { h2: "5. Nature of the content and limitation of liability" },
       {

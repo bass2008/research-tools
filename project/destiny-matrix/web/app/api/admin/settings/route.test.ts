@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const { cookieGet } = vi.hoisted(() => ({ cookieGet: vi.fn() }));
 
 vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ host: `arcana-sense.${process.env.NEXT_PUBLIC_SITE_LANG === "en" ? "com" : "ru"}`, "x-arcana-path": "/api/test" }),
   cookies: async () => ({ get: cookieGet }),
 }));
 
@@ -18,7 +19,7 @@ describe("единый BFF-снимок настроек", () => {
   it("не показывает frontend-настройки без подтверждённой admin-сессии", async () => {
     const response = await GET();
     expect(response.status).toBe(401);
-    expect(await response.json()).toEqual({ detail: D.bffErrors.noSession[L] });
+    expect(await response.json()).toEqual({ detail: D.bffErrors.noSession[L], messages: D.bffErrors.noSession });
   });
 
   it("объединяет frontend и backend только после ответа API", async () => {

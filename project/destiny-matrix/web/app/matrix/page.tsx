@@ -1,33 +1,45 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import Price from "@/components/pay/Price";
+import Crumbs from "@/components/ui/Crumbs";
+import { ALL_FREE } from "@/lib/access";
+import { forLocale as localizedContent } from "@/lib/content";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { forLocale as localizedMatrices } from "./matrices";
 
-import Crumbs from "@/components/ui/Crumbs";
+const forLocale = localized((L: Locale, site) => {
+  const { matrixCount } = localizedContent(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } = localizedMatrices(L);
 
-import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
-import { matrixCount } from "@/lib/content";
-import Price from "@/components/pay/Price";
-import { pageMeta } from "@/lib/site";
-import { DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } from "./matrices";
-
-// Каталог остаётся страницей — это путь человека с главной к конкретной карте, — но из индекса
-// уходит. Причины: спроса на список всех матриц нет (за шесть дней в поиске ноль показов при
-// наличии в карте сайта: люди ищут свою карту, а не перечень), а всё содержимое каталога — ссылки
-// на 5 544 адреса, закрытых от обхода в robots.txt, то есть для поиска это страница из тупиков.
-// `follow` обязателен: по этим ссылкам ходит человек, и обрывать каталог незачем.
-//
-// В `Disallow` каталог не добавлен намеренно: чтобы прочитать `noindex`, робот обязан скачать
-// страницу. Запрет обхода вместе с `noindex` оставил бы её в выдаче адресом без описания.
-export const metadata: Metadata = pageMeta({
-  title: D.matrixPages.catalogTitle[L],
-  description:
-    D.matrixPages.catalogDescription[L],
-  path: "/matrix",
-  noindex: true,
-  follow: true,
+  // Каталог остаётся страницей — это путь человека с главной к конкретной карте, — но из индекса
+  // уходит. Причины: спроса на список всех матриц нет (за шесть дней в поиске ноль показов при
+  // наличии в карте сайта: люди ищут свою карту, а не перечень), а всё содержимое каталога — ссылки
+  // на 5 544 адреса, закрытых от обхода в robots.txt, то есть для поиска это страница из тупиков.
+  // `follow` обязателен: по этим ссылкам ходит человек, и обрывать каталог незачем.
+  //
+  // В `Disallow` каталог не добавлен намеренно: чтобы прочитать `noindex`, робот обязан скачать
+  // страницу. Запрет обхода вместе с `noindex` оставил бы её в выдаче адресом без описания.
+  const metadata: Metadata = pageMeta({
+    title: D.matrixPages.catalogTitle[L],
+    description:
+      D.matrixPages.catalogDescription[L],
+    path: "/matrix",
+    noindex: true,
+    follow: true,
+  });
+  return { matrixCount, pageMeta, DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys, metadata };
 });
 
-export default function MatrixIndexPage() {
+export default async function MatrixIndexPage() {
+  const L = await requestLocale();
+  const { matrixCount, DAY_KEYS, MONTHS_NOM, MONTH_KEYS, matrixHref, yearKeys } = forLocale(L, await requestSite());
+
   const years = yearKeys();
   const entry = years[0];
   // Без content/matrices.json страниц матриц не существует: сетку входов рисовать нельзя,
@@ -37,7 +49,7 @@ export default function MatrixIndexPage() {
   return (
     <main id="content" className="page">
       <div className="wrap">
-        <Crumbs trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.allMatrices[L] }]} />
+        <Crumbs locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.allMatrices[L] }]} />
 
         <h1>{D.matrixPages.catalogH1[L]}</h1>
         <p className="dim prose">
@@ -58,7 +70,7 @@ export default function MatrixIndexPage() {
               <>{D.matrixPages.allFreeSections[L]}</>
             ) : (
               <>
-                {D.matrixPages.paidTail[L]} <Price />.
+                {D.matrixPages.paidTail[L]} <Price locale={L} />.
               </>
             )}
           </p>
@@ -120,4 +132,7 @@ export default function MatrixIndexPage() {
       </div>
     </main>
   );
+}
+export async function generateMetadata() {
+  return forLocale(await publicLocale(), await requestSite()).metadata;
 }

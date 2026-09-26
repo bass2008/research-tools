@@ -1,3 +1,4 @@
+import { requestSiteHeaders } from "@/lib/siteProfile.server";
 import { upstreamUrl } from "./upstream";
 
 /**
@@ -9,11 +10,11 @@ export async function acceptNotification(req: Request, path: string): Promise<Re
   try {
     const res = await fetch(upstreamUrl(path), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...await requestSiteHeaders(req) },
       body: raw,
       cache: "no-store",
     });
-    if (!res.ok) return new Response("FAIL", { status: 502 });
+    if (!res.ok) return new Response("FAIL", { status: res.status >= 500 ? 502 : res.status });
   } catch {
     return new Response("FAIL", { status: 502 });
   }

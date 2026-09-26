@@ -1,18 +1,49 @@
 // Приёмка собранного фронта: метаданные, прайс, заглушки, мёртвые ссылки, запретные слова.
 //
-// Страницы приходят из двух источников. Статика лежит готовым HTML в .next/server/app. Страницы
-// с ценой (главная, оплата, оферта) печатаются на запрос — цена живёт в базе, — поэтому на время
-// проверки поднимается сервер и они забираются по HTTP. Без этого прайс и реквизиты в оферте
-// не проверял бы никто.
+// Статика лежит в .next/server/app. Локализованные страницы формируются на запрос, поэтому
+// проверяем их через HTTP с доменом нужной версии, включая sitemap и внутренние ссылки.
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
+const http = require("node:http");
 
 const ROOT = ".next/server/app";
 const PORT = Number(process.env.CHECK_PORT ?? 3131);
 // Витрина без оплаты: кассы нет, страницы оплаты отвечают 404 — забирать и проверять нечего.
 const ALL_FREE = process.env.NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT === "1";
-const ON_DEMAND = ALL_FREE ? ["/", "/terms"] : ["/", "/terms", "/pay", "/pay/single"];
+const LOCALE = process.env.CHECK_LOCALE ?? process.env.NEXT_PUBLIC_SITE_LANG ?? "ru";
+const HOST = LOCALE === "en" ? "arcana-sense.com" : "arcana-sense.ru";
+const requestHeaders = { Host: HOST, "Accept-Language": LOCALE, "User-Agent": "ArcanaBuildCheckBot" };
+let sitemapXml = "";
+
+// Node fetch may discard a custom Host. Connect to loopback explicitly while
+// sending the actual domain to the one shared frontend.
+function fetchPage(route) {
+  return new Promise((resolve, reject) => {
+    const req = http.get({ hostname: "127.0.0.1", port: PORT, path: route, headers: requestHeaders }, (res) => {
+      const chunks = [];
+      res.on("data", (chunk) => chunks.push(chunk));
+      res.on("error", reject);
+      res.on("end", () => resolve(new Response(Buffer.concat(chunks), {
+        status: res.statusCode, headers: res.headers,
+      })));
+    });
+    req.on("error", reject);
+    req.setTimeout(30000, () => req.destroy(new Error(`Timeout: ${route}`)));
+  });
+}
+const appRoutes = JSON.parse(fs.readFileSync(".next/app-path-routes-manifest.json", "utf8"));
+const publicRoutes = Object.entries(appRoutes)
+  .filter(([file, route]) => file.endsWith("/page") && !route.includes("[")
+    && !route.startsWith("/_")
+    && !/^\/(?:api|admin|print|version|report|account|login|register|forgot|reset)(?:\/|$)/.test(route)
+    && !/^\/pay\/(?:done|fail)$/.test(route)
+    && !(ALL_FREE && route.startsWith("/pay")))
+  .map(([, route]) => route);
+const ON_DEMAND = [...new Set([...publicRoutes,
+  "/matrix/1-1-2", "/encyclopedia/arcanum/4", "/encyclopedia/karmic-tail/18-9-9",
+  ...(ALL_FREE ? [] : ["/pay/single"]),
+])];
 
 const diskFiles = [];
 (function walk(dir) {
@@ -61,7 +92,7 @@ async function serve() {
   for (let i = 0; i < 120; i++) {
     if (proc.exitCode !== null) throw new Error(`next start упал: ${stderr.slice(0, 400)}`);
     try {
-      const res = await fetch(`http://127.0.0.1:${PORT}/`);
+      const res = await fetchPage("/");
       if (res.ok) return proc;
     } catch {
       /* сервер ещё поднимается */
@@ -81,12 +112,14 @@ const money = (kopecks) => Math.round(kopecks / 100).toLocaleString("ru-RU").rep
 /** Прайс, который сервер получил из API через BFF. При недоступном API цены нет. */
 async function priceList() {
   try {
-    const res = await fetch(`http://127.0.0.1:${PORT}/api/tariffs`);
+    const res = await fetchPage("/api/tariffs");
     if (res.ok) {
-      const items = (await res.json()).items;
+      const body = await res.json();
+      const items = body.items;
       if (Array.isArray(items) && items.length) {
         const single = items.find((t) => t.id === "single") ?? items[0];
-        return { lead: single.price, all: items.map((t) => t.price) };
+        if (!Array.isArray(body.payment_providers)) return null;
+        return { lead: single.price, all: items.map((t) => t.price), providers: body.payment_providers };
       }
     }
   } catch {
@@ -99,14 +132,39 @@ async function loadOnDemand() {
   const proc = await serve();
   let price = null;
   try {
+    const sitemap = await fetchPage("/sitemap.xml");
+    if (!sitemap.ok) fail(`sitemap.xml: сервер ответил ${sitemap.status}`);
+    sitemapXml = await sitemap.text();
+    for (const match of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+      const route = new URL(match[1]).pathname.replace(/(.)\/$/, "$1");
+      if (!known.has(route)) { known.add(route); ON_DEMAND.push(route); }
+    }
     if (!ALL_FREE) price = await priceList();
     for (const r of ON_DEMAND) {
-      const res = await fetch(`http://127.0.0.1:${PORT}${r}`);
+      const res = await fetchPage(r);
       if (!res.ok) {
         fail(`${r}: сервер ответил ${res.status} — страница по запросу не открывается`);
         continue;
       }
       pages.set(r, await res.text());
+    }
+    const missing = await fetchPage("/__localization-check-missing__");
+    if (missing.status !== 404) fail(`404: сервер ответил ${missing.status}`);
+    pages.set("/_not-found", await missing.text());
+    // Динамический маршрут ещё не гарантирует существование статьи. Проверяем конечные
+    // адреса ссылок, которых не было в статике/sitemap, вместо разрешения любого slug.
+    const linked = new Set();
+    for (const html of pages.values()) {
+      for (const m of html.matchAll(/href="(\/[^"#?]*)"/g)) {
+        const target = m[1].replace(/\/$/, "") || "/";
+        if (!known.has(target) && !target.startsWith("/_next")
+          && !/\.[a-z0-9]{2,5}$/.test(target) && !dynamicOk.some((re) => re.test(target))) linked.add(target);
+      }
+    }
+    for (const target of linked) {
+      const res = await fetchPage(target);
+      await res.arrayBuffer();
+      if (res.ok) known.add(target);
     }
   } finally {
     stop(proc);
@@ -117,7 +175,7 @@ async function loadOnDemand() {
 // Единственный список запретных выражений собирается из content/data/text-policy.json в
 // web/content/text-policy.json. Здесь остаётся только JS-адаптер для проверки готового HTML.
 // Корпус языка развёртки: приёмка проверяет ту же сборку, что поедет на домен.
-const CORPUS_DIR = `content/${process.env.NEXT_PUBLIC_SITE_LANG || "ru"}`;
+const CORPUS_DIR = `content/${LOCALE}`;
 const textPolicy = JSON.parse(fs.readFileSync(`${CORPUS_DIR}/text-policy.json`, "utf8"));
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const TEXT_RULES = textPolicy.blocked.filter((group) => group.scopes.includes("html")).flatMap((group) => [
@@ -209,20 +267,13 @@ for (const [r, html] of pages) {
 }
 
 function checkSitemap() {
-  const file = path.join(ROOT, "sitemap.xml.body");
-  if (!fs.existsSync(file)) {
-    fail("sitemap.xml не собран");
-    return;
-  }
-  const xml = fs.readFileSync(file, "utf8");
+  const xml = sitemapXml;
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-  // На test origin sitemap намеренно пуст. Production release обязан собираться с боевым SITE.
   if (!locs.length) {
-    if ((process.env.NEXT_PUBLIC_SITE_URL ?? "https://arcana-sense.ru") === "https://arcana-sense.ru") {
-      fail("боевой sitemap пуст");
-    }
+    fail("боевой sitemap пуст");
     return;
   }
+  if (locs.some((url) => new URL(url).host !== HOST)) fail("sitemap содержит адреса другого домена");
   if (new Set(locs).size !== locs.length) fail("sitemap содержит дубли URL");
   // Дат правки в карте нет намеренно (docs/decisions.md, Decision 8): общая дата на все адреса —
   // ложный сигнал, а Google учитывает `lastmod`, только пока тот достоверен. Вернувшееся поле
@@ -285,6 +336,19 @@ for (const m of home.matchAll(/href="\/pay\/[^"]*"/g)) {
   if (/\d{4}-\d{2}-\d{2}|birth|date=/.test(m[0])) fail(`главная: дата в ссылке оплаты ${m[0]}`);
 }
 
+// Пустой список провайдеров — регион без кассы; тарифы и права остаются общими.
+if (!prices.providers.length) {
+  const message = LOCALE === "en"
+    ? "There are currently no payment methods available for your region"
+    : "На данный момент нет доступной оплаты для вашего региона";
+  for (const route of ["/pay", "/pay/single"]) {
+    const html = norm(pages.get(route) ?? "");
+    if (!html.includes(message)) fail(`${route}: нет сообщения о недоступной оплате региона`);
+    if (html.includes('data-testid="pay-modal"')) fail(`${route}: касса открыта без провайдера`);
+  }
+  return;
+}
+
 // страница оплаты обязана показывать ту же цену, что спишет касса
 const pay = norm(pages.get("/pay/single") ?? "");
 if (pay && !pay.includes(label)) fail(`/pay/single: цена не совпадает с прайсом (${label})`);
@@ -325,7 +389,7 @@ const REQUISITES_BY_LANG = {
     },
   },
 };
-const REQUISITES = REQUISITES_BY_LANG[process.env.NEXT_PUBLIC_SITE_LANG || "ru"];
+const REQUISITES = REQUISITES_BY_LANG[LOCALE];
 const FAKES = ["example.com", "example.ru", "example.org", "lorem ipsum"];
 const legalState = {};
 
@@ -342,6 +406,19 @@ for (const legal of ["/terms", "/privacy", "/refund"]) {
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ");
+
+  // The international domain identifies the service by name and contact address;
+  // Russian registration fields belong to the .ru legal profile only.
+  if (LOCALE === "en") {
+    if (!text.includes("Arcana Sense") || !/mailto:[^"\s]+@[^"\s]+/.test(html)) {
+      fail(`${legal}: international owner/contact missing`);
+    }
+    if (text.includes("⟨") || FAKES.some((fake) => text.toLowerCase().includes(fake))) {
+      fail(`${legal}: international legal placeholder`);
+    }
+    legalState[legal] = "international";
+    continue;
+  }
 
   const kinds = new Set();
   let seen = 0;
@@ -393,7 +470,7 @@ const paidRows = privateSections.filter((section) => section.access === "paid");
 // которым собран сайт: иначе на английской сборке он сравнивает русские подписи с английским
 // каталогом точек, не находит совпадений и объявляет секретом каждую из них.
 const LABELS = JSON.parse(fs.readFileSync(
-  `lib/__fixtures__/labels/${process.env.NEXT_PUBLIC_SITE_LANG || "ru"}.json`, "utf8"));
+  `lib/__fixtures__/labels/${LOCALE}.json`, "utf8"));
 const paidTexts = paidRows.flatMap((section) => {
   const words = LABELS.sections?.[section.key] ?? {};
   return [
@@ -414,7 +491,7 @@ const publicPointLabels = (JSON.parse(fs.readFileSync(`${CORPUS_DIR}/points-cata
 // и там, и там.
 const freeLabels = Object.values(
   JSON.parse(fs.readFileSync(
-    `lib/__fixtures__/labels-public/${process.env.NEXT_PUBLIC_SITE_LANG || "ru"}.json`, "utf8"),
+    `lib/__fixtures__/labels-public/${LOCALE}.json`, "utf8"),
   ).sections ?? {},
 ).flatMap((section) => [section.title, section.lead, ...(section.positions ?? [])]);
 const paidOnly = [...new Set(paidTexts)].filter((t) =>
@@ -499,8 +576,7 @@ const VOLATILE = ["CONTENT_MODIFIED", "NEXT_PUBLIC_BUILD_COMMIT", "NEXT_PUBLIC_B
 function checkCorpusChunks() {
   const file = path.join(ROOT, "sitemap.xml.body");
   if (!fs.existsSync(file)) return;                 // собрано не на боевом адресе: сверять нечего
-  const routes = [...fs.readFileSync(file, "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)]
-    .map((match) => new URL(match[1]).pathname.replace(/(.)\/$/, "$1"));
+  const routes = sitemapRoutes.length ? sitemapRoutes : ON_DEMAND;
   const referenced = new Set();
   for (const route of routes) {
     const html = pages.get(route);

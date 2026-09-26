@@ -1,30 +1,41 @@
 "use client";
 
+import { forLocale as localizedUseSession } from "@/components/account/useSession";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { ApiError, forLocale as localizedApi } from "@/lib/api";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
+import type { PayStage as Stage } from "@/lib/payresult";
+import { forLocale as localizedPayresult } from "@/lib/payresult";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ApiError, api } from "@/lib/api";
-import { D, L } from "@/lib/i18n";
-import { resultTitle } from "@/lib/payresult";
+export const forLocale = localized((L: Locale) => {
+  const { api } = localizedApi(L);
+  const { resultTitle } = localizedPayresult(L);
+  const { refreshSession } = localizedUseSession(L);
 
-import { refreshSession } from "@/components/account/useSession";
+  const WAIT_STEPS = [0, 2000, 4000, 8000];
+  return { api, resultTitle, refreshSession, WAIT_STEPS };
+});
 
-import type { PayStage as Stage } from "@/lib/payresult";
+export default function PayResult({ locale: requestedLocale, ...localeProps }: ({ order: string; outcome: "done" | "fail" }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { order, outcome } = localeProps;
+  const { api, resultTitle, refreshSession, WAIT_STEPS } = forLocale(L);
 
-
-
-const WAIT_STEPS = [0, 2000, 4000, 8000];
-
-export default function PayResult({ order, outcome }: { order: string; outcome: "done" | "fail" }) {
   const [stage, setStage] = useState<Stage>("checking");
-  const [note, setNote] = useState<string | null>(null);
+  const [note, setNote] = useMessage(L);
   const [matrixId, setMatrixId] = useState<number | null>(null);
 
   // Заголовок вкладки следует за состоянием: статический «Оплата прошла» обещал исход ещё до
   // ответа банка, а при отказе по карте говорил то же самое.
   useEffect(() => {
     document.title = `${resultTitle(stage)} — Arcana Sense`;
-  }, [stage]);
+  }, [stage, resultTitle]);
 
   // Уведомление банка и возврат покупателя идут независимо, поэтому статус переспрашиваем
   // несколько раз: к моменту редиректа платёж мог быть ещё AUTHORIZED.
@@ -44,7 +55,7 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
           // и страница поздравляла с покупкой при каждой перезагрузке, хотя деньги уже вернулись.
           if (res.state === "abandoned") {
             setStage("failed");
-            setNote(D.payResult.invoiceGone[L]);
+            setNote((locale) => D.payResult.invoiceGone[locale]);
             return;
           }
           if (res.state === "refunded") {
@@ -62,17 +73,18 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
             return;
           }
           if (res.state === "failed") {
+            setMatrixId(res.matrix_id);
             setStage("failed");
             return;
           }
         } catch (err) {
           if (err instanceof ApiError && err.status === 401) {
             setStage("pending");
-            setNote(D.payResult.ownerOnly[L]);
+            setNote((locale) => D.payResult.ownerOnly[locale]);
             return;
           }
           setStage("error");
-          setNote(err instanceof ApiError ? err.message : D.payResult.noServer[L]);
+          setNote((locale) => err instanceof ApiError ? err.messageFor(locale) : D.payResult.noServer[locale]);
           return;
         }
       }
@@ -120,7 +132,7 @@ export default function PayResult({ order, outcome }: { order: string; outcome: 
       <div className="panel paybox">
         <h1>{D.payResult.failedTitle[L]}</h1>
         <p className="dim">{D.payResult.failedText[L]}</p>
-        <Link className="btn wide" href="/pay">
+        <Link className="btn wide" href={matrixId ? `/pay?m=${matrixId}` : "/pay"}>
           {D.payResult.backToPay[L]}
         </Link>
       </div>

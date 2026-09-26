@@ -1,12 +1,14 @@
-import { D, L } from "@/lib/i18n";
+import { requestSite } from "@/lib/siteProfile.server";
+import ReportView from "@/components/matrix/ReportView";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale } from "@/lib/i18n/request";
+import { forLocale as localizedSections } from "@/lib/sections";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import ReportView from "@/components/matrix/ReportView";
-import { freePositionArticles, freePositionTexts } from "@/lib/sections";
-import { pageMeta } from "@/lib/site";
-
 import { pickMatrix, readAccess, readSavedMatrices } from "../_lib/access";
 import { SavedReport, Sheet } from "../_lib/report";
 
@@ -15,19 +17,28 @@ import { SavedReport, Sheet } from "../_lib/report";
 // готовом HTML и видны любому, кто откроет исходник.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = pageMeta({
-  title: D.pages.reportTitle[L],
-  description:
-    D.pages.reportDescription[L],
-  path: "/report",
-  noindex: true,
-});
-
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
-const OTHER = <Link href="/encyclopedia">{D.nav.encyclopedia[L]}</Link>;
+const forLocale = localized((L: Locale, site) => {
+  const { freePositionArticles, freePositionTexts } = localizedSections(L);
+  const { pageMeta } = localizedSite(L, site);
+
+  const metadata: Metadata = pageMeta({
+    title: D.pages.reportTitle[L],
+    description:
+      D.pages.reportDescription[L],
+    path: "/report",
+    noindex: true,
+  });
+
+  const OTHER = <Link href="/encyclopedia">{D.nav.encyclopedia[L]}</Link>;
+  return { freePositionArticles, freePositionTexts, pageMeta, metadata, OTHER };
+});
 
 export default async function ReportPage({ searchParams }: { searchParams: Search }) {
+  const L = await requestLocale();
+  const { freePositionArticles, freePositionTexts, OTHER } = forLocale(L, await requestSite());
+
   const wanted = (await searchParams).m;
   const access = await readAccess();
   // Дата из браузера и запись в кабинете связываются по id: без списка кнопка под бесплатным
@@ -43,16 +54,16 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
   // заводят — отвечала «матрица не выбрана» при открытой записи в кабинете.
   if (chosen?.unlocked) {
     return (
-      <Sheet other={OTHER}>
-        <SavedReport chosen={chosen} saved={saved} access={access} />
+      <Sheet locale={L} other={OTHER}>
+        <SavedReport locale={L} chosen={chosen} saved={saved} access={access} />
       </Sheet>
     );
   }
 
   return (
-    <Sheet other={OTHER}>
+    <Sheet locale={L} other={OTHER}>
       {access.offline ? <div className="err">{D.pages.reportOffline[L]}</div> : null}
-      <ReportView
+      <ReportView locale={L}
         granted={access.paid}
         texts={freePositionTexts()}
         articles={freePositionArticles()}
@@ -60,4 +71,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
       />
     </Sheet>
   );
+}
+export async function generateMetadata() {
+  return forLocale(await requestLocale(), await requestSite()).metadata;
 }

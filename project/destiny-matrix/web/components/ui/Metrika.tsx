@@ -6,13 +6,14 @@ import { useEffect, useRef } from "react";
 
 import { alive, metrikaId, notBounce } from "@/lib/analytics";
 import { trackEngagement } from "@/lib/engagement";
+import { useSite } from "./LocaleProvider";
 
 // Сайт одноэкранный: без notBounce отказы стабильно около 90 % и тест трафика
 // ничего не измеряет. Пятнадцать секунд — порог из плана запуска.
 const NOT_BOUNCE_MS = 15_000;
 
 export default function Metrika() {
-  const id = metrikaId();
+  const id = metrikaId(useSite());
   const path = usePathname();
   const previous = useRef<string | null>(null);
 

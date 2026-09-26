@@ -1,4 +1,7 @@
-# Тестовый контур на той же машине: test.arcana-sense.ru.
+x-site-profiles: &site-profiles >-
+  [{"origin":"https://test.arcana-sense.ru","hosts":["test.arcana-sense.ru"],"defaultLocale":"ru","locales":["ru"],"payments":[{"id":"tbank","provider":"tbank","notificationUrl":"https://test.arcana-sense.ru/api/payments/notify/tbank"}]},{"origin":"https://test.arcana-sense.com","hosts":["test.arcana-sense.com","test-web:3000","web:3000","127.0.0.1:3000"],"defaultLocale":"en","locales":["en","ru"],"payments":[]}]
+
+# Общий тестовый контур: test.arcana-sense.ru и test.arcana-sense.com.
 #
 # Отличия от прода, и каждое — по причине:
 #   • свои образы с тегом test-*: фичи проверяются агентами до того, как уедут на прод;
@@ -14,22 +17,19 @@
 name: arcana-test
 
 services:
-  # Имена сервисов уникальны на всю машину не для красоты: compose добавляет алиас по имени сервиса
-  # в каждую сеть, куда подключает контейнер. С сервисом «web» в общей сети печати имя стало
-  # неоднозначным, и браузер прода печатал страницу тестового контура — вместо разбора выходил 404.
-  ru-api:
+  # Сервисы нейтральны к языку. В общей сети печати используются уникальные алиасы test-*,
+  # чтобы общий browser не спутал API и страницы основного и тестового сайтов.
+  api:
     image: ${REGISTRY:-arcana}/api:${TAG:-test}
     env_file:
       - path: .env.test
         required: false
     environment:
       APP_ENV: prod
-      # Язык и витрина заданы явно, как у английского контура: значение по умолчанию у флага
-      # безопасное, но читать раскладку приходится не только тому, кто её писал.
+      # Язык API по умолчанию и единый режим доступа заданы явно для обоих доменов.
       SITE_LANG: ru
       ALL_FREE_WITHOUT_PAYMENT: 0
-      SITE_URL: https://test.arcana-sense.ru
-      PAYMENT_PROVIDER: tbank
+      SITE_PROFILES: *site-profiles
       # как и на локальном стенде: прогоны не должны попадать в боевое хранилище
       REPORTS_STORE: local
       MAIL_TO_LOG: 1
@@ -41,7 +41,7 @@ services:
       BROWSER_URL: http://browser:3001
       # адрес именно тестового web: имя «web» браузер печати резолвил бы в своей сети — то есть
       # в прод-web, и печатал бы чужую страницу (получался файл на 50 КБ вместо трёх мегабайт)
-      WEB_INTERNAL_URL: http://test-ru-web:3000
+      WEB_INTERNAL_URL: http://test-web:3000
       # метрики с теста в облако не отправляем: прогоны агентов смешались бы с боевыми числами
       MONITORING_FOLDER: ""
       BUILD_COMMIT: ${TAG:-test}
@@ -51,7 +51,7 @@ services:
       default: {}
       print:
         aliases:
-          - test-ru-api
+          - test-api
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3).status == 200 else 1)"]
       interval: 10s
@@ -60,26 +60,29 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  ru-web:
+  web:
     image: ${REGISTRY:-arcana}/web:${TAG:-test}
     environment:
-      API_INTERNAL_URL: http://test-ru-api:8010
+      API_INTERNAL_URL: http://test-api:8010
+      SITE_PROFILES: *site-profiles
       NEXT_PUBLIC_SITE_LANG: ru
       NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: 0
       SESSION_COOKIE_SECURE: 1
     ports:
       # наружу смотрит nginx хоста; порт другой, чтобы не спорить с продом
       - "127.0.0.1:${TEST_WEB_PORT:-3100}:3000"
+      - "127.0.0.1:${TEST_EN_WEB_PORT:-3300}:3000"
     volumes:
       - ${TEST_STATIC_DIR:-/srv/arcana/static-test}:/static-out
-    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && exec node server.js"
+      - ${TEST_EN_STATIC_DIR:-/srv/arcana/static-test-en}:/static-en-out
+    command: sh -c "rm -rf /static-out/* && cp -a /app/.next/static/. /static-out/ && rm -rf /static-en-out/* && cp -a /app/.next/static/. /static-en-out/ && exec node server.js"
     networks:
       default: {}
       print:
         aliases:
-          - test-ru-web
+          - test-web
     depends_on:
-      ru-api:
+      api:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]

@@ -17,6 +17,8 @@ from ..routers.payments import apply as apply_payment
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
+from ..i18n import using_locale, say, validation_message
+from ..http_errors import LocalizedHTTPException
 from ..models import (Entitlement, Payment, PaymentSweep, ReportJob, SavedMatrix, SecurityAudit,
                       User, default_title, iso)
 from ..schemas import BirthIn
@@ -29,7 +31,7 @@ log = logging.getLogger("admin")
 def admin_user(user: User = Depends(current_user)) -> User:
     if not settings.is_admin(user.email):
         # 404, а не 403: существование админских адресов посторонним знать незачем
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Не найдено")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.not_found"))
     return user
 
 
@@ -93,21 +95,20 @@ def refund(payment_id: int, _: User = Depends(admin_user), db: Session = Depends
     банка, но статус применяем сразу, чтобы доступ не оставался открытым до его прихода."""
     payment = db.get(Payment, payment_id)
     if payment is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Платёж не найден")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
     # Возврат идемпотентен: повторное нажатие отдаёт текущее состояние, а не ошибку. Иначе
     # устаревшая вкладка получала отказ банка «уже возвращён», а строка оставалась «оплачен» с
     # живой кнопкой — интерфейс уверял, что деньги на месте, хотя они уже вернулись.
     if payment.refunded_at is not None:
         return {"ok": True, "status": payment.status, "refunded_at": iso(payment.refunded_at),
                 "already": True}
-    provider = gateway.get(payment.provider)
+    provider = gateway.for_payment(payment)
     if provider is None or not provider.enabled():
-        raise HTTPException(status.HTTP_400_BAD_REQUEST,
-                            detail="Этот платёж отменить нельзя: способ оплаты недоступен")
+        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST, detail=lambda: say("admin.cancel_unavailable"))
     try:
         update = provider.cancel(payment.external_id)
     except gateway.PaymentError as exc:
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+        raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
     apply_payment(db, payment, update)
     return {"ok": True, "status": payment.status, "refunded_at": iso(payment.refunded_at)}
 
@@ -130,6 +131,9 @@ def reports(page: int = 1, page_size: int = 10,
     running = sum(1 for job, _e in rows if job.status == "running")
     done = [job.seconds() for job, _e in rows if job.status == "done" and job.seconds()]
     page_rows = rows[(page - 1) * page_size:(page - 1) * page_size + page_size]
+    # Check only the visible page, not every object in the report history.
+    for job, _email in page_rows:
+        printing.available(db, job)
     return {
         "items": [{**job.item(), "user_id": job.user_id, "email": email}
                   for job, email in page_rows],
@@ -159,7 +163,7 @@ def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_d
     """Карточка пользователя: его матрицы и его платежи."""
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_user"))
     rights = access.active_rights(db, user)
     matrices = db.scalars(
         select(SavedMatrix).where(SavedMatrix.user_id == user.id).order_by(SavedMatrix.id.desc())
@@ -193,7 +197,7 @@ def impersonate(user_id: int, request: Request, admin: User = Depends(admin_user
     """
     target = db.get(User, user_id)
     if target is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_user"))
     audit.record("impersonate", "success", email=target.email, ip=audit.client_ip(request))
     log.info("админ %s вошёл под %s", admin.email, target.email)
     # Сессия помечена как чужая: она не двигает «последнее появление» покупателя (см. pulse).
@@ -212,18 +216,19 @@ def add_matrix(user_id: int, payload: BirthIn, _: User = Depends(admin_user),
     """
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_user"))
     try:
         calculate(payload.birth, payload.sex)
     except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
+                                     detail=lambda: validation_message(exc)) from exc
 
     row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
                                               SavedMatrix.birth == payload.birth,
                                               SavedMatrix.sex == payload.sex))
     if row is None:
         row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
-                          title=default_title(payload.birth))
+                          title=None)
         db.add(row)
         db.commit()
         db.refresh(row)
@@ -242,11 +247,14 @@ def report_link(job_id: int, _: User = Depends(admin_user), db: Session = Depend
     что заплатил. Ссылка подписана на час — та же, что получает покупатель."""
     job = db.get(ReportJob, job_id)
     if job is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Задача печати не найдена")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_job"))
+    if job.status == "expired" or (job.status == "done" and not printing.available(db, job)):
+        raise LocalizedHTTPException(status.HTTP_410_GONE, detail=lambda: say("admin.file_expired"))
     if job.status != "done" or not job.object_key:
-        raise HTTPException(status.HTTP_409_CONFLICT, detail="Файла нет: печать не завершилась")
+        raise LocalizedHTTPException(status.HTTP_409_CONFLICT, detail=lambda: say("admin.no_file"))
     matrix = db.get(SavedMatrix, job.matrix_id)
-    name = f"{default_title(matrix.birth)}.pdf".replace("/", "-") if matrix else None
+    with using_locale(job.locale):
+        name = f"{default_title(matrix.birth)}.pdf".replace("/", "-") if matrix else None
     return {"url": report_store.link(job.object_key, name)}
 
 
@@ -257,15 +265,16 @@ def report_rebuild(job_id: int, _: User = Depends(admin_user), db: Session = Dep
     было нечем, кроме как руками на машине."""
     job = db.get(ReportJob, job_id)
     if job is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Задача печати не найдена")
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_job"))
     try:
-        fresh = printing.run(db, job.user_id, job.matrix_id)
+        with using_locale(job.locale), printing.exclusive(job.user_id, job.matrix_id):
+            fresh = printing.run(db, job.user_id, job.matrix_id)
     except printing.Busy as exc:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail="Все места печати заняты, попробуйте позже") from exc
+        raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=lambda: say("admin.print_busy")) from exc
     except Exception as exc:                       # noqa: BLE001
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY,
-                            detail=f"Печать не удалась: {exc}") from exc
+        log.exception("Report rebuild failed")
+        raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY,
+                                     detail=lambda: say("admin.print_failed")) from exc
     return {"job_id": fresh.id, "status": fresh.status, "size_bytes": fresh.size_bytes,
             "seconds": fresh.seconds()}
 

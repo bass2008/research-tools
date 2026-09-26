@@ -1,12 +1,34 @@
-import { D, L } from "@/lib/i18n";
+import ArcanumCard from "@/components/matrix/ArcanumCard";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedContent } from "@/lib/content";
+import { POSITIONS, forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedText } from "@/lib/text";
 import Link from "next/link";
 
-import ArcanumCard from "@/components/matrix/ArcanumCard";
+export type PositionKind = (typeof POSITIONS)[number]["kind"];
 
-import { ARCANA } from "@/lib/arcana";
-import { chakraContent, positionContent } from "@/lib/content";
-import { CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, combinationHref, positionHref } from "@/lib/encyclopedia";
-import { clip } from "@/lib/text";
+export const forLocale = localized((L: Locale) => {
+  const { ARCANA } = localizedArcana(L);
+  const { chakraContent, positionContent } = localizedContent(L);
+  const { CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, combinationHref, positionHref } = localizedEncyclopedia(L);
+  const { clip } = localizedText(L);
+
+  function positionsOfKind(kind: "section" | "point") {
+    return POSITIONS.filter((p) => (kind === "section" ? p.kind === "section" : p.kind !== "section")).map(
+      (position) => {
+        const content = positionContent(position.key);
+        if (!content) throw new Error(`нет канонического материала позиции ${position.key}`);
+        return { ...position, lead: content.lead };
+      },
+    );
+  }
+  return { ARCANA, chakraContent, positionContent, CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, combinationHref, positionHref, clip, positionsOfKind };
+});
+
+export const { positionsOfKind } = forLocale(defaultLocale);
 
 // Списки разделов справочника. Раньше все шесть лежали телами панелей на /encyclopedia, и та
 // страница раздавала 363 ссылки сразу: вес делился между 231 парой арканов и 7 чакрами поровну,
@@ -15,12 +37,15 @@ import { clip } from "@/lib/text";
 // проверена браузерными сценариями, и менять её заодно с адресами значило бы менять две вещи
 // разом.
 
-export function ArcanaDeck() {
+export function ArcanaDeck({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const L = requestedLocale ?? defaultLocale;
+  const { ARCANA, arcanumHref } = forLocale(L);
+
   return (
     <div className="enc-deck">
       {ARCANA.map((a) => (
         <Link className="enc-card" key={a.n} href={arcanumHref(a.n)} prefetch={false}>
-          <ArcanumCard n={a.n} size="grid" decorative />
+          <ArcanumCard locale={L} n={a.n} size="grid" decorative />
           <span className="dn">
             {a.n} · {a.title}
           </span>
@@ -30,19 +55,11 @@ export function ArcanaDeck() {
   );
 }
 
-export type PositionKind = (typeof POSITIONS)[number]["kind"];
+export function PositionRows({ locale: requestedLocale, ...localeProps }: ({ items: { key: string; title: string; lead: string }[] }) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const { items } = localeProps;
+  const { positionHref } = forLocale(L);
 
-export function positionsOfKind(kind: "section" | "point") {
-  return POSITIONS.filter((p) => (kind === "section" ? p.kind === "section" : p.kind !== "section")).map(
-    (position) => {
-      const content = positionContent(position.key);
-      if (!content) throw new Error(`нет канонического материала позиции ${position.key}`);
-      return { ...position, lead: content.lead };
-    },
-  );
-}
-
-export function PositionRows({ items }: { items: { key: string; title: string; lead: string }[] }) {
   return (
     <dl className="kv">
       {items.map((p) => (
@@ -57,7 +74,10 @@ export function PositionRows({ items }: { items: { key: string; title: string; l
   );
 }
 
-export function ChakraList() {
+export function ChakraList({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const L = requestedLocale ?? defaultLocale;
+  const { chakraContent, CHAKRA_PAGES, chakraHref, clip } = forLocale(L);
+
   return (
     <div className="chcol">
       {CHAKRA_PAGES.map((c) => {
@@ -83,7 +103,10 @@ export function ChakraList() {
   );
 }
 
-export function CombinationMatrix() {
+export function CombinationMatrix({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const L = requestedLocale ?? defaultLocale;
+  const { ARCANA, combinationHref } = forLocale(L);
+
   return (
     <div className="enc-matrix">
       <table className="mx">

@@ -8,6 +8,7 @@ vi.mock("@/components/pay/TariffsProvider", () => ({
   useTariffs: () => [{ id: "single", name: "Разбор", price: 25000, scope: ["single"], period_days: null }],
   useLead: () => ({ id: "single", name: "Разбор", price: 25000, scope: ["single"], period_days: null }),
   usePriceKnown: () => true,
+  usePaymentProviders: () => [],
 }));
 
 import Header from "@/components/ui/Header";

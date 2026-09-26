@@ -1,48 +1,66 @@
 "use client";
 
+import { forLocale as localizedUseSession, useSession } from "@/components/account/useSession";
+import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { track } from "@/lib/analytics";
+import { ApiError, forLocale as localizedApi, type MatrixListItem } from "@/lib/api";
+import { forLocale as localizedEmail } from "@/lib/email";
 import { useHydrated } from "@/lib/hydrated";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
+import { forLocale as localizedPayStage, type PayEvent, type Stage } from "@/lib/payStage";
+import { forLocale as localizedTariffs, type Tariff, type PaymentProvider } from "@/lib/tariffs";
+import { useBirth } from "@/lib/useBirth";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
-import { ApiError, api, type MatrixListItem } from "@/lib/api";
-import { track } from "@/lib/analytics";
-import { D, L } from "@/lib/i18n";
-import { emailError, normalizeEmail } from "@/lib/email";
-import { needsOwnerPassword, reduce, START, type PayEvent, type Stage } from "@/lib/payStage";
-import { useBirth } from "@/lib/useBirth";
-import { byId, capLabel, money, periodLabel, priceLabel, type Tariff } from "@/lib/tariffs";
-
-import { birthLabel } from "@/components/matrix/MatrixResult";
 import PayReceipt from "./PayReceipt";
 import PayUnchecked from "./PayUnchecked";
-import { usePayTarget, targetValue } from "./usePayTarget";
-import { refreshSession, useSession } from "@/components/account/useSession";
+import { targetValue, usePayTarget } from "./usePayTarget";
 
+export const forLocale = localized((L: Locale) => {
+  const { api } = localizedApi(L);
+  const { emailError, normalizeEmail } = localizedEmail(L);
+  const { needsOwnerPassword, reduce, START } = localizedPayStage(L);
+  const { byId, capLabel, money, periodLabel, priceLabel } = localizedTariffs(L);
+  const { birthLabel } = localizedMatrixResult(L);
+  const { refreshSession } = localizedUseSession(L);
 
-const MIN_PASSWORD = 3;
+  const MIN_PASSWORD = 3;
 
-/** Что даёт тариф — выводим из scope, а не из списка в разметке: тариф правят в базе. */
-function optionNote(t: Tariff): string {
-  const parts = [t.scope.includes("all") ? D.payForm.anyDates[L] : D.payForm.oneDate[L]];
-  if (t.scope.includes("matrix")) parts.push(D.payForm.storedInAccount[L]);
-  // «навсегда» на витрине спорило с офертой («не менее 12 месяцев»): обещаем то, что
-  // выполняем — доступ без подписки и файл, который остаётся у человека
-  parts.push(t.period_days === null
-    ? D.payForm.noSubscription[L]
-    : D.payForm.openedUntil[L](periodLabel(t)));
-  return parts.join(" · ");
-}
+  /** Что даёт тариф — выводим из scope, а не из списка в разметке: тариф правят в базе. */
+  function optionNote(t: Tariff): string {
+    const parts = [t.scope.includes("all") ? D.payForm.anyDates[L] : D.payForm.oneDate[L]];
+    if (t.scope.includes("matrix")) parts.push(D.payForm.storedInAccount[L]);
+    // «навсегда» на витрине спорило с офертой («не менее 12 месяцев»): обещаем то, что
+    // выполняем — доступ без подписки и файл, который остаётся у человека
+    parts.push(t.period_days === null
+      ? D.payForm.noSubscription[L]
+      : D.payForm.openedUntil[L](periodLabel(t)));
+    return parts.join(" · ");
+  }
+  return { api, emailError, normalizeEmail, needsOwnerPassword, reduce, START, byId, capLabel, money, periodLabel, priceLabel, birthLabel, refreshSession, MIN_PASSWORD, optionNote };
+});
 
-export default function PayForm({ tariffs, initial, test = false }: { tariffs: Tariff[]; initial: string
+export default function PayForm({ locale: requestedLocale, ...localeProps }: ({
+  tariffs: Tariff[]; initial: string; providers: PaymentProvider[]
   /** деньги ненастоящие: предупреждение показываем только тогда */
   test?: boolean;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { tariffs, initial, providers, test = false } = localeProps;
+  const { api, emailError, normalizeEmail, needsOwnerPassword, reduce, START, byId, capLabel, priceLabel, birthLabel, refreshSession, MIN_PASSWORD, optionNote } = forLocale(L);
+
+  const [provider, setProvider] = useState(providers[0]?.id);
   const [chosen, setChosen] = useState(initial);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useMessage(L);
   const [busy, setBusy] = useState(false);
   const hydrated = useHydrated();
   // экран оплаты — конечный автомат: переходы собраны в lib/payStage, а не разбросаны
@@ -83,7 +101,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
         );
         if (!hit) {
           const back = res.items.find((x) => x.external_id === receipt && x.refunded_at);
-          if (back) setError(D.payForm.errors.refunded[L]);
+          if (back) setError((locale) => D.payForm.errors.refunded[locale]);
           send({ type: "receipt-missing" });
           return;
         }
@@ -133,7 +151,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       .matrices()
       .then((res) => setSaved(res.items))
       .catch(() => setSaved([]));
-  }, [session.status]);
+  }, [session.status, api]);
 
   const aimAt = usePayTarget({
     saved,
@@ -150,22 +168,22 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
     setError(null);
     const mail = normalizeEmail(email);
     const wrongMail = emailError(email);
-    if (wrongMail) return setError(wrongMail);
-    if (!agreed) return setError(D.payForm.errors.consent[L]);
+    if (wrongMail) return setError((locale) => localizedEmail(locale).emailError(email));
+    if (!agreed) return setError((locale) => D.payForm.errors.consent[locale]);
     // Про чужую почту говорим раньше, чем про пароль: вошедшему человеку бессмысленно требовать
     // пароль от аккаунта, которым он не пользуется.
     if (session.status === "user" && session.email && session.email !== mail) {
       return setError(
-        D.payForm.errors.otherAccount[L](session.email ?? ""),
+        (locale) => D.payForm.errors.otherAccount[locale](session.email ?? ""),
       );
     }
     const typed = password;
     if (!signedIn && typed.length < MIN_PASSWORD) {
-      return setError(D.payForm.errors.shortPassword[L](MIN_PASSWORD));
+      return setError((locale) => D.payForm.errors.shortPassword[locale](MIN_PASSWORD));
     }
     const forAll = tariff.scope.includes("all");
     if (!forAll && target === null) {
-      return setError(D.payForm.errors.noDate[L]);
+      return setError((locale) => D.payForm.errors.noDate[locale]);
     }
 
     setBusy(true);
@@ -173,11 +191,10 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       const live = session.status === "loading" ? await refreshSession() : session;
       if (live.status === "user" && live.email && live.email !== mail) {
         setError(
-          D.payForm.errors.otherAccount[L](live.email ?? ""),
+          (locale) => D.payForm.errors.otherAccount[locale](live.email ?? ""),
         );
         return;
       }
-
 
       // Доступ обязан работать с любого устройства, поэтому аккаунт создаётся до платежа —
       // с тем паролем, который ввели рядом с почтой.
@@ -199,7 +216,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             if (loginErr instanceof ApiError && loginErr.status === 401) {
               send({ type: "password-needed", email: mail });
               setError(
-                D.payForm.errors.wrongPassword[L],
+                (locale) => D.payForm.errors.wrongPassword[locale],
               );
               return;
             }
@@ -218,10 +235,10 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
               ? { birth: birth.birth, sex: birth.sex }
               : undefined;
       if (!forAll && !aim) {
-        setError(D.payForm.errors.noDate[L]);
+        setError((locale) => D.payForm.errors.noDate[locale]);
         return;
       }
-      const res = await api.payStart(tariff.id, mail, aim);
+      const res = await api.payStart(tariff.id, mail, aim, provider);
       if (res.payment_url) {
         window.location.href = res.payment_url;
         return;
@@ -235,27 +252,26 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {
-        const tail = D.payForm.errors.notCharged[L];
         if (err.status === 401) {
           send({ type: "password-needed", email: mail });
-          setError(D.payForm.errors.sessionExpired[L] + tail);
+          setError((locale) => D.payForm.errors.sessionExpired[locale] + D.payForm.errors.notCharged[locale]);
           return;
         }
         // 409 — не отказ платежа, а отказ повторной покупки: про деньги здесь говорить нечего
         if (err.status === 409) {
-          setError(err.message.replace(/[.!…]?$/, "."));
+          setError((locale) => err.messageFor(locale).replace(/[.!…]?$/, "."));
           void refreshSession();
           return;
         }
         setError(
           // ответ не дошёл — значит про деньги мы ничего не знаем: платёж мог пройти,
           // и обещание «не списаны» оказывалось ложью
-          err.status === 0
-            ? D.payForm.errors.noAnswer[L]
-            : err.message.replace(/[.!…]?$/, ".") + tail,
+          (locale) => err.status === 0
+            ? D.payForm.errors.noAnswer[locale]
+            : err.messageFor(locale).replace(/[.!…]?$/, ".") + D.payForm.errors.notCharged[locale],
         );
       } else {
-        setError(D.payForm.errors.generic[L]);
+        setError((locale) => D.payForm.errors.generic[locale]);
       }
     } finally {
       setBusy(false);
@@ -263,13 +279,13 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
   };
 
   if (stage.kind === "unchecked") {
-    return <PayUnchecked paymentId={receipt} />;
+    return <PayUnchecked locale={L} paymentId={receipt} />;
   }
 
   if (stage.kind === "paid" && receipt) {
     return (
-      <PayReceipt
-        stage={stage}
+      <PayReceipt locale={L}
+        stage={{ ...stage, matrix: saved?.find((row) => row.id === stage.matrix?.id) ?? stage.matrix }}
         tariffName={tariff.name}
         test={test}
         signedInto={signedInto}
@@ -284,7 +300,16 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
     // валидацией submit гасился раньше нашего обработчика, и адрес с невидимым символом из
     // копипаста получал отказ без объяснения.
     <form method="post" className="panel paybox" data-testid="pay-modal" onSubmit={submit}
-          noValidate>
+      noValidate>
+      {providers.length > 1 && <label className="field">
+        <span>{D.pay.paymentMethod[L]}</span>
+        <select value={provider} onChange={(event) => setProvider(event.target.value)} disabled={busy}>
+          {providers.map((item) => <option key={item.id} value={item.id}>
+            {item.provider === "tbank" ? D.pay.tbank[L] : item.provider === "mock" ? D.pay.mock[L] : item.provider}
+          </option>)}
+        </select>
+      </label>}
+
       <h3>{D.payForm.whatWeBuy[L]}</h3>
       <div className="cap">
         {tariffs.length > 1 ? D.payForm.manyPlans[L] : D.payForm.onePlan[L](priceLabel(tariff))}
@@ -293,33 +318,33 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
       {/* выбор не рисуем вовсе, пока продаём один тариф: скрытый стилями блок оставлял бы
           в разметке подписи вроде «Подписка» и «Одна дата» */}
       {tariffs.length > 1 ? (
-      <div className="tchoice" role="radiogroup" aria-label={D.payForm.planGroup[L]} data-testid="tariff-choice">
-        {tariffs.map((t) => (
-          <label className={t.id === tariff.id ? "topt on" : "topt"} key={t.id}>
-            <input
-        disabled={!hydrated}
-              type="radio"
-              name="tariff"
-              value={t.id}
-              data-testid={`tariff-${t.id}`}
-              checked={t.id === tariff.id}
-              onChange={() => {
-                setChosen(t.id);
-                setError(null);
-                track("tariff_select", { tariff: t.id });
-              }}
-            />
-            <span>
-              <span className="tname">{t.name}</span>
-              <span className="tsub">{optionNote(t)}</span>
-            </span>
-            <span className="tprice">
-              {priceLabel(t)}
-              <s>{capLabel(t)}</s>
-            </span>
-          </label>
-        ))}
-      </div>
+        <div className="tchoice" role="radiogroup" aria-label={D.payForm.planGroup[L]} data-testid="tariff-choice">
+          {tariffs.map((t) => (
+            <label className={t.id === tariff.id ? "topt on" : "topt"} key={t.id}>
+              <input
+                disabled={!hydrated}
+                type="radio"
+                name="tariff"
+                value={t.id}
+                data-testid={`tariff-${t.id}`}
+                checked={t.id === tariff.id}
+                onChange={() => {
+                  setChosen(t.id);
+                  setError(null);
+                  track("tariff_select", { tariff: t.id });
+                }}
+              />
+              <span>
+                <span className="tname">{t.name}</span>
+                <span className="tsub">{optionNote(t)}</span>
+              </span>
+              <span className="tprice">
+                {priceLabel(t)}
+                <s>{capLabel(t)}</s>
+              </span>
+            </label>
+          ))}
+        </div>
       ) : null}
 
       {!tariff.scope.includes("all") ? (
@@ -382,10 +407,10 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             {D.payForm.emailLabel[L]}
           </label>
           <input
-        disabled={!hydrated}
+            disabled={!hydrated}
             id="payemail"
             data-testid="pay-email"
-        maxLength={200}
+            maxLength={200}
             name="email"
             type="email"
             autoComplete="email"
@@ -406,7 +431,7 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
             <div>
               <label htmlFor="payemail">{D.payForm.emailLabel[L]}</label>
               <input
-        disabled={!hydrated}
+                disabled={!hydrated}
                 id="payemail"
                 data-testid="pay-email"
                 name="email"
@@ -427,10 +452,10 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
                 {known ? D.payForm.passwordKnown[L] : D.payForm.passwordNew[L]}
               </label>
               <input
-        disabled={!hydrated}
+                disabled={!hydrated}
                 id="paypass"
                 data-testid="pay-password"
-        maxLength={200}
+                maxLength={200}
                 name="password"
                 type="password"
                 autoComplete={known ? "current-password" : "new-password"}
@@ -488,8 +513,8 @@ export default function PayForm({ tariffs, initial, test = false }: { tariffs: T
         {!hydrated
           ? D.payForm.preparing[L]
           : busy
-          ? D.payForm.processing[L]
-          : D.payForm.payButton[L](
+            ? D.payForm.processing[L]
+            : D.payForm.payButton[L](
               priceLabel(tariff),
               tariff.scope.includes("all") || chosenLabel === null ? "" : ` · ${chosenLabel}`,
             )}

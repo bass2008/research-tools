@@ -1,19 +1,34 @@
 "use client";
 
+import { useLocale, useSite } from "@/components/ui/LocaleProvider";
+import { ApiError, forLocale as localizedApi } from "@/lib/api";
+import { forLocale as localizedEmail } from "@/lib/email";
 import { useHydrated } from "@/lib/hydrated";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
+import { forLocale as localizedSite } from "@/lib/site";
 import Link from "next/link";
 import { useState } from "react";
 
-import { ALL_FREE } from "@/lib/access";
-import { ApiError, api } from "@/lib/api";
-import { D, L } from "@/lib/i18n";
-import { emailError, normalizeEmail } from "@/lib/email";
-import { LEGAL } from "@/lib/site";
+export const forLocale = localized((L: Locale, site) => {
+  const { api } = localizedApi(L);
+  const { emailError, normalizeEmail } = localizedEmail(L);
+  const { LEGAL } = localizedSite(L, site);
 
-export default function ForgotForm() {
+  return { api, emailError, normalizeEmail, LEGAL };
+});
+
+export default function ForgotForm({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const activeLocale = useLocale();
+  const site = useSite();
+  const L = requestedLocale ?? activeLocale;
+  const { api, emailError, normalizeEmail, LEGAL } = forLocale(L, site);
+
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useMessage(L);
   const [busy, setBusy] = useState(false);
   const hydrated = useHydrated();
 
@@ -21,13 +36,13 @@ export default function ForgotForm() {
     e.preventDefault();
     setError(null);
     const wrong = emailError(email);
-    if (wrong) return setError(wrong);
+    if (wrong) return setError((locale) => localizedEmail(locale).emailError(email));
     setBusy(true);
     try {
       await api.resetRequest(normalizeEmail(email));
       setSent(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : D.auth.generic[L]);
+      setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
     } finally {
       setBusy(false);
     }
@@ -62,7 +77,7 @@ export default function ForgotForm() {
 
   return (
     <form method="post" className="panel narrow" onSubmit={submit} data-testid="forgot-form"
-          noValidate>
+      noValidate>
       <h1>{D.auth.forgotTitle[L]}</h1>
       <p className="dim">{D.auth.forgotLead[L]}</p>
       <label htmlFor="fmail">{D.auth.email[L]}</label>

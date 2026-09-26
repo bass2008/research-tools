@@ -1,27 +1,39 @@
 "use client";
 
+import ArcanumCard from "@/components/matrix/ArcanumCard";
+import Price from "@/components/pay/Price";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { ALL_FREE } from "@/lib/access";
+import { track } from "@/lib/analytics";
+import { forLocale as localizedHeroSlides, type HeroSlide } from "@/lib/heroSlides";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { ALL_FREE } from "@/lib/access";
-import { track } from "@/lib/analytics";
-import { D, L } from "@/lib/i18n";
-import { LANDING_SLIDES, type HeroSlide } from "@/lib/heroSlides";
+export const forLocale = localized((L: Locale) => {
+  const { LANDING_SLIDES } = localizedHeroSlides(L);
 
-import ArcanumCard from "@/components/matrix/ArcanumCard";
-import Price from "@/components/pay/Price";
+  // Первый экран главной и энциклопедии: слева карусель композиций из колоды, справа виджет
+  // расчёта. Виджет приходит через children и не участвует в листании — он один и тот же.
+  const SLIDE_MS = 10_000;
 
-// Первый экран главной и энциклопедии: слева карусель композиций из колоды, справа виджет
-// расчёта. Виджет приходит через children и не участвует в листании — он один и тот же.
-const SLIDE_MS = 10_000;
+  const FAN = [2, 6, 10, 1, 14, 18, 21];
 
-const FAN = [2, 6, 10, 1, 14, 18, 21];
-const RING = [1, 3, 6, 8, 13, 15, 18, 21];
-const TAPE = [4, 7, 9, 11, 2, 6, 10, 1, 14, 18, 21, 13, 16, 20];
-const MOSAIC = Array.from({ length: 32 }, (_, i) => (i % 22) + 1);
+  const RING = [1, 3, 6, 8, 13, 15, 18, 21];
 
-function Star() {
+  const TAPE = [4, 7, 9, 11, 2, 6, 10, 1, 14, 18, 21, 13, 16, 20];
+
+  const MOSAIC = Array.from({ length: 32 }, (_, i) => (i % 22) + 1);
+  return { LANDING_SLIDES, SLIDE_MS, FAN, RING, TAPE, MOSAIC };
+});
+
+function Star({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+
   return (
     <svg className="emb" viewBox="0 0 120 120" aria-hidden="true">
       <g fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -41,7 +53,11 @@ function Star() {
   );
 }
 
-function Seal({ monogram = false }: { monogram?: boolean }) {
+function Seal({ locale: requestedLocale, ...localeProps }: ({ monogram?: boolean }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { monogram = false } = localeProps;
+
   return (
     <svg className="emb" viewBox="0 0 120 120" aria-hidden="true">
       <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" strokeWidth="1" opacity=".3" />
@@ -78,7 +94,10 @@ function Seal({ monogram = false }: { monogram?: boolean }) {
   );
 }
 
-function Rhomb() {
+function Rhomb({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+
   return (
     <svg className="emb" viewBox="0 0 120 120" aria-hidden="true">
       <g fill="none" stroke="currentColor">
@@ -91,7 +110,12 @@ function Rhomb() {
   );
 }
 
-function Fan({ eager }: { eager: boolean }) {
+function Fan({ locale: requestedLocale, ...localeProps }: ({ eager: boolean }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { FAN } = forLocale(L);
+  const { eager } = localeProps;
+
   const mid = (FAN.length - 1) / 2;
   return (
     <div className="fanwrap">
@@ -103,13 +127,12 @@ function Fan({ eager }: { eager: boolean }) {
             className="fanc"
             style={{
               left: `calc(50% + ${off * 62}px)`,
-              transform: `translateX(-50%) rotate(${(off * 6.5).toFixed(1)}deg) translateY(${
-                Math.abs(off) ** 2 * 3
-              }px)`,
+              transform: `translateX(-50%) rotate(${(off * 6.5).toFixed(1)}deg) translateY(${Math.abs(off) ** 2 * 3
+                }px)`,
               zIndex: 20 - Math.round(Math.abs(off) * 2),
             }}
           >
-            <ArcanumCard n={n} size="grid" decorative eager={eager} />
+            <ArcanumCard locale={L} n={n} size="grid" decorative eager={eager} />
           </i>
         );
       })}
@@ -117,7 +140,11 @@ function Fan({ eager }: { eager: boolean }) {
   );
 }
 
-function Ring() {
+function Ring({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { RING } = forLocale(L);
+
   return (
     <div className="ringwrap">
       {RING.map((n, i) => {
@@ -134,26 +161,19 @@ function Ring() {
               transform: `translate(-50%,-50%) rotate(${((i * 360) / RING.length).toFixed(0)}deg)`,
             }}
           >
-            <ArcanumCard n={n} size="grid" decorative />
+            <ArcanumCard locale={L} n={n} size="grid" decorative />
           </i>
         );
       })}
       <span className="ringcore">
-        <Seal />
+        <Seal locale={L} />
         <span className="rc-t">{D.slides.landing[2].link[L]}</span>
       </span>
     </div>
   );
 }
 
-export default function CalcHero({
-  slides = LANDING_SLIDES,
-  h1 = true,
-  place = "hero",
-  children,
-  below,
-  fullReport = false,
-}: {
+export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
   /** пять надписей: своя на каждую композицию */
   slides?: HeroSlide[];
   /** заголовок первого слайда становится h1 страницы; на странице со своим h1 — false */
@@ -166,7 +186,19 @@ export default function CalcHero({
   below?: ReactNode;
   /** На главной уже напечатан оплаченный отчёт: первая кнопка ведёт к нему, не к покупке. */
   fullReport?: boolean;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { LANDING_SLIDES, SLIDE_MS, TAPE, MOSAIC } = forLocale(L);
+  const {
+    slides = LANDING_SLIDES,
+    h1 = true,
+    place = "hero",
+    children,
+    below,
+    fullReport = false,
+  } = localeProps;
+
   const path = usePathname();
   const total = slides.length;
   const [i, setI] = useState(0);
@@ -214,7 +246,7 @@ export default function CalcHero({
           if (!fullReport) track("buy_click", { place: `${place}-hero` });
         }}
       >
-        {fullReport ? D.home.heroToReport[L] : <>{D.home.heroBuy[L]}<Price /></>}
+        {fullReport ? D.home.heroToReport[L] : <>{D.home.heroBuy[L]}<Price locale={L} /></>}
       </Link>
     );
   }
@@ -241,7 +273,7 @@ export default function CalcHero({
       case 1:
         return (
           <div className="offer v-ring">
-            <Ring />
+            <Ring locale={L} />
             <div className="ringtext">{text(s, k)}</div>
           </div>
         );
@@ -251,19 +283,19 @@ export default function CalcHero({
             <div className="trihead">
               <span className="rule" />
               <span className="triemb">
-                <Rhomb />
+                <Rhomb locale={L} />
               </span>
               <span className="rule" />
             </div>
             <div className="triwrap">
               <i className="tric">
-                <ArcanumCard n={8} size="grid" decorative />
+                <ArcanumCard locale={L} n={8} size="grid" decorative />
               </i>
               <i className="tric mid">
-                <ArcanumCard n={1} size="grid" decorative />
+                <ArcanumCard locale={L} n={1} size="grid" decorative />
               </i>
               <i className="tric">
-                <ArcanumCard n={18} size="grid" decorative />
+                <ArcanumCard locale={L} n={18} size="grid" decorative />
               </i>
             </div>
             {text(s, k)}
@@ -276,12 +308,12 @@ export default function CalcHero({
               <div className="tape">
                 {TAPE.map((n, j) => (
                   <i className="tapec" key={`${n}-${j}`}>
-                    <ArcanumCard n={n} size="grid" decorative />
+                    <ArcanumCard locale={L} n={n} size="grid" decorative />
                   </i>
                 ))}
               </div>
               <span className="tapemed">
-                <Seal monogram />
+                <Seal locale={L} monogram />
               </span>
             </div>
             {text(s, k)}
@@ -293,13 +325,13 @@ export default function CalcHero({
             <div className="mosaic">
               {MOSAIC.map((n, j) => (
                 <i className="mos" key={`${n}-${j}`}>
-                  <ArcanumCard n={n} size="grid" decorative />
+                  <ArcanumCard locale={L} n={n} size="grid" decorative />
                 </i>
               ))}
             </div>
             <div className="lightbody">
               <span className="demb">
-                <Star />
+                <Star locale={L} />
               </span>
               {text(s, k)}
             </div>
@@ -308,7 +340,7 @@ export default function CalcHero({
       default:
         return (
           <div className="offer v-fan">
-            <Fan eager={k === 0} />
+            <Fan locale={L} eager={k === 0} />
             <div className="markline">
               <span className="eyebrow">{s.eyebrow}</span>
             </div>

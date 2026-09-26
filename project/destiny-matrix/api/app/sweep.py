@@ -41,7 +41,7 @@ def pending(db: Session, now: dt.datetime | None = None) -> list[Payment]:
     for row in rows:
         if row.status in SETTLED or row.status == ABANDONED:
             continue
-        provider = payments.get(row.provider)
+        provider = payments.for_payment(row)
         if provider is None or not provider.enabled():
             continue
         out.append(row)
@@ -74,7 +74,7 @@ def run(db: Session | None = None) -> PaymentSweep | None:
         entries: list[dict] = []
         changed = 0
         for payment in waiting:
-            provider = payments.get(payment.provider)
+            provider = payments.for_payment(payment)
             was = payment.status
             record = {"payment": payment.id, "external_id": payment.external_id,
                       "email": payment.user.email, "was": was}

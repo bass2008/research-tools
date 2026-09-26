@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from ..i18n import say
 from .. import access, printing, reports, tariffs
+from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
@@ -22,7 +23,7 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 def _own_matrix(db: Session, user: User, matrix_id: int) -> SavedMatrix:
     row = db.get(SavedMatrix, matrix_id)
     if row is None or row.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("matrix.not_found"))
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
     return row
 
 
@@ -51,15 +52,15 @@ def file(token: str = Query(..., min_length=16)) -> Response:
     """Выдача файла из локального хранилища — замена подписанной ссылке S3. Пропуск живёт час,
     как и подпись, и годится ровно на один ключ: в PDF есть дата рождения."""
     if settings.reports_store != "local":
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("report.not_found"))
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("report.not_found"))
     read = read_file_token(token)
     if read is None:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=say("report.link_expired"))
+        raise LocalizedHTTPException(status.HTTP_403_FORBIDDEN, detail=lambda: say("report.link_expired"))
     key, filename = read
     try:
         body = store().read(key)
     except (OSError, ValueError):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=say("report.file_missing")) from None
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("report.file_missing")) from None
     headers = {"Content-Disposition": disposition(filename)} if filename else {}
     return Response(content=body, media_type="application/pdf", headers=headers)
 
@@ -67,12 +68,23 @@ def file(token: str = Query(..., min_length=16)) -> Response:
 @router.post("/render")
 def render(payload: ReportRequest, user: User = Depends(current_user),
            db: Session = Depends(get_db)) -> dict:
+    try:
+        with printing.exclusive(user.id, payload.matrix_id):
+            # A preceding operation may have completed while this request waited.
+            db.expire_all()
+            return _render(payload, user, db)
+    except printing.Busy as exc:
+        raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                                     detail=lambda: say("report.print_busy")) from exc
+
+
+def _render(payload: ReportRequest, user: User, db: Session) -> dict:
     """Синхронно: пока запрос идёт, PDF печатается. Задача в очереди нужна не клиенту, а админу —
     видеть, что печатали, сколько это заняло и что упало."""
     row = _own_matrix(db, user, payload.matrix_id)
     if not access.unlocked_matrix(db, user, row.id):
-        raise HTTPException(status.HTTP_402_PAYMENT_REQUIRED,
-                            detail=say("report.not_paid"))
+        raise LocalizedHTTPException(status.HTTP_402_PAYMENT_REQUIRED,
+                            detail=lambda: say("report.not_paid"))
 
     done = None if payload.fresh else printing.ready(db, user.id, row.id)
     if done is not None and done.object_key:
@@ -82,8 +94,8 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
                 "seconds": done.seconds()}
 
     if not settings.pdf_enabled:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail=say("report.print_off"))
+        raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail=lambda: say("report.print_off"))
 
     busy = printing.running(db, user.id, row.id)
     if busy is not None:
@@ -93,17 +105,17 @@ def render(payload: ReportRequest, user: User = Depends(current_user),
                     "url": reports.link(waited.object_key, _filename(row)), "size_bytes": waited.size_bytes,
                     "seconds": waited.seconds()}
         if busy.status == "running":
-            raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT,
-                                detail=say("report.print_running"))
+            raise LocalizedHTTPException(status.HTTP_504_GATEWAY_TIMEOUT,
+                                detail=lambda: say("report.print_running"))
 
     try:
         job = printing.run(db, user.id, row.id)
     except printing.Busy as exc:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
-                            detail=say("report.print_busy")) from exc
+        raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail=lambda: say("report.print_busy")) from exc
     except Exception as exc:                       # noqa: BLE001
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY,
-                            detail=say("report.print_failed")) from exc
+        raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY,
+                            detail=lambda: say("report.print_failed")) from exc
     return {"job_id": job.id, "status": "done", "cached": False,
             "url": reports.link(job.object_key, _filename(row)), "size_bytes": job.size_bytes,
             "seconds": job.seconds()}
@@ -116,13 +128,13 @@ def page(matrix_id: int, t: str = Query(..., description="print-токен"),
     поэтому куку владельца браузерному сервису отдавать не нужно."""
     read = read_print_token(t)
     if read is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("report.pass_invalid"))
+        raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("report.pass_invalid"))
     user_id, allowed = read
     if allowed != matrix_id:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=say("report.pass_other_matrix"))
+        raise LocalizedHTTPException(status.HTTP_403_FORBIDDEN, detail=lambda: say("report.pass_other_matrix"))
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=say("report.pass_invalid"))
+        raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("report.pass_invalid"))
     row = _own_matrix(db, user, matrix_id)
     # страница печати считает матрицу сама, как и обычный разбор: ей нужны дата, пол и признак
     # оплаты, а не готовые разделы
@@ -133,7 +145,7 @@ def page(matrix_id: int, t: str = Query(..., description="print-токен"),
     if not unlocked:
         plan_name = say("report.plan_free")
     elif plan and not settings.all_free_without_payment:
-        plan_name = plan.name
+        plan_name = plan.public()["name"]
     else:
         plan_name = say("report.plan_full")
     return {**row.item(), "unlocked": unlocked, "plan": plan_name}

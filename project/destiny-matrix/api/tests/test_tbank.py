@@ -9,6 +9,7 @@ from sqlalchemy import select
 
 from app import payments
 from app.payments.tbank import Tbank
+from app.payments.base import PaymentUrls
 from app.models import Entitlement, Payment, User
 
 
@@ -192,7 +193,7 @@ def test_start_needs_credentials(client, monkeypatch):
     monkeypatch.setattr(payments.PROVIDERS["mock"], "enabled", lambda: False)
     r = client.post("/api/payments/start",
                     json={"tariff": "single", "email": "off@example.ru", "birth": "1990-01-01"})
-    assert r.status_code == 503
+    assert r.status_code == 403
 
 
 def test_admin_refund_revokes_access(client, auth, db, bank, monkeypatch):
@@ -271,7 +272,7 @@ def test_second_provider_plugs_in_without_touching_the_router(client, db, monkey
         def enabled(self):
             return True
 
-        def start(self, order_id, amount, title, email):
+        def start(self, order_id, amount, title, email, *, urls):
             return payments.Started(external_id=f"fake-{order_id}", pay_url="https://fake/pay",
                                     status="created")
 
@@ -284,6 +285,11 @@ def test_second_provider_plugs_in_without_touching_the_router(client, db, monkey
         def read_notification(self, body):
             return payments.Update(str(body.get("id")), None, payments.Outcome.PAID, "succeeded")
 
+    from app.config import settings
+    profiles = json.loads(settings.site_profiles)
+    profiles[0]["payments"].append({"id": "fake", "provider": "fake",
+                                    "notificationUrl": "http://testserver/api/payments/notify/fake"})
+    monkeypatch.setattr(settings, "site_profiles", json.dumps(profiles))
     monkeypatch.setitem(payments.PROVIDERS, "fake", Fake())
     monkeypatch.setattr(payments.PROVIDERS["mock"], "enabled", lambda: False)
     monkeypatch.setattr(payments.PROVIDERS["tbank"], "enabled", lambda: False)
@@ -547,7 +553,8 @@ def test_receipt_follows_the_tax_mode_from_settings(client, db, bank, monkeypatc
 def test_payment_without_email_never_reaches_the_bank(bank):
     """Чек без адреса покупателя не примут, поэтому такой платёж не начинаем вовсе."""
     with pytest.raises(payments.PaymentError):
-        payments.PROVIDERS["tbank"].start("arcana-1-x", 25_000, "Разбор", None)
+        payments.PROVIDERS["tbank"].start("arcana-1-x", 25_000, "Разбор", None,
+                                            urls=PaymentUrls("", "", ""))
     assert bank == [], "в банк ушёл запрос без чека"
 
 

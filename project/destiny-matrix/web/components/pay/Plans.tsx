@@ -1,32 +1,45 @@
 "use client";
 
+import { useTariffs, usePaymentProviders } from "@/components/pay/TariffsProvider";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { ALL_FREE } from "@/lib/access";
+import { track } from "@/lib/analytics";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedTariffs, type Tariff } from "@/lib/tariffs";
 import Link from "next/link";
 
-import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
-import { track } from "@/lib/analytics";
-import { type Tariff, capLabel, periodLabel, priceLabel } from "@/lib/tariffs";
+export const forLocale = localized((L: Locale) => {
+  const { capLabel, periodLabel, priceLabel } = localizedTariffs(L);
 
-import { useTariffs } from "@/components/pay/TariffsProvider";
+  // Состав тарифа выводится из scope, а не хранится списком: тариф правят в базе, и отдельный
+  // список возможностей разошёлся бы с правами, которые реально выдаёт оплата.
+  function features(t: Tariff): string[] {
+    const unlimited = t.scope.includes("all");
+    return [
+      D.pay.allSections[L],
+      unlimited ? D.pay.unlimitedDates[L] : D.pay.singleDate[L],
+      ...(t.scope.includes("matrix") ? [D.pay.storedInAccount[L]] : []),
+      ...(t.period_days === null
+        ? [D.pay.noSubscription[L], D.pay.opensAtOnce[L], D.pay.downloadsAsPdf[L]]
+        : [D.pay.openedFor[L](periodLabel(t)), D.pay.manualRenewal[L]]),
+    ];
+  }
+  return { capLabel, periodLabel, priceLabel, features };
+});
 
-// Состав тарифа выводится из scope, а не хранится списком: тариф правят в базе, и отдельный
-// список возможностей разошёлся бы с правами, которые реально выдаёт оплата.
-function features(t: Tariff): string[] {
-  const unlimited = t.scope.includes("all");
-  return [
-    D.pay.allSections[L],
-    unlimited ? D.pay.unlimitedDates[L] : D.pay.singleDate[L],
-    ...(t.scope.includes("matrix") ? [D.pay.storedInAccount[L]] : []),
-    ...(t.period_days === null
-      ? [D.pay.noSubscription[L], D.pay.opensAtOnce[L], D.pay.downloadsAsPdf[L]]
-      : [D.pay.openedFor[L](periodLabel(t)), D.pay.manualRenewal[L]]),
-  ];
-}
+export default function Plans({ locale: requestedLocale, ...localeProps }: ({ place?: string }) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const { place = "plans" } = localeProps;
+  const { capLabel, periodLabel, priceLabel, features } = forLocale(L);
 
-export default function Plans({ place = "plans" }: { place?: string }) {
   const tariffs = useTariffs();
+  const providers = usePaymentProviders();
   // на витрине без оплаты кассы нет: тариф показывать нечем и незачем
   if (ALL_FREE) return null;
+  if (providers?.length === 0) return <div className="panel" id="plans">{D.pay.regionUnavailable[L]}</div>;
   // цена ещё не подтверждена базой: показывать блок с ценой из кода нельзя — по ней всё равно
   // не купить, платёж идёт в тот же API
   if (!tariffs.length) return null;

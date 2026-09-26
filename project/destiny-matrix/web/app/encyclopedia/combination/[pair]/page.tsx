@@ -1,27 +1,24 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import ArcanumCard from "@/components/matrix/ArcanumCard";
+import { PriceOrFree } from "@/components/pay/Price";
+import CrumbsLd from "@/components/ui/CrumbsLd";
+import JsonLd from "@/components/ui/JsonLd";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedCombinationReading } from "@/lib/combinationReading";
+import { forLocale as localizedContent } from "@/lib/content";
+import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSeo } from "@/lib/seo";
+import { forLocale as localizedSite } from "@/lib/site";
+import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import { D, L } from "@/lib/i18n";
-import ArcanumCard from "@/components/matrix/ArcanumCard";
-import CrumbsLd from "@/components/ui/CrumbsLd";
-import JsonLd from "@/components/ui/JsonLd";
-import Price, { PriceOrFree } from "@/components/pay/Price";
-
-import { arcanum } from "@/lib/arcana";
-import { buildCombinationArticle } from "@/lib/combinationReading";
-import {
-  allCombinationSlugs,
-  arcanumHref,
-  combinationHref,
-  parseCombinationSlug,
-} from "@/lib/encyclopedia";
-import { arcanumContent, combinationContent } from "@/lib/content";
-import { pageMeta } from "@/lib/site";
-import { sentence } from "@/lib/text";
-import { articleLd } from "@/lib/schema";
-import { NOT_FOUND_META } from "@/lib/seo";
-import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { pair: string };
 
@@ -29,11 +26,31 @@ type Params = { pair: string };
 // динамическим рендером — у того пустое тело и заголовок главной.
 export const dynamicParams = false;
 
+const forLocale = localized((L: Locale, site) => {
+  const { arcanum } = localizedArcana(L);
+  const { buildCombinationArticle } = localizedCombinationReading(L);
+  const { allCombinationSlugs, arcanumHref, combinationHref, parseCombinationSlug } = localizedEncyclopedia(L);
+  const { arcanumContent, combinationContent } = localizedContent(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { sentence } = localizedText(L);
+  const { articleLd } = localizedSchema(L, site);
+  const { NOT_FOUND_META } = localizedSeo(L, site);
+  const { encyclopediaSectionCrumb } = localizedEncyclopediaNavigation(L);
+
+  return { arcanum, buildCombinationArticle, allCombinationSlugs, arcanumHref, combinationHref, parseCombinationSlug, arcanumContent, combinationContent, pageMeta, sentence, articleLd, NOT_FOUND_META, encyclopediaSectionCrumb };
+});
+
 export function generateStaticParams(): Params[] {
+  const L = defaultLocale;
+  const { allCombinationSlugs } = forLocale(L);
+
   return allCombinationSlugs().map((pair) => ({ pair }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const L = await publicLocale();
+  const { combinationHref, parseCombinationSlug, combinationContent, pageMeta, NOT_FOUND_META } = forLocale(L, await requestSite());
+
   const pair = parseCombinationSlug((await params).pair);
   // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
   // несуществующая страница выглядела как главная.
@@ -50,6 +67,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function CombinationPage({ params }: { params: Promise<Params> }) {
+  const L = await requestLocale();
+  const { arcanum, buildCombinationArticle, arcanumHref, combinationHref, parseCombinationSlug, arcanumContent, combinationContent, sentence, articleLd, encyclopediaSectionCrumb } = forLocale(L, await requestSite());
+
   const pair = parseCombinationSlug((await params).pair);
   if (!pair) notFound();
   const [a, b] = pair;
@@ -72,7 +92,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
   return (
     <>
 
-      <CrumbsLd
+      <CrumbsLd locale={L}
         trail={[
           { name: D.nav.home[L], path: "/" },
           { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
@@ -80,21 +100,21 @@ export default async function CombinationPage({ params }: { params: Promise<Para
           { name: D.encCombination.pairCrumb[L](a, b) },
         ]}
       />
-        <JsonLd
-          data={articleLd({
-            headline: c.seo.title,
-            description: c.seo.description,
-            path: combinationHref(a, b),
-            keywords: D.encCombination.keywords[L](a, b),
-          })}
-        />
+      <JsonLd
+        data={articleLd({
+          headline: c.seo.title,
+          description: c.seo.description,
+          path: combinationHref(a, b),
+          keywords: D.encCombination.keywords[L](a, b),
+        })}
+      />
 
-        {/* Первый экран как на странице аркана: слева пара карт — здесь их две, поэтому крупнее,
+      {/* Первый экран как на странице аркана: слева пара карт — здесь их две, поэтому крупнее,
             чем миниатюры в блоке сочетаний; справа заголовок, лид и вход в расчёт. */}
       <div className="arc-top pair">
         <figure className="arc-side pair">
-          <ArcanumCard n={a} size="grid" eager decorative />
-          <ArcanumCard n={b} size="grid" eager decorative />
+          <ArcanumCard locale={L} n={a} size="grid" eager decorative />
+          <ArcanumCard locale={L} n={b} size="grid" eager decorative />
           <figcaption className="arc-cap">
             {D.encCombination.cardPair[L](a, x.title, b, y.title)}
           </figcaption>
@@ -116,102 +136,102 @@ export default async function CombinationPage({ params }: { params: Promise<Para
         </div>
       </div>
 
-        <div className="prose section-gap">
-          {c.meaning.map((text, i) => (
-            <p key={i}>{text}</p>
-          ))}
-        </div>
-
-        <h2 className="vh">{D.encCombination.givesAndStumbles[L]}</h2>
-        <div className="twocol section-gap">
-          <div className="panel">
-            <h3>{D.encCombination.gives[L]}</h3>
-            <div className="cap">{D.encCombination.givesHint[L]}</div>
-            <ul className="pmlist plus">
-              {[...xContent.plus.slice(0, 3), ...yContent.plus.slice(0, 3)].map((p, i) => (
-                <li key={`${p}-${i}`}>{p}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="panel">
-            <h3>{D.encCombination.stumbles[L]}</h3>
-            <div className="cap">{D.encCombination.stumblesHint[L]}</div>
-            <ul className="pmlist minus">
-              {[...xContent.minus.slice(0, 3), ...yContent.minus.slice(0, 3)].map((p, i) => (
-                <li key={`${p}-${i}`}>{p}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {article.groups.map((group) => (
-          <div className="section-gap" key={group.key}>
-            <h2>{D.encCombination.groupTitle[L](group.title, a, b)}</h2>
-            <p className="dim prose">{group.lead}</p>
-            {group.contexts.map((context) => (
-              <section className="section-gap" key={context.key}>
-                <h3>{context.title}</h3>
-                <p className="dim prose">{context.question}.</p>
-                <div className="twocol">
-                  {context.variants.map((variant) => (
-                    <div className="panel" key={`${context.key}-${variant.order}`}>
-                      <h3>{variant.heading}</h3>
-                      <div className="cap">{D.encCombination.variantOrder[L](variant.order)}</div>
-                      {variant.paragraphs.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-            <p className="encref">
-              <Link href={group.href}>{group.linkLabel}</Link>
-            </p>
-          </div>
+      <div className="prose section-gap">
+        {c.meaning.map((text, i) => (
+          <p key={i}>{text}</p>
         ))}
+      </div>
 
-        <div className="panel section-gap">
-          <h2>{D.encCombination.howToCheck[L]}</h2>
-          <div className="cap">{D.encCombination.howToCheckHint[L]}</div>
-          {article.practice.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+      <h2 className="vh">{D.encCombination.givesAndStumbles[L]}</h2>
+      <div className="twocol section-gap">
+        <div className="panel">
+          <h3>{D.encCombination.gives[L]}</h3>
+          <div className="cap">{D.encCombination.givesHint[L]}</div>
+          <ul className="pmlist plus">
+            {[...xContent.plus.slice(0, 3), ...yContent.plus.slice(0, 3)].map((p, i) => (
+              <li key={`${p}-${i}`}>{p}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="panel">
+          <h3>{D.encCombination.stumbles[L]}</h3>
+          <div className="cap">{D.encCombination.stumblesHint[L]}</div>
+          <ul className="pmlist minus">
+            {[...xContent.minus.slice(0, 3), ...yContent.minus.slice(0, 3)].map((p, i) => (
+              <li key={`${p}-${i}`}>{p}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {article.groups.map((group) => (
+        <div className="section-gap" key={group.key}>
+          <h2>{D.encCombination.groupTitle[L](group.title, a, b)}</h2>
+          <p className="dim prose">{group.lead}</p>
+          {group.contexts.map((context) => (
+            <section className="section-gap" key={context.key}>
+              <h3>{context.title}</h3>
+              <p className="dim prose">{context.question}.</p>
+              <div className="twocol">
+                {context.variants.map((variant) => (
+                  <div className="panel" key={`${context.key}-${variant.order}`}>
+                    <h3>{variant.heading}</h3>
+                    <div className="cap">{D.encCombination.variantOrder[L](variant.order)}</div>
+                    {variant.paragraphs.map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </section>
           ))}
+          <p className="encref">
+            <Link href={group.href}>{group.linkLabel}</Link>
+          </p>
         </div>
+      ))}
 
-        <div className="panel section-gap">
-          <h2>{D.encCombination.neighbours[L]}</h2>
-          <div className="cap">{D.encCombination.neighboursHint[L]}</div>
-          <div className="taglist">
-            {/* голый слаг «4-9» ничего не говорит: подписываем парой имён, как везде */}
-            {neighbours.map((href) => {
-              const pairSlug = href.split("/").pop() ?? "";
-              const [p1, p2] = pairSlug.split("-").map(Number);
-              return (
-                <Link key={href} href={href}>
-                  {D.encCombination.cardPair[L](p1, arcanum(p1).title, p2, arcanum(p2).title)}
-                </Link>
-              );
-            })}
-            {/* подпись обещает список сочетаний — значит и открывать надо его вкладку,
+      <div className="panel section-gap">
+        <h2>{D.encCombination.howToCheck[L]}</h2>
+        <div className="cap">{D.encCombination.howToCheckHint[L]}</div>
+        {article.practice.map((paragraph, index) => (
+          <p key={index}>{paragraph}</p>
+        ))}
+      </div>
+
+      <div className="panel section-gap">
+        <h2>{D.encCombination.neighbours[L]}</h2>
+        <div className="cap">{D.encCombination.neighboursHint[L]}</div>
+        <div className="taglist">
+          {/* голый слаг «4-9» ничего не говорит: подписываем парой имён, как везде */}
+          {neighbours.map((href) => {
+            const pairSlug = href.split("/").pop() ?? "";
+            const [p1, p2] = pairSlug.split("-").map(Number);
+            return (
+              <Link key={href} href={href}>
+                {D.encCombination.cardPair[L](p1, arcanum(p1).title, p2, arcanum(p2).title)}
+              </Link>
+            );
+          })}
+          {/* подпись обещает список сочетаний — значит и открывать надо его вкладку,
                 а не «Значение», где сочетаний на экране нет */}
-            <Link href={`${arcanumHref(a)}?tab=combos`}>{D.encCombination.allCombosOf[L](a)}</Link>
-            <Link href={`${arcanumHref(b)}?tab=combos`}>{D.encCombination.allCombosOf[L](b)}</Link>
-          </div>
+          <Link href={`${arcanumHref(a)}?tab=combos`}>{D.encCombination.allCombosOf[L](a)}</Link>
+          <Link href={`${arcanumHref(b)}?tab=combos`}>{D.encCombination.allCombosOf[L](b)}</Link>
         </div>
+      </div>
 
-        <div className="allbox">
-          <h2>{D.encCombination.pairInYourChart[L]}</h2>
-          <p>
-            {D.encCombination.calcLead[L]}
-          </p>
-          <Link className="btn" href="/#calc">
-            {D.matrixPages.calcMatrix[L]}
-          </Link>
-          <p className="small" style={{ marginTop: 10 }}>
-            {D.encCombination.fullReading[L]} <PriceOrFree />.
-          </p>
-        </div>
+      <div className="allbox">
+        <h2>{D.encCombination.pairInYourChart[L]}</h2>
+        <p>
+          {D.encCombination.calcLead[L]}
+        </p>
+        <Link className="btn" href="/#calc">
+          {D.matrixPages.calcMatrix[L]}
+        </Link>
+        <p className="small" style={{ marginTop: 10 }}>
+          {D.encCombination.fullReading[L]} <PriceOrFree locale={L} />.
+        </p>
+      </div>
     </>
   );
 }

@@ -1,14 +1,14 @@
 import { publicSettings } from "../settings/public";
-
-/** Языки развёртки. Один язык — одна сборка и один домен: `.ru` русский, `.com` английский.
- *  Сама карта живёт в `hosts.ts`: её читают и настройки, которые этот модуль импортирует. */
-export { LANGS, SITE_HOSTS, isLang, type Lang } from "./hosts";
-import { isLang } from "./hosts";
 import type { Lang } from "./hosts";
+import { isLang } from "./hosts";
+import { parseLocales } from "./selection";
+
+/** Переводы приложения; разрешённый набор для HTTP-запроса задаёт профиль домена. */
+export { isLang, LANGS, SITE_HOSTS, type Lang } from "./hosts";
 
 /**
- * Язык этой развёртки. Читается один раз на старте процесса: корпус, словари и разметка
- * страницы собраны под него, и менять язык на запрос нечему.
+ * Совместимый fallback для чистых функций и перечисления маршрутов при сборке.
+ * HTTP-страницы используют профиль Host и requestLocale(), компоненты — useLocale().
  */
 export const SITE_LANG: Lang = (() => {
   const raw = String(publicSettings.get("siteLang") || "").toLowerCase();
@@ -18,4 +18,4 @@ export const SITE_LANG: Lang = (() => {
   return raw;
 })();
 
-
+export const SUPPORTED_LOCALES = parseLocales(publicSettings.get("supportedLocales"), SITE_LANG);

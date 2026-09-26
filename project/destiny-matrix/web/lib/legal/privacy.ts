@@ -100,7 +100,7 @@ export const PRIVACY: LegalDocs = {
       },
       { h2: "8. Файлы cookie и аналитика" },
       {
-        p: ["Сайт использует технические cookie (сохранение входа) и cookie Яндекс Метрики. "
+        p: ["Сайт использует технические cookie (сохранение входа и выбранного языка) и cookie Яндекс Метрики. "
           + "Отказаться можно настройками браузера; при отключении cookie расчёт продолжает "
           + "работать, а вход в кабинет — нет. Свободный расчёт и выбранная дата хранятся в "
           + "локальном хранилище вашего браузера; на сервер дата попадает только в двух случаях "
@@ -195,7 +195,7 @@ export const PRIVACY: LegalDocs = {
       },
       { h2: "8. Cookies and analytics" },
       {
-        p: ["The website sets one technical cookie for the session. Analytics, if enabled, "
+        p: ["The website sets technical cookies for the session and your selected language. Analytics, if enabled, "
           + "receives no date of birth: the fields that could carry it are filtered out before an "
           + "event is sent."],
       },

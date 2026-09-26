@@ -140,6 +140,45 @@ def test_unfinished_report_has_nothing_to_download(client, auth, db):
     assert answer.status_code == 409
 
 
+def test_missing_report_is_expired_in_admin_list_and_has_no_download_link(client, auth, db, monkeypatch):
+    from types import SimpleNamespace
+    from app import printing
+
+    buyer(client)
+    admin = auth(settings.admins[0])
+    target = user_id(db)
+    matrix = db.query(SavedMatrix).filter(SavedMatrix.user_id == target).one()
+    job = ReportJob(user_id=target, matrix_id=matrix.id, status="done", object_key="missing.pdf")
+    db.add(job)
+    db.commit()
+    monkeypatch.setattr(printing, "store", lambda: SimpleNamespace(exists=lambda key: False))
+
+    items = client.get("/api/admin/reports", headers=admin).json()["items"]
+    assert items[0]["status"] == "expired"
+    response = client.get(f"/api/admin/reports/{job.id}/link", headers=admin)
+    assert response.status_code == 410
+    assert "Пересоздать" in response.json()["detail"]
+
+
+def test_report_disappearing_after_admin_list_does_not_produce_a_dead_link(client, auth, db, monkeypatch):
+    from types import SimpleNamespace
+    from app import printing
+
+    buyer(client)
+    admin = auth(settings.admins[0])
+    target = user_id(db)
+    matrix = db.query(SavedMatrix).filter(SavedMatrix.user_id == target).one()
+    job = ReportJob(user_id=target, matrix_id=matrix.id, status="done", object_key="removed.pdf")
+    db.add(job)
+    db.commit()
+    monkeypatch.setattr(printing, "store", lambda: SimpleNamespace(exists=lambda key: False))
+    response = client.get(f"/api/admin/reports/{job.id}/link", headers={**admin, "Accept-Language": "en"})
+    assert response.status_code == 410
+    assert "Rebuild" in response.json()["detail"]
+    db.refresh(job)
+    assert job.status == "expired" and job.object_key is None
+
+
 def test_summary_does_not_call_a_gift_a_purchase(client, auth, db):
     """«Куплено 2 даты» там, где заплатили за одну, — ложь и покупателю, и админке."""
     token = buyer(client)["token"]

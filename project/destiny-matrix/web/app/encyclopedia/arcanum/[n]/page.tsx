@@ -1,40 +1,28 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import Related from "@/components/enc/Related";
+import Sections from "@/components/enc/Sections";
+import ArcanumCard, { forLocale as localizedArcanumCard } from "@/components/matrix/ArcanumCard";
+import { PriceOrFree } from "@/components/pay/Price";
+import CrumbsLd from "@/components/ui/CrumbsLd";
+import Faq from "@/components/ui/Faq";
+import JsonLd from "@/components/ui/JsonLd";
+import Tabs from "@/components/ui/Tabs";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedContent } from "@/lib/content";
+import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedPositionArcanum } from "@/lib/positionArcanum";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSeo } from "@/lib/seo";
+import { forLocale as localizedSite } from "@/lib/site";
+import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import { D, L } from "@/lib/i18n";
-import ArcanumCard, { arcanumImage } from "@/components/matrix/ArcanumCard";
-import Tabs from "@/components/ui/Tabs";
-import Faq from "@/components/ui/Faq";
-import CrumbsLd from "@/components/ui/CrumbsLd";
-import JsonLd from "@/components/ui/JsonLd";
-import Sections from "@/components/enc/Sections";
-import Price, { PriceOrFree } from "@/components/pay/Price";
-import Related from "@/components/enc/Related";
-
-import { ARCANA } from "@/lib/arcana";
-import {
-  KARMIC_TAIL_HUB,
-  arcanumHref,
-  positionByKey,
-  karmicTailHref,
-  positionHref,
-} from "@/lib/encyclopedia";
-import {
-  arcanumContent,
-  combinationContent,
-  karmicTails,
-} from "@/lib/content";
-import { pageMeta } from "@/lib/site";
-import { sentence } from "@/lib/text";
-import { articleLd } from "@/lib/schema";
-import { positionArcanumHref, positionArcanumLabel, registryItems } from "@/lib/positionArcanum";
-import { NOT_FOUND_META } from "@/lib/seo";
-import {
-  encyclopediaSection,
-  encyclopediaSectionCrumb,
-  encyclopediaSectionHref,
-} from "@/lib/encyclopediaNavigation";
 
 type Params = { n: string };
 
@@ -42,23 +30,43 @@ type Params = { n: string };
 // динамическим рендером — у того пустое тело и заголовок главной.
 export const dynamicParams = false;
 
+const forLocale = localized((L: Locale, site) => {
+  const { arcanumImage } = localizedArcanumCard(L);
+  const { ARCANA } = localizedArcana(L);
+  const { KARMIC_TAIL_HUB, arcanumHref, positionByKey, karmicTailHref, positionHref } = localizedEncyclopedia(L);
+  const { arcanumContent, combinationContent, karmicTails } = localizedContent(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { sentence } = localizedText(L);
+  const { articleLd } = localizedSchema(L, site);
+  const { positionArcanumHref, positionArcanumLabel, registryItems } = localizedPositionArcanum(L);
+  const { NOT_FOUND_META } = localizedSeo(L, site);
+  const { encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
+
+  function entry(n: number) {
+    const value = arcanumContent(n);
+    if (!value) throw new Error(`нет канонического материала для аркана ${n}`);
+    return value;
+  }
+
+  function num(raw: string): number | null {
+    if (!/^\d{1,2}$/.test(raw)) return null;
+    const n = Number(raw);
+    return n >= 1 && n <= 22 ? n : null;
+  }
+  return { arcanumImage, ARCANA, KARMIC_TAIL_HUB, arcanumHref, positionByKey, karmicTailHref, positionHref, arcanumContent, combinationContent, karmicTails, pageMeta, sentence, articleLd, positionArcanumHref, positionArcanumLabel, registryItems, NOT_FOUND_META, encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref, entry, num };
+});
+
 export function generateStaticParams(): Params[] {
+  const L = defaultLocale;
+  const { ARCANA } = forLocale(L);
+
   return ARCANA.map((a) => ({ n: String(a.n) }));
 }
 
-function entry(n: number) {
-  const value = arcanumContent(n);
-  if (!value) throw new Error(`нет канонического материала для аркана ${n}`);
-  return value;
-}
-
-function num(raw: string): number | null {
-  if (!/^\d{1,2}$/.test(raw)) return null;
-  const n = Number(raw);
-  return n >= 1 && n <= 22 ? n : null;
-}
-
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const L = await publicLocale();
+  const { arcanumHref, pageMeta, NOT_FOUND_META, entry, num } = forLocale(L, await requestSite());
+
   const n = num((await params).n);
   // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
   // несуществующая страница выглядела как главная.
@@ -73,6 +81,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function ArcanumPage({ params }: { params: Promise<Params> }) {
+  const L = await requestLocale();
+  const { arcanumImage, ARCANA, KARMIC_TAIL_HUB, arcanumHref, positionByKey, karmicTailHref, positionHref, combinationContent, karmicTails, sentence, articleLd, positionArcanumHref, positionArcanumLabel, registryItems, encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref, entry, num } = forLocale(L, await requestSite());
+
   const n = num((await params).n);
   if (!n) notFound();
   const e = entry(n);
@@ -103,7 +114,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
       {/* Грани спроса — «в отношениях», «деньги», «в центре» — приходят из контента отдельными
           секциями: в одном meaning они сливались в простыню без заголовков. */}
       <Sections items={e.sections} />
-      <Faq items={e.faq} />
+      <Faq locale={L} items={e.faq} />
     </>
   );
 
@@ -137,8 +148,8 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
         {pairs.map((c) => (
           <Link className="combo" key={c.with} href={c.href}>
             <span className="duo">
-              <ArcanumCard n={n} size="mini" half decorative />
-              <ArcanumCard n={c.with} size="mini" half decorative />
+              <ArcanumCard locale={L} n={n} size="mini" half decorative />
+              <ArcanumCard locale={L} n={c.with} size="mini" half decorative />
             </span>
             <span className="cbd">
               <span className="cnm">
@@ -196,7 +207,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
 
   return (
     <>
-      <CrumbsLd
+      <CrumbsLd locale={L}
         trail={[
           { name: D.nav.home[L], path: "/" },
           { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
@@ -219,7 +230,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
           ключевые слова и две врезки «сильная сторона / изнанка». */}
       <div className="arc-top">
         <figure className="arc-side">
-          <ArcanumCard n={n} size="grid" eager decorative />
+          <ArcanumCard locale={L} n={n} size="grid" eager decorative />
           <figcaption className="arc-cap">
             {n} · {e.title}
           </figcaption>
@@ -269,7 +280,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
         ]}
       />
 
-      <Related
+      <Related locale={L}
         path={arcanumHref(n)}
         refs={[]}
         // блок хвостов на этой же странице уже вывел свои тройки: без этого один и тот же
@@ -287,7 +298,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
           {D.matrixPages.calcFree[L]}
         </Link>
         <p className="small" style={{ marginTop: 10 }}>
-          {D.encArcanum.fullReadingAll[L]} <PriceOrFree />.
+          {D.encArcanum.fullReadingAll[L]} <PriceOrFree locale={L} />.
         </p>
       </div>
     </>

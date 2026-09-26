@@ -108,27 +108,32 @@ CGROUP_LAYOUTS = ("{root}/system.slice/docker-{cid}.scope", "{root}/docker/{cid}
 _container_mark: dict[str, tuple[float, int]] = {}
 
 
-def _container_names() -> dict[str, str]:
-    """Идентификатор контейнера → имя, из метаданных docker на хосте."""
-    names: dict[str, str] = {}
+def _container_metadata() -> dict[str, dict[str, str]]:
+    """Имя и compose-проект из метаданных Docker, без доступа к его сокету."""
+    metadata: dict[str, dict[str, str]] = {}
     try:
         ids = os.listdir(HOST_CONTAINERS)
     except OSError:
-        return names
+        return metadata
     for cid in ids:
         try:
             with open(f"{HOST_CONTAINERS}/{cid}/config.v2.json", encoding="utf-8") as f:
-                names[cid] = json.load(f).get("Name", "").lstrip("/") or cid[:12]
+                config = json.load(f)
+            labels = (config.get("Config") or {}).get("Labels") or {}
+            metadata[cid] = {
+                "name": config.get("Name", "").lstrip("/") or cid[:12],
+                "project": labels.get("com.docker.compose.project", ""),
+            }
         except (OSError, ValueError):
             continue
-    return names
+    return metadata
 
 
 def containers() -> list[dict]:
     """Сколько процессора и памяти ест каждый контейнер: доля за время с прошлого опроса."""
     rows: list[dict] = []
     now = time.time()
-    for cid, name in _container_names().items():
+    for cid, metadata in _container_metadata().items():
         base = next((path for path in
                      (layout.format(root=HOST_CGROUP, cid=cid) for layout in CGROUP_LAYOUTS)
                      if os.path.isdir(path)), None)
@@ -148,22 +153,20 @@ def containers() -> list[dict]:
             if elapsed > 0.5:
                 percent = round((usec - was[1]) / (elapsed * 10_000), 1)
         _container_mark[cid] = (now, usec)
-        rows.append({"name": name, "percent": percent,
+        rows.append({**metadata, "percent": percent,
                      "memory_mb": round(memory_bytes / 2**20)})
     return sorted(rows, key=lambda r: -r["percent"])
 
 
 def contours(rows: list[dict]) -> list[dict]:
-    """Контейнеры, собранные в контуры: язык виден в имени, тест отделён от боевого."""
+    """Основной и тестовый сайты определяются проектом Compose, а не языком в имени."""
     groups = (
-        ("Русский сайт", lambda n: "-ru-" in n and "test" not in n),
-        ("Английский сайт", lambda n: "-en-" in n and "test" not in n),
-        ("Тест русский", lambda n: "test" in n and "-ru-" in n),
-        ("Тест английский", lambda n: "test" in n and "-en-" in n),
+        ("Основной сайт", "arcana"),
+        ("Тестовый сайт", "arcana-test"),
     )
     out = []
-    for title, belongs in groups:
-        mine = [r for r in rows if belongs(r["name"])]
+    for title, project in groups:
+        mine = [r for r in rows if r.get("project") == project]
         if mine:
             out.append({"title": title,
                         "percent": round(sum(r["percent"] for r in mine), 1),
@@ -215,13 +218,11 @@ def last_errors(db: Session, limit: int = 20) -> list[dict]:
 def stuck_payments(db: Session, minutes: int = 30) -> int:
     """Платежи, застрявшие на форме банка: человек ушёл, деньги не дошли. Какие статусы считать
     незавершёнными, решает провайдер — знание о банке в этот модуль не переезжает."""
-    provider = gateway.active()
-    if provider is None:
-        return 0
     edge = utcnow() - dt.timedelta(minutes=minutes)
     rows = db.scalars(select(Payment).where(Payment.paid_at.is_(None),
                                             Payment.refunded_at.is_(None))).all()
-    return sum(1 for p in rows if as_utc(p.created_at) < edge and provider.reusable(p.status))
+    return sum(1 for p in rows if as_utc(p.created_at) < edge
+               and (provider := gateway.for_payment(p)) is not None and provider.reusable(p.status))
 
 
 def print_failures(db: Session, hours: int = 1) -> int:

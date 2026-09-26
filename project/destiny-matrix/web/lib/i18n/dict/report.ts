@@ -235,8 +235,4 @@ export const reportSheet = {
     ru: (roles: string) => `Позиции ${roles}`,
     en: (roles: string) => `Positions ${roles}`,
   } satisfies PhraseFn<[string]>,
-  printedBy: {
-    ru: "Arcana Sense · arcana-sense.ru",
-    en: "Arcana Sense · arcana-sense.com",
-  } satisfies Phrase,
 };

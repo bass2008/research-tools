@@ -1,26 +1,30 @@
 // Колода лежит готовыми webp 520×780 в public/img/arcana — оптимизатор next/image не нужен,
 // иначе standalone потребовал бы sharp и рантайм-обработку на той же виртуалке.
-import { D, L } from "@/lib/i18n";
-import { arcanumTitle } from "@/lib/arcana";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
 
 const WIDTH = { big: 260, grid: 132, mini: 56 } as const;
-// кадр обрезается снизу (см. .arccard в globals.css): подпись на самом изображении —
-// генеративный мусор, а имя аркана печатается рядом текстом
-const RATIO = 700 / 520;
 
 export type CardSize = keyof typeof WIDTH;
 
-export function arcanumImage(n: number, half = false): string {
-  return `/img/arcana/${half ? "half/" : ""}gen-${String(n).padStart(2, "0")}.webp`;
-}
+export const forLocale = localized((L: Locale) => {
+  const { arcanumTitle } = localizedArcana(L);
 
-export default function ArcanumCard({
-  n,
-  size = "grid",
-  eager = false,
-  decorative = false,
-  half = false,
-}: {
+  // кадр обрезается снизу (см. .arccard в globals.css): подпись на самом изображении —
+  // генеративный мусор, а имя аркана печатается рядом текстом
+  const RATIO = 700 / 520;
+
+  function arcanumImage(n: number, half = false): string {
+    return `/img/arcana/${half ? "half/" : ""}gen-${String(n).padStart(2, "0")}.webp`;
+  }
+  return { arcanumTitle, WIDTH, RATIO, arcanumImage };
+});
+
+export const { arcanumImage } = forLocale(defaultLocale);
+
+export default function ArcanumCard({ locale: requestedLocale, ...localeProps }: ({
   n: number;
   size?: CardSize;
   /** печать в PDF: карта вкладывается в файл целиком, поэтому берём половинный файл */
@@ -29,7 +33,17 @@ export default function ArcanumCard({
   eager?: boolean;
   /** карта дублирует соседний текст — тогда скринридеру она не нужна */
   decorative?: boolean;
-}) {
+}) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    n,
+    size = "grid",
+    eager = false,
+    decorative = false,
+    half = false,
+  } = localeProps;
+  const { arcanumTitle, WIDTH, RATIO, arcanumImage } = forLocale(L);
+
   const width = WIDTH[size];
   return (
     <img

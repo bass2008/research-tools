@@ -1,13 +1,14 @@
 "use client";
 
+import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
+
 // Что происходит сейчас: машина, люди на сайте, печать, платежи, ошибки. Живёт рядом с облачным
 // мониторингом намеренно — когда до консоли облака не добраться, это единственное место, где
 // видно состояние.
 import { useEffect, useState } from "react";
 
-import { ApiError, api, type ErrorRow, type Pulse } from "@/lib/api";
+import { ApiError, type ErrorRow, type Pulse } from "@/lib/api";
 import { level, troubles, worst } from "@/lib/pulse";
-import { counted } from "@/lib/plural";
 
 const EVERY = 10_000;
 
@@ -26,15 +27,11 @@ function Bar({ label, percent, note }: { label: string; percent: number; note: s
   );
 }
 
-function time(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
 export default function AdminPulse() {
+  const { L, t, api, time, counted } = useAdminLocale();
   const [pulse, setPulse] = useState<Pulse | null>(null);
   const [errors, setErrors] = useState<ErrorRow[]>([]);
-  const [failed, setFailed] = useState<string | null>(null);
+  const [failed, setFailed] = useAdminMessage();
   const [open, setOpen] = useState<number | null>(null);
 
   useEffect(() => {
@@ -47,7 +44,7 @@ export default function AdminPulse() {
           setFailed(null);
           setPulse(p);
         })
-        .catch((err) => alive && setFailed(err instanceof ApiError ? err.message : "нет связи"));
+        .catch((err) => alive && setFailed(err instanceof ApiError ? err : "нет связи"));
       void api.admin
         .errors()
         .then((e) => alive && setErrors(e.items))
@@ -61,25 +58,25 @@ export default function AdminPulse() {
       alive = false;
       clearInterval(timer);
     };
-  }, []);
+  }, [api]);
 
-  if (failed && !pulse) return <div className="panel"><h3>Состояние</h3><p className="dim">{failed}</p></div>;
-  if (!pulse) return <div className="panel"><h3>Состояние</h3><p className="dim">Смотрим…</p></div>;
+  if (failed && !pulse) return <div className="panel"><h3>{t("Состояние")}</h3><p className="dim">{failed}</p></div>;
+  if (!pulse) return <div className="panel"><h3>{t("Состояние")}</h3><p className="dim">{t("Смотрим…")}</p></div>;
 
-  const bad = troubles(pulse);
+  const bad = troubles(pulse, L);
 
   return (
     <div className="panel" data-testid="admin-pulse">
       <h3>
-        Состояние <span className={`pdot lv-${worst(pulse)}`} aria-hidden="true" />
-        <span className="small dim"> обновлено {time(pulse.at)}</span>
+        {t("Состояние ")}<span className={`pdot lv-${worst(pulse)}`} aria-hidden="true" />
+        <span className="small dim"> {t(" обновлено ")}{time(pulse.at)}</span>
       </h3>
 
       {/* опрос идёт каждые 10 с; когда он перестаёт отвечать, панель раньше молча показывала
           старые числа — по ней нельзя было понять, что сервер уже не отвечает */}
       {failed ? (
         <p className="err" role="status" data-testid="pulse-stale">
-          Сервер не отвечает ({failed}): числа ниже — с последнего удачного опроса в {time(pulse.at)}.
+          {t("Сервер не отвечает (")}{failed}{t("): числа ниже — с последнего удачного опроса в ")}{time(pulse.at)}.
         </p>
       ) : null}
 
@@ -90,39 +87,38 @@ export default function AdminPulse() {
           ))}
         </ul>
       ) : (
-        <p className="small dim" data-testid="pulse-calm">Всё в пределах порогов.</p>
+        <p className="small dim" data-testid="pulse-calm">{t("Всё в пределах порогов.")}</p>
       )}
 
       <div className="pgrid">
         {/* Все четыре плитки говорят об одном: сколько занято. Раньше у дисков процент был про
             занятое, а подпись — про свободное, и цифры читались как «остаток». */}
-        <Bar label="Память" percent={pulse.memory.percent}
-             note={`занято ${pulse.memory.used_mb} из ${pulse.memory.total_mb} МБ`} />
-        <Bar label="Подкачка" percent={pulse.memory.swap_percent}
+        <Bar label={t("Память")} percent={pulse.memory.percent}
+             note={t("занято {0} из {1} МБ", pulse.memory.used_mb, pulse.memory.total_mb)} />
+        <Bar label={t("Подкачка")} percent={pulse.memory.swap_percent}
              note={pulse.memory.swap_total_mb
-               ? `занято ${pulse.memory.swap_used_mb} из ${pulse.memory.swap_total_mb} МБ`
-               : "файла подкачки нет"} />
-        <Bar label="Процессор" percent={pulse.cpu.percent}
-             note={`в среднем за ${Math.round(pulse.cpu.window_seconds)} с · load ${pulse.cpu.load1} на ${pulse.cpu.cores} ядра`} />
-        <Bar label="Диск" percent={pulse.disk.percent}
-             note={`занято ${pulse.disk.used_gb} из ${pulse.disk.total_gb} ГБ · свободно ${pulse.disk.free_gb} ГБ`} />
-        <Bar label="Том с базой" percent={pulse.data_disk.percent}
-             note={`занято ${pulse.data_disk.used_gb} из ${pulse.data_disk.total_gb} ГБ · ${pulse.data_disk.path}`} />
+               ? t("занято {0} из {1} МБ", pulse.memory.swap_used_mb, pulse.memory.swap_total_mb)
+               : t("файла подкачки нет")} />
+        <Bar label={t("Процессор")} percent={pulse.cpu.percent}
+             note={t("в среднем за {0} с · load {1} на {2} ядра", Math.round(pulse.cpu.window_seconds), pulse.cpu.load1, pulse.cpu.cores)} />
+        <Bar label={t("Диск")} percent={pulse.disk.percent}
+             note={t("занято {0} из {1} ГБ · свободно {2} ГБ", pulse.disk.used_gb, pulse.disk.total_gb, pulse.disk.free_gb)} />
+        <Bar label={t("Том с базой")} percent={pulse.data_disk.percent}
+             note={t("занято {0} из {1} ГБ · {2}", pulse.data_disk.used_gb, pulse.data_disk.total_gb, pulse.data_disk.path)} />
       </div>
 
       {pulse.contours.length ? (
         <div className="pcontours" data-testid="pulse-contours">
           {pulse.contours.map((group) => (
-            <div className="pcontour" key={group.title}>
+            <div className="pcontour" key={t(group.title)}>
               <div className="pcap">
-                <span>{group.title}</span>
-                <b>{group.percent}% · {group.memory_mb} МБ</b>
+                <span>{t(group.title)}</span>
+                <b>{group.percent}% · {group.memory_mb} {t(" МБ")}</b>
               </div>
               <ul className="small dim">
                 {group.items.map((row) => (
                   <li key={row.name}>
-                    {row.name.replace(/^arcana-|-1$/g, "")} — {row.percent}% · {row.memory_mb} МБ
-                  </li>
+                    {row.name.replace(/^arcana-|-1$/g, "")} — {row.percent}% · {row.memory_mb} {t(" МБ")}</li>
                 ))}
               </ul>
             </div>
@@ -133,18 +129,17 @@ export default function AdminPulse() {
       <div className="pnums">
         <span data-testid="pulse-online">
           {counted(pulse.online.people, "человек", "человека", "человек")} ·{" "}
-          {counted(pulse.online.tabs, "вкладка", "вкладки", "вкладок")} сейчас
-        </span>
-        <span><b>{pulse.online.robots}</b> роботов</span>
-        <span><b>{pulse.print.active}</b> печатается, {pulse.print.waiting} в очереди</span>
-        <span><b>{pulse.payments.stuck}</b> платежей застряло</span>
-        <span><b>{pulse.errors.hour}</b> ошибок за час</span>
-        <span className="dim">сборка {pulse.version}</span>
+          {counted(pulse.online.tabs, "вкладка", "вкладки", "вкладок")} {t(" сейчас")}</span>
+        <span><b>{pulse.online.robots}</b> {t(" роботов")}</span>
+        <span><b>{pulse.print.active}</b> {t(" печатается, ")}{pulse.print.waiting} {t(" в очереди")}</span>
+        <span><b>{pulse.payments.stuck}</b> {t(" платежей застряло")}</span>
+        <span><b>{pulse.errors.hour}</b> {t(" ошибок за час")}</span>
+        <span className="dim">{t("сборка ")}{pulse.version}</span>
       </div>
 
       {pulse.online.pages.length ? (
         <p className="small dim">
-          Смотрят:{" "}
+          {t("Смотрят:")}{" "}
           {pulse.online.pages
             .map(
               (p) =>
@@ -157,7 +152,7 @@ export default function AdminPulse() {
 
       {pulse.crawlers && pulse.crawlers.length ? (
         <p className="small dim" data-testid="pulse-crawlers">
-          Роботы за час: {pulse.crawlers.map((c) => `${c.bot} — ${c.requests}`).join(" · ")}
+          {t("Роботы за час: ")}{pulse.crawlers.map((c) => `${c.bot} — ${c.requests}`).join(" · ")}
         </p>
       ) : null}
 
@@ -165,9 +160,9 @@ export default function AdminPulse() {
         <table className="postab" data-testid="pulse-errors">
           <thead>
             <tr>
-              <th>Когда</th>
-              <th>Что</th>
-              <th>Код</th>
+              <th>{t("Когда")}</th>
+              <th>{t("Что")}</th>
+              <th>{t("Код")}</th>
             </tr>
           </thead>
           <tbody>

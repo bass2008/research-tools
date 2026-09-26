@@ -1,27 +1,39 @@
-import { D, L } from "@/lib/i18n";
-import { MAP_CENTER, MAP_POINTS, mapXY, type MapPoint } from "@/lib/matrixMap";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedMatrixMap, type MapPoint } from "@/lib/matrixMap";
 
-// Схема карты с подсвеченной точкой. Отвечает на запрос «где находится визитка в матрице судьбы»
-// буквально — картинкой, а не фразой «внешняя точка A». Чисел здесь нет: они у каждого свои и
-// появляются после расчёта, а статья объясняет место, а не значение.
+export const forLocale = localized((L: Locale) => {
+  const { MAP_CENTER, MAP_POINTS, mapXY } = localizedMatrixMap(L);
 
-// Размеры считаются в координатах viewBox 620, а на экране картинка ужимается до 520 px —
-// то есть каждый кегль делится примерно на 1,2. Меньше 13 в этой системе на телефоне
-// нечитаемо, поэтому подписи крупнее, чем кажется по числам.
-const SIZE = { big: 23, mid: 19, small: 15 } as const;
-const FONT = { big: 18, mid: 16, small: 13 } as const;
+  // Схема карты с подсвеченной точкой. Отвечает на запрос «где находится визитка в матрице судьбы»
+  // буквально — картинкой, а не фразой «внешняя точка A». Чисел здесь нет: они у каждого свои и
+  // появляются после расчёта, а статья объясняет место, а не значение.
 
-function fmt(n: number): string {
-  return n.toFixed(1);
-}
+  // Размеры считаются в координатах viewBox 620, а на экране картинка ужимается до 520 px —
+  // то есть каждый кегль делится примерно на 1,2. Меньше 13 в этой системе на телефоне
+  // нечитаемо, поэтому подписи крупнее, чем кажется по числам.
+  const SIZE = { big: 23, mid: 19, small: 15 } as const;
 
-export default function PositionMap({
-  highlight,
-  caption,
-}: {
+  const FONT = { big: 18, mid: 16, small: 13 } as const;
+
+  function fmt(n: number): string {
+    return n.toFixed(1);
+  }
+  return { MAP_CENTER, MAP_POINTS, mapXY, SIZE, FONT, fmt };
+});
+
+export default function PositionMap({ locale: requestedLocale, ...localeProps }: ({
   highlight: MapPoint[];
   caption: string;
-}) {
+}) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    highlight,
+    caption,
+  } = localeProps;
+  const { MAP_CENTER, MAP_POINTS, mapXY, SIZE, FONT, fmt } = forLocale(L);
+
   if (!highlight.length) return null;
   const marked = new Set(highlight.map((p) => p.key));
   const names = highlight.map((p) => `${p.label} · ${p.symbol}`).join(", ");

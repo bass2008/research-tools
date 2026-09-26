@@ -4,7 +4,7 @@ from __future__ import annotations
 import uuid
 
 from ..config import settings
-from .base import Outcome, Started, Update
+from .base import PaymentUrls, Outcome, Started, Update
 
 
 class Mock:
@@ -13,7 +13,7 @@ class Mock:
     def enabled(self) -> bool:
         return settings.mock_payments
 
-    def start(self, order_id: str, amount: int, title: str, email: str | None) -> Started:
+    def start(self, order_id: str, amount: int, title: str, email: str | None, *, urls: PaymentUrls) -> Started:
         return Started(external_id=f"mock-{uuid.uuid4().hex[:24]}", pay_url=None,
                        status="CONFIRMED", outcome=Outcome.PAID)
 

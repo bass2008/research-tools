@@ -304,11 +304,17 @@ def test_corpus_answers_conditional_request(path):
     full = requests.get(f"{BASE}{path}", timeout=30)
     assert full.status_code == 200, (path, full.status_code)
     tag = full.headers.get("ETag")
-    assert tag, f"{path}: нет ETag — обход платит за то, что уже видел"
+    if not tag:
+        # Runtime Host/locale rendering is deliberately not stored in a shared cache.
+        assert full.headers.get("x-nextjs-prerender") != "1"
+        assert "no-store" in full.headers.get("Cache-Control", "")
 
-    same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag})
-    assert same.status_code == 304, (path, same.status_code)
-    assert not same.content, f"{path}: 304 пришёл с телом {len(same.content)} байт"
+    same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag or '"stale"'})
+    assert same.status_code == (304 if tag else 200), (path, same.status_code)
+    if tag:
+        assert not same.content, f"{path}: 304 пришёл с телом {len(same.content)} байт"
+    else:
+        assert "no-store" in same.headers.get("Cache-Control", "")
 
     stale = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": '"stale"'})
     assert stale.status_code == 200, f"{path}: чужой отпечаток получил 304 — правка спрятана"
@@ -319,13 +325,16 @@ def test_date_does_not_cancel_the_fingerprint(path):
     """RFC 9110 §13.1.3: при `If-None-Match` дату надо игнорировать. Next её не игнорирует и
     теряет совпавший отпечаток — вместо `304` уходит полное тело. Оба заголовка сразу шлёт
     всякий, у кого в кэше лежит ответ с датой; это и есть главный случай механизма."""
-    tag = requests.get(f"{BASE}{path}", timeout=30).headers["ETag"]
+    full = requests.get(f"{BASE}{path}", timeout=30)
+    tag = full.headers.get("ETag")
+    if not tag:
+        assert "no-store" in full.headers.get("Cache-Control", "")
     both = requests.get(
         f"{BASE}{path}",
         timeout=30,
-        headers={"If-None-Match": tag, "If-Modified-Since": "Mon, 01 Sep 2026 00:00:00 GMT"},
+        headers={"If-None-Match": tag or '"stale"', "If-Modified-Since": "Mon, 01 Sep 2026 00:00:00 GMT"},
     )
-    assert both.status_code == 304, (path, both.status_code)
+    assert both.status_code == (304 if tag else 200), (path, both.status_code)
 
 
 def test_missing_page_never_answers_not_modified():
@@ -348,10 +357,13 @@ def test_calculation_results_get_their_own_validator():
         r = requests.get(f"{BASE}{path}", timeout=30)
         assert r.status_code == 200, (path, r.status_code)
         tag = r.headers.get("ETag")
-        assert tag, f"{path}: нет ETag — возврат к своей карте стоит полной перекачки"
-        tags[path] = tag
-        same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag})
-        assert same.status_code == 304, (path, same.status_code)
+        if not tag:
+            assert r.headers.get("x-nextjs-prerender") != "1"
+            assert "no-store" in r.headers.get("Cache-Control", "")
+        # Dynamic responses must remain distinct as well, without cache reuse.
+        tags[path] = tag or re.search(r"<h1[^>]*>(.*?)</h1>", r.text, re.S).group(1)
+        same = requests.get(f"{BASE}{path}", timeout=30, headers={"If-None-Match": tag or '"stale"'})
+        assert same.status_code == (304 if tag else 200), (path, same.status_code)
     assert len(set(tags.values())) == len(tags), f"разные разборы делят один отпечаток: {tags}"
 
 

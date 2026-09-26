@@ -1,15 +1,18 @@
 "use client";
 
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { forLocale as apiForLocale } from "@/lib/api";
+import { SITE_LANG, type Lang } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+
 // Единственный источник признака доступа — ответ сервера (`GET /api/auth/me` через BFF).
 // localStorage держит только подсказку «права скорее всего есть», чтобы не мигать замками
 // в ожидании ответа; открыть разделы она не может.
-import { useEffect, useState } from "react";
-
-import { D, L } from "@/lib/i18n";
-
-import { ApiError, api } from "@/lib/api";
+import { ApiError } from "@/lib/api";
+import { D } from "@/lib/i18n";
 import { needsReload, ownerChanged, sessionAppeared } from "@/lib/session";
 import { cachePaid, cachedPaid, clearBirth, forgetSession } from "@/lib/storage";
+import { useEffect, useState } from "react";
 
 export type SessionStatus = "loading" | "guest" | "user" | "offline";
 
@@ -36,6 +39,7 @@ export interface Session {
   /** подсказка из кеша браузера: доступ не даёт, только объясняет ожидание */
   cached: boolean;
   error: string | null;
+  errorMessages?: Record<Lang, string>;
 }
 
 const EMPTY: Session = {
@@ -64,7 +68,8 @@ function publish(next: Session): Session {
   return next;
 }
 
-export function refreshSession(): Promise<Session> {
+export function refreshSession(L: Lang = SITE_LANG): Promise<Session> {
+  const { api } = apiForLocale(L);
   if (inflight) return inflight;
   publish({ ...snapshot, status: "loading", cached: cachedPaid(), error: null });
   const before = snapshot.email;
@@ -106,6 +111,9 @@ export function refreshSession(): Promise<Session> {
         status: "offline",
         cached: cachedPaid(),
         error: err instanceof ApiError ? err.message : D.pay.checkFailed[L],
+        errorMessages: err instanceof ApiError
+          ? { ru: err.messageFor("ru"), en: err.messageFor("en") }
+          : D.pay.checkFailed,
       });
     })
     .finally(() => {
@@ -192,7 +200,8 @@ function watchTabs(): void {
 
 /** Выход. Возвращает false, когда сервер не подтвердил: кука httpOnly жива, и молча
  *  показывать «вы вышли» нельзя — на общем компьютере это чужой доступ. */
-export async function signOutSession(): Promise<boolean> {
+export async function signOutSession(L: Lang = SITE_LANG): Promise<boolean> {
+  const { api } = apiForLocale(L);
   try {
     await api.logout();
   } catch {
@@ -212,6 +221,8 @@ export function useSession(): Session & {
   refresh: () => Promise<Session>;
   signOut: () => Promise<boolean>;
 } {
+  const locale = useLocale();
+  const { refreshSession, signOutSession } = forLocale(locale);
   const [state, setState] = useState<Session>(snapshot);
 
   useEffect(() => {
@@ -224,5 +235,12 @@ export function useSession(): Session & {
     };
   }, []);
 
-  return { ...state, refresh: refreshSession, signOut: signOutSession };
+  return { ...state, error: state.errorMessages?.[locale] ?? state.error,
+    refresh: refreshSession, signOut: signOutSession };
 }
+
+// Locale changes affect messages, never the shared authentication state.
+export const forLocale = localized((locale: Lang) => ({
+  refreshSession: () => refreshSession(locale),
+  signOutSession: () => signOutSession(locale),
+}));

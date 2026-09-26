@@ -1,4 +1,7 @@
-import policyJson from "@/corpus/text-policy.json";
+import policyJsonEn from "@/content/en/text-policy.json";
+import policyJsonRu from "@/content/ru/text-policy.json";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
+import { localized } from "./i18n/localized";
 
 interface PolicyGroup {
   id: string;
@@ -25,49 +28,60 @@ export interface TextPolicyMatch {
   matched: string;
 }
 
-const policy = policyJson as TextPolicyData;
-const WORD = "а-яёa-z0-9";
-const LETTERS = "а-яёa-z";
+/** A locale-bound view; safe to use alongside other languages. */
+export const forLocale = localized((L: Locale) => {
+  const policyJson = ({ ru: policyJsonRu, en: policyJsonEn } as const)[L];
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+  const policy = policyJson as TextPolicyData;
 
-if (!Array.isArray(policy.blocked) || !Array.isArray(policy.cases)) {
-  throw new Error("text-policy.json: некорректная структура");
-}
+  const WORD = "а-яёa-z0-9";
 
-const rules = policy.blocked.filter((group) => group.scopes?.includes("content")).flatMap((group) => {
-  if (!group.id || !Array.isArray(group.prefixes) || !Array.isArray(group.phrases)
-    || group.prefixes.length + group.phrases.length === 0) {
-    throw new Error(`text-policy.json: неполная группа ${group.id || "без id"}`);
+  const LETTERS = "а-яёa-z";
+
+  function escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
-  return [
-    ...group.prefixes.map((prefix) => ({
-      category: group.id,
-      rule: prefix,
-      pattern: new RegExp(`(^|[^${WORD}])${escapeRegExp(prefix)}[${LETTERS}]*`, "iu"),
-    })),
-    ...group.phrases.map((phrase) => ({
-      category: group.id,
-      rule: phrase,
-      pattern: new RegExp(escapeRegExp(phrase), "iu"),
-    })),
-  ];
+
+  if (!Array.isArray(policy.blocked) || !Array.isArray(policy.cases)) {
+    throw new Error("text-policy.json: некорректная структура");
+  }
+
+  const rules = policy.blocked.filter((group) => group.scopes?.includes("content")).flatMap((group) => {
+    if (!group.id || !Array.isArray(group.prefixes) || !Array.isArray(group.phrases)
+      || group.prefixes.length + group.phrases.length === 0) {
+      throw new Error(`text-policy.json: неполная группа ${group.id || "без id"}`);
+    }
+    return [
+      ...group.prefixes.map((prefix) => ({
+        category: group.id,
+        rule: prefix,
+        pattern: new RegExp(`(^|[^${WORD}])${escapeRegExp(prefix)}[${LETTERS}]*`, "iu"),
+      })),
+      ...group.phrases.map((phrase) => ({
+        category: group.id,
+        rule: phrase,
+        pattern: new RegExp(escapeRegExp(phrase), "iu"),
+      })),
+    ];
+  });
+
+  const TEXT_POLICY_CASES: TextPolicyCase[] = policy.cases;
+
+  function blockedTextMatch(text: string): TextPolicyMatch | null {
+    for (const rule of rules) {
+      const found = rule.pattern.exec(text);
+      if (found) {
+        return { category: rule.category, rule: rule.rule, matched: found[0].trim() };
+      }
+    }
+    return null;
+  }
+
+  function isBlockedText(text: string): boolean {
+    return blockedTextMatch(text) !== null;
+  }
+  return { TEXT_POLICY_CASES, blockedTextMatch, isBlockedText };
 });
 
-export const TEXT_POLICY_CASES: TextPolicyCase[] = policy.cases;
-
-export function blockedTextMatch(text: string): TextPolicyMatch | null {
-  for (const rule of rules) {
-    const found = rule.pattern.exec(text);
-    if (found) {
-      return { category: rule.category, rule: rule.rule, matched: found[0].trim() };
-    }
-  }
-  return null;
-}
-
-export function isBlockedText(text: string): boolean {
-  return blockedTextMatch(text) !== null;
-}
+// Compatibility for callers that explicitly use the deployment default.
+export const { TEXT_POLICY_CASES, blockedTextMatch, isBlockedText } = forLocale(defaultLocale);

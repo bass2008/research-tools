@@ -1,7 +1,9 @@
+import EncShell from "@/components/enc/EncShell";
+import { requestLocale } from "@/lib/i18n/request";
 import type { ReactNode } from "react";
 
-import EncShell from "@/components/enc/EncShell";
+export default async function EncyclopediaLayout({ children }: { children: ReactNode }) {
+  const L = await requestLocale();
 
-export default function EncyclopediaLayout({ children }: { children: ReactNode }) {
-  return <EncShell>{children}</EncShell>;
+  return <EncShell locale={L}>{children}</EncShell>;
 }

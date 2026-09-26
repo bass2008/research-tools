@@ -46,7 +46,9 @@ else
     "$LOGS/tests-npm-audit.log" npm --prefix web audit
 fi
 run_logged web "unit, golden и полный TypeScript parity" \
-  "$LOGS/tests-web.log" npm --prefix web test -- --run
+  "$LOGS/tests-web.log" env NEXT_PUBLIC_SITE_LANG=ru npm --prefix web test -- --run
+run_logged web-en "English unit contracts" \
+  "$LOGS/tests-web-en.log" env NEXT_PUBLIC_SITE_LANG=en npm --prefix web test -- --run
 run_logged types "TypeScript typecheck" \
   "$LOGS/tests-types.log" npm --prefix web run typecheck
 run_logged build "production-сборка Next" \
@@ -63,22 +65,30 @@ for env in ~/.config/arcana/reports.env ~/.config/arcana/smtp.env; do
   if [ -f "$env" ]; then set -a; . "$env"; set +a; fi
 done
 export PAYMENT_PROVIDER=mock MAIL_TO_LOG=1 UNIFIED_RELEASE_ARTIFACT_DIR="$ARTIFACTS"
-# Язык развёртки обязателен и умолчания не имеет (compose падает без него). Гейт гоняет
-# русский контур: английский проверяется своим прогоном (`e2e/test_locale_en.py`).
+# Один стенд с двумя профилями: полный RU E2E и отдельные EN/переключения ниже.
 export SITE_LANG=ru ALL_FREE_WITHOUT_PAYMENT=0
 docker network inspect arcana-print >/dev/null 2>&1 || docker network create arcana-print >/dev/null
-if (cd compose && docker compose up -d --build --wait) >"$LOGS/tests-stand.log" 2>&1; then
-  docker compose -f compose/docker-compose.yml ps
+if (cd compose && docker compose -f docker-compose.localized.yml up -d --build --wait) >"$LOGS/tests-stand.log" 2>&1; then
+  docker compose -f compose/docker-compose.localized.yml ps
 else
   failed+=("stand")
   tail -30 "$LOGS/tests-stand.log"
 fi
 
 if [ ${#failed[@]} -eq 0 ]; then
+  # The legacy UI scenarios start in Russian; runtime-switch scenarios start on .com.
+  localization=(e2e/test_locale_*.py e2e/test_runtime_localization.py e2e/test_domain_localization.py)
+  ignore=()
+  for file in "${localization[@]}"; do ignore+=(--ignore "$file"); done
+  export E2E_API_CONTAINER=arcana-localized-api-1
   run_logged e2e "браузер, mock-payment, callback, refund и PDF" \
-    "$LOGS/tests-e2e.log" "$PY" -m pytest e2e -q
+    "$LOGS/tests-e2e.log" env E2E_URL=http://localhost:3000 "$PY" -m pytest e2e -q "${ignore[@]}"
+  run_logged localization "переключение языка и изоляция доменов" \
+    "$LOGS/tests-localization.log" env E2E_URL=http://127.0.0.1:3000 "$PY" -m pytest "${localization[@]}" -q
   run_logged check "приёмка собранного фронта" \
-    "$LOGS/tests-check.log" npm --prefix web run check
+    "$LOGS/tests-check.log" env API_INTERNAL_URL=http://127.0.0.1:8010 npm --prefix web run check
+  run_logged check-en "приёмка английского профиля" \
+    "$LOGS/tests-check-en.log" env API_INTERNAL_URL=http://127.0.0.1:8010 CHECK_LOCALE=en npm --prefix web run check
 fi
 
 if [ ${#failed[@]} -eq 0 ]; then

@@ -1,36 +1,29 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import ArcanumCard from "@/components/matrix/ArcanumCard";
+import ChakraTable from "@/components/matrix/ChakraTable";
+import Octagram from "@/components/matrix/Octagram";
+import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
+import Price from "@/components/pay/Price";
+import Crumbs from "@/components/ui/Crumbs";
+import JsonLd from "@/components/ui/JsonLd";
+import { ALL_FREE } from "@/lib/access";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedContent } from "@/lib/content";
+import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import type { Matrix } from "@/lib/matrix";
+import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSections } from "@/lib/sections";
+import { forLocale as localizedSeo } from "@/lib/seo";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import ArcanumCard from "@/components/matrix/ArcanumCard";
-import ChakraTable from "@/components/matrix/ChakraTable";
-import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
-import Crumbs from "@/components/ui/Crumbs";
-import JsonLd from "@/components/ui/JsonLd";
-import Price from "@/components/pay/Price";
-import Octagram from "@/components/matrix/Octagram";
-import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
-import { arcanumShort, arcanumTitle } from "@/lib/arcana";
-import { matrixItem, matrixSlugs } from "@/lib/content";
-import { POSITIONS, arcanumHref, chakraHref, positionHref } from "@/lib/encyclopedia";
-import type { Matrix } from "@/lib/matrix";
-import { build, withPositionArticles } from "@/lib/sections";
-import { POINT_KEYS } from "@/lib/publicSpec";
-import { pageMeta } from "@/lib/site";
-import { articleLd } from "@/lib/schema";
-import { NOT_FOUND_META } from "@/lib/seo";
-
-import {
-  MONTHS_GEN,
-  MONTHS_NOM,
-  birthDates,
-  matrixHref,
-  parseSlug,
-  sameDayMonth,
-  sameDayYear,
-  sameMonthYear,
-} from "../matrices";
+import { forLocale as localizedMatrices } from "../matrices";
 
 type Params = { slug: string };
 
@@ -38,54 +31,73 @@ type Params = { slug: string };
 // динамическим рендером — у того пустое тело и заголовок главной.
 export const dynamicParams = false;
 
+const forLocale = localized((L: Locale, site) => {
+  const { arcanumShort, arcanumTitle } = localizedArcana(L);
+  const { matrixItem, matrixSlugs } = localizedContent(L);
+  const { POSITIONS, arcanumHref, chakraHref, positionHref } = localizedEncyclopedia(L);
+  const { build, withPositionArticles } = localizedSections(L);
+  const { POINT_KEYS } = localizedPublicSpec(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { articleLd } = localizedSchema(L, site);
+  const { NOT_FOUND_META } = localizedSeo(L, site);
+  const { MONTHS_GEN, MONTHS_NOM, birthDates, matrixHref, parseSlug, sameDayMonth, sameDayYear, sameMonthYear } = localizedMatrices(L);
+
+  // в феврале 28 дней, в апреле, июне, сентябре и ноябре — 30: иначе пояснение обещало «30 февраля»
+  const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  const DATES_SHOWN = 12;
+
+  // Только точки, которые лежат в расчёте отдельным числом: таблица читает матрицу по ключу.
+  // Партнёрская точка R1 живёт внутри линии отношений, её строка тут появиться не может —
+  // зато сама линия отношений печатается ниже целиком.
+  const SCALAR_POINTS = new Set<string>(POINT_KEYS);
+
+  const POINT_POSITIONS = POSITIONS.filter((p) => p.kind === "point" && SCALAR_POINTS.has(p.key));
+
+  // Линии карты: третий аркан в каждой — итог, поэтому он выделен золотым.
+  const LINES: Array<[string, string, (m: Matrix) => number[]]> = [
+    [D.matrixPages.lineMoney[L], D.matrixPages.lineMoneyHint[L], (m) => m.money],
+    [D.matrixPages.lineRelations[L], D.matrixPages.lineRelationsHint[L], (m) => m.love],
+    [D.matrixPages.lineTalents[L], D.matrixPages.lineTalentsHint[L], (m) => m.talent],
+    [D.matrixPages.lineSkyGround[L], D.matrixPages.lineSkyGroundHint[L],
+    (m) => [m.sky[2], m.ground[2], m.harmony]],
+    [D.matrixPages.lineFamily[L], D.matrixPages.lineFamilyHint[L],
+    (m) => [m.social_male[2], m.social_female[2], m.planetary]],
+    [D.matrixPages.lineTail[L], D.matrixPages.lineTailHint[L], (m) => m.karmic_tail],
+  ];
+
+  function seo(slug: string) {
+    const item = matrixItem(slug);
+    const key = parseSlug(slug);
+    if (!item || !key) return null;
+    const m = item.matrix;
+    const dates = birthDates(key);
+    // Заголовок короткий намеренно: layout дописывает « — Матрица судьбы», а выдача режет
+    // всё после ~70 знаков. Остальные арканы уходят в description.
+    const title = D.matrixPages.pageTitle[L](slug, m.center, arcanumTitle(m.center));
+    const description = D.matrixPages.pageDescription[L](
+      slug, key.day, key.month, key.year,
+      `${m.center} ${arcanumTitle(m.center)}`,
+      `${m.mission} ${arcanumTitle(m.mission)}`,
+      m.money[0], m.love[0],
+      D.matrixPages.datesCount[L](dates.length),
+    );
+    return { item, key, m, dates, title, description };
+  }
+  return { arcanumShort, arcanumTitle, matrixItem, matrixSlugs, POSITIONS, arcanumHref, chakraHref, positionHref, build, withPositionArticles, POINT_KEYS, pageMeta, articleLd, NOT_FOUND_META, MONTHS_GEN, MONTHS_NOM, birthDates, matrixHref, parseSlug, sameDayMonth, sameDayYear, sameMonthYear, DAYS_IN_MONTH, DATES_SHOWN, SCALAR_POINTS, POINT_POSITIONS, LINES, seo };
+});
+
 export function generateStaticParams(): Params[] {
+  const L = defaultLocale;
+  const { matrixSlugs } = forLocale(L);
+
   return matrixSlugs().map((slug) => ({ slug }));
 }
 
-// в феврале 28 дней, в апреле, июне, сентябре и ноябре — 30: иначе пояснение обещало «30 февраля»
-const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-const DATES_SHOWN = 12;
-
-
-// Только точки, которые лежат в расчёте отдельным числом: таблица читает матрицу по ключу.
-// Партнёрская точка R1 живёт внутри линии отношений, её строка тут появиться не может —
-// зато сама линия отношений печатается ниже целиком.
-const SCALAR_POINTS = new Set<string>(POINT_KEYS);
-const POINT_POSITIONS = POSITIONS.filter((p) => p.kind === "point" && SCALAR_POINTS.has(p.key));
-
-// Линии карты: третий аркан в каждой — итог, поэтому он выделен золотым.
-const LINES: Array<[string, string, (m: Matrix) => number[]]> = [
-  [D.matrixPages.lineMoney[L], D.matrixPages.lineMoneyHint[L], (m) => m.money],
-  [D.matrixPages.lineRelations[L], D.matrixPages.lineRelationsHint[L], (m) => m.love],
-  [D.matrixPages.lineTalents[L], D.matrixPages.lineTalentsHint[L], (m) => m.talent],
-  [D.matrixPages.lineSkyGround[L], D.matrixPages.lineSkyGroundHint[L],
-   (m) => [m.sky[2], m.ground[2], m.harmony]],
-  [D.matrixPages.lineFamily[L], D.matrixPages.lineFamilyHint[L],
-   (m) => [m.social_male[2], m.social_female[2], m.planetary]],
-  [D.matrixPages.lineTail[L], D.matrixPages.lineTailHint[L], (m) => m.karmic_tail],
-];
-
-function seo(slug: string) {
-  const item = matrixItem(slug);
-  const key = parseSlug(slug);
-  if (!item || !key) return null;
-  const m = item.matrix;
-  const dates = birthDates(key);
-  // Заголовок короткий намеренно: layout дописывает « — Матрица судьбы», а выдача режет
-  // всё после ~70 знаков. Остальные арканы уходят в description.
-  const title = D.matrixPages.pageTitle[L](slug, m.center, arcanumTitle(m.center));
-  const description = D.matrixPages.pageDescription[L](
-    slug, key.day, key.month, key.year,
-    `${m.center} ${arcanumTitle(m.center)}`,
-    `${m.mission} ${arcanumTitle(m.mission)}`,
-    m.money[0], m.love[0],
-    D.matrixPages.datesCount[L](dates.length),
-  );
-  return { item, key, m, dates, title, description };
-}
-
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const L = await publicLocale();
+  const { pageMeta, NOT_FOUND_META, matrixHref, seo } = forLocale(L, await requestSite());
+
   const data = seo((await params).slug);
   // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
   // несуществующая страница выглядела как главная.
@@ -104,6 +116,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function MatrixPage({ params }: { params: Promise<Params> }) {
+  const L = await requestLocale();
+  const { arcanumShort, arcanumTitle, arcanumHref, positionHref, build, withPositionArticles, articleLd, MONTHS_GEN, MONTHS_NOM, matrixHref, sameDayMonth, sameDayYear, sameMonthYear, DAYS_IN_MONTH, DATES_SHOWN, POINT_POSITIONS, LINES, seo } = forLocale(L, await requestSite());
+
   const data = seo((await params).slug);
   if (!data) notFound();
   const { item, key, m, dates, title, description } = data;
@@ -119,7 +134,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
       <div className="wrap">
         <JsonLd data={articleLd({ headline: title, description, path: matrixHref(slug) })} />
 
-        <Crumbs
+        <Crumbs locale={L}
           trail={[
             { name: D.nav.home[L], path: "/" },
             { name: D.nav.allMatrices[L], path: "/matrix" },
@@ -130,13 +145,13 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
         <h1>{D.matrixPages.h1[L](slug)}</h1>
         <div className="matrixcards">
           <Link className="cardlink" href={arcanumHref(m.center)}>
-            <ArcanumCard n={m.center} size="grid" eager decorative />
+            <ArcanumCard locale={L} n={m.center} size="grid" eager decorative />
             <span>
               {D.matrixPages.centreCard[L]} · {m.center} {D.common.quoted[L](arcanumTitle(m.center))}
             </span>
           </Link>
           <Link className="cardlink" href={arcanumHref(m.mission)}>
-            <ArcanumCard n={m.mission} size="grid" eager decorative />
+            <ArcanumCard locale={L} n={m.mission} size="grid" eager decorative />
             <span>
               {D.matrixPages.missionCard[L]} · {m.mission} {D.common.quoted[L](arcanumTitle(m.mission))}
             </span>
@@ -158,11 +173,11 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
             <div className="cap">
               {D.matrixPages.octagramHint[L]}
             </div>
-            <Octagram m={m} linked={false} />
+            <Octagram locale={L} m={m} linked={false} />
           </div>
 
           <div>
-            <ChakraTable m={m} heading="h2" />
+            <ChakraTable locale={L} m={m} heading="h2" />
 
             <div className="mini">
               {LINES.map(([label, hint, triad]) => (
@@ -228,7 +243,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
             <>{D.matrixPages.allOpenFree[L](free.length)}</>
           ) : (
             <>
-              {D.matrixPages.freeOpenPaidTail[L](paid.length)} <Price />.
+              {D.matrixPages.freeOpenPaidTail[L](paid.length)} <Price locale={L} />.
             </>
           )}
         </p>
@@ -259,7 +274,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
                 </li>
               ))}
             </ul>
-            <SectionEncyclopediaLinks section={s} />
+            <SectionEncyclopediaLinks locale={L} section={s} />
           </div>
         ))}
 
@@ -340,7 +355,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
             {ALL_FREE ? (
               <>{D.matrixPages.chartAndAllOpen[L]}</>
             ) : (
-              <>{D.matrixPages.chartAndTwoOpen[L]} <Price />.</>
+              <>{D.matrixPages.chartAndTwoOpen[L]} <Price locale={L} />.</>
             )}
           </p>
           <Link className="btn" href="/#calc">

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Выложить текущее дерево на тестовый контур test.arcana-sense.ru.
+# Выложить общий фронтенд/API на test.arcana-sense.ru и test.arcana-sense.com.
 #
 # Образы свои, с тегом test-*: так фичу проверяют агентами до того, как она уедет на прод. База
 # тоже своя, платежи идут через тестовый терминал банка, счётчик Метрики в сборку не попадает.
@@ -13,8 +13,9 @@ if [ -n "$(git status --porcelain -- . ../../tools/seo)" ]; then
   echo "== дерево не чистое: образ будет помечен временем сборки"
 fi
 
-# Юнит-тесты того языка, который собираем: красные тесты сборки не выкладываются.
+# Общий образ содержит оба языка: проверяем оба набора словарей.
 scripts/assert-unit-tests.sh ru
+scripts/assert-unit-tests.sh en
 
 SITE=https://test.arcana-sense.ru
 IP="${ARCANA_PROD_IP:-45.80.130.166}"
@@ -71,12 +72,17 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml pull -q \
+  && docker ps -q --filter label=com.docker.compose.project=arcana-test-en | xargs -r docker stop >/dev/null \
+  && docker ps -q --filter label=com.docker.compose.project=arcana-test-localized | xargs -r docker stop >/dev/null \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml up -d --wait --remove-orphans \
   && /usr/local/bin/arcana-prune-images prune"
 
 echo "== проверка"
 until "${TEST_CURL[@]}" -o /dev/null "$SITE/"; do sleep 3; done
 "${TEST_CURL[@]}" "$SITE/version/current.txt"
+"${TEST_CURL[@]}" https://test.arcana-sense.com/version/current.txt
+"${TEST_CURL[@]}" "$SITE/" | grep '<html lang="ru"' >/dev/null
+"${TEST_CURL[@]}" https://test.arcana-sense.com/ | grep '<html lang="en"' >/dev/null
 mkdir -p ../reports/unified
 # Свидетельство для прод-релиза пишется только из чистого дерева: выкладка правок, которых нет
 # в коммите, ничего не говорит о самом коммите, а прод сверяет именно его.

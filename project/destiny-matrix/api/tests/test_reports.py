@@ -89,6 +89,20 @@ def test_second_click_returns_the_same_file(client, db, printing):
     assert len(db.scalars(select(ReportJob)).all()) == 1
 
 
+def test_old_pdf_revision_is_reprinted_with_current_links(client, db, printing):
+    headers, mid = buy(client, "old-pdf@example.ru")
+    uid = client.get("/api/auth/me", headers=headers).json()["user"]["id"]
+    old = ReportJob(user_id=uid, matrix_id=mid, locale="ru", status="done", object_key=f"{uid}/{mid}/ru/old.pdf")
+    db.add(old)
+    db.commit()
+    response = client.post("/api/reports/render", json={"matrix_id": mid}, headers=headers)
+    assert response.status_code == 200
+    assert response.json()["cached"] is False
+    assert response.json()["job_id"] != old.id
+    db.refresh(old)
+    assert old.status == "expired"
+
+
 def test_unpaid_matrix_is_402(client, auth, printing):
     headers = auth("free@example.ru")
     saved = client.post("/api/matrices", json={"birth": "1991-02-02", "sex": "f"},

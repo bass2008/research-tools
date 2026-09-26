@@ -6,42 +6,60 @@
  * страницу открывает Chromium с нашими параметрами, PDF ложится в хранилище и живёт там — второе
  * нажатие отдаёт тот же файл, ничего не печатая заново.
  */
-import { useEffect, useState } from "react";
-
-import { ApiError, api } from "@/lib/api";
-import { D, L } from "@/lib/i18n";
+import { useLocale } from "@/components/ui/LocaleProvider";
 import { track } from "@/lib/analytics";
+import { ApiError, forLocale as localizedApi } from "@/lib/api";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { useMessage } from "@/lib/i18n/useMessage";
+import { useEffect, useState } from "react";
 
 type State = "idle" | "busy" | "ready" | "failed";
 
-export default function SavePdfButton({
-  matrixId,
-  label = D.report.savePdf[L],
-  hint,
-}: {
+export const forLocale = localized((L: Locale) => {
+  const { api } = localizedApi(L);
+
+  return { api };
+});
+
+export default function SavePdfButton({ locale: requestedLocale, ...localeProps }: ({
   matrixId: number;
   label?: string;
   /** дата открытого разбора: попадает в подсказку, чтобы было видно, что скачается именно он */
   hint?: string;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    matrixId,
+    label = D.report.savePdf[L],
+    hint,
+  } = localeProps;
+  const { api } = forLocale(L);
+
   // до гидратации обработчик клика не подключён: без этого кнопка выглядела рабочей, а нажатие
   // не делало ничего
   const [ready, setReady] = useState(false);
-  const [state, setState] = useState<State>("idle");
-  const [note, setNote] = useState<string | null>(null);
+  const [download, setDownload] = useState<{ locale: Locale; matrixId: number; state: State } | null>(null);
+  const state = download?.locale === L && download.matrixId === matrixId ? download.state : "idle";
+  const setState = (state: State) => setDownload({ locale: L, matrixId, state });
+  const [note, setNote] = useMessage(L);
 
   useEffect(() => setReady(true), []);
 
   // Печать начинается сразу после оплаты, поэтому к первому нажатию файл обычно уже готов.
   // Спрашиваем состояние один раз: если готов — кнопка так и говорит и не обещает ожидания.
-  const [warm, setWarm] = useState(false);
+  const [cached, setCached] = useState<{ locale: Locale; matrixId: number; ready: boolean } | null>(null);
+  const warm = cached?.locale === L && cached.matrixId === matrixId && cached.ready;
   useEffect(() => {
     let alive = true;
     api
       .reportJobs()
       .then((res) => {
         if (!alive) return;
-        setWarm(res.items.some((job) => job.matrix_id === matrixId && job.status === "done"));
+        setCached({ locale: L, matrixId,
+          ready: res.items.some((job) => job.matrix_id === matrixId && job.locale === L && job.status === "done") });
       })
       .catch(() => {
         /* состояние печати — подсказка, без неё кнопка работает как раньше */
@@ -49,7 +67,7 @@ export default function SavePdfButton({
     return () => {
       alive = false;
     };
-  }, [matrixId]);
+  }, [matrixId, L]);
 
   const open = (href: string) => window.open(href, "_blank", "noopener");
 
@@ -67,9 +85,9 @@ export default function SavePdfButton({
     } catch (err) {
       setState("failed");
       setNote(
-        err instanceof ApiError
-          ? err.message
-          : D.report.pdfFailed[L],
+        (locale) => err instanceof ApiError
+          ? err.messageFor(locale)
+          : D.report.pdfFailed[locale],
       );
     }
   };

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import io
 import urllib.request
+import urllib.parse
 import uuid
 
 from pypdf import PdfReader
@@ -44,8 +45,10 @@ def _matrix_for_report(page: Page) -> int:
     paid_contour = page.get_by_test_id("buy-top").count() > 0
 
     if paid_contour:
-        # На контуре с кассой доступ берётся деньгами: тестовая карта банка, как у человека.
-        flows.buy_on_bank(page, f"print-{uuid.uuid4().hex[:8]}@example.com", 8, 8, 1998)
+        # Local release E2E uses mock payments; live test uses its test terminal.
+        local = urllib.parse.urlsplit(BASE).hostname in {"localhost", "127.0.0.1"}
+        buy = flows.buy if local else flows.buy_on_bank
+        buy(page, f"print-{uuid.uuid4().hex[:8]}@example.com", 8, 8, 1998)
     else:
         _register(page)
         # Матрица заводится запросом, а не кнопкой: путь через «сохранить» на витрине без кассы
@@ -117,3 +120,10 @@ def test_report_prints_on_this_contour(page: Page):
     for missing in ("Такой страницы нет", "This page does not exist"):
         assert missing not in text, f"напечатана страница ошибки вместо разбора: «{missing}»"
     assert "1998" in text, "в отчёте нет даты, по которой его печатали"
+    # Public articles always render the domain's language, so a RU PDF must link to RU.
+    links = [str(annotation.get_object().get("/A", {}).get("/URI", ""))
+             for sheet in reader.pages for annotation in sheet.get("/Annots", [])]
+    articles = [link for link in links if "/encyclopedia/" in link]
+    assert articles, "в PDF нет ссылок на статьи"
+    assert all(urllib.parse.urlsplit(link).netloc == urllib.parse.urlsplit(BASE).netloc
+               for link in articles), sorted(set(articles))[:5]

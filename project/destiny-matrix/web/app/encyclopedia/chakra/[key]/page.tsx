@@ -1,23 +1,25 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import PositionMap from "@/components/enc/PositionMap";
+import CalcPromo from "@/components/matrix/CalcPromo";
+import Price from "@/components/pay/Price";
+import CrumbsLd from "@/components/ui/CrumbsLd";
+import JsonLd from "@/components/ui/JsonLd";
+import { ALL_FREE } from "@/lib/access";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { forLocale as localizedContent } from "@/lib/content";
+import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
+import { forLocale as localizedSchema } from "@/lib/schema";
+import { forLocale as localizedSeo } from "@/lib/seo";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import { D, L } from "@/lib/i18n";
-import PositionMap from "@/components/enc/PositionMap";
-import CalcPromo from "@/components/matrix/CalcPromo";
-import CrumbsLd from "@/components/ui/CrumbsLd";
-import JsonLd from "@/components/ui/JsonLd";
-import Price from "@/components/pay/Price";
-
-import { ALL_FREE } from "@/lib/access";
-import { ARCANA } from "@/lib/arcana";
-import { CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref } from "@/lib/encyclopedia";
-import { chakraContent } from "@/lib/content";
-import { mapPointsBySymbol } from "@/lib/matrixMap";
-import { pageMeta } from "@/lib/site";
-import { articleLd } from "@/lib/schema";
-import { NOT_FOUND_META } from "@/lib/seo";
-import { encyclopediaSectionCrumb } from "@/lib/encyclopediaNavigation";
 
 type Params = { key: string };
 
@@ -25,11 +27,30 @@ type Params = { key: string };
 // динамическим рендером — у того пустое тело и заголовок главной.
 export const dynamicParams = false;
 
+const forLocale = localized((L: Locale, site) => {
+  const { ARCANA } = localizedArcana(L);
+  const { CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref } = localizedEncyclopedia(L);
+  const { chakraContent } = localizedContent(L);
+  const { mapPointsBySymbol } = localizedMatrixMap(L);
+  const { pageMeta } = localizedSite(L, site);
+  const { articleLd } = localizedSchema(L, site);
+  const { NOT_FOUND_META } = localizedSeo(L, site);
+  const { encyclopediaSectionCrumb } = localizedEncyclopediaNavigation(L);
+
+  return { ARCANA, CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref, chakraContent, mapPointsBySymbol, pageMeta, articleLd, NOT_FOUND_META, encyclopediaSectionCrumb };
+});
+
 export function generateStaticParams(): Params[] {
+  const L = defaultLocale;
+  const { CHAKRA_PAGES } = forLocale(L);
+
   return CHAKRA_PAGES.map((c) => ({ key: c.key }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const L = await publicLocale();
+  const { chakraByKey, chakraHref, chakraContent, pageMeta, NOT_FOUND_META } = forLocale(L, await requestSite());
+
   const c = chakraByKey((await params).key);
   // Пустые метаданные оставляли на 404 заголовок главной: в истории браузера и в выдаче
   // несуществующая страница выглядела как главная.
@@ -45,6 +66,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function ChakraPage({ params }: { params: Promise<Params> }) {
+  const L = await requestLocale();
+  const { ARCANA, CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, positionHref, chakraContent, mapPointsBySymbol, articleLd, encyclopediaSectionCrumb } = forLocale(L, await requestSite());
+
   const c = chakraByKey((await params).key);
   if (!c) notFound();
   const extra = chakraContent(c.key);
@@ -58,7 +82,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
   return (
     <>
 
-      <CrumbsLd
+      <CrumbsLd locale={L}
         trail={[
           { name: D.nav.home[L], path: "/" },
           { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
@@ -66,107 +90,107 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           { name: c.title },
         ]}
       />
-        <JsonLd
-          data={articleLd({
-            headline: title,
-            description: extra.seo.description,
-            path: chakraHref(c.key),
-          })}
-        />
+      <JsonLd
+        data={articleLd({
+          headline: title,
+          description: extra.seo.description,
+          path: chakraHref(c.key),
+        })}
+      />
 
-        {/* Форма запроса, а не только имя: «чакра <имя> в матрице судьбы» — единственная
+      {/* Форма запроса, а не только имя: «чакра <имя> в матрице судьбы» — единственная
             формулировка со спросом у верхних трёх чакр, а «<имя> — уровень N» не спрашивает
             никто. Номер уровня остаётся, но после названия страницы. */}
-        <h1>
-          {D.encChakra.h1[L](c.title, c.index)}
-        </h1>
-        <p className="dim prose">{c.hint}</p>
+      <h1>
+        {D.encChakra.h1[L](c.title, c.index)}
+      </h1>
+      <p className="dim prose">{c.hint}</p>
 
-        <PositionMap
-          highlight={spots}
-          caption={D.encChakra.caption[L](
-            spots.map((x) => `${x.label} · ${x.symbol}`).join(` ${D.encArcanum.and[L]} `),
-          )}
+      <PositionMap locale={L}
+        highlight={spots}
+        caption={D.encChakra.caption[L](
+          spots.map((x) => `${x.label} · ${x.symbol}`).join(` ${D.encArcanum.and[L]} `),
+        )}
+      />
+
+      <div className="prose section-gap">
+        {paragraphs.map((text, i) => (
+          <p key={i}>{text}</p>
+        ))}
+        <h2>{D.encChakra.howCounted[L]}</h2>
+        <p>
+          {D.encChakra.howCountedText[L](c.title, c.physics, c.energy)}
+        </p>
+        <p>
+          {D.encChakra.totalsText[L]}{" "}
+          <Link href={positionHref("chakras")}>{D.encChakra.sectionChakras[L]}</Link>{" "}
+          {D.encChakra.showsWholeTable[L]}{" "}
+          <Link href={positionHref("body_resource")}>{D.encChakra.sectionBody[L]}</Link>{" "}
+          {D.encChakra.coversLowest[L]}
+        </p>
+      </div>
+
+      {extra.columns.length ? (
+        <div className="panel section-gap">
+          <h3>{D.encChakra.threeColumns[L]}</h3>
+          <div className="cap">{D.encChakra.threeColumnsHint[L]}</div>
+          <dl className="kv">
+            {extra.columns.map((col) => (
+              <div key={col.title} style={{ display: "contents" }}>
+                <dt>{col.title}</dt>
+                <dd>{col.text}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ) : null}
+
+      <div className="section-gap">
+        <CalcPromo locale={L}
+          title={D.encChakra.promoTitle[L]}
+          lead={D.encChakra.promoLead[L](c.title)}
+          place="chakra"
         />
+      </div>
 
-        <div className="prose section-gap">
-          {paragraphs.map((text, i) => (
-            <p key={i}>{text}</p>
+      <div className="panel section-gap">
+        <h3>{D.encChakra.otherLevels[L]}</h3>
+        <div className="cap">{D.encChakra.otherLevelsHint[L]}</div>
+        <div className="taglist">
+          {CHAKRA_PAGES.filter((o) => o.key !== c.key).map((o) => (
+            <Link key={o.key} href={chakraHref(o.key)}>
+              {o.index}. {o.title}
+            </Link>
           ))}
-          <h2>{D.encChakra.howCounted[L]}</h2>
-          <p>
-            {D.encChakra.howCountedText[L](c.title, c.physics, c.energy)}
-          </p>
-          <p>
-            {D.encChakra.totalsText[L]}{" "}
-            <Link href={positionHref("chakras")}>{D.encChakra.sectionChakras[L]}</Link>{" "}
-            {D.encChakra.showsWholeTable[L]}{" "}
-            <Link href={positionHref("body_resource")}>{D.encChakra.sectionBody[L]}</Link>{" "}
-            {D.encChakra.coversLowest[L]}
-          </p>
         </div>
+      </div>
 
-        {extra.columns.length ? (
-          <div className="panel section-gap">
-            <h3>{D.encChakra.threeColumns[L]}</h3>
-            <div className="cap">{D.encChakra.threeColumnsHint[L]}</div>
-            <dl className="kv">
-              {extra.columns.map((col) => (
-                <div key={col.title} style={{ display: "contents" }}>
-                  <dt>{col.title}</dt>
-                  <dd>{col.text}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        ) : null}
-
-        <div className="section-gap">
-          <CalcPromo
-            title={D.encChakra.promoTitle[L]}
-            lead={D.encChakra.promoLead[L](c.title)}
-            place="chakra"
-          />
+      <div className="panel section-gap">
+        <h3>{D.encChakra.whichArcanum[L]}</h3>
+        <div className="cap">{D.encChakra.whichArcanumHint[L]}</div>
+        <div className="taglist">
+          {ARCANA.map((a) => (
+            <Link key={a.n} href={arcanumHref(a.n)}>
+              {a.n} · {a.title}
+            </Link>
+          ))}
         </div>
+      </div>
 
-        <div className="panel section-gap">
-          <h3>{D.encChakra.otherLevels[L]}</h3>
-          <div className="cap">{D.encChakra.otherLevelsHint[L]}</div>
-          <div className="taglist">
-            {CHAKRA_PAGES.filter((o) => o.key !== c.key).map((o) => (
-              <Link key={o.key} href={chakraHref(o.key)}>
-                {o.index}. {o.title}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="panel section-gap">
-          <h3>{D.encChakra.whichArcanum[L]}</h3>
-          <div className="cap">{D.encChakra.whichArcanumHint[L]}</div>
-          <div className="taglist">
-            {ARCANA.map((a) => (
-              <Link key={a.n} href={arcanumHref(a.n)}>
-                {a.n} · {a.title}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="allbox">
-          <h3>{D.encChakra.buildEnergyMap[L]}</h3>
-          <p>
-            {D.encChakra.buildEnergyMapText[L]}{" "}
-            {ALL_FREE ? (
-              <>{D.encChakra.fullMapOpen[L]}</>
-            ) : (
-              <>{D.encChakra.fullMapPaid[L]} <Price />.</>
-            )}
-          </p>
-          <Link className="btn" href="/#calc">
-            {D.matrixPages.calcMatrix[L]}
-          </Link>
-        </div>
+      <div className="allbox">
+        <h3>{D.encChakra.buildEnergyMap[L]}</h3>
+        <p>
+          {D.encChakra.buildEnergyMapText[L]}{" "}
+          {ALL_FREE ? (
+            <>{D.encChakra.fullMapOpen[L]}</>
+          ) : (
+            <>{D.encChakra.fullMapPaid[L]} <Price locale={L} />.</>
+          )}
+        </p>
+        <Link className="btn" href="/#calc">
+          {D.matrixPages.calcMatrix[L]}
+        </Link>
+      </div>
     </>
   );
 }

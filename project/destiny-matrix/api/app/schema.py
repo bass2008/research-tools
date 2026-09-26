@@ -41,6 +41,9 @@ def add_missing_columns() -> list[str]:
         "users": {
             "last_seen_at": "TIMESTAMP WITH TIME ZONE",
         },
+        "report_jobs": {
+            "locale": "VARCHAR(16) NOT NULL DEFAULT '" + ("en" if settings.site_lang == "en" else "ru") + "'",
+        },
         "payments": {
             "provider": "VARCHAR(16) NOT NULL DEFAULT 'mock'",
             "status": "VARCHAR(24) NOT NULL DEFAULT 'NEW'",

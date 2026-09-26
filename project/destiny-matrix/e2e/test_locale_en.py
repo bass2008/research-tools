@@ -1,11 +1,6 @@
-"""Английский контур: то, что на русской развёртке проверять нечем.
+"""English profile of the shared application (127.0.0.1:3000 in the localized stand).
 
-Прогон идёт против стенда с `SITE_LANG=en` (`compose/scripts/run-eng.sh`, порт 3200):
-
-    E2E_URL=http://127.0.0.1:3200 pytest e2e/test_locale_en.py
-
-На русском стенде весь файл пропускается: язык виден в `<html lang>` и подменить его запросом
-нельзя — он вшит в сборку.
+The domain selects the initial public language; the same frontend and API serve Russian.
 """
 from __future__ import annotations
 
@@ -61,7 +56,7 @@ def _html(path: str) -> str:
 @pytest.fixture(scope="module", autouse=True)
 def only_english():
     if '<html lang="en"' not in _get("/").text:
-        pytest.skip("стенд собран не на английском: E2E_URL=http://127.0.0.1:3200")
+        pytest.skip("нужен английский профиль: E2E_URL=http://127.0.0.1:3000")
 
 
 # Подпись переключателя языка читается на языке той версии, куда он ведёт: «Русская версия»
@@ -95,20 +90,25 @@ def test_other_language_version_is_linked():
     assert 'hreflang="x-default"' in html
 
 
-def test_payment_pages_are_gone():
-    """Витрина без оплаты: кассы нет, и страницы оплаты не существует, а не пустуют."""
+def test_payment_pages_follow_the_shared_access_policy():
+    """The payment URL explains unavailable providers; shared paid access is preserved."""
     for path in ("/pay", "/pay/single"):
-        status = _get(path).status_code
-        assert status == 404, f"{path}: ожидался 404, получен {status}"
+        response = _get(path)
+        assert "There are currently no payment methods available for your region" in response.text
+        assert 'data-testid="pay-modal"' not in response.text
+        status = response.status_code
+        assert status == 200, f"{path}: ожидался 200, получен {status}"
 
 
-def test_full_reading_is_open_without_payment(page: Page):
-    """Разбор открыт всем: незарегистрированный посетитель видит платные разделы целиком."""
+def test_reading_keeps_paid_access_after_switching_language(page: Page):
+    """Choosing English does not unlock paid content or change account rights."""
     page.goto(f"{BASE}/matrix/1-1-2")
     page.wait_for_selector("h1")
-    # приглашение заплатить на открытой витрине не показывается
-    body = page.inner_text("body")
-    assert "Buy" not in body and "Pay" not in body, "на открытой витрине предлагают оплату"
+    from playwright.sync_api import expect
+    expect(page.locator('a[href^="/pay"]').first).to_be_visible()
+    page.get_by_test_id("language-ru").click()
+    expect(page.locator("html")).to_have_attribute("lang", "ru")
+    expect(page.locator('a[href^="/pay"]').first).to_be_visible()
 
 
 def test_legal_pages_name_the_owner_without_russian_requisites():

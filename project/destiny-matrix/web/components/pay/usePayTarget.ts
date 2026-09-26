@@ -1,21 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
+import { useLocale } from "@/components/ui/LocaleProvider";
 import type { MatrixListItem } from "@/lib/api";
-import type { StoredBirth } from "@/lib/storage";
 import {
-  alreadyOpen,
-  askedOpen,
-  options as targetOptions,
-  pickTarget,
-  stillValid,
-  targetLabel,
-  targetValue,
+  forLocale as targetsForLocale, targetValue,
   type Target,
   type TargetOption,
-  type TargetRow,
+  type TargetRow
 } from "@/lib/paytarget";
+import type { StoredBirth } from "@/lib/storage";
+import { useMemo, useState } from "react";
 
 /**
  * Какую дату откроет платёж.
@@ -51,6 +45,8 @@ export function usePayTarget({
   wanted: number | null;
   guest: boolean;
 }): PayTarget {
+  const locale = useLocale();
+  const { alreadyOpen, askedOpen, options: targetOptions, pickTarget, stillValid, targetLabel } = targetsForLocale(locale);
   // выбор руками: с этого момента адрес его не перебивает
   const [chosen, setChosen] = useState<string | null>(null);
 
@@ -81,7 +77,7 @@ export function usePayTarget({
       missing,
       choose: (value: string) => setChosen(value),
     };
-  }, [saved, birth, wanted, guest, chosen]);
+  }, [saved, birth, wanted, guest, chosen, locale]);
 }
 
 export { targetValue };

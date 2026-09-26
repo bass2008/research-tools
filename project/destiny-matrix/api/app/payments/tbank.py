@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 
 from ..config import settings
-from .base import Outcome, PaymentError, Started, Update
+from .base import PaymentUrls, Outcome, PaymentError, Started, Update
 
 PAID = ("AUTHORIZED", "CONFIRMED")
 # ссылка на оплату ещё жива: человек либо не открывал форму, либо открыл и не доплатил
@@ -75,25 +75,26 @@ class Tbank:
             with urllib.request.urlopen(request, timeout=settings.tbank_timeout_seconds) as resp:
                 answer = json.loads(resp.read())
         except urllib.error.HTTPError as exc:
-            raise PaymentError(f"{method}: банк ответил {exc.code}") from exc
+            raise PaymentError(f"{method}: банк ответил {exc.code}", key="pay.gateway_http", code=exc.code) from exc
         except OSError as exc:
-            raise PaymentError(f"{method}: банк недоступен ({exc})") from exc
+            raise PaymentError(f"{method}: банк недоступен ({exc})", key="pay.gateway_unavailable") from exc
         if not answer.get("Success"):
             raise PaymentError(f"{method}: {answer.get('Message') or ''} "
                                f"{answer.get('Details') or ''} "
-                               f"(код {answer.get('ErrorCode')})".strip())
+                               f"(код {answer.get('ErrorCode')})".strip(),
+                               key="pay.gateway_rejected", code=answer.get("ErrorCode") or "—")
         return answer
 
-    def start(self, order_id: str, amount: int, title: str, email: str | None) -> Started:
+    def start(self, order_id: str, amount: int, title: str, email: str | None, *, urls: PaymentUrls) -> Started:
         if not email:
-            raise PaymentError("Init: чек не составить без адреса покупателя")
+            raise PaymentError("Init: чек не составить без адреса покупателя", key="pay.receipt_email")
         payload = {
             "Amount": amount,
             "OrderId": order_id,
             "Description": settings.tbank_order_description[:250],
-            "SuccessURL": f"{settings.site_url}/pay/done?order={order_id}",
-            "FailURL": f"{settings.site_url}/pay/fail?order={order_id}",
-            "NotificationURL": f"{settings.site_url}/api/payments/notify/{self.name}",
+            "SuccessURL": urls.success,
+            "FailURL": urls.fail,
+            "NotificationURL": urls.notification,
         }
         payload["DATA"] = {"Email": email}
         payload["Receipt"] = receipt(amount, email)
@@ -117,7 +118,7 @@ class Tbank:
         given = str(body.get("Token") or "")
         fields = {k: v for k, v in body.items() if k != "Token"}
         if not given or self.token(fields) != given:
-            raise PaymentError("подпись уведомления не совпала")
+            raise PaymentError("подпись уведомления не совпала", key="pay.invalid_signature")
         return self._update(body)
 
     def _update(self, answer: dict, fallback: str = "") -> Update:

@@ -1,17 +1,11 @@
-import { D, L } from "@/lib/i18n";
-import { arcanumTitle } from "@/lib/arcana";
-import { mapPoint } from "@/lib/matrixMap";
-import { publicHref } from "@/lib/site";
+import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
+import { forLocale as localizedArcana } from "@/lib/arcana";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
 import type { Matrix } from "@/lib/matrix";
-
-// Геометрия перенесена из рукописного лендинга: viewBox 620×620, центр 310,
-// внешний радиус 248, внутренний 142. Возрастная шкала идёт по кругу от запада
-// по часовой стрелке — тем же порядком, что age_scale в движке.
-const C = 310;
-const R = 248;
-const RIN = 142;
-
-const CHAKRA_COLORS = ["#c9453a", "#dd7b2a", "#d9ac1e", "#159c69", "#1f9ed6", "#3f5ec9", "#8e5bc4"];
+import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
+import { forLocale as localizedSite } from "@/lib/site";
 
 type NodeSpec = {
   angle: number;
@@ -23,26 +17,48 @@ type NodeSpec = {
   radius?: number;
 };
 
-function pt(angle: number, radius: number): [number, number] {
-  const a = (angle * Math.PI) / 180;
-  return [C + radius * Math.cos(a), C + radius * Math.sin(a)];
-}
+export const forLocale = localized((L: Locale, site) => {
+  const { arcanumTitle } = localizedArcana(L);
+  const { mapPoint } = localizedMatrixMap(L);
+  const { publicHref } = localizedSite(L, site);
 
-function fmt(n: number): string {
-  return n.toFixed(1);
-}
+  // Геометрия перенесена из рукописного лендинга: viewBox 620×620, центр 310,
+  // внешний радиус 248, внутренний 142. Возрастная шкала идёт по кругу от запада
+  // по часовой стрелке — тем же порядком, что age_scale в движке.
+  const C = 310;
 
-export default function Octagram({
-  m,
-  linked = true,
-  printing = false,
-}: {
+  const R = 248;
+
+  const RIN = 142;
+
+  const CHAKRA_COLORS = ["#c9453a", "#dd7b2a", "#d9ac1e", "#159c69", "#1f9ed6", "#3f5ec9", "#8e5bc4"];
+
+  function pt(angle: number, radius: number): [number, number] {
+    const a = (angle * Math.PI) / 180;
+    return [C + radius * Math.cos(a), C + radius * Math.sin(a)];
+  }
+
+  function fmt(n: number): string {
+    return n.toFixed(1);
+  }
+  return { arcanumTitle, mapPoint, publicHref, C, R, RIN, CHAKRA_COLORS, pt, fmt };
+});
+
+export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
   m: Matrix;
   linked?: boolean;
   /** В PDF относительный адрес указывает на внутренний хост службы печати: 12 кружков карты
    *  уезжали покупателю ссылками на `http://web:3000`. */
   printing?: boolean;
-}) {
+}) & { locale?: Locale; site?: SiteProfile }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    m,
+    linked = true,
+    printing = false,
+  } = localeProps;
+  const { arcanumTitle, mapPoint, publicHref, C, R, RIN, CHAKRA_COLORS, pt, fmt } = forLocale(L, site);
+
   const outer: NodeSpec[] = [
     { angle: 180, value: m.day, label: D.octagram.portrait[L], color: CHAKRA_COLORS[2], big: true },
     { angle: 225, value: m.father_line, label: D.octagram.fatherLine[L], color: CHAKRA_COLORS[5] },

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, api } from "./api";
+import { ApiError, api, forLocale } from "./api";
 
 function stubFetch(status: number, body: string, contentType = "application/json") {
   const spy = vi.fn(
@@ -16,6 +16,16 @@ afterEach(() => {
 });
 
 describe("клиент API", () => {
+  it("переводит полученную ошибку без повторения запроса", async () => {
+    const messages = { ru: "Неверная почта или пароль", en: "Wrong email or password" };
+    const request = stubFetch(401, JSON.stringify({ detail: messages.ru, messages }));
+    const error = await forLocale("ru").api.login("user@example.ru", "bad").catch((err) => err);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.messageFor("en")).toBe(messages.en);
+    expect(error.messageFor("ru")).toBe(messages.ru);
+    expect(request).toHaveBeenCalledOnce();
+  });
+
   it("отдаёт данные при успехе", async () => {
     stubFetch(200, JSON.stringify({ ok: true, payment_id: "p1", token: "t", user: { id: 1, email: "a@b.c" }, autoregistered: true }));
     const res = await api.payMock("full", "a@b.c");

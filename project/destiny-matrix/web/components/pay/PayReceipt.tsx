@@ -1,19 +1,20 @@
+import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import { D } from "@/lib/i18n";
+import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
+import type { Stage } from "@/lib/payStage";
 import Link from "next/link";
 
-import { D, L } from "@/lib/i18n";
+export const forLocale = localized((L: Locale) => {
+  const { birthLabel } = localizedMatrixResult(L);
+  const { sexLabel } = localizedMatrix(L);
 
-import type { Stage } from "@/lib/payStage";
-
-import { birthLabel } from "@/components/matrix/MatrixResult";
-import { sexLabel } from "@/lib/matrix";
+  return { birthLabel, sexLabel };
+});
 
 /** Чек: что оплачено, куда идти и почему доступ живёт в аккаунте, а не в браузере. */
-export default function PayReceipt({
-  stage,
-  tariffName,
-  test,
-  signedInto,
-}: {
+export default function PayReceipt({ locale: requestedLocale, ...localeProps }: ({
   stage: Extract<Stage, { kind: "paid" }>;
   tariffName: string;
   /** деньги ненастоящие: предупреждение показываем только тогда */
@@ -21,7 +22,16 @@ export default function PayReceipt({
   /** аккаунт на эту почту уже существовал — мы вошли в него, а не создали новый */
   signedInto: string | null;
   /** почта не ушла на сервер и лежит в браузере */
-}) {
+}) & { locale?: Locale }) {
+  const L = requestedLocale ?? defaultLocale;
+  const {
+    stage,
+    tariffName,
+    test,
+    signedInto,
+  } = localeProps;
+  const { birthLabel, sexLabel } = forLocale(L);
+
   // В чеке пол печатаем всегда: две карты на одну дату могут называться одинаково, а после
   // оплаты человек должен однозначно видеть, какую из них открыл платёж.
   const label = stage.matrix

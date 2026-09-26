@@ -1,26 +1,36 @@
+import { requestSite } from "@/lib/siteProfile.server";
+import Crumbs from "@/components/ui/Crumbs";
 import { ALL_FREE } from "@/lib/access";
-import { D, L } from "@/lib/i18n";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import Crumbs from "@/components/ui/Crumbs";
+const forLocale = localized((L: Locale, site) => {
+  const { LEGAL, pageMeta } = localizedSite(L, site);
 
-import { LEGAL, pageMeta } from "@/lib/site";
-
-export const metadata: Metadata = pageMeta({
-  title: D.pages.contactsTitle[L],
-  description:
-    D.pages.contactsDescription[L],
-  path: "/contacts",
+  const metadata: Metadata = pageMeta({
+    title: D.pages.contactsTitle[L],
+    description:
+      D.pages.contactsDescription[L],
+    path: "/contacts",
+  });
+  return { LEGAL, pageMeta, metadata };
 });
 
 // Реквизиты собраны здесь, а не в подвале каждой страницы: их читают дважды — при проверке
 // исполнителя и при обращении. В юридических страницах они остаются: там это обязательная часть.
-export default function ContactsPage() {
+export default async function ContactsPage() {
+  const L = await requestLocale();
+  const { LEGAL } = forLocale(L, await requestSite());
+
   return (
     <main id="content" className="page">
       <div className="wrap prose">
-        <Crumbs trail={[{ name: D.nav.home[L], path: "/" }, { name: D.pages.contactsCrumb[L] }]} />
+        <Crumbs locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: D.pages.contactsCrumb[L] }]} />
         <h1>{D.pages.contactsTitle[L]}</h1>
 
         <h2>{D.pages.contactsReach[L]}</h2>
@@ -79,4 +89,7 @@ export default function ContactsPage() {
       </div>
     </main>
   );
+}
+export async function generateMetadata() {
+  return forLocale(await publicLocale(), await requestSite()).metadata;
 }

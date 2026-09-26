@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-
+import { useLead, usePriceKnown, usePaymentProviders } from "@/components/pay/TariffsProvider";
+import { useLocale } from "@/components/ui/LocaleProvider";
 import { track } from "@/lib/analytics";
-import { D, L } from "@/lib/i18n";
-
-import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import Link from "next/link";
 
 /**
  * Кнопка покупки. Отдельным клиентским компонентом, чтобы вокруг неё жила серверная разметка:
@@ -14,23 +14,29 @@ import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
  * С `matrixId` — на оплату именно этой даты: иначе экран оплаты предложит первую закрытую,
  * и деньги откроют не то, что человек читал.
  */
-export default function UnlockCta({
-  place,
-  section,
-  className = "btn",
-  children,
-  testId,
-  matrixId,
-}: {
+export default function UnlockCta({ locale: requestedLocale, ...localeProps }: ({
   place: string;
   section?: string;
   className?: string;
   children?: React.ReactNode;
   testId?: string;
   matrixId?: number | null;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    place,
+    section,
+    className = "btn",
+    children,
+    testId,
+    matrixId,
+  } = localeProps;
+
   const lead = useLead();
   const known = usePriceKnown();
+  const providers = usePaymentProviders();
+  if (providers?.length === 0) return <p className="dim">{D.pay.regionUnavailable[L]}</p>;
   if (!known || !lead) {
     return (
       <button className={className} data-testid={testId} type="button" disabled>

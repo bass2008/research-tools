@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import time
 
 import pytest
@@ -52,6 +53,42 @@ def test_machine_numbers_look_sane():
     assert ram["used_mb"] <= ram["total_mb"]
     assert load["cores"] >= 1 and load["load1"] >= 0
     assert space["total_gb"] > 0 and 0 <= space["percent"] <= 100
+
+
+def test_container_metadata_reads_compose_project_and_tolerates_missing_labels(monkeypatch, tmp_path):
+    monkeypatch.setattr(monitor, "HOST_CONTAINERS", str(tmp_path))
+    for cid, config in {
+        "main": {"Name": "/arcana-api-1", "Config": {"Labels": {"com.docker.compose.project": "arcana"}}},
+        "test": {"Name": "/arcana-test-web-1", "Config": {"Labels": {"com.docker.compose.project": "arcana-test"}}},
+        "other": {"Name": "/external", "Config": {"Labels": None}},
+    }.items():
+        folder = tmp_path / cid
+        folder.mkdir()
+        (folder / "config.v2.json").write_text(json.dumps(config))
+    (tmp_path / "disappeared").mkdir()
+    assert monitor._container_metadata() == {
+        "main": {"name": "arcana-api-1", "project": "arcana"},
+        "test": {"name": "arcana-test-web-1", "project": "arcana-test"},
+        "other": {"name": "external", "project": ""},
+    }
+
+
+def test_contours_follow_compose_project_not_language_or_container_name():
+    rows = [
+        {"name": "arcana-api-1", "project": "arcana", "percent": 4.2, "memory_mb": 80},
+        {"name": "arcana-ru-web-1", "project": "arcana", "percent": 1.1, "memory_mb": 120},
+        {"name": "arcana-test-web-1", "project": "arcana-test", "percent": 2.0, "memory_mb": 90},
+        {"name": "renamed-api", "project": "arcana-test", "percent": 3.0, "memory_mb": 50},
+        {"name": "arcana-test-unrelated-1", "project": "another-project", "percent": 1.0, "memory_mb": 20},
+        {"name": "external", "percent": 0.0, "memory_mb": 5},
+    ]
+    groups = monitor.contours(rows)
+    assert [(g["title"], g["percent"], g["memory_mb"]) for g in groups] == [
+        ("Основной сайт", 5.3, 200), ("Тестовый сайт", 5.0, 140), ("Прочее", 1.0, 25),
+    ]
+    assert groups[0]["items"] == rows[:2]
+    assert groups[1]["items"] == rows[2:4]
+    assert groups[2]["items"] == rows[4:]
 
 
 def test_pulse_counts_people_apart_from_robots(client):
@@ -157,7 +194,7 @@ def test_stuck_payment_is_visible(client, db):
     payment.created_at = payment.created_at - dt.timedelta(hours=2)
     db.commit()
 
-    provider = gateway.active()
+    provider = gateway.for_payment(payment)
     expected = 1 if provider is not None and provider.reusable("NEW") else 0
     assert monitor.stuck_payments(db) == expected
 

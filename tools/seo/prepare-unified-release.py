@@ -26,7 +26,7 @@ RAW = ROOT / "logs" / "needs-lab" / "матрица-судьбы-dd5dcc98" / "pa
 METHOD = PROJECT / "spec" / "method.json"
 # Семантика замерена по русскому рынку: реестр запросов, классификация и карточки аудита
 # строятся только для русского корпуса. Английский получает те же адреса, но своего замера
-# спроса у него пока нет (docs/eng-ver.md §13).
+# спроса у него пока нет (docs/semcore.md, «Английские формулировки»).
 WEB_CONTENT = PROJECT / "web" / "content" / "ru"
 TAIL_SOURCE = ROOT / "tools" / "seo" / "content" / "ru" / "karmic-tails"
 AUDIT = ROOT / "tools" / "seo" / "audit"

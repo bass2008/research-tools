@@ -13,12 +13,31 @@ ROOT = Path(__file__).resolve().parents[2]
 METHOD = json.loads((ROOT / "spec" / "method.json").read_text())
 GOLDEN = json.loads((ROOT / "spec" / "golden.json").read_text())
 PARITY = json.loads((ROOT / "spec" / "parity-digests.json").read_text())
+LABELS = json.loads((ROOT / "spec" / "golden-labels-ru.json").read_text())
 # Снимок датируется днём сборки, а проверка на точное равенство краснела каждую полночь.
 PARITY_GRACE_DAYS = 31
 
 
 def _canonical(value: object) -> bytes:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+
+
+def _numeric(value):
+    """The locked parity contract excludes translated display labels."""
+    if isinstance(value, dict):
+        return {key: _numeric(item) for key, item in value.items() if key not in LABELS["keys"]}
+    if isinstance(value, list):
+        return [_numeric(item) for item in value]
+    return value
+
+
+def _texts(value):
+    if isinstance(value, dict):
+        return [text for key in sorted(value)
+                for text in ([value[key]] if key in LABELS["keys"] else _texts(value[key]))]
+    if isinstance(value, list):
+        return [text for item in value for text in _texts(item)]
+    return []
 
 
 def test_reduction_contract_examples():
@@ -30,7 +49,7 @@ def test_reduction_contract_examples():
 def test_browser_contract_fixtures_are_exact_copies():
     """Docker web-context не видит ../spec, поэтому копии обязательны, но расходиться не могут."""
     fixture = ROOT / "web" / "lib" / "__fixtures__"
-    for name in ("method.json", "sections.json", "golden.json", "parity-digests.json"):
+    for name in ("method.json", "sections.json", "golden.json", "parity-digests.json", "golden-labels-ru.json"):
         assert (ROOT / "spec" / name).read_bytes() == (fixture / name).read_bytes(), name
 
 
@@ -113,9 +132,13 @@ def test_golden_coverage_and_every_named_value():
     assert {case["sex"] for case in control} == {"f", "m"}
     for case in GOLDEN:
         matrix = calculate(case["birth"], case["sex"])
-        assert matrix.to_dict() == case["matrix"], (case["birth"], case["sex"])
-        assert build(matrix, unlocked=False) == case["sections_locked"]
-        assert build(matrix, unlocked=True) == case["sections_unlocked"]
+        actual = {**case, "matrix": matrix.to_dict(),
+                  "sections_locked": build(matrix, unlocked=False),
+                  "sections_unlocked": build(matrix, unlocked=True)}
+        assert _numeric(actual) == case, (case["birth"], case["sex"])
+        labels = next(item for item in LABELS["cases"]
+                      if (item["birth"], item["sex"]) == (case["birth"], case["sex"]))
+        assert _texts(actual) == labels["texts"], (case["birth"], case["sex"])
         assert all(1 <= value <= 22 for value in matrix.values())
 
 
@@ -147,7 +170,7 @@ def test_python_full_range_matches_locked_parity_snapshot():
         count = 0
         while cursor <= end:
             for sex in PARITY["sex_order"]:
-                row = _canonical(calculate(cursor, sex).to_dict()) + b"\n"
+                row = _canonical(_numeric(calculate(cursor, sex).to_dict())) + b"\n"
                 digest.update(row)
                 overall.update(row)
                 count += 1

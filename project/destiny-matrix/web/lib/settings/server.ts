@@ -10,6 +10,7 @@ interface ServerSettings extends Record<string, string | number | boolean> {
   port: number;
   hostname: string;
   telemetryDisabled: boolean;
+  siteProfiles: string;
 }
 
 // Эта структура не импортируется клиентскими компонентами. next.config и server-only BFF
@@ -24,6 +25,7 @@ const startupEnvironment = {
   PORT: process.env.PORT,
   HOSTNAME: process.env.HOSTNAME,
   NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED,
+  SITE_PROFILES: process.env.SITE_PROFILES,
 };
 
 const definitions: SettingDefinitions<ServerSettings> = {
@@ -44,6 +46,7 @@ const definitions: SettingDefinitions<ServerSettings> = {
   port: { env: "PORT", fallback: 3000, parse: parseNumber },
   hostname: { env: "HOSTNAME", fallback: "0.0.0.0" },
   telemetryDisabled: { env: "NEXT_TELEMETRY_DISABLED", fallback: false, parse: parseBoolean },
+  siteProfiles: { env: "SITE_PROFILES", fallback: "" },
 };
 
 export const serverSettings = new SettingManager(definitions, startupEnvironment);

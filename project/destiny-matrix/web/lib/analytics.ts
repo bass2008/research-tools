@@ -35,7 +35,14 @@ function clean(params?: GoalParams): Record<string, unknown> | undefined {
   return Object.keys(out).length ? out : undefined;
 }
 
-export function metrikaId(): number {
+export function metrikaId(site?: { metrikaId?: number }): number {
+  // SSR and hydration receive the same Host profile. Event helpers use the counter
+  // stamped into that document; switching the interface language never changes it.
+  if (site) return site.metrikaId ?? 0;
+  if (typeof document !== "undefined") {
+    const value = document.documentElement.getAttribute("data-metrika-id");
+    if (value !== null) return Number(value) || 0;
+  }
   return METRIKA_ID;
 }
 

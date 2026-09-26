@@ -170,6 +170,8 @@ export const apiErrors = {
 /** Отказы BFF: он проверяет форму полей до обращения к серверу приложения, и его сообщения
  *  человек видит в форме так же, как ответы сервера. */
 export const bffErrors = {
+  invalidLink: { ru: "Ссылка недействительна", en: "The link is invalid" } satisfies Phrase,
+  matrixNotFound: { ru: "Матрица не найдена", en: "Matrix not found" } satisfies Phrase,
   shortPassword: {
     ru: "Пароль — не короче трёх знаков",
     en: "The password has to be at least three characters long",

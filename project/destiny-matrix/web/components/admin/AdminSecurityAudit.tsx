@@ -1,19 +1,12 @@
 "use client";
 
+import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
+
 // Журнал безопасности: попытки входа/регистрации/сброса. Отдельно от прочих таблиц админки —
 // растёт на каждую попытку, поэтому с фильтром по исходу и постраничной подгрузкой.
 import { useEffect, useState } from "react";
 
-import { ApiError, api, type AuditCategory, type SecurityAuditRow } from "@/lib/api";
-
-function when(iso: string): string {
-  const d = new Date(iso);
-  return `${d.toLocaleDateString("ru-RU")} ${d.toLocaleTimeString("ru-RU", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  })}`;
-}
+import { ApiError, type AuditCategory, type SecurityAuditRow } from "@/lib/api";
 
 const ACTION: Record<string, string> = { login: "вход", register: "регистрация", reset: "сброс",
                                         impersonate: "имперсонированный вход" };
@@ -30,12 +23,14 @@ const TABS: { key: AuditCategory; label: string }[] = [
 const SIZES = [10, 25, 50, 100];
 
 export default function AdminSecurityAudit() {
+  const { t, api, day, time } = useAdminLocale();
+  const when = (iso: string) => `${day(iso)} ${time(iso)}`;
   const [rows, setRows] = useState<SecurityAuditRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [category, setCategory] = useState<AuditCategory>("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useAdminMessage();
   const [clearing, setClearing] = useState(false);
   const [reload, setReload] = useState(0);
 
@@ -54,12 +49,12 @@ export default function AdminSecurityAudit() {
       })
       .catch((err) => {
         if (!alive) return;
-        setError(err instanceof ApiError ? err.message : "Журнал недоступен.");
+        setError(err instanceof ApiError ? err : "Журнал недоступен.");
       });
     return () => {
       alive = false;
     };
-  }, [category, page, pageSize, reload]);
+  }, [category, page, pageSize, reload, api]);
 
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -71,7 +66,7 @@ export default function AdminSecurityAudit() {
   // Журнал растёт на каждую попытку входа, и после разбора перебора старые записи мешают
   // видеть новые. Спрашиваем подтверждение: восстановить удалённое нечем.
   const clear = () => {
-    if (!window.confirm(`Удалить все записи журнала (${total})? Отменить будет нельзя.`)) return;
+    if (!window.confirm(t("Удалить все записи журнала ({0})? Отменить будет нельзя.", total))) return;
     setClearing(true);
     api.admin
       .clearSecurityAudit()
@@ -79,37 +74,36 @@ export default function AdminSecurityAudit() {
         setPage(1);
         setReload((n) => n + 1);
       })
-      .catch((err) => setError(err instanceof ApiError ? err.message : "Очистить не вышло."))
+      .catch((err) => setError(err instanceof ApiError ? err : "Очистить не вышло."))
       .finally(() => setClearing(false));
   };
 
   return (
     <div className="panel section-gap">
-      <h3>Журнал безопасности</h3>
+      <h3>{t("Журнал безопасности")}</h3>
       <div className="cap">
-        Попытки входа, регистрации и сброса пароля: успешные и неуспешные
-        {/* сервер считает total уже по фильтру: «всего» читалось как размер всего журнала */}
-        {rows ? `${category === "all" ? " · всего " : " · в этом отборе "}${total}` : ""}
+        {t("Попытки входа, регистрации и сброса пароля: успешные и неуспешные")}{/* сервер считает total уже по фильтру: «всего» читалось как размер всего журнала */}
+        {rows ? `${category === "all" ? t(" · всего ") : t(" · в этом отборе ")}${total}` : ""}
       </div>
 
       <div
         // это фильтр, а не вкладки: внутри tablist ожидаются role="tab" с aria-selected,
         // а здесь кнопки-переключатели — договор не совпадал
         role="group"
-        aria-label="Фильтр журнала безопасности"
+        aria-label={t("Фильтр журнала безопасности")}
         data-testid="audit-tabs"
         style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "8px 0" }}
       >
-        {TABS.map((t) => (
+        {TABS.map((tab) => (
           <button
-            key={t.key}
+            key={tab.key}
             type="button"
-            className={`btn sm${category === t.key ? "" : " ghost"}`}
-            aria-pressed={category === t.key}
-            data-testid={`audit-tab-${t.key}`}
-            onClick={() => pick(t.key)}
+            className={`btn sm${category === tab.key ? "" : " ghost"}`}
+            aria-pressed={category === tab.key}
+            data-testid={`audit-tab-${tab.key}`}
+            onClick={() => pick(tab.key)}
           >
-            {t.label}
+            {t(tab.label)}
           </button>
         ))}
         {/* очистка стоит в том же ряду, что и отбор: обе кнопки про одну таблицу */}
@@ -121,7 +115,7 @@ export default function AdminSecurityAudit() {
           disabled={clearing || !total}
           style={{ marginLeft: "auto" }}
         >
-          {clearing ? "Чистим…" : "Очистить"}
+          {clearing ? t("Чистим…") : t("Очистить")}
         </button>
       </div>
 
@@ -135,10 +129,10 @@ export default function AdminSecurityAudit() {
             <table className="admtable" data-testid="admin-security-audit">
               <thead>
                 <tr>
-                  <th>Когда</th>
-                  <th>Событие</th>
-                  <th>Исход</th>
-                  <th>Почта</th>
+                  <th>{t("Когда")}</th>
+                  <th>{t("Событие")}</th>
+                  <th>{t("Исход")}</th>
+                  <th>{t("Почта")}</th>
                   <th>IP</th>
                 </tr>
               </thead>
@@ -146,21 +140,19 @@ export default function AdminSecurityAudit() {
                 {rows === null ? (
                   <tr>
                     <td colSpan={5} className="skeleton">
-                      Загружаем…
-                    </td>
+                      {t("Загружаем…")}</td>
                   </tr>
                 ) : rows.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="dim">
-                      Событий нет.
-                    </td>
+                      {t("Событий нет.")}</td>
                   </tr>
                 ) : (
                   rows.map((r) => (
                     <tr key={r.id} data-testid="audit-row" data-outcome={r.outcome}>
                       <td className="small">{when(r.at)}</td>
-                      <td>{ACTION[r.action] ?? r.action}</td>
-                      <td>{OUTCOME[r.outcome] ?? r.outcome}</td>
+                      <td>{t(ACTION[r.action] ?? r.action)}</td>
+                      <td>{t(OUTCOME[r.outcome] ?? r.outcome)}</td>
                       <td>{r.email ?? "—"}</td>
                       <td className="small">{r.ip ?? "—"}</td>
                     </tr>
@@ -181,10 +173,9 @@ export default function AdminSecurityAudit() {
               data-testid="audit-prev"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Назад
-            </button>
+              {t("Назад")}</button>
             <span className="dim">
-              Стр. {page} из {pages}
+              {t("Стр. ")}{page} {t(" из ")}{pages}
             </span>
             <button
               type="button"
@@ -193,10 +184,9 @@ export default function AdminSecurityAudit() {
               data-testid="audit-next"
               onClick={() => setPage((p) => Math.min(pages, p + 1))}
             >
-              Вперёд
-            </button>
+              {t("Вперёд")}</button>
             <label className="dim">
-              На странице:{" "}
+              {t("На странице:")}{" "}
               <select
                 value={pageSize}
                 data-testid="audit-size"

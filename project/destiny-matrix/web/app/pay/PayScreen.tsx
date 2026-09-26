@@ -1,25 +1,32 @@
 "use client";
 
-import { D, L } from "@/lib/i18n";
-import Link from "next/link";
-
 import PayForm from "@/components/pay/PayForm";
 import TariffsProvider from "@/components/pay/TariffsProvider";
-import type { Tariff } from "@/lib/tariffs";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import type { PaymentProvider, Tariff } from "@/lib/tariffs";
+import Link from "next/link";
 
 // Экран оплаты один на два маршрута: `/pay` (выбор с нуля) и `/pay/<тариф>` (тариф выбран
 // ссылкой из карточки). Отличаются только тем, что отмечено при открытии.
-export default function PayScreen({
-  tariffs,
-  initial,
-  test,
-}: {
+export default function PayScreen({ locale: requestedLocale, ...localeProps }: ({
   tariffs: Tariff[];
+  providers: PaymentProvider[] | null;
   initial: string;
   /** true — деньги ненастоящие (мок). Приходит с сервера: вшитое обещание «оплата тестовая»
    *  показывалось покупателям и после подключения боевого терминала. */
   test: boolean;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    tariffs,
+    providers,
+    initial,
+    test,
+  } = localeProps;
+
   return (
     <main id="content" className="page">
       <div className="wrap">
@@ -29,9 +36,11 @@ export default function PayScreen({
         <h1>{D.encLinks.payTitle[L]}</h1>
         {/* прайс приходит из базы; если его нет — API недоступен, и платёж всё равно не
             пройдёт. Называть цену из кода в этот момент нельзя. */}
-        {tariffs.length ? (
-          <TariffsProvider server={tariffs}>
-            <PayForm tariffs={tariffs} initial={initial} test={test} />
+        {providers?.length === 0 ? (
+          <div className="panel paybox" role="status">{D.pay.regionUnavailable[L]}</div>
+        ) : tariffs.length && providers?.length ? (
+          <TariffsProvider locale={L} server={tariffs} providers={providers}>
+            <PayForm locale={L} tariffs={tariffs} initial={initial} test={test} providers={providers} />
           </TariffsProvider>
         ) : (
           <div className="panel paybox">

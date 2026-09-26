@@ -1,11 +1,12 @@
-import { D, L } from "@/lib/i18n";
+import { D } from "@/lib/i18n";
+import { SITE_LANG, type Lang } from "@/lib/i18n/lang";
+import { requestLocale } from "@/lib/i18n/request";
 // Доступ к платным разделам определяется здесь — на сервере, по httpOnly-куке. В браузер
 // признак доступа не отдаётся и из JavaScript не читается: страница либо напечатана с
 // разделами, либо без них.
 //
 // Каталог `_lib` приватный: App Router не делает из папок с подчёркиванием маршрутов.
 import type { Tariff } from "@/lib/tariffs";
-
 import { sessionToken, upstreamUrl } from "../api/_lib/upstream";
 
 export interface SavedMatrix {
@@ -55,10 +56,10 @@ const NO_ACCESS: Access = {
   offline: false,
 };
 
-async function upstream(path: string, token: string): Promise<{ ok: boolean; status: number; body: unknown }> {
+async function upstream(path: string, token: string, locale?: Lang): Promise<{ ok: boolean; status: number; body: unknown }> {
   try {
     const res = await fetch(upstreamUrl(path), {
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      headers: { Accept: "application/json", "Accept-Language": locale ?? await requestLocale(), Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
     const text = await res.text();
@@ -132,8 +133,8 @@ export interface PrintPage {
  * Страница печати: её открывает браузерный сервис, у которого куки владельца нет и быть не
  * должно. Вместо неё — пропуск на одну матрицу, живущий минуту.
  */
-export async function readPrintPage(id: number, token: string): Promise<PrintPage | null> {
-  const res = await upstream(`/reports/page/${id}?t=${encodeURIComponent(token)}`, "");
+export async function readPrintPage(id: number, token: string, L: Lang = SITE_LANG): Promise<PrintPage | null> {
+  const res = await upstream(`/reports/page/${id}?t=${encodeURIComponent(token)}`, "", L);
   if (!res.ok || !res.body || typeof res.body !== "object") return null;
   const row = res.body as Record<string, unknown>;
   const birth = String(row.birth ?? "");
@@ -149,7 +150,7 @@ export async function readPrintPage(id: number, token: string): Promise<PrintPag
 }
 
 /** Как назвать доступ в отчёте: имя тарифа берём из базы, а не из кода. */
-export function planLabel(access: Access, tariffs: Tariff[], unlocked: boolean): string {
+export function planLabel(access: Access, tariffs: Tariff[], unlocked: boolean, L: Lang = SITE_LANG): string {
   if (access.unlimited) {
     return tariffs.find((t) => t.scope.includes("all"))?.name ?? D.sheet.planUnlimited[L];
   }

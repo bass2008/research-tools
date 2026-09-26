@@ -1,6 +1,7 @@
 """Строки, которые сервер показывает человеку: отказы и письма.
 
-Язык один на контур (`SITE_LANG`) и совпадает с языком фронта. Ключ — короткое имя случая;
+Язык определяется для запроса через Accept-Language; SITE_LANG задаёт только fallback.
+Фоновые задачи восстанавливают язык операции через using_locale. Ключ — короткое имя случая;
 подстановки идут через `format`, потому что порядок слов у языков разный, а не потому, что
 строку собирают из кусков.
 
@@ -8,9 +9,64 @@
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
+from contextvars import ContextVar
+
 from .config import settings
 
+SUPPORTED_LOCALES = ("ru", "en")
+_locale: ContextVar[str | None] = ContextVar("locale", default=None)
+
+
+def normalize_locale(value: str | None) -> str | None:
+    base = (value or "").strip().lower().replace("_", "-").split("-")[0]
+    return base if base in SUPPORTED_LOCALES else None
+
+
+def current_locale() -> str:
+    return _locale.get() or normalize_locale(settings.site_lang) or "ru"
+
+
+def negotiate_locale(header: str | None, default: str | None = None) -> str:
+    choices = []
+    for index, part in enumerate((header or "").split(",")):
+        tag, *params = part.strip().split(";")
+        locale = normalize_locale(tag)
+        weight = next((p.strip()[2:] for p in params if p.strip().startswith("q=")), "1")
+        try:
+            quality = float(weight)
+        except ValueError:
+            continue
+        if locale and 0 < quality <= 1:
+            choices.append((-quality, index, locale))
+    return min(choices)[2] if choices else normalize_locale(default or settings.site_lang) or "ru"
+
+
+@contextmanager
+def using_locale(locale: str):
+    token = _locale.set(normalize_locale(locale) or current_locale())
+    try:
+        yield
+    finally:
+        _locale.reset(token)
+
 PHRASES: dict[str, dict[str, str]] = {
+    "site.invalid": {"ru": "Не удалось определить сайт запроса", "en": "The request site could not be determined"},
+    "pay.region_unavailable": {"ru": "На данный момент нет доступной оплаты для вашего региона", "en": "There are currently no payment methods available for your region"},
+    "admin.not_found": {"ru": 'Не найдено', "en": 'Not found'},
+    "admin.no_user": {"ru": 'Пользователь не найден', "en": 'User not found'},
+    "admin.cancel_unavailable": {"ru": 'Этот платёж отменить нельзя: способ оплаты недоступен', "en": 'This payment cannot be canceled: the payment method is unavailable'},
+    "admin.no_job": {"ru": 'Задача печати не найдена', "en": 'Print job not found'},
+    "admin.no_file": {"ru": 'Файла нет: печать не завершилась', "en": 'No file: printing has not finished'},
+    "admin.file_expired": {"ru": "Файл больше не хранится. Нажмите «Пересоздать».", "en": "The file is no longer stored. Click Rebuild."},
+    "admin.print_busy": {"ru": 'Все места печати заняты, попробуйте позже', "en": 'All print slots are busy. Try again later'},
+    "admin.print_failed": {"ru": 'Печать не удалась. Попробуйте позже.', "en": 'Printing failed. Try again later.'},
+    "pay.gateway_failed": {"ru": 'Не удалось выполнить запрос к платёжному провайдеру. Попробуйте позже.', "en": 'The payment provider could not complete the request. Try again later.'},
+    "pay.gateway_http": {"ru": 'Платёжный провайдер ответил с ошибкой HTTP {code}. Попробуйте позже.', "en": 'The payment provider returned HTTP error {code}. Try again later.'},
+    "pay.gateway_unavailable": {"ru": 'Платёжный провайдер недоступен. Попробуйте позже.', "en": 'The payment provider is unavailable. Try again later.'},
+    "pay.gateway_rejected": {"ru": 'Платёжный провайдер отклонил запрос (код {code}).', "en": 'The payment provider rejected the request (code {code}).'},
+    "pay.receipt_email": {"ru": 'Для чека нужна почта покупателя.', "en": 'The customer email address is required for the receipt.'},
+    "pay.invalid_signature": {"ru": 'Подпись уведомления не совпала', "en": 'The notification signature does not match'},
     # вход и аккаунт
     "auth.token_required": {
         "ru": "Нужен вход: передайте токен",
@@ -34,6 +90,9 @@ PHRASES: dict[str, dict[str, str]] = {
     },
     # матрицы
     "matrix.not_found": {"ru": "Матрица не найдена", "en": "Matrix not found"},
+    "matrix.future_birth": {"ru": "дата рождения в будущем", "en": "Birth date is in the future"},
+    "matrix.early_birth": {"ru": "поддерживаются даты рождения с 1900 года", "en": "Birth dates from 1900 onwards are supported"},
+    "matrix.invalid_sex": {"ru": "sex должен быть 'm' или 'f'", "en": "Sex must be 'm' or 'f'"},
     "matrix.no_slots": {
         "ru": "Мест для хранения дат больше нет: занято {used}.{offer}",
         "en": "There is no room left for more dates: {used} in use.{offer}",
@@ -190,5 +249,14 @@ PHRASES: dict[str, dict[str, str]] = {
 
 def say(key: str, **values: object) -> str:
     phrase = PHRASES[key]
-    text = phrase.get(settings.site_lang, phrase["ru"])
+    text = phrase.get(current_locale(), phrase["ru"])
     return text.format(**values) if values else text
+
+
+def validation_message(error: ValueError) -> str:
+    """Translate the engine's public validation failures without changing its contract."""
+    message = str(error)
+    for key in ("matrix.future_birth", "matrix.early_birth", "matrix.invalid_sex"):
+        if message == PHRASES[key]["ru"]:
+            return say(key)
+    return message

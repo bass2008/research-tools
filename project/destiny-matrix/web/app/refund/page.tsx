@@ -1,16 +1,30 @@
+import { INTERNATIONAL_RU } from "@/lib/legal/international";
+import { requestSite } from "@/lib/siteProfile.server";
+import LegalDocView from "@/components/legal/LegalDoc";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { REFUND } from "@/lib/legal/refund";
+import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 
-import LegalDocView from "@/components/legal/LegalDoc";
-import { D, L } from "@/lib/i18n";
-import { REFUND } from "@/lib/legal/refund";
-import { pageMeta } from "@/lib/site";
+const forLocale = localized((L: Locale, site) => {
+  const { pageMeta } = localizedSite(L, site);
 
-export const metadata: Metadata = pageMeta({
-  title: D.pages.refundTitle[L],
-  description: D.pages.refundDescription[L],
-  path: "/refund",
+  const metadata: Metadata = pageMeta({
+    title: D.pages.refundTitle[L],
+    description: D.pages.refundDescription[L],
+    path: "/refund",
+  });
+  return { pageMeta, metadata };
 });
 
-export default function RefundPage() {
-  return <LegalDocView doc={REFUND[L]} crumb={D.nav.refund[L]} />;
+export default async function RefundPage() {
+  const L = await requestLocale();
+
+  return <LegalDocView locale={L} doc={(await requestSite()).legalLocale === "en" && L === "ru" ? INTERNATIONAL_RU.refund : REFUND[L]} crumb={D.nav.refund[L]} />;
+}
+export async function generateMetadata() {
+  return forLocale(await publicLocale(), await requestSite()).metadata;
 }

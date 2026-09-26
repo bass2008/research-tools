@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import time
 from pathlib import Path
@@ -26,6 +27,21 @@ def mock_payments(monkeypatch):
     from app.config import settings
 
     monkeypatch.setattr(settings, "mock_payments", True)
+
+
+@pytest.fixture(autouse=True)
+def site_context(monkeypatch):
+    from app.config import settings
+    from app import sites
+    origin = "http://testserver"
+    monkeypatch.setattr(settings, "site_profiles", json.dumps([{
+        "origin": origin, "defaultLocale": "ru", "locales": ["ru", "en"],
+        "payments": [{"id": name, "provider": name,
+                      "notificationUrl": f"{origin}/api/payments/notify/{name}"}
+                     for name in ("tbank", "mock")],
+    }]))
+    with sites.using_site(sites.find(origin)):
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -71,7 +87,7 @@ def client(db_engine) -> TestClient:
             yield session
 
     app.dependency_overrides[get_db] = override
-    with TestClient(app) as test_client:
+    with TestClient(app, headers={"X-Arcana-Site-Origin": "http://testserver"}) as test_client:
         yield test_client
     app.dependency_overrides.clear()
 

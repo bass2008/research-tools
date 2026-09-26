@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-
-import { ALL_FREE } from "@/lib/access";
-import { matrixItem } from "@/lib/content";
 import { parseSlug } from "@/app/matrix/matrices";
-import { build, withPositionArticles } from "@/lib/sections";
+import { ALL_FREE } from "@/lib/access";
+import { forLocale as contentForLocale } from "@/lib/content";
+import { requestLocale } from "@/lib/i18n/request";
+import { forLocale as sectionsForLocale } from "@/lib/sections";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,10 @@ export const dynamic = "force-dynamic";
  * Пока касса работает, маршрут не существует: иначе платные толкования забирал бы кто угодно
  * одним запросом.
  */
-export function GET(request: Request) {
+export async function GET(request: Request) {
+  const locale = await requestLocale(request);
+  const { matrixItem } = contentForLocale(locale);
+  const { build, withPositionArticles } = sectionsForLocale(locale);
   if (!ALL_FREE) return new NextResponse("Not found", { status: 404 });
   const slug = new URL(request.url).searchParams.get("slug") ?? "";
   const item = parseSlug(slug) && matrixItem(slug);
@@ -25,6 +28,6 @@ export function GET(request: Request) {
   const matrix = item.matrix;
   return NextResponse.json(
     { sections: withPositionArticles(matrix, build(matrix, true)) },
-    { headers: { "Cache-Control": "public, max-age=3600" } },
+    { headers: { "Cache-Control": "private, no-store", "Content-Language": locale } },
   );
 }

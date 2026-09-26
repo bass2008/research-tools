@@ -22,11 +22,7 @@ done
 echo "== секреты"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "mkdir -p /srv/arcana"
 scp -q "$SECRETS/.env" "$SECRETS/.env.test" "$SSH_USER@$IP:/srv/arcana/"
-# Английскому контуру банк не нужен: из общих секретов ему достаточно BROWSER_SECRET, чтобы
-# печать ходила к общему браузеру. Файла нет — контур поднимется, но печать ответит 403.
-[ -f "$SECRETS/.env.test-en" ] && scp -q "$SECRETS/.env.test-en" "$SSH_USER@$IP:/srv/arcana/"
-ssh "$SSH_USER@$IP" "chmod 600 /srv/arcana/.env /srv/arcana/.env.test /srv/arcana/.env.test-en 2>/dev/null || \
-  chmod 600 /srv/arcana/.env /srv/arcana/.env.test"
+ssh "$SSH_USER@$IP" "chmod 600 /srv/arcana/.env /srv/arcana/.env.test"
 
 echo "== вход в реестр"
 # Реестр Selectel не отдаёт токен по метаданным машины, как Yandex CR: кладём его файлом.
@@ -79,5 +75,5 @@ IP="$IP" SSH_USER="$SSH_USER" ./deploy-nginx.sh
 
 cat <<'NEXT'
 == дальше вручную:
-  cd ../compose && ./scripts/release-prod.sh && ./scripts/release-test.sh && ./scripts/release-test-eng.sh
+  cd ../compose && ./scripts/release-prod.sh && ./scripts/release-test.sh
 NEXT

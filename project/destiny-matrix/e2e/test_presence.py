@@ -47,8 +47,11 @@ def test_five_tabs_send_one_visitor_and_five_tab_ids(browser: Browser) -> None:
 def test_admin_names_people_and_tabs_separately(page: Page) -> None:
     pulse = {
         "at": "2026-08-29T20:00:00Z",
-        "memory": {"total_mb": 1967, "used_mb": 833, "percent": 42.4},
-        "cpu": {"load1": 0.2, "load5": 0.2, "load15": 0.2, "cores": 2, "percent": 10},
+        "memory": {"total_mb": 1967, "used_mb": 833, "percent": 42.4,
+                   "swap_total_mb": 0, "swap_used_mb": 0, "swap_percent": 0},
+        "cpu": {"load1": 0.2, "load5": 0.2, "load15": 0.2, "cores": 2, "percent": 10,
+                "window_seconds": 10},
+        "contours": [],
         "disk": {"path": "/", "total_gb": 20, "free_gb": 12, "used_gb": 8, "percent": 40},
         "data_disk": {
             "path": "/srv/api/var", "total_gb": 20, "free_gb": 12,

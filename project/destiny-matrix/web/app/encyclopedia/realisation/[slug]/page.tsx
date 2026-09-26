@@ -1,8 +1,14 @@
-import { personalReadingMetadata, personalReadingPage } from "../../_personal/reading";
+import { requestSite } from "@/lib/siteProfile.server";
+import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale } from "../../_personal/reading";
 
-// Раздел зашит в путь: общий `[section]/[slug]` перехватывал любой неизвестный адрес под
-// `/encyclopedia/` и отдавал 404 без разметки. Список маршрутов сверяется тестом.
 export const dynamic = "force-dynamic";
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
 
-export const generateMetadata = personalReadingMetadata("realisation");
-export default personalReadingPage("realisation");
+export async function generateMetadata(props: Props) {
+  return forLocale(await publicLocale(), await requestSite()).personalReadingMetadata("realisation")(props);
+}
+
+export default async function Page(props: Props) {
+  return forLocale(await requestLocale(), await requestSite()).personalReadingPage("realisation")(props);
+}

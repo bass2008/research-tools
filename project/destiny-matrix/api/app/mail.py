@@ -7,13 +7,15 @@
 """
 from __future__ import annotations
 
+from . import sites
+
 import logging
 import smtplib
 from email.message import EmailMessage
 
 import boto3
 
-from .i18n import say
+from .i18n import say, current_locale
 from .config import settings
 
 log = logging.getLogger("arcana.mail")
@@ -71,13 +73,13 @@ def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = 
              matrix_id: int | None = None) -> bool:
     # Без номера даты ссылка вела на «последнюю сохранённую», а купить могли не её:
     # человек шёл по письму и попадал в чужой по смыслу разбор.
-    report = f"{settings.site_url}/report" + (f"?m={matrix_id}" if matrix_id else "")
+    report = f"{sites.current().origin}/report?" + (f"m={matrix_id}&" if matrix_id else "") + f"lang={current_locale()}"
     lines = [
         say("mail.purchase.ready", tariff=tariff_name),
         say("mail.purchase.payment", id=payment_id),
         "",
         say("mail.purchase.open", url=report),
-        say("mail.account", url=f"{settings.site_url}/account"),
+        say("mail.account", url=f"{sites.current().origin}/account?lang={current_locale()}"),
     ]
     if password:
         lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
@@ -92,7 +94,7 @@ def welcome(to: str) -> bool:
     body = "\n".join([
         say("mail.welcome.created", email=to),
         "",
-        say("mail.account", url=f"{settings.site_url}/account"),
+        say("mail.account", url=f"{sites.current().origin}/account?lang={current_locale()}"),
         say(access_line),
         "",
         say("mail.welcome.help"),

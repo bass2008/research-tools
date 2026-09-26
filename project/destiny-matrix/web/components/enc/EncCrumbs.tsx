@@ -1,29 +1,38 @@
 "use client";
 
-import { D, L } from "@/lib/i18n";
+import { useLocale } from "@/components/ui/LocaleProvider";
+import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
+import { D } from "@/lib/i18n";
+import { type Lang as Locale } from "@/lib/i18n/lang";
+import { localized } from "@/lib/i18n/localized";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  encyclopediaSection,
-  encyclopediaSectionFromExternalRoot,
-  encyclopediaSectionFromSegment,
-  encyclopediaSectionHref,
-} from "@/lib/encyclopediaNavigation";
+
+export const forLocale = localized((L: Locale) => {
+  const { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
+
+  return { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref };
+});
 
 // Путь показывается один раз, над каркасом: последний шаг выводится из адреса, поэтому
 // детальные страницы не рисуют своих крошек.
-export default function EncCrumbs({
-  arcana,
-  positions,
-  chakras,
-  articles,
-}: {
+export default function EncCrumbs({ locale: requestedLocale, ...localeProps }: ({
   arcana: string[];
   positions: Record<string, { title: string; kind: "sec" | "pts" }>;
   chakras: Record<string, string>;
   /** адрес статьи-хаба → её заголовок */
   articles: Record<string, string>;
-}) {
+}) & { locale?: Locale }) {
+  const activeLocale = useLocale();
+  const L = requestedLocale ?? activeLocale;
+  const {
+    arcana,
+    positions,
+    chakras,
+    articles,
+  } = localeProps;
+  const { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref } = forLocale(L);
+
   const path = usePathname();
   const parts = path.split("/").filter(Boolean);
   const trail: { name: string; href?: string }[] = [
