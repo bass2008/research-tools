@@ -18,7 +18,8 @@ const definitions: SettingDefinitions<BuildSettings> = {
 // его импортирует, а `settings/public` тянут клиентские компоненты через `lib/site`. Пока метки
 // релиза лежали там, номер коммита попадал в семь общих чанков; имя чанка — хеш содержимого, и
 // оно стоит в разметке, поэтому каждый релиз менял разметку всех страниц и сбрасывал `ETag`
-// (замер 10.09: 439 страниц из 442). Читают их только админка и `/version/current.txt`.
+// (замер 10.09: 439 страниц из 442). Читают их админка, `/version/current.txt` и серверная
+// карта сайта: её lastmod с 27.09.2026 снова обновляется при каждом релизе.
 export const buildSettings = new SettingManager(definitions, {
   NEXT_PUBLIC_BUILD_COMMIT: process.env.NEXT_PUBLIC_BUILD_COMMIT,
   NEXT_PUBLIC_BUILD_TIME: process.env.NEXT_PUBLIC_BUILD_TIME,

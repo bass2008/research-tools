@@ -6,6 +6,13 @@ import { forLocale as localizedPositionArcanum } from "@/lib/positionArcanum";
 import { forLocale as localizedServicePages } from "@/lib/servicePages";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
+import { buildSettings } from "./settings/build";
+
+// По решению владельца от 27.09.2026 все адреса снова получают общую дату релиза, как до
+// 6abed77 (30.08). Тогда карта была статической и new Date() фиксировалась при сборке.
+// Теперь карта зависит от Host: берём уже вшитую метку сборки, а не время каждого запроса.
+// Без метки (локальный запуск) фиксируем время один раз при загрузке модуля.
+const RELEASE_MODIFIED = buildSettings.get("buildIso") || new Date().toISOString();
 
 // Одна карта сайта на всё: энциклопедия, категории статей и статика. Страницы матриц
 // (5 544 адреса вида 1-1-1990) в карту не входят и закрыты noindex: это массив почти-дублей
@@ -29,12 +36,6 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
   const { ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, KARMIC_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, allCombinationSlugs, arcanumHref, chakraHref, hasHubRoute, hubHref, karmicTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
 
   const abs = (path: string) => new URL(path, site.origin).toString();
-  // `lastmod` в карте нет намеренно. Честная дата у нас была бы только постраничной, а общая
-  // дата корпуса стояла на всех 444 адресах сразу: при правке одной статьи карта заявляла, что
-  // изменились все. Google учитывает `lastmod`, лишь пока тот «consistently and verifiably
-  // accurate», и перестаёт верить сайту целиком, если это не так; в справке Яндекса про этот
-  // элемент не сказано ничего. Пустое поле честнее неверного: робот решает сам.
-
   // Один адрес — одна запись. Источников у карты несколько (хабы, реестр служебных страниц,
   // разделы), и «О методе» попал в неё дважды: он одновременно хаб и служебная страница.
   // Дубль в карте — сигнал поиску, что сайт сам не знает своих адресов.
@@ -85,7 +86,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
       url: abs(SERVICE_PAGES[key].path),
       priority: SERVICE_PAGES[key].priority,
     })),
-  ]);
+  ]).map((entry) => ({ ...entry, lastModified: RELEASE_MODIFIED }));
 }
 
 function unique(rows: MetadataRoute.Sitemap): MetadataRoute.Sitemap {

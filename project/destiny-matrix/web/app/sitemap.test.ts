@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sitemapForSite as sitemap } from "@/lib/sitemapEntries";
 import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
@@ -126,17 +126,55 @@ describe("карта сайта", () => {
     expect(published).toHaveLength(26);
   });
 
-  // Даты в карте нет намеренно: честной она была бы только постраничной, а общая дата корпуса
-  // объявляла изменившимися все 444 адреса при правке одной статьи. Возврат такой даты — не
-  // улучшение, а возврат к неправде, поэтому её отсутствие закреплено тестом.
-  it("не ставит адресам дату правки", () => {
-    expect(sitemap().filter((entry) => entry.lastModified !== undefined)).toEqual([]);
-  });
-
   it("не выдаёт приватные адреса", () => {
     for (const hidden of ["/report", "/account", "/pay", "/matrices", "/admin"]) {
       expect(paths).not.toContain(hidden);
     }
+  });
+});
+
+describe("дата релиза в карте сайта", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  // Две сборки одного корпуса должны дать разные даты для всех адресов обоих доменов.
+  // Между запросами внутри одной сборки время не двигается вместе с часами сервера.
+  it.each(["2026-09-27T13:00:00Z", "2026-09-28T15:30:00Z"])(
+    "использует метку сборки %s на RU и EN",
+    async (releasedAt) => {
+      vi.stubEnv("NEXT_PUBLIC_BUILD_ISO", releasedAt);
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-10-01T00:00:00Z"));
+      vi.resetModules();
+      const { sitemapForSite } = await import("@/lib/sitemapEntries");
+      const { configuredSites } = await import("@/lib/siteProfile");
+      const sites = configuredSites();
+      expect(sites.map((site) => site.defaultLocale).sort()).toEqual(["en", "ru"]);
+      for (const site of sites) {
+        const before = sitemapForSite(site);
+        expect(before.length).toBeGreaterThan(300);
+        expect(new Set(before.map((entry) => entry.lastModified))).toEqual(new Set([releasedAt]));
+        vi.advanceTimersByTime(86_400_000);
+        expect(sitemapForSite(site)).toEqual(before);
+      }
+    },
+  );
+
+  it("без метки сборки фиксирует локальную дату при загрузке модуля", async () => {
+    vi.stubEnv("NEXT_PUBLIC_BUILD_ISO", "");
+    vi.useFakeTimers();
+    const startedAt = "2026-09-27T13:00:00.000Z";
+    vi.setSystemTime(new Date(startedAt));
+    vi.resetModules();
+    const { sitemapForSite } = await import("@/lib/sitemapEntries");
+    const before = sitemapForSite();
+    expect(before.length).toBeGreaterThan(300);
+    expect(new Set(before.map((entry) => entry.lastModified))).toEqual(new Set([startedAt]));
+    vi.advanceTimersByTime(86_400_000);
+    expect(sitemapForSite()).toEqual(before);
   });
 });
 

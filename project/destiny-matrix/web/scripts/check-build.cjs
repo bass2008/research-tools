@@ -275,12 +275,17 @@ function checkSitemap() {
   }
   if (locs.some((url) => new URL(url).host !== HOST)) fail("sitemap содержит адреса другого домена");
   if (new Set(locs).size !== locs.length) fail("sitemap содержит дубли URL");
-  // Дат правки в карте нет намеренно (docs/decisions.md, Decision 8): общая дата на все адреса —
-  // ложный сигнал, а Google учитывает `lastmod`, только пока тот достоверен. Вернувшееся поле
-  // означает возврат общей даты корпуса, поэтому роняем приёмку. Появится своя дата у страницы —
-  // менять здесь вместе с `app/sitemap.ts`.
+  // Decision 8: каждый адрес получает общую дату сборки. Проверяем каждую запись отдельно,
+  // чтобы два lastmod у одного адреса не скрыли отсутствие даты у другого.
+  const entries = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)];
   const modified = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((match) => match[1]);
-  if (modified.length) fail(`sitemap снова печатает дату правки (${modified.length} адресов)`);
+  if (entries.length !== locs.length || entries.some((entry) =>
+    [...entry[1].matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].length !== 1)) {
+    fail("sitemap: каждый адрес должен содержать ровно один lastmod");
+  }
+  if (new Set(modified).size !== 1) fail("sitemap: адреса должны иметь общую дату сборки");
+  if (modified.some((value) => !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(value)
+    || !Number.isFinite(Date.parse(value)))) fail("sitemap: некорректная дата lastmod");
   for (const raw of locs) {
     const target = new URL(raw);
     const pathname = target.pathname.replace(/\/$/, "") || "/";
