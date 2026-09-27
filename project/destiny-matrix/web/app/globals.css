@@ -1201,6 +1201,8 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .printmode .poscard { box-shadow: none; }
 .printmode .character-interactions,
 .printmode .character-conclusion { max-width: none; }
+/* В PDF нет горизонтальной прокрутки: таблица должна помещаться внутри листа. */
+.printmode .personal-chakras { min-width: 0; }
 .printmode .postab tr,
 .printmode .chak .row { break-inside: avoid; }
 /* страница печати: шапку и подвал рисует общий layout, в PDF им места нет */

@@ -144,7 +144,7 @@ def chakra(entry: dict, lang: str = DEFAULT_LANG) -> dict:
     if primary:
         queries = [primary] + queries
     return {
-        "title": tpl["chakra_title"].format(title=entry["title"], hint=entry["hint"], low=low),
+        "title": entry.get("seo_title") or tpl["chakra_title"].format(title=entry["title"], hint=entry["hint"], low=low),
         "description": clamp(entry["seo_description"], DESC_LIMIT, lang),
         "queries": _dedup(queries),
     }

@@ -262,6 +262,9 @@ def build_chakras(ctx: Ctx) -> list[dict]:
             "title": title,
             "hint": hint,
             "level": data["level"],
+            "personal_intro": data["personal_intro"],
+            **{field: data[field] for field in ("article_sections", "readings", "examples", "faq")
+               if field in data},
             "number": len(order) - idx,
             "columns": [
                 {"key": col_key, "title": ctx.text.column_title(col_key),

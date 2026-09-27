@@ -1,8 +1,10 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import PositionMap from "@/components/enc/PositionMap";
+import Sections from "@/components/enc/Sections";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import Price from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
+import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
 import { ALL_FREE } from "@/lib/access";
 import { forLocale as localizedArcana } from "@/lib/arcana";
@@ -102,9 +104,22 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
             формулировка со спросом у верхних трёх чакр, а «<имя> — уровень N» не спрашивает
             никто. Номер уровня остаётся, но после названия страницы. */}
       <h1>
-        {D.encChakra.h1[L](c.title, c.index)}
+        {extra.readings.length ? D.encChakra.readingTitle[L](c.title) : D.encChakra.h1[L](c.title, c.index)}
       </h1>
       <p className="dim prose">{c.hint}</p>
+
+      {extra.readings.length ? (
+        <div className="prose section-gap">
+          {paragraphs.map((text, i) => <p key={i}>{text}</p>)}
+          <nav aria-label={D.encChakra.onPage[L]} className="taglist">
+            <a href="#calculation">{D.encChakra.howCounted[L]}</a>
+            <a href="#reading">{D.encChakra.readingSteps[L]}</a>
+            <a href="#examples">{D.encChakra.examples[L]}</a>
+            <a href="#numbers">{D.encChakra.numbers[L]}</a>
+            <a href="#questions">{D.octagram.faqTitle[L]}</a>
+          </nav>
+        </div>
+      ) : null}
 
       <PositionMap locale={L}
         highlight={spots}
@@ -114,10 +129,10 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
       />
 
       <div className="prose section-gap">
-        {paragraphs.map((text, i) => (
+        {!extra.readings.length && paragraphs.map((text, i) => (
           <p key={i}>{text}</p>
         ))}
-        <h2>{D.encChakra.howCounted[L]}</h2>
+        <h2 id="calculation">{D.encChakra.howCounted[L]}</h2>
         <p>
           {D.encChakra.howCountedText[L](c.title, c.physics, c.energy)}
         </p>
@@ -132,7 +147,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
 
       {extra.columns.length ? (
         <div className="panel section-gap">
-          <h3>{D.encChakra.threeColumns[L]}</h3>
+          <h2>{D.encChakra.threeColumns[L]}</h2>
           <div className="cap">{D.encChakra.threeColumnsHint[L]}</div>
           <dl className="kv">
             {extra.columns.map((col) => (
@@ -144,6 +159,50 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           </dl>
         </div>
       ) : null}
+
+      <div id="reading"><Sections items={extra.sections} /></div>
+
+      {extra.examples.length ? (
+        <section className="prose section-gap" id="examples">
+          <h2>{D.encChakra.examples[L]}</h2>
+          {extra.examples.map((example) => (
+            <section key={example.birth}>
+              <h3>{example.numbers.join(" / ")}</h3>
+              <p className="dim">{D.encChakra.exampleDate[L](example.birth.split("-").reverse().join("."))}</p>
+              {example.paragraphs.map((text, i) => <p key={i}>{text}</p>)}
+            </section>
+          ))}
+        </section>
+      ) : null}
+
+      {extra.readings.length ? (
+        <section className="section-gap" id="numbers">
+          <h2>{D.encChakra.numbers[L]}</h2>
+          <p className="prose">{D.encChakra.numbersHint[L]}</p>
+          <nav className="taglist" aria-label={D.encChakra.numbers[L]}>
+            {extra.readings.map((row) => (
+              <a key={row.n} href={`#arcanum-${row.n}`}>{row.n} · {ARCANA.find((a) => a.n === row.n)!.title}</a>
+            ))}
+          </nav>
+          {extra.readings.map((row) => (
+            <section className="panel section-gap" id={`arcanum-${row.n}`} key={row.n}>
+              <h3>{row.n} · {ARCANA.find((a) => a.n === row.n)!.title}</h3>
+              <dl className="kv">
+                {extra.columns.map((col) => {
+                  const text = row[col.key as "physics" | "energy" | "emotions"];
+                  return text ? (
+                    <div key={col.key} style={{ display: "contents" }}>
+                      <dt>{col.title}</dt><dd>{text}</dd>
+                    </div>
+                  ) : null;
+                })}
+              </dl>
+            </section>
+          ))}
+        </section>
+      ) : null}
+
+      {extra.faq.length ? <div id="questions"><Faq locale={L} items={extra.faq} /></div> : null}
 
       <div className="section-gap">
         <CalcPromo locale={L}

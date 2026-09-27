@@ -76,13 +76,17 @@ describe("список адресов", () => {
   const covers = (path: string) =>
     config.matcher.some((pattern) => new RegExp(`^${pattern}$`).test(path));
 
-  it.each(["/", "/o-metode", "/encyclopedia/arcanum/7", "/matrix/1-1-1990", "/report", "/sitemap.xml"])(
+  it.each(["/", "/o-metode", "/encyclopedia/arcanum/7", "/matrix/1-1-1990", "/report", "/sitemap.xml", "/health-other", "/health/nested"])(
     "покрывает %s", (path) => expect(covers(path)).toBe(true),
   );
 
   it.each(["/_next/static/chunks/main.js", "/_next/image"])(
     "не трогает статику %s", (path) => expect(covers(path)).toBe(false),
   );
+
+  it("не загружает профиль домена и контент для проверки frontend", () => {
+    expect(covers("/health")).toBe(false);
+  });
 });
 
 describe("domain and public locale isolation", () => {

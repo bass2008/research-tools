@@ -339,7 +339,7 @@ describe("персональные разборы остальных разде�
       });
       expect(new Set(titles).size, section).toBe(5_544);
     }
-  });
+  }, 60_000); // Полный перебор 11 088 разборов; стандартных 5 секунд недостаточно.
 
   it("строит составные переходы из обеих исходных ролей, а не из последней точки", () => {
     const matrix = calculate("1993-03-31", "f");
@@ -385,7 +385,7 @@ describe("персональные разборы остальных разде�
       .toBe(DR.readingBody.pairManyTitle[L](arcanumTitle(9), arcanumTitle(18), 7));
   });
 
-  it("различает заметный разрыв чакр и хранит полную карту в 24-компонентном URL", () => {
+  it("хранит полную карту чакр в 24-компонентном URL и показывает все три итога", () => {
     const first = matrixItem("1-1-20")!.matrix;
     const second = matrixItem("1-10-20")!.matrix;
     expect(sectionReadingSlug("chakras", first)).not.toBe(sectionReadingSlug("chakras", second));
@@ -398,19 +398,10 @@ describe("персональные разборы остальных разде�
     expect(sectionReadingItem("chakras", "4-12-8-12-4-8-22-7-7-14")).toBeNull();
 
     const reading = buildSectionReading("chakras", matrix);
-    const imbalance = reading.interactions.find((item) => item.key === "imbalance");
-    expect(imbalance?.title).toBe(DR.readingBody.imbalanceTitle[L]);
-    // Подпись собирается из словаря: уровень и два столбца через тире. Имена столбцов берутся
-    // оттуда же, поэтому проверяется форма, а технические ключи ловит следующая строка.
-    expect(imbalance?.caption).toMatch(/ · .+–.+$/);
-    expect(imbalance?.caption).not.toMatch(/physics|energy|emotions/);
-    // Вывод о разрыве — предложение из словаря; сверяем, что он вообще сделан и назван уровень.
-    expect(imbalance?.paragraphs.join(" ").length).toBeGreaterThan(80);
     const columns = reading.interactions.find((item) => item.key === "columns");
-    // Подпись собирается из словаря: слово «колонки» и два столбца через тире. Имена столбцов
-    // тоже словарные, поэтому проверяется форма, а технические ключи ловит следующая строка.
-    expect(columns?.caption).toMatch(/^\S+ .+–.+$/);
-    // Вывод о колонках сделан и назван порог: слова словарные, проверяем, что абзац не пустой.
+    expect(columns?.caption).toBe(L === "ru"
+      ? "Физика — 7 · Энергия — 7 · Эмоции — 14"
+      : "Physics — 7 · Energy — 7 · Emotions — 14");
     expect(columns?.paragraphs.join(" ").length).toBeGreaterThan(80);
   });
 

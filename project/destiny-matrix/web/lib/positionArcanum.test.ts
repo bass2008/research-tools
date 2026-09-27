@@ -3,10 +3,12 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { indexedKarmicTailKeys, positionContent } from "./content";
+import { forLocale as localizedContent, indexedKarmicTailKeys, positionContent } from "./content";
 import { POSITIONS } from "./encyclopedia";
+import { DR } from "./i18n";
 import {
   buildPositionArcanum,
+  forLocale as localizedPositionArcanum,
   indexedRegistryItems,
   positionArcanumHref,
   positionArcanumLabel,
@@ -26,6 +28,59 @@ const readings = registryItems().map((item) => ({
 
 const body = (r: (typeof readings)[number]["reading"]) =>
   [r.short, ...r.sections.flatMap((s) => s.paragraphs), ...r.faq.map((f) => f.a)].join(" ");
+
+describe.each(["ru", "en"] as const)("смысл позиционного текста (%s)", (locale) => {
+  const content = localizedContent(locale);
+  const pages = localizedPositionArcanum(locale);
+
+  it("сохраняет действие позиции без утверждения о повторении аркана", () => {
+    for (const item of pages.registryItems()) {
+      const arcanum = content.arcanumContent(item.arcanum)!;
+      const reading = pages.buildPositionArcanum(item.position, item.arcanum);
+      const action = reading.sections.find((s) => s.h2 === DR.crossing.actionH2[locale])!;
+      const sourceAction = arcanum.inPositions[item.position]!.split(/(?<=[.!?…])\s+/).at(-1)!;
+      expect(action.paragraphs).toEqual([sourceAction]);
+      expect(body(reading)).not.toContain(arcanum.repeat);
+    }
+  });
+
+  // Эти 14 средних предложений описывают риски, а не преимущества. Они должны остаться
+  // в объяснении позиции, но не попадать под положительную подводку общего шаблона.
+  it.each([
+    ["money", 8], ["money", 9], ["money", 19], ["money", 20], ["money", 21], ["money", 22],
+    ["relations", 3], ["relations", 4], ["relations", 6], ["relations", 8],
+    ["relations", 18], ["relations", 19], ["relations", 20], ["relations", 21],
+  ] as const)("не называет риск преимуществом в %s/%i", (position, number) => {
+    const raw = content.arcanumContent(number)!.inPositions[position]!;
+    const warning = raw.split(/(?<=[.!?…])\s+/)[1]!;
+    const reading = pages.buildPositionArcanum(position, number);
+    const works = reading.sections.find((s) => s.h2 === DR.crossing.worksH2[locale])!;
+    expect(reading.sections[0]!.paragraphs.join(" ")).toContain(warning);
+    expect(works.paragraphs[0]!.toLowerCase()).not.toContain(warning.toLowerCase());
+  });
+
+  // Остальные пять одиночных середин не являются ошибочными рисками. Сохраняем их
+  // содержание без автоматического переноса под отрицательную подводку.
+  it.each([
+    ["relations", 9], ["relations", 15], ["relations", 17], ["relations", 22], ["money", 18],
+  ] as const)("сохраняет нейтральное или положительное пояснение в %s/%i", (position, number) => {
+    const raw = content.arcanumContent(number)!.inPositions[position]!;
+    const detail = raw.split(/(?<=[.!?…])\s+/)[1]!;
+    const reading = pages.buildPositionArcanum(position, number);
+    const works = reading.sections.find((s) => s.h2 === DR.crossing.worksH2[locale])!;
+    expect(reading.sections[0]!.paragraphs.join(" ")).toContain(detail);
+    expect(works.paragraphs[1]!.toLowerCase()).not.toContain(detail.toLowerCase().replace(/[.!?…]+$/, ""));
+  });
+
+  it("сохраняет раздельные ресурс и риск четырёхфразного текста", () => {
+    const raw = content.arcanumContent(6)!.inPositions.profession!;
+    const parts = raw.split(/(?<=[.!?…])\s+/);
+    const reading = pages.buildPositionArcanum("profession", 6);
+    const works = reading.sections.find((s) => s.h2 === DR.crossing.worksH2[locale])!;
+    expect(works.paragraphs[0]!.toLowerCase()).toContain(parts[1]!.toLowerCase());
+    expect(works.paragraphs[1]!.toLowerCase()).toContain(parts[2]!.toLowerCase().replace(/[.!?…]+$/, ""));
+  });
+});
 
 describe("реестр пересечений", () => {
   it("не пуст и держит порог числом, а не на глаз", () => {
@@ -211,7 +266,7 @@ describe("собранная страница", () => {
     const broken = readings.flatMap(({ reading }) =>
       reading.sections.flatMap((section) =>
         section.paragraphs
-          .filter((p) => /[а-яё][.!?…]\s+[а-яё]/.test(p) || !/[.!?…»)]$/.test(p.trim()))
+          .filter((p) => /[а-яё][.!?…]\s+[а-яё]/.test(p) || !/[.!?…»)"”']$/.test(p.trim()))
           .map((p) => `${reading.position}/${reading.arcanum}: ${p.slice(0, 60)}`),
       ),
     );

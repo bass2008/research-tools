@@ -597,10 +597,6 @@ export const forLocale = localized((L: Locale) => {
     ["emotions", DR.chakraYears.columnEmotionsTitle[L]],
   ] as const;
 
-  // Семь пунктов — треть шкалы 1..22. Меньшую разницу описываем как рабочую вариативность,
-  // а не объявляем любой несовпадающий показатель «заметным дисбалансом».
-  const CHAKRA_NOTICEABLE_GAP = 7;
-
   /** 22×3 модификатора собираются из аркана и роли колонки; отдельные 462 текста ячеек не нужны. */
   function chakraColumnModifier(
     number: number,
@@ -629,7 +625,7 @@ export const forLocale = localized((L: Locale) => {
         key: row.key,
         title: row.title,
         hint: row.hint,
-        level: level.level.join(" "),
+        level: level.personalIntro,
         cells: CHAKRA_COLUMNS.map(([column, title]) => {
           const arcanumNumber = row[column];
           const columnContext = level.columns.find((item) => item.key === column);
@@ -647,76 +643,21 @@ export const forLocale = localized((L: Locale) => {
   }
 
   function chakraInteractions(matrix: Matrix): ReadingInteraction[] {
-    const scored = matrix.chakras.map((row) => ({ row, score: row.physics + row.energy + row.emotions }));
-    const leading = scored.reduce((best, item) => item.score > best.score ? item : best);
-    const quiet = scored.reduce((best, item) => item.score < best.score ? item : best);
-    const totals = Object.entries(matrix.chakra_totals) as Array<["physics" | "energy" | "emotions", number]>;
-    const high = totals.reduce((best, item) => item[1] > best[1] ? item : best);
-    const low = totals.reduce((best, item) => item[1] < best[1] ? item : best);
-    const columnGap = high[1] - low[1];
-    const rowGaps = matrix.chakras.map((row) => {
-      const values = CHAKRA_COLUMNS.map(([column, title]) => ({ column, title, value: row[column] }));
-      const rowHigh = values.reduce((best, item) => item.value > best.value ? item : best);
-      const rowLow = values.reduce((best, item) => item.value < best.value ? item : best);
-      return { row, high: rowHigh, low: rowLow, gap: rowHigh.value - rowLow.value };
-    });
-    const mainGap = rowGaps.reduce((best, item) => item.gap > best.gap ? item : best);
+    // Номера арканов обозначают темы, а не силу: их суммы и разности не ранжируют чакры.
+    const totals = CHAKRA_COLUMNS.map(([column, title]) => `${title} — ${matrix.chakra_totals[column]}`);
     const repeats = new Map<number, number>();
     for (const row of matrix.chakras) {
       for (const [column] of CHAKRA_COLUMNS) repeats.set(row[column], (repeats.get(row[column]) ?? 0) + 1);
     }
     const repeated = [...repeats.entries()].filter(([, count]) => count > 1).sort((a, b) => b[1] - a[1]);
-    const names = {
-      physics: DR.readingBody.columnPhysics[L],
-      energy: DR.readingBody.columnEnergy[L],
-      emotions: DR.readingBody.columnEmotions[L],
-    } as const;
     return [
-      {
-        key: "levels",
-        title: DR.readingBody.levelsTitle[L],
-        roles: [leading.row.title, quiet.row.title],
-        caption: DR.readingBody.levelsCaption[L](leading.row.title, quiet.row.title),
-        paragraphs: [
-          DR.readingBody.levelsText[L](leading.row.title, leading.score, quiet.row.title, quiet.score),
-          DR.readingBody.levelsNote[L],
-        ],
-      },
-      {
-        key: "imbalance",
-        title: DR.readingBody.imbalanceTitle[L],
-        roles: [mainGap.row.title, mainGap.high.column, mainGap.low.column],
-        caption: DR.readingBody.imbalanceCaption[L](
-          mainGap.row.title, mainGap.high.title, mainGap.low.title,
-        ),
-        paragraphs: [
-          DR.readingBody.imbalanceText[L](
-            mainGap.row.title,
-            mainGap.high.title.toLowerCase(), mainGap.high.value,
-            mainGap.low.title.toLowerCase(), mainGap.low.value,
-            mainGap.gap,
-            mainGap.gap >= CHAKRA_NOTICEABLE_GAP
-              ? DR.readingBody.imbalanceNoticeable[L]
-              : DR.readingBody.imbalanceOrdinary[L],
-          ),
-          DR.readingBody.imbalanceNote[L],
-        ],
-      },
       {
         key: "columns",
         title: DR.readingBody.columnsTitle[L],
-        roles: [high[0], low[0]],
-        caption: DR.readingBody.columnsCaption[L](
-          CHAKRA_COLUMNS.find(([key]) => key === high[0])![1],
-          CHAKRA_COLUMNS.find(([key]) => key === low[0])![1],
-        ),
+        roles: CHAKRA_COLUMNS.map(([column]) => column),
+        caption: totals.join(" · "),
         paragraphs: [
-          DR.readingBody.columnsText[L](
-            names[high[0]], high[1], names[low[0]], low[1], columnGap,
-            columnGap >= CHAKRA_NOTICEABLE_GAP
-              ? DR.readingBody.columnsReaches[L]
-              : DR.readingBody.columnsBelow[L],
-          ),
+          DR.readingBody.columnsText[L],
           DR.readingBody.columnsNote[L],
         ],
       },
@@ -903,14 +844,13 @@ export const forLocale = localized((L: Locale) => {
     if (section === "chakras") {
       const rows = chakraPayload(matrix);
       const interactions = chakraInteractions(matrix);
-      const leading = interactions[0].roles[0];
       return {
         ...base,
         layout: "chakras",
         caption: DR.chakraYears.chakraCaption[L],
         chakraRows: rows,
         interactions,
-        summary: DR.chakraYears.chakraSummary[L](leading),
+        summary: DR.chakraYears.chakraSummary[L],
         strength: DR.chakraYears.chakraStrength[L],
         tension: DR.chakraYears.chakraTension[L],
         practice: DR.chakraYears.chakraPractice[L],

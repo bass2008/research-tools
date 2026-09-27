@@ -142,8 +142,8 @@ export const forLocale = localized((L: Locale) => {
    *  пяти текстах из восьмидесяти, написанных в два — суть и действие, без середины. Ломать его
    *  нельзя, на нём стоят статьи сочетаний и персональные разборы.
    *
-   *  Когда середина одна, она идёт в силу, а риск берётся из `minus` аркана. Ставить одну и ту же
-   *  фразу и в силу, и в риск нельзя: страница утверждала бы противоположное одними словами. */
+   *  Единственная середина может описывать и ресурс, и риск: сохраняем её в сути без назначения
+   *  знака, как в `roleContent`. Силу и риск в таком случае берём из `plus`/`minus` аркана. */
   function role(text: string, plus: string, minus: string): Role {
     const parts = text.replace(CORPUS_PREFIX, "").trim().split(/(?<=[.!?…])\s+/).filter(Boolean);
     if (parts.length < 2) {
@@ -155,8 +155,8 @@ export const forLocale = localized((L: Locale) => {
       part.includes(";") ? part.split(";").map((half) => half.trim()).filter(Boolean) : [part],
     );
     return {
-      essence: sentence(parts[0]!),
-      strength: middle[0] ? inline(middle[0]) : `${D.clause.subject[L]} ${inline(plus)}`,
+      essence: [sentence(parts[0]!), ...(middle.length === 1 ? [sentence(middle[0]!)] : [])].join(" "),
+      strength: middle.length > 1 ? inline(middle[0]!) : `${D.clause.subject[L]} ${inline(plus)}`,
       risk: middle[1] ? inline(middle[1]) : `${D.clause.subject[L]} ${inline(minus)}`,
       action: sentence(parts.at(-1)!),
     };
@@ -262,7 +262,7 @@ export const forLocale = localized((L: Locale) => {
       },
       {
         h2: DR.crossing.actionH2[L],
-        paragraphs: [read.action + (content.repeat ? ` ${sentence(content.repeat)}` : "")],
+        paragraphs: [read.action],
       },
     ];
 

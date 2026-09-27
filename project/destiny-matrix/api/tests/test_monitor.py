@@ -7,7 +7,10 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
+from unittest.mock import Mock
 
 import pytest
 from sqlalchemy import select
@@ -271,3 +274,95 @@ def test_crawlers_are_counted_from_the_nginx_log(tmp_path):
 
 def test_no_nginx_log_is_not_an_error():
     assert monitor.crawlers(path="/нет/такого/файла") is None
+
+
+def test_crawlers_reuse_summary_for_ten_minutes(monkeypatch, tmp_path):
+    now = dt.datetime.now(dt.timezone.utc).strftime("%d/%b/%Y:%H:%M:%S %z")
+    line = f'1.1.1.1 - - [{now}] "GET / HTTP/1.1" 200 5000 "-" "Googlebot"\n'
+    log = tmp_path / "access.log"
+    log.write_text(line)
+    clock = [100.0]
+    monkeypatch.setattr(monitor.time, "monotonic", lambda: clock[0])
+    read = Mock(wraps=monitor._read_crawlers)
+    monkeypatch.setattr(monitor, "_read_crawlers", read)
+
+    first = monitor.crawlers(path=str(log))
+    assert first[0]["requests"] == 1
+    log.write_text(line * 2)
+    for elapsed in range(10, 600, 10):
+        clock[0] = 100.0 + elapsed
+        assert monitor.crawlers(path=str(log)) == first
+    assert read.call_count == 1, "опросы админки повторно читали журнал"
+
+    clock[0] = 700.0
+    assert monitor.crawlers(path=str(log))[0]["requests"] == 2
+    assert read.call_count == 2
+
+
+@pytest.mark.parametrize("available", [False, True])
+def test_crawlers_cache_missing_and_empty_log(monkeypatch, tmp_path, available):
+    log = tmp_path / "access.log"
+    if available:
+        log.write_text("")
+    clock = [100.0]
+    monkeypatch.setattr(monitor.time, "monotonic", lambda: clock[0])
+    read = Mock(wraps=monitor._read_crawlers)
+    monkeypatch.setattr(monitor, "_read_crawlers", read)
+    expected = [] if available else None
+    assert monitor.crawlers(path=str(log)) == expected
+
+    now = dt.datetime.now(dt.timezone.utc).strftime("%d/%b/%Y:%H:%M:%S %z")
+    log.write_text(f'1.1.1.1 - - [{now}] "GET / HTTP/1.1" 200 5000 "-" "Googlebot"\n')
+    clock[0] = 699.0
+    assert monitor.crawlers(path=str(log)) == expected
+    assert read.call_count == 1
+    clock[0] = 700.0
+    assert monitor.crawlers(path=str(log))[0]["requests"] == 1
+    assert read.call_count == 2
+
+
+def test_crawlers_do_not_share_different_logs_or_time_ranges(tmp_path):
+    old = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=2)).strftime("%d/%b/%Y:%H:%M:%S %z")
+    log = tmp_path / "access.log"
+    other = tmp_path / "other.log"
+    log.write_text(f'1.1.1.1 - - [{old}] "GET / HTTP/1.1" 200 5000 "-" "Googlebot"\n')
+    other.write_text("")
+
+    assert monitor.crawlers(hours=1, path=str(log)) == []
+    result = monitor.crawlers(hours=3, path=str(log))
+    assert result[0]["requests"] == 1
+    result[0]["requests"] = 999
+    assert monitor.crawlers(hours=3, path=str(log))[0]["requests"] == 1
+    assert monitor.crawlers(hours=3, path=str(other)) == []
+
+
+@pytest.mark.parametrize("expired", [False, True])
+def test_concurrent_admin_polls_read_crawlers_once(monkeypatch, tmp_path, expired):
+    path = str(tmp_path / "access.log")
+    monkeypatch.setattr(monitor, "_crawlers_cache",
+                        ((1, path), 0.0, []) if expired else None)
+    reading = threading.Event()
+    release = threading.Event()
+    start = threading.Barrier(4)
+
+    def read(hours, path):
+        reading.set()
+        assert release.wait(timeout=5)
+        return [{"bot": "Googlebot", "requests": 7, "mb": 0.1}]
+
+    reader = Mock(side_effect=read)
+    monkeypatch.setattr(monitor, "_read_crawlers", reader)
+
+    def poll():
+        start.wait(timeout=5)
+        return monitor.crawlers(path=path)
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        polls = [pool.submit(poll) for _ in range(4)]
+        try:
+            assert reading.wait(timeout=5)
+        finally:
+            release.set()
+        results = [p.result(timeout=5) for p in polls]
+    assert all(result[0]["requests"] == 7 for result in results)
+    assert reader.call_count == 1

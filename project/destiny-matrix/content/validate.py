@@ -306,6 +306,11 @@ def check_chakras(rep: Report, items: list[dict], prose: list[tuple[str, str]]) 
     col_keys = [k for k, _t in COLUMNS]
     for c in items:
         who = f"чакра {c['key']}"
+        personal_intro = c.get("personal_intro", "")
+        rep.check(isinstance(personal_intro, str) and 20 <= len(personal_intro) <= 240,
+                  f"{who}: нужно короткое пояснение для персональной таблицы (20–240 знаков)")
+        if isinstance(personal_intro, str):
+            prose.append((f"{who}, пояснение персональной таблицы", personal_intro))
         rep.check(len(c["level"]) >= 2, f"{who}: значение уровня короче двух абзацев")
         for i, para in enumerate(c["level"], 1):
             rep.check(len(para) >= MIN_MEANING,

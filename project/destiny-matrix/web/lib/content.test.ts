@@ -12,6 +12,7 @@ import {
   chakraContent,
   combinationContent,
   contentStats,
+  forLocale as localizedContent,
   positionContent,
 } from "./content";
 import { SPEC } from "./sections";
@@ -19,6 +20,17 @@ import { isBlockedText } from "./textPolicy";
 // Канонический корпус обязателен: недописанный JSON должен ронять сборку, а не включать
 // незаметно вторую версию текста из TypeScript.
 describe("загрузчик сгенерированного контента", () => {
+  it("сохраняет все новые блоки русского справочника чакр", () => {
+    const raw = JSON.parse(readFileSync(path.join(process.cwd(), "content/ru/chakras.json"), "utf8"));
+    for (const item of raw.items) {
+      const article = localizedContent("ru").chakraContent(item.key)!;
+      expect(article.readings, item.key).toEqual(item.readings);
+      expect(article.examples, item.key).toEqual(item.examples);
+      expect(article.sections, item.key).toEqual(item.article_sections);
+      expect(article.faq, item.key).toEqual(item.faq);
+    }
+  });
+
   it("у всех 20 разделов отчёта есть полноценная SEO-статья", () => {
     const templateOpening = /^(Смысл|Формула|Порядок|Связи|Пример|Практика|Границы|Соседние темы) (для )?[«"]/;
     for (const position of POSITIONS.filter((item) => item.kind === "section")) {
@@ -188,6 +200,10 @@ describe("гигиена сгенерированного контента", () 
       const c = chakraContent(ch.key);
       if (!c) continue;
       parts.push(...c.level, ...c.columns.flatMap((x) => [x.title, x.text]),
+        ...c.sections.flatMap((s) => [s.h2, ...s.paragraphs]),
+        ...c.readings.flatMap((r) => [r.physics ?? "", r.energy ?? "", r.emotions ?? ""]),
+        ...c.examples.flatMap((e) => e.paragraphs),
+        ...c.faq.flatMap((q) => [q.q, q.a]),
         c.seo.title, c.seo.description);
     }
     return parts.join(" ").toLowerCase();

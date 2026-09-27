@@ -231,7 +231,30 @@ def print_failures(db: Session, hours: int = 1) -> int:
                      .where(ReportJob.status == "failed", ReportJob.created_at >= since)) or 0
 
 
+CRAWLERS_CACHE_SECONDS = 10 * 60
+_crawlers_lock = threading.Lock()
+_crawlers_cache: tuple[tuple[int, str], float, list[dict] | None] | None = None
+
+
 def crawlers(hours: int = 1, path: str = NGINX_LOG) -> list[dict] | None:
+    """Сводка роботов обновляется по запросу раз в десять минут.
+
+    Храним только один итоговый список, а не строки журнала. Общая блокировка не даёт
+    нескольким вкладкам одновременно перечитать лог при истечении срока кеша.
+    """
+    global _crawlers_cache
+    key = (hours, path)
+    with _crawlers_lock:
+        cached = _crawlers_cache
+        if cached is None or cached[0] != key or time.monotonic() >= cached[1]:
+            rows = _read_crawlers(hours, path)
+            cached = (key, time.monotonic() + CRAWLERS_CACHE_SECONDS, rows)
+            _crawlers_cache = cached
+        # Получатель не может изменить сохранённую сводку для следующих запросов.
+        return [dict(row) for row in cached[2]] if cached[2] is not None else None
+
+
+def _read_crawlers(hours: int, path: str) -> list[dict] | None:
     """Кто обходит сайт. Читаем лог nginx, если он смонтирован: краулеры ходят по страницам,
     которые печатает web, и до api не доходят — иначе их не увидеть вовсе."""
     if not os.path.exists(path):

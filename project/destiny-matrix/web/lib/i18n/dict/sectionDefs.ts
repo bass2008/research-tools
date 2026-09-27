@@ -299,8 +299,8 @@ export const sectionDefs = {
     lead: { ru: "Персональная карта семи уровней в трёх колонках с итогами, повторами и практическим наблюдением без медицинских выводов.", en: "A personal map of seven levels in three columns with totals, repetitions and a practical observation, with no medical conclusions." } satisfies Phrase,
     rolesTitle: { ru: "Семь уровней и три итога", en: "Seven levels and three totals" } satisfies Phrase,
     rolesLead: { ru: "Каждая строка отвечает за свой жизненный уровень, а физика, энергия и эмоции показывают три разных способа проявления одной темы.", en: "Each row stands for its own level of life, while physics, energy and emotions show three different ways one theme appears." } satisfies Phrase,
-    interactionsTitle: { ru: "Ведущие темы и согласование карты", en: "Leading themes and the balance of the map" } satisfies Phrase,
-    interactionsLead: { ru: "Итог учитывает максимум и минимум, согласованность колонок, повтор арканов и заметные разрывы между значениями.", en: "The conclusion takes into account the maximum and the minimum, how well the columns agree, repeated arcana and visible gaps between values." } satisfies Phrase,
+    interactionsTitle: { ru: "Итоги и повторяющиеся темы карты", en: "Totals and recurring themes in the map" } satisfies Phrase,
+    interactionsLead: { ru: "Рассмотрите итоги физики, энергии и эмоций, затем найдите повторяющиеся арканы. Их смысл зависит от строки и колонки; числовая величина не задаёт иерархию чакр.", en: "Consider the totals for physics, energy and emotions, then look for repeated arcana. Their meaning depends on the row and column; numerical values do not rank the chakras." } satisfies Phrase,
   },
   rest: {
     title: { ru: "Ваш идеальный формат отдыха", en: "Your ideal way to rest" } satisfies Phrase,

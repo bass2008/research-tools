@@ -153,6 +153,22 @@ export const encArcanum = {
 };
 
 export const encChakra = {
+  readingTitle: {
+    ru: (title: string) => `${title} в матрице судьбы: расшифровка чисел`,
+    en: (title: string) => `${title} in the destiny matrix: reading the numbers`,
+  } satisfies PhraseFn<[string]>,
+  onPage: { ru: "В этой статье", en: "On this page" } satisfies Phrase,
+  readingSteps: { ru: "Как прочитать строку", en: "How to read the row" } satisfies Phrase,
+  examples: { ru: "Примеры чтения трёх чисел", en: "Examples of reading three numbers" } satisfies Phrase,
+  exampleDate: {
+    ru: (date: string) => `Пример расчёта для даты рождения ${date}. Порядок: физика / энергия / эмоции.`,
+    en: (date: string) => `Example for the birth date ${date}. Order: Physics / Energy / Emotions.`,
+  } satisfies PhraseFn<[string]>,
+  numbers: { ru: "Значения чисел по трём колонкам", en: "Number meanings by column" } satisfies Phrase,
+  numbersHint: {
+    ru: "Найдите каждое из своих чисел и прочитайте пояснение к нужной колонке. Это темы для наблюдения за собой, а не готовые выводы о характере. Указаны только те колонки, где число встречается в нашем расчёте.",
+    en: "Find each of your numbers and read the relevant column. These are prompts for reflection, not conclusions about your character. Only columns in which the number occurs in our calculation are listed.",
+  } satisfies Phrase,
   h1: {
     ru: (title: string, index: number) => `Чакра ${title} в матрице судьбы — уровень ${index}`,
     en: (title: string, index: number) => `The ${title} chakra in the destiny matrix — level ${index}`,
@@ -165,8 +181,8 @@ export const encChakra = {
   howCountedText: {
     ru: (title: string, physics: string, energy: string) => `В карте энергий уровень ${title} `
       + `использует классическую пару точек ${physics} и ${energy}. Первое число записывается в `
-      + "колонку физики, второе — энергии, эмоции равны их редуцированной сумме. Искусственного "
-      + "смещения по номеру строки в методике нет.",
+      + "колонку физики, второе — энергии. Для эмоций сложите первые два числа. Если сумма больше "
+      + "22, сложите её цифры; повторяйте, пока не получится число от 1 до 22. Например, 12 + 11 = 23 → 5.",
     en: (title: string, physics: string, energy: string) => `In the energy map the ${title} level `
       + `uses the classic pair of points ${physics} and ${energy}. The first number goes into the `
       + "physics column, the second into energy, and emotions are their reduced sum. The method "
@@ -201,11 +217,11 @@ export const encChakra = {
     en: "The other six levels, from the top down",
   } satisfies Phrase,
   whichArcanum: {
-    ru: "Какой аркан стоит на этом уровне",
+    ru: "Общий справочник арканов",
     en: "Which arcanum stands on this level",
   } satisfies Phrase,
   whichArcanumHint: {
-    ru: "22 значения — откройте своё после расчёта",
+    ru: "Дополнительные описания арканов вне контекста конкретной чакры",
     en: "22 meanings — open yours after the calculation",
   } satisfies Phrase,
   buildEnergyMap: { ru: "Построить свою карту энергий", en: "Build your own energy map" } satisfies Phrase,

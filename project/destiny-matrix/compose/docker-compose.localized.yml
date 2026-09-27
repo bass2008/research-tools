@@ -38,9 +38,10 @@ services:
       - "127.0.0.1:8010:8010"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/api/health', timeout=3)"]
-      interval: 5s
+      interval: 30s
       timeout: 5s
-      retries: 15
+      retries: 3
+      start_period: 10s
 
   web:
     <<: *web
@@ -54,6 +55,12 @@ services:
         NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: 0
     ports:
       - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 4
+      start_period: 10s
 
   browser:
     build:

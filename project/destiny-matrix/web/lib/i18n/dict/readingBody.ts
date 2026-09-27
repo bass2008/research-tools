@@ -101,9 +101,6 @@ export const readingBody = {
       + `action of the total ${targetKey}: ${targetAction}`,
   } satisfies PhraseFn<[string, string, string]>,
   // карта чакр
-  columnPhysics: { ru: "физики", en: "physics" } satisfies Phrase,
-  columnEnergy: { ru: "энергии", en: "energy" } satisfies Phrase,
-  columnEmotions: { ru: "эмоций", en: "emotions" } satisfies Phrase,
   wherePhysics: {
     ru: ["в материальном ритме", "в наблюдаемом распорядке"],
     en: ["in the material rhythm", "in the routine you can observe"],
@@ -126,73 +123,15 @@ export const readingBody = {
     ru: (where: string, action: string) => `Для наблюдения ${where} используйте шаг: ${action}`,
     en: (where: string, action: string) => `To observe ${where}, use this step: ${action}`,
   } satisfies PhraseFn<[string, string]>,
-  levelsTitle: { ru: "Ведущий и ресурсный уровни", en: "The leading and the resource levels" } satisfies Phrase,
-  levelsCaption: {
-    ru: (high: string, low: string) => `Уровни ${high}–${low}`,
-    en: (high: string, low: string) => `Levels ${high}–${low}`,
-  } satisfies PhraseFn<[string, string]>,
-  levelsText: {
-    ru: (high: string, highScore: number, low: string, lowScore: number) =>
-      `${high} набирает самый заметный суммарный акцент (${highScore}), поэтому его тема чаще `
-      + `других оказывается на переднем плане. ${low} имеет самый спокойный показатель (${lowScore}) `
-      + "и может служить местом для бережного, небольшого эксперимента.",
-    en: (high: string, highScore: number, low: string, lowScore: number) =>
-      `${high} gathers the most visible total accent (${highScore}), so its theme comes to the `
-      + `foreground more often than the others. ${low} has the quietest figure (${lowScore}) and can `
-      + "serve as a place for a small, careful experiment.",
-  } satisfies PhraseFn<[string, number, string, number]>,
-  levelsNote: {
-    ru: "Максимум и минимум не означают «хорошую» и «плохую» чакру: это сравнительные акценты "
-      + "внутри одной карты, а не оценка состояния организма.",
-    en: "A maximum and a minimum do not mean a “good” and a “bad” chakra: these are comparative "
-      + "accents inside one chart, not a judgement about the body.",
-  } satisfies Phrase,
-  imbalanceTitle: { ru: "Главный внутренний разрыв карты", en: "The main inner gap of the chart" } satisfies Phrase,
-  imbalanceCaption: {
-    ru: (row: string, high: string, low: string) => `Уровень ${row} · ${high}–${low}`,
-    en: (row: string, high: string, low: string) => `Level ${row} · ${high}–${low}`,
-  } satisfies PhraseFn<[string, string, string]>,
-  imbalanceText: {
-    ru: (row: string, high: string, highValue: number, low: string, lowValue: number, gap: number, verdict: string) =>
-      `${row} даёт наибольшую разницу внутри одного уровня: ${high} — ${highValue}, ${low} — `
-      + `${lowValue}, разрыв — ${gap}. ${verdict}`,
-    en: (row: string, high: string, highValue: number, low: string, lowValue: number, gap: number, verdict: string) =>
-      `${row} gives the largest difference inside one level: ${high} — ${highValue}, ${low} — `
-      + `${lowValue}, the gap is ${gap}. ${verdict}`,
-  } satisfies PhraseFn<[string, string, number, string, number, number, string]>,
-  imbalanceNoticeable: {
-    ru: "По правилу карты это заметный разрыв: способы проявления уровня полезно согласовывать отдельно.",
-    en: "By the rule of the chart this is a noticeable gap: the ways this level shows are worth "
-      + "bringing into line separately.",
-  } satisfies Phrase,
-  imbalanceOrdinary: {
-    ru: "Разница меньше порога заметного разрыва и описывает обычную вариативность способов проявления.",
-    en: "The difference is below the threshold of a noticeable gap and describes the ordinary "
-      + "variety in how the level shows.",
-  } satisfies Phrase,
-  imbalanceNote: {
-    ru: "Это сравнительный показатель внутри рассчитанной карты. Он не является медицинским выводом "
-      + "и описывает только различие способов проявления.",
-    en: "This is a comparative figure inside a calculated chart. It is not a medical conclusion and "
-      + "describes only the difference in how the level shows.",
-  } satisfies Phrase,
-  columnsTitle: { ru: "Согласование трёх колонок", en: "Bringing the three columns into line" } satisfies Phrase,
-  columnsCaption: {
-    ru: (high: string, low: string) => `Колонки ${high}–${low}`,
-    en: (high: string, low: string) => `Columns ${high}–${low}`,
-  } satisfies PhraseFn<[string, string]>,
+  columnsTitle: { ru: "Итоги трёх колонок", en: "The three column totals" } satisfies Phrase,
   columnsText: {
-    ru: (high: string, highValue: number, low: string, lowValue: number, gap: number, verdict: string) =>
-      `Среди итогов сильнее выделяется колонка ${high} (${highValue}), спокойнее — колонка ${low} `
-      + `(${lowValue}). Разница ${gap} ${verdict} и показывает, насколько способы проявления требуют `
-      + "сознательного согласования.",
-    en: (high: string, highValue: number, low: string, lowValue: number, gap: number, verdict: string) =>
-      `Among the totals the ${high} column stands out more (${highValue}), the ${low} column is `
-      + `quieter (${lowValue}). The difference of ${gap} ${verdict} and shows how much the ways of `
-      + "showing need conscious tuning.",
-  } satisfies PhraseFn<[string, number, string, number, number, string]>,
-  columnsReaches: { ru: "достигает порога заметного разрыва", en: "reaches the threshold of a noticeable gap" } satisfies Phrase,
-  columnsBelow: { ru: "остаётся ниже порога заметного разрыва", en: "stays below the threshold of a noticeable gap" } satisfies Phrase,
+    ru: "Итог каждой колонки — отдельный аркан, рассчитанный по её семи значениям. Читайте его тему "
+      + "в контексте колонки: поступки, мотивация или эмоциональный отклик. Номер аркана не измеряет "
+      + "силу, а разница номеров не доказывает внутренний конфликт.",
+    en: "Each column total is a separate arcanum calculated from its seven values. Read its theme "
+      + "in the context of that column: actions, motivation or emotional response. An arcanum number "
+      + "does not measure strength, and a difference between numbers does not prove an inner conflict.",
+  } satisfies Phrase,
   columnsNote: {
     ru: "Практически полезно найти одно действие, которое можно одновременно увидеть в распорядке, "
       + "поддержать вниманием и проверить по эмоциональному отклику.",
@@ -327,13 +266,13 @@ export const chakraYears = {
     en: "How a personal map of seven levels is read",
   } satisfies Phrase,
   chakraSummary: {
-    ru: (leading: string) => `Карта соединяет семь уровней и три колонки. Ведущий акцент — `
-      + `${leading}; вывод строится по значениям всех ячеек, итогам колонок, повторам и разрывам, `
-      + "а не по одному максимальному числу.",
-    en: (leading: string) => `The map joins seven levels and three columns. The leading accent is `
-      + `${leading}; the conclusion is built from the values of all the cells, the column totals, `
-      + "the repetitions and the gaps, not from one maximum number.",
-  } satisfies PhraseFn<[string]>,
+    ru: "Карта соединяет семь уровней и три колонки. В каждой строке рассматривайте поступки, "
+      + "мотивацию и эмоциональный отклик по отдельности, затем сопоставляйте их с одной жизненной "
+      + "ситуацией. Итоги и повторы помогают связать темы; величина номера не определяет важность чакры.",
+    en: "The map combines seven levels and three columns. In each row, consider actions, motivation "
+      + "and emotional response separately, then relate them to one situation in your life. Totals "
+      + "and repetitions help connect themes; the size of a number does not determine a chakra’s importance.",
+  } satisfies Phrase,
   chakraStrength: {
     ru: "Ресурс карты проявляется, когда материальный ритм, распределение усилия и эмоциональный "
       + "отклик проверяются вместе и ни одна колонка не объявляется главной навсегда.",
@@ -341,10 +280,12 @@ export const chakraYears = {
       + "emotional response are checked together and no column is declared the main one forever.",
   } satisfies Phrase,
   chakraTension: {
-    ru: "Дисбаланс — это заметная разница способов проявления внутри карты, а не заключение о "
-      + "состоянии организма. Безопасный вывод описывает только наблюдаемое поведение.",
-    en: "An imbalance is a visible difference between ways of showing inside the chart, not a "
-      + "conclusion about the body. A safe conclusion describes only observable behaviour.",
+    ru: "Проверьте, совпадают ли ваши действия, намерения и чувства в выбранной ситуации. "
+      + "Вывод о противоречии требует конкретного наблюдения: его нельзя получить из разницы "
+      + "между номерами арканов.",
+    en: "Check whether your actions, intentions and feelings agree in the situation you chose. "
+      + "A conclusion about a conflict needs a concrete observation; it cannot be derived from "
+      + "the difference between arcanum numbers.",
   } satisfies Phrase,
   chakraPractice: {
     ru: "Выберите один уровень и в течение недели наблюдайте три колонки: что происходит в "

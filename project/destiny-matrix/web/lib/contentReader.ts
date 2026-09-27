@@ -92,8 +92,13 @@ export interface ChakraContent {
   title: string;
   hint: string;
   level: string[];
+  personalIntro: string;
   columns: Array<{ key: string; title: string; text: string }>;
   seo: { title: string; description: string };
+  sections: Section[];
+  readings: Array<{ n: number; physics?: string; energy?: string; emotions?: string }>;
+  examples: Array<{ birth: string; numbers: number[]; paragraphs: string[] }>;
+  faq: QA[];
 }
 
 export interface CombinationContent {
@@ -577,6 +582,7 @@ export function createContent(L: Locale, source: ContentSource) {
     const raw = CHAKRAS_JSON.get(key);
     if (!raw) return null;
     const level = strings(raw.level, 1);
+    const personalIntro = typeof raw.personal_intro === "string" ? raw.personal_intro.trim() : "";
     const columns = Array.isArray(raw.columns)
       ? (raw.columns as Bag[]).map((column) => ({
         key: String(column.key ?? ""),
@@ -592,13 +598,63 @@ export function createContent(L: Locale, source: ContentSource) {
       !title ||
       !hint ||
       !level ||
+      personalIntro.length < 20 || !safe(personalIntro) ||
       columns.length !== 3 ||
       !columns.every((column) => column.key && column.title && column.text.length > 40 && safe(column.title) && safe(column.text)) ||
       !seo
     ) {
       throw new Error(`[content] чакра ${key} не прошла обязательную схему`);
     }
-    return { key, title, hint, level, columns, seo };
+    const sections = sectionsOf(raw.article_sections) ?? [];
+    const faq = faqOf(raw.faq) ?? [];
+    const readings: ChakraContent["readings"] = [];
+    const examples: ChakraContent["examples"] = [];
+    // Старые переводы пока не содержат подробного разбора. Если он задан, не допускаем
+    // частично исчезнувших колонок или примеров после проверки текста.
+    if (raw.readings !== undefined) {
+      if (!Array.isArray(raw.readings) || !raw.readings.length) {
+        throw new Error(`[content] чакра ${key}: пустой справочник чисел`);
+      }
+      for (const item of raw.readings as Bag[]) {
+        const n = item.n;
+        const entry: ChakraContent["readings"][number] = { n: Number(n) };
+        if (!Number.isInteger(n) || Number(n) < 1 || Number(n) > 22 || readings.some((r) => r.n === n)) {
+          throw new Error(`[content] чакра ${key}: неверный номер аркана`);
+        }
+        for (const col of ["physics", "energy", "emotions"] as const) {
+          const value = item[col];
+          if (value === undefined) continue;
+          if (typeof value !== "string" || value.length < 20 || !safe(value)) {
+            throw new Error(`[content] чакра ${key}, аркан ${n}: неверный текст ${col}`);
+          }
+          entry[col] = value;
+        }
+        if (!entry.physics && !entry.energy && !entry.emotions) {
+          throw new Error(`[content] чакра ${key}, аркан ${n}: нет применимых колонок`);
+        }
+        readings.push(entry);
+      }
+    }
+    if (raw.examples !== undefined) {
+      if (!Array.isArray(raw.examples) || !raw.examples.length) {
+        throw new Error(`[content] чакра ${key}: нет примеров`);
+      }
+      for (const item of raw.examples as Bag[]) {
+        const values = numbers(item.numbers);
+        const paragraphs = strings(item.paragraphs, 2);
+        if (typeof item.birth !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(item.birth) ||
+            !values || values.length !== 3 || !paragraphs ||
+            paragraphs.length !== (item.paragraphs as unknown[]).length) {
+          throw new Error(`[content] чакра ${key}: неверный пример строки`);
+        }
+        examples.push({ birth: item.birth, numbers: values, paragraphs });
+      }
+    }
+    if ((raw.article_sections !== undefined && sections.length !== (raw.article_sections as unknown[]).length) ||
+        (raw.faq !== undefined && faq.length !== (raw.faq as unknown[]).length)) {
+      throw new Error(`[content] чакра ${key}: неполный текст статьи`);
+    }
+    return { key, title, hint, level, personalIntro, columns, seo, sections, readings, examples, faq };
   }
 
   function combinationContent(slug: string): CombinationContent | null {
