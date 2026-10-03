@@ -100,69 +100,7 @@ export const readingBody = {
       `The practical check goes in the same order. First the original roles: ${actions} Then the `
       + `action of the total ${targetKey}: ${targetAction}`,
   } satisfies PhraseFn<[string, string, string]>,
-  // карта чакр
-  wherePhysics: {
-    ru: ["в материальном ритме", "в наблюдаемом распорядке"],
-    en: ["in the material rhythm", "in the routine you can observe"],
-  } satisfies Record<"ru" | "en", string[]>,
-  whereEnergy: {
-    ru: ["в распределении усилия", "в выборе, куда направлять внимание"],
-    en: ["in how effort is distributed", "in the choice of where to put attention"],
-  } satisfies Record<"ru" | "en", string[]>,
-  whereEmotions: {
-    ru: ["в эмоциональном отклике", "в способе замечать и выражать переживание"],
-    en: ["in the emotional response", "in the way feeling is noticed and expressed"],
-  } satisfies Record<"ru" | "en", string[]>,
-  chakraModifier: {
-    ru: (title: string, where: string, plus: string, minus: string) =>
-      `${title} ${where} проявляется через качество «${plus}»; перегрузка заметна по тенденции «${minus}».`,
-    en: (title: string, where: string, plus: string, minus: string) =>
-      `${title} ${where} shows through the quality “${plus}”; an overload is visible in the tendency “${minus}”.`,
-  } satisfies PhraseFn<[string, string, string, string]>,
-  chakraAction: {
-    ru: (where: string, action: string) => `Для наблюдения ${where} используйте шаг: ${action}`,
-    en: (where: string, action: string) => `To observe ${where}, use this step: ${action}`,
-  } satisfies PhraseFn<[string, string]>,
-  columnsTitle: { ru: "Итоги трёх колонок", en: "The three column totals" } satisfies Phrase,
-  columnsText: {
-    ru: "Итог каждой колонки — отдельный аркан, рассчитанный по её семи значениям. Читайте его тему "
-      + "в контексте колонки: поступки, мотивация или эмоциональный отклик. Номер аркана не измеряет "
-      + "силу, а разница номеров не доказывает внутренний конфликт.",
-    en: "Each column total is a separate arcanum calculated from its seven values. Read its theme "
-      + "in the context of that column: actions, motivation or emotional response. An arcanum number "
-      + "does not measure strength, and a difference between numbers does not prove an inner conflict.",
-  } satisfies Phrase,
-  columnsNote: {
-    ru: "Практически полезно найти одно действие, которое можно одновременно увидеть в распорядке, "
-      + "поддержать вниманием и проверить по эмоциональному отклику.",
-    en: "In practice it helps to find one action you can see in your routine, support with "
-      + "attention and check by the emotional response, all at once.",
-  } satisfies Phrase,
-  repeatsTitle: { ru: "Повторы арканов в карте", en: "Repeated arcana in the chart" } satisfies Phrase,
-  repeatsCaption: {
-    ru: (list: string) => `Повторяющиеся арканы ${list}`,
-    en: (list: string) => `Repeated arcana ${list}`,
-  } satisfies PhraseFn<[string]>,
-  repeatsText: {
-    ru: (list: string) => `Повторяются арканы ${list}. Один смысл проходит через разные уровни и `
-      + "колонки, но каждый раз отвечает на другой вопрос.",
-    en: (list: string) => `The arcana ${list} repeat. One meaning runs through different levels and `
-      + "columns, but each time it answers a different question.",
-  } satisfies PhraseFn<[string]>,
-  repeatsCount: {
-    ru: (n: number, count: number) => `${n} (${count} раза)`,
-    en: (n: number, count: number) => `${n} (${count} times)`,
-  } satisfies PhraseFn<[number, number]>,
-  repeatsNone: {
-    ru: "В двадцати одной ячейке нет повторяющихся арканов: связи лучше искать через уровни и итоги "
-      + "колонок, а не придумывать общий повтор.",
-    en: "There are no repeated arcana among the twenty-one cells: look for links through the levels "
-      + "and the column totals instead of inventing a shared repetition.",
-  } satisfies Phrase,
-  repeatsNote: {
-    ru: "Повтор усиливает тему, но не создаёт отдельного значения и не является медицинским признаком.",
-    en: "A repetition strengthens the theme but creates no separate meaning and is not a medical sign.",
-  } satisfies Phrase,
+
 };
 
 /** Блок «те же позиции в соседнем разделе» и темы поворотных десятилетий. */
@@ -261,39 +199,6 @@ export const chakraYears = {
   columnPhysicsTitle: { ru: "Физика", en: "Physics" } satisfies Phrase,
   columnEnergyTitle: { ru: "Энергия", en: "Energy" } satisfies Phrase,
   columnEmotionsTitle: { ru: "Эмоции", en: "Emotions" } satisfies Phrase,
-  chakraCaption: {
-    ru: "Как читается персональная карта семи уровней",
-    en: "How a personal map of seven levels is read",
-  } satisfies Phrase,
-  chakraSummary: {
-    ru: "Карта соединяет семь уровней и три колонки. В каждой строке рассматривайте поступки, "
-      + "мотивацию и эмоциональный отклик по отдельности, затем сопоставляйте их с одной жизненной "
-      + "ситуацией. Итоги и повторы помогают связать темы; величина номера не определяет важность чакры.",
-    en: "The map combines seven levels and three columns. In each row, consider actions, motivation "
-      + "and emotional response separately, then relate them to one situation in your life. Totals "
-      + "and repetitions help connect themes; the size of a number does not determine a chakra’s importance.",
-  } satisfies Phrase,
-  chakraStrength: {
-    ru: "Ресурс карты проявляется, когда материальный ритм, распределение усилия и эмоциональный "
-      + "отклик проверяются вместе и ни одна колонка не объявляется главной навсегда.",
-    en: "The resource of the map shows when the material rhythm, the distribution of effort and the "
-      + "emotional response are checked together and no column is declared the main one forever.",
-  } satisfies Phrase,
-  chakraTension: {
-    ru: "Проверьте, совпадают ли ваши действия, намерения и чувства в выбранной ситуации. "
-      + "Вывод о противоречии требует конкретного наблюдения: его нельзя получить из разницы "
-      + "между номерами арканов.",
-    en: "Check whether your actions, intentions and feelings agree in the situation you chose. "
-      + "A conclusion about a conflict needs a concrete observation; it cannot be derived from "
-      + "the difference between arcanum numbers.",
-  } satisfies Phrase,
-  chakraPractice: {
-    ru: "Выберите один уровень и в течение недели наблюдайте три колонки: что происходит в "
-      + "распорядке, куда уходит усилие и какой отклик остаётся после действия. Меняйте только "
-      + "один небольшой элемент за раз.",
-    en: "Pick one level and watch the three columns for a week: what happens in your routine, where "
-      + "effort goes and which response is left after an action. Change only one small element at a time.",
-  } satisfies Phrase,
   yearsCaption: {
     ru: "Как читается персональная линия до 80 лет",
     en: "How a personal line up to 80 is read",

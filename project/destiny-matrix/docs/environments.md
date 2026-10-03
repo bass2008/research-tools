@@ -26,7 +26,11 @@
 
 ## Локальный стенд
 
-Из корня проекта:
+Повседневный запуск из корня проекта: `compose/scripts/run.sh` либо
+`compose/scripts/run-python.sh`. Frontend работает через `next dev` со значком Next.js
+слева внизу и автоматическим обновлением правок.
+
+Отдельный стенд для приёмки production-сборки:
 
 ```sh
 docker compose -f compose/docker-compose.localized.yml up --build -d

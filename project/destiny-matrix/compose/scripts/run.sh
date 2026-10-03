@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Собрать общее приложение. Старые аргументы ru/en оставлены как алиасы того же запуска.
+# Локальное приложение с next dev. ru/en оставлены как алиасы того же запуска.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -22,7 +22,10 @@ docker network create arcana-print >/dev/null 2>&1 || true
 
 docker compose build
 # Удаляются только старые сервисы этого проекта: после переименования они иначе занимают порты.
-docker compose up -d --wait --remove-orphans
+# Анонимные тома web содержат зависимости и dev-кеш; обновляем их из нового образа.
+# База API хранится в именованном томе.
+docker compose up -d --wait --remove-orphans --renew-anon-volumes
 # Способы оплаты зависят от профиля, а не языка интерфейса.
 echo "сайт: http://127.0.0.1:${WEB_PORT:-3000}  (COM) / http://localhost:${WEB_PORT:-3000} (RU)  ·  всё бесплатно: ${ALL_FREE_WITHOUT_PAYMENT}"
 echo "админка /admin (snborodaenko@mail.ru / 123)  ·  платежи RU: ${PAYMENT_PROVIDER:-mock}; COM: недоступны"
+echo "frontend: next dev · значок Next.js слева внизу · правки видны без пересборки"

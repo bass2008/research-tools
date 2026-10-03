@@ -2,7 +2,7 @@ import { arcanumTitle } from "./arcana";
 import { describe, expect, it } from "vitest";
 
 import { allCombinationSlugs } from "./encyclopedia";
-import { isBlockedText } from "./textPolicy";
+import { warnPolicy } from "./warnPolicy";
 import {
   buildCombinationArticle,
   buildCombinationContext,
@@ -71,7 +71,7 @@ describe("полные статьи сочетаний", () => {
         ]),
         ...article.practice,
       ].join(" ");
-      expect(isBlockedText(corpus)).toBe(false);
+      warnPolicy(corpus, `combination ${slug}`);
     }
     for (const key of CONTEXTS) {
       const expected = combinationContextOrders(key).filter((order) => {

@@ -1,6 +1,7 @@
 import { CONTENT_PUBLISHED } from "./corpusDates";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
+import { plainText } from "./richText";
 import { forLocale as localizedSite } from "./site";
 
 // Дата публикации живёт в `lib/corpusDates` и отсюда переизлучается: её импортируют как часть
@@ -81,8 +82,8 @@ export const forLocale = localized((L: Locale, site) => {
       "@type": "FAQPage",
       mainEntity: faq.map((item) => ({
         "@type": "Question",
-        name: item.q,
-        acceptedAnswer: { "@type": "Answer", text: item.a },
+        name: plainText(item.q),
+        acceptedAnswer: { "@type": "Answer", text: plainText(item.a) },
       })),
     };
   }

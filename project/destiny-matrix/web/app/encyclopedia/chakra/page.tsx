@@ -2,7 +2,7 @@ import { requestSite } from "@/lib/siteProfile.server";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
 import { ChakraList } from "@/components/enc/lists";
-import CalcPromo from "@/components/matrix/CalcPromo";
+import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
@@ -15,6 +15,8 @@ import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSite } from "@/lib/site";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
+import { exampleDay } from "@/lib/today";
 import type { Metadata } from "next";
 
 const forLocale = localized((L: Locale, site) => {
@@ -41,7 +43,11 @@ const forLocale = localized((L: Locale, site) => {
 
 export default async function ChakraHubPage() {
   const L = await requestLocale();
-  const { CHAKRA_HUB, CHAKRA_PAGES, chakraHref, encyclopediaSection, articleLd, itemListLd, HUB } = forLocale(L, await requestSite());
+  const site = await requestSite();
+  const { CHAKRA_HUB, CHAKRA_PAGES, chakraHref, encyclopediaSection, articleLd, itemListLd, HUB } = forLocale(L, site);
+  const { calculate, toIso } = localizedMatrix(L);
+  const seed = exampleDay();
+  const example = calculate(toIso({ ...seed, year: seed.year - 30 }), "f");
 
   const hub = HUB!;
 
@@ -67,21 +73,17 @@ export default async function ChakraHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
+      <ChakraAtlasExample site={site} locale={L} m={example}
+        promoTitle={D.enc.promoChakraTitle[L]} promoLead={D.enc.promoChakraLead[L]}
+        place="chakra-hub" />
+
       <div className="panel section-gap">
         <h2>{D.enc.sevenLevels[L]}</h2>
         <div className="cap">{encyclopediaSection("chk").hint} · {CHAKRA_PAGES.length}</div>
         <ChakraList locale={L} />
       </div>
 
-      <Sections items={hub.sections} />
-
-      <div className="section-gap">
-        <CalcPromo locale={L}
-          title={D.enc.promoChakraTitle[L]}
-          lead={D.enc.promoChakraLead[L]}
-          place="chakra-hub"
-        />
-      </div>
+      <Sections items={hub.sections} locale={L} />
 
       <Faq locale={L} items={hub.faq} />
 

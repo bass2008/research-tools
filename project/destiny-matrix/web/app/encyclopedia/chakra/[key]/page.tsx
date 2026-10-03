@@ -1,12 +1,14 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import PositionMap from "@/components/enc/PositionMap";
-import Sections from "@/components/enc/Sections";
+import Sections, { Paragraphs } from "@/components/enc/Sections";
 import CalcPromo from "@/components/matrix/CalcPromo";
+import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
 import Price from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
 import { ALL_FREE } from "@/lib/access";
+import { exampleDay } from "@/lib/today";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
@@ -15,6 +17,7 @@ import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { forLocale as localizedMatrix } from "@/lib/matrix";
 import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSeo } from "@/lib/seo";
@@ -59,9 +62,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!c) return NOT_FOUND_META;
   const extra = chakraContent(c.key);
   if (!extra) throw new Error(`нет канонического материала чакры ${c.key}`);
+  const seo = extra.article?.seo ?? extra.seo;
   return pageMeta({
-    title: extra.seo.title,
-    description: extra.seo.description,
+    title: seo.title,
+    description: seo.description,
     path: chakraHref(c.key),
     article: true,
   });
@@ -75,6 +79,9 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
   if (!c) notFound();
   const extra = chakraContent(c.key);
   if (!extra) throw new Error(`нет канонического материала чакры ${c.key}`);
+  if (extra.article) {
+    return <ChakraArticlePage locale={L} chakraKey={c.key} />;
+  }
   const paragraphs = extra.level;
   // Уровень — это горизонтальная пара точек карты, и «где находится свадхистана» спрашивают
   // ровно про место. Символы пары лежат в контракте метода.
@@ -112,11 +119,11 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         <div className="prose section-gap">
           {paragraphs.map((text, i) => <p key={i}>{text}</p>)}
           <nav aria-label={D.encChakra.onPage[L]} className="taglist">
-            <a href="#calculation">{D.encChakra.howCounted[L]}</a>
-            <a href="#reading">{D.encChakra.readingSteps[L]}</a>
-            <a href="#examples">{D.encChakra.examples[L]}</a>
-            <a href="#numbers">{D.encChakra.numbers[L]}</a>
-            <a href="#questions">{D.octagram.faqTitle[L]}</a>
+            <Link href="#calculation">{D.encChakra.howCounted[L]}</Link>
+            <Link href="#reading">{D.encChakra.readingSteps[L]}</Link>
+            <Link href="#examples">{D.encChakra.examples[L]}</Link>
+            <Link href="#numbers">{D.encChakra.numbers[L]}</Link>
+            <Link href="#questions">{D.octagram.faqTitle[L]}</Link>
           </nav>
         </div>
       ) : null}
@@ -160,7 +167,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         </div>
       ) : null}
 
-      <div id="reading"><Sections items={extra.sections} /></div>
+      <div id="reading"><Sections items={extra.sections} locale={L} /></div>
 
       {extra.examples.length ? (
         <section className="prose section-gap" id="examples">
@@ -181,7 +188,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           <p className="prose">{D.encChakra.numbersHint[L]}</p>
           <nav className="taglist" aria-label={D.encChakra.numbers[L]}>
             {extra.readings.map((row) => (
-              <a key={row.n} href={`#arcanum-${row.n}`}>{row.n} · {ARCANA.find((a) => a.n === row.n)!.title}</a>
+              <Link key={row.n} href={`#arcanum-${row.n}`}>{row.n} · {ARCANA.find((a) => a.n === row.n)!.title}</Link>
             ))}
           </nav>
           {extra.readings.map((row) => (
@@ -250,6 +257,102 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
           {D.matrixPages.calcMatrix[L]}
         </Link>
       </div>
+    </>
+  );
+}
+
+async function ChakraArticlePage({ locale: L, chakraKey }: { locale: Locale; chakraKey: string }) {
+  const site = await requestSite();
+  const { ARCANA, CHAKRA_PAGES, arcanumHref, chakraByKey, chakraHref, chakraContent, mapPointsBySymbol, articleLd, encyclopediaSectionCrumb } = forLocale(L, site);
+  const { calculate, toIso } = localizedMatrix(L);
+  const c = chakraByKey(chakraKey)!;
+  const article = chakraContent(chakraKey)!.article!;
+  // Match MatrixForm's initial date; its preview then follows the saved date and edits.
+  const seed = exampleDay();
+  const example = calculate(toIso({ ...seed, year: seed.year - 30 }), "f");
+  const spots = mapPointsBySymbol([c.physics, c.energy]);
+  // One calculator under the chart and one closing call to action after the article.
+  const cta = (
+    <div className="allbox">
+      <h3>{D.encChakra.buildEnergyMap[L]}</h3>
+      <p>
+        {D.encChakra.buildEnergyMapText[L]}{" "}
+        {ALL_FREE ? <>{D.encChakra.fullMapOpen[L]}</> : <>{D.encChakra.fullMapPaid[L]} <Price locale={L} />.</>}
+      </p>
+      <Link className="btn" href="/#calc">{D.matrixPages.calcMatrix[L]}</Link>
+    </div>
+  );
+  const intro = article.intro.filter((p) => typeof p === "string" || !("slot" in p));
+  const combinations = article.sections.flatMap((s) => s.paragraphs).flatMap((p) =>
+    typeof p !== "string" && "chakra_reading" in p ? [p.chakra_reading] : []);
+
+  return (
+    <>
+      <CrumbsLd locale={L}
+        trail={[
+          { name: D.nav.home[L], path: "/" },
+          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
+          encyclopediaSectionCrumb("chk"),
+          { name: c.title },
+        ]}
+      />
+      <JsonLd data={articleLd({ headline: article.seo.title, description: article.seo.description, path: chakraHref(c.key) })} />
+
+      <h1>{article.title}</h1>
+      <PositionMap locale={L}
+        highlight={spots}
+        caption={D.encChakra.caption[L](
+          spots.map((x) => `${x.label} · ${x.symbol}`).join(` ${D.encArcanum.and[L]} `),
+        )}
+      />
+      <p className="dim prose">{article.short}</p>
+
+      {combinations.length ? (
+        <nav className="panel section-gap" aria-labelledby="combination-picker-title">
+          <h2 id="combination-picker-title">{D.encChakra.chooseCombination[L]}</h2>
+          <div className="taglist">
+            {combinations.map((item) => (
+              <Link key={item.id} href={`#${item.id}`}>{item.row.cells.map((cell) => cell.arcanum).join(" / ")}</Link>
+            ))}
+          </div>
+        </nav>
+      ) : null}
+
+      {intro.length ? (
+        <div className="section-gap"><Paragraphs items={intro} locale={L} /></div>
+      ) : null}
+
+      <ChakraAtlasExample site={site} locale={L} m={example}
+        promoTitle={D.encChakra.promoTitle[L]} promoLead={D.encChakra.promoLead[L](c.title)} />
+
+      <Sections items={article.sections} locale={L} />
+
+      {article.faq.length ? <div id="questions"><Faq locale={L} items={article.faq} /></div> : null}
+
+      <div className="panel section-gap">
+        <h3>{D.encChakra.otherLevels[L]}</h3>
+        <div className="cap">{D.encChakra.otherLevelsHint[L]}</div>
+        <div className="taglist">
+          {CHAKRA_PAGES.filter((o) => o.key !== c.key).map((o) => (
+            <Link key={o.key} href={chakraHref(o.key)}>
+              {o.index}. {o.title}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="panel section-gap">
+        <h3>{D.encChakra.whichArcanum[L]}</h3>
+        <div className="cap">{D.encChakra.whichArcanumHint[L]}</div>
+        <div className="taglist">
+          {ARCANA.map((a) => (
+            <Link key={a.n} href={arcanumHref(a.n)}>
+              {a.n} · {a.title}
+            </Link>
+          ))}
+        </div>
+      </div>
+      {cta}
     </>
   );
 }

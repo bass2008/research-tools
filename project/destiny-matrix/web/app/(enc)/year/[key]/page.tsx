@@ -120,7 +120,7 @@ export default async function YearPage({ params }: { params: Promise<Params> }) 
 
       <p className="dim prose">{item.short}</p>
 
-      <Sections items={item.sections} />
+      <Sections items={item.sections} locale={L} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

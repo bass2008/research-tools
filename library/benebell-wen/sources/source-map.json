@@ -1,0 +1,1230 @@
+{
+  "archive": "holistic-tarot-2015.epub",
+  "sha256": "ec3c27040958687908df44c15014511eaccc346fd6a2580ae31dbba3d95eadca",
+  "bytes": 16473700,
+  "metadata": {
+    "title": [
+      "Holistic Tarot: An Integrative Approach to Using Tarot for Personal Growth"
+    ],
+    "creator": [
+      "Benebell Wen"
+    ],
+    "publisher": [
+      "North Atlantic Books"
+    ],
+    "date": [
+      "2015-01-20T06:00:00+00:00"
+    ],
+    "identifier": [
+      "9781583948361",
+      "B00LRHUJ9C",
+      "urn:uuid:f4b5e504-fe81-4af0-9548-c9120292ffe2",
+      "urn:uuid:f4b5e504-fe81-4af0-9548-c9120292ffe2"
+    ],
+    "language": [
+      "en"
+    ]
+  },
+  "origin": "Local EPUB supplied by user; copied without modification.",
+  "created": "2026-09-27",
+  "sections": {
+    "00-fool": {
+      "chapter": 9,
+      "heading": "Key 0 — The Fool",
+      "members": [
+        "text/part0013_split_003.html"
+      ]
+    },
+    "01-magician": {
+      "chapter": 9,
+      "heading": "Key 1 — The Magician",
+      "members": [
+        "text/part0013_split_004.html"
+      ]
+    },
+    "02-high-priestess": {
+      "chapter": 9,
+      "heading": "Key 2 — The High Priestess",
+      "members": [
+        "text/part0013_split_005.html"
+      ]
+    },
+    "03-empress": {
+      "chapter": 9,
+      "heading": "Key 3 — The Empress",
+      "members": [
+        "text/part0013_split_006.html"
+      ]
+    },
+    "04-emperor": {
+      "chapter": 9,
+      "heading": "Key 4 — The Emperor",
+      "members": [
+        "text/part0013_split_007.html"
+      ]
+    },
+    "05-hierophant": {
+      "chapter": 9,
+      "heading": "Key 5 — The Hierophant",
+      "members": [
+        "text/part0013_split_008.html"
+      ]
+    },
+    "06-lovers": {
+      "chapter": 9,
+      "heading": "Key 6 — The Lovers",
+      "members": [
+        "text/part0013_split_009.html"
+      ]
+    },
+    "07-chariot": {
+      "chapter": 9,
+      "heading": "Key 7 — The Chariot",
+      "members": [
+        "text/part0013_split_010.html"
+      ]
+    },
+    "08-strength": {
+      "chapter": 9,
+      "heading": "Key 8 — Strength",
+      "members": [
+        "text/part0013_split_011.html"
+      ]
+    },
+    "09-hermit": {
+      "chapter": 9,
+      "heading": "Key 9 — The Hermit",
+      "members": [
+        "text/part0013_split_012.html"
+      ]
+    },
+    "10-wheel-of-fortune": {
+      "chapter": 9,
+      "heading": "Key 10 — Wheel of Fortune",
+      "members": [
+        "text/part0013_split_013.html"
+      ]
+    },
+    "11-justice": {
+      "chapter": 9,
+      "heading": "Key 11 — Justice",
+      "members": [
+        "text/part0013_split_014.html"
+      ]
+    },
+    "12-hanged-man": {
+      "chapter": 9,
+      "heading": "Key 12 — The Hanged Man",
+      "members": [
+        "text/part0013_split_015.html"
+      ]
+    },
+    "13-death": {
+      "chapter": 9,
+      "heading": "Key 13 — Death",
+      "members": [
+        "text/part0013_split_016.html"
+      ]
+    },
+    "14-temperance": {
+      "chapter": 9,
+      "heading": "Key 14 — Temperance",
+      "members": [
+        "text/part0013_split_017.html"
+      ]
+    },
+    "15-devil": {
+      "chapter": 9,
+      "heading": "Key 15 — The Devil",
+      "members": [
+        "text/part0013_split_018.html"
+      ]
+    },
+    "16-tower": {
+      "chapter": 9,
+      "heading": "Key 16 — The Tower",
+      "members": [
+        "text/part0013_split_019.html"
+      ]
+    },
+    "17-star": {
+      "chapter": 9,
+      "heading": "Key 17 — The Star",
+      "members": [
+        "text/part0013_split_020.html"
+      ]
+    },
+    "18-moon": {
+      "chapter": 9,
+      "heading": "Key 18 — The Moon",
+      "members": [
+        "text/part0013_split_021.html"
+      ]
+    },
+    "19-sun": {
+      "chapter": 9,
+      "heading": "Key 19 — The Sun",
+      "members": [
+        "text/part0013_split_022.html"
+      ]
+    },
+    "20-judgement": {
+      "chapter": 9,
+      "heading": "Key 20 — Judgement",
+      "members": [
+        "text/part0013_split_023.html"
+      ]
+    },
+    "21-world": {
+      "chapter": 9,
+      "heading": "Key 21 — The World",
+      "members": [
+        "text/part0013_split_024.html"
+      ]
+    },
+    "chakras": {
+      "heading": "14: The Seven Chakras Spread",
+      "members": [
+        "text/part0019_split_025.html"
+      ]
+    },
+    "method": {
+      "heading": "17: Tarot Readings: A Step-by-Step Analytical Process",
+      "members": [
+        "text/part0023_split_000.html",
+        "text/part0023_split_001.html",
+        "text/part0023_split_002.html"
+      ]
+    },
+    "design": {
+      "heading": "16: Devising Tarot Spreads",
+      "members": [
+        "text/part0022_split_000.html",
+        "text/part0022_split_001.html",
+        "text/part0022_split_002.html",
+        "text/part0022_split_003.html",
+        "text/part0022_split_004.html",
+        "text/part0022_split_005.html",
+        "text/part0022_split_006.html",
+        "text/part0022_split_007.html"
+      ]
+    },
+    "landscape": {
+      "heading": "15: Consideration of the Spread Landscape",
+      "members": [
+        "text/part0021_split_000.html",
+        "text/part0021_split_001.html",
+        "text/part0021_split_002.html",
+        "text/part0021_split_003.html",
+        "text/part0021_split_004.html",
+        "text/part0021_split_005.html",
+        "text/part0021_split_006.html",
+        "text/part0021_split_007.html",
+        "text/part0021_split_008.html",
+        "text/part0021_split_009.html",
+        "text/part0021_split_010.html",
+        "text/part0021_split_011.html",
+        "text/part0021_split_012.html",
+        "text/part0021_split_013.html"
+      ]
+    },
+    "reversals": {
+      "heading": "15: WIND and Bill example",
+      "members": [
+        "text/part0021_split_002.html",
+        "text/part0021_split_003.html"
+      ]
+    },
+    "notes-ch9": {
+      "heading": "Endnotes: Chapter 9",
+      "members": [
+        "text/part0049_split_007.html"
+      ]
+    },
+    "notes-ch14": {
+      "heading": "Endnotes: Chapter 14",
+      "members": [
+        "text/part0049_split_012.html"
+      ]
+    }
+  },
+  "toc": [
+    {
+      "title": "Title Page",
+      "src": "text/part0001.html#UGI0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Copyright",
+      "src": "text/part0002.html#1T140-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Dedication",
+      "src": "text/part0003.html#2RHM0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Contents",
+      "src": "text/part0004.html#3Q280-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 1: Tarot Analytics: A Holistic Approach",
+      "src": "text/part0005_split_000.html#4OIQ0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 2: A Concise History Lesson",
+      "src": "text/part0006_split_000.html#5N3C0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 3: Allaying Fears and Offering Theories",
+      "src": "text/part0007_split_000.html#6LJU0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "From Fear to Understanding",
+      "src": "text/part0007_split_001.html#c03-s1"
+    },
+    {
+      "title": "Synchronicity",
+      "src": "text/part0007_split_001.html#c03-s2"
+    },
+    {
+      "title": "Apophenia and Patternicity",
+      "src": "text/part0007_split_001.html#c03-s3"
+    },
+    {
+      "title": "The Forer (or Barnum) Effect",
+      "src": "text/part0007_split_001.html#c03-s4"
+    },
+    {
+      "title": "Divine and Occult Theories",
+      "src": "text/part0007_split_001.html#c03-s5"
+    },
+    {
+      "title": "Myth of the Divination-Fulfilling Prophecy",
+      "src": "text/part0007_split_001.html#c03-s6"
+    },
+    {
+      "title": "The Theory of Qi",
+      "src": "text/part0007_split_001.html#c03-s7"
+    },
+    {
+      "title": "Projective Psychological Testing",
+      "src": "text/part0007_split_001.html#c03-s8"
+    },
+    {
+      "title": "Chapter 4: Choosing Your Deck",
+      "src": "text/part0008_split_000.html#7K4G0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Which Deck to Use?",
+      "src": "text/part0008_split_001.html#c04-s1"
+    },
+    {
+      "title": "Connecting to and Caring for a Tarot Deck",
+      "src": "text/part0008_split_001.html#c04-s2"
+    },
+    {
+      "title": "Chapter 5: Anatomy of the Rider-Waite-Smith Tarot",
+      "src": "text/part0009_split_000.html#8IL20-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 6: The Personal Journal",
+      "src": "text/part0010_split_000.html#9H5K0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Personal Glossary of Card Meanings",
+      "src": "text/part0010_split_001.html#c06-s1"
+    },
+    {
+      "title": "Log of Readings and Client Notes",
+      "src": "text/part0010_split_001.html#c06-s2"
+    },
+    {
+      "title": "Card Reflections",
+      "src": "text/part0010_split_001.html#c06-s3"
+    },
+    {
+      "title": "Practice Development",
+      "src": "text/part0010_split_001.html#c06-s4"
+    },
+    {
+      "title": "Reference Library",
+      "src": "text/part0010_split_001.html#c06-s5"
+    },
+    {
+      "title": "Chapter 7: Beginner Rote Learning",
+      "src": "text/part0011_split_000.html#AFM60-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 8: Keywords",
+      "src": "text/part0012_split_000.html#BE6O0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Major Arcana",
+      "src": "text/part0012_split_002.html"
+    },
+    {
+      "title": "Minor Arcana",
+      "src": "text/part0012_split_004.html"
+    },
+    {
+      "title": "Suit of Wands",
+      "src": "text/part0012_split_004.html"
+    },
+    {
+      "title": "Suit of Cups",
+      "src": "text/part0012_split_006.html"
+    },
+    {
+      "title": "Suit of Swords",
+      "src": "text/part0012_split_008.html"
+    },
+    {
+      "title": "Suit of Pentacles",
+      "src": "text/part0012_split_010.html"
+    },
+    {
+      "title": "Chapter 9: Cyclopedia of Card Meanings",
+      "src": "text/part0013_split_000.html#CCNA0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Major Arcana",
+      "src": "text/part0013_split_001.html#c09-s1"
+    },
+    {
+      "title": "Key 0—The Fool",
+      "src": "text/part0013_split_003.html#c09-s2"
+    },
+    {
+      "title": "Key 1—The Magician",
+      "src": "text/part0013_split_004.html#c09-s3"
+    },
+    {
+      "title": "Key 2—The High Priestess",
+      "src": "text/part0013_split_005.html#c09-s4"
+    },
+    {
+      "title": "Key 3—The Empress",
+      "src": "text/part0013_split_006.html#c09-s5"
+    },
+    {
+      "title": "Key 4—The Emperor",
+      "src": "text/part0013_split_007.html#c09-s6"
+    },
+    {
+      "title": "Key 5—The Hierophant",
+      "src": "text/part0013_split_008.html#c09-s7"
+    },
+    {
+      "title": "Key 6—The Lovers",
+      "src": "text/part0013_split_009.html#c09-s8"
+    },
+    {
+      "title": "Key 7—The Chariot",
+      "src": "text/part0013_split_010.html#c09-s9"
+    },
+    {
+      "title": "Key 8—Strength",
+      "src": "text/part0013_split_011.html#c09-s10"
+    },
+    {
+      "title": "Key 9—The Hermit",
+      "src": "text/part0013_split_012.html#c09-s11"
+    },
+    {
+      "title": "Key 10—Wheel of Fortune",
+      "src": "text/part0013_split_013.html#c09-s12"
+    },
+    {
+      "title": "Key 11—Justice",
+      "src": "text/part0013_split_014.html#c09-s13"
+    },
+    {
+      "title": "Key 12—The Hanged Man",
+      "src": "text/part0013_split_015.html#c09-s14"
+    },
+    {
+      "title": "Key 13—Death",
+      "src": "text/part0013_split_016.html#c09-s15"
+    },
+    {
+      "title": "Key 14—Temperance",
+      "src": "text/part0013_split_017.html#c09-s16"
+    },
+    {
+      "title": "Key 15—The Devil",
+      "src": "text/part0013_split_018.html#c09-s17"
+    },
+    {
+      "title": "Key 16—The Tower",
+      "src": "text/part0013_split_019.html#c09-s18"
+    },
+    {
+      "title": "Key 17—The Star",
+      "src": "text/part0013_split_020.html#c09-s19"
+    },
+    {
+      "title": "Key 18—The Moon",
+      "src": "text/part0013_split_021.html#c09-s20"
+    },
+    {
+      "title": "Key 19—The Sun",
+      "src": "text/part0013_split_022.html#c09-s21"
+    },
+    {
+      "title": "Key 20—Judgement",
+      "src": "text/part0013_split_023.html#c09-s22"
+    },
+    {
+      "title": "Key 21—The World",
+      "src": "text/part0013_split_024.html#c09-s23"
+    },
+    {
+      "title": "Minor Arcana",
+      "src": "text/part0013_split_025.html"
+    },
+    {
+      "title": "Suit of Wands",
+      "src": "text/part0013_split_025.html#c09-s25"
+    },
+    {
+      "title": "Suit of Cups",
+      "src": "text/part0013_split_039.html#c09-s26"
+    },
+    {
+      "title": "Suit of Swords",
+      "src": "text/part0014_split_014.html#c09-s27"
+    },
+    {
+      "title": "Suit of Pentacles",
+      "src": "text/part0014_split_029.html#c09-s28"
+    },
+    {
+      "title": "Chapter 10: Signifier Cards",
+      "src": "text/part0015_split_000.html#E9OE0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 11: The First Operation",
+      "src": "text/part0016_split_000.html#F8900-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 12: Interpreting Court Cards",
+      "src": "text/part0017_split_000.html#G6PI0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Literal Interpretation",
+      "src": "text/part0017_split_001.html#c12-s1"
+    },
+    {
+      "title": "Figurative Interpretation",
+      "src": "text/part0017_split_007.html#c12-s2"
+    },
+    {
+      "title": "Court Cards and the Classical Elements",
+      "src": "text/part0017_split_017.html"
+    },
+    {
+      "title": "A Contextual Character Analysis of the Court",
+      "src": "text/part0017_split_017.html#c12-s4"
+    },
+    {
+      "title": "The Pages",
+      "src": "text/part0017_split_018.html"
+    },
+    {
+      "title": "The Knights",
+      "src": "text/part0017_split_019.html"
+    },
+    {
+      "title": "The Queens",
+      "src": "text/part0017_split_020.html"
+    },
+    {
+      "title": "The Kings",
+      "src": "text/part0017_split_021.html"
+    },
+    {
+      "title": "Left-Right Symbolism in the Court Cards",
+      "src": "text/part0017_split_021.html#c12-s9"
+    },
+    {
+      "title": "Chapter 13: On Shuffling, Cutting, and Drawing",
+      "src": "text/part0018_split_000.html#H5A40-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Shuffling the Tarot Deck",
+      "src": "text/part0018_split_001.html#c13-s1"
+    },
+    {
+      "title": "Cutting the Tarot Deck",
+      "src": "text/part0018_split_001.html#c13-s2"
+    },
+    {
+      "title": "Drawing Cards into the Spread",
+      "src": "text/part0018_split_001.html#c13-s3"
+    },
+    {
+      "title": "Chapter 14: The Fundamentals of Reading Spreads",
+      "src": "text/part0019_split_000.html#I3QM0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Different Spreads and Their Uses",
+      "src": "text/part0019_split_002.html"
+    },
+    {
+      "title": "One-Card Draw",
+      "src": "text/part0019_split_002.html#c14-s2"
+    },
+    {
+      "title": "Two-Card Spread",
+      "src": "text/part0019_split_006.html"
+    },
+    {
+      "title": "Three-Card Spread",
+      "src": "text/part0019_split_007.html"
+    },
+    {
+      "title": "Alternative Three-Card Spread",
+      "src": "text/part0019_split_009.html"
+    },
+    {
+      "title": "Expanding on the Three-Card Spread",
+      "src": "text/part0019_split_011.html"
+    },
+    {
+      "title": "Four-Card Spread",
+      "src": "text/part0019_split_012.html"
+    },
+    {
+      "title": "Combination Spreads",
+      "src": "text/part0019_split_014.html"
+    },
+    {
+      "title": "The Simple Cross",
+      "src": "text/part0019_split_016.html"
+    },
+    {
+      "title": "The Essential Keys Spread",
+      "src": "text/part0019_split_017.html"
+    },
+    {
+      "title": "Fixed-Term Analysis Spread",
+      "src": "text/part0019_split_018.html"
+    },
+    {
+      "title": "The Dyadic Cross",
+      "src": "text/part0019_split_020.html"
+    },
+    {
+      "title": "The Six Points (or Six Controversies) Spread",
+      "src": "text/part0019_split_022.html"
+    },
+    {
+      "title": "V Formation or Horseshoe Spread",
+      "src": "text/part0019_split_024.html"
+    },
+    {
+      "title": "The Seven Chakras Spread",
+      "src": "text/part0019_split_025.html"
+    },
+    {
+      "title": "The Personality Tree",
+      "src": "text/part0019_split_026.html"
+    },
+    {
+      "title": "The Insight Spread",
+      "src": "text/part0019_split_028.html"
+    },
+    {
+      "title": "The Celtic Cross",
+      "src": "text/part0019_split_030.html"
+    },
+    {
+      "title": "The Tree of Life",
+      "src": "text/part0019_split_031.html"
+    },
+    {
+      "title": "The Pneuma Crossing: Eleven-Card Spread",
+      "src": "text/part0019_split_032.html"
+    },
+    {
+      "title": "Zodiac Spread",
+      "src": "text/part0019_split_033.html"
+    },
+    {
+      "title": "Twelve-Card Specific Question Spread",
+      "src": "text/part0019_split_034.html"
+    },
+    {
+      "title": "The Lemniscate Spread",
+      "src": "text/part0019_split_035.html"
+    },
+    {
+      "title": "The Six Faiths",
+      "src": "text/part0019_split_036.html"
+    },
+    {
+      "title": "Grand Profile Life Assessment Spread",
+      "src": "text/part0019_split_037.html"
+    },
+    {
+      "title": "The Traditional Fifteen-Card Spread",
+      "src": "text/part0019_split_040.html"
+    },
+    {
+      "title": "The Chai Eighteen-Card Spread",
+      "src": "text/part0019_split_042.html"
+    },
+    {
+      "title": "The Grand Tableau",
+      "src": "text/part0019_split_043.html"
+    },
+    {
+      "title": "The Triquetra Outcome Management Spread",
+      "src": "text/part0019_split_044.html"
+    },
+    {
+      "title": "The Ba Gua Spread",
+      "src": "text/part0020_split_001.html"
+    },
+    {
+      "title": "Eden Gray’s Three Aces Spread for Yes or No Inquiries",
+      "src": "text/part0020_split_003.html"
+    },
+    {
+      "title": "Two-Seeker Love and Relationship Spread",
+      "src": "text/part0020_split_006.html"
+    },
+    {
+      "title": "The Rose",
+      "src": "text/part0020_split_007.html"
+    },
+    {
+      "title": "The Seashell",
+      "src": "text/part0020_split_009.html#c14-s34"
+    },
+    {
+      "title": "The Adjustment Card",
+      "src": "text/part0020_split_011.html"
+    },
+    {
+      "title": "The Shadow Card",
+      "src": "text/part0020_split_012.html"
+    },
+    {
+      "title": "The Essence Card",
+      "src": "text/part0020_split_013.html"
+    },
+    {
+      "title": "Card Counting in Tarot",
+      "src": "text/part0020_split_015.html"
+    },
+    {
+      "title": "Telling Time with Tarot",
+      "src": "text/part0020_split_019.html"
+    },
+    {
+      "title": "Chapter 15: Consideration of the Spread Landscape",
+      "src": "text/part0021_split_000.html#K0RQ0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Choosing Spreads",
+      "src": "text/part0021_split_001.html#c15-s1"
+    },
+    {
+      "title": "The Significance of the Major Arcana",
+      "src": "text/part0021_split_001.html#c15-s2"
+    },
+    {
+      "title": "The Significance of Court Cards",
+      "src": "text/part0021_split_001.html#c15-s3"
+    },
+    {
+      "title": "Card Reversals",
+      "src": "text/part0021_split_001.html#c15-s4"
+    },
+    {
+      "title": "The Significance of Numbers",
+      "src": "text/part0021_split_004.html#c15-s5"
+    },
+    {
+      "title": "The Significance of Suits",
+      "src": "text/part0021_split_005.html#c15-s6"
+    },
+    {
+      "title": "Elemental Dignities",
+      "src": "text/part0021_split_006.html#c15-s7"
+    },
+    {
+      "title": "Elemental Affinities in the Minor Arcana",
+      "src": "text/part0021_split_010.html#c15-s8"
+    },
+    {
+      "title": "Directionality",
+      "src": "text/part0021_split_010.html#c15-s9"
+    },
+    {
+      "title": "The Color of the Sky",
+      "src": "text/part0021_split_012.html#c15-s10"
+    },
+    {
+      "title": "Intuitive Reading",
+      "src": "text/part0021_split_012.html#c15-s11"
+    },
+    {
+      "title": "How Frequently May Seekers Consult the Tarot?",
+      "src": "text/part0021_split_013.html#c15-s12"
+    },
+    {
+      "title": "Checklist of Consideration Points for a Reading",
+      "src": "text/part0021_split_013.html#c15-s13"
+    },
+    {
+      "title": "Checklist of Recommended Exercises",
+      "src": "text/part0021_split_013.html#c15-s14"
+    },
+    {
+      "title": "Chapter 16: Devising Tarot Spreads",
+      "src": "text/part0022_split_000.html#KVCC0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Step 1: Articulate purpose and objective of spread",
+      "src": "text/part0022_split_001.html#c16-s1"
+    },
+    {
+      "title": "Step 2: Decide theoretical or philosophical principle",
+      "src": "text/part0022_split_001.html#c16-s2"
+    },
+    {
+      "title": "Step 3: Apply the principle to a tarot spread layout",
+      "src": "text/part0022_split_006.html#c16-s3"
+    },
+    {
+      "title": "Step 4: Decide total number of cards",
+      "src": "text/part0022_split_006.html#c16-s4"
+    },
+    {
+      "title": "Step 5: Determine indication of each card position",
+      "src": "text/part0022_split_007.html#c16-s5"
+    },
+    {
+      "title": "Chapter 17: Tarot Readings: A Step-by-Step Analytical Process",
+      "src": "text/part0023_split_000.html#LTSU0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 18: The Five Components of Circumstance",
+      "src": "text/part0024_split_000.html#MSDG0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Force Majeure",
+      "src": "text/part0024_split_001.html#c18-s1"
+    },
+    {
+      "title": "Karma",
+      "src": "text/part0024_split_001.html#c18-s2"
+    },
+    {
+      "title": "Disposition",
+      "src": "text/part0024_split_001.html#c18-s3"
+    },
+    {
+      "title": "Education",
+      "src": "text/part0024_split_001.html#c18-s4"
+    },
+    {
+      "title": "Action",
+      "src": "text/part0024_split_001.html#c18-s5"
+    },
+    {
+      "title": "Chapter 19: Assuaging Seekers When a Reading Seems Negative",
+      "src": "text/part0025_split_000.html#NQU20-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 20: Reading Tarot for Yourself",
+      "src": "text/part0026_split_000.html#OPEK0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 21: The Setting of a Tarot Reading and Energetic Supplements",
+      "src": "text/part0027_split_000.html#PNV60-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "The Setting of a Tarot Reading",
+      "src": "text/part0027_split_001.html#c21-s1"
+    },
+    {
+      "title": "Energetic Supplements",
+      "src": "text/part0027_split_004.html#c21-s2"
+    },
+    {
+      "title": "A Note on Invocations",
+      "src": "text/part0027_split_009.html#c21-s3"
+    },
+    {
+      "title": "Reading from the Conscious vs. Reading from the Unconscious",
+      "src": "text/part0027_split_009.html#c21-s4"
+    },
+    {
+      "title": "Chapter 22: Intermediate Ruminations and Practicum",
+      "src": "text/part0028_split_000.html#QMFO0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Recommended Exercises: Ruminations",
+      "src": "text/part0028_split_001.html#c22-s1"
+    },
+    {
+      "title": "Recommended Exercises: Practicum",
+      "src": "text/part0028_split_001.html#c22-s2"
+    },
+    {
+      "title": "Chapter 23: The Value of Meditation to Tarot Practice",
+      "src": "text/part0029_split_000.html#RL0A0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 24: Inappropriate Questions",
+      "src": "text/part0030_split_000.html#SJGS0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 25: Ethical Considerations of the Tarot",
+      "src": "text/part0031_split_000.html#TI1E0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 26: Tarot and Love",
+      "src": "text/part0032_split_000.html#UGI00-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Love and Relationships in the Major Arcana",
+      "src": "text/part0032_split_001.html#c26-s1"
+    },
+    {
+      "title": "Love and Relationships in the Minor Arcana",
+      "src": "text/part0032_split_001.html#c26-s2"
+    },
+    {
+      "title": "Hope’s Three-Card Relationship Spread",
+      "src": "text/part0032_split_001.html#c26-s3"
+    },
+    {
+      "title": "Chapter 27: Tarot and Professional Development",
+      "src": "text/part0033_split_000.html#VF2I0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Professional Development in the Major Arcana",
+      "src": "text/part0033_split_002.html#c27-s1"
+    },
+    {
+      "title": "Professional Development in the Minor Arcana",
+      "src": "text/part0033_split_002.html#c27-s2"
+    },
+    {
+      "title": "Inspiring High Achievement with Tarot",
+      "src": "text/part0033_split_002.html#c27-s3"
+    },
+    {
+      "title": "Chapter 28: Using Tarot to Build Resilience",
+      "src": "text/part0034_split_000.html#10DJ40-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "The Seven Characteristics of Resilience",
+      "src": "text/part0034_split_001.html#c28-s1"
+    },
+    {
+      "title": "Optimism",
+      "src": "text/part0034_split_001.html#c28-s2"
+    },
+    {
+      "title": "Confidence",
+      "src": "text/part0034_split_001.html#c28-s3"
+    },
+    {
+      "title": "Humor",
+      "src": "text/part0034_split_001.html#c28-s4"
+    },
+    {
+      "title": "Expression",
+      "src": "text/part0034_split_001.html#c28-s5"
+    },
+    {
+      "title": "Focus",
+      "src": "text/part0034_split_001.html#c28-s6"
+    },
+    {
+      "title": "Connections",
+      "src": "text/part0034_split_001.html#c28-s7"
+    },
+    {
+      "title": "Devotion",
+      "src": "text/part0034_split_001.html#c28-s8"
+    },
+    {
+      "title": "The Analytical Process of a Resilience Reading",
+      "src": "text/part0034_split_001.html#c28-s9"
+    },
+    {
+      "title": "Positive Affirmations in Tarot",
+      "src": "text/part0034_split_004.html"
+    },
+    {
+      "title": "Affirmations in the Major Arcana",
+      "src": "text/part0034_split_004.html#c28-s11"
+    },
+    {
+      "title": "Affirmations in the Suit of Wands",
+      "src": "text/part0034_split_005.html"
+    },
+    {
+      "title": "Affirmations in the Suit of Cups",
+      "src": "text/part0034_split_006.html"
+    },
+    {
+      "title": "Affirmations in the Suit of Swords",
+      "src": "text/part0034_split_007.html"
+    },
+    {
+      "title": "Affirmations in the Suit of Pentacles",
+      "src": "text/part0034_split_008.html"
+    },
+    {
+      "title": "Chapter 29: Depth Diagnostics",
+      "src": "text/part0035_split_000.html#11C3M0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Step One: Selecting the Signifier",
+      "src": "text/part0035_split_002.html#c29-s1"
+    },
+    {
+      "title": "Step Two: The First Operation",
+      "src": "text/part0035_split_002.html#c29-s2"
+    },
+    {
+      "title": "Step Three: Preliminary Brief",
+      "src": "text/part0035_split_002.html#c29-s3"
+    },
+    {
+      "title": "Step Four: Main Tarot Spread",
+      "src": "text/part0035_split_002.html#c29-s4"
+    },
+    {
+      "title": "Step Five: Deconstruction",
+      "src": "text/part0035_split_002.html#c29-s5"
+    },
+    {
+      "title": "Step Six: Projections",
+      "src": "text/part0035_split_002.html#c29-s6"
+    },
+    {
+      "title": "Chapter 30: The Opening of the Key",
+      "src": "text/part0036_split_000.html#12AK80-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "First Operation: The Opening and the Narrative",
+      "src": "text/part0036_split_001.html#c30-s1"
+    },
+    {
+      "title": "Second Operation: The Twelve Astrological Houses",
+      "src": "text/part0036_split_002.html#c30-s2"
+    },
+    {
+      "title": "Third Operation: The Twelve Zodiac Signs",
+      "src": "text/part0036_split_005.html#c30-s3"
+    },
+    {
+      "title": "Fourth Operation: The Thirty-Six Decans (The Key)",
+      "src": "text/part0036_split_009.html#c30-s4"
+    },
+    {
+      "title": "Fifth Operation: The Ten Sephiroth",
+      "src": "text/part0036_split_009.html#c30-s5"
+    },
+    {
+      "title": "Chapter 31: Tarot de Marseille and the Thoth",
+      "src": "text/part0037_split_000.html#1394Q0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Chapter 32: The Professional Practice of Tarot",
+      "src": "text/part0038_split_000.html#147LC0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Governing Law",
+      "src": "text/part0038_split_002.html"
+    },
+    {
+      "title": "Business Formation",
+      "src": "text/part0038_split_003.html"
+    },
+    {
+      "title": "Business Model",
+      "src": "text/part0038_split_007.html"
+    },
+    {
+      "title": "Marketing Strategy",
+      "src": "text/part0038_split_008.html"
+    },
+    {
+      "title": "Consumer Analysis",
+      "src": "text/part0038_split_008.html#c32-s5"
+    },
+    {
+      "title": "Competitor Analysis",
+      "src": "text/part0038_split_010.html#c32-s6"
+    },
+    {
+      "title": "The Four Ps: Product, Pricing, Placement, Promotion",
+      "src": "text/part0038_split_010.html#c32-s7"
+    },
+    {
+      "title": "Practice Approach",
+      "src": "text/part0038_split_010.html#c32-s8"
+    },
+    {
+      "title": "Ensuring a Safe Environment",
+      "src": "text/part0038_split_010.html#c32-s9"
+    },
+    {
+      "title": "Pro Bono Publico Readings",
+      "src": "text/part0038_split_010.html#c32-s10"
+    },
+    {
+      "title": "Chapter 33: A Personal Essay: How I Started",
+      "src": "text/part0039_split_000.html#1565U0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Appendix A: Tarot Spreads Quick Reference",
+      "src": "text/part0040_split_000.html#164MG0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Appendix B: Astrological Symbols and Elemental Associations",
+      "src": "text/part0041_split_000.html#173720-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "B1. Solar System Symbols",
+      "src": "text/part0041_split_001.html"
+    },
+    {
+      "title": "B2. Zodiac Constellations",
+      "src": "text/part0041_split_002.html"
+    },
+    {
+      "title": "B3. Traditional vs. Modern Rulership Distinctions",
+      "src": "text/part0041_split_003.html"
+    },
+    {
+      "title": "B4. Alchemical Symbols of the Elements and Associations",
+      "src": "text/part0041_split_004.html"
+    },
+    {
+      "title": "B5. The Classical Elements, Western Astrology, and Tarot",
+      "src": "text/part0041_split_005.html"
+    },
+    {
+      "title": "B6. Astrological Complements",
+      "src": "text/part0041_split_006.html"
+    },
+    {
+      "title": "B7. Fire Associations in the Major Arcana",
+      "src": "text/part0041_split_007.html"
+    },
+    {
+      "title": "B8. Water Associations in the Major Arcana",
+      "src": "text/part0041_split_008.html"
+    },
+    {
+      "title": "B9. Air Associations in the Major Arcana",
+      "src": "text/part0041_split_009.html"
+    },
+    {
+      "title": "B10. Earth Associations in the Major Arcana",
+      "src": "text/part0041_split_010.html"
+    },
+    {
+      "title": "B11. Papus Mandala on the Elemental Affinities",
+      "src": "text/part0041_split_011.html"
+    },
+    {
+      "title": "B12. Astrological Correspondences of the Minor Arcana",
+      "src": "text/part0041_split_013.html"
+    },
+    {
+      "title": "B13. Tarot and the Tree of Life",
+      "src": "text/part0041_split_014.html"
+    },
+    {
+      "title": "Appendix C: Ruminations on the Major Arcana",
+      "src": "text/part0042_split_000.html#181NK0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Appendix D: Profile Tables and Ruminations on the Minor Arcana",
+      "src": "text/part0043_split_000.html#190860-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "D1. Suit of Wands",
+      "src": "text/part0043_split_001.html"
+    },
+    {
+      "title": "D2. Suit of Cups",
+      "src": "text/part0043_split_004.html"
+    },
+    {
+      "title": "D3. Suit of Swords",
+      "src": "text/part0043_split_007.html"
+    },
+    {
+      "title": "D4. Suit of Pentacles",
+      "src": "text/part0043_split_009.html"
+    },
+    {
+      "title": "Appendix E: Profile Tables for Interpreting Court Cards",
+      "src": "text/part0044_split_000.html#19UOO0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Appendix F: Numerological Associations",
+      "src": "text/part0045_split_000.html#1AT9A0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "F1. General Numerological Associations",
+      "src": "text/part0045_split_001.html"
+    },
+    {
+      "title": "F2. Numerology and the Four Suits",
+      "src": "text/part0045_split_002.html"
+    },
+    {
+      "title": "Appendix G: Pythagorean Numerology",
+      "src": "text/part0046_split_000.html#1BRPS0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "G1. Calculating the Life Path Number",
+      "src": "text/part0046_split_001.html"
+    },
+    {
+      "title": "G2. Name Correspondences in Numerology",
+      "src": "text/part0046_split_003.html"
+    },
+    {
+      "title": "G3. The Decisive Age",
+      "src": "text/part0046_split_004.html"
+    },
+    {
+      "title": "Appendix H: Sample Logs and Templates",
+      "src": "text/part0047_split_000.html#1CQAE0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Appendix I: The Marseille Major Arcana",
+      "src": "text/part0048_split_000.html#1DOR00-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Endnotes",
+      "src": "text/part0049_split_000.html#1ENBI0-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Index",
+      "src": "text/part0050.html#1FLS40-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "Acknowledgments",
+      "src": "text/part0052.html#1HIT80-7dc0e0ebbc1d4813808cd55b4e575285"
+    },
+    {
+      "title": "About the Author",
+      "src": "text/part0053.html#1IHDQ0-7dc0e0ebbc1d4813808cd55b4e575285"
+    }
+  ],
+  "errata_url": "https://benebellwen.com/about-the-book/amendments-to-text/"
+}

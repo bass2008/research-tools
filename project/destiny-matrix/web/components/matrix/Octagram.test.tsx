@@ -105,4 +105,30 @@ describe("октаграмма", () => {
     expect(plain).not.toContain("<a href");
     expect(dots(plain).length).toBe(MAP_POINTS.length);
   });
+
+  it("связывает чакры с позициями, даже когда номера арканов повторяются", () => {
+    const repeated = renderToStaticMarkup(<Octagram m={calculate("1993-03-31", "m")} />);
+    const points = [...repeated.matchAll(/data-map-point="([^"]+)" data-map-chakras="([^"]+)"/g)];
+    const expected: Record<string, string[]> = {
+      muladhara: ["year", "mission"],
+      svadhisthana: ["comfort_east", "comfort_south"],
+      manipura: ["center"],
+      anahata: ["anahata_physics", "anahata_energy"],
+      vishuddha: ["comfort_west", "comfort_north"],
+      ajna: ["ajna_physics", "ajna_energy"],
+      sahasrara: ["day", "month"],
+    };
+    for (const [chakra, keys] of Object.entries(expected)) {
+      expect(points.filter((point) => point[2] === chakra).map((point) => point[1]).sort())
+        .toEqual([...keys].sort());
+    }
+    expect(points).toHaveLength(13);
+  });
+
+  it("не добавляет подсветку в PDF", () => {
+    const printed = renderToStaticMarkup(<Octagram m={M} printing />);
+    expect(printed).not.toContain("data-chakra-halo");
+    expect(printed).not.toContain("data-map-chakras");
+    expect(dots(printed)).toHaveLength(MAP_POINTS.length);
+  });
 });

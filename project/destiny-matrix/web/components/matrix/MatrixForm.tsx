@@ -7,7 +7,7 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useMessage } from "@/lib/i18n/useMessage";
-import { forLocale as localizedMatrix, MatrixError, type Sex } from "@/lib/matrix";
+import { forLocale as localizedMatrix, MatrixError, type Matrix, type Sex } from "@/lib/matrix";
 import { saveBirth } from "@/lib/storage";
 import { browserDay, exampleDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
@@ -43,6 +43,7 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
   finish?: Finish;
   /** метка для аналитики: откуда считали */
   place?: string;
+  onPreview?: (matrix: Matrix | null) => void;
 }) & { locale?: Locale }) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
@@ -52,6 +53,7 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
     lead = D.calc.formLead[L],
     finish = { kind: "here" },
     place = "landing",
+    onPreview,
   } = localeProps;
   const { MONTHS_ACC, calculate, daysInMonth, toIso, MIN_YEAR } = forLocale(L);
 
@@ -92,6 +94,16 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
   }, [saved, finish.kind]);
 
   useEffect(() => setMaxYear(browserDay().year), []);
+
+  useEffect(() => {
+    if (!onPreview) return;
+    try {
+      onPreview(calculate(toIso({ year, month, day }), sex));
+    } catch (e) {
+      onPreview(null);
+      setError((locale) => e instanceof MatrixError ? e.messageFor(locale) : D.calc.genericError[locale]);
+    }
+  }, [day, month, year, sex, calculate, toIso, onPreview, setError]);
 
   const years: number[] = [];
   for (let y = maxYear; y >= MIN_YEAR; y--) years.push(y);

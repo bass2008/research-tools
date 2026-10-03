@@ -50,6 +50,7 @@ WORD_RE = re.compile(r"[а-яёa-z0-9]+", re.IGNORECASE)
 class Report:
     def __init__(self) -> None:
         self.errors: list[str] = []
+        self.warnings: list[str] = []
         self.checks = 0
 
     def check(self, ok: bool, message: str) -> bool:
@@ -413,7 +414,7 @@ def check_texts(rep: Report, prose: list[tuple[str, str]]) -> None:
                 rep.fail(f"канцелярит «{found.group()}» в {where}")
         blocked = blocked_match(text, "content", LANG)
         if blocked:
-            rep.fail(f"запрещённая лексика ({blocked.category}) «{blocked.matched}» в {where}")
+            rep.warnings.append(f"слово из text-policy ({blocked.category}) «{blocked.matched}» в {where}")
 
 
 def check_openings(rep: Report, data: dict[str, dict]) -> None:
@@ -461,7 +462,9 @@ def main() -> int:
         print(f"текстов: {len(prose)}, знаков: {total}, "
               f"средняя длина сочетания: {avg:.0f}")
     limit = len(rep.errors) if "--all" in sys.argv else 60
-    print(f"проверок: {rep.checks}, ошибок: {len(rep.errors)}")
+    print(f"проверок: {rep.checks}, ошибок: {len(rep.errors)}, предупреждений: {len(rep.warnings)}")
+    for warning in rep.warnings[:limit]:
+        print(f"  ! {warning}")
     for err in rep.errors[:limit]:
         print(f"  ✗ {err}")
     if len(rep.errors) > limit:

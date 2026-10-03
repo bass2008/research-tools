@@ -2,17 +2,6 @@ import type { Phrase, PhraseFn } from "./index";
 
 /** Страницы «аркан N в позиции X»: формулировки позиции и каркас статьи. */
 export const crossing = {
-  tailH1: {
-    ru: (n: number) => `${n} аркан в кармическом хвосте`,
-    en: (n: number) => `Arcanum ${n} in the karmic tail`,
-  } satisfies PhraseFn<[number]>,
-  tailInside: { ru: "на позиции кармического хвоста", en: "in the position of the karmic tail" } satisfies Phrase,
-  tailAlias: { ru: "программа", en: "program" } satisfies Phrase,
-  programH1: {
-    ru: (n: number) => `Программа ${n} в матрице судьбы`,
-    en: (n: number) => `Program ${n} in the destiny matrix`,
-  } satisfies PhraseFn<[number]>,
-  programAlias: { ru: "кармический хвост", en: "karmic tail" } satisfies Phrase,
   centerH1: {
     ru: (n: number) => `${n} аркан в центре матрицы судьбы`,
     en: (n: number) => `Arcanum ${n} in the centre of the destiny matrix`,
@@ -97,27 +86,6 @@ export const crossing = {
       + "is a common mistake when reading a chart.",
   } satisfies PhraseFn<[string]>,
   energyH2: { ru: "Что это за энергия вообще", en: "What this energy is in general" } satisfies Phrase,
-  triplesH2: {
-    ru: (n: number) => `В каких тройках стоит ${n} аркан`,
-    en: (n: number) => `Which triples arcanum ${n} appears in`,
-  } satisfies PhraseFn<[number]>,
-  triplesText: {
-    ru: (n: number, count: number, list: string) => `Хвост — всегда тройка M–N–D, отдельного `
-      + `«хвоста ${n}» не существует. С разбором аркан ${n} стоит в ${count} `
-      + `${count % 10 === 1 && count % 100 !== 11 ? "хвосте"
-        : [2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100) ? "хвостах" : "хвостах"}: `
-      + `${list} — каждая тройка уточняет сценарий, но роль самого аркана в ней остаётся той же.`,
-    en: (n: number, count: number, list: string) => `A tail is always the triple M–N–D; there is no `
-      + `separate “tail ${n}”. With a reading, arcanum ${n} stands in ${count} `
-      + `${count === 1 ? "tail" : "tails"}: ${list} — each triple sharpens the scenario, but the `
-      + "role of the arcanum itself stays the same.",
-  } satisfies PhraseFn<[number, number, string]>,
-  aliasNote: {
-    ru: (alias: string) => ` В нише этот же вопрос задают словом «${alias}»: речь об одной и той `
-      + "же позиции карты.",
-    en: (alias: string) => ` In this niche the same question is asked with the word “${alias}”: it `
-      + "is one and the same position of the chart.",
-  } satisfies PhraseFn<[string]>,
   faqMeaning: {
     ru: (head: string) => `Что означает ${head}?`,
     en: (head: string) => `What does ${head} mean?`,
@@ -140,16 +108,6 @@ export const crossing = {
     en: (example: string) => `Yes. For example, ${example}. It is the same energy in another role, `
       + "and a conclusion cannot be carried from one point to another.",
   } satisfies PhraseFn<[string]>,
-  faqTail: {
-    ru: (n: number) => `Существует ли кармический хвост ${n}?`,
-    en: (n: number) => `Is there a karmic tail ${n}?`,
-  } satisfies PhraseFn<[number]>,
-  faqTailAnswer: {
-    ru: (n: number, count: number, list: string) => `Нет: хвост — тройка арканов, а не одно число. `
-      + `С разбором аркан ${n} встречается в ${count} хвостах: ${list}.`,
-    en: (n: number, count: number, list: string) => `No: a tail is a triple of arcana, not a single `
-      + `number. With a reading, arcanum ${n} appears in ${count} tails: ${list}.`,
-  } satisfies PhraseFn<[number, number, string]>,
   seoTitle: {
     ru: (head: string) => `${head}: значение`,
     en: (head: string) => `${head}: meaning`,
@@ -158,10 +116,6 @@ export const crossing = {
     ru: (head: string) => `${head} матрица судьбы`,
     en: (head: string) => `${head} destiny matrix`,
   } satisfies PhraseFn<[string]>,
-  queryAlias: {
-    ru: (alias: string, n: number) => `${alias} ${n} матрица судьбы`,
-    en: (alias: string, n: number) => `${alias} ${n} destiny matrix`,
-  } satisfies PhraseFn<[string, number]>,
   shortLead: {
     ru: (head: string, title: string, short: string) => `${head} — это ${title}. ${short}`,
     en: (head: string, title: string, short: string) => `${head} is ${title}. ${short}`,

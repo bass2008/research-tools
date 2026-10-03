@@ -1,4 +1,5 @@
 import JsonLd from "@/components/ui/JsonLd";
+import RichText from "@/components/ui/RichText";
 import type { QA } from "@/lib/content";
 import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
@@ -27,7 +28,7 @@ export default function Faq({ locale: requestedLocale, ...localeProps }: ({ item
         {items.map((item) => (
           <div key={item.q}>
             <dt>{item.q}</dt>
-            <dd>{item.a}</dd>
+            <dd><RichText text={item.a} /></dd>
           </div>
         ))}
       </dl>

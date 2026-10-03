@@ -63,7 +63,6 @@ STATIC_NOINDEX = {
     "/matrices", "/pay", "/pay/done", "/pay/fail", "/print/report",
 }
 
-
 def read_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -186,10 +185,19 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
             evidence.append("последовательности нет в реестре 26; чужую формулу не публикуем")
     elif "программ" in low:
         intent = "program"
-        context = "loops"
-        landing = "/programs"
-        entity = f"occurrence:loops:{key}"
-        evidence.append("явное слово программа; это не делает тройку хвостом")
+        # Известная полная тройка без маркера иной позиции обслуживается её разбором.
+        # Одно число или программа денежной/другой линии не становится хвостом.
+        other_position = any(needle in low for needle, _ in POSITION_WORDS)
+        if key in valid and not other_position:
+            context = "past_lives"
+            entity = f"tail:{key}"
+            landing = f"/encyclopedia/karmic-tail/{key}" if key in indexed else None
+            evidence.append("полная программа совпала с ordered-хвостом; иной контекст не указан")
+        else:
+            context = "loops"
+            landing = "/programs"
+            entity = f"occurrence:loops:{key}"
+            evidence.append("явное слово программа; это не делает тройку хвостом")
     else:
         position = next(((needle, name) for needle, name in POSITION_WORDS if needle in low), None)
         if position:

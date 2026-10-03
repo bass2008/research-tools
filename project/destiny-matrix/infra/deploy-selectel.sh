@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Поднять копию прода на машине Selectel. Повторяет то, что в Yandex Cloud делает cloud-init
-# (terraform/server/cloud-init.yaml.tftpl), но под здешние условия: пользователь root, вход в
-# реестр по паролю вместо IAM-токена из метаданных, TLS пока нет — домен ещё смотрит на Яндекс.
+# Поднять копию прода на машине Selectel: пользователь root, вход в реестр по паролю,
+# TLS пока нет — сертификаты выписывает bootstrap-machine.sh.
 set -euo pipefail
 cd "$(dirname "$0")"
 

@@ -17,7 +17,6 @@ import { forLocale as localizedPositionArcanum } from "@/lib/positionArcanum";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
-import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -38,7 +37,6 @@ const forLocale = localized((L: Locale, site) => {
   const { NOT_FOUND_META } = localizedSeo(L, site);
   const { mapPointsFor } = localizedMatrixMap(L);
   const { pageMeta } = localizedSite(L, site);
-  const { clip } = localizedText(L);
 
   function data(params: Params) {
     const arcanum = Number(params.n);
@@ -46,7 +44,7 @@ const forLocale = localized((L: Locale, site) => {
     if (!registryItem(params.key, arcanum)) return null;
     return buildPositionArcanum(params.key, arcanum);
   }
-  return { arcanumTitle, arcanumHref, positionByKey, buildPositionArcanum, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, registryItem, registryItems, encyclopediaSectionCrumb, articleLd, faqLd, NOT_FOUND_META, mapPointsFor, pageMeta, clip, data };
+  return { arcanumTitle, arcanumHref, positionByKey, buildPositionArcanum, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, registryItem, registryItems, encyclopediaSectionCrumb, articleLd, faqLd, NOT_FOUND_META, mapPointsFor, pageMeta, data };
 });
 
 export function generateStaticParams(): Params[] {
@@ -76,7 +74,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function PositionArcanumPage({ params }: { params: Promise<Params> }) {
   const L = await requestLocale();
-  const { arcanumTitle, arcanumHref, positionByKey, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, encyclopediaSectionCrumb, articleLd, faqLd, mapPointsFor, clip, data } = forLocale(L, await requestSite());
+  const { arcanumTitle, arcanumHref, positionByKey, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, encyclopediaSectionCrumb, articleLd, faqLd, mapPointsFor, data } = forLocale(L, await requestSite());
 
   const reading = data(await params);
   if (!reading) notFound();
@@ -114,24 +112,7 @@ export default async function PositionArcanumPage({ params }: { params: Promise<
           )}
       />
 
-      <Sections items={reading.sections} />
-
-      {reading.tails.length ? (
-        <div className="panel section-gap">
-          <h2>{D.encLinks.triplesWith[L]}</h2>
-          <div className="cap">
-            {D.encLinks.triplesWithHint[L](reading.tails.length, reading.arcanum)}
-          </div>
-          <div className="cardgrid">
-            {reading.tails.map((tail) => (
-              <Link className="ecard" key={tail.key} href={tail.href} prefetch={false}>
-                <div className="num">{tail.key}</div>
-                <div className="ds">{clip(tail.short, 120)}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <Sections items={reading.sections} locale={L} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

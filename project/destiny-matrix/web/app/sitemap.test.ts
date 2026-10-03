@@ -126,6 +126,11 @@ describe("карта сайта", () => {
     expect(published).toHaveLength(26);
   });
 
+  it("сохраняет раздел хвоста без удалённых пересечений одного числа", () => {
+    expect(paths).toContain("/encyclopedia/position/past_lives");
+    expect(paths.filter((path) => path.startsWith("/encyclopedia/position/past_lives/"))).toEqual([]);
+  });
+
   it("не выдаёт приватные адреса", () => {
     for (const hidden of ["/report", "/account", "/pay", "/matrices", "/admin"]) {
       expect(paths).not.toContain(hidden);

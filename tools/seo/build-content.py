@@ -23,6 +23,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "project/destiny-matrix"))
+from content.text_policy import blocked_match  # noqa: E402
 SRC_ROOT = ROOT / "tools/seo/content"
 DST_ROOT = ROOT / "project/destiny-matrix/web/content"
 METHOD = ROOT / "project/destiny-matrix/spec/method.json"
@@ -31,30 +33,12 @@ DEFAULT_LANG = "ru"
 BRAND = len(" — Arcana Sense")
 TITLE_LIMIT = 70
 
-# Список слово-в-слово из web/lib/content.ts: там любое поле с медицинской лексикой отбрасывается
-# целиком, потому что реклама целительства требует разрешения, которого не получить. Фильтр ловит
-# подстроку, а не смысл, поэтому «не гарантирует» и «время не лечит» тоже под него попадают —
-# сборка обязана сказать об этом здесь, а не молча отдать сайту урезанную статью.
-BANNED_BY_LANG = {
-    "ru": (
-        "лечен", "лечит", "лечи́", "лечение", "диагноз", "заболеван", "исцел", "целитель",
-        "болезн", "симптом", "терапи", "препарат", "набор веса", "алкогол", "похуден",
-        "выздоравл", "недуг", "иммунит", "хроническ", "врач", "клиник",
-        "гарантиру", "уязвимые зоны",
-    ),
-    "en": (
-        "cure", "cures", "healing", "heals", "diagnos", "disease", "illness", "symptom",
-        "therapy", "treatment", "medication", "weight gain", "weight loss", "alcohol",
-        "recovery from illness", "immunity", "chronic", "doctor", "clinic", "physician",
-        "guarantee", "guaranteed", "vulnerable zones",
-    ),
-}
-BANNED = BANNED_BY_LANG[DEFAULT_LANG]
-
 # Минимумы повторяют загрузчик сайта (web/lib/content.ts): что не проходит здесь, не попадёт на
 # страницу и там — только там об этом узнают после сборки.
 ARTICLE = ("karmic-tails", "year-arcana", "category-hubs", "hubs")
-ENRICH = {"arcana": ("arcana.json", "n"), "positions": ("positions.json", "key")}
+ENRICH = {"arcana": ("arcana.json", "n"), "positions": ("positions.json", "key"),
+          "chakras": ("chakras.json", "key")}
+CHAKRA_ARTICLE = ("title", "short", "seo", "intro", "sections", "faq")
 KEY_FIELD = {"year-arcana": "n"}
 
 
@@ -62,19 +46,17 @@ def fail(problems: list[str], where: str, text: str) -> None:
     problems.append(f"{where}: {text}")
 
 
-def hygiene(value: object, where: str, path: str, losses: list[str]) -> None:
-    """Где сайт вырежет текст. Не ошибка сборки: поле уйдёт, страница останется."""
+def hygiene(value: object, where: str, path: str, warnings: list[str], lang: str) -> None:
     if isinstance(value, str):
-        low = value.lower()
-        found = [w for w in BANNED if w in low]
+        found = blocked_match(value, "content", lang)
         if found:
-            losses.append(f"{where}: {path} — {', '.join(found)}")
+            warnings.append(f"{where}: {path} — «{found.matched}» ({found.category})")
     elif isinstance(value, list):
         for i, item in enumerate(value):
-            hygiene(item, where, f"{path}[{i}]", losses)
+            hygiene(item, where, f"{path}[{i}]", warnings, lang)
     elif isinstance(value, dict):
         for key, item in value.items():
-            hygiene(item, where, f"{path}.{key}" if path else key, losses)
+            hygiene(item, where, f"{path}.{key}" if path else key, warnings, lang)
 
 
 def check_seo(seo: object, where: str, problems: list[str]) -> None:
@@ -123,24 +105,129 @@ def trim_description(item: dict, where: str) -> None:
     seo["description"] = cut
     print(f"  ~ {where}: описание подрезано с {len(text)} до {len(cut)} знаков")
 
+BLOCKS = ("h3", "ul", "ol", "table", "slot", "chakra_reading")
+SLOTS = ("calc",)
+# chakra -> triples of the paid-report corpus (chakra-personal.json); filled in main()
+CHAKRA_READINGS: dict[str, set[str]] = {}
+
+
+def check_marks(text: str, where: str, path: str, problems: list[str], rich: bool) -> None:
+    if not rich:
+        if "*" in text:
+            fail(problems, where, f"{path}: здесь выводится голый текст, звёздочки останутся на странице")
+        return
+    # The site renders only `**bold**`; any other asterisk would be printed as is.
+    if "*" in re.sub(r"\*\*[^*]+\*\*", "", text):
+        fail(problems, where, f"{path}: непарные ** или одиночная * — на странице останутся звёздочки")
+
+
+def strings_ok(value: object, allow_empty: bool) -> bool:
+    return (isinstance(value, list) and bool(value)
+            and all(isinstance(x, str) and (allow_empty or x.strip()) for x in value))
+
+
+def check_chakra_reading(value: object, where: str, at: str, problems: list[str]) -> None:
+    chakra = value.get("chakra") if isinstance(value, dict) else None
+    triple = value.get("triple") if isinstance(value, dict) else None
+    if (not isinstance(chakra, str) or not isinstance(triple, str) or set(value) - {"chakra", "triple", "note"}
+            or triple not in CHAKRA_READINGS.get(chakra, ())):
+        fail(problems, where, f"{at}: chakra_reading — chakra и triple из chakra-personal.json, плюс необязательный note")
+        return
+    note = value.get("note")
+    if note is None:
+        return
+    if not isinstance(note, str) or not note.strip():
+        fail(problems, where, f"{at}: chakra_reading.note — непустая строка")
+    else:
+        check_marks(note, where, f"{at}.note", problems, rich=True)
+
+
+def check_reading_anchors(item: dict, where: str, problems: list[str]) -> None:
+    paragraphs = [*(item.get("intro") or []), *(p for s in item.get("sections") or [] if isinstance(s, dict)
+                                                for p in s.get("paragraphs") or [])]
+    triples = [p["chakra_reading"].get("triple") for p in paragraphs
+               if isinstance(p, dict) and isinstance(p.get("chakra_reading"), dict)]
+    for triple in sorted({t for t in triples if triples.count(t) > 1}, key=str):
+        fail(problems, where, f"chakra_reading {triple}: тройка повторяется — у блоков совпадут якоря")
+
+
+def check_paragraphs(paragraphs: list, where: str, path: str, problems: list[str]) -> None:
+    for i, p in enumerate(paragraphs):
+        at = f"{path}[{i}]"
+        if isinstance(p, str):
+            if len(p.strip()) <= 20:
+                fail(problems, where, f"{at}: абзац короче 21 знака — сайт упадёт на загрузке")
+            check_marks(p, where, at, problems, rich=True)
+            continue
+        if not isinstance(p, dict) or len(p) != 1 or next(iter(p)) not in BLOCKS:
+            fail(problems, where, f"{at}: блок — ровно один ключ из {', '.join(BLOCKS)}")
+            continue
+        kind, value = next(iter(p.items()))
+        if kind == "slot":
+            if value not in SLOTS:
+                fail(problems, where, f"{at}: slot — одно из {', '.join(SLOTS)}")
+        elif kind == "h3":
+            if not isinstance(value, str) or not value.strip():
+                fail(problems, where, f"{at}: пустой h3")
+            else:
+                check_marks(value, where, at, problems, rich=False)
+        elif kind == "chakra_reading":
+            check_chakra_reading(value, where, at, problems)
+        elif kind in ("ul", "ol"):
+            if not strings_ok(value, allow_empty=False):
+                fail(problems, where, f"{at}: {kind} — непустой список непустых строк")
+            else:
+                for j, text in enumerate(value):
+                    check_marks(text, where, f"{at}.{kind}[{j}]", problems, rich=True)
+        else:
+            head = value.get("head") if isinstance(value, dict) else None
+            rows = value.get("rows") if isinstance(value, dict) else None
+            if (not strings_ok(head, allow_empty=True) or not isinstance(rows, list) or not rows
+                    or any(not strings_ok(row, allow_empty=True) or len(row) != len(head) for row in rows)):
+                fail(problems, where, f"{at}: table — head и rows из строк одной ширины")
+                continue
+            for j, cell in enumerate(head):
+                check_marks(cell, where, f"{at}.head[{j}]", problems, rich=False)
+            for r, row in enumerate(rows):
+                for c, cell in enumerate(row):
+                    check_marks(cell, where, f"{at}.rows[{r}][{c}]", problems, rich=True)
+
+
 def check_article(item: dict, where: str, problems: list[str]) -> None:
     if not str(item.get("title") or "").strip():
         fail(problems, where, "нет title")
     if len(str(item.get("short") or "")) < 60:
         fail(problems, where, "short короче 60 знаков — страница будет без первого экрана")
+    for field in ("title", "short"):
+        check_marks(str(item.get(field) or ""), where, field, problems, rich=False)
+    seo = item.get("seo") if isinstance(item.get("seo"), dict) else {}
+    for field in ("title", "description"):
+        check_marks(str(seo.get(field) or ""), where, f"seo.{field}", problems, rich=False)
     sections = item.get("sections")
     if not isinstance(sections, list) or not sections:
         fail(problems, where, "нет sections — статья отбрасывается целиком")
     else:
         for i, s in enumerate(sections):
-            if not isinstance(s, dict) or not s.get("h2") or not s.get("paragraphs"):
+            if not isinstance(s, dict) or not isinstance(s.get("h2"), str) or not s["h2"].strip() \
+                    or not isinstance(s.get("paragraphs"), list) \
+                    or not s["paragraphs"]:
                 fail(problems, where, f"sections[{i}] без h2 или без paragraphs")
+                continue
+            check_marks(str(s["h2"]), where, f"sections[{i}].h2", problems, rich=False)
+            check_paragraphs(s["paragraphs"], where, f"sections[{i}].paragraphs", problems)
     faq = item.get("faq")
     if faq is not None and not isinstance(faq, list):
         fail(problems, where, "faq должен быть массивом (или отсутствовать: он опционален)")
+        faq = []
     for i, qa in enumerate(faq or []):
-        if not isinstance(qa, dict) or len(str(qa.get("q") or "")) < 9 or len(str(qa.get("a") or "")) < 41:
-            fail(problems, where, f"faq[{i}]: вопрос от 9 знаков, ответ от 41 — иначе выпадет молча")
+        if (not isinstance(qa, dict) or not isinstance(qa.get("q"), str)
+                or not isinstance(qa.get("a"), str) or len(qa["q"].strip()) < 9
+                or len(qa["a"].strip()) < 41):
+            fail(problems, where, f"faq[{i}]: вопрос от 9 знаков, ответ от 41 — иначе сайт упадёт на загрузке")
+            continue
+        check_marks(str(qa["q"]), where, f"faq[{i}].q", problems, rich=False)
+        check_marks(str(qa["a"]), where, f"faq[{i}].a", problems, rich=True)
+    check_reading_anchors(item, where, problems)
     check_seo(item.get("seo"), where, problems)
 
 
@@ -179,24 +266,46 @@ def check_enrichment(item: dict, where: str, base_keys: set, key: str, problems:
             fail(problems, where, "article_sections должен быть непустым списком")
         elif any(
             not isinstance(section, dict)
-            or len(str(section.get("h2") or "")) < 10
+            or not isinstance(section.get("h2"), str)
+            or len(section["h2"].strip()) < 10
             or not isinstance(section.get("paragraphs"), list)
             or not section["paragraphs"]
             for section in sections
         ):
             fail(problems, where, "article_sections: у каждой главы нужны h2 и абзацы")
+        elif any(not isinstance(p, str) for section in sections for p in section["paragraphs"]):
+            # content/validate.py measures these paragraphs as strings
+            fail(problems, where, "article_sections: блоки h3/ul/ol/table пока только в статьях категорий")
+        else:
+            for i, section in enumerate(sections):
+                check_marks(section["h2"], where, f"article_sections[{i}].h2", problems, rich=False)
+                check_paragraphs(section["paragraphs"], where, f"article_sections[{i}].paragraphs", problems)
     if "faq" in item:
         faq = item["faq"]
         if not isinstance(faq, list) or not faq:
             fail(problems, where, "faq должен быть непустым списком")
         elif any(
             not isinstance(entry, dict)
-            or len(str(entry.get("q") or "")) < 9
-            or len(str(entry.get("a") or "")) < 40
+            or not isinstance(entry.get("q"), str)
+            or not isinstance(entry.get("a"), str)
+            or len(entry["q"].strip()) < 9
+            or len(entry["a"].strip()) < 41
             for entry in faq
         ):
             fail(problems, where, "faq: у каждого пункта нужны содержательные q и a")
     check_seo(item.get("seo"), where, problems)
+
+
+def check_chakra_article(item: dict, where: str, base_keys: set, key: str, problems: list[str]) -> None:
+    if key not in base_keys:
+        fail(problems, where, f"чакры {key!r} нет в корпусе — обогащать нечего")
+    check_article(item, where, problems)
+    intro = item.get("intro")
+    if intro is not None:
+        if not isinstance(intro, list):
+            fail(problems, where, "intro должен быть списком абзацев и блоков")
+        else:
+            check_paragraphs(intro, where, "intro", problems)
 
 
 def load(path: Path, problems: list[str]) -> dict | None:
@@ -218,13 +327,13 @@ def main() -> int:
     parser.add_argument("--lang", default=DEFAULT_LANG, help="язык корпуса (ru, en)")
     args = parser.parse_args()
 
-    global BANNED
-    BANNED = BANNED_BY_LANG[args.lang]
     src = SRC_ROOT / args.lang
     dst = DST_ROOT / args.lang
+    corpus = json.loads((dst / "chakra-personal.json").read_text())
+    CHAKRA_READINGS.update({key: set(chakra["readings"]) for key, chakra in corpus["chakras"].items()})
 
     problems: list[str] = []
-    losses: list[str] = []
+    warnings: list[str] = []
     written: list[str] = []
     method = json.loads(METHOD.read_text())
     allowed_tails = {item["triple"] for item in method["reachable_karmic_tails"]}
@@ -261,7 +370,7 @@ def main() -> int:
                         fail(problems, where,
                              f"primary_query уже занят {tail_primary[primary]}")
                     tail_primary[primary] = where
-            hygiene(item, where, "", losses)
+            hygiene(item, where, "", warnings, args.lang)
             trim_description(item, where)
             items.append(item)
         target = dst / f"{category}.json"
@@ -298,10 +407,18 @@ def main() -> int:
                 fail(problems, where, f"ключ {key!r} уже занят файлом {seen[key]}")
                 continue
             seen[key] = path.name
-            check_enrichment(item, where, set(index), key, problems)
-            hygiene(item, where, "", losses)
+            if category == "chakras":
+                check_chakra_article(item, where, set(index), key, problems)
+            else:
+                check_enrichment(item, where, set(index), key, problems)
+            hygiene(item, where, "", warnings, args.lang)
             entry = index.get(key)
             if entry is None:
+                continue
+            if category == "chakras":
+                trim_description(item, where)
+                entry["article"] = {field: item[field] for field in CHAKRA_ARTICLE if field in item}
+                touched += 1
                 continue
             entry["meaning"] = item["meaning"]
             if isinstance(item.get("seo"), dict):
@@ -328,11 +445,10 @@ def main() -> int:
             print(f"  ✗ {p}")
         return 1
 
-    if losses:
-        print(f"\nгигиена вырежет {len(losses)} полей — секция, абзац или вопрос просто не появятся:")
-        for line in losses:
+    if warnings:
+        print(f"\nслова из text-policy.json ({len(warnings)}): сайт выведет их как есть, проверьте смысл:")
+        for line in warnings:
             print(f"  ! {line}")
-        print("  формулировку правит автор: фильтр юридический и ослаблению не подлежит")
 
     print("\nсобрано:" if not args.check else "\nпроверка прошла, к записи готово:")
     for line in written:

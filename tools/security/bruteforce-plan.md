@@ -18,7 +18,7 @@
 
 ## Архитектура (важное для плана)
 
-- Единая дверь — nginx (`infra/nginx/arcana.conf`), всё уходит на Next-BFF (`127.0.0.1:3000`).
+- Единая дверь — nginx (`infra/nginx/arcana-selectel.conf`), всё уходит на Next-BFF (`127.0.0.1:3000`).
   FastAPI (`:8010`) наружу не смотрит — прямого пути к auth-ручкам из интернета нет.
 - Браузер ходит только на свой origin `/api/*`; BFF форвардит на FastAPI.
 - FastAPI — один процесс uvicorn (без `--workers`), Redis нет → in-memory состояние безопасно

@@ -93,7 +93,9 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
       </div>
 
       <div className="section-gap">
-        <MatrixResult site={linkSite} locale={L} m={matrix} printing={printing} />
+        <MatrixResult site={linkSite} locale={L} m={matrix} printing={printing}
+          chakraUnlocked={unlocked || ALL_FREE} matrixId={currentId}
+          chakraReading={unlocked || ALL_FREE ? sections.find((s) => s.key === "chakras")?.longform : undefined} />
       </div>
 
       <ReportSections site={linkSite} locale={L} sections={sections} matrixId={currentId} printing={printing} />

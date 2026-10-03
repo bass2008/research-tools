@@ -338,6 +338,10 @@ def build_all(lang: str = DEFAULT_LANG) -> dict[str, list[dict]]:
           f"{path.stat().st_size / 1024:.0f} КБ")
     path = write_raw(lang, "text-policy.json", ctx.src.text_policy)
     print(f"[{lang}] text-policy.json: {path.stat().st_size / 1024:.0f} КБ")
+    # Персональные тексты хранятся по точной тройке чакры; пустые строки намеренны
+    # на этапе редакционной переработки и не заменяются общими значениями аркана.
+    personal = Path(__file__).parent / "data" / lang / "chakra-personal.json"
+    write_raw(lang, "chakra-personal.json", json.loads(personal.read_text(encoding="utf-8")))
     pages = sum(len(items) for items in parts.values()) + 1
     print(f"[{lang}] страниц энциклопедии: {pages}")
     return parts

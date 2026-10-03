@@ -46,21 +46,18 @@ services:
   web:
     build:
       context: ../web
-      dockerfile: ../compose/web.Dockerfile
-      args:
-        NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
-        # Резервный язык; язык запроса выбирается профилем домена ниже.
-        NEXT_PUBLIC_SITE_LANG: ${SITE_LANG:-ru}
-        NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
-        # локально счётчик выключен: включить — METRIKA_ID=111856670 scripts/run.sh
-        NEXT_PUBLIC_METRIKA_ID: ${METRIKA_ID:-}
-        # версия сборки: отдаётся на /version/current.txt и видна в админке
-        BUILD_COMMIT: ${BUILD_COMMIT:-—}
-        BUILD_BRANCH: ${BUILD_BRANCH:-—}
-        BUILD_TIME: ${BUILD_TIME:-—}
-        BUILD_ISO: ${BUILD_ISO:-}
+      dockerfile: ../compose/web.dev.Dockerfile
     environment:
+      NODE_ENV: development
       NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://127.0.0.1:3000}
+      NEXT_PUBLIC_SITE_LANG: ${SITE_LANG:-ru}
+      NEXT_PUBLIC_SUPPORTED_LOCALES: ru,en
+      NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: ${ALL_FREE_WITHOUT_PAYMENT:-0}
+      NEXT_PUBLIC_METRIKA_ID: ${METRIKA_ID:-}
+      NEXT_PUBLIC_BUILD_COMMIT: ${BUILD_COMMIT:-—}
+      NEXT_PUBLIC_BUILD_BRANCH: ${BUILD_BRANCH:-—}
+      NEXT_PUBLIC_BUILD_TIME: ${BUILD_TIME:-—}
+      NEXT_PUBLIC_BUILD_ISO: ${BUILD_ISO:-}
       SITE_PROFILES: *site-profiles
       # по http кука с secure не ставится и вход не работает
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-0}
@@ -68,6 +65,9 @@ services:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
     ports: !override
       - "${WEB_PORT:-3000}:3000"
-    # статику локально раздаёт сам node: nginx впереди нет, каталог хоста не нужен
-    volumes: !override []
-    command: !override node server.js
+    # Исходники меняются на хосте; зависимости Linux и кеш Next изолированы от хоста.
+    volumes: !override
+      - ../web:/app
+      - /app/node_modules
+      - /app/.next
+    command: !override ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]

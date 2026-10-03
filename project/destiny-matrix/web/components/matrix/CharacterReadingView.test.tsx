@@ -7,47 +7,41 @@ import { forLocale as contentForLocale } from "@/lib/content";
 import CharacterReadingView from "./CharacterReadingView";
 
 describe.each(["ru", "en"] as const)("readable role names (%s)", (locale) => {
-  it.each([false, true])("keeps article introductions out of personal chakra tables (printing=%s)", (printing) => {
-    const matrix = matrixForLocale(locale).calculate("1993-03-04", "f");
+  it.each([false, true])("renders seven chakra panels with exact triples (printing=%s)", (printing) => {
+    const matrix = matrixForLocale(locale).calculate("1993-03-31", "m");
+    const before = structuredClone(matrix);
     const reading = readingsForLocale(locale).buildSectionReading("chakras", matrix);
     const html = renderToStaticMarkup(<CharacterReadingView reading={reading} locale={locale} printing={printing} />);
-    const visible = html.replace(/<[^>]*>/g, " ");
+    expect(html.match(/data-chakra=/g)).toHaveLength(7);
+    expect(html.match(/data-column=/g)).toHaveLength(21);
+    expect(reading.chakraRows!.map((row) => row.cells.map((cell) => cell.arcanum))).toEqual(
+      [...matrix.chakras].reverse().map((row) => [row.physics, row.energy, row.emotions]),
+    );
     for (const row of reading.chakraRows!) {
       const article = contentForLocale(locale).chakraContent(row.key)!;
-      expect(visible).toContain(article.personalIntro);
-      for (const paragraph of article.level) expect(visible).not.toContain(paragraph);
+      for (const paragraph of article.level) expect(html).not.toContain(paragraph);
       expect(html).toContain(`/encyclopedia/chakra/${row.key}`);
     }
-    expect(visible).not.toMatch(/Ниже — чтение этой строки|второй пример и справочник|Ниже показано/);
+    if (locale === "ru") {
+      expect(html).toContain("Вам легче идти в новое, когда есть к кому возвращаться.");
+    } else {
+      expect(html.replace(/<[^>]*>/g, " ")).not.toMatch(/[А-Яа-яЁё]/);
+    }
+    expect(html).not.toContain('data-empty="true"');
+    expect(html).not.toContain("Ресурс карты проявляется");
+    expect(reading.roles).toEqual([]);
+    expect(reading.interactions).toEqual([]);
+    expect(matrix).toEqual(before);
   });
 
-  it("does not infer chakra strength or conflict from arcanum magnitudes", () => {
-    for (const birth of ["1993-03-04", "1985-07-15", "2000-01-01"]) {
-      const matrix = matrixForLocale(locale).calculate(birth, "f");
-      const before = structuredClone(matrix);
-      const reading = readingsForLocale(locale).buildSectionReading("chakras", matrix);
-      const html = renderToStaticMarkup(<CharacterReadingView reading={reading} locale={locale} />);
-      const visible = html.replace(/<[^>]*>/g, " ");
-      expect(visible).not.toMatch(/Ведущий акцент|Ведущий и ресурсный|суммарный акцент|Главный внутренний разрыв|разрыв —|порог|сильнее выделяется колонка|максимум и минимум|leading accent|leading and the resource|total accent|main inner gap|gap is|threshold|column stands out more|maximum and the minimum/i);
-      expect(visible).toContain(locale === "ru"
-        ? "Номер аркана не измеряет силу"
-        : "An arcanum number does not measure strength");
-      const totals = reading.interactions.find((item) => item.key === "columns")!;
-      // Every total is present in its original column, even when two totals coincide.
-      expect(totals.caption?.match(/\d+/g)?.map(Number)).toEqual([
-        matrix.chakra_totals.physics, matrix.chakra_totals.energy, matrix.chakra_totals.emotions,
-      ]);
-      expect(reading.chakraRows!.map((row) => row.cells.map((cell) => cell.arcanum))).toEqual(
-        matrix.chakras.map((row) => [row.physics, row.energy, row.emotions]),
-      );
-      // Keep actual repetition data; repeated numbers do not create a strength ranking.
-      const repeated = reading.interactions.find((item) => item.key === "repeats")!;
-      const numbers = matrix.chakras.flatMap((row) => [row.physics, row.energy, row.emotions]);
-      const expected = [...new Set(numbers.filter((n, i) => numbers.indexOf(n) !== i))].sort((a, b) => a - b);
-      expect(repeated.roles.map(Number).sort((a, b) => a - b)).toEqual(expected);
-      expect(matrix).toEqual(before);
-      if (locale === "en") expect(visible).not.toMatch(/[А-Яа-яЁё]/);
-    }
+  it("reads every triple from the corpus", () => {
+    const matrix = matrixForLocale(locale).calculate("2000-01-01", "m");
+    const reading = readingsForLocale(locale).buildSectionReading("chakras", matrix);
+    expect(reading.chakraRows!.every((row) => row.paragraphs.every((p) => p !== ""))).toBe(true);
+    expect(reading.chakraRows!.every((row) => row.cells.every((cell) => cell.caption !== ""))).toBe(true);
+    const html = renderToStaticMarkup(<CharacterReadingView reading={reading} locale={locale} />);
+    expect(html).not.toContain('data-empty="true"');
+    expect(html).not.toContain("Вам легче идти в новое");
   });
 
   it("renders translated names in summaries, role cards, repeats and interactions", () => {

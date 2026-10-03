@@ -28,6 +28,7 @@ import { forLocale as localizedPublicSpec, type PositionArticles, type PositionT
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { exampleDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
+import { useChakraAccess } from "@/lib/useChakraAccess";
 import { useFullSections } from "@/lib/useFullSections";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -72,28 +73,22 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
   }, [birth, seed, L]);
   // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
   const full = useFullSections(matrix);
+  const access = useChakraAccess(matrix, ownDates, full);
 
   if (!matrix) return <div id="result" />;
 
   const sections = full ?? buildFree(matrix, texts, articles);
   const locked = sections.filter((s) => !s.positions.length);
-  const anyDate = session.status === "user" && session.unlimited;
-  // Право ищем по дате, а не по паре «дата + пол». Пол не меняет в карте ни одного числа
-  // (`engine/tests/test_method_contract.py`: разборы обоих полов совпадают дословно), а оферта и
-  // экран оплаты обещают «все 20 разделов по одной дате рождения». Пока сравнивался и пол,
-  // переключатель после покупки возвращал оплаченную дату под 18 замков.
-  const thisDate = ownDates.find(
-    (row) => row.birth === matrix.birth && row.access !== "locked",
-  );
-  const thisDateSaved = ownDates.find(
-    (row) => row.birth === matrix.birth && row.sex === matrix.sex,
-  ) ?? ownDates.find((row) => row.birth === matrix.birth);
+  const { anyDate, paid: thisDate, saved: thisDateSaved } = access;
   const thisDatePaid = Boolean(thisDate);
 
   return (
     <div id="result">
       <section className="wrap section-gap" style={{ padding: 0 }}>
-        <MatrixResult locale={L} m={matrix} example={example} />
+        <MatrixResult locale={L} m={matrix} example={example}
+          chakraReading={access.reading}
+          chakraUnlocked={access.unlocked}
+          matrixId={access.matrixId} />
         <ReportSections locale={L} sections={sections} place="landing" />
 
         {ALL_FREE ? (

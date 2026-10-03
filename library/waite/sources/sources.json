@@ -1,0 +1,352 @@
+{
+  "title": "The Pictorial Key to the Tarot",
+  "author": "Arthur Edward Waite",
+  "illustrator": "Pamela Colman Smith",
+  "first_publication": 1910,
+  "transcribed_edition": 1922,
+  "retrieved_at": "2026-09-27T15:25:00.496756+00:00",
+  "transcription_source": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot",
+  "scan_and_rights_metadata": "https://commons.wikimedia.org/wiki/File:The_Pictorial_Key_to_the_Tarot.pdf",
+  "status": "Primary reference source; not an approved chakra interpretation dictionary",
+  "files": [
+    {
+      "name": "00-title-and-contents",
+      "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot",
+      "permanent_url": "https://en.wikisource.org/w/index.php?title=The_Pictorial_Key_to_the_Tarot&oldid=15985439",
+      "html_sha256": "c813791bee7d941f291d05840bef273c3653ff7528ce9386fbb548f1f3e30fb4",
+      "text_sha256": "6b1363dfccc476b77a65874d1527b09f3b9517cb170fe4216115d29d36b00189",
+      "text_characters": 2043
+    },
+    {
+      "name": "01-preface",
+      "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot/Preface",
+      "permanent_url": "https://en.wikisource.org/w/index.php?title=The_Pictorial_Key_to_the_Tarot/Preface&oldid=15274477",
+      "html_sha256": "6f1f8d87ef2eb4cadc540c4ed571ed180ef9ccbbf10e2de651704ec70cd03cef",
+      "text_sha256": "73ee2826ebd489725005a8dc0ec96323f3eccb4f2c808d4a119b08c3bb488430",
+      "text_characters": 5095
+    },
+    {
+      "name": "02-part-i",
+      "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot/Part_1",
+      "permanent_url": "https://en.wikisource.org/w/index.php?title=The_Pictorial_Key_to_the_Tarot/Part_1&oldid=15274505",
+      "html_sha256": "fb9ff190173b470c9273439219c27cbbb0db379134f67467782dd782580c2936",
+      "text_sha256": "3f36587a0e10c10535399125f0bc6e45a2878ffe6c7d44a41026dcae72ed250e",
+      "text_characters": 60320
+    },
+    {
+      "name": "03-part-ii",
+      "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot/Part_2",
+      "permanent_url": "https://en.wikisource.org/w/index.php?title=The_Pictorial_Key_to_the_Tarot/Part_2&oldid=15274517",
+      "html_sha256": "eda3baa7f749842d371c8049e974fc507e8fb414da4e99b5e077563a1dc8bbdd",
+      "text_sha256": "a4a95699e87521a3dada4da562b5755ada929f91cf6a90e85d5ff57cb831d1f1",
+      "text_characters": 49775
+    },
+    {
+      "name": "04-part-iii",
+      "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot/Part_3",
+      "permanent_url": "https://en.wikisource.org/w/index.php?title=The_Pictorial_Key_to_the_Tarot/Part_3&oldid=15274510",
+      "html_sha256": "adb79480ba250ee4ddab473881b88c5fa0a84d6c057e482375888c56798c901e",
+      "text_sha256": "51a34bb14a3b98cf735e3565e678b08a1a9ac55f50e81c8dfdbe200bce39d3e6",
+      "text_characters": 64303
+    },
+    {
+      "name": "05-bibliography",
+      "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot/Bibliography",
+      "permanent_url": "https://en.wikisource.org/w/index.php?title=The_Pictorial_Key_to_the_Tarot/Bibliography&oldid=15274513",
+      "html_sha256": "a10f8ba46e21ca8030ecd29dfa844d92183b26a46e49e34a0a9f63bc66af3820",
+      "text_sha256": "a1516cb4353d539c607ed49a8d1cc7d36c1dc30011ae630c152cf333b4ece750",
+      "text_characters": 27559
+    }
+  ],
+  "library_prepared_at": "2026-09-27T15:43:42.411802+00:00",
+  "scan": {
+    "file": "the-pictorial-key-to-the-tarot-1922.pdf",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/The_Pictorial_Key_to_the_Tarot.pdf",
+    "description_url": "https://commons.wikimedia.org/wiki/File:The_Pictorial_Key_to_the_Tarot.pdf",
+    "bytes": 76769356,
+    "sha256": "2f54bc008cab332b10d9f114ba8dda55845ce850a05e3a707089677bf3d0abb8",
+    "pages": 353
+  },
+  "editorial": {
+    "language": "ru",
+    "prepared_by": "Codex",
+    "date": "2026-09-27",
+    "status": "Working Russian summaries and translations; no claim of specialist approval",
+    "symbolism": "Editorial Russian summary, complete English section II.2",
+    "divination": "Working Russian translation, complete English entry III.3",
+    "history": "Complete English entry I.2, including discussion of other interpretations",
+    "normalization": [
+      "HTML formatting and page markers removed",
+      "whitespace normalized",
+      "soft hyphens and zero-width spaces removed",
+      "typographical errors retained, known issues documented"
+    ],
+    "scope": "22 Major Arcana; complete book also contains the Minor Arcana; no chakra or birth-date calculation canon provided"
+  },
+  "major_arcana": [
+    {
+      "waite_number": 0,
+      "name": "The Fool",
+      "file": "../arcana/00-fool.md",
+      "symbolism_printed_page": 152,
+      "symbolism_scan_page": 165,
+      "history_printed_page": 29,
+      "divination_printed_page": 286,
+      "english_symbolism_sha256": "4cc18b6bfdf1090bd896d3e613fce06c4864dade8598e48e9c3e2f9573f5a8a1",
+      "english_divination_sha256": "51b62fa8e6e4a1cef766cd4ac37616c4785fad128636448973c032aee6673f12",
+      "english_history_sha256": "c2d3a5ffc8ed4ff40b66fbcf1d9e5f4788166a7ec5ec6e2719bfafb3afda6301"
+    },
+    {
+      "waite_number": 1,
+      "name": "The Magician",
+      "file": "../arcana/01-magician.md",
+      "symbolism_printed_page": 72,
+      "symbolism_scan_page": 85,
+      "history_printed_page": 12,
+      "divination_printed_page": 283,
+      "english_symbolism_sha256": "215369a7c9a26bc9ec9332a9993dac9cd9c3ac482169f93353aaea8476491b3f",
+      "english_divination_sha256": "b1ebef7cdd98a426051794b2a9d5dd6c7295c847f540320231d81bf30e219778",
+      "english_history_sha256": "2e8c37f02213039a4409d8b475755114ddfaf234691ffec0b92b03245b7c95eb"
+    },
+    {
+      "waite_number": 2,
+      "name": "The High Priestess",
+      "file": "../arcana/02-high-priestess.md",
+      "symbolism_printed_page": 76,
+      "symbolism_scan_page": 89,
+      "history_printed_page": 13,
+      "divination_printed_page": 283,
+      "english_symbolism_sha256": "d3447b1611f7670c94b25a3b471bf279ba849324e6293690935209dcf59aa863",
+      "english_divination_sha256": "12dc7f08397158111cdfd51708e07d6d6ede2ba25b4b2b6521ebfdff1cf43dc7",
+      "english_history_sha256": "88b8482f487addd74802baa98089e0c314769ef10aa22efba8c61f6347474eaa"
+    },
+    {
+      "waite_number": 3,
+      "name": "The Empress",
+      "file": "../arcana/03-empress.md",
+      "symbolism_printed_page": 80,
+      "symbolism_scan_page": 93,
+      "history_printed_page": 13,
+      "divination_printed_page": 283,
+      "english_symbolism_sha256": "a29b91da433b992951fa28520216974ee8285d516911a75ad535af19e0d54cce",
+      "english_divination_sha256": "a35555d7078a2f8260e3b2d2c9b81ddc4d65dfd83e4b9a84bedb1d3c1233e336",
+      "english_history_sha256": "5e724ca29802947f833db8c87199e85dd62eb760aaf78200ace6e18bae4400da"
+    },
+    {
+      "waite_number": 4,
+      "name": "The Emperor",
+      "file": "../arcana/04-emperor.md",
+      "symbolism_printed_page": 84,
+      "symbolism_scan_page": 97,
+      "history_printed_page": 13,
+      "divination_printed_page": 283,
+      "english_symbolism_sha256": "7da30f0322c0efd050b793de3927196332323e7caa443d43b11579adf7e010ab",
+      "english_divination_sha256": "02f30678269fc484866aaece955889dad09f13dacfdfbab52ff8b45365ed9c98",
+      "english_history_sha256": "7791be326186eb5e5e3618c081472819d4090ce0fd0b32ceebb8d7bddc74576e"
+    },
+    {
+      "waite_number": 5,
+      "name": "The Hierophant",
+      "file": "../arcana/05-hierophant.md",
+      "symbolism_printed_page": 88,
+      "symbolism_scan_page": 101,
+      "history_printed_page": 14,
+      "divination_printed_page": 284,
+      "english_symbolism_sha256": "94a72bcade227ed60b0cdea0da0551024707059a2171c6601ba0b7e9405c3609",
+      "english_divination_sha256": "c85ec04d5c73fa70b6305be7996b61531acbb333b75428b20f40d068e6cf9b8a",
+      "english_history_sha256": "b03316ddbeb6a2344a4ea94dc3b5f54f27183fa7f27fb7c92e2ec34b5b8964df"
+    },
+    {
+      "waite_number": 6,
+      "name": "The Lovers",
+      "file": "../arcana/06-lovers.md",
+      "symbolism_printed_page": 92,
+      "symbolism_scan_page": 105,
+      "history_printed_page": 14,
+      "divination_printed_page": 284,
+      "english_symbolism_sha256": "7c5ee21425be53bf455c3e750f5f5f31e4aad86c7b5fb5f640ef477f23959c8f",
+      "english_divination_sha256": "6f0fdd160a8264c4faddfb2c60f4c02e60e162d127256a6a679900821d1bddd1",
+      "english_history_sha256": "37592a9896d6986d93f749cd15f9dd54cdf8c6e95c929d488ab40e1c6656da84"
+    },
+    {
+      "waite_number": 7,
+      "name": "The Chariot",
+      "file": "../arcana/07-chariot.md",
+      "symbolism_printed_page": 96,
+      "symbolism_scan_page": 109,
+      "history_printed_page": 15,
+      "divination_printed_page": 284,
+      "english_symbolism_sha256": "1759325fa3373576ccbe51ef2f8d6908685df622708c297ed85384f386334165",
+      "english_divination_sha256": "4d74256d1b5faf035ff6e06facd76337b41e185d02d1a1aacb694868cc0e9d8e",
+      "english_history_sha256": "d7dbf4e10c7e339d38aae701b54a8d213e69fab7766158e629732af5e46fe335"
+    },
+    {
+      "waite_number": 8,
+      "name": "Strength, or Fortitude",
+      "file": "../arcana/08-strength.md",
+      "symbolism_printed_page": 100,
+      "symbolism_scan_page": 113,
+      "history_printed_page": 16,
+      "divination_printed_page": 284,
+      "english_symbolism_sha256": "44980ba91a10de3c21f45a5a160d66b01d3ee18aaa2b655f91caab325cdb41ef",
+      "english_divination_sha256": "ad6923bedae4ad4fa330b6b102643fc2757dfa5492f09562c7f5fb372883fddb",
+      "english_history_sha256": "ff027ae9c8806f1b3b9bfff01b0f2ebe8dfe7f4e1c7b952dcb98973db8c44ed2"
+    },
+    {
+      "waite_number": 9,
+      "name": "The Hermit",
+      "file": "../arcana/09-hermit.md",
+      "symbolism_printed_page": 104,
+      "symbolism_scan_page": 117,
+      "history_printed_page": 16,
+      "divination_printed_page": 284,
+      "english_symbolism_sha256": "7f678dcf944bb112b73c982831e1f84f8f7d4e6e15413163d60d9e236b2539dc",
+      "english_divination_sha256": "d053173f7acbcf534184bf74dc84a31b5b857b313545e5ae0b56222c47988ead",
+      "english_history_sha256": "ff844b09a3e948e444bb9ee9b35e375f6625217b877ad90be0414e44565cd455"
+    },
+    {
+      "waite_number": 10,
+      "name": "Wheel of Fortune",
+      "file": "../arcana/10-wheel-of-fortune.md",
+      "symbolism_printed_page": 108,
+      "symbolism_scan_page": 121,
+      "history_printed_page": 20,
+      "divination_printed_page": 284,
+      "english_symbolism_sha256": "a2f07882e7f966d8fe72130729061a7ccad8212b3157ab2bb04ae0f3e0f77445",
+      "english_divination_sha256": "a3017041ca42fa6a1f66f62709e3b475eaf840a25e914d7a4f76c8636bfe32f0",
+      "english_history_sha256": "1c9ed6f4462bc0f41cd00524f3f770c086516d330dce648f2a5cfcf20f6b54bb"
+    },
+    {
+      "waite_number": 11,
+      "name": "Justice",
+      "file": "../arcana/11-justice.md",
+      "symbolism_printed_page": 112,
+      "symbolism_scan_page": 125,
+      "history_printed_page": 21,
+      "divination_printed_page": 285,
+      "english_symbolism_sha256": "ea5dcb2808e3ac133b35e7f93c5fcf33521bcbc4c1c52ea893283c1bc0c0fe0d",
+      "english_divination_sha256": "d51b75f7b633977a631cc9b9dfe140c616b7138ecc3cbf328dd48d72dc1c57c4",
+      "english_history_sha256": "92629f3db5fad9a7c22165ba125cdbc0d7a2a38202716e60c4810270699018b1"
+    },
+    {
+      "waite_number": 12,
+      "name": "The Hanged Man",
+      "file": "../arcana/12-hanged-man.md",
+      "symbolism_printed_page": 116,
+      "symbolism_scan_page": 129,
+      "history_printed_page": 22,
+      "divination_printed_page": 285,
+      "english_symbolism_sha256": "89206b6b7e855ca7873a1d0e9d0d345b298d69f7807ed4b42ccf5719796f62aa",
+      "english_divination_sha256": "a089c02b782d0d67582a1b95cde8755608c3357f91c467a99e633cf85a9f86c2",
+      "english_history_sha256": "28ff85563007fd5fc4c740c4d69fcd067bbbc959deda810969573e0d767363c7"
+    },
+    {
+      "waite_number": 13,
+      "name": "Death",
+      "file": "../arcana/13-death.md",
+      "symbolism_printed_page": 120,
+      "symbolism_scan_page": 133,
+      "history_printed_page": 23,
+      "divination_printed_page": 285,
+      "english_symbolism_sha256": "2011cdc7923882e4a3a062731de7da91f7b54ba320808f67aa0ddbe0ac83f0b9",
+      "english_divination_sha256": "7f7f0c04cc3ed06af2d9b623591a06f76cdc114773eb2e05e56cc09a79dd6da1",
+      "english_history_sha256": "f11ced3e34ad2020d92746ef1a93c19f8f5076981ceeb0e2f7c861d9762613a5"
+    },
+    {
+      "waite_number": 14,
+      "name": "Temperance",
+      "file": "../arcana/14-temperance.md",
+      "symbolism_printed_page": 124,
+      "symbolism_scan_page": 137,
+      "history_printed_page": 24,
+      "divination_printed_page": 285,
+      "english_symbolism_sha256": "905079de026decdf810cc2d50b4c39e713df10b4ee1f9235c216bd5c6e84e298",
+      "english_divination_sha256": "5937b98dd1e48a01e3f7ba5360cdb9135ec7da82ce9442b11ef1bc3fe46b1118",
+      "english_history_sha256": "f2ab501494ffcf1d036d37dd4a64a3f6f92743c278c6b2e4db64c938d2be3220"
+    },
+    {
+      "waite_number": 15,
+      "name": "The Devil",
+      "file": "../arcana/15-devil.md",
+      "symbolism_printed_page": 128,
+      "symbolism_scan_page": 141,
+      "history_printed_page": 24,
+      "divination_printed_page": 285,
+      "english_symbolism_sha256": "892e1e4dc7a07a25283781e14ca316104c15fee0427ffb99b88652cb1d892c58",
+      "english_divination_sha256": "31fbea6c94bfab2af0053f5a52f5f42975b1a910d80029b2114b81fb35f23b26",
+      "english_history_sha256": "fb4380763858d3ae961b5522bc9e5633e00dbed73098d6c07b8a109be937a5f5"
+    },
+    {
+      "waite_number": 16,
+      "name": "The Tower",
+      "file": "../arcana/16-tower.md",
+      "symbolism_printed_page": 132,
+      "symbolism_scan_page": 145,
+      "history_printed_page": 25,
+      "divination_printed_page": 286,
+      "english_symbolism_sha256": "426271135deb6a32727b11dd526dde01f3538daae3a833807087530a636f2a1f",
+      "english_divination_sha256": "7011378404962ce792863affdbc0e3f2b8cee92b908c30b9f6594a63666faeed",
+      "english_history_sha256": "7bd0b866cdcabcada0ac40131491a7861743fbc119b69da1b30ed4ec524d1416"
+    },
+    {
+      "waite_number": 17,
+      "name": "The Star",
+      "file": "../arcana/17-star.md",
+      "symbolism_printed_page": 136,
+      "symbolism_scan_page": 149,
+      "history_printed_page": 26,
+      "divination_printed_page": 286,
+      "english_symbolism_sha256": "c9c99f9915ff88916ff567f340261f903fc81aade491969712585ab9d2ac9a3d",
+      "english_divination_sha256": "75f2a2bbaaab47d69d03e3fe97bffaeb14970f482469d700336da035da75c268",
+      "english_history_sha256": "4d8a48adcf038ba2c9606b27834774f9171e9a3a86354e4ee003c8cd3d16999c"
+    },
+    {
+      "waite_number": 18,
+      "name": "The Moon",
+      "file": "../arcana/18-moon.md",
+      "symbolism_printed_page": 140,
+      "symbolism_scan_page": 153,
+      "history_printed_page": 27,
+      "divination_printed_page": 286,
+      "english_symbolism_sha256": "0d43f5aa4b484c1bec5cbff8347a4eea85c1c0ea2407a0c6a6ead8c3902f8134",
+      "english_divination_sha256": "e9ffa8e935e052b72004a5a7345d088cf479fc8353ef4559abd66fe4995a7765",
+      "english_history_sha256": "fa7505181dcebf83ee7b3a237465edc7146a2fccc7a22ce1d0a865c86e0dd132"
+    },
+    {
+      "waite_number": 19,
+      "name": "The Sun",
+      "file": "../arcana/19-sun.md",
+      "symbolism_printed_page": 144,
+      "symbolism_scan_page": 157,
+      "history_printed_page": 27,
+      "divination_printed_page": 286,
+      "english_symbolism_sha256": "fbc28e8e600e952454a3a644d47f928f62b942f5dfc76490755c435f29275325",
+      "english_divination_sha256": "3d3f35b1dabff183c15c7064ffca74e8bb033faaa788decec897030a256c5027",
+      "english_history_sha256": "5136e3d44dd01cf213f6fe0ceec1ec13299db48b5924a3cbd6f1131c1b4addc2"
+    },
+    {
+      "waite_number": 20,
+      "name": "The Last Judgment",
+      "file": "../arcana/20-judgement.md",
+      "symbolism_printed_page": 148,
+      "symbolism_scan_page": 161,
+      "history_printed_page": 28,
+      "divination_printed_page": 286,
+      "english_symbolism_sha256": "4a41c12652af33599c410f72a59daf9150c6ae36673a40120aa75a00ecf24861",
+      "english_divination_sha256": "eb349c741114008d63231d00db188c999f4813eb4a331203bdc5165e3dde7fbb",
+      "english_history_sha256": "53197e5f7d7e72692914ef62dc29de444a8152cbd5325322cd402ad85076d7cb"
+    },
+    {
+      "waite_number": 21,
+      "name": "The World",
+      "file": "../arcana/21-world.md",
+      "symbolism_printed_page": 156,
+      "symbolism_scan_page": 169,
+      "history_printed_page": 30,
+      "divination_printed_page": 287,
+      "english_symbolism_sha256": "fa91db5fb1c2b119d7f4fbc042e7fb3844dcb617478be97b67ffa0adb701e382",
+      "english_divination_sha256": "bf7d29460f6afb0e018dde4d889521216b0273bae0b1645cf7d32f7d599fc149",
+      "english_history_sha256": "820a19f6f0d6bdb11de6f8f5a0398edb887512625e832f0da9c8b166f27946aa"
+    }
+  ]
+}

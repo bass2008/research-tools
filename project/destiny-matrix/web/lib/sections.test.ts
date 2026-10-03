@@ -1,4 +1,3 @@
-import { D, L } from "./i18n";
 import { describe, expect, it } from "vitest";
 
 import { buildFree, sectionEntityLink } from "@/lib/publicSpec";
@@ -35,6 +34,7 @@ describe("разделы разбора", () => {
 
   it("позиции одного раздела не пересказывают друг друга", () => {
     for (const s of build(m, true)) {
+      if (s.longform?.layout === "chakras") continue; // Текст здесь относится к тройке, а не отдельной позиции.
       const texts = s.positions.map((p) => p.text ?? "");
       expect(new Set(texts).size).toBe(texts.length);
     }
@@ -42,18 +42,26 @@ describe("разделы разбора", () => {
 
   it("у каждой позиции открытого раздела есть текст", () => {
     for (const s of build(m, true)) {
+      if (s.longform?.layout === "chakras") continue;
       for (const p of s.positions) expect((p.text ?? "").length).toBeGreaterThan(20);
     }
   });
 
-  it("толкования карты энергий совпадают со страницей позиции в справочнике", () => {
-    for (const position of section("chakras").positions) {
-      // Повтор аркана намеренно ссылается на первую строку вместо второго одинакового абзаца.
-      // Повтор аркана намеренно ссылается на первую строку вместо второго одинакового абзаца;
-      // формулировка ссылки живёт в словаре языка.
-      if (position.text?.startsWith(D.report.sameArcanum[L]("").slice(0, 12))) continue;
-      expect(position.text).toBe(arcanumInPosition(position.arcanum, "chakras"));
+  it("карта энергий использует семь троек без старого текста отдельных позиций", () => {
+    const chakraSection = section("chakras");
+    expect(chakraSection.positions.every((position) => position.text === "")).toBe(true);
+    const rows = chakraSection.longform!.chakraRows!;
+    expect(rows).toHaveLength(7);
+    expect(rows.map((row) => row.cells.map((cell) => cell.arcanum))).toEqual(
+      [...m.chakras].reverse().map((row) => [row.physics, row.energy, row.emotions]),
+    );
+    for (const row of rows) {
+      expect(row.paragraphs).toHaveLength(3);
+      for (const cell of row.cells) {
+        expect(row.paragraphs).not.toContain(arcanumInPosition(cell.arcanum, "chakras"));
+      }
     }
+    expect(build(m, false).find((item) => item.key === "chakras")?.longform).toBeUndefined();
   });
 
   it("каждая строка получает ключ трактовки прямо из канонической спецификации", () => {
@@ -114,6 +122,10 @@ describe("разделы разбора", () => {
       entityKey: key,
       positionKey: "past_lives",
     });
+    expect(tail.positions).toHaveLength(3);
+    expect(tail.positions.every((position) => (position.text?.length ?? 0) > 20)).toBe(true);
+    expect(tail.positions.flatMap((position) => position.article ? [position.article.href] : []))
+      .not.toContainEqual(expect.stringMatching(/^\/encyclopedia\/position\/past_lives\//));
   });
 
   it("центр ведёт на персональную статью, а не на ошибочный кармический хвост", () => {
@@ -162,8 +174,13 @@ describe("разделы разбора", () => {
     for (const item of build(m, true)) {
       if (excluded.has(item.key)) continue;
       expect(item.personalHref, item.key).toMatch(/^\/encyclopedia\//);
-      expect(item.longform?.roles.length, item.key).toBe(item.positions.length);
-      expect(item.longform?.summary.length, item.key).toBeGreaterThan(100);
+      if (item.longform?.layout === "chakras") {
+        expect(item.longform.chakraRows).toHaveLength(7);
+        expect(item.longform.roles).toEqual([]);
+      } else {
+        expect(item.longform?.roles.length, item.key).toBe(item.positions.length);
+        expect(item.longform?.summary.length, item.key).toBeGreaterThan(100);
+      }
       expect(sectionEntityLink(item).href, item.key).toBe(item.personalHref);
     }
   });

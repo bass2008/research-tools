@@ -70,7 +70,7 @@ export default async function CombinationHubPage() {
         <CombinationMatrix locale={L} />
       </div>
 
-      <Sections items={hub.sections} />
+      <Sections items={hub.sections} locale={L} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

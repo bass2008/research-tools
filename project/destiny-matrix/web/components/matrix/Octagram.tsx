@@ -6,8 +6,12 @@ import { localized } from "@/lib/i18n/localized";
 import type { Matrix } from "@/lib/matrix";
 import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
 import { forLocale as localizedSite } from "@/lib/site";
+import chakraLevels from "@/lib/__fixtures__/chakras.json";
+import type { CSSProperties } from "react";
+import styles from "./ChakraMapHover.module.css";
 
 type NodeSpec = {
+  pointKey: string;
   angle: number;
   value: number;
   label: string;
@@ -60,21 +64,21 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
   const { arcanumTitle, mapPoint, publicHref, C, R, RIN, CHAKRA_COLORS, pt, fmt } = forLocale(L, site);
 
   const outer: NodeSpec[] = [
-    { angle: 180, value: m.day, label: D.octagram.portrait[L], color: CHAKRA_COLORS[2], big: true },
-    { angle: 225, value: m.father_line, label: D.octagram.fatherLine[L], color: CHAKRA_COLORS[5] },
-    { angle: -90, value: m.month, label: D.octagram.spiritualTask[L], color: CHAKRA_COLORS[6], big: true },
-    { angle: -45, value: m.mother_line, label: D.octagram.motherLine[L], color: CHAKRA_COLORS[5] },
-    { angle: 0, value: m.year, label: D.octagram.materialTask[L], color: CHAKRA_COLORS[4], big: true },
-    { angle: 45, value: m.descendants, label: D.octagram.descendants[L], color: CHAKRA_COLORS[3] },
-    { angle: 90, value: m.mission, label: D.octagram.karmicTask[L], color: CHAKRA_COLORS[0], big: true },
-    { angle: 135, value: m.inheritance, label: D.octagram.inheritance[L], color: CHAKRA_COLORS[1] },
+    { pointKey: "day", angle: 180, value: m.day, label: D.octagram.portrait[L], color: CHAKRA_COLORS[2], big: true },
+    { pointKey: "father_line", angle: 225, value: m.father_line, label: D.octagram.fatherLine[L], color: CHAKRA_COLORS[5] },
+    { pointKey: "month", angle: -90, value: m.month, label: D.octagram.spiritualTask[L], color: CHAKRA_COLORS[6], big: true },
+    { pointKey: "mother_line", angle: -45, value: m.mother_line, label: D.octagram.motherLine[L], color: CHAKRA_COLORS[5] },
+    { pointKey: "year", angle: 0, value: m.year, label: D.octagram.materialTask[L], color: CHAKRA_COLORS[4], big: true },
+    { pointKey: "descendants", angle: 45, value: m.descendants, label: D.octagram.descendants[L], color: CHAKRA_COLORS[3] },
+    { pointKey: "mission", angle: 90, value: m.mission, label: D.octagram.karmicTask[L], color: CHAKRA_COLORS[0], big: true },
+    { pointKey: "inheritance", angle: 135, value: m.inheritance, label: D.octagram.inheritance[L], color: CHAKRA_COLORS[1] },
   ];
 
   const inner: NodeSpec[] = [
-    { angle: 180, value: m.comfort_west, label: D.octagram.innerLeft[L], color: "#7d92a1" },
-    { angle: -90, value: m.comfort_north, label: D.octagram.talentPoint[L], color: "#7d92a1" },
-    { angle: 0, value: m.comfort_east, label: D.octagram.moneyEntry[L], color: "#7d92a1" },
-    { angle: 90, value: m.comfort_south, label: D.octagram.loveEntry[L], color: "#7d92a1" },
+    { pointKey: "comfort_west", angle: 180, value: m.comfort_west, label: D.octagram.innerLeft[L], color: "#7d92a1" },
+    { pointKey: "comfort_north", angle: -90, value: m.comfort_north, label: D.octagram.talentPoint[L], color: "#7d92a1" },
+    { pointKey: "comfort_east", angle: 0, value: m.comfort_east, label: D.octagram.moneyEntry[L], color: "#7d92a1" },
+    { pointKey: "comfort_south", angle: 90, value: m.comfort_south, label: D.octagram.loveEntry[L], color: "#7d92a1" },
   ];
 
   // Точки второго порядка — те, что метод считает из внутренних: середины линий любви, денег,
@@ -97,6 +101,7 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
       const place = mapPoint(key);
       if (!place || value === undefined) return null;
       return {
+        pointKey: key,
         angle: place.angle,
         radius: place.radius,
         value,
@@ -137,9 +142,21 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
   const node = (spec: NodeSpec, radius: number, size: number, font: number, key: string, small = false) => {
     const [x, y] = pt(spec.angle, spec.radius ?? radius);
     const title = D.octagram.nodeTitle[L](spec.label, spec.value, arcanumTitle(spec.value));
+    const symbol = mapPoint(spec.pointKey)?.symbol;
+    // Сопоставляем позиции по канону, а не одинаковые номера арканов в разных местах карты.
+    const chakras = chakraLevels.filter((level) => level.physics === symbol || level.energy === symbol)
+      .map((level) => level.key).join(" ");
+    const pointProps = {
+      className: styles.node,
+      style: { "--point-color": spec.color } as CSSProperties,
+      "data-map-point": spec.pointKey,
+      "data-map-chakras": printing ? undefined : chakras || undefined,
+    };
     const body = (
       <>
         <title>{title}</title>
+        {!printing && chakras ? <circle className={styles.halo} data-chakra-halo="true"
+          cx={fmt(x)} cy={fmt(y)} r={size + 7} aria-hidden="true" /> : null}
         <circle cx={fmt(x)} cy={fmt(y)} r={size} fill={spec.color} />
         <text className={small ? "n sm" : "n"} x={fmt(x)} y={fmt(y)} fontSize={font}>
           {spec.value}
@@ -153,11 +170,12 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
           ? publicHref(`/encyclopedia/arcanum/${spec.value}`)
           : `/encyclopedia/arcanum/${spec.value}`}
         aria-label={title}
+        {...pointProps}
       >
         {body}
       </a>
     ) : (
-      <g key={key} aria-label={title}>
+      <g key={key} aria-label={title} {...pointProps}>
         {body}
       </g>
     );
@@ -203,7 +221,7 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
       {inner.map((s, i) => node(s, RIN, 15, 13, `i${i}`))}
       {outer.map((s, i) => node(s, R, s.big ? 24 : 19, s.big ? 19 : 15.5, `o${i}`))}
       {node(
-        { angle: 0, value: m.center, label: D.octagram.centre[L], color: "#0e8f88" },
+        { pointKey: "center", angle: 0, value: m.center, label: D.octagram.centre[L], color: "#0e8f88" },
         0,
         31,
         23,

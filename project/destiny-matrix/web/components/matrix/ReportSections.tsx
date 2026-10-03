@@ -95,6 +95,9 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
               {s.title}
             </summary>
             <div className="body">
+              {s.longform?.layout === "chakras" ? (
+                <CharacterReadingView site={site} locale={L} reading={s.longform} printing={printing} />
+              ) : <>
               <p className="lead">{s.lead}</p>
               <ul className="poslist" data-cols={gridColumns(s.positions.length)}>
                 {s.positions.map((p, j) => {
@@ -138,9 +141,9 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                 })}
               </ul>
               {s.fullArticle ? (
-                <article className="section-gap" data-testid="past-lives-full-article">
+                <article className="section-gap report-article" data-testid="past-lives-full-article">
                   <p className="dim prose">{s.fullArticle.short}</p>
-                  <Sections items={s.fullArticle.sections} />
+                  <Sections items={s.fullArticle.sections} locale={L} />
                   <Faq locale={L} items={s.fullArticle.faq} />
                 </article>
               ) : printing && s.longform ? (
@@ -152,6 +155,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                   idPrefix={`${s.key}-reading`}
                 />
               ) : null}
+              </>}
               <SectionEncyclopediaLinks site={site} locale={L} section={s} printing={printing} />
             </div>
           </details>

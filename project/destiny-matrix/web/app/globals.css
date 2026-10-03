@@ -424,6 +424,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .acc[open] { border-color: var(--gold); }
 .acc .body { padding: 0 18px 18px; font-size: 14.6px; color: var(--dim); }
 .acc .lead { color: var(--dim); margin-bottom: 10px; }
+.acc .report-article .prose { max-width: none; }
 .acc.lock .head { display: flex; align-items: center; gap: 12px; padding: 15px 18px; font: 600 15.2px var(--sans); color: var(--dim); }
 .acc.lock .ic { color: var(--dim2); font-size: 14px; }
 .acc.lock .unlock { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 7px; font: 700 13px var(--sans); color: var(--gold); border-bottom: 1px dashed rgba(14, 143, 136, 0.5); }
@@ -1571,6 +1572,8 @@ table.mx td.self { background: var(--card2); }
 /* Абзац начинается с отступа, правый край ровный: переносы включены, иначе выключка
    по формату разрывает строки пробелами. */
 .tabbody .prose p, .enc-panes .prose p { text-indent: 1.4em; text-align: justify; hyphens: auto; }
+/* Calculator and chakra table embedded in an article keep their own typography. */
+.enc-panes .prose .slot p { text-indent: 0; text-align: inherit; hyphens: manual; }
 
 
 /* ── Правки вёрстки по циклу 6 ── */
@@ -1586,11 +1589,14 @@ table.mx td.self { background: var(--card2); }
 /* крошки: разделитель не отрывается от своего шага, длинный последний шаг усекается */
 .crumbs .crumb { white-space: nowrap; }
 @media (max-width: 640px) {
+  /* Название промежуточного раздела тоже может быть длиннее экрана: переносим ссылку,
+     сохраняя разделитель рядом и прежнее усечение последнего шага со слагом. */
+  .crumbs .crumb { min-width: 0; max-width: 100%; }
+  .crumbs .crumb a { white-space: normal; }
   /* Последний шаг персональной статьи — её слаг: у карты чакр это 24 числа, 357 px в одну строку.
      Прежнее правило не срабатывало: `.crumb` — флекс-элемент, он не сжимается ниже содержимого,
      пока у него `min-width: auto`, и `max-width: 100%` у внутреннего span считался от уже
      раздутой ширины. Отсюда 57 px горизонтальной прокрутки всей страницы на 320 px. */
-  .crumbs .crumb:last-child { min-width: 0; }
   .crumbs .crumb:last-child span:not(.csep) {
     min-width: 0;
     overflow: hidden;

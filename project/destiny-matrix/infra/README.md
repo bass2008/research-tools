@@ -28,29 +28,15 @@ infra/
     arcana-selectel.conf       prod .ru/.com и лендинг: статика, таймаут печати, путь ACME
     arcana-test-selectel.conf  тестовый домен: пароль, noindex, открытые вебхук банка и health
     arcana-test-en-selectel.conf  test .com: порт 3300 того же web; Т-Банк не разрешён, callback идёт на .ru
-    arcana.conf, arcana-test.conf  прежняя раскладка в Yandex Cloud, остались для истории
     conf.d/                настройки уровня http: сжатие, лимиты, формат лога, карты фильтров
     snippets/              правила отсечения сканеров, подключаются в оба server-блока
   check.sh                 приёмка живого сайта (DNS, TLS, страницы, BFF, кука, ассеты)
   terraform/
-    README.md              подробности: раскладка, доставка, стоимость, что проверено
     selectel/              действующая машина: сеть, роутер, порт, floating IP, CRaaS
-    server/                прежняя VM в Yandex Cloud: сеть, IP, A-записи, cloud-init
-    site/                  бакет ассетов (только `_next/static` и картинки) + deploy.sh + check.sh
-    modules/static-site/   бакет, публичное чтение, при желании CNAME, сертификат и CDN
 ```
 
 Сайт живёт на машине Selectel `45.80.130.166`; вход по ssh — `root`. DNS обеих зон ведёт
-Cloudflare, отчёты и бэкапы лежат в R2. Прежняя машина в Yandex Cloud (`84.201.157.100`)
-какое-то время остаётся выключенной под откат.
-
-| корень | state | что трогает |
-|---|---|---|
-| `server/` | `matritsa/server/terraform.tfstate` | сеть, IP, VM, A-записи `matritsa.` и `api.` |
-| `site/` | `matritsa/site/terraform.tfstate` | бакет ассетов, ключ деплоя, (выключено) CDN |
-
-Разные state оставлены намеренно: VM пересоздают часто, бакет — почти никогда, и `destroy`
-приложения не может задеть хранилище.
+Cloudflare, отчёты и бэкапы лежат в R2.
 
 ## Путь от нуля до работающего сайта
 

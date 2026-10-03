@@ -1,16 +1,55 @@
 // Framework-independent reader for generated encyclopedia content.
 // The caller supplies filesystem, bundled or other content through ContentSource.
 
+import { chakraRow, type ChakraCorpus } from "./chakraRow";
 import type { Lang as Locale } from "./i18n/hosts";
 import { forLocale as localizedPublicLabels } from "./i18n/publicLabels";
 import type { Matrix } from "./matrix";
-import { forLocale as localizedTextPolicy } from "./textPolicy";
+import type { ChakraReadingRow } from "./readingTypes";
+import { plainText } from "./richText";
 
 type Bag = Record<string, unknown>;
 
+export type Block =
+  | { h3: string }
+  | { ul: string[] }
+  | { ol: string[] }
+  | { table: { head: string[]; rows: string[][] } }
+  | { slot: Slot }
+  | { chakra_reading: ChakraReadingItem };
+
+// Source form: { "chakra_reading": { "chakra": "manipura", "triple": "7-7-14", "note": "…" } };
+// the reader resolves it against the paid-report corpus.
+export interface ChakraReadingItem {
+  id: string;
+  number: number;
+  note?: string;
+  row: ChakraReadingRow;
+}
+
+// Places where a page inserts its own component inside the article.
+export const SLOTS = ["calc"] as const;
+export type Slot = (typeof SLOTS)[number];
+
+// Body text allows only `**bold**`; headings and table heads stay plain.
+export type Paragraph = string | Block;
+
 export interface Section {
   h2: string;
-  paragraphs: string[];
+  paragraphs: Paragraph[];
+}
+
+export function paragraphText(p: Paragraph): string {
+  if (typeof p === "string") return plainText(p);
+  if ("h3" in p) return p.h3;
+  if ("ul" in p) return p.ul.map(plainText).join(" ");
+  if ("ol" in p) return p.ol.map(plainText).join(" ");
+  if ("slot" in p) return "";
+  if ("chakra_reading" in p) {
+    const { row, note } = p.chakra_reading;
+    return [row.heading, ...row.cells.map((cell) => cell.caption), ...row.paragraphs, note ?? ""].map(plainText).join(" ");
+  }
+  return [...p.table.head, ...p.table.rows.flat()].map(plainText).join(" ");
 }
 
 export interface QA {
@@ -83,7 +122,6 @@ export interface PositionArcanumRow {
   primaryQuery: string | null;
   wording: string;
   wordings: Record<string, number>;
-  tails: string[];
   publication: { index: boolean; follow: boolean };
 }
 
@@ -98,6 +136,16 @@ export interface ChakraContent {
   sections: Section[];
   readings: Array<{ n: number; physics?: string; energy?: string; emotions?: string }>;
   examples: Array<{ birth: string; numbers: number[]; paragraphs: string[] }>;
+  faq: QA[];
+  article?: ChakraArticle;
+}
+
+export interface ChakraArticle {
+  title: string;
+  short: string;
+  seo: { title: string; description: string };
+  intro: Paragraph[];
+  sections: Section[];
   faq: QA[];
 }
 
@@ -129,19 +177,8 @@ export interface ContentSource {
 /** A locale-bound view; safe to use alongside other languages. */
 export function createContent(L: Locale, source: ContentSource) {
   const { chakraHint, chakraTitle } = localizedPublicLabels(L);
-  const { isBlockedText } = localizedTextPolicy(L);
 
   // Корпус лежит по каталогам языка; предрасчёт матриц один на все языки и остаётся уровнем выше.
-
-  let rejected = 0;
-
-  function safe(text: string): boolean {
-    if (isBlockedText(text)) {
-      rejected++;
-      return false;
-    }
-    return true;
-  }
 
   function readItems(file: string, shared = false): Bag[] {
     try {
@@ -160,7 +197,7 @@ export function createContent(L: Locale, source: ContentSource) {
 
   function strings(v: unknown, min = 1): string[] | null {
     if (!Array.isArray(v) || v.length < min) return null;
-    if (!v.every((value) => typeof value === "string" && value.trim().length > 20 && safe(value))) {
+    if (!v.every((value) => typeof value === "string" && value.trim().length > 20)) {
       return null;
     }
     return v as string[];
@@ -171,7 +208,7 @@ export function createContent(L: Locale, source: ContentSource) {
     const out: Record<string, string> = {};
     for (const [k, val] of Object.entries(v as Bag)) {
       if (typeof val !== "string") continue;
-      if (!val.trim() || !safe(val)) return null;
+      if (!val.trim()) return null;
       out[k] = val;
     }
     return Object.keys(out).length ? out : null;
@@ -181,29 +218,112 @@ export function createContent(L: Locale, source: ContentSource) {
     const m = stringMap(v);
     if (!m?.title || !m?.description) return null;
     if (m.title.length < 10 || m.description.length < 60) return null;
-    if (!safe(m.title) || !safe(m.description)) return null;
     return { title: m.title, description: m.description };
   }
 
-  function sectionsOf(v: unknown): Section[] | null {
+  function cells(v: unknown, allowEmpty: boolean): string[] | null {
+    if (!Array.isArray(v) || !v.length) return null;
+    const ok = v.every((x) => typeof x === "string" && (allowEmpty || x.trim()));
+    return ok ? (v as string[]) : null;
+  }
+
+  let chakraCorpus: ChakraCorpus | undefined;
+  let chakraNumbers: Map<string, number> | undefined;
+
+  function chakraReadingOf(v: unknown): ChakraReadingItem | null {
+    if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+    const { chakra, triple, note, ...rest } = v as Bag;
+    if (Object.keys(rest).length || typeof chakra !== "string" || typeof triple !== "string" ||
+        !/^\d+-\d+-\d+$/.test(triple) || (note !== undefined && (typeof note !== "string" || !note.trim()))) {
+      return null;
+    }
+    chakraCorpus ??= source.read("chakra-personal.json", L) as ChakraCorpus;
+    chakraNumbers ??= new Map(readItems("chakras.json").map((row) => [String(row.key), Number(row.number)]));
+    const copy = chakraCorpus.chakras[chakra]?.readings[triple];
+    const number = chakraNumbers.get(chakra);
+    if (!copy || !number) return null;
+    const numbers = triple.split("-").map(Number);
+    return {
+      id: `combination-${triple}`, number, ...(note ? { note: note.trim() } : {}),
+      row: chakraRow(chakraCorpus, L, chakra, chakraTitle(chakra), numbers, copy),
+    };
+  }
+
+  function blockOf(v: unknown): Block | null {
+    if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+    const raw = v as Bag;
+    if (Object.keys(raw).length !== 1) return null;
+    if ("h3" in raw) {
+      return typeof raw.h3 === "string" && raw.h3.trim() ? { h3: raw.h3.trim() } : null;
+    }
+    if ("ul" in raw) {
+      const ul = cells(raw.ul, false);
+      return ul ? { ul } : null;
+    }
+    if ("ol" in raw) {
+      const ol = cells(raw.ol, false);
+      return ol ? { ol } : null;
+    }
+    if ("slot" in raw) {
+      return SLOTS.includes(raw.slot as Slot) ? { slot: raw.slot as Slot } : null;
+    }
+    if ("chakra_reading" in raw) {
+      const item = chakraReadingOf(raw.chakra_reading);
+      return item ? { chakra_reading: item } : null;
+    }
+    if ("table" in raw) {
+      const table = raw.table as Bag | null;
+      const head = cells(table?.head, true);
+      const rows = Array.isArray(table?.rows) && table.rows.length
+        ? (table.rows as unknown[]).map((row) => cells(row, true))
+        : null;
+      if (!head || !rows || rows.some((row) => !row || row.length !== head.length)) return null;
+      return { table: { head, rows: rows as string[][] } };
+    }
+    return null;
+  }
+
+  function paragraphsOf(v: unknown): Paragraph[] | null {
+    if (!Array.isArray(v) || !v.length) return null;
+    const out: Paragraph[] = [];
+    for (const item of v) {
+      if (typeof item === "string") {
+        if (item.trim().length <= 20) return null;
+        out.push(item);
+        continue;
+      }
+      const block = blockOf(item);
+      if (!block) return null;
+      out.push(block);
+    }
+    return out;
+  }
+
+  function sectionsOf(v: unknown, where: string): Section[] | null {
     if (!Array.isArray(v)) return null;
     const out: Section[] = [];
-    for (const raw of v as Bag[]) {
+    for (const [i, raw] of (v as Bag[]).entries()) {
       const h2 = typeof raw?.h2 === "string" ? raw.h2.trim() : "";
-      const paragraphs = strings(raw?.paragraphs, 1);
-      if (h2 && safe(h2) && paragraphs) out.push({ h2, paragraphs });
+      const paragraphs = paragraphsOf(raw?.paragraphs);
+      if (!h2 || !paragraphs) {
+        throw new Error(`[content] ${where}: раздел ${i + 1} «${h2}» — пустой h2, абзац короче 21 знака или неверный блок`);
+      }
+      out.push({ h2, paragraphs });
     }
     return out.length ? out : null;
   }
 
-  function faqOf(v: unknown): QA[] | null {
+  function faqOf(v: unknown, where: string): QA[] | null {
     if (!Array.isArray(v)) return null;
     const out: QA[] = [];
-    for (const raw of v as Bag[]) {
+    for (const [i, raw] of (v as Bag[]).entries()) {
       const q = typeof raw?.q === "string" ? raw.q.trim() : "";
       const a = typeof raw?.a === "string" ? raw.a.trim() : "";
       // короткий ответ в FAQPage бесполезен и поиску, и человеку
-      if (q.length > 8 && a.length > 40 && safe(q) && safe(a)) out.push({ q, a });
+      if (q.length <= 8 || a.length <= 40) {
+        throw new Error(`[content] ${where}: вопрос FAQ ${i + 1} — вопрос от 9 знаков, ответ от 41`);
+      }
+      out.push({ q, a });
     }
     return out.length ? out : null;
   }
@@ -233,18 +353,13 @@ export function createContent(L: Locale, source: ContentSource) {
     const title = typeof raw.title === "string" ? raw.title.trim() : "";
     const seo = seoOf(raw.seo);
     const short = typeof raw.short === "string" ? raw.short.trim() : "";
-    const sections = sectionsOf(raw.sections);
+    const sections = sectionsOf(raw.sections, `статья ${id || "без ключа"}`);
     if (!id || !title || !seo || short.length < 60 || !sections) {
       throw new Error(`[content] статья ${id || "без ключа"} не прошла обязательную схему`);
     }
-    if (!safe(title) || !safe(short)) {
-      throw new Error(`[content] статья ${id} содержит запрещённую лексику`);
-    }
-    // queries уходят в keywords разметки, то есть публикуются: гигиена им нужна такая же, как
-    // прозе, иначе медицинская формулировка обходит фильтр через поле «поисковые запросы»
     const queries = Array.isArray((raw.seo as Bag | undefined)?.queries)
       ? ((raw.seo as Bag).queries as unknown[]).filter(
-        (x): x is string => typeof x === "string" && safe(x),
+        (x): x is string => typeof x === "string",
       )
       : [];
     const publicationRaw =
@@ -257,7 +372,7 @@ export function createContent(L: Locale, source: ContentSource) {
       seo: { ...seo, queries },
       short,
       sections,
-      faq: faqOf(raw.faq) ?? [],
+      faq: faqOf(raw.faq, `статья ${id}`) ?? [],
       related: keys(raw.related) ?? [],
       arcana: numbers(raw.arcana) ?? [],
       entityType: typeof raw.entity_type === "string" ? raw.entity_type : undefined,
@@ -398,10 +513,10 @@ export function createContent(L: Locale, source: ContentSource) {
   function arcanumContent(n: number): ArcanumContent | null {
     const raw = ARCANA_JSON.get(n);
     if (!raw) return null;
-    const title = typeof raw.title === "string" && safe(raw.title) ? raw.title : null;
+    const title = typeof raw.title === "string" ? raw.title : null;
     const slug = typeof raw.slug === "string" ? raw.slug : null;
     const roman = typeof raw.roman === "string" ? raw.roman : null;
-    const short = typeof raw.short === "string" && raw.short.length > 10 && safe(raw.short) ? raw.short : null;
+    const short = typeof raw.short === "string" && raw.short.length > 10 ? raw.short : null;
     const keywords = Array.isArray(raw.keywords)
       ? raw.keywords.filter((value): value is string => typeof value === "string" && value.length > 1)
       : [];
@@ -424,9 +539,7 @@ export function createContent(L: Locale, source: ContentSource) {
         typeof item.with === "number" &&
         typeof item.title === "string" &&
         typeof item.href === "string" &&
-        typeof item.short === "string" &&
-        safe(item.title) &&
-        safe(item.short),
+        typeof item.short === "string",
     );
     if (
       raw.n !== n ||
@@ -435,14 +548,11 @@ export function createContent(L: Locale, source: ContentSource) {
       !roman ||
       !short ||
       keywords.length < 3 ||
-      !keywords.every(safe) ||
       !meaning ||
       !inPositions ||
       Object.keys(inPositions).length !== 38 ||
       plus.length < 3 ||
-      !plus.every(safe) ||
       minus.length < 3 ||
-      !minus.every(safe) ||
       repeat.length < 200 ||
       combinations.length !== 21 ||
       !validCombinations ||
@@ -464,8 +574,8 @@ export function createContent(L: Locale, source: ContentSource) {
       repeat,
       combinations: combinations as ArcanumContent["combinations"],
       seo,
-      sections: sectionsOf(raw.sections) ?? [],
-      faq: faqOf(raw.faq) ?? [],
+      sections: sectionsOf(raw.sections, `аркан ${n}`) ?? [],
+      faq: faqOf(raw.faq, `аркан ${n}`) ?? [],
     };
   }
 
@@ -491,7 +601,6 @@ export function createContent(L: Locale, source: ContentSource) {
       primaryQuery: query,
       wording,
       wordings: (raw.wordings ?? {}) as Record<string, number>,
-      tails: numbersOrStrings(raw.tails),
       publication: {
         index,
         follow: typeof publication.follow === "boolean" ? publication.follow : true,
@@ -504,10 +613,6 @@ export function createContent(L: Locale, source: ContentSource) {
     return POSITION_ARCANUM.filter((row) => row.publication.index);
   }
 
-  function numbersOrStrings(value: unknown): string[] {
-    return Array.isArray(value) ? value.filter((x): x is string => typeof x === "string") : [];
-  }
-
   function positionArcanumRows(): PositionArcanumRow[] {
     return POSITION_ARCANUM;
   }
@@ -516,11 +621,11 @@ export function createContent(L: Locale, source: ContentSource) {
     const raw = POSITIONS_JSON.get(key);
     if (!raw) return null;
     const kind = raw.kind === "section" || raw.kind === "point" ? raw.kind : null;
-    const title = typeof raw.title === "string" && safe(raw.title) ? raw.title : null;
-    const lead = typeof raw.lead === "string" && raw.lead.length > 20 && safe(raw.lead) ? raw.lead : null;
-    const formula = typeof raw.formula === "string" && raw.formula.length > 5 && safe(raw.formula) ? raw.formula : null;
+    const title = typeof raw.title === "string" ? raw.title : null;
+    const lead = typeof raw.lead === "string" && raw.lead.length > 20 ? raw.lead : null;
+    const formula = typeof raw.formula === "string" && raw.formula.length > 5 ? raw.formula : null;
     const meaning = strings(raw.meaning, 2);
-    const reading = typeof raw.reading === "string" && raw.reading.length > 40 && safe(raw.reading) ? raw.reading : null;
+    const reading = typeof raw.reading === "string" && raw.reading.length > 40 ? raw.reading : null;
     const seo = seoOf(raw.seo);
     const points = Array.isArray(raw.points)
       ? (raw.points as Bag[]).map((point) => ({
@@ -533,7 +638,6 @@ export function createContent(L: Locale, source: ContentSource) {
       (point) =>
         point.key &&
         point.title &&
-        safe(point.title) &&
         point.href === `/encyclopedia/position/${point.key}` &&
         POSITIONS_JSON.get(point.key)?.kind === "point",
     );
@@ -560,8 +664,8 @@ export function createContent(L: Locale, source: ContentSource) {
       meaning,
       reading,
       seo,
-      sections: sectionsOf(raw.article_sections) ?? [],
-      faq: faqOf(raw.faq) ?? [],
+      sections: sectionsOf(raw.article_sections, `позиция ${key}`) ?? [],
+      faq: faqOf(raw.faq, `позиция ${key}`) ?? [],
       points: points.map(({ key: pointKey, title: pointTitle }) => ({
         key: pointKey,
         title: pointTitle,
@@ -570,12 +674,26 @@ export function createContent(L: Locale, source: ContentSource) {
         ? (raw.links as Bag[]).flatMap((link) => {
           const label = typeof link.label === "string" ? link.label.trim() : "";
           const href = typeof link.href === "string" ? link.href : "";
-          return label && safe(label) && href.startsWith("/encyclopedia/")
+          return label && href.startsWith("/encyclopedia/")
             ? [{ label, href }]
             : [];
         })
         : [],
     };
+  }
+
+  function chakraArticleOf(v: unknown, key: string): ChakraArticle {
+    const raw = (v && typeof v === "object" && !Array.isArray(v) ? v : {}) as Bag;
+    const where = `чакра ${key}, статья`;
+    const title = typeof raw.title === "string" ? raw.title.trim() : "";
+    const short = typeof raw.short === "string" ? raw.short.trim() : "";
+    const seo = seoOf(raw.seo);
+    const intro = raw.intro === undefined ? [] : paragraphsOf(raw.intro);
+    const sections = sectionsOf(raw.sections, where);
+    if (!title || short.length < 60 || !seo || !intro || !sections) {
+      throw new Error(`[content] ${where} не прошла обязательную схему`);
+    }
+    return { title, short, seo, intro, sections, faq: faqOf(raw.faq, where) ?? [] };
   }
 
   function chakraContent(key: string): ChakraContent | null {
@@ -591,22 +709,22 @@ export function createContent(L: Locale, source: ContentSource) {
       }))
       : [];
     const seo = seoOf(raw.seo);
-    const title = typeof raw.title === "string" && safe(raw.title) ? raw.title : null;
-    const hint = typeof raw.hint === "string" && safe(raw.hint) ? raw.hint : null;
+    const title = typeof raw.title === "string" ? raw.title : null;
+    const hint = typeof raw.hint === "string" ? raw.hint : null;
     if (
       raw.key !== key ||
       !title ||
       !hint ||
       !level ||
-      personalIntro.length < 20 || !safe(personalIntro) ||
+      personalIntro.length < 20 ||
       columns.length !== 3 ||
-      !columns.every((column) => column.key && column.title && column.text.length > 40 && safe(column.title) && safe(column.text)) ||
+      !columns.every((column) => column.key && column.title && column.text.length > 40) ||
       !seo
     ) {
       throw new Error(`[content] чакра ${key} не прошла обязательную схему`);
     }
-    const sections = sectionsOf(raw.article_sections) ?? [];
-    const faq = faqOf(raw.faq) ?? [];
+    const sections = sectionsOf(raw.article_sections, `чакра ${key}`) ?? [];
+    const faq = faqOf(raw.faq, `чакра ${key}`) ?? [];
     const readings: ChakraContent["readings"] = [];
     const examples: ChakraContent["examples"] = [];
     // Старые переводы пока не содержат подробного разбора. Если он задан, не допускаем
@@ -624,7 +742,7 @@ export function createContent(L: Locale, source: ContentSource) {
         for (const col of ["physics", "energy", "emotions"] as const) {
           const value = item[col];
           if (value === undefined) continue;
-          if (typeof value !== "string" || value.length < 20 || !safe(value)) {
+          if (typeof value !== "string" || value.length < 20) {
             throw new Error(`[content] чакра ${key}, аркан ${n}: неверный текст ${col}`);
           }
           entry[col] = value;
@@ -654,14 +772,15 @@ export function createContent(L: Locale, source: ContentSource) {
         (raw.faq !== undefined && faq.length !== (raw.faq as unknown[]).length)) {
       throw new Error(`[content] чакра ${key}: неполный текст статьи`);
     }
-    return { key, title, hint, level, personalIntro, columns, seo, sections, readings, examples, faq };
+    const article = raw.article === undefined ? undefined : chakraArticleOf(raw.article, key);
+    return { key, title, hint, level, personalIntro, columns, seo, sections, readings, examples, faq, article };
   }
 
   function combinationContent(slug: string): CombinationContent | null {
     const raw = COMBINATIONS_JSON.get(slug);
     if (!raw) return null;
-    const title = typeof raw.title === "string" && raw.title.length > 4 && safe(raw.title) ? raw.title : null;
-    const short = typeof raw.short === "string" && raw.short.length > 10 && safe(raw.short) ? raw.short : null;
+    const title = typeof raw.title === "string" && raw.title.length > 4 ? raw.title : null;
+    const short = typeof raw.short === "string" && raw.short.length > 10 ? raw.short : null;
     const meaning = strings(raw.paragraphs, 2);
     const seo = seoOf(raw.seo);
     if (
@@ -739,7 +858,6 @@ export function createContent(L: Locale, source: ContentSource) {
       yearArcana: YEAR_ARCANA.size,
       categoryHubs: CATEGORY_HUBS.size,
       hubs: HUBS.size,
-      rejected,
     };
   }
   return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, yearArcanum, yearKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats };

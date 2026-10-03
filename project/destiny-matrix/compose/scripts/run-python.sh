@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Запуск без докера: uvicorn и собранный фронт на node.
+# Запуск без докера: uvicorn и next dev со значком Next.js и обновлением при правках.
 # Аргументы ru/en сохранены как алиасы общего приложения, язык выбирается по Host.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -12,12 +12,13 @@ export ALL_FREE_WITHOUT_PAYMENT="${ALL_FREE_WITHOUT_PAYMENT:-0}"
 export WEB_PORT="${WEB_PORT:-3000}" API_PORT="${API_PORT:-8010}"
 export MOCK_PAYMENTS="${MOCK_PAYMENTS:-1}" MAIL_TO_LOG=1 SESSION_COOKIE_SECURE=0
 export NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT="$ALL_FREE_WITHOUT_PAYMENT"
+# как в compose: PDF стенда лежат в локальном каталоге, а не в бакете S3
+export REPORTS_STORE="${REPORTS_STORE:-local}"
 
 PY="${PY:-/home/sergey/miniconda3/envs/research3.12/bin/python}"
 LOGS=/tmp/arcana; mkdir -p "$LOGS"
 
-# ключи Postbox и бакета отчётов лежат вне репозитория: без них письма пишутся в лог,
-# а печать PDF отвечает 503
+# ключи Postbox и секрет браузера печати лежат вне репозитория: без smtp.env письма пишутся в лог
 for env in ~/.config/arcana/smtp.env ~/.config/arcana/reports.env; do
   if [ -f "$env" ]; then set -a; . "$env"; set +a; fi
 done
@@ -73,17 +74,15 @@ echo "== api"
   && PYTHONPATH=.. setsid --fork "$PY" -m uvicorn app.main:app --host 127.0.0.1 --port "$API_PORT" \
        </dev/null >>"$LOGS/api.log" 2>&1 &)
 
-echo "== фронт: сборка"
+echo "== фронт: режим разработки Next.js"
 cd web
 export NEXT_PUBLIC_BUILD_COMMIT="$(git rev-parse --short HEAD)$(git diff --quiet HEAD -- .. || echo +)"
 export NEXT_PUBLIC_BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export NEXT_PUBLIC_BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"
 export NEXT_PUBLIC_SITE_URL="${SITE_URL:-http://127.0.0.1:$WEB_PORT}"
-npm run build >"$LOGS/build.log" 2>&1 || { tail -20 "$LOGS/build.log"; exit 1; }
-
-# NODE_ENV=development: с secure-кукой вход по http не работает
+# dev-сервер собирает страницы по запросу; SESSION_COOKIE_SECURE=0 задан выше для HTTP.
 NODE_ENV=development API_INTERNAL_URL="http://127.0.0.1:$API_PORT" \
-  setsid --fork npx next start -p "$WEB_PORT" </dev/null >"$LOGS/web.log" 2>&1 &
+  setsid --fork ./node_modules/.bin/next dev -p "$WEB_PORT" </dev/null >"$LOGS/web.log" 2>&1 &
 
 # Ожидание с пределом: молчаливое «висит» ничего не говорит о причине, а причина всегда в логе.
 for _ in $(seq 1 90); do

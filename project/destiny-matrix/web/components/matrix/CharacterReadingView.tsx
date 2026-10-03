@@ -3,7 +3,6 @@ import { forLocale as localizedArcana } from "@/lib/arcana";
 import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
-import { forLocale as localizedPublicLabels } from "@/lib/i18n/publicLabels";
 import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
 import type { LongformReading } from "@/lib/readingTypes";
 import { readingRoleReference, readingRoleSymbol } from "@/lib/readingRoleLabel";
@@ -11,15 +10,15 @@ import { forLocale as localizedSite } from "@/lib/site";
 import Link from "next/link";
 import ArcanumCard from "./ArcanumCard";
 import CharacterConclusionView from "./CharacterConclusionView";
+import ChakraReadingView from "./ChakraReadingView";
 import CharacterRoleParts from "./CharacterRoleParts";
 
 export const forLocale = localized((L: Locale, site) => {
   const { arcanumTitle } = localizedArcana(L);
-  const { columnTitle } = localizedPublicLabels(L);
   const { arcanumHref } = localizedPublicSpec(L);
   const { publicHref } = localizedSite(L, site);
 
-  return { arcanumTitle, columnTitle, arcanumHref, publicHref };
+  return { arcanumTitle, arcanumHref, publicHref };
 });
 
 export default function CharacterReadingView({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
@@ -33,7 +32,11 @@ export default function CharacterReadingView({ site = DEFAULT_SITE, locale: requ
     printing = false,
     showRoles = true,
   } = localeProps;
-  const { arcanumTitle, columnTitle, arcanumHref, publicHref } = forLocale(L, site);
+  const { arcanumTitle, arcanumHref, publicHref } = forLocale(L, site);
+
+  if (reading.layout === "chakras") {
+    return <ChakraReadingView reading={reading} locale={L} site={site} printing={printing} />;
+  }
 
   const href = (path: string) => (printing ? publicHref(path) : path);
   const rolesTitleId = `${reading.testId}-roles-title`;
@@ -47,45 +50,7 @@ export default function CharacterReadingView({ site = DEFAULT_SITE, locale: requ
         <p>{reading.summary}</p>
       </div>
 
-      {reading.layout === "chakras" && reading.chakraRows ? (
-        <section className="section-gap" aria-labelledby={rolesTitleId}>
-          <h2 id={rolesTitleId}>{reading.rolesTitle}</h2>
-          <p className="dim prose">{reading.rolesLead}</p>
-          <div className="tabscroll">
-            <table className="chak personal-chakras">
-              <thead>
-                <tr>
-                  <th>{D.report.chakraLevel[L]}</th>
-                  <th>{columnTitle("physics")}</th>
-                  <th>{columnTitle("energy")}</th>
-                  <th>{columnTitle("emotions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reading.chakraRows.map((row) => (
-                  <tr key={row.key} data-chakra={row.key}>
-                    <th scope="row">
-                      <Link href={href(`/encyclopedia/chakra/${row.key}`)}>{row.title}</Link>
-                      <span className="small">{row.hint}</span>
-                      <span className="small">{row.level}</span>
-                    </th>
-                    {row.cells.map((cell) => (
-                      <td key={cell.column} data-column={cell.column}>
-                        <Link href={href(arcanumHref(cell.arcanum))}>
-                          <strong>{cell.arcanum} · {arcanumTitle(cell.arcanum)}</strong>
-                        </Link>
-                        <p>{cell.context}</p>
-                        <p>{cell.modifier}</p>
-                        <p>{cell.action}</p>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ) : reading.layout === "years" && reading.agePeriods ? (
+      {reading.layout === "years" && reading.agePeriods ? (
         <section className="section-gap" aria-labelledby={rolesTitleId}>
           <h2 id={rolesTitleId}>{reading.rolesTitle}</h2>
           <p className="dim prose">{reading.rolesLead}</p>

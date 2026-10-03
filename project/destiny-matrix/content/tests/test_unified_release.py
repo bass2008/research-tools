@@ -161,6 +161,29 @@ def test_position_arcanum_registry_matches_the_public_url_map():
     assert all(i["publication"]["follow"] for i in registry["items"])
 
 
+def test_removed_past_lives_are_absent_from_registries_and_landings():
+    removed = {f"/encyclopedia/position/past_lives/{n}"
+               for n in (3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 18, 19, 20, 21, 22)}
+    rows = [row for row in items(AUDIT / "public-url-map.json")
+            if row["old_url"].startswith("/encyclopedia/position/past_lives/")]
+    assert rows == []
+    key_sets = []
+    for lang in ("ru", "en"):
+        registry = load(PROJECT / "web" / "content" / lang / "position-arcanum.json")
+        assert registry["count"] == len(registry["items"]) == 74
+        assert not any(item["position"] == "past_lives" for item in registry["items"])
+        key_sets.append({(item["position"], item["arcanum"]) for item in registry["items"]})
+    assert key_sets[0] == key_sets[1]
+    assert not any(row["landing_url"] in removed for row in items(AUDIT / "semantic-core.json"))
+    assert not any(row["entity"].startswith("position_arcanum:past_lives/")
+                   for row in items(AUDIT / "content-review.json"))
+
+
+def test_full_tail_program_query_has_the_specific_reading():
+    rows = {row["query"]: row for row in items(AUDIT / "semantic-core.json")}
+    assert rows["программа 9 12 3 в матрице судьбы"]["landing_url"] == "/encyclopedia/karmic-tail/9-12-3"
+
+
 def test_position_arcanum_primary_queries_are_unique():
     """Два адреса не могут целиться в один головной запрос: поиск выберет между ними сам и
     обычно занизит оба. У страницы вне индекса головного запроса нет вовсе — заявить его
@@ -184,19 +207,3 @@ def test_position_arcanum_pages_exist_only_for_arcana_the_method_produces():
     for item in load(WEB / "position-arcanum.json")["items"]:
         domain = reachable.get(item["position"]) or by_section[item["position"]]
         assert item["arcanum"] in domain, (item["position"], item["arcanum"])
-
-
-def test_tail_crossings_exist_in_the_method():
-    """Хвост — тройка: аркан, которого движок туда не ставит, не может иметь страницу «в хвосте»,
-    сколько бы его ни спрашивали. Арканы 1 и 2 как раз такие, и спрос по ним нулевой под обоими
-    именами — это и подтвердило, что «программа N» и «хвост N» одно и то же."""
-    registry = load(WEB / "position-arcanum.json")["items"]
-    reachable = {row["triple"] for row in load(PROJECT / "spec" / "method.json")["reachable_karmic_tails"]}
-    for item in registry:
-        if item["position"] != "past_lives":
-            assert item["tails"] == [], item
-            continue
-        assert item["tails"], item
-        for triple in item["tails"]:
-            assert triple in reachable, (item["arcanum"], triple)
-            assert str(item["arcanum"]) in triple.split("-"), (item["arcanum"], triple)

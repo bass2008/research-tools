@@ -81,7 +81,7 @@ export default async function PositionHubPage() {
         <PositionRows locale={L} items={sections} />
       </div>
 
-      <Sections items={hub.sections} />
+      <Sections items={hub.sections} locale={L} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

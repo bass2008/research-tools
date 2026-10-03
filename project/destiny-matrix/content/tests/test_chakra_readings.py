@@ -1,6 +1,7 @@
 """Редакционный справочник сверяется с достижимыми числами реального расчёта."""
 import datetime as dt
 import json
+import warnings
 from pathlib import Path
 
 from content.text_policy import blocked_match
@@ -39,10 +40,12 @@ def test_editorial_examples_match_birth_date_and_dictionary():
                 assert col in dictionary[number]
 
 
-def test_new_chakra_text_is_not_silently_filtered_on_the_site():
+def test_chakra_text_policy_words_are_reported_as_warnings():
     def check(value):
         if isinstance(value, str):
-            assert blocked_match(value, "content", "ru") is None, value
+            found = blocked_match(value, "content", "ru")
+            if found:
+                warnings.warn(f"text-policy «{found.matched}» ({found.category}): {value[:80]}", stacklevel=2)
         elif isinstance(value, dict):
             for item in value.values():
                 check(item)

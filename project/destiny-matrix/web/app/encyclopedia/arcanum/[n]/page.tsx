@@ -113,7 +113,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
       </div>
       {/* Грани спроса — «в отношениях», «деньги», «в центре» — приходят из контента отдельными
           секциями: в одном meaning они сливались в простыню без заголовков. */}
-      <Sections items={e.sections} />
+      <Sections items={e.sections} locale={L} />
       <Faq locale={L} items={e.faq} />
     </>
   );

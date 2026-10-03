@@ -1,0 +1,39 @@
+/* Один .scope связывает соседние схему и атлас, включая серверный отчёт и каталог.
+   Наведение имеет приоритет над оставшимся клавиатурным фокусом на другой строке. */
+.node > circle:not(.halo) { fill: var(--chakra-highlight, var(--point-color)); transition: fill 140ms ease; }
+.node > text:global(.n) { fill: var(--chakra-number, #fff); transition: fill 140ms ease; }
+.halo { fill: none; stroke: var(--chakra-highlight, transparent); stroke-width: 4; opacity: var(--chakra-halo, 0); transition: opacity 140ms ease; pointer-events: none; }
+
+@media screen {
+  .scope:has([data-chakra-row="muladhara"]:hover) [data-map-chakras~="muladhara"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="muladhara"]:focus-visible) [data-map-chakras~="muladhara"] {
+    --chakra-highlight: #c9453a; --chakra-number: #fff; --chakra-halo: 1;
+  }
+  .scope:has([data-chakra-row="svadhisthana"]:hover) [data-map-chakras~="svadhisthana"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="svadhisthana"]:focus-visible) [data-map-chakras~="svadhisthana"] {
+    --chakra-highlight: #dd7b2a; --chakra-number: #14181c; --chakra-halo: 1;
+  }
+  .scope:has([data-chakra-row="manipura"]:hover) [data-map-chakras~="manipura"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="manipura"]:focus-visible) [data-map-chakras~="manipura"] {
+    --chakra-highlight: #d9ac1e; --chakra-number: #14181c; --chakra-halo: 1;
+  }
+  .scope:has([data-chakra-row="anahata"]:hover) [data-map-chakras~="anahata"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="anahata"]:focus-visible) [data-map-chakras~="anahata"] {
+    --chakra-highlight: #159c69; --chakra-number: #14181c; --chakra-halo: 1;
+  }
+  .scope:has([data-chakra-row="vishuddha"]:hover) [data-map-chakras~="vishuddha"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="vishuddha"]:focus-visible) [data-map-chakras~="vishuddha"] {
+    --chakra-highlight: #1f9ed6; --chakra-number: #14181c; --chakra-halo: 1;
+  }
+  .scope:has([data-chakra-row="ajna"]:hover) [data-map-chakras~="ajna"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="ajna"]:focus-visible) [data-map-chakras~="ajna"] {
+    --chakra-highlight: #3f5ec9; --chakra-number: #fff; --chakra-halo: 1;
+  }
+  .scope:has([data-chakra-row="sahasrara"]:hover) [data-map-chakras~="sahasrara"],
+  .scope:not(:has([data-chakra-row]:hover)):has([data-chakra-row="sahasrara"]:focus-visible) [data-map-chakras~="sahasrara"] {
+    --chakra-highlight: #8e5bc4; --chakra-number: #fff; --chakra-halo: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .node > circle, .node > text:global(.n) { transition: none; }
+}

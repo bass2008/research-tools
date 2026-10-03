@@ -11,6 +11,7 @@ import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
+import { karmicTailNumberIndex } from "@/lib/karmicTailIndex";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
@@ -57,7 +58,9 @@ export default async function KarmicTailHubPage() {
   const { arcanumTitle, karmicTails, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, articleLd, itemListLd, clip, encyclopediaSection, HUB, byTriple } = forLocale(L, await requestSite());
 
   const hub = HUB!;
-  const items = karmicTails().slice().sort((a, b) => byTriple(a.key, b.key));
+  const items = karmicTails().filter((item) => item.publication.index).sort((a, b) => byTriple(a.key, b.key));
+  const numberIndex = karmicTailNumberIndex(items.map((item) => item.key));
+  const placeNames = { M: D.enc.tailPlaceM[L], N: D.enc.tailPlaceN[L], D: D.enc.tailPlaceD[L] };
 
   return (
     <>
@@ -110,7 +113,23 @@ export default async function KarmicTailHubPage() {
         </div>
       ) : null}
 
-      <Sections items={hub.sections} />
+      <div className="panel section-gap">
+        <Sections items={hub.sections.slice(0, 1)} locale={L} />
+        {numberIndex.map(({ arcanum, tails }) => (
+          <div className="section-gap" key={arcanum}>
+            <h3>{arcanum} · {arcanumTitle(arcanum)}</h3>
+            <div className="taglist">
+              {tails.map(({ key, places }) => (
+                <Link key={key} href={karmicTailHref(key)} prefetch={false}>
+                  {key} · {places.map((place) => placeNames[place]).join(", ")}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Sections items={hub.sections.slice(1)} locale={L} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

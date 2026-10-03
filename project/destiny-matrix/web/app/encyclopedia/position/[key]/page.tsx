@@ -180,7 +180,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         ))}
       </div>
 
-      <Sections items={extra.sections} />
+      <Sections items={extra.sections} locale={L} />
 
       {p.key === "day" ? (
         <p className="encref">

@@ -1,386 +1,8 @@
 {
  "threshold": 500,
  "show_threshold": 0,
- "count": 90,
+ "count": 74,
  "items": [
-  {
-   "position": "past_lives",
-   "arcanum": 3,
-   "frequency": 9220,
-   "primary_query": "destiny matrix karmic tail 3",
-   "wording": "tail",
-   "wordings": {
-    "tail": 5028,
-    "program": 4192
-   },
-   "tails": [
-    "18-3-12",
-    "3-13-10",
-    "3-22-19",
-    "3-7-22",
-    "9-12-3",
-    "9-3-21"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 3",
-    "exact_frequency": 9220,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 4,
-   "frequency": 5618,
-   "primary_query": "destiny matrix karmic tail 4",
-   "wording": "program",
-   "wordings": {
-    "program": 3541,
-    "tail": 2077
-   },
-   "tails": [
-    "12-16-4",
-    "21-4-10"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 4",
-    "exact_frequency": 5618,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 5,
-   "frequency": 6503,
-   "primary_query": "destiny matrix karmic tail 5",
-   "wording": "program",
-   "wordings": {
-    "tail": 3632,
-    "program": 2871
-   },
-   "tails": [
-    "15-20-5",
-    "15-5-8",
-    "6-5-17"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 5",
-    "exact_frequency": 6503,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 6,
-   "frequency": 10198,
-   "primary_query": "destiny matrix karmic tail 6",
-   "wording": "program",
-   "wordings": {
-    "program": 7735,
-    "tail": 2463
-   },
-   "tails": [
-    "18-6-15",
-    "18-6-6",
-    "6-14-8",
-    "6-17-11",
-    "6-20-14",
-    "6-5-17",
-    "6-8-20",
-    "9-15-6"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 6",
-    "exact_frequency": 10198,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 7,
-   "frequency": 8704,
-   "primary_query": "destiny matrix karmic tail 7",
-   "wording": "program",
-   "wordings": {
-    "program": 6644,
-    "tail": 2060
-   },
-   "tails": [
-    "12-19-7",
-    "21-10-7",
-    "21-7-13",
-    "3-7-22"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 7",
-    "exact_frequency": 8704,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 8,
-   "frequency": 10637,
-   "primary_query": "destiny matrix karmic tail 8",
-   "wording": "program",
-   "wordings": {
-    "program": 6831,
-    "tail": 3806
-   },
-   "tails": [
-    "15-5-8",
-    "15-8-11",
-    "6-14-8",
-    "6-8-20"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 8",
-    "exact_frequency": 10637,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 9,
-   "frequency": 15614,
-   "primary_query": "destiny matrix karmic tail 9",
-   "wording": "program",
-   "wordings": {
-    "tail": 9231,
-    "program": 6383
-   },
-   "tails": [
-    "18-9-9",
-    "9-12-3",
-    "9-15-6",
-    "9-18-9",
-    "9-3-21",
-    "9-9-18"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 9",
-    "exact_frequency": 15614,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 10,
-   "frequency": 6668,
-   "primary_query": "destiny matrix karmic tail 10",
-   "wording": "program",
-   "wordings": {
-    "program": 3809,
-    "tail": 2859
-   },
-   "tails": [
-    "21-10-16",
-    "21-10-7",
-    "21-4-10",
-    "3-13-10"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 10",
-    "exact_frequency": 6668,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 11,
-   "frequency": 738,
-   "primary_query": "destiny matrix karmic tail 11",
-   "wording": "tail",
-   "wordings": {
-    "tail": 738
-   },
-   "tails": [
-    "15-8-11",
-    "6-17-11"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 11",
-    "exact_frequency": 738,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 15,
-   "frequency": 4696,
-   "primary_query": "destiny matrix karmic tail 15",
-   "wording": "tail",
-   "wordings": {
-    "tail": 2471,
-    "program": 2225
-   },
-   "tails": [
-    "15-20-5",
-    "15-5-8",
-    "15-8-11",
-    "18-6-15",
-    "9-15-6"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 15",
-    "exact_frequency": 4696,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 16,
-   "frequency": 1564,
-   "primary_query": "destiny matrix karmic tail 16",
-   "wording": "program",
-   "wordings": {
-    "program": 1564
-   },
-   "tails": [
-    "12-16-4",
-    "21-10-16"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 16",
-    "exact_frequency": 1564,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 18,
-   "frequency": 4819,
-   "primary_query": "destiny matrix karmic tail 18",
-   "wording": "tail",
-   "wordings": {
-    "tail": 4819
-   },
-   "tails": [
-    "18-3-12",
-    "18-6-15",
-    "18-6-6",
-    "18-9-9",
-    "9-18-9",
-    "9-9-18"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 18",
-    "exact_frequency": 4819,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 19,
-   "frequency": 3024,
-   "primary_query": "destiny matrix karmic tail 19",
-   "wording": "tail",
-   "wordings": {
-    "tail": 3024
-   },
-   "tails": [
-    "12-19-7",
-    "3-22-19"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 19",
-    "exact_frequency": 3024,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 20,
-   "frequency": 3019,
-   "primary_query": "destiny matrix karmic tail 20",
-   "wording": "program",
-   "wordings": {
-    "program": 1778,
-    "tail": 1241
-   },
-   "tails": [
-    "15-20-5",
-    "6-20-14",
-    "6-8-20"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 20",
-    "exact_frequency": 3019,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 21,
-   "frequency": 4299,
-   "primary_query": "destiny matrix karmic tail 21",
-   "wording": "tail",
-   "wordings": {
-    "tail": 4299
-   },
-   "tails": [
-    "21-10-16",
-    "21-10-7",
-    "21-4-10",
-    "21-7-13",
-    "9-3-21"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 21",
-    "exact_frequency": 4299,
-    "reviewed_at": "2026-09-14"
-   }
-  },
-  {
-   "position": "past_lives",
-   "arcanum": 22,
-   "frequency": 1201,
-   "primary_query": "destiny matrix karmic tail 22",
-   "wording": "tail",
-   "wordings": {
-    "tail": 1201
-   },
-   "tails": [
-    "3-22-19",
-    "3-7-22"
-   ],
-   "publication": {
-    "index": true,
-    "follow": true,
-    "primary_query": "destiny matrix karmic tail 22",
-    "exact_frequency": 1201,
-    "reviewed_at": "2026-09-14"
-   }
-  },
   {
    "position": "center",
    "arcanum": 3,
@@ -390,7 +12,6 @@
    "wordings": {
     "center": 1686
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -408,7 +29,6 @@
    "wordings": {
     "center": 1964
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -426,7 +46,6 @@
    "wordings": {
     "center": 2956
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -444,7 +63,6 @@
    "wordings": {
     "center": 2729
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -462,7 +80,6 @@
    "wordings": {
     "center": 2332
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -480,7 +97,6 @@
    "wordings": {
     "center": 2141
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -498,7 +114,6 @@
    "wordings": {
     "center": 1681
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -516,7 +131,6 @@
    "wordings": {
     "center": 2183
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -534,7 +148,6 @@
    "wordings": {
     "center": 2532
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -552,7 +165,6 @@
    "wordings": {
     "center": 1492
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -570,7 +182,6 @@
    "wordings": {
     "center": 789
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -588,7 +199,6 @@
    "wordings": {
     "center": 489
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -606,7 +216,6 @@
    "wordings": {
     "center": 326
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -624,7 +233,6 @@
    "wordings": {
     "center": 580
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -642,7 +250,6 @@
    "wordings": {
     "center": 470
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -660,7 +267,6 @@
    "wordings": {
     "center": 376
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -678,7 +284,6 @@
    "wordings": {
     "relations": 683
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -696,7 +301,6 @@
    "wordings": {
     "relations": 616
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -714,7 +318,6 @@
    "wordings": {
     "relations": 1136
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -732,7 +335,6 @@
    "wordings": {
     "relations": 1764
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -750,7 +352,6 @@
    "wordings": {
     "relations": 1474
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -768,7 +369,6 @@
    "wordings": {
     "relations": 1053
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -786,7 +386,6 @@
    "wordings": {
     "relations": 1781
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -804,7 +403,6 @@
    "wordings": {
     "relations": 1002
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -822,7 +420,6 @@
    "wordings": {
     "relations": 976
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -840,7 +437,6 @@
    "wordings": {
     "relations": 1265
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -858,7 +454,6 @@
    "wordings": {
     "relations": 664
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -876,7 +471,6 @@
    "wordings": {
     "relations": 817
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -894,7 +488,6 @@
    "wordings": {
     "relations": 744
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -912,7 +505,6 @@
    "wordings": {
     "relations": 900
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -930,7 +522,6 @@
    "wordings": {
     "relations": 1094
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -948,7 +539,6 @@
    "wordings": {
     "relations": 1148
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -966,7 +556,6 @@
    "wordings": {
     "money": 870
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -984,7 +573,6 @@
    "wordings": {
     "money": 853
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1002,7 +590,6 @@
    "wordings": {
     "money": 646
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1020,7 +607,6 @@
    "wordings": {
     "money": 1077
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1038,7 +624,6 @@
    "wordings": {
     "money": 942
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1056,7 +641,6 @@
    "wordings": {
     "money": 845
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1074,7 +658,6 @@
    "wordings": {
     "money": 913
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1092,7 +675,6 @@
    "wordings": {
     "money": 654
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1110,7 +692,6 @@
    "wordings": {
     "money": 622
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1128,7 +709,6 @@
    "wordings": {
     "money": 512
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1146,7 +726,6 @@
    "wordings": {
     "money": 799
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1164,7 +743,6 @@
    "wordings": {
     "heart": 398
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1182,7 +760,6 @@
    "wordings": {
     "heart": 377
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1200,7 +777,6 @@
    "wordings": {
     "heart": 902
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1218,7 +794,6 @@
    "wordings": {
     "heart": 850
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1236,7 +811,6 @@
    "wordings": {
     "heart": 962
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1254,7 +828,6 @@
    "wordings": {
     "heart": 832
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1272,7 +845,6 @@
    "wordings": {
     "heart": 557
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1290,7 +862,6 @@
    "wordings": {
     "heart": 667
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1308,7 +879,6 @@
    "wordings": {
     "heart": 697
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1326,7 +896,6 @@
    "wordings": {
     "heart": 113
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1344,7 +913,6 @@
    "wordings": {
     "heart": 86
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1362,7 +930,6 @@
    "wordings": {
     "heart": 352
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1380,7 +947,6 @@
    "wordings": {
     "heart": 360
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1398,7 +964,6 @@
    "wordings": {
     "heart": 505
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1416,7 +981,6 @@
    "wordings": {
     "heart": 398
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1434,7 +998,6 @@
    "wordings": {
     "heart": 559
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1452,7 +1015,6 @@
    "wordings": {
     "heart": 628
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1470,7 +1032,6 @@
    "wordings": {
     "heart": 882
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1488,7 +1049,6 @@
    "wordings": {
     "heart": 706
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1506,7 +1066,6 @@
    "wordings": {
     "heart": 1485
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1524,7 +1083,6 @@
    "wordings": {
     "talent": 515
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1542,7 +1100,6 @@
    "wordings": {
     "talent": 682
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1560,7 +1117,6 @@
    "wordings": {
     "talent": 874
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1578,7 +1134,6 @@
    "wordings": {
     "talent": 544
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1596,7 +1151,6 @@
    "wordings": {
     "talent": 591
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1614,7 +1168,6 @@
    "wordings": {
     "talent": 738
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1632,7 +1185,6 @@
    "wordings": {
     "talent": 765
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1650,7 +1202,6 @@
    "wordings": {
     "talent": 781
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1668,7 +1219,6 @@
    "wordings": {
     "talent": 605
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1686,7 +1236,6 @@
    "wordings": {
     "card": 542
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,
@@ -1704,7 +1253,6 @@
    "wordings": {
     "card": 588
    },
-   "tails": [],
    "publication": {
     "index": true,
     "follow": true,

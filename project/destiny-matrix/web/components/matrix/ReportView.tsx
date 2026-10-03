@@ -127,7 +127,8 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
       </p>
 
       <div className="section-gap">
-        <MatrixResult locale={L} m={matrix} />
+        <MatrixResult locale={L} m={matrix} chakraUnlocked={session.unlimited || ALL_FREE}
+          chakraReading={full?.find((s) => s.key === "chakras")?.longform} matrixId={currentSaved?.id} />
       </div>
 
       <ReportSections locale={L} sections={sections} />

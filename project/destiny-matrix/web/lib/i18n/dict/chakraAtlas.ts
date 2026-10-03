@@ -1,0 +1,28 @@
+import type { Phrase } from "./index";
+
+export const chakraAtlas = {
+  title: { ru: "Чакры и ваши арканы", en: "Chakras and your arcana" } satisfies Phrase,
+  exampleTitle: { ru: "Пример разбора чакр по дате рождения в нашем разборе", en: "Example of a birth-date chakra interpretation in our reading" } satisfies Phrase,
+  chakra: { ru: "Чакра", en: "Chakra" } satisfies Phrase,
+  lead: { ru: "Семь чакр · три аркана в каждой · нажмите, чтобы прочитать", en: "Seven chakras · three arcana in each · select a chakra to read" } satisfies Phrase,
+  lockedLead: { ru: "Семь чакр · три аркана в каждой · толкования в полном разборе", en: "Seven chakras · three arcana in each · interpretations in the full reading" } satisfies Phrase,
+  printLead: { ru: "Семь чакр · три аркана в каждой", en: "Seven chakras · three arcana in each" } satisfies Phrase,
+  referenceLead: { ru: "Семь чакр · три аркана в каждой · подробнее о чакре по нажатию", en: "Seven chakras · three arcana in each · select a chakra to learn more" } satisfies Phrase,
+  read: { ru: "Открыть толкование", en: "Open interpretation" } satisfies Phrase,
+  locked: { ru: "Толкование доступно после оплаты", en: "Interpretation available after purchase" } satisfies Phrase,
+  unlockHint: { ru: "Полный разбор объясняет сочетание трёх арканов в каждой чакре вашей матрицы.", en: "The full reading explains the three arcana together in each chakra of your matrix." } satisfies Phrase,
+  openSaved: { ru: "Сохраните эту дату, чтобы открыть её полный разбор по вашему доступу.", en: "Save this date to open its full reading using your access." } satisfies Phrase,
+  origin: { ru: "Откуда числа", en: "Where the numbers come from" } satisfies Phrase,
+  close: { ru: "Закрыть", en: "Close" } satisfies Phrase,
+  originLead: { ru: "Числа взяты из точек вашей матрицы, рассчитанной по дате рождения. В каждой строке физика и энергия берутся из двух позиций, а эмоции — из их суммы. Это номера арканов, а не оценки состояния чакр.", en: "These numbers come from positions in your birth-date matrix. Each row takes physics and energy from two positions; emotions come from their sum. They are arcanum numbers, not chakra health scores." } satisfies Phrase,
+  reduction: { ru: "Если число больше 22, складываем его цифры, пока не получим число от 1 до 22. Итог колонки — свёрнутая сумма её семи чисел.", en: "If a number exceeds 22, add its digits until the result is between 1 and 22. Each column total is the reduced sum of its seven numbers." } satisfies Phrase,
+  sources: {
+    sahasrara: { ru: "Физика — аркан дня рождения (левая точка). Энергия — месяц рождения (верхняя точка).", en: "Physics: birth-day arcanum (left point). Energy: birth month (top point)." },
+    ajna: { ru: "Физика — сумма левой внешней и левой внутренней точек. Энергия — сумма верхней внешней и верхней внутренней точек.", en: "Physics: outer left plus inner left. Energy: outer top plus inner top." },
+    vishuddha: { ru: "Физика — левая внутренняя точка. Энергия — верхняя внутренняя точка.", en: "Physics: inner left point. Energy: inner top point." },
+    anahata: { ru: "Физика — сумма левой внутренней точки и центра. Энергия — сумма верхней внутренней точки и центра.", en: "Physics: inner left plus centre. Energy: inner top plus centre." },
+    manipura: { ru: "Физика и энергия — центральная точка матрицы.", en: "Physics and energy both use the centre of the matrix." },
+    svadhisthana: { ru: "Физика — правая внутренняя точка. Энергия — нижняя внутренняя точка.", en: "Physics: inner right point. Energy: inner bottom point." },
+    muladhara: { ru: "Физика — свёртка года рождения (правая точка). Энергия — сумма арканов дня, месяца и года (нижняя точка).", en: "Physics: reduced birth year (right point). Energy: the sum of day, month and year arcana (bottom point)." },
+  } satisfies Record<string, Phrase>,
+};

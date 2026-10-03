@@ -1,4 +1,4 @@
-"""Printed tables must fit the sheet: a PDF has no horizontal scrollbar."""
+"""Printed chakras must fit the sheet: a PDF has no horizontal scrollbar."""
 import urllib.parse
 
 import pytest
@@ -27,15 +27,19 @@ def test_printed_chakras_fit_all_columns(page, mail, locale):
     page.goto(f"http://127.0.0.1:{port}/print/report?m={matrix_id}"
               f"&t={urllib.parse.quote(token.stdout.strip())}&lang={locale}")
     expect(page.locator("html")).to_have_attribute("lang", locale)
-    table = page.locator(".printmode .personal-chakras")
-    expect(table).to_be_visible()
-    expect(table.locator("tbody tr")).to_have_count(7)
+    reading = page.locator(".printmode [data-testid=chakras-reading]")
+    expect(reading).to_be_visible()
+    expect(reading.locator("section[data-chakra]")).to_have_count(7)
     page.evaluate("document.fonts.ready")
-    sizes = table.evaluate("""table => {
-      const wrapper = table.closest('.tabscroll');
-      return {table: table.getBoundingClientRect().width, wrapper: wrapper.clientWidth,
-        clippedCells: [...table.querySelectorAll('th,td')].filter(cell =>
-          cell.scrollWidth > cell.clientWidth + 1).length};
+    sizes = reading.evaluate("""reading => {
+      const right = reading.getBoundingClientRect().right;
+      const blocks = [...reading.querySelectorAll('section[data-chakra]')];
+      return {page: document.documentElement.clientWidth, reading: reading.getBoundingClientRect().width,
+        overflowing: blocks.filter(b => b.getBoundingClientRect().right > right + 1
+          || b.scrollWidth > b.clientWidth + 1).map(b => b.dataset.chakra),
+        clipped: [...reading.querySelectorAll('h2,h3,p')].filter(e =>
+          e.scrollWidth > e.clientWidth + 1).length};
     }""")
-    assert sizes["table"] <= sizes["wrapper"] + 1, sizes
-    assert sizes["clippedCells"] == 0, sizes
+    assert sizes["reading"] <= sizes["page"] + 1, sizes
+    assert sizes["overflowing"] == [], sizes
+    assert sizes["clipped"] == 0, sizes

@@ -29,9 +29,9 @@ def test_core_content_artifacts_have_no_generation_drift():
     }
     for name, items in expected.items():
         actual = _items(name)
-        if name in {"arcana.json", "positions.json"}:
+        if name in {"arcana.json", "positions.json", "chakras.json"}:
             # SEO-сборщик поверх канонического core намеренно заменяет длинное meaning и
-            # metadata, а для статей разделов добавляет article_sections и faq. Ни одно
+            # metadata, для статей разделов добавляет article_sections и faq, для чакр — article. Ни одно
             # расчётное/структурное поле при обогащении меняться не может.
             by_key = {str(row.get("n", row.get("key"))): row for row in items}
             normalized = []
@@ -39,7 +39,7 @@ def test_core_content_artifacts_have_no_generation_drift():
                 key = str(row.get("n", row.get("key")))
                 copy = dict(row)
                 core = by_key[key]
-                for field in ("meaning", "seo", "article_sections", "faq"):
+                for field in ("meaning", "seo", "article_sections", "faq", "article"):
                     if field in core:
                         copy[field] = core[field]
                     else:

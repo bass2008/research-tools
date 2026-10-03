@@ -30,7 +30,7 @@ export default function PersonalSectionArticle({ locale: requestedLocale, ...loc
     <>
       <p className="eyebrow">{D.sheet.personalEyebrow[L]}</p>
       <h1>{reading.title}</h1>
-      <p className="dim prose">{reading.lead}</p>
+      {reading.layout !== "chakras" ? <p className="dim prose">{reading.lead}</p> : null}
 
       <CharacterReadingView locale={L} reading={reading} />
 

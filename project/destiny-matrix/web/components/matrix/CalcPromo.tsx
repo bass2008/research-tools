@@ -4,6 +4,7 @@ import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang
 import { localized } from "@/lib/i18n/localized";
 import ArcanumCard from "./ArcanumCard";
 import MatrixForm from "./MatrixForm";
+import type { Matrix } from "@/lib/matrix";
 
 export const forLocale = localized((L: Locale) => {
   const { arcanumTitle } = localizedArcana(L);
@@ -22,6 +23,7 @@ export default function CalcPromo({ locale: requestedLocale, ...localeProps }: (
   title?: string;
   lead?: string;
   place?: string;
+  onPreview?: (matrix: Matrix | null) => void;
 }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
   const {
@@ -30,6 +32,7 @@ export default function CalcPromo({ locale: requestedLocale, ...localeProps }: (
     title = D.home.promoTitle[L],
     lead = D.calc.formLead[L],
     place = "encyclopedia",
+    onPreview,
   } = localeProps;
   const { arcanumTitle } = forLocale(L);
 
@@ -47,6 +50,7 @@ export default function CalcPromo({ locale: requestedLocale, ...localeProps }: (
         title={title}
         lead={lead}
         place={place}
+        onPreview={onPreview}
         finish={{ kind: "go", href: "/#result" }}
       />
     </div>

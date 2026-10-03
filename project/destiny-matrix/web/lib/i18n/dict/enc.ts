@@ -1,6 +1,9 @@
 import type { Phrase, PhraseFn } from "./index";
 
 export const enc = {
+  tailPlaceM: { ru: "начало M", en: "entry M" } satisfies Phrase,
+  tailPlaceN: { ru: "середина N", en: "middle N" } satisfies Phrase,
+  tailPlaceD: { ru: "конец D", en: "end D" } satisfies Phrase,
   title: {
     ru: "Энциклопедия матрицы судьбы: арканы, позиции, чакры",
     en: "Destiny matrix encyclopedia: arcana, positions, chakras",
@@ -80,7 +83,7 @@ export const enc = {
   buildYourChart: { ru: "Построить свою карту", en: "Build your own chart" } satisfies Phrase,
   tailBuildText: {
     ru: "Хвост — одна из позиций октаграммы. Сама карта по дате рождения строится бесплатно, а "
-      + "тройка с разбором входит в раздел «Задачи прошлых воплощений» —",
+      + "тройка с разбором входит в раздел «Кармический хвост» —",
     en: "The tail is one of the positions of the octagram. The chart itself is built from a date "
       + "of birth for free, and the triple with its reading is part of the “Tasks of past lives” section —",
   } satisfies Phrase,
@@ -153,6 +156,7 @@ export const encArcanum = {
 };
 
 export const encChakra = {
+  chooseCombination: { ru: "Выберите свою комбинацию", en: "Choose your combination" } satisfies Phrase,
   readingTitle: {
     ru: (title: string) => `${title} в матрице судьбы: расшифровка чисел`,
     en: (title: string) => `${title} in the destiny matrix: reading the numbers`,
@@ -482,11 +486,6 @@ export const encLinks = {
     en: (title: string) => `More about the “${title}” section in the encyclopedia →`,
   } satisfies PhraseFn<[string]>,
   // страница «аркан N в позиции X»
-  triplesWith: { ru: "Тройки с этим арканом", en: "Triples with this arcanum" } satisfies Phrase,
-  triplesWithHint: {
-    ru: (n: number, arcanum: number) => `${n} хвостов с разбором, где стоит аркан ${arcanum}`,
-    en: (n: number, arcanum: number) => `${n} tails with a reading where arcanum ${arcanum} stands`,
-  } satisfies PhraseFn<[number, number]>,
   promoCrossTitle: {
     ru: "Узнать свой аркан на этой позиции",
     en: "Find your own arcanum in this position",

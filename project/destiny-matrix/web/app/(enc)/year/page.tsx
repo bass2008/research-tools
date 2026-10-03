@@ -96,7 +96,7 @@ export default async function YearHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
-      <Sections items={hub.sections} />
+      <Sections items={hub.sections} locale={L} />
 
       {/* Расчёт живёт на хабе, а не на 23 страницах арканов: одинаковый блок на каждой поднимал
             их похожесть между собой с 10,9 до 21,5 процента, а это лучший по различимости раздел

@@ -76,7 +76,7 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
       <h1>{item.title}</h1>
       <p className="dim prose">{item.short}</p>
 
-      <Sections items={item.sections} />
+      <Sections items={item.sections} locale={L} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

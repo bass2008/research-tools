@@ -45,16 +45,15 @@ export interface ChakraReadingCell {
   column: "physics" | "energy" | "emotions";
   title: string;
   arcanum: number;
-  context: string;
-  modifier: string;
-  action: string;
+  caption: string;
 }
 
 export interface ChakraReadingRow {
   key: string;
   title: string;
-  hint: string;
-  level: string;
+  topic: string;
+  heading: string;
+  paragraphs: string[];
   cells: ChakraReadingCell[];
 }
 
@@ -82,5 +81,6 @@ export interface LongformReading extends ReadingConclusion {
   roles: ReadingRole[];
   interactions: ReadingInteraction[];
   chakraRows?: ChakraReadingRow[];
+  chakraNote?: string;
   agePeriods?: AgeReadingPeriod[];
 }

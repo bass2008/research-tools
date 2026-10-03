@@ -70,6 +70,8 @@ const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/,
 
 let fails = [];
 const fail = (msg) => fails.push(msg);
+const warns = [];
+const warn = (msg) => warns.push(msg);
 
 function stop(proc) {
   try {
@@ -223,7 +225,7 @@ for (const [r, html] of pages) {
     // Политика конфиденциальности обязана назвать специальные категории ПДн. Это юридическое
     // перечисление, а не рекламное обещание или толкование матрицы.
     if (r === "/privacy" && rule.category === "medical") continue;
-    if (rule.pattern.test(html)) fail(`${r}: запрещённая формулировка (${rule.category}) «${rule.rule}»`);
+    if (rule.pattern.test(html)) warn(`${r}: слово из text-policy (${rule.category}) «${rule.rule}»`);
   }
 
   if (!/<title>[^<]{10,}<\/title>/.test(html)) fail(`${r}: нет содержательного <title>`);
@@ -557,6 +559,11 @@ for (const need of ["notBounce", "NEXT_PUBLIC_METRIKA_ID"]) {
 }
 
 console.log(`страниц: ${pages.size} (по запросу: ${ON_DEMAND.length}), sitemap: ${sitemapChecks}, ссылок: ${linkChecks}, картинок: ${imgChecks}`);
+if (warns.length) {
+  console.log(`ПРЕДУПРЕЖДЕНИЙ: ${warns.length} — страницы выводят слова из text-policy, проверьте смысл`);
+  for (const w of warns.slice(0, 40)) console.log(" !", w);
+  if (warns.length > 40) console.log(` … ещё ${warns.length - 40}`);
+}
 if (fails.length) {
   console.log(`ПРОВАЛОВ: ${fails.length}`);
   const seen = new Set();

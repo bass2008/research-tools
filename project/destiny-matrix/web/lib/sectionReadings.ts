@@ -1,3 +1,4 @@
+import { buildChakraReading } from "./chakraReadings";
 import {
   forLocale as localizedCombinationReading,
   type CombinationContextKey
@@ -68,7 +69,7 @@ interface ReadingDefinition {
 
 /** A locale-bound view; safe to use alongside other languages. */
 export const forLocale = localized((L: Locale) => {
-  const { arcanumContent, chakraContent, combinationContent, matrixItem, matrixSlugs, positionContent } = localizedContent(L);
+  const { arcanumContent, combinationContent, matrixItem, matrixSlugs, positionContent } = localizedContent(L);
   const { buildCombinationContext } = localizedCombinationReading(L);
   const { birthLabel, calculate } = localizedMatrix(L);
   const { ageFrameText, positionRoleTemplate, variantRoleTemplate } = localizedRoleContent(L);
@@ -591,97 +592,6 @@ export const forLocale = localized((L: Locale) => {
     return ordered;
   }
 
-  const CHAKRA_COLUMNS = [
-    ["physics", DR.chakraYears.columnPhysicsTitle[L]],
-    ["energy", DR.chakraYears.columnEnergyTitle[L]],
-    ["emotions", DR.chakraYears.columnEmotionsTitle[L]],
-  ] as const;
-
-  /** 22×3 модификатора собираются из аркана и роли колонки; отдельные 462 текста ячеек не нужны. */
-  function chakraColumnModifier(
-    number: number,
-    column: (typeof CHAKRA_COLUMNS)[number][0],
-  ): { modifier: string; action: string } {
-    const content = arcanum(number);
-    const frames = {
-      physics: DR.readingBody.wherePhysics[L],
-      energy: DR.readingBody.whereEnergy[L],
-      emotions: DR.readingBody.whereEmotions[L],
-    } as const;
-    const [where, actionWhere] = frames[column];
-    return {
-      modifier: DR.readingBody.chakraModifier[L](content.title, where, content.plus[0], content.minus[0]),
-      action: DR.readingBody.chakraAction[L](
-        actionWhere, positionRoleTemplate(number, "chakras").action,
-      ),
-    };
-  }
-
-  function chakraPayload(matrix: Matrix) {
-    return matrix.chakras.map((row) => {
-      const level = chakraContent(row.key);
-      if (!level) throw new Error(`[section-reading] нет уровня ${row.key}`);
-      return {
-        key: row.key,
-        title: row.title,
-        hint: row.hint,
-        level: level.personalIntro,
-        cells: CHAKRA_COLUMNS.map(([column, title]) => {
-          const arcanumNumber = row[column];
-          const columnContext = level.columns.find((item) => item.key === column);
-          if (!columnContext) throw new Error(`[section-reading] нет колонки ${row.key}:${column}`);
-          return {
-            column,
-            title,
-            arcanum: arcanumNumber,
-            context: columnContext.text,
-            ...chakraColumnModifier(arcanumNumber, column),
-          };
-        }),
-      };
-    });
-  }
-
-  function chakraInteractions(matrix: Matrix): ReadingInteraction[] {
-    // Номера арканов обозначают темы, а не силу: их суммы и разности не ранжируют чакры.
-    const totals = CHAKRA_COLUMNS.map(([column, title]) => `${title} — ${matrix.chakra_totals[column]}`);
-    const repeats = new Map<number, number>();
-    for (const row of matrix.chakras) {
-      for (const [column] of CHAKRA_COLUMNS) repeats.set(row[column], (repeats.get(row[column]) ?? 0) + 1);
-    }
-    const repeated = [...repeats.entries()].filter(([, count]) => count > 1).sort((a, b) => b[1] - a[1]);
-    return [
-      {
-        key: "columns",
-        title: DR.readingBody.columnsTitle[L],
-        roles: CHAKRA_COLUMNS.map(([column]) => column),
-        caption: totals.join(" · "),
-        paragraphs: [
-          DR.readingBody.columnsText[L],
-          DR.readingBody.columnsNote[L],
-        ],
-      },
-      {
-        key: "repeats",
-        title: DR.readingBody.repeatsTitle[L],
-        roles: repeated.map(([number]) => String(number)),
-        ...(repeated.length
-          ? { caption: DR.readingBody.repeatsCaption[L](repeated.map(([number]) => number).join("–")) }
-          : {}),
-        paragraphs: [
-          repeated.length
-            ? DR.readingBody.repeatsText[L](
-              repeated
-                .map(([number, count]) => DR.readingBody.repeatsCount[L](number, count))
-                .join(", "),
-            )
-            : DR.readingBody.repeatsNone[L],
-          DR.readingBody.repeatsNote[L],
-        ],
-      },
-    ];
-  }
-
   function age(matrix: Matrix, now = new Date()): number {
     const [year, month, day] = matrix.birth.split("-").map(Number);
     let value = now.getFullYear() - year;
@@ -816,7 +726,7 @@ export const forLocale = localized((L: Locale) => {
     now = new Date(),
   ): LongformReading {
     const definition = DEFINITIONS[section];
-    const roleItems = roles(section, matrix);
+    const roleItems = section === "chakras" ? [] : roles(section, matrix);
     const slug = sectionReadingSlug(section, matrix);
     const date = `${matrix.day}–${matrix.month}–${matrix.year}`;
     const title = section === "chakras"
@@ -828,6 +738,7 @@ export const forLocale = localized((L: Locale) => {
         : DR.sectionReading.titleRoles[L](
           definition.title, slug, roleItems.map((role) => role.title).join(", "),
         );
+    if (section === "chakras") return buildChakraReading(matrix, L, slug, title);
     const base: LongformReading = {
       slug,
       title,
@@ -841,21 +752,6 @@ export const forLocale = localized((L: Locale) => {
       interactions: [...interactions(section, roleItems), ...sharedInteraction(section, matrix, roleItems)],
       ...buildSectionConclusion(section, roleItems),
     };
-    if (section === "chakras") {
-      const rows = chakraPayload(matrix);
-      const interactions = chakraInteractions(matrix);
-      return {
-        ...base,
-        layout: "chakras",
-        caption: DR.chakraYears.chakraCaption[L],
-        chakraRows: rows,
-        interactions,
-        summary: DR.chakraYears.chakraSummary[L],
-        strength: DR.chakraYears.chakraStrength[L],
-        tension: DR.chakraYears.chakraTension[L],
-        practice: DR.chakraYears.chakraPractice[L],
-      };
-    }
     if (section === "years") {
       // Без даты рождения линия читается как последовательность десятилетий: текущий этап
       // неизвестен, и выдумывать его по чужой матрице нельзя.
@@ -1024,8 +920,8 @@ export const forLocale = localized((L: Locale) => {
     }
     return fallback;
   }
-  return { buildSectionConclusion, sectionReadingHref, sectionReadingSlug, sectionRoleMeta, sectionRoleTemplate, chakraColumnModifier, buildSectionReading, sectionExampleNote, sectionReadingSlugs, sectionReadingItem, sectionReadingMatrix };
+  return { buildSectionConclusion, sectionReadingHref, sectionReadingSlug, sectionRoleMeta, sectionRoleTemplate, buildSectionReading, sectionExampleNote, sectionReadingSlugs, sectionReadingItem, sectionReadingMatrix };
 });
 
 // Compatibility for callers that explicitly use the deployment default.
-export const { sectionRoleTemplate, chakraColumnModifier, buildSectionReading, sectionExampleNote, sectionReadingSlugs, sectionReadingItem, sectionReadingMatrix } = forLocale(defaultLocale);
+export const { sectionRoleTemplate, buildSectionReading, sectionExampleNote, sectionReadingSlugs, sectionReadingItem, sectionReadingMatrix } = forLocale(defaultLocale);

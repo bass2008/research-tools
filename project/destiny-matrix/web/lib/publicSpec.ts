@@ -15,6 +15,7 @@ import {
   type CharacterRoleReading
 } from "./characterTypes";
 import { forLocale as localizedComfortReading } from "./comfortReading";
+import type { Section } from "./contentReader";
 import { D } from "./i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
@@ -76,7 +77,7 @@ export interface SectionOut {
   /** Для ordered-хвоста отчёт печатает готовую статью дословно, без сборки из трёх арканов. */
   fullArticle?: {
     short: string;
-    sections: Array<{ h2: string; paragraphs: string[] }>;
+    sections: Section[];
     faq: Array<{ q: string; a: string }>;
   };
 }

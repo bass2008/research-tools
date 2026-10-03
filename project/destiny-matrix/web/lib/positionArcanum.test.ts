@@ -127,21 +127,10 @@ describe("реестр пересечений", () => {
     expect(seen.length).toBe(new Set(seen).size);
   });
 
-  // Хвост — тройка: аркан, которого движок не ставит туда ни при какой дате, не может иметь
-  // страницу «в хвосте», сколько бы его ни спрашивали. Арканы 1 и 2 как раз такие, и спрос по
-  // ним нулевой под обоими именами — это и подтвердило, что «программа N» и «хвост N» одно и то же.
-  it("не выдумывает хвост там, где его не даёт расчёт", () => {
-    const tails = registryItems().filter((i) => i.position === "past_lives");
-    expect(tails.length).toBeGreaterThan(10);
-    expect(tails.filter((i) => i.tails.length === 0)).toEqual([]);
-  });
-
-  it("ссылается только на опубликованные тройки", () => {
-    const published = new Set(indexedKarmicTailKeys());
-    const dangling = readings.flatMap(({ reading }) =>
-      reading.tails.filter((t) => !published.has(t.key)).map((t) => `${reading.position}/${reading.arcanum}: ${t.key}`),
-    );
-    expect(dangling).toEqual([]);
+  it("обслуживает хвост целой тройкой, сохраняя родительский раздел", () => {
+    expect(registryItems().filter((i) => i.position === "past_lives")).toEqual([]);
+    expect(positionContent("past_lives")).not.toBeNull();
+    expect(indexedKarmicTailKeys()).toHaveLength(26);
   });
 });
 

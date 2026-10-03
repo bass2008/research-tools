@@ -32,7 +32,7 @@ def _html(path: str) -> str:
 @pytest.mark.parametrize("path", PROMO_PAGES)
 def test_calculator_promises_only_what_free_calculation_shows(path):
     """Форма обещала «покажет вашу тройку… бесплатно» и «Рассчитать свой год», а бесплатная карта
-    тройку не подписывает (раздел «Задачи прошлых воплощений» платный), а расчёта персонального
+    тройку не подписывает (раздел «Кармический хвост» платный), а расчёта персонального
     года в продукте нет вовсе. Обещание конкретного результата в подписи формы недопустимо."""
     html = _html(path)
     promo = re.search(r'data-testid="calc-promo".*?</div></div>', html, re.S)

@@ -8,8 +8,8 @@ import { forLocale as localizedMatrixMap } from "./matrixMap";
 import { forLocale as localizedText } from "./text";
 
 // Страница на пересечении «аркан N в позиции X». Отдельная от каталога позиции и от страницы
-// аркана намеренно: спрашивают именно пересечение — «8 аркан профессии», «9 в хвосте матрицы
-// судьбы», — а каталог из 22 карточек формально содержит ответ, но ответом не является. Замер на
+// аркана намеренно: спрашивают именно пересечение — «8 аркан профессии», «21 аркан в отношениях»,
+// — а каталог из 22 карточек формально содержит ответ, но ответом не является. Замер на
 // самом сайте: единственный раздел, где адрес повторяет запрос, стоит на медиане 5, каталоги
 // позиций — на 33–42.
 //
@@ -19,12 +19,7 @@ import { forLocale as localizedText } from "./text";
 
 export type RegistryItem = PositionArcanumRow;
 
-/** Как пересечение называется в заголовке и внутри текста.
- *
- *  У хвоста два равноправных имени: «хвост N» и «программа N». Это одно и то же — арканы 1 и 2
- *  не встречаются ни в одном достижимом хвосте, и спрос по ним нулевой под обоими именами, а
- *  объёмы почти совпадают (49 385 против 47 573). Одна страница отвечает на оба, иначе два почти
- *  одинаковых набора делят одну выдачу. */
+/** Как пересечение называется в заголовке и внутри текста. */
 interface Naming {
   /** h1 целиком: раньше «head» склеивался с «в матрице судьбы» и давал «в центре матрицы в матрице судьбы». */
   h1: (n: number) => string;
@@ -32,8 +27,6 @@ interface Naming {
   seo: (n: number) => string;
   /** Как называть позицию внутри фразы. */
   inside: string;
-  /** Второе имя того же пересечения, если оно есть. */
-  alias?: string;
 }
 
 interface Role {
@@ -51,7 +44,6 @@ export interface PositionArcanumReading {
   short: string;
   sections: Array<{ h2: string; paragraphs: string[] }>;
   faq: Array<{ q: string; a: string }>;
-  tails: Array<{ key: string; href: string; short: string }>;
   positionTitle: string;
   positionHref: string;
   /** Что подсветить на схеме карты: точка отмечает себя, раздел — все свои точки. */
@@ -60,28 +52,12 @@ export interface PositionArcanumReading {
 
 /** A locale-bound view; safe to use alongside other languages. */
 export const forLocale = localized((L: Locale) => {
-  const { arcanumContent, indexedKarmicTailKeys, indexedPositionArcanumRows, karmicTail, positionArcanumRows, positionContent } = localizedContent(L);
-  const { karmicTailHref, positionHref } = localizedEncyclopedia(L);
+  const { arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent } = localizedContent(L);
+  const { positionHref } = localizedEncyclopedia(L);
   const { sectionLineKeys } = localizedMatrixMap(L);
   const { clip } = localizedText(L);
 
   const NAMES: Record<string, Naming> = {
-    // У хвоста два равноправных имени: «хвост N» и «программа N». Это одно и то же — арканы 1 и 2
-    // не встречаются ни в одном достижимом хвосте, и спрос по ним нулевой под обоими именами, а
-    // объёмы почти совпадают (49 385 против 47 573). Одна страница отвечает на оба, иначе два
-    // почти одинаковых набора делят одну выдачу.
-    tail: {
-      h1: (n) => DR.crossing.tailH1[L](n),
-      seo: (n) => DR.crossing.tailH1[L](n),
-      inside: DR.crossing.tailInside[L],
-      alias: DR.crossing.tailAlias[L],
-    },
-    program: {
-      h1: (n) => DR.crossing.programH1[L](n),
-      seo: (n) => DR.crossing.programH1[L](n),
-      inside: DR.crossing.tailInside[L],
-      alias: DR.crossing.programAlias[L],
-    },
     center: {
       h1: (n) => DR.crossing.centerH1[L](n),
       seo: (n) => DR.crossing.centerSeo[L](n),
@@ -185,7 +161,7 @@ export const forLocale = localized((L: Locale) => {
     return positionArcanumRows().filter((i) => i.arcanum === arcanum && i.position !== position);
   }
 
-  /** Подпись пересечения для ссылок и меню: ключ позиции («money», «past_lives») человеку
+  /** Подпись пересечения для ссылок и меню: ключ позиции («money», «relations») человеку
    *  показывать нельзя. */
   function positionArcanumLabel(item: RegistryItem): string {
     const name = NAMES[item.wording];
@@ -213,15 +189,6 @@ export const forLocale = localized((L: Locale) => {
       content.plus[0] ?? D.clause.fallbackStrength[L],
       content.minus[0] ?? D.clause.fallbackRisk[L],
     );
-
-    const published = new Set(indexedKarmicTailKeys());
-    const tails = item.tails
-      .filter((key) => published.has(key))
-      .map((key) => {
-        const tail = karmicTail(key);
-        return tail ? { key, href: karmicTailHref(key), short: tail.short } : null;
-      })
-      .filter((x): x is { key: string; href: string; short: string } => x !== null);
 
     // Костяк страницы — сравнение с тем же арканом в его других позициях. Оно и есть ответ на
     // вопрос «что энергия делает именно здесь», и оно же расходит страницы одной позиции между
@@ -286,19 +253,8 @@ export const forLocale = localized((L: Locale) => {
       });
     }
 
-    if (tails.length) {
-      sections.push({
-        h2: DR.crossing.triplesH2[L](arcanum),
-        paragraphs: [
-          DR.crossing.triplesText[L](arcanum, tails.length, tails.map((t) => t.key).join(", ")),
-        ],
-      });
-    }
-
-    const alias = name.alias ? DR.crossing.aliasNote[L](name.alias) : "";
-
     const faq: Array<{ q: string; a: string }> = [
-      { q: DR.crossing.faqMeaning[L](inline(name.h1(arcanum))), a: `${read.essence}${alias}` },
+      { q: DR.crossing.faqMeaning[L](inline(name.h1(arcanum))), a: read.essence },
       {
         q: DR.crossing.faqMinus[L](arcanum),
         a: DR.crossing.faqMinusAnswer[L](sentence(read.risk), listing(content.minus, read.risk)),
@@ -309,13 +265,6 @@ export const forLocale = localized((L: Locale) => {
       faq.push({
         q: DR.crossing.faqOther[L](arcanum),
         a: DR.crossing.faqOtherAnswer[L](contrasts[0]),
-      });
-    }
-
-    if (tails.length) {
-      faq.push({
-        q: DR.crossing.faqTail[L](arcanum),
-        a: DR.crossing.faqTailAnswer[L](arcanum, tails.length, tails.map((t) => t.key).join(", ")),
       });
     }
 
@@ -331,10 +280,9 @@ export const forLocale = localized((L: Locale) => {
       short: shortLead(name.h1(arcanum), content.title, content.short, read),
       sections,
       faq,
-      tails,
       positionTitle: place.title,
       positionHref: positionHref(position),
-      // Раздел-линия подсвечивается целиком: у хвоста это M–N–D, и середина N важнее краёв.
+      // Раздел-линия подсвечивается целиком, отдельная точка — сама по себе.
       mapKeys: place.kind === "section"
         ? sectionLineKeys(position, place.points.map((x) => x.key))
         : [position],
@@ -350,7 +298,6 @@ export const forLocale = localized((L: Locale) => {
     const head = inline(name.h1(arcanum));
     const extras = [
       DR.crossing.matrixWord[L].test(head) ? head : DR.crossing.queryMatrix[L](head),
-      name.alias ? DR.crossing.queryAlias[L](name.alias, arcanum) : "",
     ];
     for (const extra of extras) {
       const value = extra.trim();

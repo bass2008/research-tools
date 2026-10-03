@@ -104,6 +104,7 @@ describe("эталон из engine/matrix.py", () => {
     const m = calculate("1987-06-14", "m");
     const rows = build(m, true);
     for (const s of rows) {
+      if (s.longform?.layout === "chakras") continue;
       for (const p of s.positions) {
         expect(p.text, `${s.key}/${p.label}`).toBeTruthy();
         expect(p.text!.length).toBeGreaterThan(40);

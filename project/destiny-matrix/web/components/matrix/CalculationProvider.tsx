@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "@/components/account/useSession";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { forLocale as localizedApi, type MatrixListItem } from "@/lib/api";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -13,6 +12,7 @@ import {
   type StoredBirth,
 } from "@/lib/storage";
 import { useBirth } from "@/lib/useBirth";
+import { useSavedDates } from "@/lib/useSavedDates";
 import { useRouter } from "next/navigation";
 import {
   createContext,
@@ -45,12 +45,8 @@ export default function CalculationProvider({ locale: requestedLocale, ...locale
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
   const { children } = localeProps;
-  const { api } = forLocale(L);
-
   const router = useRouter();
-  const session = useSession();
-  const [ownDates, setOwnDates] = useState<MatrixListItem[]>([]);
-  const [datesReady, setDatesReady] = useState(false);
+  const { dates: ownDates, ready: datesReady } = useSavedDates();
   const [requested, setRequested] = useState<StoredBirth | null>(null);
   const birth = useBirth();
 
@@ -74,36 +70,6 @@ export default function CalculationProvider({ locale: requestedLocale, ...locale
     window.addEventListener(BIRTH_EVENT, onCalculation);
     return () => window.removeEventListener(BIRTH_EVENT, onCalculation);
   }, []);
-
-  useEffect(() => {
-    if (session.status === "loading") {
-      setDatesReady(false);
-      return;
-    }
-    if (session.status !== "user") {
-      setOwnDates([]);
-      setDatesReady(true);
-      return;
-    }
-
-    let alive = true;
-    setDatesReady(false);
-    api
-      .matrices()
-      .then((res) => {
-        if (!alive) return;
-        setOwnDates(res.items);
-        setDatesReady(true);
-      })
-      .catch(() => {
-        if (!alive) return;
-        setOwnDates([]);
-        setDatesReady(true);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [session.status, api]);
 
   // Пол показывается по купленной записи всегда, а не только сразу после «Рассчитать»: дату
   // могли купить из кабинета, а в браузере остался прежний выбор пола — тогда форма и подпись

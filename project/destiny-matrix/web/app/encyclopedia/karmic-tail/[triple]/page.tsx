@@ -115,7 +115,7 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
         ))}
       </div>
 
-      <Sections items={item.sections} />
+      <Sections items={item.sections} locale={L} />
 
       <div className="panel section-gap">
         <h2>{D.encTail.howCounted[L]}</h2>
@@ -136,7 +136,7 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
       <div className="section-gap">
         <CalcPromo locale={L}
           title={D.enc.buildYourChart[L]}
-          // Тройка с подписью и толкованием живёт в разделе «Задачи прошлых воплощений», а он
+          // Тройка с подписью и толкованием живёт в разделе «Кармический хвост», а он
           // платный: обещать её в бесплатном расчёте — прямая неправда.
           lead={D.enc.promoTailLead[L]}
           place="karmic-tail"

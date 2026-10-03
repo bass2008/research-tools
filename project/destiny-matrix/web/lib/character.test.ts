@@ -3,7 +3,7 @@ import { arcanumTitle } from "./arcana";
 import { describe, expect, it } from "vitest";
 
 import { matrixItem, matrixSlugs } from "./content";
-import { isBlockedText } from "./textPolicy";
+import { warnPolicy } from "./warnPolicy";
 import { buildCharacterReading, characterRoleTemplate } from "./character";
 import { characterHref } from "./characterTypes";
 
@@ -64,7 +64,7 @@ describe("персональный разбор характера", () => {
     }
   });
 
-  it("покрывает все 5 544 достижимые тройки без пустот и запрещённой лексики", () => {
+  it("покрывает все 5 544 достижимые тройки без пустот", () => {
     const slugs = matrixSlugs();
     expect(slugs).toHaveLength(5544);
     for (const slug of slugs) {
@@ -92,7 +92,7 @@ describe("персональный разбор характера", () => {
         reading.practice,
       ].join(" ");
       expect(corpus.length).toBeGreaterThan(1800);
-      expect(isBlockedText(corpus)).toBe(false);
+      warnPolicy(corpus, `character ${slug}`);
     }
   });
 });

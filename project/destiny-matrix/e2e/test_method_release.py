@@ -107,7 +107,9 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
     ):
         assert re.sub(r"\s+", "", text).lower() in compact, f"в PDF нет «{text}»"
 
-    tail = compact.split("задачипрошлыхвоплощений", 1)[1].split("вашепредназначение", 1)[0]
+    spec = json.loads((Path(__file__).resolve().parents[1] / "spec" / "sections.json").read_text("utf-8"))
+    title = {s["key"]: re.sub(r"\s+", "", s["title"]).lower() for s in spec["sections"]}
+    tail = compact.split(title["past_lives"], 1)[1].split(title["purpose"], 1)[0]
     for value in ("15дьявол", "8сила", "11справедливость"):
         assert value in tail, f"в PDF-хвосте нет «{value}»"
 
@@ -115,7 +117,6 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
     # а не pdftotext: у части шрифтов ломается ToUnicode, и pdftotext со второй половины файла
     # отдаёт мусор — по нему потеря разделов выглядела бы как дефект извлечения.
     whole = re.sub(r"[^а-яёa-z0-9]", "", "".join(p.extract_text() or "" for p in pages).lower())
-    spec = json.loads((Path(__file__).resolve().parents[1] / "spec" / "sections.json").read_text("utf-8"))
     absent = [s["title"] for s in spec["sections"]
               if re.sub(r"[^а-яёa-z0-9]", "", s["title"].lower()) not in whole]
     assert not absent, f"в PDF нет разделов: {absent}"

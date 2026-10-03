@@ -118,7 +118,7 @@ export const forLocale = localized((L: Locale) => {
           label,
           arcanum,
           href: arcanumHref(arcanum),
-          text: first
+          text: spec.key === "chakras" ? "" : first
             ? D.report.sameArcanum[L](first)
             : arcanumInPosition(arcanum, positionKey),
         };

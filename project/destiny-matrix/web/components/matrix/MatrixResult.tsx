@@ -1,7 +1,9 @@
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraTable from "@/components/matrix/ChakraTable";
+import type { LongformReading } from "@/lib/readingTypes";
 import Octagram from "@/components/matrix/Octagram";
+import chakraMapStyles from "./ChakraMapHover.module.css";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { D } from "@/lib/i18n";
 import { birthLabel, forLocale as localizedMatrix, type Matrix } from "@/lib/matrix";
@@ -42,12 +44,18 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
   printing?: boolean;
   /** карта построена по дате-заглушке, а не по введённой: назвать её своей нельзя */
   example?: boolean;
+  chakraReading?: LongformReading;
+  chakraUnlocked?: boolean;
+  matrixId?: number | null;
 }) & { locale?: Locale; site?: SiteProfile }) {
   const L = requestedLocale ?? defaultLocale;
   const {
     m,
     printing = false,
     example = false,
+    chakraReading,
+    chakraUnlocked = false,
+    matrixId,
   } = localeProps;
   const { arcanum, arcanumTitle, birthLabel, POINT_KEYS, POINT_LABELS, positionHref, publicHref } = forLocale(L, site);
 
@@ -68,7 +76,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
 
   return (
     <>
-      <div className="rgrid">
+      <div className={`rgrid ${chakraMapStyles.scope}`}>
         <div className="panel">
           <h2>{example ? D.report.exampleChart[L] : D.report.yourChart[L]}</h2>
           <div className="cap">
@@ -78,7 +86,8 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
         </div>
 
         <div>
-          <ChakraTable site={site} locale={L} m={m} heading="h2" printing={printing} />
+          <ChakraTable site={site} locale={L} m={m} heading="h2" printing={printing}
+            reading={chakraReading} unlocked={chakraUnlocked} matrixId={matrixId} />
 
           <div className="mini">
             <div className="mb">

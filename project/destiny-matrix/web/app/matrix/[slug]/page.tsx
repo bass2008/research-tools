@@ -2,6 +2,7 @@ import { requestSite } from "@/lib/siteProfile.server";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraTable from "@/components/matrix/ChakraTable";
 import Octagram from "@/components/matrix/Octagram";
+import chakraMapStyles from "@/components/matrix/ChakraMapHover.module.css";
 import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
 import Price from "@/components/pay/Price";
 import Crumbs from "@/components/ui/Crumbs";
@@ -167,7 +168,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
           {D.matrixPages.runsInBrowser[L]}
         </p>
 
-        <div className="rgrid section-gap">
+        <div className={`rgrid section-gap ${chakraMapStyles.scope}`}>
           <div className="panel">
             <h2>{D.matrixPages.octagramTitle[L]}</h2>
             <div className="cap">
@@ -177,7 +178,7 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
           </div>
 
           <div>
-            <ChakraTable locale={L} m={m} heading="h2" />
+            <ChakraTable locale={L} m={m} heading="h2" referenceOnly />
 
             <div className="mini">
               {LINES.map(([label, hint, triad]) => (

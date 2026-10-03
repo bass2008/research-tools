@@ -158,9 +158,9 @@ def test_chakra_map_and_year_timeline_keep_exact_personal_context(page: Page) ->
     response = page.goto(f"{BASE}{chakra}", wait_until="domcontentloaded")
     assert response is not None and response.status == 200
     reading = page.get_by_test_id("chakras-reading")
-    expect(page).to_have_title(re.compile(r"Карта энергий: толкование семи уровней для матрицы 4–3–22"))
-    assert reading.locator("tr[data-chakra]").count() == 7
-    assert reading.locator("td[data-column]").count() == 21
+    expect(page).to_have_title(re.compile(r"Чакры: карта энергий, толкование семи уровней для матрицы 4–3–22"))
+    assert reading.locator("section[data-chakra]").count() == 7
+    assert reading.locator("figure[data-column]").count() == 21
     expect(page.locator('meta[name="robots"]')).to_have_attribute("content", "noindex, follow")
 
     years = "/encyclopedia/years/4-7-3-7-22-6-11-15?birth=1993-03-31"
@@ -257,8 +257,8 @@ def test_chakras_and_years_have_only_readable_interaction_captions(page: Page) -
         f"{BASE}/encyclopedia/chakras/4-3-7-12-10-22-8-7-15-12-11-5-4-4-8-8-15-5-22-11-6-7-7-14",
         wait_until="domcontentloaded",
     )
-    captions = page.locator("[data-testid=chakras-reading] [data-interaction] > .cap").all_inner_texts()
-    assert captions
+    captions = page.locator("[data-testid=chakras-reading] figure[data-column] figcaption > span:first-child").all_inner_texts()
+    assert captions == ["Физика", "Энергия", "Эмоции"] * 7
     assert not any(re.search(r"\b(?:physics|energy|emotions)\b", value) for value in captions)
     assert not any(value.strip() == "Позиции" for value in captions)
 

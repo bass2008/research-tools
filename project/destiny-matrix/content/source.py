@@ -21,6 +21,7 @@ DEFAULT_LANG = "ru"
 LANGS = ("ru", "en")
 DATA_FILES = frozenset({
     "arcana.json",
+    "chakra-personal.json",
     "chakras.json",
     "in-positions.json",
     "pairs.json",
