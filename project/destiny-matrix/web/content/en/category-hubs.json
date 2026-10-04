@@ -269,6 +269,944 @@
    ]
   },
   {
+   "key": "energy-field",
+   "crumb": "Overall energy field",
+   "seo": {
+    "queries": [
+     "overall energy field in the destiny matrix",
+     "destiny matrix energy field",
+     "where is the energy field in the destiny matrix",
+     "destiny matrix energy field calculation"
+    ],
+    "title": "Overall Energy Field in the Destiny Matrix: How to Find and Read It",
+    "description": "The energy field in the destiny matrix is the bottom row of the chakra table."
+   },
+   "related": [
+    "position/chakras",
+    "chakra",
+    "energies",
+    "method"
+   ],
+   "title": "The overall energy field in the destiny matrix: one voice for all seven chakras",
+   "short": "The overall energy field is the bottom row of the chakra table: the three column totals for Physics, Energy and Emotions. It does not appear on the star of the matrix itself, which is why people so often cannot find it. It is simple to work out: add up the seven numbers in each column, and if the sum is over 22, add its digits (82 → 10). You get three arcana. The first shows how you act in general, the second where your strength comes from and where it goes, the third how you live through what happens to you. The energy field is not an eighth chakra. It has no area of life of its own: it is the overall tone in which all seven levels sound, the way one voice sounds in different songs. There are 363 possible combinations. The most common are 10-10-11 and 14-9-14, each found in roughly one person in 87. And the Sun, Judgement, the World and the Fool never appear in the energy field, whatever the birth date.",
+   "sections": [
+    {
+     "h2": "Where to find the energy field in the destiny matrix",
+     "paragraphs": [
+      "The destiny matrix is drawn as an eight-pointed star: corners, a centre, inner points, lines. The energy field is not on this star. You will not find it in a corner, in the centre or on the lines, however long you look at the picture. It lives somewhere else — in the **chakra table**, which is worked out from the points of the star. The seven rows of this table are the seven chakras, and the three columns are Physics, Energy and Emotions. Under the seven rows there is an eighth one, with no chakra name. That is the overall energy field: the total of each column.",
+      "In our reading the table is called “Chakras and your arcana”. The rows go from Muladhara (01) up to Sahasrara (07), and under them is a row marked **Σ** — “Overall energy field”. The sum sign is meant literally: the row is added up from all seven rows above it.",
+      "Other calculators usually draw the table the other way round: Sahasrara at the top, Muladhara at the bottom. Then the energy field is the row under Muladhara, labelled “Result”, “Total” or simply “Overall energy field”. Wherever it is placed, it is easy to recognise: it has three numbers and no chakra name.",
+      "Here is the whole table for 10 March 1984:",
+      {
+       "table": {
+        "head": [
+         "#",
+         "Chakra",
+         "Physics",
+         "Energy",
+         "Emotions"
+        ],
+        "rows": [
+         [
+          "01",
+          "Muladhara",
+          "22 · The Fool",
+          "8 · Strength",
+          "3 · The Empress"
+         ],
+         [
+          "02",
+          "Svadhisthana",
+          "11 · Justice",
+          "15 · The Devil",
+          "8 · Strength"
+         ],
+         [
+          "03",
+          "Manipura",
+          "7 · The Chariot",
+          "7 · The Chariot",
+          "14 · Temperance"
+         ],
+         [
+          "04",
+          "Anahata",
+          "6 · The Lovers",
+          "17 · The Star",
+          "5 · The Hierophant"
+         ],
+         [
+          "05",
+          "Vishuddha",
+          "17 · The Star",
+          "10 · Wheel of Fortune",
+          "9 · The Hermit"
+         ],
+         [
+          "06",
+          "Ajna",
+          "9 · The Hermit",
+          "13 · Death",
+          "22 · The Fool"
+         ],
+         [
+          "07",
+          "Sahasrara",
+          "10 · Wheel of Fortune",
+          "3 · The Empress",
+          "13 · Death"
+         ],
+         [
+          "**Σ**",
+          "**Overall energy field**",
+          "**10 · Wheel of Fortune**",
+          "**10 · Wheel of Fortune**",
+          "**11 · Justice**"
+         ]
+        ]
+       }
+      },
+      "If all you have is the star without the table, you will need to work out the energy field yourself. It takes five minutes with a pen and paper."
+     ]
+    },
+    {
+     "h2": "How to calculate the overall energy field from your birth date",
+     "paragraphs": [
+      "There is one rule for the whole calculation: **if a number is greater than 22, add its digits**. 29 → 2 + 9 = 11, 43 → 4 + 3 = 7. Let’s go through the same date step by step: 10 March 1984.",
+      "**Step 1. Three numbers from the date.**",
+      {
+       "ul": [
+        "**A — the day arcanum.** The birth day: 10. If the day is greater than 22, add its digits: 25 → 7, 31 → 4.",
+        "**B — the month.** The number of the month: 3.",
+        "**C — the year arcanum.** The sum of the digits of the year: 1 + 9 + 8 + 4 = 22. If it comes out above 22, add once more: 1985 → 23 → 5."
+       ]
+      },
+      "**Step 2. The bottom point and the centre.**",
+      {
+       "ul": [
+        "**D = A + B + C** = 10 + 3 + 22 = 35 → 8.",
+        "**E = A + B + C + D** = 10 + 3 + 22 + 8 = 43 → 7. This is the centre of the matrix."
+       ]
+      },
+      "**Step 3. Four inner points** — each corner plus the centre:",
+      {
+       "ul": [
+        "J = A + E = 10 + 7 = 17;",
+        "K = B + E = 3 + 7 = 10;",
+        "L = C + E = 22 + 7 = 29 → 11;",
+        "M = D + E = 8 + 7 = 15."
+       ]
+      },
+      "**Step 4. Four more points:**",
+      {
+       "ul": [
+        "O = A + J = 10 + 17 = 27 → 9;",
+        "P = B + K = 3 + 10 = 13;",
+        "S = J + E = 17 + 7 = 24 → 6;",
+        "T = K + E = 10 + 7 = 17."
+       ]
+      },
+      "**Step 5. Seven rows.** In each chakra, Physics and Energy come from their own points, and Emotions is their sum, reduced:",
+      {
+       "table": {
+        "head": [
+         "Chakra",
+         "Physics",
+         "Energy",
+         "Emotions",
+         "For 10 March 1984"
+        ],
+        "rows": [
+         [
+          "Muladhara",
+          "C",
+          "D",
+          "C + D",
+          "22 / 8 / 30 → 3"
+         ],
+         [
+          "Svadhisthana",
+          "L",
+          "M",
+          "L + M",
+          "11 / 15 / 26 → 8"
+         ],
+         [
+          "Manipura",
+          "E",
+          "E",
+          "E + E",
+          "7 / 7 / 14"
+         ],
+         [
+          "Anahata",
+          "S",
+          "T",
+          "S + T",
+          "6 / 17 / 23 → 5"
+         ],
+         [
+          "Vishuddha",
+          "J",
+          "K",
+          "J + K",
+          "17 / 10 / 27 → 9"
+         ],
+         [
+          "Ajna",
+          "O",
+          "P",
+          "O + P",
+          "9 / 13 / 22"
+         ],
+         [
+          "Sahasrara",
+          "A",
+          "B",
+          "A + B",
+          "10 / 3 / 13"
+         ]
+        ]
+       }
+      },
+      "**Step 6. Add up each column and reduce the sum.**",
+      {
+       "ul": [
+        "Physics: 22 + 11 + 7 + 6 + 17 + 9 + 10 = 82 → 8 + 2 = **10**;",
+        "Energy: 8 + 15 + 7 + 17 + 10 + 13 + 3 = 73 → 7 + 3 = **10**;",
+        "Emotions: 3 + 8 + 14 + 5 + 9 + 22 + 13 = 74 → 7 + 4 = **11**."
+       ]
+      },
+      "The energy field for 10 March 1984 is **10 / 10 / 11**: Wheel of Fortune, Wheel of Fortune, Justice.",
+      "The main trap in working it out by hand: **the third number is the sum of the Emotions column, not the sum of the first two totals.** Here 10 + 10 = 20, yet the energy field shows 11. Why this happens, and why it is correct, is explained in the next section.",
+      {
+       "h3": "A five-second check: the rule of nine"
+      },
+      "Worked it out by hand and not sure? Add the Physics and Energy totals and subtract Emotions. **The result is always divisible by nine.** For 10 March 1984: 10 + 10 − 11 = 9.",
+      "Across all dates since 1900, 56% give 9, 36% give 18, and the rest give 0 or 27 (and seven dates in 127 years give minus nine). If you got 5, 12 or any other number that does not divide by nine, there is a mistake somewhere. Usually it is in a reduction or in the Emotions column.",
+      "Why it works. The sum of a number’s digits leaves the same remainder after division by nine as the number itself: 82 and 10 have the same one. So every reduction throws away only whole nines: 82 → 10 loses 72, which is eight nines. Each column loses its own number of nines, and the third total differs from the sum of the first two by exactly as many nines as were lost.",
+      "There is a second check too. **If your energy field shows 19, 20, 21 or 22, the calculator used different rules.** When numbers are reduced by adding digits, these values never come out as a total (why is explained below, in the section on frequencies)."
+     ]
+    },
+    {
+     "h2": "The energy field is not an eighth chakra",
+     "paragraphs": [
+      "Next to the seven rows, the totals row looks like one more chakra. It is not, and the difference goes beyond the name.",
+      "**Each chakra has its own theme.** Muladhara is everyday support, Svadhisthana desire and pleasure, Manipura will and independence, Anahata closeness, Vishuddha speech and influence, Ajna understanding, Sahasrara meaning and direction. The energy field has no theme of its own. It is not about home, not about work and not about love. It is about **how you sound in all of it at once**.",
+      "**The arithmetic works differently.** In any chakra the third number is the reduced sum of the first two, with no exceptions: 7 + 7 = 14, 17 + 10 = 27 → 9. In the energy field this holds for only a third of dates: 32.8%. In the example above, the chakra rule would have put Judgement in Emotions (10 + 10 = 20). Instead it is Justice, because the Emotions total is added up from the Emotions of the seven separate chakras, not from the two totals. This is the main arithmetic argument: the energy field is not one more row in the line of chakras but their shared total.",
+      "The easiest way to think about it is this. **The seven chakras are seven different songs: about support, desire, will, closeness, words, understanding and meaning. The energy field is your voice, the one you sing them all in.** A voice has three qualities, and they are exactly the three columns of the total: rhythm, breath and tone. The songs are different, but the voice is recognisable in each of them.",
+      "In her textbook Holistic Tarot, Benebell Wen offers the Seven Chakras Spread for readings where a person is looking for an overall **“big picture” understanding** of their life rather than an answer to a specific question. Her spread has one card per chakra and no totals. In the destiny matrix the big picture is compressed even further: the twenty-one numbers of the table add up to three."
+     ]
+    },
+    {
+     "h2": "What the energy field is made of",
+     "paragraphs": [
+      "If you expand the formulas, you can see which points of the star sound louder than others in the energy field.",
+      {
+       "table": {
+        "head": [
+         "Column",
+         "Centre E",
+         "Corner",
+         "One more point",
+         "Total “shares”"
+        ],
+        "rows": [
+         [
+          "Physics",
+          "6 times",
+          "day A — 5 times",
+          "year C — 2 times",
+          "13"
+         ],
+         [
+          "Energy",
+          "6 times",
+          "month B — 5 times",
+          "bottom point D — 2 times",
+          "13"
+         ]
+        ]
+       }
+      },
+      "The day, for example, enters Physics in five ways: on its own into Sahasrara, through point J into Vishuddha and Anahata, and twice into Ajna (O = A + J, and J itself contains A). The centre goes into Manipura, Vishuddha, Ajna, Svadhisthana and twice into Anahata.",
+      "Three things follow from this.",
+      {
+       "ul": [
+        "**The centre is the loudest voice, but not the only one.** Going by the formulas, almost half of each column is the centre of the matrix, the point a person comes back to after any strain. But you cannot guess the energy field from the centre: one and the same centre goes with anywhere from 13 to 95 different energy fields.",
+        "**The Energy total depends on just two things: the birth month and the sum A + B + C.** Everyone born in March whose three date numbers add up to 35 has the same Energy total — 10. For example, 10 March 1984 and 13 March 1990. The Physics total depends on the day, the year and the same sum.",
+        "**There are no family lines in the energy field.** Not a single number from the father’s and mother’s lines enters the chakra table. The energy field is built from the personal square and the centre. If you read somewhere that it is “directly linked to the family line”, that does not apply to this row."
+       ]
+      },
+      "To keep the energy field apart from the neighbouring parts of the reading:",
+      {
+       "table": {
+        "head": [
+         "",
+         "Chakra",
+         "Overall energy field",
+         "Centre of the matrix (E)",
+         "General conclusion"
+        ],
+        "rows": [
+         [
+          "Where",
+          "one of the seven rows of the table",
+          "the Σ row under the seven chakras",
+          "the middle of the star",
+          "at the end of the full reading"
+         ],
+         [
+          "About",
+          "one area of life",
+          "rhythm, strength and response in all areas at once",
+          "the baseline state you come back to",
+          "conclusions about the whole chart"
+         ],
+         [
+          "Comes from",
+          "two points of the star and their sum",
+          "reduced sums of the three columns",
+          "A + B + C + D",
+          "written in words, not numbers"
+         ],
+         [
+          "Third number",
+          "always the sum of the first two",
+          "the sum of the first two for only a third of dates",
+          "—",
+          "—"
+         ],
+         [
+          "Variants",
+          "from 16 (Manipura) to 393 (Anahata)",
+          "363",
+          "16",
+          "—"
+         ]
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "h2": "Physics, Energy and Emotions in the energy field: rhythm, breath and tone",
+     "paragraphs": [
+      "In a chakra, the columns answer questions about one area. In the energy field, the same questions are asked about your whole life at once.",
+      {
+       "h3": "The Physics total: rhythm"
+      },
+      "How you act in general: at what pace, in what way you take things on, how you handle time, things and your own effort. This is what stays the same whether you are fixing a shelf, writing a report or packing for a holiday. Some people start straight away and work it out as they go, some think everything through first, some tidy up before anything else. The Physics total is your stride, the one you walk any road with. It says nothing about your body or how you feel: “Physics” here means what you do, not the body you do it with.",
+      {
+       "h3": "The Energy total: breath"
+      },
+      "Where your strength comes from in the first place, what it goes on and how it is restored. Each chakra has its own source: one thing gives you strength in Manipura, another in Anahata. The Energy total shows how effort is spread across all areas: what charges you almost everywhere and what drains you almost everywhere. It is breathing in and breathing out: where you take in air and what you spend it on.",
+      {
+       "h3": "The Emotions total: tone"
+      },
+      "How you live through what happens: success and loss, uncertainty and closeness. Not a single feeling, but the way you respond most often — the overall colour of what you go through. If rhythm is what shows in your actions, tone is what happens inside when an action meets its result.",
+      {
+       "h3": "One arcanum, three different roles"
+      },
+      "Take the Hermit, who often turns up in the energy field, and put him in each column.",
+      {
+       "ul": [
+        "**In Physics** the Hermit is the rhythm of someone who does everything at their own pace and gets to the heart of things. There is no point rushing them: it will not get faster, only worse.",
+        "**In Energy** he is a source of strength: silence, a solitary walk, an evening without conversation restore more than a party.",
+        "**In Emotions** he is a way of living things through: first inwardly, and only later, if you feel like it, out loud."
+       ]
+      },
+      "One card can stand for three very different people: a sociable person who simply works thoughtfully; someone who quickly tires of people; someone who takes in any news in silence. That is why the meaning of an arcanum in the energy field is always read together with its column."
+     ]
+    },
+    {
+     "h2": "Energy field meaning: what each arcanum stands for",
+     "paragraphs": [
+      "Below are the keys for every arcanum that occurs in the energy field. Find your three numbers, each in its own column. These are footholds for reading, not a finished interpretation: how to join three keys into one thought is shown in the next section.",
+      {
+       "table": {
+        "head": [
+         "Arcanum",
+         "In Physics: how you act",
+         "In Energy: where your strength comes from",
+         "In Emotions: how you live it through"
+        ],
+        "rows": [
+         [
+          "1 · The Magician",
+          "going first with whatever is at hand",
+          "strength from skill, when what you planned works out",
+          "responding with action: “what can I do?”"
+         ],
+         [
+          "2 · The High Priestess",
+          "acting quietly, once you have understood everything for yourself",
+          "never occurs",
+          "feeling a lot and saying little"
+         ],
+         [
+          "3 · The Empress",
+          "investing and nurturing until there is fruit",
+          "strength from whatever grows and brings joy",
+          "a warm, generous, sensual response"
+         ],
+         [
+          "4 · The Emperor",
+          "putting things in order and taking charge",
+          "strength from clarity and your own authority",
+          "calm when everything is arranged and clear"
+         ],
+         [
+          "5 · The Hierophant",
+          "relying on proven rules, learning and teaching",
+          "strength from belonging and shared values",
+          "checking what you go through against what you believe is right"
+         ],
+         [
+          "6 · The Lovers",
+          "acting through choice and together with someone",
+          "strength from attraction and people close to you",
+          "responding with the heart, everything through relationships"
+         ],
+         [
+          "7 · The Chariot",
+          "holding a course and driving towards the goal",
+          "strength from progress and the road already covered",
+          "you need to feel you are moving forward"
+         ],
+         [
+          "8 · Strength",
+          "gentle firmness, endurance without pressure",
+          "strength from self-mastery",
+          "holding a strong feeling in your hands, not under lock and key"
+         ],
+         [
+          "9 · The Hermit",
+          "at your own pace, in depth, to the heart of it",
+          "strength in silence and solitude",
+          "living it through inwardly, then sharing"
+         ],
+         [
+          "10 · Wheel of Fortune",
+          "in the rhythm of change, catching the moment",
+          "strength from movement and turns",
+          "ups and downs as a change of seasons"
+         ],
+         [
+          "11 · Justice",
+          "weighing things up and answering for the consequences",
+          "strength from fair exchange and clear terms",
+          "measuring what happens by fairness"
+         ],
+         [
+          "12 · The Hanged Man",
+          "stopping and looking from another side",
+          "strength from a pause and a step aside",
+          "feeling it later, through a change of view"
+         ],
+         [
+          "13 · Death",
+          "finishing and clearing away what is spent",
+          "strength comes when you let go of the old",
+          "living through change deeply, by saying goodbye"
+         ],
+         [
+          "14 · Temperance",
+          "keeping proportion, combining, holding an even pace",
+          "strength from alternation and measure",
+          "softening extremes, restoring balance"
+         ],
+         [
+          "15 · The Devil",
+          "a firm grip and extraordinary efforts for the result",
+          "strength from strong desire that can take over",
+          "strong attachment, hard to let go"
+         ],
+         [
+          "16 · The Tower",
+          "acting in bursts, knocking down what has had its day",
+          "strength from a shake-up and the truth that follows",
+          "feeling in a flash, understanding after the blow"
+         ],
+         [
+          "17 · The Star",
+          "acting openly and sharing generously",
+          "strength from hope and inspiration",
+          "a bright response, the ability to recover"
+         ],
+         [
+          "18 · The Moon",
+          "acting in uncertainty, by impression",
+          "strength from imagination that easily turns into anxiety",
+          "fine sensitivity, where foreboding mixes with fear"
+         ],
+         [
+          "19–22",
+          "never occurs",
+          "never occurs",
+          "never occurs"
+         ]
+        ]
+       }
+      },
+      "A few notes on the table:",
+      {
+       "ul": [
+        "**Low numbers in the total are rare.** Physics from 1 to 6 comes up in about 3% of dates, and so does Energy from 1 to 6. The middle of the deck, on the other hand, turns up all the time: Physics from 9 to 15 belongs to three people out of four.",
+        "**The High Priestess never appears in the Energy total.** A two would need a column sum of 101 or 110, and no date gives such an Energy sum.",
+        "**A number is not a score.** 18 is not “stronger” than 3, and 1 is not “weaker” than 14. These are the names of cards, not a scale of charge."
+       ]
+      },
+      "The meanings draw on the card imagery in Waite and Wen, and carrying them over into three columns is our own adaptation. Neither author wrote about the destiny matrix."
+     ]
+    },
+    {
+     "h2": "How to read the three numbers together",
+     "paragraphs": [
+      "Three keys side by side are not yet an interpretation. “Wheel: catching the moment. Wheel: strength from change. Justice: fairness” — this reads like a dictionary, and the reader is left to guess how the words connect. Interpretation begins when the three cards come together into one thought.",
+      {
+       "ol": [
+        "**Read each key in its own column.** The same card in Physics and in Emotions plays two different roles; it is not a “double helping” of one quality.",
+        "**Find how the cards relate to each other.** They support each other: the Emperor in rhythm and Justice in Energy — order that draws its strength from fair agreements. They argue: the Tower in Energy and Temperance in Emotions — strength comes from shake-ups, while inside everything gets smoothed over. They take turns: the Hanged Man, then Death — a pause, followed by an ending.",
+        "**Put it into one sentence about you.** Not “these cards mean”, but “you”: “You live in a rhythm of change and test every change for fairness.”",
+        "**Find where the same logic starts to get in the way.** The difficulty of an energy field grows out of its own strength. A rhythm of change easily turns into expecting every change to be fair.",
+        "**Check it against a week of your life.** If you cannot recognise a single situation, do not force it. It means this layer is not the main one right now."
+       ]
+      },
+      "The full reading is built the same way: each of the 363 combinations has its own heading, captions for the three cards and three paragraphs — the theme of the field, the whole picture, and the place where the strength starts to get in the way. Below are two such texts in full."
+     ]
+    },
+    {
+     "h2": "Energy field 10-10-11: Wheel of Fortune, Wheel of Fortune, Justice",
+     "paragraphs": [
+      "The most common energy field: 1.15% of dates, roughly one person in 87. For example, people born on 10 March 1984, 13 March 1990 and 11 June 1986. 14-9-14 is almost as common.",
+      {
+       "h3": "Living in the rhythm of change and holding the scales"
+      },
+      {
+       "table": {
+        "head": [
+         "Column",
+         "Arcanum",
+         "Caption"
+        ],
+        "rows": [
+         [
+          "Physics",
+          "10 · Wheel of Fortune",
+          "Catching the turn of the moment"
+         ],
+         [
+          "Energy",
+          "10 · Wheel of Fortune",
+          "Drawing charge from movement"
+         ],
+         [
+          "Emotions",
+          "11 · Justice",
+          "Measuring what happens by fairness"
+         ]
+        ]
+       }
+      },
+      "Your life comes in waves, and you feel this better than most. The Wheel of Fortune sets the overall rhythm of what you do: you notice which way circumstances have turned, rework the plan and step in when the moment comes. The same Wheel feeds you in a different way — as fuel: strength flows in when life starts moving and drains away wherever everything has frozen. And it is Justice that lives through what happens. You weigh every turn: is it fair, is it deserved, who is responsible for what.",
+      "**Everything around you moves, and inside you hold the scales.** It is a rare mix of flexibility and decency: you change plans easily and never go back on your word. A move, a new job, a different team — you go into change without panic and make sure nobody is left cheated. You renegotiate, pay back debts, spell out the terms. Being around you feels both lively and safe.",
+      "Things get harder when you start expecting justice from the wheel itself. The turns of circumstance pass no verdicts, but good luck is easily taken for a reward and a downturn for an injustice: “why me?”, “I did everything right”. Then a lawsuit against the past begins. You look for someone to blame, in yourself or in others, recount who owes whom, and stand still, although life has already turned and moved on.",
+      "**Where this idea comes from.** Wen herself draws a line between these two cards. The Wheel, in her words, is about “the universe’s adherence to the laws of motion”: **“What goes up will come down. What hits bottom will bounce up.”** Justice is about balance that is **“human-made”**, about “the consequences of our decisions and actions”. Waite sees in the Wheel **“stability amidst movement”** and **“the denial of chance”**. The strength of this energy field lies in holding two laws together: the world moves, and a person keeps their word. The difficulty lies in swapping them: judging the course of life by a human court."
+     ]
+    },
+    {
+     "h2": "Energy field 9-9-9: the only one made of three identical numbers",
+     "paragraphs": [
+      "People search for it in exactly this form: “energy field 999”. And it really is a special combination: **9-9-9 is the only energy field where all three numbers are the same.** No other “triple of one number” exists. The reason is the same rule of nine: if all three numbers are equal, their check x + x − x = x must divide by nine. Only 9 and 18 qualify, and 18-18-18 does not occur for any date.",
+      "9-9-9 is not rare: 1.06% of dates, eleventh place out of 363, roughly one person in 94. For example, people born on 2, 11, 20 and 29 June 1975.",
+      "A triple Hermit is not “triple wisdom” and not triple loneliness. He has three different jobs.",
+      {
+       "h3": "Walking by the light of your own lantern"
+      },
+      {
+       "table": {
+        "head": [
+         "Column",
+         "Arcanum",
+         "Caption"
+        ],
+        "rows": [
+         [
+          "Physics",
+          "9 · The Hermit",
+          "Working at your own pace, in depth"
+         ],
+         [
+          "Energy",
+          "9 · The Hermit",
+          "Gathering strength in silence"
+         ],
+         [
+          "Emotions",
+          "9 · The Hermit",
+          "Living things through inwardly"
+         ]
+        ]
+       }
+      },
+      "The Hermit appears three times in your energy field, and in each column he has his own job. In what you do, he sets the overall rhythm: you go at your own pace, get to the heart of things and do not like being rushed. He restores your strength through silence: a solitary walk, a long thought, an evening without conversation give you more than a noisy party. And he takes your feelings inward: you live through everything important on your own first, and only later, if you want to, talk about it.",
+      "**You need to understand things for yourself first — and then you can be a light for others.** On the card the Hermit holds his lantern high, on a summit: the light is not hidden under his cloak, it can be seen from below. Your rhythm works the same way. While others argue and rush about, you go off to think and come back with a clear conclusion that helps everyone. People come to you for advice: you say little, but to the point, and your word is trusted because your own path stands behind it.",
+      "The difficulty is that silence is easily mistaken for a fortress. When things are hard, you shut yourself away to sort it out alone, and that is right as long as the pause has an end. But if the inner work never comes out into the open, the people close to you see only a closed door. They do not know what is going on with you and stop offering help. You are left alone with everything at once: the lantern is burning, but now it shines only inward.",
+      "**Where this idea comes from.** Waite calls the Hermit “a card of attainment”, and his raised lantern says: **“where I am, you also may be.”** And straight away he argues against a reading that sounds especially modern today. He calls it “one of the frivolous renderings” to connect the card with **“occult isolation, as the protection of personal magnetism against admixture”** with other people’s. For an article about the energy field, this is a precise hint. Even a triple Hermit is not about hiding your “energy” from people. He is about a light that is first lit in solitude and then raised higher."
+     ]
+    },
+    {
+     "h2": "Six energy fields people ask about",
+     "paragraphs": [
+      "People bring these combinations to search engines and forums: “what does my energy field mean?” Below is the idea that ties each one together, and the place where it starts to get in the way. The full texts, with captions for all three cards, are in the reading.",
+      {
+       "h3": "8-13-12 · Strength, Death, the Hanged Man"
+      },
+      "Strength in the rhythm: you win through endurance and gentle firmness, not pressure. Death in Energy: your strength comes back when you close what is spent — a project, a habit, a routine that long ago became form without life. The Hanged Man in Emotions: you do not feel things straight away but after a pause, and after it you see what happened differently. **Your endurance is not there to hold on to everything for ever, but to wait for clarity and then let go.** The weak spot is being stuck in suspension: it is already clear that it is time to finish, but your endurance is good for another year of waiting. About 0.5% of dates, for example 9 February 1975.",
+      {
+       "h3": "15-9-15 · The Devil, the Hermit, the Devil"
+      },
+      "The Devil appears twice, and his roles are different. In the rhythm, it is a firm grip: you can latch on to a goal and put in “extraordinary efforts” — Waite lists them in so many words among this card’s meanings. In Emotions, it is the force of attachment to people, things, results, to everything that has become “mine”. Between them stands the Hermit: you gather strength in solitude, in your own thoughts. **You want things badly and deal with it on your own.** The best thing about this combination is passion that is not afraid of an honest look at itself: the Hermit’s lantern sees where desire has turned into a chain. The weak spot is when solitude becomes the place where attachment grows with no witnesses. Waite reminds us that the one who holds the chains on this card is “not to be their master for ever”. About 1% of dates, for example 5 September 1975.",
+      {
+       "h3": "17-9-8 · The Star, the Hermit, Strength"
+      },
+      "The Star in the rhythm: you act openly and generously — you share, inspire, show the way. The Hermit in Energy: yet your strength builds up not in company but in silence. Strength in Emotions: you hold strong feelings gently in your hands, without suppressing them. **You give out light among people and recharge alone.** People ask about this combination: “how do others see me?” The energy field describes you, not someone else’s impression, but the openness of the Star and the calm of Strength usually show in what you do. The weak spot is generosity without refilling: while you keep giving and keep your composure, nobody notices that the lantern needs more oil. About 0.5% of dates, for example 6 April 1975.",
+      {
+       "h3": "7-16-14 · The Chariot, the Tower, Temperance"
+      },
+      "The Chariot in the rhythm: you hold a course and drive towards the goal. The Tower in Energy: shake-ups give you strength — a last-minute crunch, a plan falling apart, a truth that suddenly comes out. Temperance in Emotions: inside, you mix hot with cold and quickly get your sense of measure back. **You drive best on a bumpy road.** A blow does not knock you off course, because inside there is someone to soften it. The weak spot is starting to need the collapses: without a crunch you do not feel like moving, and an even life seems empty. Meanwhile Temperance softens the blows so well that the signal “something here is built wrong” never gets through in time. About 0.2% of dates, for example 13 March 1975.",
+      {
+       "h3": "10-12-13 · Wheel of Fortune, the Hanged Man, Death"
+      },
+      "The Wheel in the rhythm: you live by turns and step in when the moment comes. The Hanged Man in Energy: strength comes from pauses, a step aside, a look from another side. Death in Emotions: you live through change deeply, as the end of a stage, with a farewell. **For you, life goes in seasons, and each one has to be finished for the next to begin.** The weak spot is getting stuck between seasons: the pause that was meant to bring a fresh view drags on, because saying goodbye to the old hurts, while the wheel has already turned. About 1% of dates, for example 7 February 1975.",
+      {
+       "h3": "8-12-11 · Strength, the Hanged Man, Justice"
+      },
+      "Strength in the rhythm: endurance and gentle persistence. The Hanged Man in Energy: strength comes from being able to stop and look at things from another side. Justice in Emotions: you live through what happens by keeping an honest count — are work, attention and responsibility shared equally. **You can hold out for a long time and remember all along what is fair and what is not.** At its best this is patience with open eyes: you wait, but you know what for, and you name the terms out loud. The weak spot is a silent tally: you do not complain, but inside you a list of injustices grows that nobody knows about. About 0.8% of dates, for example 2 April 1976."
+     ]
+    },
+    {
+     "h2": "How many energy fields there are and how common yours is",
+     "paragraphs": [
+      "We went through all 46,298 dates from 1 January 1900 to 4 October 2026. They produced **363 different energy fields**. For comparison, the same dates have 5,544 different chakra tables. On average, one energy field covers fifteen different tables.",
+      "Energy fields are spread more evenly than chakras. Manipura has only 16 variants, and the most common ones go to one person in nine. In the energy field, even the most common combination belongs to one person in 87.",
+      {
+       "table": {
+        "head": [
+         "Rank",
+         "Energy field",
+         "Arcana",
+         "Share of dates",
+         "Roughly"
+        ],
+        "rows": [
+         [
+          "1",
+          "10-10-11",
+          "Wheel of Fortune, Wheel of Fortune, Justice",
+          "1.15%",
+          "one in 87"
+         ],
+         [
+          "2",
+          "14-9-14",
+          "Temperance, The Hermit, Temperance",
+          "1.15%",
+          "one in 87"
+         ],
+         [
+          "3",
+          "13-8-12",
+          "Death, Strength, The Hanged Man",
+          "1.09%",
+          "one in 92"
+         ],
+         [
+          "4",
+          "13-10-14",
+          "Death, Wheel of Fortune, Temperance",
+          "1.09%",
+          "one in 92"
+         ],
+         [
+          "5",
+          "14-14-10",
+          "Temperance, Temperance, Wheel of Fortune",
+          "1.09%",
+          "one in 92"
+         ],
+         [
+          "6",
+          "11-9-11",
+          "Justice, The Hermit, Justice",
+          "1.08%",
+          "one in 92"
+         ],
+         [
+          "7",
+          "15-15-12",
+          "The Devil, The Devil, The Hanged Man",
+          "1.08%",
+          "one in 93"
+         ],
+         [
+          "8",
+          "9-14-14",
+          "The Hermit, Temperance, Temperance",
+          "1.07%",
+          "one in 94"
+         ],
+         [
+          "9",
+          "9-12-12",
+          "The Hermit, The Hanged Man, The Hanged Man",
+          "1.07%",
+          "one in 94"
+         ],
+         [
+          "10",
+          "10-8-9",
+          "Wheel of Fortune, Strength, The Hermit",
+          "1.06%",
+          "one in 94"
+         ]
+        ]
+       }
+      },
+      "What else the count showed:",
+      {
+       "ul": [
+        "**Half of all people fit into 50 combinations.** The fifty most common energy fields cover 49% of dates, and the top hundred cover 77%.",
+        "**166 energy fields are rare**, each under one date in a thousand. Together they go to roughly one person in fifteen.",
+        "**Two energy fields came up exactly once in 127 years.** 7-12-1 (the Chariot, the Hanged Man, the Magician) belongs only to 18 February 2000. 5-1-15 (the Hierophant, the Magician, the Devil) belongs only to 2 August 2000.",
+        "**The Sun (19), Judgement (20), the World (21) and the Fool (22) never appear in the energy field.** The sum of the seven numbers in a column never drops to 22: the smallest one found is 27. And the digit sum of any number from 23 to 131 is no more than 18 (for 99). So 18, the Moon, is the ceiling of the energy field. The Fool can stand in any chakra, but in the total, never.",
+        "**The energy field is not generational.** The most common combinations and their shares barely change from decade to decade. There is one difference: people born after 2000 have slightly more rare energy fields — 7–8% of dates against 6% in the 20th century."
+       ]
+      }
+     ]
+    },
+    {
+     "h2": "One energy field, different people",
+     "paragraphs": [
+      "The energy field 10-10-11 belongs to 61 different chakra tables. Here are two of them:",
+      {
+       "table": {
+        "head": [
+         "Chakra",
+         "10 March 1984",
+         "11 June 1986"
+        ],
+        "rows": [
+         [
+          "Muladhara",
+          "22 / 8 / 3",
+          "6 / 5 / 11"
+         ],
+         [
+          "Svadhisthana",
+          "11 / 15 / 8",
+          "16 / 15 / 4"
+         ],
+         [
+          "Manipura",
+          "7 / 7 / 14",
+          "10 / 10 / 20"
+         ],
+         [
+          "Anahata",
+          "6 / 17 / 5",
+          "4 / 8 / 12"
+         ],
+         [
+          "Vishuddha",
+          "17 / 10 / 9",
+          "21 / 16 / 10"
+         ],
+         [
+          "Ajna",
+          "9 / 13 / 22",
+          "5 / 22 / 9"
+         ],
+         [
+          "Sahasrara",
+          "10 / 3 / 13",
+          "11 / 6 / 17"
+         ],
+         [
+          "**Energy field**",
+          "**10 / 10 / 11**",
+          "**10 / 10 / 11**"
+         ]
+        ]
+       }
+      },
+      "Of the 21 cells in the table, these two dates share only one: the Energy of Svadhisthana, 15. Their centres are different, and so are their Manipuras. Their karmic tails are different too. But the voice is the same.",
+      "There is also a pattern that is easy to test on people you know. **The energy field loves nines.** Take two people born in the same month of the same year exactly nine days apart, say on the 10th and the 19th. In 61% of cases they have the same energy field, even though their chakra tables differ. For two random days of the same month, a match happens in about 6% of cases. So people born on 1, 10, 19 and 28 March 1984 all share one energy field — 10-10-11. The reason is the same as for the rule of nine: shifting the day by nine does not change the remainders the totals are built from.",
+      "One last thing: the energy field matches one of a person’s own seven rows for only 1.1% of dates. Almost always it is a new triple that appears nowhere in your table.",
+      "Hence a simple reading rule. **You cannot judge any particular chakra by the energy field.** If your energy field matches a friend’s, you share a voice but not the songs. What is going on in your closeness, your words or your money, only your own rows of the table will show."
+     ]
+    },
+    {
+     "h2": "What the energy field does not show",
+     "paragraphs": [
+      "The word “field” is misleading. It suggests an aura or biofield that can be measured, pierced or strengthened. In the destiny matrix the energy field is three numbers added up from the table. So:",
+      {
+       "ul": [
+        "**There is no strong or weak energy field.** The numbers are card numbers, not a charge level. 17-9-8 is not “more powerful” than 3-8-2.",
+        "**“Holes” and “leaks” cannot be seen in the numbers.** The table has no empty cells; everyone has three arcana in the total.",
+        "**The energy field does not change over time.** There is one birth date, and so one set of numbers. What changes is how you live these three cards: you can spend years inside the difficulty of a combination and one day start using its strength.",
+        "**It does not describe your body or how you feel.** In the matrix, “Physics” is a way of acting, not the body, and these numbers say nothing about your physical condition.",
+        "**It is not about the family line.** The father’s and mother’s lines do not enter its calculation.",
+        "**It does not describe how others see you.** The energy field is about how you act, what you spend your strength on and how you respond. People around you see your actions, not numbers, and what exactly they notice in them depends on them too.",
+        "**“Plus” and “minus” are not two different cards.** The strength of a combination and its difficulty grow out of the same logic. Instead of asking “how do I get my energy field into the plus?”, it is more useful to ask: where does my overall rhythm stop serving me?"
+       ]
+      }
+     ]
+    },
+    {
+     "h2": "How to test the energy field on yourself: a week of observation",
+     "paragraphs": [
+      "The energy field describes what repeats everywhere. So you can catch it in an ordinary week.",
+      {
+       "ol": [
+        "**Write down the three keys** of your energy field from the table above.",
+        "**For seven evenings in a row, write three lines.** How did I take things on today, at what pace, in what way? What gave me strength and what took it away? How did I respond to the main event of the day?",
+        "**After a week, reread and compare with the keys.** Where did the rhythm, the source of strength and the response match the cards, and where not?",
+        "**Find one situation where your overall rhythm helped you and one where it got in the way.** Usually it is the same trait in two places.",
+        "**Ask someone close to you.** Not “what is my energy field”, but three questions: at what pace do I usually act, when do I look most alive, how do I react to a setback. Answers from the outside are sometimes more accurate than your own."
+       ]
+      },
+      "If the week looks nothing like the keys, do not bend it to fit them. The energy field is the overall tone, and at certain times one chakra sounds louder. Then it is more useful to open its row."
+     ]
+    },
+    {
+     "h2": "What the full reading reveals",
+     "paragraphs": [
+      "After the free calculation you will see the whole table: seven chakras and the energy field row, 24 arcana with numbers and cards. Under the table there is a “Where the numbers come from” button: it shows which seven numbers make up each total.",
+      "The full reading adds interpretations of all eight rows for your date and a general conclusion on the chart. The energy field is read the same way as the chakras:",
+      {
+       "ul": [
+        "a heading that names the essence of your combination;",
+        "a caption for each of the three cards: the role it plays in this particular column;",
+        "three paragraphs: the overall theme of the field and what each card brings to it, the whole picture in your life, and the place where the strength starts to get in the way."
+       ]
+      },
+      "The texts are not assembled from a dictionary. Each of the 363 possible energy fields has its own text, like 10-10-11 and 9-9-9 above. The keys in this article will help you understand the energy field on your own, and the reading will connect it to the seven chakras of your chart."
+     ]
+    },
+    {
+     "h2": "What this article is based on",
+     "paragraphs": [
+      {
+       "ul": [
+        "**Calculation**: the classic destiny matrix with points A–T: D = A + B + C, E = A + B + C + D, the inner points J, K, L, M are a corner plus the centre, O = A + J, P = B + K, S = J + E, T = K + E. Chakra rows: Sahasrara A/B, Ajna O/P, Vishuddha J/K, Anahata S/T, Manipura E/E, Svadhisthana L/M, Muladhara C/D; the Emotions of a row is the sum of its Physics and Energy. The energy field is the reduced sum of each column. Sums over 22 are reduced by adding their digits. All the numerical facts in this article come from going through 46,298 dates from 1 January 1900 to 4 October 2026 on the calculator’s engine: 363 combinations, frequencies, the rule of nine, the absence of 19–22, matches between dates nine days apart.",
+        "**Card meanings**: A. E. Waite, The Pictorial Key to the Tarot (1910, reissued 1922), and Benebell Wen, Holistic Tarot (2015). Quotations are given in the authors’ original English. The Seven Chakras Spread: Wen, chapter 14.",
+        "**The name “overall energy field”** comes from popular destiny matrix calculators. The meanings of the total columns, the arcana keys and the interpretations of combinations are the author’s own reading. Neither Waite nor Wen wrote about the destiny matrix, the chakra table or its totals.",
+        "The destiny matrix is an esoteric model for self-observation with no scientific evidence behind it. It is neither a forecast nor a description of your physical condition."
+       ]
+      },
+      "**Hear your whole voice.** Enter your birth date, and your energy field will appear under the seven chakras: three arcana that sound in everything you do. The full reading covers all eight rows: the seven chakras and the overall tone that connects them."
+     ]
+    }
+   ],
+   "intro": [
+    "Three facts set the energy field apart from everything else in the matrix:",
+    {
+     "ul": [
+      "**It is not on the star.** It is built from the chakra table and does not sit at any point of the chart.",
+      "**It is not an eighth chakra.** In every chakra the third number is the sum of the first two. In the energy field this holds for only a third of people, and it is not a calculator error.",
+      "**One energy field is shared by dozens of different charts.** The energy field 10-10-11 comes from 61 different chakra tables. That is why the energy field cannot tell you what any single chakra holds."
+     ]
+    },
+    {
+     "table": {
+      "head": [
+       "Column",
+       "Where the number comes from",
+       "The question it asks you",
+       "Example: 10 March 1984"
+      ],
+      "rows": [
+       [
+        "**Physics**",
+        "reduced sum of the seven Physics numbers",
+        "How you act in general",
+        "82 → 10 · Wheel of Fortune"
+       ],
+       [
+        "**Energy**",
+        "reduced sum of the seven Energy numbers",
+        "Where your strength comes from and where it goes",
+        "73 → 10 · Wheel of Fortune"
+       ],
+       [
+        "**Emotions**",
+        "reduced sum of the seven Emotions numbers",
+        "How you live through what happens",
+        "74 → 11 · Justice"
+       ]
+      ]
+     }
+    },
+    "You see the energy field and all seven chakras as soon as the calculation is done. Free, no sign-up."
+   ],
+   "faq": [
+    {
+     "q": "Where is the energy field in the destiny matrix?",
+     "a": "Not on the star but in the chakra table — in the bottom row, under the seven chakras. In our reading it is marked with Σ and labelled “Overall energy field”. Other calculators call it “Result” or “Total”. If there is no table, you have to work out the energy field from the date."
+    },
+    {
+     "q": "How do you calculate the overall energy field from a birth date?",
+     "a": "Work out the seven rows of the chakra table, add up each column and reduce the sum: if it is over 22, add its digits. Example, 10 March 1984: Physics 82 → 10, Energy 73 → 10, Emotions 74 → 11. The step-by-step calculation is in the section above."
+    },
+    {
+     "q": "What do the three numbers of the energy field mean?",
+     "a": "The first is the Physics total: how you act in general, your overall rhythm. The second is the Energy total: where your strength comes from and where it goes. The third is the Emotions total: how you live through what happens. The order matters: 14-9-14 and 9-14-14 are two different energy fields, and both are in the top ten."
+    },
+    {
+     "q": "Why is the third number not the sum of the first two? Is it a mistake?",
+     "a": "No. The Emotions total is the reduced sum of the Emotions column, not the sum of the two totals. The third number differs from the sum of the first two for two dates out of three. You can check the calculation with the rule of nine: Physics + Energy − Emotions always divides by 9. For 10-10-11: 10 + 10 − 11 = 9."
+    },
+    {
+     "q": "Why does another calculator show a different energy field?",
+     "a": "There are two common reasons. The first is the third number: some calculators get it by adding the first two totals rather than from the Emotions column. Then their Emotions total differs from ours for two dates out of three, and 19–22 start to appear. The second is the reduction rule: if you subtract 22 instead of adding digits, the sum 82 becomes 16, not 10. Compare the rules first, then the interpretations."
+    },
+    {
+     "q": "What does the energy field 9-9-9 mean?",
+     "a": "A triple Hermit: you act at your own pace, gather strength in silence and live through everything important inwardly first. It is the only energy field made of three identical numbers, and one person in 94 has it. The full interpretation is in the 9-9-9 section above."
+    },
+    {
+     "q": "Can the energy field contain the Sun, Judgement, the World or the Fool?",
+     "a": "No, not for any birth date. The sum of the seven numbers in a column is always over 22, and its reduction never goes above 18. If your total shows 19, 20, 21 or 22, the calculator used different rules."
+    },
+    {
+     "q": "Is there such a thing as a strong or weak energy field?",
+     "a": "No. The numbers of the energy field are arcanum numbers, not scores. Each combination describes its own way of acting, recharging and responding, with its own strength and its own difficulty."
+    },
+    {
+     "q": "How do others see me, according to my energy field?",
+     "a": "The energy field describes you, not other people’s impressions. People around you see your actions and reactions, and your overall rhythm is often the first thing they notice, but what exactly they see in it depends on them too. It is simpler to ask people close to you about your pace and how you react to setbacks, and compare their answers with the three keys."
+    },
+    {
+     "q": "Can the energy field be changed or strengthened?",
+     "a": "The numbers do not change: they are calculated from your birth date. What changes is how you live these three cards. A sign that a combination is working for you: its strength shows in what you do, and you recognise its difficulty before it has time to get in the way."
+    },
+    {
+     "q": "Is the energy field linked to the family line and karma?",
+     "a": "Not to the family lines: the points of the father’s and mother’s lines do not enter its calculation. The karmic tail is also calculated separately, along the bottom ray of the star. The energy field is built from the chakra table, that is, from the personal square and the centre."
+    },
+    {
+     "q": "Is the energy field different for men and women?",
+     "a": "No. Gender plays no part in the calculation, and a man and a woman with the same birth date have the same energy field."
+    },
+    {
+     "q": "Why is 8 Strength and 11 Justice?",
+     "a": "That is how Waite numbers the cards, and so does the destiny matrix on this site. In some decks these two cards are swapped, so interpretations are compared by the name of the card, not only by its number."
+    }
+   ]
+  },
+  {
    "key": "karmic-tail",
    "crumb": "Karmic tail",
    "title": "The karmic tail in the destiny matrix: what it is and how to read it",

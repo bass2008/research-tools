@@ -10,9 +10,9 @@ import { forLocale as localizedSite } from "@/lib/site";
 
 export const forLocale = localized((L: Locale, site) => {
   const { SERVICE_PAGES, servicePagesOf } = localizedServicePages(L);
-  const { DISCLAIMER, LEGAL } = localizedSite(L, site);
+  const { DISCLAIMER } = localizedSite(L, site);
 
-  return { SERVICE_PAGES, servicePagesOf, DISCLAIMER, LEGAL };
+  return { SERVICE_PAGES, servicePagesOf, DISCLAIMER };
 });
 
 // Набор ссылок задан реестром: у языка, где страницы нет, её нет и в подвале — и не появится
@@ -38,7 +38,7 @@ function Links({ locale: requestedLocale, ...localeProps }: ({ group: ServiceGro
 export default function FooterContent({ locale: requestedLocale, site, ...localeProps }: { plain?: boolean; locale?: Locale; site: SiteProfile }) {
   const L = requestedLocale ?? defaultLocale;
   const { plain } = localeProps;
-  const { DISCLAIMER, LEGAL } = forLocale(L, site);
+  const { DISCLAIMER } = forLocale(L, site);
 
   return (
     <footer className="site-footer">
@@ -50,16 +50,10 @@ export default function FooterContent({ locale: requestedLocale, site, ...locale
           <p>{DISCLAIMER}</p>
         </div>
         <div>
-          {/* в подвале — только кто исполнитель и куда писать; номера на странице контактов */}
-          <p>{LEGAL.entity}</p>
           <Links locale={L} group="about" plain={plain} />
-          <p><a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a></p>
         </div>
         <div>
           <Links locale={L} group="legal" plain={plain} />
-          <p>
-            <SiteLink plain={plain} href="/encyclopedia">{D.nav.arcanaEncyclopedia[L]}</SiteLink>
-          </p>
           <p><LanguageLink /></p>
           <p style={{ marginTop: 8 }}>© 2026</p>
         </div>

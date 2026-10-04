@@ -31,7 +31,7 @@ provider = os.environ.get("PAYMENT_PROVIDER", "mock")
 ru = f"http://localhost:{port}"
 print(json.dumps([
     {"origin": ru, "hosts": [f"localhost:{port}", f"ru.localhost:{port}"],
-     "defaultLocale": "ru", "locales": ["ru"],
+     "defaultLocale": "ru", "locales": ["ru", "en"],
      "payments": [{"id": provider, "provider": provider,
                    "notificationUrl": f"{ru}/api/payments/notify/{provider}"}]},
     {"origin": f"http://127.0.0.1:{port}",

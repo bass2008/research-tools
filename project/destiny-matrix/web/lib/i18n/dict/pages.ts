@@ -114,14 +114,6 @@ export const pages = {
   contactsName: { ru: "Наименование", en: "Name" } satisfies Phrase,
   contactsTaxId: { ru: "ИНН", en: "Tax ID" } satisfies Phrase,
   contactsRegistration: { ru: "ОГРНИП", en: "Registration number" } satisfies Phrase,
-  contactsActivity: { ru: "Вид деятельности", en: "Activity" } satisfies Phrase,
-  contactsActivityText: {
-    ru: "Разработка компьютерного программного обеспечения, включая адаптацию и модификацию "
-      + "web-страниц (пп. 62 п. 2 ст. 346.43 НК РФ). Патентная система налогообложения, НДС не "
-      + "облагается.",
-    en: "Development of computer software, including the adaptation and modification of web "
-      + "pages.",
-  } satisfies Phrase,
   contactsSite: { ru: "Сайт", en: "Website" } satisfies Phrase,
   contactsEmail: { ru: "Почта", en: "Email" } satisfies Phrase,
   contactsPhone: { ru: "Телефон", en: "Phone" } satisfies Phrase,

@@ -18,8 +18,7 @@ export const dynamic = "force-dynamic";
 const forLocale = localized((L: Locale, site) => {
   const { pageMeta } = localizedSite(L, site);
 
-  const OTHER = <Link href="/report">{D.nav.myReading[L]}</Link>;
-  return { pageMeta, OTHER };
+  return { pageMeta };
 });
 
 // canonical объявляли на /matrices — маршрута верхнего уровня нет, и все сохранённые матрицы
@@ -39,14 +38,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function SavedMatrixPage({ params }: { params: Promise<{ id: string }> }) {
   const L = await requestLocale();
-  const { OTHER } = forLocale(L, await requestSite());
 
   const { id } = await params;
   const access = await readAccess();
 
   if (!access.authenticated) {
     return (
-      <Sheet locale={L} other={OTHER}>
+      <Sheet>
         <div className="panel narrow">
           {/* заголовок страницы, а не подзаголовок панели: у гостя это единственный экран */}
           <h1 className="panel-h1">{D.account.needSignIn[L]}</h1>
@@ -72,7 +70,7 @@ export default async function SavedMatrixPage({ params }: { params: Promise<{ id
   if (!chosen) notFound();
 
   return (
-    <Sheet locale={L} other={OTHER}>
+    <Sheet>
       <SavedReport locale={L} chosen={chosen} saved={saved} access={access} />
     </Sheet>
   );

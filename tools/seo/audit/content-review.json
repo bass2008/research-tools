@@ -426,6 +426,23 @@
       "independent_editor": "pending human sign-off"
     },
     {
+      "entity": "category_hub:energy-field",
+      "source": "web/content/ru/category-hubs.json",
+      "primary_query": "энергополе в матрице судьбы",
+      "search_intent": "category_hub",
+      "formula_verified": false,
+      "position_context_verified": false,
+      "claims_reviewed": "automated contract/safety audit",
+      "unique_value": "content validator + category invariants",
+      "paid_report_overlap": "n/a",
+      "internal_links": "automated",
+      "metadata": "automated",
+      "decision": "keep",
+      "reviewer": "Codex engineering/content audit",
+      "reviewed_at": "2026-08-30",
+      "independent_editor": "pending human sign-off"
+    },
+    {
       "entity": "category_hub:karmic-tail",
       "source": "web/content/ru/category-hubs.json",
       "primary_query": "хвосты в матрице судьбы",
@@ -5460,7 +5477,7 @@
     {
       "entity": "position:chakras",
       "source": "web/content/ru/positions.json",
-      "primary_query": "карта энергий в матрице судьбы",
+      "primary_query": "матрица судьбы физика энергия эмоции",
       "search_intent": "position",
       "formula_verified": true,
       "position_context_verified": true,

@@ -38,7 +38,7 @@ const productionSites = (["ru", "en"] as const).map((locale): HostedSite => ({
   origin: SITE_HOSTS[locale],
   hosts: [new URL(SITE_HOSTS[locale]).host],
   defaultLocale: locale,
-  locales: locale === "ru" ? ["ru"] : ["en", "ru"],
+  locales: locale === "ru" ? ["ru", "en"] : ["en", "ru"],
   legalLocale: locale,
   indexable: true,
 }));

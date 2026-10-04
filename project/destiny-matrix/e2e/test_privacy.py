@@ -40,7 +40,6 @@ def test_print_page_needs_a_pass(page):
         answer = page.goto(f"{BASE}/print/report{query}", wait_until="domcontentloaded")
         page.wait_for_timeout(400)
         assert answer.status == 404, f"{query}: {answer.status}"
-        # на 404 в подвале есть ссылка «Энциклопедия арканов», поэтому смотрим содержимое разбора
         assert page.locator(".octa, [data-testid=report]").count() == 0
         assert "Ваша матрица" not in page.inner_text("body")
 

@@ -1,92 +1,639 @@
 {
- "key": "21-10-7",
- "entity_type": "karmic_tail",
- "publication": {
-  "index": true,
-  "follow": true,
-  "exact_frequency": 178,
-  "reviewed_at": "2026-08-30",
-  "primary_query": "destiny matrix 21 10 7"
- },
- "title": "Karmic tail 21-10-7: a big circle with no chosen route",
- "arcana": [
-  21,
-  10,
-  7
- ],
- "seo": {
-  "title": "Karmic tail 21-10-7: meaning of the karmic program",
-  "description": "Karmic tail 21-10-7: a broad vision, changing opportunities and difficulty choosing a course. Learn the difference between another opening and a route.",
-  "queries": [
-   "destiny matrix 21 10 7",
-   "destiny matrix karmic tail 21 10 7",
-   "karmic tail 21 10 7",
-   "21 10 7 in the destiny matrix"
+  "key": "21-10-7",
+  "entity_type": "karmic_tail",
+  "publication": {
+    "index": true,
+    "follow": true,
+    "exact_frequency": 178,
+    "reviewed_at": "2026-08-30",
+    "primary_query": "destiny matrix 21 10 7"
+  },
+  "title": "Karmic tail 21-10-7 in the destiny matrix: “the Warrior of Faith”, a wheel without a chariot and a crown at the end of the road",
+  "arcana": [
+    21,
+    10,
+    7
+  ],
+  "seo": {
+    "title": "21-10-7 in the destiny matrix: the “Warrior of Faith” karmic tail",
+    "description": "Karmic tail 21-10-7: why knowing “how things should be” leads in circles and how to turn faith into your own road. A date check, every birth date, practices.",
+    "queries": [
+      "destiny matrix 21 10 7",
+      "destiny matrix karmic tail 21 10 7",
+      "karmic tail 21 10 7",
+      "21 10 7 in the destiny matrix"
+    ]
+  },
+  "short": "21-10-7 is the karmic tail that popular readings of the destiny matrix call “the Warrior of Faith”. Its script goes like this. Early on, a person receives a picture of the whole: what the world should be like, what a right life looks like, what real love is, what cause is worth living for. That is the entry, the World (21). But life around them turns by its own laws, and the picture runs into a turn again and again. That is the mechanism, the Wheel of Fortune (10). At the turn the tail has two habits: to push the wheel by force — prove, remake, fight for its truth — or to wait for the wheel to carry it where it needs to go. Both bring it back to the same circle. At the root stands the Chariot (7): the task is to turn faith into a road, that is, to choose your own stretch of the way and drive it yourself. This is one of the rarest tails, about one birth date in 275. People born in May, June and July never have it, and from 2022 to 2029 not a single person with it was or will be born. And everyone who has it has Temperance in the centre of the chart — the very measure that the “warrior of faith” lacks.",
+  "sections": [
+    {
+      "h2": "Do you have the 21-10-7 tail? A ten-second check",
+      "paragraphs": [
+        "No calculator needed. 21-10-7 comes up if and only if the first three numbers of the matrix add up to **7 or 52**.",
+        {
+          "ol": [
+            "**Day arcanum** — the day you were born. If it is over 22, add its digits: 30 → 3, 31 → 4.",
+            "**Month** — its number, from 1 to 12.",
+            "**Year arcanum** — the sum of the digits of the year. If the result is over 22, add the digits again: 1985 → 23 → 5, 1993 → 22, 2001 → 3."
+          ]
+        },
+        "Add the three numbers and check the result:",
+        {
+          "ul": [
+            "20.10.1993: 20 + 10 + 22 = **52** → tail 21-10-7.",
+            "19.12.1974: 19 + 12 + 21 = **52** → tail 21-10-7.",
+            "01.01.1985: 1 + 1 + 5 = **7** → tail 21-10-7 (1985 → 23 → 5).",
+            "30.01.2001: 3 + 1 + 3 = **7** → tail 21-10-7 (the 30th reduces to 3).",
+            "21.12.1980: 21 + 12 + 18 = 51 → not this one (this date has the tail 18-6-6).",
+            "01.01.1986: 1 + 1 + 6 = 8 → not this one (this date has the tail 6-14-8)."
+          ]
+        },
+        "Why it works. The bottom corner of the chart, D, is the reduced sum of the three numbers. The sums 7, 25, 34, 43 and 52 all reduce to seven. After that the centre E decides everything — the same sum plus D. For 7 and 52 it comes out at 14 (7 + 7 = 14; 52 + 7 = 59 → 14), for 25, 34 and 43 at 5. A centre of 14 gives the tail 21-10-7: the entry M = 7 + 14 = 21, the middle N = 7 + 21 = 28 → 10. A centre of 5 gives a different tail with the same Chariot at the root, 12-19-7. There is no other way to 21-10-7: this was checked by going through every day from 1900 to 2100.",
+        {
+          "table": {
+            "head": [
+              "Point",
+              "Arcanum",
+              "How it is derived"
+            ],
+            "rows": [
+              [
+                "E · centre",
+                "14 · Temperance",
+                "for everyone with this tail"
+              ],
+              [
+                "M · entry",
+                "21 · The World",
+                "(7 + 14)"
+              ],
+              [
+                "N · mechanism",
+                "10 · The Wheel",
+                "(7 + 21 = 28 → 10)"
+              ],
+              [
+                "D · root",
+                "7 · The Chariot",
+                "bottom corner of the chart"
+              ]
+            ]
+          }
+        },
+        "The sum doesn’t match, but 21-10-7 is in your chart? Almost certainly you are not looking at the tail — that is the next section, and it concerns most people who search for these numbers.",
+        {
+          "h3": "Every birth date with this tail"
+        },
+        "The tail is so rare that all its dates fit into two tables. Before 2000 it comes in through the sum 52: the day is the 18th to the 22nd, the month August to December, the sum of the year’s digits 18 to 22.",
+        {
+          "table": {
+            "head": [
+              "Years of birth",
+              "Birthdays"
+            ],
+            "rows": [
+              [
+                "1957, 1966, 1975, 1984, 1993",
+                "22 August, 21 September, 20 October, 19 November, 18 December"
+              ],
+              [
+                "1956, 1965, 1974, 1983, 1992",
+                "22 September, 21 October, 20 November, 19 December"
+              ],
+              [
+                "1955, 1964, 1973, 1982, 1991",
+                "22 October, 21 November, 20 December"
+              ],
+              [
+                "1954, 1963, 1972, 1981, 1990",
+                "22 November, 21 December"
+              ],
+              [
+                "1953, 1962, 1971, 1980",
+                "22 December"
+              ],
+              [
+                "1958, 1967, 1976, 1985, 1994",
+                "1 January (here the sum is 7)"
+              ]
+            ]
+          }
+        },
+        "For 1900–1949 the rule is the same: years whose digits add up to 18 to 22 (for example, 1939 or 1948), and 1 January 1949.",
+        "Since 2000 the tail comes in only through the sum 7, that is, through the smallest day, month and year:",
+        {
+          "table": {
+            "head": [
+              "Year of birth",
+              "Birthdays"
+            ],
+            "rows": [
+              [
+                "2000",
+                "4 January, 31 January, 3 February, 2 March, 1 April"
+              ],
+              [
+                "2001, 2010",
+                "3 January, 30 January, 2 February, 1 March"
+              ],
+              [
+                "2002, 2011, 2020",
+                "2 January, 1 February"
+              ],
+              [
+                "2003, 2012, 2021",
+                "1 January"
+              ],
+              [
+                "2030",
+                "1 January — the next date after 2021"
+              ]
+            ]
+          }
+        },
+        {
+          "h3": "What follows from this arithmetic"
+        },
+        {
+          "ul": [
+            "**This is one of the rarest tails.** Of all dates from 1950 to 2025 it got 101 out of 27,759, roughly one in 275. That is 24th place out of the 26 tails the formula produces: only 9-18-9 and 6-14-8 are rarer.",
+            "**It has two doors at opposite ends of the year.** Before 2000 — from 22 August to 22 December, and only on the 18th–22nd. Since 2000 — from 1 January to 1 April, and only the first days of a month or 30–31 January, which reduce to 3 and 4.",
+            "**There are months and days when it never occurs.** People born in May, June and July never get 21-10-7, in any year. Nor do those born on the 5th to the 17th or the 23rd to the 29th.",
+            "**A New Year’s tail.** On 1 January it comes up once every nine years: in 1949, 1958, 1967, 1976, 1985, 1994, 2003, 2012, 2021 and 2030. The digits of these years reduce to 5, and 1 + 1 + 5 = 7.",
+            "**It has almost disappeared.** Among people born in 1950–1999 it is one date in 231; since 2000, one in 432. After 1 January 2021 the next such date is 1 January 2030, and after that only 22 December 2079. A whole generation of children will grow up without a single “warrior of faith”.",
+            "**Temperance in the centre means this tail.** If the centre of the chart holds 14, the tail can only be 21-10-7, and vice versa. There are no dates with a centre of 14 and a different tail; this too was checked on every day from 1900 to 2100.",
+            "**7-10-21 is the same tail read from the outside.** There is no tail that starts with 7: the first number of a tail is always a multiple of three. The triple 7-10-21 does not occur at all in the other lines of a personal chart. If you see 7, 10 and 21 on the bottom ray, you are reading your tail from the corner to the centre."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "Most often 21-10-7 is not in the tail",
+      "paragraphs": [
+        "This is worth checking before you read on. The same three numbers in the same order appear in one more place of the chart — in the relationship line M–R1–R, also called the love programme. There they occur four times as often as in the tail: 414 dates against 101 over 1950–2025. Of everyone who finds 21-10-7 in their chart, only about one in five has it as the tail.",
+        "Telling them apart is easy: look at the centre of the chart. If it is 14, this is your tail, and the reading below is about you. If it is another number, 21-10-7 is in your relationship line. Nobody has this triple in both places at once. People with the 21-10-7 tail always have a different relationship line. And those with 21-10-7 in the relationship line always have one of three neighbouring tails: 21-4-10 (six in ten of them), 21-7-13 or 21-10-16. For example, 07.01.1982 has the tail 21-4-10, 07.01.1976 has 21-7-13, 07.01.1979 has 21-10-16, and all three dates share the same relationship line: 21-10-7.",
+        "The relationship line is read by its own rules. Its entry M is shared with the tail, so here too the World means the first move — entering closeness with a picture of a whole shared life. The middle, R1, the point “under the heart”, shows what the couple revolves around once the first attraction has passed: with the Wheel, that is changes, new stages, shared turns. The end point R is where money and relationships cross, what the union comes up against: with the Chariot, that is the question of who steers and where the two of them are going. The result is the script of a couple on the road. It is not a karmic tail and not a debt from the past: the same arcana in another position answer another question. The plot about choosing a direction, which the reading below is devoted to, can be recognised there too, but it has to be read as the story of a couple, not as a personal tail."
+      ]
+    },
+    {
+      "h2": "Why 21-10-7 is called “the Warrior of Faith”",
+      "paragraphs": [
+        "Popular interpretations explain the name with a past-life legend. The soul supposedly was a preacher, a warrior for the faith or a “moral despot”: it believed devoutly in its own truth and imposed it by force, not by word. Hence the lesson attributed to the tail — tolerance of other people’s views. The legend has a second half, written about less often but recognised just as well: a person “without an inner engine” who changes jobs and places and still can’t find their path. The legend cannot be checked: a birth date says nothing about events of the past. But both its halves, as we will see, are one story.",
+        "The name has a footing in the cards themselves. In Waite’s divinatory list the Chariot has “war, triumph, presumption, vengeance”. The World is not a private goal but a picture of the whole world at once, where everything is in its place — that is, faith in the broadest sense. And the third part of the name lies not in the tail but in the centre.",
+        "There is a puzzle here. The 12-19-7 tail, called simply “the Warrior”, has the Hierophant, a priest, in the centre of the chart. The “Warrior of Faith” has Temperance there — a winged angel with two cups, the card of measure. So where is the faith? In the same list of Waite’s. To Temperance reversed he gives “Things connected with churches, religions, sects, the priesthood”, and then “disunion, unfortunate combinations, competing interests”. A calculated number has no reversed position, but the list shows which themes Waite connected with this card at all. Its light is the harmony of different things. Its shadow is the sect: my truth against yours, and interests that do not fit together.",
+        "What comes out is almost a formula for the name: a warrior (the Chariot) goes on a campaign for a picture of the whole world (the World), and in the centre stands a card that can become either tolerance or sectarianism (Temperance). Whether this is a coincidence or the source of the name cannot be said: the origin of the popular names of the tails is not documented anywhere. But it helps to read the tail."
+      ]
+    },
+    {
+      "h2": "The main image: a crown at the start of the road and a crown at the end",
+      "paragraphs": [
+        "The three cards of the tail and the card of the centre are linked by one detail, and it explains 21-10-7 more precisely than any list of traits.",
+        "The World in Pamela Colman Smith’s drawing is a dancing figure in an oval garland. Waite reports that Éliphas Lévi “calls the garland a crown”. And he makes an unexpected remark about the card: the World is “perhaps more especially a story of the past”, of the day “when all was declared to be good, when the morning stars sang together”. The World’s garland is a memory of the whole, where everything is in its place.",
+        "In the 21-10-7 tail this crown stands at the start. A person enters the script with a ready picture of the right world — not as a dream to walk towards, but as knowledge they already have: “I know how it should be.” Hence the particular tone of the “warrior of faith”. He does not invent anything new; he restores what is right: he gives back to a family, a team, a country, a loved one the order he sees. Wen writes about the World in the position of the past — for her it is a spread, not the matrix, but the match is exact: it is “the state that is predetermined or outlined for the Seeker, though whether the Seeker will walk the path of manifesting that full potential is to be determined by present conditions and choices”. The picture is given. The road is not.",
+        "The Chariot at the root says something else about the crown. Waite explains that this card “is really the King in his triumph”, but a king of a particular kind: “the victory which creates kingship as its natural consequence and not the vested royalty of the fourth card”, the Emperor. The Chariot’s crown is not received in advance; it is earned by the road.",
+        "And Temperance in the centre shows where the crown really is. Behind the angel with the cups, Waite writes, “A direct path goes up to certain heights on the verge of the horizon, and above there is a great light, through which a crown is seen vaguely.”",
+        "So the pictures add up to the task of the tail. At the entry, the person holds the garland in their hands and thinks the road has already been travelled. The root and the centre restore the right order: first the path, then the crown, and it can be made out in advance only vaguely. The link between the pictures is our reading, but it rests on Waite’s own words. The practical conclusion is simple: **a picture of the whole is useful as a horizon and harmful as a ready answer.** With a horizon, you drive. With a ready answer, you fight or you wait."
+      ]
+    },
+    {
+      "h2": "A wheel without a chariot: how the loop works",
+      "paragraphs": [
+        "The numbers of the tail almost make a sentence. The middle is calculated as the sum of the root and the entry: **Wheel = Chariot + World** (7 + 21 = 28 → 10). A will that drives “towards everything at once” drives in a circle: the whole world has no point on the map you can reach. And a wheel that is not set under a chariot only spins. People rise and fall on it — on Waite’s card one figure goes up with the rim and a serpent goes down — but you cannot get anywhere on it.",
+        {
+          "ol": [
+            "**Vision.** A picture takes shape: how to live, work, love, raise children, run a home or a country the right way. It is not an opinion but a sense of the whole — everything fits, and the World gives a rare certainty: I know.",
+            "**The turn.** Life turns by its own laws: people think differently, circumstances change, luck comes and goes. The picture runs into the first turn of the wheel.",
+            "**The fork.** Here the tail makes its habitual move, and it has two options. Push: prove, persuade, remake — with the Chariot’s force, only aimed at other people. Or wait: “it wasn’t meant to be”, “the time isn’t right”, “this is a sign I should go another way” — and hand the steering to the wheel.",
+            "**The revolution.** The wheel comes back to the same point. The campaign ends in defeat, a Pyrrhic victory or a break with those you wanted to convert. The waiting does not pay off. The person ends up where they started, only older.",
+            "**A new vision.** The next faith, country, teaching, cause, person — or the old picture under a new banner. And again with the feeling that this time everything will come together."
+          ]
+        },
+        "Wen writes of the Wheel that it can foreshadow “that history will repeat itself”: “the past will become the future and there could be a sense of déjà vu”. For this tail déjà vu is the main sign. “It’s all just like last time” sounds at every new revolution, even though the scenery is different each time.",
+        "The tail’s trouble is not a shortage of chances but an excess of them. Curiously, in Waite’s divinatory list the Wheel reversed means not failure but “Increase, abundance, superfluity”. 21-10-7 never runs short of turns, and each one looks like a new path. What is missing is one thing — a destination of your own against which a turn can be judged.",
+        "**The loop opens at the third step.** At the fork there is a third move besides “push” and “wait” — to steer: decide what this turn changes about the road and what it does not change about the destination, and drive your stretch yourself. In Colman Smith’s drawing the charioteer has no visible reins: this chariot can only be steered by decision; no harness can replace it. The wheel does not go anywhere. It simply goes under the chariot and starts to carry it."
+      ]
+    },
+    {
+      "h2": "The Crusader and the Wanderer: one and the same tail",
+      "paragraphs": [
+        "The two halves of the legend — “a warrior who imposes his truth” and “a person without an engine who can’t find their path” — look like two different portraits in popular readings. In fact they are two answers to one and the same turn. Wen observes of the Chariot person: “The Seeker likes to appear in control, but has a tendency to run from his or her problems (or attack the problems with such aggression as to subdue it and therefore avoid true, mature confrontation).” These are the two modes of 21-10-7.",
+        {
+          "table": {
+            "head": [
+              "",
+              "The Crusader",
+              "The Wanderer",
+              "The Charioteer — the tail lived through"
+            ],
+            "rows": [
+              [
+                "What they do at a turn",
+                "push the wheel: prove, press, fight",
+                "hand the wheel the steering: wait for a sign, leave",
+                "change the road, but not the destination"
+              ],
+              [
+                "How it sounds inside",
+                "“I know what’s right, and I’ll prove it”",
+                "“it wasn’t meant to be”, “this isn’t for me”",
+                "“here is my stretch, and here is where it ends”"
+              ],
+              [
+                "The picture of the whole",
+                "a banner to fight for",
+                "a promise that keeps being put off",
+                "a horizon to check the course by"
+              ],
+              [
+                "Other people",
+                "converts or opponents",
+                "fellow travellers who will decide for them",
+                "companions with roads of their own"
+              ],
+              [
+                "Déjà vu",
+                "“nobody understood again”",
+                "“not the right thing again”",
+                "noticed and driven through differently"
+              ],
+              [
+                "The price",
+                "arguments, break-ups, loneliness among the “uninitiated”",
+                "years of a life that isn’t theirs",
+                "giving up part of the world for the sake of their own stretch"
+              ]
+            ]
+          }
+        },
+        "Quite often both modes live in one person in turn: years of campaigning for a righteous cause, defeat, exhaustion, a long spell of “I don’t want anything, let life decide” — and a new faith with which it all begins again.",
+        "Waite left a precise caveat about the Chariot: “the liberation which he effects may leave himself in the bondage of the logical understanding”. The Crusader frees others from their delusions and does not notice that he himself is captive to his own rightness. The Wanderer is free of all campaigns and does not notice that the wheel is the one in charge of this freedom.",
+        "So the way out is not to swap one mode for the other: become more tolerant of everything, or more decisive in everything. The way out is a question the charioteer asks himself at every turn: **where am I going, and whose decision is it — mine, my idea’s or the circumstances’?**"
+      ]
+    },
+    {
+      "h2": "The hidden fourth card: everyone with 21-10-7 has Temperance in the centre",
+      "paragraphs": [
+        "In the method, the centre is the comfort zone, the point a person returns to. Everyone with this tail has 14 there, Temperance, and this is not a coincidence but arithmetic: a centre of 14 occurs only with this tail. The entry of the tail comes straight out of it: **World = Chariot + Temperance** (7 + 14 = 21).",
+        "Together with the formula for the middle, this gives two roads from one point. The Chariot plus the whole world gives a circle. The Chariot plus measure gives the whole. The tail literally points to what the will lacks to reach its goal.",
+        "Waite’s Temperance is a winged angel “pouring the essences of life from chalice to chalice”, with “one foot upon the earth and one upon waters”. Waite explains the card’s name this way: “when the rule of it obtains in our consciousness, it tempers, combines and harmonises the psychic and material natures”. And he adds a sentence that sounds like a direct answer to the tail’s question: “Under that rule we know in our rational part something of **whence we came and whither we are going**.”",
+        "Hence the paradox of 21-10-7. The centre is harmony, measure, “both at once”. The root is the Chariot, a chosen direction. Until the centre works for the root, Temperance becomes a convenient excuse for the Wanderer: everything can be combined, nothing needs to be chosen, any turn can be accepted. And its shadow from Waite’s list feeds the Crusader: the sect, my truth against yours. When the centre does work, it gives both modes exactly what they lack.",
+        {
+          "ul": [
+            "**For the Crusader — tolerance.** Not an empty cup in place of your faith, but two full ones: your own and someone else’s, between which you can pour. Wen describes Temperance as “the fusion of two contrasting elements and bringing them into harmony within the mind or the spirit”.",
+            "**For the Wanderer — direction.** That very path to the heights, and the knowledge of where you are going. Wen has a very practical reading of the card for work: often “it isn’t that new skills need to be learned, but rather that the Seeker need only reconcile his or her existing skills with the task at hand”. For the Wanderer this is the answer to endless new beginnings: almost everything needed for a road of their own already lies in their past roads."
+          ]
+        },
+        "Two details for those who love coincidences. In The Symbolism of the Tarot, P. D. Ouspensky called the angel of Temperance Time: “One of the cups the angel holds is the past, the other is the future. The rainbow stream between the cups is the present. You see that it flows both ways” (Wen quotes these words). For a tail that tradition links with the past, the image is exact: the past is not a sentence; it can be poured into the future. And one more: on the angel’s breast Waite sees “the square and triangle of the septenary”, and 4 + 3 = 7. The centre of the tail is 14, that is 7 + 7, and the root is 7. This is not a rule of the method, but it is worth noticing."
+      ]
+    },
+    {
+      "h2": "Where else the same arcana stand in your chart",
+      "paragraphs": [
+        "A seven in the bottom corner and a fourteen in the centre fix several more numbers. They are the same for everyone with 21-10-7:",
+        {
+          "table": {
+            "head": [
+              "Where in the chart",
+              "Number",
+              "What it gives the reading"
+            ],
+            "rows": [
+              [
+                "Centre, comfort zone (E)",
+                "14 — Temperance",
+                "Always and only with this tail. More in the section above."
+              ],
+              [
+                "Manipura",
+                "14-14-10",
+                "Temperance in Physics and Energy, the Wheel in Emotions: the middle of the tail repeats in the chakra of will."
+              ],
+              [
+                "Svadhisthana, energy",
+                "21 — The World",
+                "This is point M, the entry of the tail."
+              ],
+              [
+                "Muladhara, energy",
+                "7 — The Chariot",
+                "This is point D, the root of the tail."
+              ],
+              [
+                "Relationship line",
+                "starts with 21",
+                "Its entry is shared with the tail. After that, most often 21-5-11, 21-6-3 or 21-4-10, and never 21-10-7."
+              ]
+            ]
+          }
+        },
+        "So all three arcana of the tail and the centre stand in the three lower chakras of the chart. The numbers repeat because of the formula, not because the quality gets stronger: in each position the arcanum has its own role. But if sevens, fourteens and twenty-ones stand out in your chart, the reason is the arithmetic of the tail."
+      ]
+    },
+    {
+      "h2": "How 21-10-7 shows up in life",
+      "paragraphs": [
+        "The scenes below are sketches. Recognise yourself in them where the mechanism matches: a picture of the whole, a turn, “push or wait”, a new circle.",
+        {
+          "h3": "In work and money"
+        },
+        "At work the Crusader is a reformer. He joins a team with a ready understanding of how everything should be set up, and that understanding is often right. The trouble is the method: changes are carried out as a campaign, those who disagree are written down as opponents, every meeting becomes a battle for a righteous cause. After a year or two he leaves feeling misunderstood, and at the new company he starts the same campaign. The wheel turns, and the CV grows.",
+        "At work the Wanderer is a person of many beginnings. Every new offer, fashionable direction or crisis looks like a sign: this is it, this is mine. Popular readings of this tail contain an accurate complaint: you can change several jobs, and the sense of your own path still never comes. There is a lot of experience, and it is real; it just has not been put together into one road.",
+        "With this script, money often comes in waves, following the revolutions of the wheel: a project took off, a project closed. The numbers do not predict this, but if you recognise it, look at the centre. In Waite’s divinatory list Temperance upright is “Economy, moderation, frugality, management”. For 21-10-7, money is provisions for the road, not campaign spoils, and it helps to manage it as the budget of the chosen stretch, not as a stake on the next turn.",
+        "The strong move is the same for both modes: keep the destination fixed and change the road freely. For the reformer — choose one change and see it through. For the Wanderer — judge a new offer not by how bright it is but by whether it brings you closer to what you have chosen.",
+        {
+          "h3": "In relationships"
+        },
+        "Here the script switches on earliest of all: the tail’s entry M also opens the relationship line, so for everyone with 21-10-7 it begins with the World. Love begins with a picture of a whole shared life — what a real family, real closeness, a proper home should be.",
+        "In a couple the Crusader educates. The partner becomes someone to be brought round to the right picture: the right way to holiday, the right way with money, the right attitude to the relatives. Quarrels turn into sermons, making up into capitulation. In a couple the Wanderer waits: first for a person in whom the whole world will come together, then for the partner to change on their own. At the first serious turn — a move, a child, a crisis for one of the two — out comes “it wasn’t meant to be”.",
+        "Imagine a couple where one wants to move to another country and the other does not. The Crusader will gather arguments within a month, win the debate and then live next to a person he has carried off. The Wanderer will give in and wait for years for life to turn everything around by itself. The Charioteer will ask: where are the two of us going over the next two years, and what is each of us ready to give for this road? Temperance in the centre suggests the shape of the answer: two cups, two pictures, and what can be poured from one into the other.",
+        {
+          "h3": "In beliefs and arguments"
+        },
+        "The most recognisable form of the tail. Converting your parents, winning friends over, out-arguing commenters, explaining to your brother the right way to raise children, spend money, vote or believe. The faith here is not necessarily religious: any complete answer to the question “how should one live” will do.",
+        "Signs of the Crusader: you prove more often than you ask; your circle gradually narrows to the like-minded; it gets lonely among the “uninitiated”. The sign of the Wanderer is a change of teachings. Each new one is taken as final, disappointment in it feels like a cliff edge, and the next one turns up at the nearest turn.",
+        {
+          "h3": "In roads and moves"
+        },
+        "For this tail the road is not a metaphor. All three cards are about movement: in Waite’s divinatory list the World has “voyage, route, emigration, flight, change of place”, the Wheel is a revolution, the Chariot is the vehicle itself. For 21-10-7 a move may well turn out to be the best decision of their life. The script gives itself away in two variants: a move as a campaign (“over there everything is set up right, and here it isn’t”) and a move as an escape from a turn.",
+        "Wen says something precise about the Chariot: it is “travel not for the sake of travel, but for the sake of acquisition”. The test is simple: what are you going to bring back from there — a skill, a business, money, people, understanding? If there is no answer, you are not going for something but away from something.",
+        {
+          "h3": "Parents and children"
+        },
+        "There are few children with this tail: since 2000, 22 birthdays, all listed above. If your child is among them, the most useful thing is to give them not a crown but a road: small finished tasks with a clear finish, the right to lose an argument, and the experience that changing your mind is not betrayal.",
+        "A parent with 21-10-7 should watch for something else: whether they are raising a convert. A child who has been taught from early on the one right picture of the world usually does one of two things with it. Either they carry it further like a banner, or one day they walk away from it — and become a Wanderer."
+      ]
+    },
+    {
+      "h2": "The road or the circle: how to tell them apart",
+      "paragraphs": [
+        {
+          "table": {
+            "head": [
+              "The road",
+              "The circle"
+            ],
+            "rows": [
+              [
+                "The stretch has an end and a sign that you’ve arrived",
+                "The goal is “everything”, “the right life”, “when everything sorts itself out”"
+              ],
+              [
+                "A turn changes the route, but not the destination",
+                "Every turn changes the destination"
+              ],
+              [
+                "A new offer is judged by the course",
+                "A new offer is judged by its brightness"
+              ],
+              [
+                "In an argument you look for a solution",
+                "In an argument you look for a convert"
+              ],
+              [
+                "Companions can believe in something of their own",
+                "Companions must believe in the same thing"
+              ],
+              [
+                "In a year you can show what has been done",
+                "In a year there is a new story about what will be"
+              ]
+            ]
+          }
+        },
+        "If more of your answers fall in the right-hand column, you are on the wheel. That is not a sentence: the wheel is part of the chariot; it needs not to be thrown away but to be set under the cart."
+      ]
+    },
+    {
+      "h2": "What to do with the 21-10-7 tail: eight practices",
+      "paragraphs": [
+        "These are the author’s exercises, derived from the logic of the triple — not a rite and not a promise of results. Each one targets a specific link in the loop.",
+        {
+          "ol": [
+            "**A stretch instead of the world.** Describe your picture of the whole in one sentence and put it aside: it is a horizon, not an address. Then name the nearest stretch of road — what will be done, by when, and by what sign you will know you have arrived. The crown is visible only at the end of the path, but the path can be seen right now.",
+            "**Three questions at a turn.** A new offer, a crisis, a failure or a bright idea — ask yourself: does this change the destination or only the road? Who is deciding now — me, my idea or the circumstances? What will I drop if I turn, and am I ready to drop it? These questions are the third move at the fork, between “push” and “wait”.",
+            "**A log of revolutions.** Write down five “new beginnings” from the last ten years: what began, at what turn it ended, where you ended up. Find the place where the same thing happens every time. That is your déjà vu, and it needs to be driven through differently, not all over again.",
+            "**Someone else’s faith in your own words.** Before arguing, restate the other person’s position so that they say: “Yes, that’s exactly what I think.” Only then say your own piece. This is the two-cups exercise: first pour from someone else’s.",
+            "**Say it once.** Offer your conviction once: what I think, why, what follows from it. After that the choice is the other person’s, and you can come back to the topic only if asked. A sermon differs from an opinion not in content but in the number of repeats.",
+            "**A daily move.** For the Wanderer mode: one small action on the chosen stretch every day, even fifteen minutes. The Chariot is not a decision made once but driving.",
+            "**What to bring back.** Before a move, a change of job, a new teacher or a new venture, answer in writing: what do I want to bring back from there? Travel for the sake of acquisition is a road. Travel with no answer to this question is an escape from a turn.",
+            "**Two cups.** When you are torn between two paths or two truths, don’t rush to throw one away. Ask what can be poured from one into the other: which skill from the past will be useful in the new, which part of someone else’s truth you can take into your own. Temperance in the centre is your tool, not your weakness."
+          ]
+        },
+        "And five phrases that break the script in the moment:",
+        {
+          "ul": [
+            "Instead of “I know what’s right” — “this is what seems right to me”.",
+            "Instead of “it wasn’t meant to be” — “what will I do at this turn?”",
+            "Instead of “you have to understand” — “may I tell you how I see it?”",
+            "Instead of “I’ll start again from scratch” — “I’ll finish this stretch and then decide”.",
+            "Instead of “nobody understands me” — “who besides me needs this?”"
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "The strength of 21-10-7: a guide through change",
+      "paragraphs": [
+        "In its lived-through version this tail gives a rare combination. The person sees the whole (the World), knows how to move with change rather than against it (the Wheel), and sees what they have chosen through to the end (the Chariot). Add the centre — the ability to bring different things into harmony (Temperance) — and you get a guide: someone who leads people, a business or a family through changing circumstances towards a big goal and does not lose it at the turns.",
+        "Such people know how:",
+        {
+          "ul": [
+            "**to hold the horizon and see the next step** — the big picture does not get in their way but helps them choose the stretches;",
+            "**to change the road without drama** — for them a turn is information, not a sign from above and not a betrayal;",
+            "**to join what can’t be joined** — people of different views, cultures and professions, old skills and new tasks;",
+            "**to persuade without preaching** — because they know how to pour from someone else’s cup first;",
+            "**to finish** — what they leave behind is not stories about what will be but finished sections of the road."
+          ]
+        },
+        "No list of “right” professions follows from this: you can be a guide in logistics, in a family, in science and in negotiations.",
+        "In Waite, the Chariot’s divinatory list does not begin with war at all. Its first words are “Succour, providence”, and war, triumph and vengeance come after the word “also”. The lived-through “warrior of faith” is the same chariot turned back to its first meaning: **a faith that does not fight but carries.**"
+      ]
+    },
+    {
+      "h2": "How 21-10-7 differs from similar tails",
+      "paragraphs": [
+        {
+          "table": {
+            "head": [
+              "Tail",
+              "What they share",
+              "Where they differ"
+            ],
+            "rows": [
+              [
+                "12-19-7",
+                "The same Chariot at the root; in popular readings both are “warriors”",
+                "12-19-7 fights under someone else’s banner for the sake of recognition, and has the Hierophant in the centre. 21-10-7 drives towards its own picture of the whole, with Temperance in the centre. There the question is “whose war is this”, here it is “where does this road lead”."
+              ],
+              [
+                "21-10-16",
+                "The same entry (the World) and the same middle (the Wheel)",
+                "At the root is the Tower: a form is held on to longer than it can stand, and it collapses. 21-10-7 often has no form to rebuild at all — only movement without a destination."
+              ],
+              [
+                "21-4-10",
+                "The World at the entry, the Wheel in the tail",
+                "There the Wheel stands at the root — it is the task, balance in motion. Here the Wheel is in the middle — it is the trap, the circle that the Chariot leads you out of."
+              ],
+              [
+                "21-7-13",
+                "The World and the Chariot in one tail",
+                "There the Chariot is the mechanism: the whole is taken by storm, and Death stands at the root. Here the Chariot is the root, the thing to learn: not to storm but to steer."
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "h2": "Myths about the 21-10-7 tail",
+      "paragraphs": [
+        {
+          "ul": [
+            "**“The Warrior of Faith is a religious fanatic.”** Faith here is any complete picture of how to live rightly. Many people with this tail are not religious at all and fight for a method, a politics, a way of raising children or the “right” kind of love.",
+            "**“A rare tail means a special soul with an important mission.”** The rarity is a consequence of arithmetic: days, months and years that add up to 7 or 52 are simply rare. There are no such dates at all in May, June and July, and there will be none from 2022 to 2029. Chosenness is not handed out that way.",
+            "**“Working with the tail means giving up your convictions.”** Temperance does not empty the cup; it needs two full ones: your own and someone else’s. And the root of the tail is the Chariot, which will not move without conviction.",
+            "**“The Wheel in the tail means life depends on luck.”** Waite saw behind this card precisely “the denial of chance and the fatality which is implied therein”. The Wheel here describes not luck but the habit of handing the steering to a turn or fighting it.",
+            "**“The tail promises moves and emigration.”** The tail does not assign events. It describes how a person deals with the road, not how many roads they will have.",
+            "**“In a past life you were an inquisitor or sold fakes.”** Such stories do not follow from the calculation and contradict each other: on some sites the tail comes from a preacher, on others from a seller of expired medicines. They cannot be checked, and they give nothing for the work."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "What this reading is based on",
+      "paragraphs": [
+        {
+          "ul": [
+            "**Calculation** — Natalia Ladini’s classic destiny matrix scheme with points A–T: D = A + B + C, E = A + B + C + D, the tail M–N–D, where M = D + E and N = D + M; the relationship line M–R1–R, where L = C + E, R = L + M, R1 = M + R. Sums over 22 are reduced by adding their digits. The “7 or 52” condition, the constant centre 14, the full list of dates and the comparison with the relationship line were obtained by going through every day from 1900 to 2100; shares and frequency ranks were calculated from the dates of 1950–2025.",
+            "**Card meanings** — A. E. Waite, The Pictorial Key to the Tarot (1910, reissued 1922) with drawings by Pamela Colman Smith, and Benebell Wen, Holistic Tarot (2015). Quotations are given in the original English. P. D. Ouspensky’s words on Temperance are given as quoted by Wen.",
+            "**The name “the Warrior of Faith” and the past-life legend** come from popular interpretations of the destiny matrix. Neither Waite nor Wen wrote about the matrix or karmic tails: assembling the three cards and the centre into one script is the author’s interpretation."
+          ]
+        },
+        "The destiny matrix is an esoteric system of interpretation, not a scientific method. The tail describes a tendency and gives you a language to notice it; it does not predict events, health or money."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "q": "How do I know I have the 21-10-7 karmic tail?",
+      "a": "Add the arcanum of your birth day (30 → 3, 31 → 4), the number of the month and the reduced sum of the digits of the year. If you get exactly 7 or exactly 52, your tail is 21-10-7. In a ready chart the sign is even simpler: 14 in the centre. There is no other way to this tail."
+    },
+    {
+      "q": "My chart has 21-10-7, but the centre is not 14. What is it?",
+      "a": "Most likely the triple stands in your relationship line M–R1–R. It occurs there four times as often as in the tail, and it is a different position: the script of a couple, not a karmic tail. In that case your tail is 21-4-10, 21-7-13 or 21-10-16. Look at the bottom ray of the chart, from the centre to the bottom corner: that is where the tail is written."
+    },
+    {
+      "q": "Are 21-10-7 and 7-10-21 the same tail?",
+      "a": "Yes, if 7, 10 and 21 stand on the bottom ray of your chart: you are reading the tail from the corner to the centre. There is no tail that starts with 7 in this scheme — the first number is always a multiple of three. The triple 7-10-21 does not occur at all in the other lines of a personal chart, so “the 7-10-21 programme” is the same tail written in reverse order. The roles do not change: 21 is the entry, 10 the mechanism, 7 the root."
+    },
+    {
+      "q": "Why is it so rare, and is it true that nobody gets it now?",
+      "a": "It is true. The sum 52 needs the largest numbers: a day from the 18th to the 22nd, a month no earlier than August, year digits adding up to 18 to 22. Years from 2000 to 2078 do not have such a sum. The sum 7 needs the smallest ones, and since 2022 even those are not small enough: the arcanum of 2022 is 6, and it only goes up from there. The next date with this tail is 1 January 2030, and after that 22 December 2079. That is why almost everyone who has it was born in 1953–1994 and 2000–2021."
+    },
+    {
+      "q": "Why “the Warrior of Faith” if I am not religious?",
+      "a": "Because the faith in this name is any complete picture of “how it should be”. The name has a footing in the cards: in Waite’s divinatory list the Chariot has war, and Temperance reversed, which stands in the centre for everyone with this tail, has churches, religions, sects and competing interests. The plot of the tail is not about religion but about what a person does with their truth: fights for it, waits for life to confirm it, or drives their own road with it."
+    },
+    {
+      "q": "I found 21-10-7 in a compatibility matrix. Is it the same tail?",
+      "a": "No. A compatibility matrix is built from two dates, and the triple in it describes the shared script of a couple. The partners keep their own personal tails, each their own. A triple from a compatibility chart has to be read by the rules of that scheme; the reading above is about a personal chart."
+    },
+    {
+      "q": "Is the tail different for men and women?",
+      "a": "No. Sex plays no part in the calculation and changes neither the numbers nor the mechanism. A person of any sex can turn out to be a Crusader or a Wanderer; only the circumstances in which the script shows itself differ."
+    },
+    {
+      "q": "Can the 21-10-7 tail be closed?",
+      "a": "The numbers in the chart do not change; what changes is how the script is played out. Signs of a lived-through tail: your road has a nearest stretch with a finish line; you meet a turn with a question, not with war or submission; you can retell someone else’s truth so that its author agrees; what you leave behind are finished sections of the road, not just started ones."
+    }
+  ],
+  "related": [
+    "21-10-16",
+    "21-4-10",
+    "21-7-13",
+    "12-19-7",
+    "arcanum/21",
+    "arcanum/10",
+    "arcanum/7"
+  ],
+  "intro": [
+    {
+      "table": {
+        "head": [
+          "Position",
+          "Arcanum",
+          "Role in the script",
+          "Image"
+        ],
+        "rows": [
+          [
+            "**M** — entry",
+            "21 · The World",
+            "a picture of the whole: “I know how everything should be”",
+            "a garland that Lévi called a crown"
+          ],
+          [
+            "**N** — mechanism",
+            "10 · The Wheel of Fortune",
+            "a turn after which everything starts over",
+            "a wheel without a chariot"
+          ],
+          [
+            "**D** — root",
+            "7 · The Chariot",
+            "choose your own stretch of road and drive it yourself",
+            "a charioteer without reins"
+          ],
+          [
+            "**E** — centre of the chart",
+            "14 · Temperance",
+            "the same for everyone with this tail: measure, harmony, “both at once”",
+            "a path to a barely visible crown"
+          ]
+        ]
+      }
+    }
+  ],
+  "report": [
+    "The legend of the 21-10-7 tail portrays two people who seem impossible to fit into one biography. In a past life the soul was supposedly a preacher or a “moral despot”, devoutly sure of its truth and imposing it by force, not by word. The other half is someone “without an inner engine”, who changes jobs and places and never finds a path of their own. The legend cannot be checked: a birth date says nothing about past lives. But both halves are one story, and it is written in the cards themselves.",
+    "Popular readings call the tail “the Warrior of Faith”, and the cards do hold a warrior: in Waite’s divinatory list the Chariot, the root of the tail, has “war, triumph, presumption, vengeance”. The faith turns up where nobody expects it — in the centre of the chart. Everyone with 21-10-7 has Temperance there, and to Temperance reversed Waite gives “churches, religions, sects, the priesthood”, then “disunion, unfortunate combinations, competing interests”. Matrix numbers are never reversed, but the themes are plain: the card’s light is harmony between differences, its shadow is the sect. Almost a formula for the name: a warrior (the Chariot) campaigns for a picture of the whole world (the World at the entry), and the centre holds a card that can become either tolerance or sectarianism. Whether this is the source of the name is unknown.",
+    {
+      "h3": "Crowned before the road begins"
+    },
+    "Waite reports that Éliphas Lévi called the World’s garland a crown, and calls the card “perhaps more especially a story of the past”, of the day “when all was declared to be good, when the morning stars sang together”. In 21-10-7 this crown stands at the entry. The picture of the right world comes not as a dream but as knowledge: “I know how it should be.” The picture is given. The road is not.",
+    "The Chariot at the root knows a different crown: Waite’s charioteer is a king whose kingship is created by victory. Such a crown is earned by the road, not received in advance. Temperance in the centre shows where it really lies: behind the angel, Waite writes, “a direct path goes up to certain heights on the verge of the horizon”, and through a great light above them “a crown is seen vaguely”.",
+    "Linking these images is our reading, resting on Waite’s own words: first the path, then the crown. **A picture of the whole is useful as a horizon and harmful as a ready answer.** A horizon is something to drive towards. A ready answer is something to fight for or wait on.",
+    {
+      "h3": "A wheel without a chariot only spins"
+    },
+    "The middle of the tail is the root plus the entry: Wheel = Chariot + World (7 + 21 = 28 → 10). A will that drives “towards everything at once” drives in a circle: the whole world has no point on the map to reach.",
+    "The picture runs into a turn, and the tail has two moves. Push: prove, persuade, remake. Or wait — “it wasn’t meant to be”, “not yet” — and hand the steering to the wheel. Both lead back to the same point, followed by a new faith or the old one under a new banner. Wen links the Wheel with history repeating itself, and déjà vu is the tail’s main sign: “just like last time”, though the scenery is always different.",
+    "**The tail’s trouble is not a shortage of chances but an excess of them.** To the Wheel reversed Waite gives not failure but “Increase, abundance, superfluity”. What is missing is a destination of one’s own to judge a turn by.",
+    {
+      "h3": "The Crusader and the Wanderer are the same person"
+    },
+    "The two halves of the legend are two answers to one turn. Wen says the Chariot person tends either to run from problems or to attack them hard enough to subdue them — and so avoids “true, mature confrontation”.",
+    "At work the Crusader is a reformer. Often right on substance, he writes off those who disagree as opponents. After a year or two he leaves misunderstood and starts the same campaign elsewhere: the wheel turns, and the CV grows. The Wanderer is a person of many beginnings; every offer looks like a sign: “this is it, this is mine”. Often both modes take turns in one person: years of campaigning, defeat, exhaustion, “let life decide” — and a new faith.",
+    "Waite adds a caveat: the charioteer’s liberation “may leave himself in the bondage of the logical understanding”. The Crusader frees others from their delusions without noticing he is captive to his own rightness. The Wanderer is free of every campaign without noticing that the wheel runs his freedom.",
+    "The loop opens with a third move — steering: deciding what the turn changes about the road and what it leaves untouched about the destination, then driving one’s own stretch. A couple argues about moving abroad. The Crusader wins the argument and then lives beside someone he has carried off. The Wanderer gives in and waits years for things to sort themselves out. The Charioteer asks where the two of them are heading over the next two years. His question at every turn: **where am I going, and whose decision is it — mine, my idea’s or the circumstances’?**",
+    {
+      "h3": "Two full cups instead of one truth"
+    },
+    "The entry of the tail comes from the centre: World = Chariot + Temperance (7 + 14 = 21). Two roads from one point: the Chariot plus the whole world gives a circle; the Chariot plus measure gives the whole. Under the rule of Temperance, Waite writes, “we know in our rational part something of whence we came and whither we are going”.",
+    "Until the centre works for the root, Temperance excuses the Wanderer: everything can be combined, nothing has to be chosen. Its shadow feeds the Crusader. When the centre works, the Crusader gets tolerance — not an empty cup instead of his faith, but two full ones, his own and another’s. The Wanderer gets direction: Wen notes that often no new skills are needed, “the Seeker need only reconcile his or her existing skills with the task at hand”. The Wanderer’s past roads already hold almost everything needed for his own.",
+    "The exercises are the author’s own, not a rite or a promise of results:",
+    {
+      "ul": [
+        "Describe the picture of the whole in one sentence and set it aside: it is a horizon, not an address. Name the nearest stretch — what, by when, and what counts as “arrived”.",
+        "Before arguing, restate the other side’s position until they say: “Yes, that’s exactly what I think.” First pour from someone else’s cup.",
+        "Offer a conviction once: a sermon differs from an opinion not in content but in the number of repeats."
+      ]
+    },
+    {
+      "h3": "The Chariot’s list puts succour before war"
+    },
+    "In the lived-through version the person sees the whole (the World), moves with change (the Wheel), sees the chosen thing through (the Chariot) and harmonises differences (Temperance). This is a guide who leads people, a business or a family towards a big goal without losing it at the turns. Behind such a person remain finished stretches of road, not stories of what will be.",
+    "Waite’s divinatory list for the Chariot does not begin with war. Its first words are “Succour, providence”; war, triumph and vengeance come after the word “also”. The lived-through “warrior of faith” is the same chariot turned back to its first meaning: **a faith that does not fight but carries.**"
   ]
- },
- "short": "Karmic tail (karmic program) 21-10-7 begins with the scale of The World: you want to put a whole system together, see the far picture and not be limited to one role. The Wheel in the middle holds the script with a constant change of opportunities — every new turn looks like the chance worth changing course for. The root Chariot brings back a simple question: where exactly are you driving? This set is not about a lack of ambition, but about a scale that stays a view of all the roads until one of them is chosen as the route.",
- "sections": [
-  {
-   "h2": "The World opens the script with a wish to take in everything at once",
-   "paragraphs": [
-    "At first it all looks like a rare gift: a person sees not one task but the whole system — the links between people, projects and markets, and openings beyond their job title and the usual limits. They are drawn to international subjects, complicated constructions and plans that bring several fields together into one. That is how The World shows up in position M, and it is why the entry to this tail is easy to take for a plain advantage: it starts with a large and genuinely strong idea.",
-    "The difficulty appears when it comes to choosing where to apply it. The World shows the whole map at once, so any single road looks too narrow next to that picture. A person wants to keep access to the entire field and puts off narrowing the scale. This is exactly the moment The Wheel arrives: a new opportunity makes it possible once again not to choose for good, and at the same time it creates a feeling of movement."
-   ]
-  },
-  {
-   "h2": "The Wheel holds the repeat with the promise of the next turn",
-   "paragraphs": [
-    "Position N is taken by 10 The Wheel. The outside world really does bring this set plenty of turns: new acquaintances, ideas, invitations, a change of setting. The repeat works because every turn is taken for a new direction. Instead of a road that adds up, you get a series of bright starts, linked only by having happened to the same person.",
-    "The Wheel is most convincing right after the first difficulties. If a road has stopped answering quickly, a fresh chance looks like a sign that the earlier choice was a mistake. The project is rebuilt, the role changes, the route starts over — and the scale of The World stays a promise about the future. There are plenty of events, while the distance to your own goal barely gets any shorter."
-   ]
-  },
-  {
-   "h2": "The root Chariot asks for direction before speed",
-   "paragraphs": [
-    "Position D holds 7 The Chariot. Its task is often misread as a call to move faster still. For 21-10-7 speed is no longer what is missing. What is missing is a chosen direction, the one thing that lets you tell a useful turn from an attractive step sideways. The Chariot only becomes a force once the destination has been named.",
-    "Choosing a route means giving up part of The World’s picture for a while. That does not make the plan smaller; it turns it into a sequence of stretches. One project can be the first piece of a big system; one speciality can be the way into a wide subject. The root seven teaches you to measure movement not by the number of changes, but by whether they bring the stated goal closer."
-   ]
-  },
-  {
-   "h2": "How not to mistake an opportunity for a route",
-   "paragraphs": [
-    "Before a new turn it helps to ask: which part of my long goal does it move forward, what will I have to stop for it, and what result will still be there in six months? An opportunity with no answer to those questions may be interesting, but it does not have to become the new course. That way The Wheel keeps its liveliness without grabbing the steering wheel.",
-    "Another method that works is to keep the measure fixed rather than the plan. For example: a finished product, a skill you have mastered, a particular number of clients, a system that runs. The way of getting there can change along with The Wheel, but the measure stops any movement at all from being declared progress. The Chariot gets a road, and The World gets a real piece of the future whole."
-   ]
-  },
-  {
-   "h2": "The strong version: a guide through complicated systems",
-   "paragraphs": [
-    "A 21-10-7 that has been pulled together works well where a big system really does change as it goes. The World holds the whole, The Wheel helps to change the method in good time, and The Chariot keeps the direction. Such a person can carry a project across several markets and stages without clinging to the original plan and without losing sight of the goal.",
-    "The sign of a mature set is finished stretches of road. What stays behind such a person is not only contacts and experience but things you can name: a line of work that was launched, a team that was put together, a process that runs. Scale stops being a breadth of interests and becomes the ability to join the routes already travelled into one large map."
-   ]
-  }
- ],
- "faq": [
-  {
-   "q": "What does the order 21-10-7 mean?",
-   "a": "Entry M — arcanum 21, The World: the wish to see the whole opens many possible directions at once. Middle N — arcanum 10, Wheel of Fortune: each new opportunity keeps the search for another direction going. Root D — arcanum 7, The Chariot: the root task is to choose a route so the broad vision can become sustained movement. Rearranging the numbers changes these roles; it is not another spelling of the same program."
-  },
-  {
-   "q": "Do you have to give up having several interests?",
-   "a": "No. What matters is choosing one current route and a measure for finishing it. The other interests can stay part of the big map, but they should not take the wheel from the chosen direction every time."
-  },
-  {
-   "q": "Does The Wheel mean constant changes from outside?",
-   "a": "This page does not promise events. The Wheel here describes a way of handling opportunities: either taking every new turn as a reason to change course, or using the changes inside one long goal."
-  },
-  {
-   "q": "What first step helps this set?",
-   "a": "Name one destination and a measurable result for the nearest stretch. New offers are then judged by whether they bring that result closer, and not only by how new they are."
-  }
- ],
- "related": [
-  "21-10-16",
-  "21-4-10",
-  "21-7-13",
-  "12-19-7",
-  "arcanum/21",
-  "arcanum/10",
-  "arcanum/7"
- ]
 }

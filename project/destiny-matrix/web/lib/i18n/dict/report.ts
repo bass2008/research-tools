@@ -115,11 +115,6 @@ export const report = {
   // а не запертая покупка. Предлагать «Открыть» там, где платить негде, значит вести человека
   // на страницу оплаты, которой нет.
   notLoaded: { ru: "Не загрузился", en: "Not loaded" } satisfies Phrase,
-  pairSummary: { ru: "Как складывается пара", en: "How the pair works together" } satisfies Phrase,
-  rolesSummary: {
-    ru: "Как складываются роли раздела",
-    en: "How the roles of the section work together",
-  } satisfies Phrase,
   tripleSummary: { ru: "Как складывается тройка", en: "How the three work together" } satisfies Phrase,
   // кнопки сохранения
   saveMatrix: { ru: "Сохранить матрицу в кабинет", en: "Save the matrix to your account" } satisfies Phrase,
@@ -201,6 +196,12 @@ export const reportSheet = {
   // ссылки раздела
   byYourMatrix: { ru: "По вашей матрице", en: "From your matrix" } satisfies Phrase,
   aboutMethod: { ru: "О методе", en: "About the method" } satisfies Phrase,
+  chakraHubLink: { ru: "Все семь чакр в энциклопедии →", en: "All seven chakras in the encyclopedia →" } satisfies Phrase,
+  chakraMore: {
+    ru: (title: string) => `Подробнее о чакре ${title} в энциклопедии →`,
+    en: (title: string) => `More about ${title} in the encyclopedia →`,
+  } satisfies PhraseFn<[string]>,
+  energyFieldMore: { ru: "Подробнее об общем энергополе в энциклопедии →", en: "More about the overall energy field in the encyclopedia →" } satisfies Phrase,
   howToRead: {
     ru: (title: string) => `Как читать раздел «${title}» →`,
     en: (title: string) => `How to read the “${title}” section →`,

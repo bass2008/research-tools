@@ -72,7 +72,8 @@ export const { encSections, articleList, articlePaths } = forLocale(defaultLocal
 export default function EncShell({ locale: requestedLocale, ...localeProps }: ({ children: ReactNode }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
   const { children } = localeProps;
-  const { ARCANA, CHAKRA_PAGES, POSITIONS, ENCYCLOPEDIA_SLIDES, encSections, articleList } = forLocale(L);
+  const { ARCANA, CHAKRA_PAGES, POSITIONS, ENCYCLOPEDIA_SLIDES, categoryHub, encSections, articleList } = forLocale(L);
+  const energyField = categoryHub("energy-field");
 
   const positionKinds = Object.fromEntries(
     POSITIONS.map((p) => [p.key, p.kind === "section" ? ("sec" as const) : ("pts" as const)]),
@@ -99,7 +100,10 @@ export default function EncShell({ locale: requestedLocale, ...localeProps }: ({
               { title: p.title, kind: p.kind === "section" ? ("sec" as const) : ("pts" as const) },
             ]),
           )}
-          chakras={Object.fromEntries(CHAKRA_PAGES.map((c) => [c.key, c.title]))}
+          chakras={{
+            ...Object.fromEntries(CHAKRA_PAGES.map((c) => [c.key, c.title])),
+            ...(energyField ? { "energy-field": energyField.crumb ?? energyField.title } : {}),
+          }}
           articles={articles}
         />
 

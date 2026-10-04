@@ -12,7 +12,7 @@ import sys
 from .config import settings
 from .db import Base, SessionLocal, engine
 from . import models  # noqa: F401  — модели должны быть импортированы до create_all
-from . import tariffs
+from . import errors, tariffs
 from .models import User
 from .security import hash_password
 
@@ -119,6 +119,9 @@ def ensure() -> None:
     admin = seed_admin()
     if admin:
         print(f"админ: {admin}")
+    trimmed = errors.trim()
+    if trimmed:
+        print(f"удалено старых ошибок: {trimmed}")
     print(f"схема на месте, тарифов: {len(rows)}")
     for t in rows:
         print(f"  {t.id:8s} {t.name:28s} {t.price / 100:8.2f} ₽  "

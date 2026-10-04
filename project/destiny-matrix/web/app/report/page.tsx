@@ -7,7 +7,6 @@ import { requestLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSections } from "@/lib/sections";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pickMatrix, readAccess, readSavedMatrices } from "../_lib/access";
 import { SavedReport, Sheet } from "../_lib/report";
@@ -31,13 +30,12 @@ const forLocale = localized((L: Locale, site) => {
     noindex: true,
   });
 
-  const OTHER = <Link href="/encyclopedia">{D.nav.encyclopedia[L]}</Link>;
-  return { freePositionArticles, freePositionTexts, pageMeta, metadata, OTHER };
+  return { freePositionArticles, freePositionTexts, pageMeta, metadata };
 });
 
 export default async function ReportPage({ searchParams }: { searchParams: Search }) {
   const L = await requestLocale();
-  const { freePositionArticles, freePositionTexts, OTHER } = forLocale(L, await requestSite());
+  const { freePositionArticles, freePositionTexts } = forLocale(L, await requestSite());
 
   const wanted = (await searchParams).m;
   const access = await readAccess();
@@ -54,14 +52,14 @@ export default async function ReportPage({ searchParams }: { searchParams: Searc
   // заводят — отвечала «матрица не выбрана» при открытой записи в кабинете.
   if (chosen?.unlocked) {
     return (
-      <Sheet locale={L} other={OTHER}>
+      <Sheet>
         <SavedReport locale={L} chosen={chosen} saved={saved} access={access} />
       </Sheet>
     );
   }
 
   return (
-    <Sheet locale={L} other={OTHER}>
+    <Sheet>
       {access.offline ? <div className="err">{D.pages.reportOffline[L]}</div> : null}
       <ReportView locale={L}
         granted={access.paid}

@@ -90,7 +90,8 @@ def test_refunded_receipt_does_not_promise_access(page: Page):
     row = page.locator("[data-testid=admin-payment-row]", has_text=mail).first
     row.wait_for(timeout=20_000)
     page.once("dialog", lambda d: d.accept())
-    row.get_by_test_id("refund").click()
+    row.get_by_test_id("payment-actions").click()
+    page.get_by_test_id("refund").click()
     page.wait_for_timeout(2500)
 
     flows.logout(page)

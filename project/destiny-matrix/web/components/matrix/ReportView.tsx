@@ -173,7 +173,7 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
               </span>
             ))}
           </div>
-          <UnlockCta locale={L} place="report_bottom" testId="unlock-cta" matrixId={currentSaved?.id}>
+          <UnlockCta locale={L} place="report_bottom" testId="unlock-cta" matrixId={currentSaved?.id} unavailable={null}>
             {D.nav.buy[L]}
           </UnlockCta>
           {/* вошедшему предлагать вход бессмысленно: он уже здесь, и подпись читалась как

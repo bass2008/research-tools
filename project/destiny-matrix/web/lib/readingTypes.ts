@@ -48,6 +48,10 @@ export interface ChakraReadingCell {
   caption: string;
 }
 
+export const ENERGY_FIELD_KEY = "energy_field";
+export const CHAKRA_HUB_HREF = "/encyclopedia/chakra";
+export const ENERGY_FIELD_HREF = `${CHAKRA_HUB_HREF}/energy-field`;
+
 export interface ChakraReadingRow {
   key: string;
   title: string;
@@ -81,6 +85,8 @@ export interface LongformReading extends ReadingConclusion {
   roles: ReadingRole[];
   interactions: ReadingInteraction[];
   chakraRows?: ChakraReadingRow[];
+  /** Строка итогов трёх колонок; не восьмая чакра. */
+  energyField?: ChakraReadingRow;
   chakraNote?: string;
   agePeriods?: AgeReadingPeriod[];
 }

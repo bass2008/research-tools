@@ -1,14 +1,7 @@
-import { requestSite } from "@/lib/siteProfile.server";
-import { requestLocale, publicLocale } from "@/lib/i18n/request";
-import { forLocale } from "../../_personal/reading";
+import { permanentRedirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
-
-export async function generateMetadata(props: Props) {
-  return forLocale(await publicLocale(), await requestSite()).personalReadingMetadata("chakras")(props);
-}
-
-export default async function Page(props: Props) {
-  return forLocale(await requestLocale(), await requestSite()).personalReadingPage("chakras")(props);
+// The personal chakra page was retired: the paid report prints the full reading, and printed PDFs
+// still link here.
+export default function Page(): never {
+  permanentRedirect("/encyclopedia/position/chakras");
 }

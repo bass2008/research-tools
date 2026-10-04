@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { buildFree, sectionEntityLink } from "@/lib/publicSpec";
 
-import { arcanumInPosition } from "./content";
+import { arcanumInPosition, karmicTail } from "./content";
+import { paragraphText } from "./contentReader";
 import { calculate } from "./matrix";
 import { SPEC, build, freePositionTexts } from "./sections";
 
@@ -173,7 +174,14 @@ describe("разделы разбора", () => {
     const excluded = new Set(["character", "past_lives"]);
     for (const item of build(m, true)) {
       if (excluded.has(item.key)) continue;
-      expect(item.personalHref, item.key).toMatch(/^\/encyclopedia\//);
+      if (item.key === "chakras") {
+        // The report prints the whole chakra reading, so it links to the general guide instead.
+        expect(item.personalHref).toBeUndefined();
+        expect(sectionEntityLink(item).href).toBe("/encyclopedia/position/chakras");
+      } else {
+        expect(item.personalHref, item.key).toMatch(/^\/encyclopedia\//);
+        expect(sectionEntityLink(item).href, item.key).toBe(item.personalHref);
+      }
       if (item.longform?.layout === "chakras") {
         expect(item.longform.chakraRows).toHaveLength(7);
         expect(item.longform.roles).toEqual([]);
@@ -181,16 +189,18 @@ describe("разделы разбора", () => {
         expect(item.longform?.roles.length, item.key).toBe(item.positions.length);
         expect(item.longform?.summary.length, item.key).toBeGreaterThan(100);
       }
-      expect(sectionEntityLink(item).href, item.key).toBe(item.personalHref);
     }
   });
 
-  it("кармический хвост берёт полный ordered-текст готовой статьи", () => {
+  // The free article stays on the site for search traffic; the report holds only a short reading.
+  it("кармический хвост в отчёте — короткая расшифровка со ссылкой на полную статью", () => {
     const tail = section("past_lives");
-    expect(tail.personalHref).toBe(`/encyclopedia/karmic-tail/${m.karmic_tail.join("-")}`);
-    expect(tail.fullArticle?.short.length).toBeGreaterThan(60);
-    expect(tail.fullArticle?.sections.length).toBeGreaterThan(3);
-    expect(tail.fullArticle?.faq.length).toBeGreaterThan(2);
+    const key = m.karmic_tail.join("-");
+    expect(tail.personalHref).toBe(`/encyclopedia/karmic-tail/${key}`);
+    const text = (tail.tailReading?.paragraphs ?? []).map(paragraphText).join(" ");
+    const full = karmicTail(key)!.sections.flatMap((s) => s.paragraphs.map(paragraphText)).join(" ");
+    expect(text.length).toBeGreaterThan(60);
+    expect(text.length).toBeLessThan(full.length / 3);
     expect(tail.longform).toBeUndefined();
   });
 });

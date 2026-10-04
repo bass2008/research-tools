@@ -80,14 +80,15 @@ def test_admin_returns_a_payment_from_the_interface(page, mail):
         dialog.accept()
 
     page.once("dialog", confirm)
-    row.get_by_test_id("refund").click()
+    row.get_by_test_id("payment-actions").click()
+    page.get_by_test_id("refund").click()
     expect(row).to_contain_text("возвращён", timeout=30_000)
     assert asked, "интерфейс не спросил подтверждения"
     assert mail in asked[0] and "250" in asked[0], asked[0]
     external = row.locator("td").nth(6).inner_text().strip()
     assert external and external in asked[0], f"в подтверждении нет номера платежа: {asked[0]}"
     expect(row).to_contain_text("возвращён", timeout=30_000)
-    assert row.get_by_test_id("refund").count() == 0, "кнопка осталась на возвращённом платеже"
+    assert row.get_by_test_id("payment-actions").count() == 0, "кнопка осталась на возвращённом платеже"
 
     # Право проверяем в кабинете, а не на /report: там дата берётся из браузера, а после нового
     # входа её нет — страница честно говорит «дата не выбрана», и это ничего не сказало бы о праве.
@@ -113,14 +114,15 @@ def test_failed_refund_does_not_wipe_the_admin_screen(page, mail):
 
     page.route("**/api/admin/payments/*/refund", lambda route: route.abort())
     page.once("dialog", lambda d: d.accept())
-    row.get_by_test_id("refund").click()
+    row.get_by_test_id("payment-actions").click()
+    page.get_by_test_id("refund").click()
 
     expect(page.get_by_test_id("refund-error")).to_be_visible(timeout=20_000)
     expect(page.get_by_test_id("admin-payments")).to_be_visible()
     expect(page.get_by_test_id("admin-users")).to_be_visible()
     assert "Админка недоступна" not in page.inner_text("main")
     expect(row).to_contain_text("оплачен")
-    assert row.get_by_test_id("refund").count() == 1, "кнопка исчезла, хотя возврат не прошёл"
+    assert row.get_by_test_id("payment-actions").count() == 1, "кнопка исчезла, хотя возврат не прошёл"
 
 
 def test_admin_sees_what_happens_right_now(page, browser, mail):

@@ -13,6 +13,7 @@ export interface ChakraCorpus {
   note: string;
   empty_reading: ChakraCopy;
   chakras: Record<string, { topic: string; readings: Record<string, ChakraCopy> }>;
+  energy_field?: { readings: Record<string, ChakraCopy> };
 }
 
 export const CHAKRA_COLUMNS = ["physics", "energy", "emotions"] as const;

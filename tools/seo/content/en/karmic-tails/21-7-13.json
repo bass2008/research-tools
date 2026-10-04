@@ -1,92 +1,545 @@
 {
- "key": "21-7-13",
- "entity_type": "karmic_tail",
- "publication": {
-  "index": true,
-  "follow": true,
-  "primary_query": "destiny matrix 21 7 13",
-  "exact_frequency": 1188,
-  "reviewed_at": "2026-08-30"
- },
- "title": "Karmic tail 21 7 13 in the destiny matrix: a huge plan, full speed and a sudden stop",
- "arcana": [
-  21,
-  7,
-  13
- ],
- "seo": {
-  "title": "Karmic tail 21-7-13: meaning of the karmic program",
-  "description": "Karmic tail 21-7-13: a vast beginning, maximum speed and a break before the finish. Learn to distinguish a mature ending from repeatedly starting over.",
-  "queries": [
-   "destiny matrix 21 7 13",
-   "karmic tail 21 7 13",
-   "21 7 13 in the destiny matrix",
-   "21 7 13 meaning"
+  "key": "21-7-13",
+  "entity_type": "karmic_tail",
+  "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "destiny matrix 21 7 13",
+    "exact_frequency": 1188,
+    "reviewed_at": "2026-08-30"
+  },
+  "title": "Karmic tail 21-7-13 in the destiny matrix: “The Destroyer”, a triumph and a rider without a weapon",
+  "arcana": [
+    21,
+    7,
+    13
+  ],
+  "seo": {
+    "title": "Karmic tail 21-7-13 “The Destroyer”: meaning in the destiny matrix",
+    "description": "21-7-13 is the tail of a winner to whom every ending sounds like defeat, so they end things first. A ten-second date check and why the “destroyer” is so patient.",
+    "queries": [
+      "destiny matrix 21 7 13",
+      "karmic tail 21 7 13",
+      "21 7 13 in the destiny matrix",
+      "21 7 13 meaning"
+    ]
+  },
+  "short": "21-7-13 is the karmic tail that popular destiny matrix guides call “The Destroyer and Killer” (other lists call it “Destruction, Death to Many Souls”). Its script goes like this. The person needs the world whole: a big cause, a great love, a life that comes together all the way. That is the entry, the World (21). They take that whole the way you take a fortress: with will, speed and pressure. That is the mechanism, the Chariot (7). And at the root stands Death (13) — the one force that cannot be defeated and does not need to be fought. To the charioteer every ending sounds like defeat, so he has two answers: fight to the last for something that is already over, or strike first and end everything himself — all at once, without warning, burning the bridges behind him. Hence the “destroyer”. The root task is to learn to end things without a sword: to let things finish in their own time and to see an ending as a passage, not a loss. The tail is rare, about one birth date in 68, but it is noticeably more common among people born after 2000. And everyone who has it has the same card in the centre of the chart: Strength. It explains why the “destroyer” so often turns out to be the most patient person in the room.",
+  "sections": [
+    {
+      "h2": "Do you have the 21-7-13 tail: a ten-second check",
+      "paragraphs": [
+        "You can find 21-7-13 without a calculator. It comes up if, and only if, the first three numbers of the matrix add up to **13 or 49**.",
+        {
+          "ol": [
+            "**Day arcanum** — the day you were born. If it is over 22, add its digits: 23 → 5, 30 → 3, 31 → 4.",
+            "**Month** — its number, from 1 to 12.",
+            "**Year arcanum** — the sum of the digits of the year. If it comes out over 22, add the digits again: 2000 → 2, 2009 → 11, 1975 → 22, 1987 → 25 → 7."
+          ]
+        },
+        "Add the three numbers and check the result:",
+        {
+          "ul": [
+            "05.06.2000: 5 + 6 + 2 = **13** → the 21-7-13 tail.",
+            "30.01.2007: 3 + 1 + 9 = **13** → the 21-7-13 tail (the 30th reduces to 3).",
+            "22.05.1975: 22 + 5 + 22 = **49** → the 21-7-13 tail.",
+            "19.12.1980: 19 + 12 + 18 = **49** → the 21-7-13 tail.",
+            "22.06.1975: 22 + 6 + 22 = 50 → not this one (this date has the tail 15-20-5).",
+            "10.01.2001: 10 + 1 + 3 = 14 → not this one (this date has the tail 6-20-14)."
+          ]
+        },
+        "Why this works. The bottom corner of the chart, D, is the reduced sum of the three numbers. Only 13 and 49 (4 + 9 = 13) reduce to 13; the next such sum, 58, is out of reach, because three numbers never add up to more than 56. The centre E is the same sum plus D: 13 + 13 = 26 → 8, and 49 + 13 = 62 → 8. After that there is no choice: the entry M = D + E = 13 + 8 = 21, the middle N = D + M = 13 + 21 = 34 → 7. There are no other routes to 21-7-13 — this was checked by running every day from 1900 to 2100.",
+        {
+          "table": {
+            "head": [
+              "Point",
+              "Arcanum",
+              "How it is derived"
+            ],
+            "rows": [
+              [
+                "E · centre",
+                "8 · Strength",
+                "comfort zone"
+              ],
+              [
+                "M · entry",
+                "21 · The World",
+                "(13 + 8)"
+              ],
+              [
+                "N · mechanism",
+                "7 · The Chariot",
+                "(13 + 21 = 34 → 7)"
+              ],
+              [
+                "D · root",
+                "13 · Death",
+                "bottom corner of the chart"
+              ]
+            ]
+          }
+        },
+        "The same arithmetic leads to a few facts you will rarely see anywhere else:",
+        {
+          "ul": [
+            "**It is a rare tail.** 1.47% of birth dates from 1900 to 2025 — roughly one in 68. Twentieth place out of the 26 possible tails.",
+            "**Thirteen in the bottom corner always means this tail.** If D = 13, the tail can only be 21-7-13, without exception. There is no other tail with a root of 13 in this scheme; in one more, 3-13-10, the thirteen stands in the middle.",
+            "**The tail has two doors: the smallest numbers and the biggest.** A sum of 13 is made from a small day, month and year, like 5 + 6 + 2. A sum of 49 comes only from the largest ones: a day from the 15th to the 22nd, a month no earlier than May, a year arcanum of at least 15.",
+            "**It is becoming more common.** Among people born in the 1900s it is one date in 203, in 1950–1999 about one in 57, and from 2000 on one in 46. The reason is the doors. Before 1950 the tail almost always came in through 49 (136 dates out of 151); in 1950–1999 equally through both. Since 2000 it comes in only through 13: the year arcanum of these years is no more than 12, so the sum cannot reach 49 (the maximum is 22 + 12 + 12 = 46), while small numbers make 13 easily.",
+            "**There are rich years and empty ones.** The year 2000 has the most such days — 18. And years with an arcanum of 12, 13 or 14 (for example 1930, 1940 or 2019) have none at all: the sum overshoots 13 and falls short of 49.",
+            "**There are “forbidden” days.** People born on the 11th, 12th, 13th, 14th or 29th never get this tail. Those born on the 10th and the 28th got it once each in 126 years: on 10 and 28 January 2000. Most often it falls on the 22nd: 4.2% of everyone born on that day has 21-7-13. Among people born in January it is 2.3%, in August about 1%.",
+            "**13-7-21 is the same tail, read from the outside.** No tail in this scheme starts with 13: the first number of a tail is always a multiple of three (3, 6, 9, 12, 15, 18 or 21). And the triads 21-7-13 and 13-7-21 do not occur in any other line of the chart or in any chakra — this was also checked by running every date. If you see 13, 7 and 21 on the bottom ray, you are reading your tail from the corner towards the centre. Its meaning is read in the direct order: the entry is the World, the root is Death."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "Why 21-7-13 is called “The Destroyer and Killer”",
+      "paragraphs": [
+        "Popular interpretations explain the name with a past-life legend, and it has several versions. In the darkest one the soul was an executioner, a jailer or a merciless fighter who caused many deaths. In another it was a ruler, an inventor of weapons or a revolutionary whose decision changed the fate of thousands. In a third it is the other way round: the person took their own life too early. None of these versions can be checked: a birth date tells nothing about events in the past.",
+        "But the legends share a common denominator, and it is more interesting than the legends themselves. In every version the end comes not in its own time but by force: someone’s hand brings it, or it cuts a life short. That is how the tail is built. In the middle stands the Chariot, and in Waite’s divinatory list its meanings are “succour, providence; also war, triumph, presumption, vengeance”. At the root is Death, whose list begins with the words “end, mortality, destruction”. The folk lists did not invent the word “destroyer”: it can be put together from two neighbouring cards.",
+        "Only the roles in this pair are handed out in an unexpected way. Waite describes the charioteer as “carrying a drawn sword” (in Pamela Colman Smith’s drawing he holds a baton, and that is how Wen sees him too, but in Waite’s text it is a sword). And of the rider on the Death card he writes that he “carries no visible weapon”, and yet everyone falls before him, from king to child. Death does not need a sword. The sword is needed by whoever has taken on Death’s work.",
+        "So this is how we read the name. The “destroyer” in this tail is not Death but the Chariot, which has decided to end things itself. And “killer” here is not about people but about endings: about the habit of breaking off relationships, projects and ties with your own hand, instead of letting them come to an end. This is not a description of a person’s character and not an accusation. It describes how their meeting with an ending is set up."
+      ]
+    },
+    {
+      "h2": "A triumph with no whisperer: how the circle works",
+      "paragraphs": [
+        "In ancient Rome, after a great victory, a general rode into the city in a triumphal chariot, wearing a laurel wreath. Tertullian, a Christian writer at the turn of the 2nd and 3rd centuries, records a detail that was repeated for centuries afterwards: even in that “loftiest chariot” the man in triumph was reminded that he was human. From behind him came the words: “Look behind you! Remember that you are a man.” Later retellings turned these words into “memento mori” — “remember that you will die”.",
+        "Waite knew nothing about the destiny matrix, but he writes about the Chariot in the same language. In the historical part of his book he calls this card “the King in his triumph”, and the chariot itself currus triumphalis, a triumphal car. And in the same place he says of Death that it is “more especially a card of the death of Kings”. The 21-7-13 tail unfolds between these two phrases: from the king’s triumph to the death of kings. And the voice from behind, which in Rome rode along with the victor, is here too. It is the root of the tail. The whole script is a triumph in which nobody hears the whisperer.",
+        "**1. Entry: the World wants the whole.** For Waite the World is the “final message” of the Major Arcana, “the perfection and end of the Cosmos”. A figure in an oval wreath dances with a wand in each hand, and Waite sees in her “joy attained in the body”. Wen calls the World “the card of synthesis” and describes its theme as “fulfillment, completion, and triumph in all undertakings”. This is where the tail begins — not with aggression but with a hunger for the whole. Half is not enough for a person with 21-7-13: they need a life that comes together all the way. Work — so as to be the best at it. Love — so that it is forever. A move — so as to start everything over.",
+        "**2. Mechanism: the Chariot turns the whole into a victory.** But the whole cannot be taken — it can only be put together or lived through. The Chariot cannot do that; it can only win. Waite calls the charioteer “conquest on all planes—in the mind, in science, in progress” and immediately adds a caveat: the planes of his conquest are manifest or external, “and not within himself”. Wen sees armour on him — “a hard encasing over vulnerable human flesh” — and asks a question that fits this tail like a key: who exactly is in control, the charioteer or the sphinxes that pull the chariot?",
+        "Here the main substitution takes place. In Wen the World is encircled by “the wreath of victory”, and the charioteer also wears “the laurel wreaths of victory”. But in the World the wreath embraces a dancing figure, while in the Chariot it sits on the head of a man in armour. The whole you live inside becomes a trophy you wear. Work turns into a siege, love into a conquest, life into a list of captured heights.",
+        "Plutarch, in his essay on tranquillity of mind, tells how Alexander the Great wept when the philosopher Anaxarchus told him that there are infinitely many worlds: “Is it not worth weeping that the worlds are countless, and we have not become master of even one?” This is an exact portrait of the World and the Chariot together. If the whole is taken by storm, it is never taken completely.",
+        "**3. Root: Death — a rider who moves slowly.** Waite’s Death card is not a skeleton with a scythe. He deliberately replaced “the crude notion of the reaping skeleton” with an apocalyptic vision: “The mysterious horseman moves slowly, bearing a black banner emblazoned with the Mystic Rose, which signifies life. Between two pillars on the verge of the horizon there shines the sun of immortality.” Waite does not pretend that the card never speaks of death. But he considers the best explanations of the thirteenth card to be “rebirth, creation, destination, renewal”. Wen reads it as the end of one stage of life and the beginning of another, and notices a detail: the rider is heading towards the rising sun, “though that sun is still far in the distance”.",
+        "This root holds three things the Chariot does not have. Slowness: the rider does not race. Being unarmed: he does not need to fight for his journey to happen. And the rose on the banner: here the end is carried in the name of life. The root task of the tail is not to defeat this rider and not to become him, but to let him into your life. To admit that everything has its term, and that a term is not a defeat.",
+        "**4. An ending that cannot be won.** Sooner or later the thing happens for which Death stands at the root. A project is exhausted. A feeling has cooled. The company has changed, the child has grown up, the city has become foreign, your strength is not what it was. For the Chariot this is the worst event of all, because it cannot be defeated. The last word among the Chariot’s reversed meanings in Waite is “defeat”, and that is exactly how the charioteer hears any ending.",
+        "**5. The charioteer’s two answers — and a third.** The Chariot has two moves, and Wen describes them almost word for word. The person of this card, she writes, “likes to appear in control, but has a tendency to run from his or her problems (or attack the problems with such aggression as to subdue it and therefore avoid true, mature confrontation)”. There are two ways to attack an ending. Fight it to the last. Or get ahead of it: strike first and end everything yourself, while it still looks like a decision and not a loss. Running means leaving before it becomes clear that everything is over. Each of the three moves saves you from the same thing: from meeting an ending that came by itself.",
+        "**6. Repeat.** In the space that has been cleared, the World appears again: a new big goal, a new love “forever”, a new city. The Chariot picks up speed again. Burnt bridges are left behind, and each following ending gets not easier but harder: by now you approach it in armour. The circle does not hold because of weakness. The Chariot really does win, and striking first really does bring relief — the weight disappears instantly. The tail lives on as long as these two wins pay for what they cost.",
+        "**How to tell that the tail has switched on right now:**",
+        {
+          "ul": [
+            "“better I leave first than wait until I’m pushed out”;",
+            "the end of something feels like a personal defeat, not an event;",
+            "you get bored wherever there is nothing left to win;",
+            "“that’s it, enough” is decided in a single evening — after months of silence;",
+            "you want to delete, block, throw away, “so that nothing reminds me”;",
+            "“I don’t give up” — about something you yourself stopped believing in long ago;",
+            "a new big plan appears the same week the old one collapsed."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "The Destroyer, the Reviver and the Runaway are one and the same tail",
+      "paragraphs": [
+        "The charioteer’s three moves have three faces. All of them rest on one belief: **the end must be my action**. A victory, a decision, a deed — anything but an event that simply happened.",
+        {
+          "table": {
+            "head": [
+              "",
+              "The Destroyer",
+              "The Reviver",
+              "The Runaway"
+            ],
+            "rows": [
+              [
+                "What they do with an ending",
+                "get ahead of it: end things themselves, at once and for good",
+                "refuse to accept it: fight for what has already died",
+                "outrun it: leave before the end has come"
+              ],
+              [
+                "Inner phrase",
+                "“better me than them”",
+                "“I don’t give up”",
+                "“it’s all over here, I’ll start somewhere else”"
+              ],
+              [
+                "How it looks from outside",
+                "decisive, good at “burning bridges”",
+                "unbending, loyal",
+                "easy-going, free"
+              ],
+              [
+                "The price",
+                "people nearby don’t get to say goodbye, more falls than needed",
+                "years and strength go into what will not come back to life",
+                "the ending catches up in the new place"
+              ]
+            ]
+          }
+        },
+        "**The Destroyer** ends things himself. For a long time he says nothing, and then he leaves in a single day: resignation on the desk, belongings in the car, number blocked. The decision is often right — what he is leaving really has ended. The form is wrong. An ending that could have come like a sunset comes to everyone else like a bolt of lightning. Those who were close are not allowed to say goodbye, and more falls than needed: together with the relationship, the mutual friends are crossed out; together with the job, the people it was good to work with. The folk phrase “death to many souls” sounds quite everyday here: when the Destroyer ends one thing, everything around it ends too.",
+        "**The Reviver** fights the ending. A business that has been losing money for ages, a relationship nobody has lived in for a long time, a friendship held up by one person — he saves all of it, pouring in more and more strength. It looks like loyalty and resilience, and popular guides even hold it up as an example: “never give up and go all the way”. But Wen describes this state too — in reversed Death: inertia, a plateau, disappointment “due to the inability to let go and move on”. The Reviver does not let the end come, and so the beginning does not come either.",
+        "**The Runaway** leaves before the end. The Chariot is a card of movement, and among the meanings of the World Waite lists “voyage, route, emigration, flight, change of place”. The Runaway changes city, job and circle as soon as they sense that something is ending. From the outside it looks like freedom. From the inside it is the same belief: better to leave as a winner than to stay and see the end with your own eyes.",
+        "Most often all three faces live in one person. He leaves a job as the Destroyer, becomes the Reviver in love, and moves house twice in between. All three share one way out, and it is not about choosing a better face. It is about letting an ending be an event, not a feat."
+      ]
+    },
+    {
+      "h2": "The hidden fourth card: everyone with 21-7-13 has Strength in the centre",
+      "paragraphs": [
+        "The arithmetic of the tail leaves the centre of the chart only one option: E = 8. In the method the centre is the comfort zone, the place a person returns to in order to feel like themselves. Everyone with 21-7-13 has Strength there. The numbering here follows Waite: he swapped Strength and Justice, so some popular destiny matrix guides that follow the Marseille Tarot call the 8th arcanum Justice. Two more tails have Strength in the centre: 3-7-22 and 12-16-4.",
+        "Waite draws Strength like this: a woman is closing a lion’s jaws, and her “beneficent fortitude” has already subdued the beast — it is being led on a chain of flowers. The lion, in one of Waite’s readings, stands for the passions, and the woman is “the higher nature in its liberation”. The card, he stresses, has nothing to do with “self-confidence in the ordinary sense”. Wen puts it more simply: “Compassion is strength.” You cannot use brute force to impose your will on others, only gentle, subtle influence.",
+        "She also places this card next to the Chariot, that is, next to the mechanism of the tail. Both cards are about strength and victory, but the Chariot is the strength to master the world around you, and Strength is the strength to master yourself. Almost four centuries before Wen, Descartes wrote down a similar rule in his “Discourse on the Method”: to try always to conquer himself rather than fortune, and to change his desires rather than the order of the world. For 21-7-13 this is an almost ready-made formula. The middle of the tail teaches you to conquer fortune, and the centre of the chart teaches you to conquer yourself.",
+        {
+          "h3": "Why the “destroyer” is the most patient person in the room"
+        },
+        "This centre explains the tail’s main oddity. “The Destroyer and Killer” sounds like a portrait of someone harsh and aggressive. But a person with 21-7-13 is more often gentle and restrained, and puts up with a lot for a long time. They don’t make scenes, don’t slam doors over small things, and know how to keep their lion in check. That is exactly why their endings are so destructive.",
+        "The pattern can already be seen in the chart. Everyone with this tail has the triad 8-8-16 in Manipura, the chakra of will, status and money: Strength, Strength again and the Tower. In our reading of this chakra, Strength stands for how a person acts and what drives them: gently and persistently, without pushing. And the Tower stands for how a breakdown is experienced: as a lightning strike. While Strength holds the lion, tension builds up unnoticed, and then comes out in a single discharge. This is where the Chariot kicks in: the decision is made, and it is carried out at full speed.",
+        "For the people around, it is a bolt from the blue: “but he never said anything”. Waite calls the Tower “a card in particular of unforeseen catastrophe”. And of Death’s rider he writes that he “moves slowly”. These are two different cards of ending, and the tail mixes them up. Because of the long silence and the fast chariot, an ending that could have come slowly and visibly, like a sunset, comes to others like lightning.",
+        {
+          "h3": "The World = Death + Strength"
+        },
+        "The numbers of the tail say this almost word for word. The entry is the sum of the root and the centre: 21 = 13 + 8. The World is Death plus Strength, the ability to end things plus a gentle hand. Wen has a phrase that reads like a comment on this sum: in the sequence of the Major Arcana, Strength is “a foreshadowing of what it will take for a Seeker to reach Judgement and The World”. And the Chariot is the sum of Death and the World: 13 + 21 = 34 → 7. When the whole meets an ending, movement is born. This is a play of numbers, not a proof, but it is an exact one: in this tail the whole is put together not by victories but by endings made with a gentle hand.",
+        "The same idea is in the pictures. Three of the four cards have flowers. Waite compares the World’s garland to “a chain of flowers”, the lion of Strength is led on a chain of flowers, and on Death’s banner there is a rose, the sign of life. Only the descriptions of the Chariot have no flowers: in Waite the charioteer carries a sword, in Wen he wears armour and a victor’s laurels. For 21-7-13 this is a hint: in this tail the sword is a detail too many."
+      ]
+    },
+    {
+      "h2": "Where else the same arcana appear in your chart",
+      "paragraphs": [
+        "The arithmetic that assembles 21-7-13 also places its cards across the rest of the matrix. Here is what everyone with this tail shares, without exception:",
+        {
+          "table": {
+            "head": [
+              "Where in the matrix",
+              "What everyone with 21-7-13 has"
+            ],
+            "rows": [
+              [
+                "Centre of the chart E — comfort zone",
+                "8 · Strength"
+              ],
+              [
+                "Bottom corner D — karmic task",
+                "13 · Death"
+              ],
+              [
+                "Start of the relationship line M–R1–R",
+                "21 · The World (it is the same point M)"
+              ],
+              [
+                "Manipura",
+                "8 · 8 · 16"
+              ],
+              [
+                "Svadhisthana, energy",
+                "21 · The World"
+              ],
+              [
+                "Muladhara, energy",
+                "13 · Death"
+              ],
+              [
+                "Sky line (month — D — their sum), middle",
+                "13 · Death"
+              ],
+              [
+                "Age scale, 60–70 years",
+                "13 · Death"
+              ]
+            ]
+          }
+        },
+        "The purposes depend on which door the tail came through:",
+        {
+          "table": {
+            "head": [
+              "Purpose",
+              "Sum 13 (including everyone born since 2000)",
+              "Sum 49"
+            ],
+            "rows": [
+              [
+                "Personal",
+                "8 · Strength",
+                "17 · The Star (58%) or 8 · Strength (42%)"
+              ],
+              [
+                "Social",
+                "16 · The Tower",
+                "7 · The Chariot (90%) or 16 · The Tower (10%)"
+              ],
+              [
+                "Spiritual",
+                "6 · The Lovers",
+                "6 · The Lovers (58%) or 15 · The Devil (42%)"
+              ],
+              [
+                "Planetary",
+                "22 · The Fool",
+                "22 · The Fool (51%) or 13 · Death (49%)"
+              ]
+            ]
+          }
+        },
+        "**Strength is not only the centre but also a task.** Three quarters of the people with this tail (74%) also have Strength in their personal purpose. What serves as a comfort zone in the centre becomes work in the purpose: not just enduring, but consciously mastering yourself.",
+        "**Destruction that people need.** The “thirteens” have the Tower in their social purpose. In Waite it is the ruin of “a House of Falsehood” — of something built on a false foundation. This is our interpretation, not the book’s, but the conclusion it leads to matters. The ability to end things in a mature way is something people need: as the ability to tell the truth at the right moment, bringing down what was held up by a lie. And the “forty-nines” almost always have the Chariot in their social purpose. In its mature form the mechanism of the tail becomes a role: guiding others through transitions.",
+        "**Love starts with the World too.** The entry to the tail and the entry to the relationship line are one and the same point M. So after work, the second main stage of this tail is closeness.",
+        "**Death at 60–70.** On the age scale point D falls on the decade from 60 to 70, and everyone with this tail has 13 there. This is a rhyme of images, not a forecast, and certainly not a lifespan. More on this in the questions below."
+      ]
+    },
+    {
+      "h2": "How 21-7-13 shows up in life",
+      "paragraphs": [
+        "The scenes below are made-up examples, not a description of everyone with this tail.",
+        {
+          "h3": "In work and money"
+        },
+        "The most recognisable scene is **a hundred days of storming**. A person with 21-7-13 takes on a whole project and pulls it through: nights, a sprint, a result nobody expected. Then the project moves into maintenance, and there is nothing left to storm. The Chariot is bored. Six months later they leave at the peak, or start a “relaunch from scratch” so that there is something to take again. The team is left with a half-built bridge. The root version sounds different: “The campaign is over. Whom do I hand the work over to, and how?” A handover is an ending too, and far from the easiest one.",
+        "The second scene is **the war for something dead**. The business has not paid for itself for three years. Stopping means losing, and the person puts in more: money, loans, weekends. People praise their persistence. The root version is to set a limit in advance: how much more time and money, after which I admit it is over. An ending with a date stops being a defeat and becomes a decision.",
+        "The third is **in a single day**. Years with a difficult boss. The person does not complain, takes the blows and stays polite — that is Strength. And then, on an ordinary Tuesday, they put their resignation on the desk and leave all the work chats the same day. The decision was right; the form was not. They could have left a month later, with a proper handover and a farewell letter, keeping the people it was good to work with.",
+        "With money the tail plays big, on an “all or nothing” basis: sell everything and start from zero, put everything into one venture, close an account in one move. The lived-through version knows that money has seasons too. It decides in advance when to get out of an investment, and gets out by rule, not in a flash of temper.",
+        "Where this combination of cards works as a talent: crisis management, restructuring, closing and relaunching projects, selling and merging businesses, emergency services, work with loss and transitions — anywhere you need to end things so that what is alive survives. Popular guides recommend professions for this tail where lives are saved: surgery, work in a maternity hospital, crisis psychology. The specific work is decided by interests and skills; the cards only give a direction.",
+        {
+          "h3": "In relationships"
+        },
+        "For everyone with this tail the relationship line starts with the same World. So a person with 21-7-13 enters closeness in earnest: they need a whole world for two, “forever”, not an affair.",
+        "The first scene is **courtship as a campaign**. The feeling switches on the Chariot: to win, to conquer, to take. The person can be very generous and persistent, and it works. The difficulty comes later. There is nobody left to conquer, and life together is not a series of victories. If the chariot gets bored, it looks for a new front: arguments over who is right, competition, tests of strength.",
+        "The second scene is **the quiet exit**, and it is the most recognisable. For years the person does not complain: smooths things over, puts up with things, gives in. The partner is sure everything is fine. Then come the words: “I’m leaving. It’s decided.” No scene, no discussion — the door closes for good, the number is blocked, the mutual friends are divided up. The partner is in shock: “Why didn’t you say anything?” This is where the folk word “killer” gets its everyday meaning: the relationship did not die, it was ended, and the other person was given neither a word nor a goodbye. The root version does not cancel the leaving, if leaving is needed. It changes its form. Say you are unhappy while it is still small. Warn that things are heading for an end. Leave in a way that does not require crossing out the past.",
+        "The third scene is **winning it back**. If someone leaves him, the Reviver switches on: get them back at any cost, prove a point, take revenge. The ex-partner becomes a fortress to be taken, and the war itself keeps the person inside a relationship that is already over.",
+        "In the strong version, 21-7-13 is the one you can lean on in a couple’s hardest transitions: a move, the birth of a child, a lost job, ageing parents. They are not afraid of the word “end”, and so they can close old chapters without tearing up the book.",
+        {
+          "h3": "Parents and children"
+        },
+        "A parent with 21-7-13 often decides alone when something in the child’s life is over. “Enough of this music”, “we’re moving in September”, old toys go into a bag while the child is at school. The Chariot sets a goal and drives on, and the child is left with no time to say goodbye. Another form of the same tail is a war with the end of childhood, when a growing child is not allowed to leave. The root version is to let the child live through the ending themselves: the last day at the old school, the last lesson with a favourite coach, the right to decide which toys to keep.",
+        "If a child has 21-7-13, they often play “to win”, take losses hard and quit abruptly: “I’m not going any more” — and really don’t go. It helps to teach them to finish things: to stay till the end of the season before dropping a club, to say goodbye to what is going away, to see that an ending can be calm. A child who knows what a good goodbye looks like grows up without the habit of burning bridges. There are more and more such children: among people born since 2000, about one in 46 has 21-7-13, and among those born before 2000, one in 78."
+      ]
+    },
+    {
+      "h2": "Ending or destroying: how to tell them apart",
+      "paragraphs": [
+        "The whole tail rests on a few substitutions. Learn to tell them apart, and the circle loses half its power.",
+        "**Sunset or lightning.** A sunset ending can be seen in advance: people talk about it and prepare for it. A lightning ending is seen by nobody except the one who decided on it. The check: did others know that things were heading for an end before it was over?",
+        "**Finish or victory.** A victory is when someone has lost. An ending is when something is closed. The World is a card of completion, not of triumph. The check: are there any losers left after this ending?",
+        "**Letting go or throwing away.** When you let go, you keep what was alive — the rose on the banner. When you throw away, you erase everything, “so that nothing reminds me”. The check: can you name what was good there?",
+        "**Resilience or resuscitation.** Resilience fights for what is alive and knows its limit. Resuscitation fights for what is already over and knows no limit. The check: under what condition will you stop?",
+        "**Closing a door or burning a bridge.** A closed door can be opened a little, to say thank you or to collect your things. A burnt bridge cannot. The check: will you be able to say hello in a year’s time?",
+        "**Gentleness or silence.** The gentleness of Strength speaks early and quietly. Silence piles up until it discharges. The check: does the person next to you know that you are unhappy?",
+        "**An ending or a defeat.** Death’s rider neither fights nor wins — he passes by. If your first thought after an ending is “I lost”, you are once again looking at Death through the Chariot’s eyes."
+      ]
+    },
+    {
+      "h2": "The tail in shadow and in light",
+      "paragraphs": [
+        "The phrases “the tail in minus” and “the tail in plus” are easier to understand as two ways of handling the same material, not as a property of a person.",
+        {
+          "table": {
+            "head": [
+              "Theme",
+              "In shadow",
+              "In light"
+            ],
+            "rows": [
+              [
+                "Ending",
+                "a defeat to be prevented or forestalled",
+                "a passage that is allowed to come"
+              ],
+              [
+                "Speed",
+                "full throttle, then a crash",
+                "knowing how to speed up and how to brake"
+              ],
+              [
+                "Scale",
+                "“all or nothing”",
+                "a whole brought to the finish"
+              ],
+              [
+                "Patience",
+                "silence until the lightning",
+                "speaking early and gently"
+              ],
+              [
+                "Leaving",
+                "in a single day, burning bridges",
+                "announced, with gratitude"
+              ],
+              [
+                "Fighting",
+                "to the last — for what has already died",
+                "for what is alive — with a limit set in advance"
+              ],
+              [
+                "Strength",
+                "pressing on circumstances",
+                "mastering yourself"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "h2": "What to do with the 21-7-13 tail: eight practices",
+      "paragraphs": [
+        "These are the author’s own exercises, drawn from the logic of the triad — not a ritual and not a guarantee of results.",
+        {
+          "ol": [
+            "**The voice behind you.** Before any “that’s it, enough” decision, ask yourself three questions. What am I really ending right now? Who will fall along with it? What will I think about this in a year? This is the voice that rode behind the victor in a Roman triumph. Nobody will assign one to a person with 21-7-13, so you have to say it to yourself.",
+            "**The slow rider.** No irreversible endings on the day the decision ripens. Write it down, set a date a week later, and if it hasn’t changed, carry it out — announced, not as a blow. Waite’s Death rider moves slowly, and this is not weakness: it is how an ending gets room.",
+            "**A yellow card.** Make a deal with yourself to speak about your unhappiness while it is small: “this is hard for me”, “I don’t want it to go on like this”. The rule is simple: no ending without a warning. This is Strength that does not stay silent until the lightning.",
+            "**A limit in advance.** At the start of any risky venture, write down the condition under which you will end it: a deadline, a sum, a sign. When the condition arrives, the ending becomes keeping a promise to yourself, not surrender. This exercise is for the Reviver.",
+            "**A rite of ending.** When something ends — a job, a stage, a relationship, a city — mark the ending: a last day, words of thanks, a short review of “what I take with me, what I leave, what was alive here”. There is a rose on Death’s banner, and every ending has something worth carrying on.",
+            "**Bring it to the wreath.** Once a week, finish one small thing completely and celebrate the completion itself, not a victory. The World’s wreath surrounds the figure; it does not sit on her head. The tail needs to know the joy of an ending in which nobody lost.",
+            "**The lion, not the world.** When you want to reshape your circumstances — quit, move, cut someone off — first ask: what in me is demanding this right now? Sometimes the answer is that it is time to leave. Sometimes it is time to rest, to say something unpleasant, or to admit you are tired. Strength rules the lion, not the world around it.",
+            "**The sun between the pillars.** After any ending, leave yourself an in-between season — a time when the old has finished and the new has not yet begun. In Wen the rider heads towards the rising sun, “though that sun is still far in the distance”. A new big plan a week after an ending is usually the same chariot on a new road."
+          ]
+        },
+        "The signs that the practice is working are modest and easy to check. Your departures stop being a surprise to others. You can say hello to former colleagues and partners. You can stop a losing venture before it eats everything. After an ending you don’t rush straight into a new assault."
+      ]
+    },
+    {
+      "h2": "The strength of 21-7-13: a master of transitions",
+      "paragraphs": [
+        "In its lived-through version 21-7-13 gives a rare and much-needed gift — the ability to end things. Most people are afraid of endings and drag them out for years. A person with this tail is not afraid of them. The World lets them see the whole and bring it to completion. The Chariot gives them the strength to go through a transition rather than get stuck in it; the first meaning of this card in Waite’s list is “succour”. Death teaches that after an ending life goes on in another form.",
+        "People like this close companies so that nobody is left without money or a next step. They part in a way that does not turn the children into a battlefield. They move without tearing up their roots. They guide others through loss and change, because they know that road themselves. Wen writes that Death can mean the overthrow of a former authoritarian regime, and calls it “the card of revolutions”. A lived-through 21-7-13 has no need for revolutions: they change the order of things before it starts to crush anyone.",
+        "Waite remarks that the explanations of the thirteenth card are “on the whole, better than usual”: rebirth, creation, destination, renewal. That is the mature work of this tail. Not destruction and not killing, but an ending after which something is born.",
+        "And the Roman triumph suggests one last formula. There is no need to give up victories: the World and the Chariot are strong cards, and a person with 21-7-13 really does know how to win. All that is needed is someone riding behind the victor and saying: look behind you, you are human, and everything, your victories included, has its term. This is not a threat. It is exactly what keeps a victory alive."
+      ]
+    },
+    {
+      "h2": "What this article is based on",
+      "paragraphs": [
+        {
+          "ul": [
+            "**Calculation** — Natalia Ladini’s classic destiny matrix scheme with points A–T: D = A + B + C, E = A + B + C + D, M = D + E, N = D + M; every sum over 22 is reduced by adding its digits. The “13 or 49” rule was checked by running every day from 1900 to 2100. The frequencies, the distribution by year, month and day, the constant points of the chart, the purposes and the absence of the triad in other lines were counted over all dates from 1900 to 2025.",
+            "**Card meanings** — A. E. Waite, The Pictorial Key to the Tarot (1910, 1922 reprint) and Benebell Wen, Holistic Tarot (2015). Both are quoted in the original English. The numbering follows Waite: 8 is Strength, 11 is Justice, 22 is the Fool.",
+            "**Other sources**: Tertullian, “Apology”, ch. 33 (the words spoken to the man in triumph); Plutarch, “On Tranquillity of Mind”, ch. 4 (Alexander’s tears); Descartes, “Discourse on the Method”, part III (the third maxim of morals). These quotations are in our translation.",
+            "**The names “The Destroyer and Killer” and “Destruction, Death to Many Souls” and the past-life legends** are taken from popular interpretations of the destiny matrix. Neither Waite nor Wen wrote about the matrix or karmic tails. Assembling the three cards into a script, reading the Chariot as the hand that does Death’s work, the three faces of the tail, the role of Strength in the centre and the reading of the purposes are the author’s interpretation.",
+            "The destiny matrix is an esoteric model for self-observation with no scientific evidence base. It is not a forecast, not a diagnosis and not advice on health, money or relationships."
+          ]
+        }
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "q": "What happened in the past life of a person with the 21-7-13 tail?",
+      "a": "Popular interpretations tell different stories: an executioner, a jailer or a merciless warrior; a ruler, an inventor of weapons or a revolutionary whose decision changed the fate of many; a person who took their own life too early. These are legends of the tradition: neither numbers nor cards establish the events of past lives. It is more useful to read them as a description of what can be seen already now — a habit in which an ending comes not in its own time but by force."
+    },
+    {
+      "q": "Does “The Destroyer and Killer” mean that I am dangerous, or that death is threatening me?",
+      "a": "No. The name is an image, not a description of character and not a forecast. Waite’s Death card speaks of a change in the form of life, and he himself considers rebirth and renewal its best explanations. Popular guides sometimes contain threats like “if you don’t work through your tail, you’ll die before your time”. There is no basis for them either in the cards or in the method. Numbers predict neither illness, nor death, nor violence."
+    },
+    {
+      "q": "Are 21-7-13 and 13-7-21 the same tail?",
+      "a": "Yes, if we are talking about the bottom ray of your chart. In this scheme a tail cannot start with 13: its first number is always a multiple of three. And in other lines and chakras the triad 13-7-21 does not occur at all. So 13-7-21 is your 21-7-13, read from the bottom corner towards the centre. The meaning is read in the direct order: the entry is the World, the mechanism the Chariot, the root Death."
+    },
+    {
+      "q": "I have arcanum 13 at 60–70 on the age scale. Is that dangerous?",
+      "a": "No. For everyone with 21-7-13, point D falls on the decade from 60 to 70, and Death stands there. The age scale does not set lifespans: an arcanum describes the theme of a period. For Death that theme is a change of form — a different rhythm, a new role in the family and at work, the completion of a big stage. It is worth meeting it the same way as any ending in this tail: in advance and without armour."
+    },
+    {
+      "q": "How is 21-7-13 different from 3-7-22?",
+      "a": "They share a mechanism, the Chariot, and a centre, Strength. Everything else is different. 3-7-22 starts with the Empress and goes down to the Fool at the root: it is the tail of a home that becomes a fortress, and of a freedom that needs no escape. 21-7-13 starts with the World and goes to Death: it is the tail of a victory that lacks the skill of ending. 3-7-22 is twice as common: 2.9% of dates against 1.5%. With the 3-13-10 tail, 21-7-13 shares only Death, and there it stands in the middle, not at the root."
+    },
+    {
+      "q": "Is 21-7-13 different for women and men?",
+      "a": "No. Gender plays no part in the calculation and changes neither the numbers nor the mechanism. Advice like “a woman should soften, a man should stop fighting” is stereotype, not a conclusion from the cards. The Destroyer, the Reviver and the Runaway are found in everyone."
+    },
+    {
+      "q": "Is the 21-7-13 tail the same as the “21-7-13 program”? And in a compatibility matrix?",
+      "a": "A karmic tail is the M–N–D triad on the bottom ray. Many websites also call the tail itself a program; then it is the same thing. In the other lines of a personal chart the triad 21-7-13 never occurs. In a compatibility matrix the numbers are calculated from two dates, and the same triad then describes the couple’s script, while each partner keeps their own personal tail. The article above is about the personal chart."
+    },
+    {
+      "q": "What if a child has 21-7-13?",
+      "a": "Teach them to finish things, not just to win. To stay till the end of the season before dropping an activity. To say goodbye to what is going away: an old school, a move, belongings. Show by your own example that an ending can be announced in advance and calmly. And don’t make love a reward for victories: a child with the Chariot in their tail needs to know that losses and endings can be survived."
+    },
+    {
+      "q": "Can the 21-7-13 tail be “closed”?",
+      "a": "The numbers in the matrix do not change — what changes is how the script plays out. Signs of a tail lived through: people know about your endings in advance; you can stop a losing venture without feeling defeated; after you leave, people can still say hello; you have time between the old and the new; you don’t need a victory to feel that it was all worthwhile."
+    }
+  ],
+  "related": [
+    "21-10-7",
+    "12-19-7",
+    "21-10-16",
+    "21-4-10",
+    "arcanum/21",
+    "arcanum/7",
+    "arcanum/13"
+  ],
+  "intro": [
+    {
+      "table": {
+        "head": [
+          "Position",
+          "Arcanum",
+          "Role in the script",
+          "Image"
+        ],
+        "rows": [
+          [
+            "**M** — entry",
+            "21 · The World",
+            "wanting the whole: the work, the love, a life “for real and all the way”",
+            "a dance inside a wreath"
+          ],
+          [
+            "**N** — mechanism",
+            "7 · The Chariot",
+            "taking that whole by storm, as a victory",
+            "a triumphal chariot"
+          ],
+          [
+            "**D** — root",
+            "13 · Death",
+            "learning an ending that comes by itself and does not mean defeat",
+            "a rider without a weapon"
+          ],
+          [
+            "**E** — centre of the chart",
+            "8 · Strength",
+            "found in everyone with this tail: patience and a gentle hand are the comfort zone",
+            "a lion on a chain of flowers"
+          ]
+        ]
+      }
+    }
+  ],
+  "report": [
+    "Popular destiny matrix guides call the karmic tail 21-7-13 “The Destroyer and Killer”, yet the person who carries it is often the most patient one in the room. For years they take the blows, then one ordinary Tuesday hand in their resignation and leave every work chat the same day. To everyone around, it is a bolt from the blue: “but he never said anything”.",
+    "The name is explained by a past-life legend: an executioner, a ruler, an inventor of weapons, a person who took their own life too early. None of these versions can be checked: a birth date tells nothing about events in the past. But the legends share a common denominator more interesting than any of them: in each, the end comes not in its own time but by force.",
+    "That is how the tail is built. In the middle stands the Chariot, and Waite’s divinatory list gives it “succour, providence; also war, triumph, presumption, vengeance”. At the root is Death, whose list opens with “end, mortality, destruction”. The folk lists did not invent the word “destroyer”: it can be put together from two neighbouring cards.",
+    {
+      "h3": "Death needs no sword"
+    },
+    "But the roles in this pair are cast unexpectedly. Waite describes the charioteer as “carrying a drawn sword”, while the rider on the Death card “carries no visible weapon”, and yet everyone falls before him, from king to child. **Death needs no sword. A sword is for whoever has taken on Death’s work.**",
+    "So this is how we read the name: the “destroyer” here is not Death but the Chariot, which has decided to end things itself. And “killer” is not about people but about endings: the habit of breaking off relationships, projects and ties with one’s own hand instead of letting them end.",
+    {
+      "h3": "A triumph deaf to the whisperer"
+    },
+    "After a great victory, a Roman general rode into the city in a triumphal chariot, wearing a laurel wreath. Tertullian records a detail: from behind, someone kept telling the man in triumph, “Look behind you! Remember that you are a man.” Later retellings turned these words into memento mori — “remember that you will die”.",
+    "Waite knew nothing about the destiny matrix, yet he calls the Chariot “the King in his triumph” and says of Death that it is “more especially a card of the death of Kings”. The tail unfolds between these two phrases, and the voice from behind is here too: it is the root. The whole script is a triumph in which nobody hears the whisperer.",
+    "It begins with a hunger for the whole. At the entry stands the World, for Waite “the perfection and end of the Cosmos”. Half is never enough for a person with this tail: work means being the best at it, love means forever. But the whole cannot be taken; it can only be put together or lived through. And the Chariot can do only one thing: win.",
+    "In Wen the World is encircled by “the wreath of victory”, and her charioteer also wears “the laurel wreaths of victory”. But in the World the wreath embraces a dancing figure, while in the Chariot it sits on the head of a man in armour. **A whole to live inside becomes a trophy to wear.** Work turns into a siege, love into a conquest.",
+    "Then the ending comes: a project is exhausted, a feeling has cooled, the city has become foreign. The last word among the Chariot’s reversed meanings in Waite is “defeat”, and that is how the charioteer hears any ending. He has three moves. The Destroyer gets ahead of the ending and finishes everything himself. The Reviver fights for what has already died. The Runaway leaves before it becomes clear that everything is over. All three moves rest on one belief: **the end must be my action**, anything but an event that simply happened.",
+    {
+      "h3": "The longer Strength holds on, the harder the Tower strikes"
+    },
+    "The riddle of the patient destroyer is solved in the centre of the chart. Everyone with 21-7-13 has Strength there, the comfort zone. Wen boils it down to a formula: “Compassion is strength.” The Chariot masters the world around it; Strength masters the self.",
+    "And in Manipura, the chakra of will, status and money, everyone with this tail has the triad 8-8-16: Strength, Strength again and the Tower. While Strength holds the lion, tension builds up unnoticed, then comes out in a single discharge, and the decision is carried out at the Chariot’s full speed. Waite calls the Tower “a card in particular of unforeseen catastrophe”, and of Death’s rider he writes that he “moves slowly”. The tail mixes up these two cards of ending. **An ending that could have come like a sunset reaches others like lightning.**",
+    "The decision is often right; the form is wrong. Nobody gets to say goodbye, and mutual friends are crossed out with the relationship, good colleagues with the job. This is the everyday sense of the tail’s second folk name, “death to many souls”: when the Destroyer ends one thing, everything around it ends too.",
+    {
+      "h3": "The sword is one detail too many"
+    },
+    "The numbers point the way out. The entry is the sum of the root and the centre: 21 = 13 + 8. The World is Death plus Strength, the ability to end things plus a gentle hand. This is a play of numbers, not a proof, but an exact one: here the whole is put together not by victories but by endings. Waite compares the World’s garland to “a chain of flowers”, the lion of Strength is led on a chain of flowers, and on Death’s banner there is a rose, the sign of life. Only the Chariot has no flowers: there the charioteer carries a sword.",
+    "The task is to learn to end things without a sword. The author’s exercises, drawn from the logic of the triad, not a ritual:",
+    {
+      "ul": [
+        "The voice behind. Before any “that’s it, enough”, ask three questions: what am I really ending, who will fall along with it, what will I think about this in a year? Nobody will assign a whisperer to a person with 21-7-13.",
+        "The slow rider. No irreversible endings on the day the decision ripens: set a date a week later and, if the decision holds, carry it out in the open, not as a blow.",
+        "No ending without a warning. Speak up about unhappiness while it is still small. This is Strength that does not stay silent until the lightning.",
+        "An in-between season. After an ending, leave a pause before anything new begins. A new big plan a week later is usually the same chariot on a new road."
+      ]
+    },
+    {
+      "h3": "A victory with someone riding behind it"
+    },
+    "Lived through, 21-7-13 gives a rare gift: the ability to end things. Such a person closes a company so that nobody is left without a next step, parts without turning the children into a battlefield, and guides others through loss, because they know that road themselves. Waite finds the explanations of the thirteenth card “on the whole, better than usual”: rebirth, creation, destination, renewal.",
+    "There is no need to give up victories: a person with 21-7-13 really does know how to win. All that is needed is someone riding behind the victor, reminding him to look back: he is human, and everything, his victories included, has its term. This is not a threat. It is exactly what keeps a victory alive."
   ]
- },
- "short": "Karmic tail (karmic program) 21-7-13 enters through The World: the plan swells at once to the scale of “everything at all”. The Chariot holds the loop in place with sheer speed, and Death at the root slips in an early wipe-out disguised as a mature ending. The pattern breaks the first time one small circle runs all the way to a finish chosen in advance — with no new bar raised halfway down the road.",
- "sections": [
-  {
-   "h2": "Aiming at everything, racing flat out and breaking off halfway",
-   "paragraphs": [
-    "Each of the three arcana is harmless on its own, but together they add up to one recognisable move. The World at the entrance measures life in large units and pulls towards a plan about “everything at once”. The Chariot in the middle picks up that sweep and turns it into a distance you have to cover first. And Death at the root carries the conviction that whatever has outlived itself must be cut off cleanly; in the weak version this ability switches on before the real finish.",
-    "Taken apart, these are strong traits: seeing scale, acting fast, not clinging to what is over. In the bundle the plan swells faster than the work moves; when the road gets too long, the root right to finish is swapped for wiping everything out. The loop does not hold because the person is weak — quite the opposite: the entrance is too wide, the engine too fast, and nobody named the finish line in advance."
-   ]
-  },
-  {
-   "h2": "The scale sets a finish you can never reach",
-   "paragraphs": [
-    "The World and The Chariot work against each other here, although they look like allies. The World keeps pushing the horizon away: the moment a goal becomes close and concrete, it looks small next to “the real big thing”, and the bar creeps up. The Chariot answers in the only way it knows — it adds speed. But you cannot catch a finish line that runs away on its own: the faster you drive, the further it moves off, because what moves it is not distance but the swelling scale of the plan.",
-    "Hence the steady feeling of an endless race with no arrival. Small and near things — closing the current piece, finishing a modest task — are written off as “not it”, while the big thing never arrives, because every time it turns out to be only the approach to something bigger still. The person lives with the engine running and with no point at which that engine can be switched off with the feeling of having arrived."
-   ]
-  },
-  {
-   "h2": "Why wiping everything out feels like rescue",
-   "paragraphs": [
-    "When the road drags on and the finish keeps moving away, the tiredness of a long distance meets the arcanum that knows how to close doors. Death offers a move that feels like relief: instead of seeing it through, tear the whole thing down at once and start from a blank page. In the moment it really does make things easier — the load of unfinished business disappears instantly.",
-    "But this arcanum has a mature side and an immature one, and the bundle falls into the immature one. Strong Death ends what has genuinely run out. Here the break comes early — not because the work is over, but because it got hard and far away. What goes under the knife is alive and could have been carried through; the freed space is taken at once by a new plan from The World, larger than the last one, and the whole thing goes round again."
-   ]
-  },
-  {
-   "h2": "Where the bundle cuts itself down",
-   "paragraphs": [
-    "The weak spot hides not in the arcana themselves but in the shift from acceleration to the break. The Chariot picks up speed to match the sweep of The World, but The World will not let the finish stand still, and the drive runs out before it arrives. Then the weak version of Death at the root switches on: the break reads not as a failure but as relief and even as a virtue — “after all, I know how to let go”. This very swap is what keeps the loop going: running away from a long road passes itself off as a mature ending.",
-    "Seeing this matters more than fighting each arcanum separately. Damping the scale means losing the very reason a person takes on big things at all. Cutting the speed means choking the main resource. Banning yourself from endings is beside the point too. Only one thing moves: what exactly the person calls a finish, and at which moment the engine is allowed to stop."
-   ]
-  },
-  {
-   "h2": "Finish one circle without raising the bar",
-   "paragraphs": [
-    "The way out is not to dream smaller or drive slower. It is to walk one small circle through to the end at least once, with a ban on raising the bar along the way. Take something deliberately modest and concrete, set the finish in advance — and do not let The World rewrite it into “the real big thing” before the work is closed. The speed of The Chariot is useful here, but pointed down one narrow corridor rather than spread wide.",
-    "Death’s role then changes from a break into a real ending. Closing a small piece of work on purpose, putting a full stop and feeling that you have arrived — that is the same arcanum of endings, only in its strong version. One finished circle breaks the habit of wiping things out: you get the experience of a finish that the engine never had. That is where to start, and scale can be added later — on a foundation of what is already done, not on top of an empty lot."
-   ]
-  }
- ],
- "faq": [
-  {
-   "q": "Is this one tail or three different ones, since the numbers can be rearranged?",
-   "a": "Entry M — arcanum 21, The World: the undertaking expands into a whole that is difficult to reach. Middle N — arcanum 7, The Chariot: maximum acceleration keeps the pursuit of that scale going. Root D — arcanum 13, Death: the root task is to end a stage deliberately rather than erase its result and call that completion. Rearranging the numbers changes these roles; it is not another spelling of the same program."
-  },
-  {
-   "q": "Does everything have to end in collapse?",
-   "a": "No. This is not a forecast of events but a description of a habitual move. The break here is not fate but a reaction to a road that is too long and keeps getting longer; as soon as there is experience of one finished circle, that move stops being the only one available."
-  },
-  {
-   "q": "How is this tail different from ordinary procrastination?",
-   "a": "Procrastination stalls at the start. Here it is the other way round: the start is powerful and fast, and the collapse comes in the middle or nearer the end, when the plan has outgrown the strength behind it, and the work is not postponed but torn down whole."
-  },
-  {
-   "q": "Where do I start if I recognise myself in this?",
-   "a": "With one deliberately small task whose finish is set in advance and does not move. Carry it to the full stop without widening it along the way — that is how the arcanum of endings fires for the first time as a completion rather than a wipe-out."
-  }
- ],
- "related": [
-  "21-10-7",
-  "12-19-7",
-  "21-10-16",
-  "21-4-10",
-  "arcanum/21",
-  "arcanum/7",
-  "arcanum/13"
- ]
 }

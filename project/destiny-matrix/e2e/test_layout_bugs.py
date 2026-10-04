@@ -41,19 +41,18 @@ def test_result_stops_below_the_sticky_header(page: Page, width: int):
     assert geometry["resultTop"] >= geometry["headerBottom"] - 1, geometry
 
 
-def test_paid_report_has_one_bottom_navigation_row(page: Page):
+def test_paid_report_has_no_bottom_navigation_row(page: Page):
+    # The header already links to the account, the calculator and the encyclopedia.
     mail = f"layout-{uuid.uuid4().hex[:10]}@example.com"
     assert not flows.buy(page, mail, 11, 3, 1990)
 
     page.goto(f"{BASE}/report", wait_until="domcontentloaded")
     page.wait_for_timeout(700)
-    rows = page.locator("main > .wrap > p.small").all_inner_texts()
-    assert rows == ["Кабинет · Новый расчёт · Энциклопедия"]
+    assert page.locator("main > .wrap > p.small").count() == 0
 
     matrix_id = flows.matrix_ids(page)[0]
     page.goto(f"{BASE}/matrices/{matrix_id}", wait_until="domcontentloaded")
-    rows = page.locator("main > .wrap > p.small").all_inner_texts()
-    assert rows == ["Кабинет · Новый расчёт · Мой разбор"]
+    assert page.locator("main > .wrap > p.small").count() == 0
 
 
 def test_positions_table_fits_a_320px_screen_with_justice(page: Page):

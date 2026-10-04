@@ -98,5 +98,15 @@ curl -fsS "$SITE/version/current.txt"
 curl -fsS https://arcana-sense.com/version/current.txt
 curl -fsS "$SITE/" | grep '<html lang="ru"' >/dev/null
 curl -fsS https://arcana-sense.com/ | grep '<html lang="en"' >/dev/null
+
+echo "== прогрев печати"
+# Chromium поднимается на первой печати после перезапуска: без прогрева эти секунды ждёт покупатель.
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
+  "cd /srv/arcana && docker compose exec -T api python -m app.print_warm" || echo "прогрев не удался: первая печать будет дольше"
+
+echo "== отчёты PDF"
+# Поднят PDF_REVISION — api при старте перепечатывает старые файлы в фоне. Ждём и скачиваем каждый.
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
+  "cd /srv/arcana && docker compose exec -T api python -m app.report_check --wait 900" || echo "ВНИМАНИЕ: не все PDF перепечатаны или скачиваются"
 scripts/release-snapshot.sh | tee "../reports/unified/prod-after-$TAG.json"
 echo "готово: $SITE"

@@ -85,7 +85,7 @@ export const enc = {
     ru: "Хвост — одна из позиций октаграммы. Сама карта по дате рождения строится бесплатно, а "
       + "тройка с разбором входит в раздел «Кармический хвост» —",
     en: "The tail is one of the positions of the octagram. The chart itself is built from a date "
-      + "of birth for free, and the triple with its reading is part of the “Tasks of past lives” section —",
+      + "of birth for free, and the triple with its reading is part of the “Karmic tail” section —",
   } satisfies Phrase,
 };
 
@@ -474,8 +474,8 @@ export const encLinks = {
     en: (key: string) => `More about profession and work you love ${key} in the encyclopedia →`,
   } satisfies PhraseFn<[string]>,
   moreTail: {
-    ru: (key: string) => `Подробнее про кармический хвост ${key} в энциклопедии →`,
-    en: (key: string) => `More about the karmic tail ${key} in the encyclopedia →`,
+    ru: (key: string) => `Читать полную статью про кармический хвост ${key} в энциклопедии →`,
+    en: (key: string) => `Read the full article on the karmic tail ${key} in the encyclopedia →`,
   } satisfies PhraseFn<[string]>,
   moreYourSection: {
     ru: (title: string) => `Подробнее про ваш раздел «${title}» в энциклопедии →`,

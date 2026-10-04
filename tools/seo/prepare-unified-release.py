@@ -50,6 +50,7 @@ STATIC_INDEXED = {
     "/encyclopedia/arcanum": "arcanum_hub",
     "/encyclopedia/position": "position_hub",
     "/encyclopedia/chakra": "chakra_hub",
+    "/encyclopedia/chakra/energy-field": "energy_field",
     "/encyclopedia/combination": "combination_hub",
     "/encyclopedia/karmic-tail": "tail_hub", "/year": "year_hub",
     "/contacts": "legal", "/terms": "legal", "/privacy": "legal", "/refund": "legal",

@@ -6,6 +6,7 @@ import {
   forLocale as localizedPublicSpec,
   type SectionOut
 } from "@/lib/publicSpec";
+import { CHAKRA_HUB_HREF } from "@/lib/readingTypes";
 import { forLocale as localizedSite } from "@/lib/site";
 import Link from "next/link";
 
@@ -31,17 +32,25 @@ export default function SectionEncyclopediaLinks({ site = DEFAULT_SITE, locale: 
   const href = (path: string) => (printing ? publicHref(path) : path);
 
   if (!section.personalHref) {
+    const link = (
+      <Link
+        href={href(entity.href)}
+        data-entity-type={entity.entityType}
+        data-entity-key={entity.entityKey}
+        data-position-key={entity.positionKey}
+      >
+        {entity.label}
+      </Link>
+    );
+    if (section.key !== "chakras") return <p className="encref">{link}</p>;
     return (
-      <p className="encref">
-        <Link
-          href={href(entity.href)}
-          data-entity-type={entity.entityType}
-          data-entity-key={entity.entityKey}
-          data-position-key={entity.positionKey}
-        >
-          {entity.label}
-        </Link>
-      </p>
+      <div className="encref character-encrefs" data-testid="chakras-encyclopedia-links">
+        <div className="character-encref-group">
+          <Link href={href(CHAKRA_HUB_HREF)} data-testid="chakras-hub-link">{D.sheet.chakraHubLink[L]}</Link>
+        </div>
+        <span className="character-encref-separator" aria-hidden="true" />
+        <div className="character-encref-group">{link}</div>
+      </div>
     );
   }
 

@@ -21,6 +21,7 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
   children?: React.ReactNode;
   testId?: string;
   matrixId?: number | null;
+  unavailable?: React.ReactNode;
 }) & { locale?: Locale }) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
@@ -31,12 +32,13 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
     children,
     testId,
     matrixId,
+    unavailable = <p className="dim">{D.pay.regionUnavailable[L]}</p>,
   } = localeProps;
 
   const lead = useLead();
   const known = usePriceKnown();
   const providers = usePaymentProviders();
-  if (providers?.length === 0) return <p className="dim">{D.pay.regionUnavailable[L]}</p>;
+  if (providers?.length === 0) return unavailable;
   if (!known || !lead) {
     return (
       <button className={className} data-testid={testId} type="button" disabled>

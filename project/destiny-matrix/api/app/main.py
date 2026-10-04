@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import errors, monitor, payments, presence, sites, store, tariffs
+from . import errors, monitor, payments, presence, printing, sites, store, tariffs
 from .config import settings
 from .db import get_db
 from .deps import ghost_session, optional_user
@@ -134,6 +134,7 @@ def create_app() -> FastAPI:
 
     monitor.start()
     presence.start()
+    printing.reprint_stale()
     return app
 
 

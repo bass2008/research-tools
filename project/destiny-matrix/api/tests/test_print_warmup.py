@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app import monitor, printing, reports
+from app import monitor, printing, report_check, reports
 from app.config import settings
 from app.models import ReportJob, User
 
@@ -155,3 +155,65 @@ def test_pulse_does_not_count_one_print_twice(client, db, printer, monkeypatch):
     assert waiting == 0, (
         f"во время единственной печати очередь показывает {waiting}: "
         "та же печать посчитана дважды")
+
+
+def test_release_reprints_stale_pdfs_once(client, db, printer):
+    """Поднятый PDF_REVISION: старый файл перепечатан при старте, повторный старт ничего не делает."""
+    buy(client)
+    old = db.scalars(select(ReportJob)).one()
+    old.object_key = "v0/" + old.object_key.split("/", 1)[1]
+    db.commit()
+
+    assert printing.reprint_stale() == 1
+    db.expire_all()
+    jobs = db.scalars(select(ReportJob).order_by(ReportJob.id)).all()
+    assert [j.status for j in jobs] == ["expired", "done"]
+    assert jobs[1].object_key.startswith(f"{printing.PDF_REVISION}/")
+    assert len(printer) == 2
+    assert printing.reprint_stale() == 0
+
+
+def test_failed_reprint_is_retried_and_keeps_the_old_file(client, db, printer, monkeypatch):
+    buy(client)
+    old = db.scalars(select(ReportJob)).one()
+    old.object_key = "v0/" + old.object_key.split("/", 1)[1]
+    db.commit()
+    monkeypatch.setattr(printing, "REPRINT_PAUSE_SECONDS", 0)
+    monkeypatch.setattr(reports, "render", lambda url: (_ for _ in ()).throw(RuntimeError("web ещё не поднялся")))
+
+    printing.reprint_stale()
+    db.expire_all()
+    statuses = [j.status for j in db.scalars(select(ReportJob).order_by(ReportJob.id))]
+    assert statuses == ["done"] + ["failed"] * printing.REPRINT_ATTEMPTS
+    assert printing.reprint_stale() == 1, "неудачная перепечатка должна повториться при следующем старте"
+
+
+def test_reprint_skips_a_report_the_owner_already_reprinted(client, db, printer):
+    buy(client)
+    fresh = db.scalars(select(ReportJob)).one()
+    stale = ReportJob(user_id=fresh.user_id, matrix_id=fresh.matrix_id, locale=fresh.locale,
+                      status="done", object_key="v0/old.pdf", size_bytes=1)
+    db.add(stale)
+    db.commit()
+
+    assert printing.reprint_stale() == 1
+    db.expire_all()
+    assert len(printer) == 1, "свежий файл уже был — второй печати быть не должно"
+    assert db.get(ReportJob, stale.id).status == "expired"
+    assert db.get(ReportJob, fresh.id).status == "done"
+
+
+def test_report_check_does_not_wait_for_wiped_local_pdfs(client, db, printer, monkeypatch, tmp_path, capsys):
+    """Test contour: local PDFs are wiped on restart and never reprinted, so there is nothing to wait for."""
+    buy(client)
+    old = db.scalars(select(ReportJob)).one()
+    old.object_key = "v0/" + old.object_key.split("/", 1)[1]
+    db.commit()
+    monkeypatch.setattr(report_check.settings, "reports_store", "local")
+    monkeypatch.setattr(report_check.settings, "reports_dir", str(tmp_path))
+    monkeypatch.setattr(report_check, "SessionLocal", printing.SessionLocal)
+    monkeypatch.setattr("sys.argv", ["report_check", "--wait", "900"])
+    monkeypatch.setattr(report_check.time, "sleep", lambda s: pytest.fail("waited for a wiped PDF"))
+
+    assert report_check.main() == 0
+    assert "стёрты при перезапуске 1" in capsys.readouterr().out

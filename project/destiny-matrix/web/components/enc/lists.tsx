@@ -3,9 +3,11 @@ import { forLocale as localizedArcana } from "@/lib/arcana";
 import { forLocale as localizedContent } from "@/lib/content";
 import { POSITIONS, forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { D } from "@/lib/i18n";
+import { chakraAtlas } from "@/lib/i18n/dict/chakraAtlas";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedText } from "@/lib/text";
+import { ENERGY_FIELD_HREF } from "@/lib/readingTypes";
 import Link from "next/link";
 
 export type PositionKind = (typeof POSITIONS)[number]["kind"];
@@ -74,9 +76,10 @@ export function PositionRows({ locale: requestedLocale, ...localeProps }: ({ ite
   );
 }
 
-export function ChakraList({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+export function ChakraList({ locale: requestedLocale, field = false }: { locale?: Locale; field?: boolean } = {}) {
   const L = requestedLocale ?? defaultLocale;
   const { chakraContent, CHAKRA_PAGES, chakraHref, clip } = forLocale(L);
+  const fieldColumns = [chakraAtlas.energyFieldPhysics[L], chakraAtlas.energyFieldEnergy[L], chakraAtlas.energyFieldEmotions[L]];
 
   return (
     <div className="chcol">
@@ -99,6 +102,21 @@ export function ChakraList({ locale: requestedLocale, ...localeProps }: ({}) & {
           </Link>
         );
       })}
+      {field ? (
+        <Link className="chrow kf" href={ENERGY_FIELD_HREF} data-energy-field="">
+          <span className="chn">Σ</span>
+          <span className="chb">
+            <span className="cht">{chakraAtlas.energyField[L]}</span>
+            <span className="chh">{chakraAtlas.energyFieldTopic[L]}</span>
+          </span>
+          {chakraContent(CHAKRA_PAGES[0].key)!.columns.map((col, i) => (
+            <span className="chc" key={col.title}>
+              <i>{col.title}</i>
+              {fieldColumns[i]}
+            </span>
+          ))}
+        </Link>
+      ) : null}
     </div>
   );
 }

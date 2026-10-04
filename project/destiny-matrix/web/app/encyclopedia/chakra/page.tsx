@@ -44,7 +44,7 @@ const forLocale = localized((L: Locale, site) => {
 export default async function ChakraHubPage() {
   const L = await requestLocale();
   const site = await requestSite();
-  const { CHAKRA_HUB, CHAKRA_PAGES, chakraHref, encyclopediaSection, articleLd, itemListLd, HUB } = forLocale(L, site);
+  const { categoryHub, CHAKRA_HUB, CHAKRA_PAGES, chakraHref, encyclopediaSection, articleLd, itemListLd, HUB } = forLocale(L, site);
   const { calculate, toIso } = localizedMatrix(L);
   const seed = exampleDay();
   const example = calculate(toIso({ ...seed, year: seed.year - 30 }), "f");
@@ -80,7 +80,7 @@ export default async function ChakraHubPage() {
       <div className="panel section-gap">
         <h2>{D.enc.sevenLevels[L]}</h2>
         <div className="cap">{encyclopediaSection("chk").hint} · {CHAKRA_PAGES.length}</div>
-        <ChakraList locale={L} />
+        <ChakraList locale={L} field={!!categoryHub("energy-field")} />
       </div>
 
       <Sections items={hub.sections} locale={L} />

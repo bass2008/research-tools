@@ -109,9 +109,9 @@ describe("domain and public locale isolation", () => {
     expect(response.headers.has("set-cookie")).toBe(false);
   });
 
-  it("allows language links for private reports, constrained by the domain", () => {
+  it("allows language links for private reports on both domains", () => {
     expect(call({ host: "arcana-sense.com" }, "/report?lang=ru").headers.get("set-cookie")).toContain("arcana_locale=ru");
-    expect(call({ host: "arcana-sense.ru" }, "/report?lang=en").headers.has("set-cookie")).toBe(false);
+    expect(call({ host: "arcana-sense.ru" }, "/report?lang=en").headers.get("set-cookie")).toContain("arcana_locale=en");
   });
 
   it("marks interactive RSC responses as private and non-indexable", () => {

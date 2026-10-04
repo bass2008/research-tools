@@ -28741,140 +28741,140 @@
     ]
   },
   {
-    "birth": "2026-09-27",
+    "birth": "2026-10-05",
     "sex": "f",
     "reason": "current_date_boundary",
     "contract": "spec/method.json",
     "review": "engineering_cross_check_pending_human_signoff",
     "matrix": {
-      "birth": "2026-09-27",
+      "birth": "2026-10-05",
       "sex": "f",
-      "day": 9,
-      "month": 9,
+      "day": 5,
+      "month": 10,
       "year": 10,
-      "mission": 10,
-      "center": 11,
-      "father_line": 18,
-      "mother_line": 19,
-      "descendants": 20,
-      "inheritance": 19,
+      "mission": 7,
+      "center": 5,
+      "father_line": 15,
+      "mother_line": 20,
+      "descendants": 17,
+      "inheritance": 12,
       "karmic_tail": [
-        21,
-        4,
-        10
+        12,
+        19,
+        7
       ],
-      "comfort_west": 20,
-      "comfort_north": 20,
-      "comfort_east": 21,
-      "comfort_south": 21,
+      "comfort_west": 10,
+      "comfort_north": 15,
+      "comfort_east": 15,
+      "comfort_south": 12,
       "sky": [
-        9,
         10,
-        19
+        7,
+        17
       ],
       "ground": [
-        9,
+        5,
         10,
-        19
+        15
       ],
       "social_male": [
-        18,
-        20,
-        11
+        15,
+        17,
+        5
       ],
       "social_female": [
-        19,
-        19,
-        11
+        20,
+        12,
+        5
       ],
-      "harmony": 6,
-      "planetary": 10,
+      "harmony": 15,
+      "planetary": 7,
       "money": [
-        21,
-        9,
-        6
+        15,
+        6,
+        9
       ],
       "love": [
+        12,
         21,
-        9,
-        6
+        9
       ],
       "talent": [
-        9,
-        11,
-        20
+        10,
+        7,
+        15
       ],
-      "purpose_personal": 11,
-      "purpose_social": 22,
+      "purpose_personal": 5,
+      "purpose_social": 10,
       "chakras": [
         {
           "key": "sahasrara",
-          "physics": 9,
-          "energy": 9,
-          "emotions": 18
+          "physics": 5,
+          "energy": 10,
+          "emotions": 15
         },
         {
           "key": "ajna",
-          "physics": 11,
-          "energy": 11,
+          "physics": 15,
+          "energy": 7,
           "emotions": 22
         },
         {
           "key": "vishuddha",
-          "physics": 20,
-          "energy": 20,
-          "emotions": 4
+          "physics": 10,
+          "energy": 15,
+          "emotions": 7
         },
         {
           "key": "anahata",
-          "physics": 4,
-          "energy": 4,
+          "physics": 15,
+          "energy": 20,
           "emotions": 8
         },
         {
           "key": "manipura",
-          "physics": 11,
-          "energy": 11,
-          "emotions": 22
+          "physics": 5,
+          "energy": 5,
+          "emotions": 10
         },
         {
           "key": "svadhisthana",
-          "physics": 21,
-          "energy": 21,
-          "emotions": 6
+          "physics": 15,
+          "energy": 12,
+          "emotions": 9
         },
         {
           "key": "muladhara",
           "physics": 10,
-          "energy": 10,
-          "emotions": 20
+          "energy": 7,
+          "emotions": 17
         }
       ],
       "chakra_totals": {
-        "physics": 14,
-        "energy": 14,
-        "emotions": 1
+        "physics": 12,
+        "energy": 13,
+        "emotions": 16
       },
       "age_scale": [
         {
           "from": 0,
           "to": 10,
-          "arcanum": 9
+          "arcanum": 5
         },
         {
           "from": 10,
           "to": 20,
-          "arcanum": 18
+          "arcanum": 15
         },
         {
           "from": 20,
           "to": 30,
-          "arcanum": 9
+          "arcanum": 10
         },
         {
           "from": 30,
           "to": 40,
-          "arcanum": 19
+          "arcanum": 20
         },
         {
           "from": 40,
@@ -28884,17 +28884,17 @@
         {
           "from": 50,
           "to": 60,
-          "arcanum": 20
+          "arcanum": 17
         },
         {
           "from": 60,
           "to": 70,
-          "arcanum": 10
+          "arcanum": 7
         },
         {
           "from": 70,
           "to": 80,
-          "arcanum": 19
+          "arcanum": 12
         }
       ]
     },
@@ -28904,12 +28904,12 @@
         "access": "free",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
           },
           {
             "arcanum": 10,
@@ -28922,16 +28922,16 @@
         "access": "free",
         "positions": [
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29032,12 +29032,12 @@
         "access": "free",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
           },
           {
             "arcanum": 10,
@@ -29050,16 +29050,16 @@
         "access": "free",
         "positions": [
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29068,16 +29068,16 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29086,16 +29086,16 @@
         "access": "paid",
         "positions": [
           {
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
+          },
+          {
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
+          },
+          {
             "arcanum": 10,
             "href": "/encyclopedia/arcanum/10"
-          },
-          {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
-          },
-          {
-            "arcanum": 22,
-            "href": "/encyclopedia/arcanum/22"
           }
         ]
       },
@@ -29104,12 +29104,12 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
           }
         ]
       },
@@ -29118,12 +29118,12 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           }
         ]
       },
@@ -29132,20 +29132,20 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 18,
-            "href": "/encyclopedia/arcanum/18"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 20,
+            "href": "/encyclopedia/arcanum/20"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           }
         ]
       },
@@ -29154,16 +29154,16 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
-          },
-          {
             "arcanum": 10,
             "href": "/encyclopedia/arcanum/10"
           },
           {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
+          },
+          {
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
           }
         ]
       },
@@ -29172,16 +29172,16 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
-            "arcanum": 4,
-            "href": "/encyclopedia/arcanum/4"
+            "arcanum": 19,
+            "href": "/encyclopedia/arcanum/19"
           },
           {
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -29190,20 +29190,20 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
-          },
-          {
-            "arcanum": 22,
-            "href": "/encyclopedia/arcanum/22"
-          },
-          {
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
             "arcanum": 10,
             "href": "/encyclopedia/arcanum/10"
+          },
+          {
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
+          },
+          {
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -29212,20 +29212,20 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
-          },
-          {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "arcanum": 6,
             "href": "/encyclopedia/arcanum/6"
           },
           {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 9,
+            "href": "/encyclopedia/arcanum/9"
+          },
+          {
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29234,12 +29234,12 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 6,
+            "href": "/encyclopedia/arcanum/6"
           },
           {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29248,6 +29248,10 @@
         "access": "paid",
         "positions": [
           {
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
+          },
+          {
             "arcanum": 21,
             "href": "/encyclopedia/arcanum/21"
           },
@@ -29256,12 +29260,8 @@
             "href": "/encyclopedia/arcanum/9"
           },
           {
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
-          },
-          {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29270,16 +29270,16 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 18,
-            "href": "/encyclopedia/arcanum/18"
-          },
-          {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "arcanum": 20,
             "href": "/encyclopedia/arcanum/20"
+          },
+          {
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
           }
         ]
       },
@@ -29288,20 +29288,20 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           }
         ]
       },
@@ -29314,12 +29314,12 @@
             "href": "/encyclopedia/arcanum/10"
           },
           {
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
           }
         ]
       },
@@ -29328,44 +29328,44 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
-          },
-          {
-            "arcanum": 20,
-            "href": "/encyclopedia/arcanum/20"
-          },
-          {
-            "arcanum": 4,
-            "href": "/encyclopedia/arcanum/4"
-          },
-          {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
-          },
-          {
-            "arcanum": 21,
-            "href": "/encyclopedia/arcanum/21"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "arcanum": 10,
             "href": "/encyclopedia/arcanum/10"
           },
           {
-            "arcanum": 14,
-            "href": "/encyclopedia/arcanum/14"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
-            "arcanum": 14,
-            "href": "/encyclopedia/arcanum/14"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 1,
-            "href": "/encyclopedia/arcanum/1"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
+          },
+          {
+            "arcanum": 10,
+            "href": "/encyclopedia/arcanum/10"
+          },
+          {
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
+          },
+          {
+            "arcanum": 13,
+            "href": "/encyclopedia/arcanum/13"
+          },
+          {
+            "arcanum": 16,
+            "href": "/encyclopedia/arcanum/16"
           }
         ]
       },
@@ -29374,12 +29374,12 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
+            "arcanum": 9,
+            "href": "/encyclopedia/arcanum/9"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           }
         ]
       },
@@ -29388,16 +29388,16 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 10,
-            "href": "/encyclopedia/arcanum/10"
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
           },
           {
-            "arcanum": 11,
-            "href": "/encyclopedia/arcanum/11"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 6,
-            "href": "/encyclopedia/arcanum/6"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           }
         ]
       },
@@ -29406,20 +29406,12 @@
         "access": "paid",
         "positions": [
           {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
+            "arcanum": 5,
+            "href": "/encyclopedia/arcanum/5"
           },
           {
-            "arcanum": 18,
-            "href": "/encyclopedia/arcanum/18"
-          },
-          {
-            "arcanum": 9,
-            "href": "/encyclopedia/arcanum/9"
-          },
-          {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 15,
+            "href": "/encyclopedia/arcanum/15"
           },
           {
             "arcanum": 10,
@@ -29434,8 +29426,16 @@
             "href": "/encyclopedia/arcanum/10"
           },
           {
-            "arcanum": 19,
-            "href": "/encyclopedia/arcanum/19"
+            "arcanum": 17,
+            "href": "/encyclopedia/arcanum/17"
+          },
+          {
+            "arcanum": 7,
+            "href": "/encyclopedia/arcanum/7"
+          },
+          {
+            "arcanum": 12,
+            "href": "/encyclopedia/arcanum/12"
           }
         ]
       }

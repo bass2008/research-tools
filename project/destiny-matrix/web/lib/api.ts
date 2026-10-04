@@ -74,6 +74,8 @@ export interface PaymentItem {
   state?: "new" | "paid" | "refunded" | "failed" | "abandoned";
 }
 
+export type AdminUserSort = "id" | "email" | "matrices" | "payments" | "spent" | "access" | "last_seen_at" | "created_at";
+
 /** Строка списка пользователей в админке. */
 export interface AdminUser {
   id: number;
@@ -355,8 +357,8 @@ export const forLocale = localized((L: Locale) => {
     payments: () => request<{ items: PaymentItem[] }>("/payments"),
 
     admin: {
-      users: (page = 1, pageSize = 10) => {
-        const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      users: (page = 1, pageSize = 10, sort: AdminUserSort = "last_seen_at", order: "asc" | "desc" = "desc") => {
+        const q = new URLSearchParams({ page: String(page), page_size: String(pageSize), sort, order });
         return request<{ items: AdminUser[]; total: number; page: number; page_size: number }>(
           `/admin/users?${q.toString()}`,
         );

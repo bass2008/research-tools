@@ -5,7 +5,8 @@ import { chakraRow, type ChakraCorpus } from "./chakraRow";
 import type { Lang as Locale } from "./i18n/hosts";
 import { forLocale as localizedPublicLabels } from "./i18n/publicLabels";
 import type { Matrix } from "./matrix";
-import type { ChakraReadingRow } from "./readingTypes";
+import { ENERGY_FIELD_KEY, type ChakraReadingRow } from "./readingTypes";
+import { chakraAtlas } from "./i18n/dict/chakraAtlas";
 import { plainText } from "./richText";
 
 type Bag = Record<string, unknown>;
@@ -22,7 +23,7 @@ export type Block =
 // the reader resolves it against the paid-report corpus.
 export interface ChakraReadingItem {
   id: string;
-  number: number;
+  number?: number;
   note?: string;
   row: ChakraReadingRow;
 }
@@ -63,8 +64,11 @@ export interface ArticleContent {
   title: string;
   seo: { title: string; description: string; queries: string[] };
   short: string;
+  intro: Paragraph[];
   sections: Section[];
   faq: QA[];
+  /** Short reading of a karmic tail for the paid report; the article itself stays on the site. */
+  report: Paragraph[];
   related: string[];
   arcana: number[];
   entityType?: string;
@@ -102,6 +106,8 @@ export interface PositionContent {
   key: string;
   kind: "section" | "point";
   title: string;
+  /** Редакционный заголовок статьи; без него h1 — название позиции. */
+  h1?: string;
   lead: string;
   formula: string;
   meaning: string[];
@@ -239,13 +245,15 @@ export function createContent(L: Locale, source: ContentSource) {
     }
     chakraCorpus ??= source.read("chakra-personal.json", L) as ChakraCorpus;
     chakraNumbers ??= new Map(readItems("chakras.json").map((row) => [String(row.key), Number(row.number)]));
-    const copy = chakraCorpus.chakras[chakra]?.readings[triple];
-    const number = chakraNumbers.get(chakra);
-    if (!copy || !number) return null;
+    const field = chakra === ENERGY_FIELD_KEY;
+    const copy = field ? chakraCorpus.energy_field?.readings[triple] : chakraCorpus.chakras[chakra]?.readings[triple];
+    const number = field ? undefined : chakraNumbers.get(chakra);
+    if (!copy || (!field && !number)) return null;
     const numbers = triple.split("-").map(Number);
+    const row = chakraRow(chakraCorpus, L, chakra, field ? chakraAtlas.energyField[L] : chakraTitle(chakra), numbers, copy);
     return {
-      id: `combination-${triple}`, number, ...(note ? { note: note.trim() } : {}),
-      row: chakraRow(chakraCorpus, L, chakra, chakraTitle(chakra), numbers, copy),
+      id: `combination-${triple}`, ...(number ? { number } : {}), ...(note ? { note: note.trim() } : {}),
+      row: field ? { ...row, topic: chakraAtlas.energyFieldTopic[L] } : row,
     };
   }
 
@@ -354,7 +362,9 @@ export function createContent(L: Locale, source: ContentSource) {
     const seo = seoOf(raw.seo);
     const short = typeof raw.short === "string" ? raw.short.trim() : "";
     const sections = sectionsOf(raw.sections, `статья ${id || "без ключа"}`);
-    if (!id || !title || !seo || short.length < 60 || !sections) {
+    const intro = raw.intro === undefined ? [] : paragraphsOf(raw.intro);
+    const report = raw.report === undefined ? [] : paragraphsOf(raw.report);
+    if (!id || !title || !seo || short.length < 60 || !sections || !intro || !report) {
       throw new Error(`[content] статья ${id || "без ключа"} не прошла обязательную схему`);
     }
     const queries = Array.isArray((raw.seo as Bag | undefined)?.queries)
@@ -371,8 +381,10 @@ export function createContent(L: Locale, source: ContentSource) {
       title,
       seo: { ...seo, queries },
       short,
+      intro,
       sections,
       faq: faqOf(raw.faq, `статья ${id}`) ?? [],
+      report,
       related: keys(raw.related) ?? [],
       arcana: numbers(raw.arcana) ?? [],
       entityType: typeof raw.entity_type === "string" ? raw.entity_type : undefined,
@@ -459,7 +471,7 @@ export function createContent(L: Locale, source: ContentSource) {
     ["combinations.json", COMBINATIONS_JSON.size, 231],
     ["karmic-tails.json", KARMIC_TAILS.size, 26],
     ["year-arcana.json", YEAR_ARCANA.size, 23],
-    ["category-hubs.json", CATEGORY_HUBS.size, 6],
+    ["category-hubs.json", CATEGORY_HUBS.size, 7],
     ["hubs.json", HUBS.size, 10],
   ] as const) {
     if (actual !== expected) throw new Error(`[content] ${name}: ожидалось ${expected}, получено ${actual}`);
@@ -659,6 +671,7 @@ export function createContent(L: Locale, source: ContentSource) {
       key,
       kind,
       title,
+      ...(typeof raw.h1 === "string" && raw.h1.trim() ? { h1: raw.h1.trim() } : {}),
       lead,
       formula,
       meaning,

@@ -148,6 +148,7 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
                   place="allbox"
                   testId="unlock-cta"
                   matrixId={thisDateSaved?.access === "locked" ? thisDateSaved.id : undefined}
+                  unavailable={null}
                 >
                   {D.nav.buy[L]}
                 </UnlockCta>

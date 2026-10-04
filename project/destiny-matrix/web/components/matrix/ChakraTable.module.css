@@ -1,5 +1,5 @@
-.panel { box-sizing: border-box; height: 440px; padding: 18px 20px; display: flex; flex-direction: column; container-type: inline-size; }
-.example { height: auto; min-height: 440px; }
+.panel { box-sizing: border-box; height: 480px; padding: 18px 20px; display: flex; flex-direction: column; container-type: inline-size; }
+.example { height: auto; min-height: 480px; }
 .example .list { min-height: 300px; }
 .heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .heading h2, .heading h3 { font: 600 26px/1.08 var(--ser); margin: 0; }
@@ -7,7 +7,7 @@
 .panel .lead { font-size: 10px; line-height: 1.5; color: var(--dim); margin: 5px 0 11px; }
 .columns { display: grid; grid-template-columns: 139px minmax(0, 1fr); gap: 10px; padding: 0 22px 0 10px; font-size: 8px; font-weight: 600; line-height: 1.3; color: var(--dim2); margin-bottom: 5px; }
 .columns > span:last-child, .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.list { display: grid; grid-template-rows: repeat(7, minmax(0, 1fr)); gap: 5px; flex: 1; min-height: 0; }
+.list { display: grid; grid-template-rows: repeat(8, minmax(0, 1fr)); gap: 5px; flex: 1; min-height: 0; }
 .row { position: relative; width: 100%; min-width: 0; min-height: 0; display: grid; grid-template-columns: 139px minmax(0, 1fr); align-items: center; gap: 10px; border: 1px solid var(--edge); border-radius: 7px; padding: 3px 22px 3px 10px; background: linear-gradient(110deg, var(--tone), color-mix(in srgb, var(--tone) 28%, #fff)); color: var(--text); font-family: var(--sans); text-align: left; text-decoration: none; cursor: pointer; }
 .row:hover { border-color: var(--accent); background: linear-gradient(110deg, var(--tone), color-mix(in srgb, var(--tone) 52%, #fff)); }
 .row:focus-visible, .footer button:focus-visible, .close:focus-visible { outline: 2px solid var(--ink, var(--gold2)); outline-offset: 2px; }
@@ -22,9 +22,9 @@
 .cardCopy > span { display: block; font-size: 9px; line-height: 1.2; margin-top: 3px; white-space: nowrap; }
 .lock { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); color: var(--ink); }
 .lock :global(.lockico) { width: 10px; height: 13px; margin: 0; }
-.footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; font-size: 9px; line-height: 1.3; color: var(--dim); }
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 5px; font-size: 9px; line-height: 1.3; color: var(--dim); }
 .footer b { color: var(--gold2); font-size: 10px; margin-left: 5px; }
-.footer button { border: 0; border-bottom: 1px solid var(--line2); background: none; padding: 0 0 1px; color: var(--gold2); font: 600 9px/1.2 var(--sans); cursor: pointer; }
+.footer button { margin-left: auto; border: 0; border-bottom: 1px solid var(--line2); background: none; padding: 0 0 1px; color: var(--gold2); font: 600 9px/1.2 var(--sans); cursor: pointer; }
 .dialog { border: 1px solid var(--line); border-radius: 15px; padding: 0; width: min(680px, calc(100% - 28px)); max-height: calc(100dvh - 40px); margin: auto; color: var(--text); background: #fff; box-shadow: 0 25px 80px #16283c33; }
 .dialog::backdrop { background: #16283c75; backdrop-filter: blur(4px); }
 .dialogTop { background: var(--tone); padding: 23px 60px 23px 30px; position: relative; border-bottom: 1px solid var(--edge); color: var(--ink); }
@@ -88,8 +88,8 @@
   .columns > span:last-child { gap: 4px; font-size: 7px; }
 }
 @media screen and (max-width: 360px) {
-  .panel { height: auto; min-height: 440px; }
-  .list { min-height: 352px; }
+  .panel { height: auto; min-height: 480px; }
+  .list { min-height: 384px; }
 }
 @media (max-width: 600px) {
   .panel { padding: 17px 12px; }

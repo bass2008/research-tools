@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
 
@@ -31,9 +32,9 @@ _started: set[tuple[int, int, str]] = set()
 _lock = threading.Lock()
 _report_locks: dict[tuple[int, int, str], tuple[threading.Lock, int]] = {}
 
-# Older cached PDFs contain links from the internal print Host, including COM links in RU.
-# Reprint on the next owner download without deleting historical objects or changing the DB schema.
-PDF_REVISION = "v2"
+# Bump when the printed content changes: older PDFs are reprinted on the next owner download,
+# historical objects stay. v2: internal print Host links; v3: rewritten chakra readings.
+PDF_REVISION = "v3"
 
 
 @contextmanager
@@ -225,6 +226,63 @@ def active() -> int:
     """Сколько печатей идёт прямо сейчас — по этому числу видно, упирается ли машина в места."""
     with _lock:
         return _active
+
+
+REPRINT_ATTEMPTS = 3
+REPRINT_PAUSE_SECONDS = 20
+
+
+def _reprint(user_id: int, matrix_id: int, locale: str) -> bool:
+    current = f"{PDF_REVISION}/%"
+    with using_locale(locale), SessionLocal() as db:
+        try:
+            with exclusive(user_id, matrix_id):
+                group = (ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
+                         ReportJob.locale == locale, ReportJob.status == "done")
+                user = db.get(User, user_id)
+                if (user is not None and access.unlocked_matrix(db, user, matrix_id)
+                        and db.scalars(select(ReportJob.id).where(*group, ReportJob.object_key.like(current))).first() is None
+                        and running(db, user_id, matrix_id) is None):
+                    job = run(db, user_id, matrix_id)
+                    log.info("перепечатан разбор матрицы %s: %s Б за %s c", matrix_id, job.size_bytes, job.seconds())
+                # Expire only after a successful reprint: a failed one stays stale and is retried next start.
+                for old in db.scalars(select(ReportJob).where(*group, ReportJob.object_key.not_like(current))).all():
+                    old.status = "expired"
+                    old.object_key = None
+                db.commit()
+            return True
+        except Exception as exc:                   # noqa: BLE001
+            log.warning("перепечатка разбора матрицы %s не удалась: %s", matrix_id, exc)
+            return False
+
+
+def _reprint_all(groups: list[tuple[int, int, str]]) -> None:
+    # The API can come up before web on a release, so the first prints may fail: retry with a pause.
+    for group in groups:
+        for attempt in range(REPRINT_ATTEMPTS):
+            if _reprint(*group):
+                break
+            if attempt + 1 < REPRINT_ATTEMPTS:
+                time.sleep(REPRINT_PAUSE_SECONDS)
+
+
+# Release-time migration, safe on every start: PDFs of an older PDF_REVISION are reprinted in the
+# background; once all are current it does nothing.
+def reprint_stale() -> int:
+    if not settings.print_warmup or not settings.pdf_enabled:
+        return 0
+    try:
+        with SessionLocal() as db:
+            groups = db.execute(select(ReportJob.user_id, ReportJob.matrix_id, ReportJob.locale).distinct()
+                                .where(ReportJob.status == "done",
+                                       ReportJob.object_key.not_like(f"{PDF_REVISION}/%"))).all()
+    except Exception as exc:                       # noqa: BLE001
+        log.warning("устаревшие PDF не найдены: %s", exc)
+        return 0
+    if groups:
+        _pool.submit(_reprint_all, [tuple(g) for g in groups])
+        log.info("перепечатка устаревших PDF: %s", len(groups))
+    return len(groups)
 
 
 def warm(user_id: int, matrix_id: int | None) -> bool:

@@ -3,6 +3,7 @@ import PositionMap from "@/components/enc/PositionMap";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
 import CalcPromo from "@/components/matrix/CalcPromo";
+import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
 import Price from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
@@ -26,6 +27,7 @@ import { forLocale as localizedSectionReadingShared, type PersonalSectionKey } f
 import { forLocale as localizedSections } from "@/lib/sections";
 import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
+import { exampleDay } from "@/lib/today";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -41,7 +43,7 @@ const forLocale = localized((L: Locale, site) => {
   const { POSITIONS, arcanumHref, positionByKey, positionHref } = localizedEncyclopedia(L);
   const { arcanumInPosition, positionArcanumRows, positionContent } = localizedContent(L);
   const { positionArcanumHref, positionArcanumLabel } = localizedPositionArcanum(L);
-  const { calculate } = localizedMatrix(L);
+  const { calculate, toIso } = localizedMatrix(L);
   const { mapPointsFor, mapPointsForSection } = localizedMatrixMap(L);
   const { pageMeta } = localizedSite(L, site);
   const { articleLd } = localizedSchema(L, site);
@@ -52,7 +54,7 @@ const forLocale = localized((L: Locale, site) => {
   const { PERSONAL_SECTION_KEYS } = localizedSectionReadingShared(L);
   const { sectionExampleNote, sectionReadingHref, sectionReadingSlug } = localizedSectionReadings(L);
 
-  return { ARCANA, POSITIONS, arcanumHref, positionByKey, positionHref, arcanumInPosition, positionArcanumRows, positionContent, positionArcanumHref, positionArcanumLabel, calculate, mapPointsFor, mapPointsForSection, pageMeta, articleLd, sectionByKey, FREE_POSITION_KEYS, NOT_FOUND_META, encyclopediaSectionCrumb, encyclopediaSectionHref, PERSONAL_SECTION_KEYS, sectionExampleNote, sectionReadingHref, sectionReadingSlug };
+  return { ARCANA, POSITIONS, arcanumHref, positionByKey, positionHref, arcanumInPosition, positionArcanumRows, positionContent, positionArcanumHref, positionArcanumLabel, calculate, toIso, mapPointsFor, mapPointsForSection, pageMeta, articleLd, sectionByKey, FREE_POSITION_KEYS, NOT_FOUND_META, encyclopediaSectionCrumb, encyclopediaSectionHref, PERSONAL_SECTION_KEYS, sectionExampleNote, sectionReadingHref, sectionReadingSlug };
 });
 
 export function generateStaticParams(): Params[] {
@@ -82,7 +84,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function PositionPage({ params }: { params: Promise<Params> }) {
   const L = await requestLocale();
-  const { ARCANA, POSITIONS, arcanumHref, positionByKey, positionHref, arcanumInPosition, positionArcanumRows, positionContent, positionArcanumHref, positionArcanumLabel, calculate, mapPointsFor, mapPointsForSection, articleLd, sectionByKey, FREE_POSITION_KEYS, encyclopediaSectionCrumb, encyclopediaSectionHref, PERSONAL_SECTION_KEYS, sectionExampleNote, sectionReadingHref, sectionReadingSlug } = forLocale(L, await requestSite());
+  const site = await requestSite();
+  const { ARCANA, POSITIONS, arcanumHref, positionByKey, positionHref, arcanumInPosition, positionArcanumRows, positionContent, positionArcanumHref, positionArcanumLabel, calculate, toIso, mapPointsFor, mapPointsForSection, articleLd, sectionByKey, FREE_POSITION_KEYS, encyclopediaSectionCrumb, encyclopediaSectionHref, PERSONAL_SECTION_KEYS, sectionExampleNote, sectionReadingHref, sectionReadingSlug } = forLocale(L, site);
 
   const p = positionByKey((await params).key);
   if (!p) notFound();
@@ -105,12 +108,19 @@ export default async function PositionPage({ params }: { params: Promise<Params>
   // деньги. Список — тот же, по которому собирается публичный разбор.
   const isFree = section?.access === "free" || FREE_POSITION_KEYS.includes(p.key);
   const exampleMatrix = calculate("1993-03-31", "f");
+  // The chakra guide carries the chart widget and the only date form inside its text (slot "calc").
+  const guide = p.key === "chakras";
+  const seed = exampleDay();
+  const slots = guide ? {
+    calc: <ChakraAtlasExample site={site} locale={L} m={calculate(toIso({ ...seed, year: seed.year - 30 }), "f")}
+      promoTitle={D.enc.promoChakraTitle[L]} promoLead={D.enc.promoChakraLead[L]} place="chakra-guide" />,
+  } : undefined;
   const personalKey = (PERSONAL_SECTION_KEYS as readonly string[]).includes(p.key)
     ? p.key as PersonalSectionKey
     : null;
   const exampleHref = p.key === "past_lives"
     ? `/encyclopedia/karmic-tail/${exampleMatrix.karmic_tail.join("-")}`
-    : personalKey
+    : personalKey && !guide
       ? sectionReadingHref(personalKey, exampleMatrix)
       : null;
   const exampleCode = personalKey
@@ -143,7 +153,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         })}
       />
 
-      <h1>{p.title}</h1>
+      <h1>{extra.h1 ?? p.title}</h1>
       <p className="dim prose">{lead}</p>
 
       <PositionMap locale={L}
@@ -155,7 +165,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           )}
       />
 
-      <div className="panel section-gap">
+      {guide ? null : <div className="panel section-gap">
         <h2>{D.encPosition.howCounted[L]}</h2>
         <div className="cap">{D.encPosition.howCountedHint[L]}</div>
         <p style={{ margin: 0 }}>{extra.formula}</p>
@@ -172,7 +182,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
             <Link href="/report">{D.encPosition.seeYourReport[L]}</Link>
           </p>
         ) : null}
-      </div>
+      </div>}
 
       <div className="prose section-gap">
         {paragraphs.map((text, i) => (
@@ -180,7 +190,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         ))}
       </div>
 
-      <Sections items={extra.sections} locale={L} />
+      <Sections items={extra.sections} locale={L} slots={slots} />
 
       {p.key === "day" ? (
         <p className="encref">
@@ -256,7 +266,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         </div>
       ) : null}
 
-      <div className="section-gap">
+      {guide ? null : <div className="section-gap">
         <CalcPromo locale={L}
           title={D.enc.buildYourChart[L]}
           // Бесплатны только два раздела разбора («характер» и «зона комфорта»): обещать
@@ -268,7 +278,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
           }
           place="position"
         />
-      </div>
+      </div>}
 
       {/* Пересечения этой позиции: спрашивают именно их — «8 аркан профессии», «6 в центре
             матрицы». Без этих ссылок 80 страниц реестра оставались бы сиротами: в карте сайта

@@ -12,8 +12,11 @@ describe.each(["ru", "en"] as const)("readable role names (%s)", (locale) => {
     const before = structuredClone(matrix);
     const reading = readingsForLocale(locale).buildSectionReading("chakras", matrix);
     const html = renderToStaticMarkup(<CharacterReadingView reading={reading} locale={locale} printing={printing} />);
-    expect(html.match(/data-chakra=/g)).toHaveLength(7);
-    expect(html.match(/data-column=/g)).toHaveLength(21);
+    expect(html.match(/data-chakra="(?!energy_field)/g)).toHaveLength(7);
+    expect(reading.energyField!.cells.map((cell) => cell.arcanum)).toEqual(
+      [matrix.chakra_totals.physics, matrix.chakra_totals.energy, matrix.chakra_totals.emotions]);
+    expect(html).toContain('data-chakra="energy_field"');
+    expect(html.match(/data-column=/g)).toHaveLength(24);
     expect(reading.chakraRows!.map((row) => row.cells.map((cell) => cell.arcanum))).toEqual(
       [...matrix.chakras].reverse().map((row) => [row.physics, row.energy, row.emotions]),
     );

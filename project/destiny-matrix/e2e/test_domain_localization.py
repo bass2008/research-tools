@@ -95,14 +95,16 @@ def test_choice_survives_navigation_reload_and_another_tab(page):
     expect(page.locator("h1")).to_have_text("Destiny matrix encyclopedia")
 
 
-def test_russian_domain_ignores_foreign_preference_and_has_no_switch(browser):
+def test_russian_domain_serves_russian_html_and_switches_to_english(browser):
+    html, _ = read("/encyclopedia/arcanum/4", "localhost:3000", Cookie="arcana_locale=en")
+    assert '<html lang="ru"' in html and "Император" in html
     with browser.new_context(locale="en-US") as context:
-        context.add_cookies([{"name": "arcana_locale", "value": "en", "url": "http://localhost:3000"}])
         page = context.new_page()
-        page.goto("http://localhost:3000/encyclopedia/arcanum/4?lang=en")
-        expect(page.locator("html")).to_have_attribute("lang", "ru")
+        page.goto("http://localhost:3000/encyclopedia/arcanum/4")
         expect(page.locator("h1")).to_contain_text("Император")
-        expect(page.locator(".language-switch")).to_have_count(0)
+        page.get_by_test_id("language-en").click()
+        expect(page.locator("html")).to_have_attribute("lang", "en")
+        expect(page.locator("h1")).to_contain_text("The Emperor")
 
 
 def test_unknown_host_is_rejected():

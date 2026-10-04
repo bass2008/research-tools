@@ -31,7 +31,8 @@ def purchase(page, mail, birth='1993-03-31'):
 
 def assert_cards(widget):
     expect(widget.locator('button[data-chakra]')).to_have_count(7)
-    expect(widget.locator('[data-column]')).to_have_count(21)
+    expect(widget.locator('[data-chakra] [data-column]')).to_have_count(21)
+    expect(widget.locator('[data-energy-field] [data-column]')).to_have_count(3)
     assert widget.locator('button[data-chakra]').evaluate_all('(rows) => rows.map(r => r.dataset.chakra)') == list(TRIPLES)
     for key, triple in TRIPLES.items():
         assert widget.locator(f'button[data-chakra="{key}"] [data-arcanum]').evaluate_all(
@@ -44,7 +45,7 @@ def test_locked_widget_and_payment_link(page):
     flows.calculate(page, 31, 3, 1993)
     widget = page.get_by_test_id('chakra-atlas')
     expect(widget).to_have_attribute('data-access', 'locked')
-    expect(widget.locator('.lockico')).to_have_count(7)
+    expect(widget.locator('.lockico')).to_have_count(8)
     assert_cards(widget)
     row = widget.locator('button[data-chakra=muladhara]')
     row.click()
@@ -72,11 +73,11 @@ def test_paid_widget_all_chakras_desktop_mobile_and_other_date(page, mail):
         page.set_viewport_size({'width': width, 'height': 1000})
         widget.scroll_into_view_if_needed()
         size = widget.bounding_box()
-        # До 360 px панель растёт ради строк по 46 px (ChakraTable.module.css), шире — ровно 440.
+        # До 360 px панель растёт ради строк по 46 px (ChakraTable.module.css), шире — ровно 480.
         if width > 360:
-            assert size['height'] <= 440.5
+            assert size['height'] <= 480.5
         else:
-            assert size['height'] >= 439.5
+            assert size['height'] >= 479.5
         assert widget.evaluate('(e) => e.scrollWidth <= e.clientWidth')
         assert widget.locator('button[data-chakra]').evaluate_all(
             '(rows) => rows.every(e => e.scrollWidth <= e.clientWidth)')
@@ -119,7 +120,7 @@ def test_paid_widget_all_chakras_desktop_mobile_and_other_date(page, mail):
     # Покупка одной даты не должна открывать другую.
     flows.calculate(page, 1, 1, 1990)
     expect(page.get_by_test_id('chakra-atlas')).to_have_attribute('data-access', 'locked')
-    expect(page.get_by_test_id('chakra-atlas').locator('.lockico')).to_have_count(7)
+    expect(page.get_by_test_id('chakra-atlas').locator('.lockico')).to_have_count(8)
     assert errors == []
 
 

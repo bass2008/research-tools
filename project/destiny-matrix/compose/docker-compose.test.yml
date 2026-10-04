@@ -1,5 +1,5 @@
 x-site-profiles: &site-profiles >-
-  [{"origin":"https://test.arcana-sense.ru","hosts":["test.arcana-sense.ru"],"defaultLocale":"ru","locales":["ru"],"payments":[{"id":"tbank","provider":"tbank","notificationUrl":"https://test.arcana-sense.ru/api/payments/notify/tbank"}]},{"origin":"https://test.arcana-sense.com","hosts":["test.arcana-sense.com","test-web:3000","web:3000","127.0.0.1:3000"],"defaultLocale":"en","locales":["en","ru"],"payments":[]}]
+  [{"origin":"https://test.arcana-sense.ru","hosts":["test.arcana-sense.ru"],"defaultLocale":"ru","locales":["ru","en"],"payments":[{"id":"tbank","provider":"tbank","notificationUrl":"https://test.arcana-sense.ru/api/payments/notify/tbank"}]},{"origin":"https://test.arcana-sense.com","hosts":["test.arcana-sense.com","test-web:3000","web:3000","127.0.0.1:3000"],"defaultLocale":"en","locales":["en","ru"],"payments":[]}]
 
 # Общий тестовый контур: test.arcana-sense.ru и test.arcana-sense.com.
 #

@@ -12,7 +12,7 @@ import { chakraAtlas as copy } from "@/lib/i18n/dict/chakraAtlas";
 import { SITE_LANG as defaultLocale, type Lang } from "@/lib/i18n/lang";
 import { forLocale as localizedPublicLabels } from "@/lib/i18n/publicLabels";
 import type { Matrix } from "@/lib/matrix";
-import type { LongformReading } from "@/lib/readingTypes";
+import { ENERGY_FIELD_HREF, ENERGY_FIELD_KEY, type LongformReading } from "@/lib/readingTypes";
 import { forLocale as localizedSite } from "@/lib/site";
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 import styles from "./ChakraTable.module.css";
@@ -26,6 +26,7 @@ const palettes: Record<string, string[]> = {
   vishuddha: ["#e1f0f5", "#306477", "#86b5c4", "#cde2e9"],
   ajna: ["#e5e9f5", "#40557c", "#8d9fc5", "#d4dced"],
   sahasrara: ["#ece5f3", "#604772", "#a68abb", "#ded2e9"],
+  [ENERGY_FIELD_KEY]: ["#e4efed", "#2f5d58", "#86b3ab", "#cfe2de"],
 };
 function theme(key: string): CSSProperties {
   return Object.fromEntries(["--tone", "--ink", "--accent", "--edge"].map((name, i) => [name, palettes[key]?.[i]]));
@@ -61,10 +62,14 @@ export default function ChakraTable({ m, title, heading: Heading = "h3", printin
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const rows = [...m.chakras].reverse();
-  const row = rows.find((item) => item.key === selected);
+  const field: Matrix["chakras"][number] = { key: ENERGY_FIELD_KEY, title: copy.energyField[L], hint: "", ...m.chakra_totals };
+  const row = selected === ENERGY_FIELD_KEY ? field : rows.find((item) => item.key === selected);
   // Даже при быстрой смене даты не показываем текст предыдущей комбинации.
-  const detail = unlocked && row ? reading?.chakraRows?.find((item) => item.key === row.key
-    && columns.every((column) => item.cells.find((cell) => cell.column === column)?.arcanum === row[column])) : undefined;
+  const detail = unlocked && row ? (row.key === ENERGY_FIELD_KEY ? [reading?.energyField] : reading?.chakraRows)
+    ?.find((item) => item?.key === row.key
+      && columns.every((column) => item.cells.find((cell) => cell.column === column)?.arcanum === row[column])) : undefined;
+  // A reading without a field text means the locale has no corpus for it, not that the date is unsaved.
+  const fieldMissing = row?.key === ENERGY_FIELD_KEY && !!reading?.chakraRows && !reading.energyField;
   const href = (path: string) => printing ? publicHref(path) : path;
   const locked = !unlocked && !referenceOnly;
 
@@ -87,6 +92,31 @@ export default function ChakraTable({ m, title, heading: Heading = "h3", printin
   const label = (item: Matrix["chakras"][number]) => `${item.title}. ${columns.map((column) =>
     `${columnTitle(column)}: ${item[column]} · ${arcanumTitle(item[column])}`).join(", ")}. ${locked ? copy.locked[L] : copy.read[L]}`;
 
+  function renderRow(item: Matrix["chakras"][number], index: string) {
+    const isField = item.key === ENERGY_FIELD_KEY;
+    const content = <>
+      <span className={styles.label}>
+        <span className={styles.index}>{index}</span>
+        <strong className={styles.name}>{isField ? copy.energyFieldShort[L] : item.title}</strong>
+      </span>
+      <span className={styles.cards}>
+        {columns.map((column) => <span className={styles.card} key={column} data-column={column} data-arcanum={item[column]}
+          title={`${columnTitle(column)}: ${item[column]} · ${arcanumTitle(item[column])}`}>
+          <ArcanumCard locale={L} n={item[column]} size="mini" decorative half={printing} eager />
+          <span className={styles.cardCopy}><b>{item[column]}</b><span>{arcanumTitle(item[column])}</span></span>
+        </span>)}
+      </span>
+      {locked && !printing ? <span className={styles.lock}><LockIcon /></span> : null}
+    </>;
+    const props = { className: styles.row, style: theme(item.key),
+      ...(isField ? { "data-energy-field": "" } : { "data-chakra": item.key }),
+      "data-chakra-row": printing ? undefined : item.key, "aria-label": label(item) };
+    const article = isField ? ENERGY_FIELD_HREF : `/encyclopedia/chakra/${item.key}`;
+    return printing ? <div key={item.key} {...props}>{content}</div>
+      : referenceOnly || reportHref ? <Link key={item.key} {...props} href={reportHref ?? article}>{content}</Link>
+      : <button key={item.key} {...props} type="button" aria-haspopup="dialog" onClick={() => setSelected(item.key)}>{content}</button>;
+  }
+
   return (
     <div className={`panel ${styles.panel} ${title ? styles.example : ""}`} data-testid="chakra-atlas" data-access={referenceOnly ? "reference" : locked ? "locked" : "open"}>
       <div className={styles.heading}>
@@ -98,30 +128,10 @@ export default function ChakraTable({ m, title, heading: Heading = "h3", printin
         <span>{copy.chakra[L]}</span><span>{columns.map((column) => <span key={column}>{columnTitle(column)}</span>)}</span>
       </div>
       <div className={styles.list}>
-        {rows.map((item, index) => {
-          const content = <>
-            <span className={styles.label}>
-              <span className={styles.index}>{String(index + 1).padStart(2, "0")}</span>
-              <strong className={styles.name}>{item.title}</strong>
-            </span>
-            <span className={styles.cards}>
-              {columns.map((column) => <span className={styles.card} key={column} data-column={column} data-arcanum={item[column]}
-                title={`${columnTitle(column)}: ${item[column]} · ${arcanumTitle(item[column])}`}>
-                <ArcanumCard locale={L} n={item[column]} size="mini" decorative half={printing} eager />
-                <span className={styles.cardCopy}><b>{item[column]}</b><span>{arcanumTitle(item[column])}</span></span>
-              </span>)}
-            </span>
-            {locked && !printing ? <span className={styles.lock}><LockIcon /></span> : null}
-          </>;
-          const props = { className: styles.row, style: theme(item.key), "data-chakra": item.key,
-            "data-chakra-row": printing ? undefined : item.key, "aria-label": label(item) };
-          return printing ? <div key={item.key} {...props}>{content}</div>
-            : referenceOnly || reportHref ? <Link key={item.key} {...props} href={reportHref ?? `/encyclopedia/chakra/${item.key}`}>{content}</Link>
-            : <button key={item.key} {...props} type="button" aria-haspopup="dialog" onClick={() => setSelected(item.key)}>{content}</button>;
-        })}
+        {rows.map((item, index) => renderRow(item, String(index + 1).padStart(2, "0")))}
+        {renderRow(field, "Σ")}
       </div>
       <div className={styles.footer}>
-        <span>{D.report.chakraTotal[L]}: <b>{columns.map((column) => m.chakra_totals[column]).join(" / ")}</b></span>
         {!printing ? <button type="button" onClick={() => setSelected("origin")} aria-haspopup="dialog">{copy.origin[L]}</button> : null}
       </div>
 
@@ -146,7 +156,7 @@ export default function ChakraTable({ m, title, heading: Heading = "h3", printin
               <p>{columnTitle("emotions")}: {item.physics} + {item.energy} = {item.physics + item.energy}
                 {item.physics + item.energy !== item.emotions ? ` → ${item.emotions}` : ""}</p>
             </div>)}
-            <h3>{D.report.chakraTotal[L]}</h3>
+            <h3>{copy.energyField[L]}</h3>
             {columns.map((column) => <p key={column}>{columnTitle(column)}: {rows.map((item) => item[column]).join(" + ")} → {m.chakra_totals[column]}</p>)}
           </> : row ? <>
             {detail?.heading ? <h3>{detail.heading}</h3> : null}
@@ -162,7 +172,7 @@ export default function ChakraTable({ m, title, heading: Heading = "h3", printin
             {locked ? <div className={styles.lockedCopy} data-testid="chakra-locked">
               <p><LockIcon /> {copy.locked[L]}</p><p>{copy.unlockHint[L]}</p>
               <UnlockCta locale={L} place="report" section="chakras" matrixId={matrixId}>{D.nav.buy[L]}</UnlockCta>
-            </div> : detail ? <div className={styles.copy} data-testid="chakra-copy" data-empty={detail.paragraphs.every((text) => !text) || undefined}>
+            </div> : fieldMissing ? null : detail ? <div className={styles.copy} data-testid="chakra-copy" data-empty={detail.paragraphs.every((text) => !text) || undefined}>
               {detail.paragraphs.map((text, index) => <p key={index}><RichText text={text} /></p>)}
             </div> : <div className={styles.lockedCopy}>
               <p>{copy.openSaved[L]}</p>

@@ -39,7 +39,7 @@ def test_core_content_artifacts_have_no_generation_drift():
                 key = str(row.get("n", row.get("key")))
                 copy = dict(row)
                 core = by_key[key]
-                for field in ("meaning", "seo", "article_sections", "faq", "article"):
+                for field in ("meaning", "seo", "article_sections", "faq", "article", "h1"):
                     if field in core:
                         copy[field] = core[field]
                     else:

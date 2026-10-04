@@ -31,11 +31,11 @@ describe("PDF download errors follow the active language", () => {
     expect(await response.text()).toBe(D.bffErrors.noPass[locale]);
   });
 
-  it("keeps the Russian domain Russian", async () => {
+  it("follows the chosen language on the Russian domain", async () => {
     const response = await GET(new Request("https://arcana-sense.ru/api/reports/file", {
       headers: { Cookie: "arcana_locale=en", "Accept-Language": "en", "Sec-Fetch-Mode": "navigate" },
     }));
-    expect(await response.text()).toBe(D.bffErrors.noPass.ru);
+    expect(await response.text()).toBe(D.bffErrors.noPass.en);
   });
 
   it("preserves the PDF stream and attachment filename", async () => {

@@ -37,7 +37,7 @@ export const encTail = {
   allTails: { ru: "Все кармические хвосты", en: "All karmic tails" } satisfies Phrase,
   howPastLivesRead: {
     ru: "Как читается раздел «Кармический хвост»",
-    en: "How the “Tasks of past lives” section is read",
+    en: "How the “Karmic tail” section is read",
   } satisfies Phrase,
   findYourTail: {
     ru: "Найти свой хвост в своей карте",
@@ -45,7 +45,7 @@ export const encTail = {
   } satisfies Phrase,
   tailInReading: {
     ru: "Тройка хвоста с разбором входит в раздел «Кармический хвост» полного разбора —",
-    en: "The tail triple with its reading is part of the “Tasks of past lives” section of the full reading —",
+    en: "The tail triple with its reading is part of the “Karmic tail” section of the full reading —",
   } satisfies Phrase,
   octagramFree: {
     ru: "Октаграмма по дате рождения строится бесплатно и в браузере.",

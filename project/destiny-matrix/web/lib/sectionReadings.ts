@@ -706,7 +706,7 @@ export const forLocale = localized((L: Locale) => {
       key: `shared:${shared.section}`,
       ...sharedWording(parts.length > 1, { other, labels, places, named, aliases: parts.map((p) => p.alias) }),
       roles: shared.roles,
-      ...(sharedLinkIsExact(section, shared.section)
+      ...(shared.section !== "chakras" && sharedLinkIsExact(section, shared.section)
         ? {
           href: sectionReadingHref(shared.section, matrix),
           linkLabel: DR.sharedBlock.openOther[L](other),

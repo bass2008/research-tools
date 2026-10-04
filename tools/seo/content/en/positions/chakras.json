@@ -1,98 +1,689 @@
 {
- "key": "chakras",
- "title": "Energy map: reading the seven levels",
- "seo": {
-  "title": "The chakra section in a destiny matrix reading",
-  "description": "Chakras in the destiny matrix: seven levels and three columns of matter, energy and feeling. How the column totals show which area is sagging.",
-  "queries": [
-   "energy map in the destiny matrix",
-   "destiny matrix energy map",
-   "chakras in the destiny matrix meaning",
-   "destiny matrix chakra energy map"
+  "key": "chakras",
+  "title": "Chakras: the energy map, reading the seven levels",
+  "h1": "How to read the energy map: seven chakras, physics, energy and emotions in the destiny matrix",
+  "seo": {
+    "title": "Destiny matrix physics, energy and emotions: how to read the chakras",
+    "description": "What physics, energy and emotions mean in the chakra table, how to work out its seven rows from a birth date and read the whole energy map on one example.",
+    "queries": [
+      "destiny matrix physics energy emotions",
+      "energy map in the destiny matrix",
+      "destiny matrix energy map",
+      "chakras in the destiny matrix meaning",
+      "destiny matrix chakra energy map"
+    ]
+  },
+  "meaning": [
+    "The energy map is the chakra table in the destiny matrix: seven rows, three columns, twenty-one arcana and a row of totals. Every number comes from the date of birth. A row sets a theme of life, from the ground under your feet to the meaning that makes your effort worth it. A column puts a question to that theme. Physics is what you do. Energy is what drives you to do it. Emotions are what you feel as you do it. The arcanum in the cell is the answer.",
+    "The chakra catalogue helps you get your own table and pick the row you need, and seven separate articles go through each level in detail. This guide is about something else: how to read the table as a whole. How a cell turns into a thought, three cards into one coherent row, and seven rows into a portrait of a person. There is one example throughout: 4 March 1993. The same date is worked through in all seven chakra articles, so you can follow it across the whole site."
+  ],
+  "article_sections": [
+    {
+      "h2": "What the energy map shows",
+      "paragraphs": [
+        "Here is the energy map for 4 March 1993. The rows go in reading order, from Muladhara to Sahasrara.",
+        {
+          "table": {
+            "head": [
+              "",
+              "Chakra",
+              "Theme",
+              "Physics",
+              "Energy",
+              "Emotions"
+            ],
+            "rows": [
+              [
+                "01",
+                "Muladhara",
+                "support",
+                "22 · The Fool",
+                "11 · Justice",
+                "6 · The Lovers"
+              ],
+              [
+                "02",
+                "Svadhisthana",
+                "desire",
+                "8 · Strength",
+                "15 · The Devil",
+                "5 · The Hierophant"
+              ],
+              [
+                "03",
+                "Manipura",
+                "will",
+                "4 · The Emperor",
+                "4 · The Emperor",
+                "8 · Strength"
+              ],
+              [
+                "04",
+                "Anahata",
+                "closeness",
+                "12 · The Hanged Man",
+                "11 · Justice",
+                "5 · The Hierophant"
+              ],
+              [
+                "05",
+                "Vishuddha",
+                "speech",
+                "8 · Strength",
+                "7 · The Chariot",
+                "15 · The Devil"
+              ],
+              [
+                "06",
+                "Ajna",
+                "understanding",
+                "12 · The Hanged Man",
+                "10 · Wheel of Fortune",
+                "22 · The Fool"
+              ],
+              [
+                "07",
+                "Sahasrara",
+                "meaning",
+                "4 · The Emperor",
+                "3 · The Empress",
+                "7 · The Chariot"
+              ],
+              [
+                "",
+                "**Total**",
+                "overall tone",
+                "7 · The Chariot",
+                "7 · The Chariot",
+                "14 · Temperance"
+              ]
+            ]
+          }
+        },
+        "Every cell is read with the same formula: **the row is the theme, the column is the question, the arcanum is the answer.** Take the cell where Anahata meets physics. The theme is closeness, the question is “what do I do when I love someone?”, and the answer is 12, the Hanged Man: stop and look at the situation through the other person’s eyes. The next cell, energy: “what keeps me close to someone?” The answer is 11, Justice: wanting things to be fair to both of you. Now Vishuddha and emotions: “what do I feel when people answer me?” The answer is 15, the Devil: it is hard to let a conversation go when the answer is not the one you hoped for.",
+        "There are three things the table does not show. The numbers are arcanum numbers, not scores: 22 is not “stronger” than 3, and the Sun is not “better” than the Tower. A card’s number cannot tell you that a chakra is empty, closed or weak: for any real date all 21 cells are filled, and the number is not a measure of strength. And no number says anything about your wellbeing. The map describes how you live each theme, not the state of your body."
+      ]
+    },
+    {
+      "h2": "How to work out your energy map: a step-by-step example",
+      "paragraphs": [
+        {
+          "slot": "calc"
+        },
+        "The calculator builds the whole table at once. But it is worth working it out by hand at least once: you will see that these are not 21 random numbers but one structure, in which the rows grow out of each other.",
+        "One rule covers the whole calculation: **if a sum is greater than 22, add up its digits**, and repeat until you get a number from 1 to 22. 29 → 2 + 9 = 11, 40 → 4, 26 → 8. The number 22 is not reduced: it is the Fool.",
+        "**Step 1. The three numbers of the date.** The day is 4. If you were born on the 23rd or later, the day is reduced too: 25 → 7, 31 → 4. The month is 3. The year is the sum of its digits: 1 + 9 + 9 + 3 = 22.",
+        "**Step 2. Two more numbers.** The sum of the three: 4 + 3 + 22 = 29 → 11. The centre is all four numbers together: 4 + 3 + 22 + 11 = 40 → 4.",
+        "**Step 3. Three anchor rows.** You don’t calculate these; they come ready-made:",
+        {
+          "ul": [
+            "**Sahasrara**: day and month, 4 / 3;",
+            "**Muladhara**: year and the sum of the three, 22 / 11;",
+            "**Manipura**: the centre twice, 4 / 4."
+          ]
+        },
+        "**Step 4. Four rows by addition.** The columns are counted separately: physics is added to physics, energy to energy.",
+        {
+          "table": {
+            "head": [
+              "Row",
+              "How to get it",
+              "Physics",
+              "Energy"
+            ],
+            "rows": [
+              [
+                "Svadhisthana",
+                "Muladhara + centre",
+                "22 + 4 = 26 → **8**",
+                "11 + 4 = **15**"
+              ],
+              [
+                "Vishuddha",
+                "Sahasrara + centre",
+                "4 + 4 = **8**",
+                "3 + 4 = **7**"
+              ],
+              [
+                "Anahata",
+                "Vishuddha + centre",
+                "8 + 4 = **12**",
+                "7 + 4 = **11**"
+              ],
+              [
+                "Ajna",
+                "Sahasrara + Vishuddha",
+                "4 + 8 = **12**",
+                "3 + 7 = **10**"
+              ]
+            ]
+          }
+        },
+        "**Step 5. Emotions are the sum of the first two numbers in the row.** Muladhara: 22 + 11 = 33 → 6. Svadhisthana: 8 + 15 = 23 → 5. Manipura: 4 + 4 = 8. Anahata: 12 + 11 = 23 → 5. Vishuddha: 8 + 7 = 15. Ajna: 12 + 10 = 22. Sahasrara: 4 + 3 = 7.",
+        "**Step 6. Totals.** Add up each column from top to bottom and reduce the sum. Physics: 22 + 8 + 4 + 12 + 8 + 12 + 4 = 70 → 7. Energy: 11 + 15 + 4 + 11 + 7 + 10 + 3 = 61 → 7. Emotions: 6 + 5 + 8 + 5 + 15 + 22 + 7 = 68 → 14.",
+        "Done: this is the very table from the start of the article.",
+        {
+          "h3": "What this calculation shows"
+        },
+        "**The energy map is a road through the whole matrix.** On the chart, Sahasrara sits at the very edge, in the outer points of the day and the month (A and B). Ajna, Vishuddha and Anahata are points on the same two rays, each one closer to the centre than the last. Manipura is the centre itself (E). Svadhisthana is the first pair of points past the centre, on the rays of the year and the bottom point, and Muladhara is the outer points of the year and the sum (C and D), at the opposite edge. Reading the table from Muladhara to Sahasrara, you cross the chart from one edge, through the core, to the other.",
+        "**The centre goes into five rows out of seven.** Only the two outer rows, Sahasrara and Muladhara, do not depend on it. That is how the formula is built, not proof of anything, but the image is apt: will, desire, heart, voice and understanding gather around one point, while meaning and footing stand at the edges.",
+        "**The whole map rests on three numbers.** Day, month and year: nothing else is needed. That is why there are far fewer different tables than dates: the 46,021 days from 1900 to 2025 give only 5,544 versions of the energy map. The table from our example is shared by fourteen dates: 4 and 31 March of 1939, 1948, 1957, 1966, 1975, 1984 and 1993.",
+        "**Four quick checks.** If your table was worked out somewhere else and you have doubts about it:",
+        {
+          "ol": [
+            "the first number of Sahasrara is your birth day (reduced), and the second is the number of the month;",
+            "in Manipura the first two numbers are the same;",
+            "in every row the third number is the sum of the first two, reduced if needed;",
+            "Svadhisthana energy is one of seven numbers: 3, 6, 9, 12, 15, 18 or 21."
+          ]
+        },
+        "If even one rule fails, the table was worked out by a different method or with a mistake. The most common slip is forgetting to reduce a sum above 22."
+      ]
+    },
+    {
+      "h2": "Seven chakras, seven questions to put to life",
+      "paragraphs": [
+        "The names of the chakras come from the Indian tradition, but in the matrix they are above all seven themes for talking about yourself. Each row has its own article: where it sits in the matrix, how to work it out, what each arcanum means in each column, and which combinations come up most often.",
+        {
+          "table": {
+            "head": [
+              "",
+              "Chakra",
+              "Theme",
+              "What the row asks"
+            ],
+            "rows": [
+              [
+                "01",
+                "Muladhara",
+                "everyday support",
+                "what I stand on: home, household, money to live on, my usual rhythm"
+              ],
+              [
+                "02",
+                "Svadhisthana",
+                "desire and pleasure",
+                "what I want, and what I do with my desire"
+              ],
+              [
+                "03",
+                "Manipura",
+                "will and independence",
+                "how I take on a task and answer for it"
+              ],
+              [
+                "04",
+                "Anahata",
+                "closeness and mutual care",
+                "how I love, and how I accept care"
+              ],
+              [
+                "05",
+                "Vishuddha",
+                "speech and influence",
+                "how I speak, and what I want my words to achieve"
+              ],
+              [
+                "06",
+                "Ajna",
+                "perception and understanding",
+                "how I make sense of what is unclear"
+              ],
+              [
+                "07",
+                "Sahasrara",
+                "meaning and direction",
+                "what makes my effort worth it"
+              ]
+            ]
+          }
+        },
+        "The order of the rows is a path. First comes what gives you a sense of home, then desire, will, closeness, the spoken word, understanding and, finally, meaning. The three lower rows are about your own world: what you stand on, what you want, how you act. Anahata, in the middle, is about meeting another person. The three upper rows are about how you express, understand and make sense of what is happening.",
+        "This is an order of questions, not a ladder of merit. Sahasrara is not “higher” than Muladhara in quality. A person with a clear sense of meaning can live for years without solid footing, and the other way round.",
+        "There is a quiet arithmetic rhyme in this order, too. Sahasrara is worked out from the day and month alone, so it is the same for everyone who shares your birthday, whatever the year. And the first number of Muladhara is the arcanum of the year, shared by everyone born in the same year as you. Meaning comes from the day; the ground beneath you comes from the year.",
+        "If you want to pick one chakra and go straight to its numbers, the chakra catalogue is the easier place to start."
+      ]
+    },
+    {
+      "h2": "Physics, energy and emotions: three questions about one situation",
+      "paragraphs": [
+        "The columns have the same names in all seven rows. The question adapts to the theme of the row, but its core stays the same. The difference is easiest to see in one everyday situation. Let’s take one that almost everyone has been through: doing up a flat.",
+        {
+          "h3": "What physics means in the destiny matrix"
+        },
+        "Physics is what can be seen from the outside. Who drew up the budget, who was first to pick up a scraper, who argues with the foreman, how the money and the deadlines are organised, what you do when the wrong tiles are delivered. If there were a camera in the flat, your physics is what it would catch.",
+        "The name is misleading: this column has nothing to do with school physics or with your physical wellbeing. It is the visible layer of the theme: actions, habits, decisions, the way you handle things, money and time. In Anahata, physics shows what your love looks like in practice. In Vishuddha, it shows your way of speaking. In Muladhara, how you run your household.",
+        "The question for physics: **what do I do?**",
+        {
+          "h3": "What energy means"
+        },
+        "Energy is what starts the engine, and what makes it stall. Why did you take on the renovation in the first place: did you want order, beauty, a new chapter, more comfort for your parents? Why did you see it through when half the crew vanished? And what drains you fastest: uncertainty, other people’s decisions, repetitive work?",
+        "No camera can film energy; you have to ask about it: “why?” Two people can paint walls the same way (their physics is the same) for completely different reasons. One of them cannot live in a mess. For the other, what matters is that the decision was their own.",
+        "The question for energy: **what pushes me to do this, and what gives me strength?**",
+        {
+          "h3": "What emotions mean"
+        },
+        "Emotions are what you would write in your diary in the evening. Relief when the last wall is done. Annoyance when the tiles turn out to be the wrong colour. The thrill of the first day and the gloom of the skirting-board stage. This is your inner response to what is happening.",
+        "The third number in a row does not come from a separate point of the matrix: it is the sum of the first two. You can see this clearly in life: what you feel grows out of what you did and why. Theatre people will recognise the principle. In his later years Stanislavski arrived at the “method of physical actions”: a feeling cannot be played on demand; it arises by itself when the actor acts truthfully towards a clear objective. This is a rhyme, not a justification of the method, but it makes the main point easy to remember: in the table, emotions stand where the action meets the motive.",
+        "The question for emotions: **what do I feel while I’m doing it?**",
+        {
+          "h3": "One arcanum, three different answers"
+        },
+        "Now the key point. The same card answers different questions in different columns, so it reads differently too. Here are two arcana from our example, in the same renovation.",
+        {
+          "table": {
+            "head": [
+              "",
+              "4 · The Emperor",
+              "22 · The Fool"
+            ],
+            "rows": [
+              [
+                "**Physics:** what I do",
+                "I draw up a budget and a schedule, and decide who is responsible for what",
+                "I start the very first evening: the wallpaper is stripped, and there is no plan yet"
+              ],
+              [
+                "**Energy:** what drives me",
+                "I want the job to have someone in charge and a clear order; when things are decided any old how, my strength drains away",
+                "I want things to be different from before; my interest lasts as long as there is something new"
+              ],
+              [
+                "**Emotions:** what I feel",
+                "calm while the plan holds; irritation when a wall gets moved without me",
+                "the thrill and lightness of the start; boredom when it gets to the skirting boards"
+              ]
+            ]
+          }
+        },
+        "The Emperor in physics and the Emperor in energy are not one quality repeated twice. In physics, order is a way of acting. In energy, it is the condition without which you don’t feel like acting at all. That is why the description of an arcanum cannot be copied into every cell where it appears.",
+        "The column changes the question, and the row changes the scene. In Sahasrara physics the same Emperor gives an idea its shape; in Manipura physics he organises the work and sees it through. One card, different ways of showing up.",
+        {
+          "h3": "Cheat sheet: the 21 questions of the energy map"
+        },
+        "Write out the questions for every cell and you get a questionnaire for the whole table. Plug your own cards into it.",
+        {
+          "table": {
+            "head": [
+              "Chakra",
+              "Physics: what I do",
+              "Energy: what drives me",
+              "Emotions: what I feel"
+            ],
+            "rows": [
+              [
+                "Muladhara",
+                "how I run my household, and what I do when my footing gets shaky",
+                "what gives me a sense of security",
+                "when I feel calm, and what throws me off balance"
+              ],
+              [
+                "Svadhisthana",
+                "what I do with my desire",
+                "what really draws me",
+                "what is left after pleasure"
+              ],
+              [
+                "Manipura",
+                "how I take on a task",
+                "what gives me the strength to keep going",
+                "how I take success, refusal and other people’s judgement"
+              ],
+              [
+                "Anahata",
+                "what I do when I love",
+                "what keeps me close to someone",
+                "what I feel in closeness"
+              ],
+              [
+                "Vishuddha",
+                "how I speak when there is no time to choose my words",
+                "what I want from a conversation",
+                "what I feel when people answer me or say nothing"
+              ],
+              [
+                "Ajna",
+                "how I make sense of what is unclear",
+                "what makes me dig deeper",
+                "what I feel at the edge of the known"
+              ],
+              [
+                "Sahasrara",
+                "how my values show in what I do",
+                "what I rely on when choosing my path",
+                "how it feels to go my own way"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "h2": "How to read one chakra: three cards, one thought",
+      "paragraphs": [
+        "The reference table in each chakra article gives the meaning of any card in any column. But three meanings side by side are not yet a reading. “The Fool: the courage to start afresh. Justice: promises you can rely on. The Lovers: a sense of closeness.” That is Muladhara 22 / 11 / 6 from our example, and what it all means together is still unclear. The row has to be put together. Here is how.",
+        "**1. Ask the row its question.** Muladhara is support: what do I stand on? **2. Answer in three voices.** What I do: I step lightly over the threshold of the familiar, changing routines, trying things, starting over (the Fool). What holds me: a promise carries weight, and decisions have consequences (Justice). What I feel: my footing is warm when my own people are close by (the Lovers).",
+        "**3. Find where the cards argue and where they support each other.** The Fool wants change; Justice wants reliability. At first glance that is a contradiction. But the Lovers show how the two meet: change is not frightening when you have people beside you with whom agreements are kept.",
+        "**4. Put it into one thought you can recognise in your life.** In the full reading, the thought for this row is: **“It is easier for you to step into the new when you have someone to come back to.”** All three cards are at work in it, and none of them can be left out.",
+        "**5. Find the difficulty in the same logic.** The strength of this row breaks down where you keep the freedom for yourself and leave the job of being reliable to others. You have already rewritten everything, while someone close to you is still counting on yesterday’s promise. The difficulty is not a separate “minus” of the card but the same picture turned the other way round.",
+        "Look at the third number. The Lovers are 22 + 11, reduced to six. And in the reading, the feeling of home really does appear where freedom meets a promise. The arithmetic does not prove this, but in any row it is handy to read emotions as the place where physics and energy meet.",
+        "And one last check, the most useful one: **swap one card, and the thought should change.** Put the Emperor in place of the Fool, and the row becomes 4 / 11 / 15: instead of a story about leaving and coming back, you get a story about building and holding on. If your wording fits any three cards, you are reading generalities, not the row.",
+        "A finished row in the full reading looks like this: the heading “Feeling at home and staying free”, under it the three cards with captions on the role of each (“The courage to start afresh”, “Promises you can rely on”, “A sense of closeness”), and three paragraphs that go through the same five steps, only now as connected text."
+      ]
+    },
+    {
+      "h2": "How to read the whole map: from rows to a portrait",
+      "paragraphs": [
+        "Seven rows are not seven separate character traits. They are one life seen from seven sides. Three moves are enough to put them together.",
+        {
+          "h3": "Move one: read from the bottom up as a single story"
+        },
+        "First put each row together into one thought, as in the section above. For 4 March 1993, these are the titles of the seven blocks of the full reading:",
+        {
+          "table": {
+            "head": [
+              "",
+              "Chakra",
+              "Row",
+              "Main thought"
+            ],
+            "rows": [
+              [
+                "01",
+                "Muladhara",
+                "22 / 11 / 6",
+                "Feeling at home and staying free"
+              ],
+              [
+                "02",
+                "Svadhisthana",
+                "8 / 15 / 5",
+                "Enjoying what you love"
+              ],
+              [
+                "03",
+                "Manipura",
+                "4 / 4 / 8",
+                "Taking matters into your own hands"
+              ],
+              [
+                "04",
+                "Anahata",
+                "12 / 11 / 5",
+                "Closeness where you hear each other"
+              ],
+              [
+                "05",
+                "Vishuddha",
+                "8 / 7 / 15",
+                "Speaking so that you are understood"
+              ],
+              [
+                "06",
+                "Ajna",
+                "12 / 10 / 22",
+                "Finding a way out where there was a dead end"
+              ],
+              [
+                "07",
+                "Sahasrara",
+                "4 / 3 / 7",
+                "Making something you recognise yourself in"
+              ]
+            ]
+          }
+        },
+        "Read them in order and a story emerges. This person needs a home they can set out from into the new. They can want something badly and still choose. They take matters into their own hands. They love while leaving room for the other person’s experience. They speak to get through to people. They look for another move where everyone else is stuck. And they want to be the author of whatever they put themselves into.",
+        {
+          "h3": "Move two: find the recurring cards"
+        },
+        "The 21 cells of our table hold only 11 different arcana. That is quite normal: an energy map holds just under 13 different cards on average, and for 93% of dates at least one card appears in the table three times or more. A recurring card is a way of acting that meets you in different areas of life, each time in a new role.",
+        {
+          "table": {
+            "head": [
+              "Arcanum",
+              "Where it stands",
+              "How it sounds in each place"
+            ],
+            "rows": [
+              [
+                "8 · Strength",
+                "Svadhisthana physics, Vishuddha physics, Manipura emotions",
+                "handling desire gently · firmness without pressure · keeping your composure"
+              ],
+              [
+                "4 · The Emperor",
+                "Sahasrara physics, Manipura physics and energy",
+                "giving an idea its shape · organising and seeing it through · making your own decisions"
+              ],
+              [
+                "15 · The Devil",
+                "Svadhisthana energy, Vishuddha emotions",
+                "the hold of attraction · attachment to the answer"
+              ],
+              [
+                "12 · The Hanged Man",
+                "Ajna physics, Anahata physics",
+                "seeing it from the other side · seeing through the other’s eyes"
+              ]
+            ]
+          }
+        },
+        "There are other repeats too. Justice appears twice in energy: both at home and in closeness, what holds you is a fair agreement. The Hierophant appears twice in emotions: you are at ease when you are in tune with yourself and with shared values. The Fool opens up both your footing and your understanding. The Chariot sits in the aim of a conversation and in the feeling of moving forward.",
+        "The most striking pair here is Strength and the Devil. In Waite, both cards are built around a chain. On the Devil, a man and a woman are chained at the foot of an altar, and Waite calls this “the chain and fatality of the material life”, though he adds that “he who is exalted above them is not to be their master for ever”. On Strength, a woman leads a lion on a chain of flowers, and Waite reads that chain as “the sweet yoke and the light burden” of a law “taken into the heart of hearts”. In our map the two chains stand side by side. An attraction that holds you: desire, and the answer you need to hear. And a gentle hand that holds the attraction itself.",
+        "The second pair is the Emperor and the Hanged Man. Three times the Emperor says “keep it in hand”: the idea, the work, the decision. Twice the Hanged Man says the opposite: stop for a while and look from the other side. In Waite, the Hanged Man suggests “life in suspension, but life and not death”.",
+        {
+          "h3": "Move three: put the difficulties together"
+        },
+        "In the full reading, the third paragraph of each row is the difficulty that grows out of the same strength. Write them out side by side, and a common thread shows:",
+        {
+          "ul": [
+            "**Svadhisthana:** forbidding yourself too much at first, then making up for it all at once;",
+            "**Manipura:** a mistake starts to mean losing face, and you want to check every step in advance;",
+            "**Anahata:** “But I only meant well” closes the conversation, and a good intention seems answer enough to someone else’s pain;",
+            "**Vishuddha:** relief can come only after the other person says “yes”;",
+            "**Sahasrara:** the next goal turns up before you have had time to enjoy what you have achieved."
+          ]
+        },
+        "Five different scenes, one movement: keeping a grip on the result. Desire, the work, your own rightness, someone else’s answer, the next peak. And the map itself suggests a counterweight. Where the Emperor wants to hold on, Strength offers to hold gently, and the Hanged Man offers to let go for a minute and look at it differently.",
+        "The difficulties of Muladhara and Ajna are about something else. One is about freedom that leaves reliability to others; the other is about a new explanation that never gets the chance to meet experience. A common thread does not have to run through all seven rows. Force it, and the portrait comes out beautiful and wrong.",
+        {
+          "h3": "The portrait in one sentence"
+        },
+        "Together, the three moves add up to a portrait: **someone who wants to be the author of their own life, and the main question of their map is which chain to hold things with: one of iron, or one of flowers.**",
+        "This is not a verdict, and not the only possible way to put it together. Another reader may place the emphasis differently, but any conclusion has to rest on the cards and their roles. And it is tested by life: if you don’t recognise the portrait, don’t bend events to fit it. Go back to the rows and see where the reading drifted away from the cards."
+      ]
+    },
+    {
+      "h2": "Repeats and column totals",
+      "paragraphs": [
+        {
+          "h3": "One card twice in one row"
+        },
+        "Manipura always has a repeat: physics and energy both come from the same centre, so 4 / 4 / 8 and 9 / 9 / 18 are ordinary rows. In the other chakras the first two numbers match for 3–9% of dates. A repeat like this is always read the same way: one card in two roles, in the action and in the motive. It is not “double strength”. Remember the Emperor from the renovation: order as a way of acting, and order as the condition without which you don’t want to act at all.",
+        {
+          "h3": "One card in different rows"
+        },
+        "A recurring card is read in each row separately, and then you look at what the readings have in common. Some of these repeats follow directly from the formula: the rows are neighbours in the calculation. Anahata comes from Vishuddha, Ajna from Sahasrara and Vishuddha, Svadhisthana from Muladhara. In our example, 12 stands in the physics of both Ajna and Anahata because the arcanum of the day matched the centre: both equal 4, and 4 + 8 = 8 + 4. This happens for roughly one date in fifteen. The formula explains where the card came from, but it does not cancel the card’s meaning in each row.",
+        "The extreme case shows this best. For people born on 9 September 1989 or 1998, the whole table consists of two cards: the Hermit (9) and the Moon (18). Since 1900 there have been 42 such dates, all of them in September, on the 9th, 18th or 27th. The Hermit appears here twelve times, the Moon nine. But this is not “a twelvefold Hermit”. It is one question, how to find your own light at dusk, which life asks on seven different levels. Here are the row titles for 9 September 1998 in the full reading:",
+        {
+          "table": {
+            "head": [
+              "Chakra",
+              "Row",
+              "Main thought"
+            ],
+            "rows": [
+              [
+                "Muladhara",
+                "9 / 9 / 18",
+                "Working it out yourself when there’s fog ahead"
+              ],
+              [
+                "Svadhisthana",
+                "18 / 18 / 9",
+                "Get to know your shadow in safe darkness"
+              ],
+              [
+                "Manipura",
+                "9 / 9 / 18",
+                "Walking through dusk with your own lantern"
+              ],
+              [
+                "Anahata",
+                "9 / 9 / 18",
+                "A silence full of understanding"
+              ],
+              [
+                "Vishuddha",
+                "18 / 18 / 9",
+                "Speaking quietly about what matters most"
+              ],
+              [
+                "Ajna",
+                "9 / 9 / 18",
+                "Looking into the haze until it becomes a thought"
+              ],
+              [
+                "Sahasrara",
+                "9 / 9 / 18",
+                "Seeking meaning where few have walked"
+              ]
+            ]
+          }
+        },
+        "Five identical rows, and five different thoughts. The row sets the scene, and the same pair of cards plays a different part in each one.",
+        {
+          "h3": "The same numbers in other sections of the matrix"
+        },
+        "The energy map is built from the same points as the whole matrix. That is why the numbers in the table also turn up in other sections of the reading:",
+        {
+          "table": {
+            "head": [
+              "Energy map cell",
+              "Where else this number stands"
+            ],
+            "rows": [
+              [
+                "Sahasrara physics",
+                "the birth day arcanum, the calling card"
+              ],
+              [
+                "Sahasrara, Ajna and Vishuddha energy",
+                "three points of the talent line"
+              ],
+              [
+                "Muladhara physics",
+                "the arcanum of the year, the material task"
+              ],
+              [
+                "Muladhara energy",
+                "the karmic task, which is also the root of the karmic tail"
+              ],
+              [
+                "Manipura",
+                "the centre of the matrix"
+              ],
+              [
+                "Svadhisthana physics",
+                "the entry point of the money line"
+              ],
+              [
+                "Svadhisthana energy",
+                "the entry point of the relationship line and the karmic tail"
+              ]
+            ]
+          }
+        },
+        "If the same number meets you in three sections, it is not a sign from fate but one and the same point. The chakra table looks at it from its own angle. In the section on character, the birth month is the spiritual task; in Sahasrara, it is what you rely on when choosing your path.",
+        {
+          "h3": "The Total row: the overall energy field"
+        },
+        "Below the table there are three more numbers: the column totals. Each column is added up from top to bottom and reduced: in our case 70 → 7, 61 → 7 and 68 → 14. This row is called the overall energy field. It is not an eighth chakra but the shared tone in which all seven levels sound. The physics total is the general rhythm of your affairs: how you take on tasks in general, and how you handle time and things. The energy total is where your strength comes from overall, and where it goes. The emotions total is your general response to what happens.",
+        "Two caveats. The totals are arcanum numbers too, not percentages, and 7 is not “two units of energy” more than 5. Besides, the totals have their own arithmetic: unlike in a row, the third number here does not have to be the sum of the first two. For 4 March 1993 it does match (7 + 7 = 14), but that happens for only about a third of dates. There are 363 possible total triples in all. How to read them, and how the energy field differs from the individual chakras, is covered in detail in “The overall energy field in the destiny matrix”."
+      ]
+    },
+    {
+      "h2": "What a personal reading adds",
+      "paragraphs": [
+        "This article is enough to read your table on your own: work it out, ask each cell its question, put the rows together, find the recurring cards. The reference tables in the seven chakra articles give the meaning of any card in any column.",
+        "What no reference can give you is a ready-made text about your three cards in your row. Justice next to the Hanged Man sounds different from Justice next to the Fool. And the same triple changes its meaning with the chakra. The row 12 / 11 / 5 in Anahata is “Closeness where you hear each other”, in Vishuddha “Listen before you judge”, and in Sahasrara “Belonging and still asking the awkward question”.",
+        "**Free and with no sign-up**, straight after you enter a date:",
+        {
+          "ul": [
+            "the whole matrix and the “Chakras and your arcana” table: 21 arcana with their names, plus the Total row;",
+            "the “Where the numbers come from” note: which points each row is taken from, and how each sum is reduced;",
+            "two sections of the reading: “Character and personal qualities” and “The centre and the inner points”;",
+            "this guide and the seven chakra articles, with reference tables for every arcanum."
+          ]
+        },
+        "**The full reading** includes the “Chakra energy map” section: seven blocks, from Muladhara to Sahasrara. Each block has:",
+        {
+          "ul": [
+            "**a heading**: the main thought of your row;",
+            "**three captions**: the role each card plays in your particular combination;",
+            "**three paragraphs**: the theme of the chakra and what each card brings to it; the whole picture, with a recognisable example from life; and the difficulty that grows out of the same strength."
+          ]
+        },
+        "The texts are written separately for every row that occurs in real dates, and there are almost two thousand of them. This is not a patchwork of dictionary meanings: every heading you have seen in this article comes from there. The chakra section is part of the full reading, together with the other sections of the matrix, 20 in all. One payment, no subscription and no repeat charges.",
+        "What the full reading does not do: it does not predict events, does not rate the “strength” of your chakras and says nothing about health. It is a symbolic portrait for you to check against your own experience.",
+        "Start with your own table: the calculation form is near the top of the article, and the numbers appear straight away. Pick the row that feels closest to you right now and put it together yourself using the five steps. And when you want to see the whole map as connected text, the readings of all seven rows are waiting in the full reading."
+      ]
+    },
+    {
+      "h2": "What this guide is based on",
+      "paragraphs": [
+        {
+          "ul": [
+            "**Calculation**: the classic destiny matrix of Natalia Ladini, with points A–T. Sahasrara is A and B; Ajna is A + J and B + K; Vishuddha is J = A + E and K = B + E; Anahata is J + E and K + E; Manipura is E twice; Svadhisthana is L = C + E and M = D + E; Muladhara is C and D. Emotions are the sum of the first two numbers in the row; the totals are the reduced sums of the columns. Any sum above 22 is reduced by adding up its digits. The example and every number in the article have been checked against the site’s calculator, and the statistics cover all 46,021 dates from 1900 to 2025.",
+            "**Card meanings**: A. E. Waite, The Pictorial Key to the Tarot (1910, 1922 reprint), and Benebell Wen, Holistic Tarot (2015). Waite is quoted in his original wording. Wen has a seven-chakra spread (chapter 14), but in it each chakra gets a single drawn card, not three columns.",
+            "**The columns, the links between cards and the combination texts**: the author’s interpretation. Neither Waite nor Wen wrote about the destiny matrix.",
+            "The destiny matrix is an esoteric model for self-reflection, with no scientific evidence behind it. It is not a forecast, and not advice about your wellbeing, money or relationships."
+          ]
+        }
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "q": "What does physics mean in the destiny matrix?",
+      "a": "Physics is the first column of the chakra table. It answers the question “what do I do?”: how the theme of the row shows in your actions and habits, and in the way you handle things, money and time. In Anahata it is what your love looks like in practice; in Vishuddha, your way of speaking. The column has nothing to do with your physical wellbeing or the state of your body."
+    },
+    {
+      "q": "What do emotions mean in the destiny matrix?",
+      "a": "Emotions are the third column: what you feel within the theme of the row. This number is not taken from a separate point of the matrix; it is the sum of physics and energy, reduced to 1–22. So it is handy to read it as a response born of an action and a motive. In Anahata, 12 + 11 = 23 → 5: the Hierophant in emotions, trust in shared values."
+    },
+    {
+      "q": "Why is “energy” the name of a column and of any arcanum?",
+      "a": "In the language of the destiny matrix, any arcanum is often called an “energy”: “energy 5”, “the energy of the year”. In the chakra table the word is the name of the middle column, meaning the motive and the source of strength. To avoid mix-ups, say “the arcanum in the energy column of Anahata”. For arcana in general, see “Energies in the destiny matrix”."
+    },
+    {
+      "q": "Which chakra should I start reading from?",
+      "a": "For a full reading, start from Muladhara and go up: that way the rows add up to a story. If you have a specific question, start from the row that matches it. A difficult conversation: Vishuddha. A relationship: Anahata. A decision about a project: Manipura. A move or a change of job: Muladhara and Sahasrara. Don’t pick a row by the smallest or the largest number: the size of the number means nothing."
+    },
+    {
+      "q": "What does the Total row under the table mean?",
+      "a": "These are the column totals: each column is added up and reduced to 1–22. The result is three arcana: the general rhythm of your affairs, the general source of your strength and your general emotional response. This row is called the overall energy field. It is not an eighth chakra, and not a percentage of “charge”. There is more in the article on the overall energy field."
+    },
+    {
+      "q": "What does it mean if numbers repeat in the table?",
+      "a": "Nothing to worry about. For 93% of dates some card appears in the table three times or more, and Manipura always has a repeat. A repeat is one card in different roles, not an amplified quality. Read it in each cell separately, then look at what the readings have in common: that is how you find the themes the card carries through the map."
+    },
+    {
+      "q": "Why do a friend and I have the same chakras?",
+      "a": "The table depends on only three numbers: the reduced day, the month and the reduced year. That is why the 46,021 dates from 1900 to 2025 give only 5,544 different energy maps. For example, 4 and 31 March of the same year share one table, and so do those days in years with the same year arcanum: for 1984 and 1993 it is 22. Gender plays no part in the calculation."
+    },
+    {
+      "q": "Is this the same table as the “health map”?",
+      "a": "Yes, some calculators call these seven rows a health map. Here they are read as a map of life themes: the numbers describe ways of acting, motives and experiences, not the state of the body. Questions about how you feel physically belong with a qualified specialist, not with the arcana."
+    },
+    {
+      "q": "How is the energy map different from a chakra analysis in percentages?",
+      "a": "They are different methods. A chakra analysis by date of birth gives percentages or small numbers from its own formula, while the destiny matrix puts one of the 22 arcana into each cell. Comparing “78%” with the Emperor makes no sense, and readings cannot be carried over from one system to the other."
+    },
+    {
+      "q": "Why did another calculator give me different numbers?",
+      "a": "There are usually three reasons. The first is the reduction rule: here the digits are added up (23 → 5), while some calculators subtract 22 (23 → 1), and the tables then hardly ever match. The second is the order: rows sometimes run from the top down, and the columns come in a different sequence. The third is the numbering: here, as in Waite, 8 is Strength, 11 is Justice and 22 is the Fool (Waite numbers it 0). In older decks Strength and Justice are the other way round, so match readings by the card’s name, not its number. The four rules from the calculation section will help you check your table."
+    }
   ]
- },
- "meaning": [
-  "The chakra energy map in the destiny matrix is a separate table in the report, where a whole life is laid out across seven levels and three columns. The seven rows are the seven chakras, from the support at the bottom to meaning at the top; the three columns show which plane each area lives on: body and money, force and will, or feeling. The position does not answer “who are you by the chart” — it answers “where are you full and where are you empty”, which areas are filled and which ones fall through.",
-  "Unlike the centre or the relationship line, this is not a single point but a cut through the whole chart at once: each chakra gathers its own theme — from material support and pleasure to standing, love, self-expression, intuition and the link to the family line. The point of the section is that one and the same area can be lived in three ways — earned (matter), pushed with force (energy) and felt (emotions). The map shows which of the three planes works for a person and which one is blocked.",
-  "A strong reading looks like an even map with no holes: the columns come out comparable, and no row hangs at zero. A weak one is a sharp tilt. A full column of matter with empty feeling gives an outwardly successful person who lives dry; the opposite case is a fine inner life with no money and no household. An empty bottom row almost always weighs more than a rich top one: without support the upper levels do not hold, however much is gathered above.",
-  "What the energy map affects is where a person draws force and where it drains away: a filled chakra works like a source, a collapsed one like a hole that swallows energy and attention. The practical use of the position is not to admire the strong rows but to find the weakest one and work out which plane will top it up — work, action or relationships. That is why the section counts as the clearest in the report: it shows the tilt of a whole character, not the value of one cell."
- ],
- "article_sections": [
-  {
-   "h2": "How the energy map is built in the destiny matrix",
-   "paragraphs": [
-    "The energy map is a table of seven rows and three columns: Physics, Energy, Emotions. Each row takes two arcana from the chart that has already been worked out, and the third value comes out by itself: emotions are the reduced sum of physics and energy in the same row. Under the table stand the column totals, also reduced sums of all seven values. Rows and columns describe ways of living a theme, not the state of the body. Meaning appears in comparison: column against column, row against row, a repeat against a gap. A single cell pulled out of its row and column says little."
-   ]
-  },
-  {
-   "h2": "Seven levels: from material support to meaning",
-   "paragraphs": [
-    "The rows run from top to bottom, from Sahasrara down to Muladhara, and each one asks its own question. Muladhara at the bottom is support: a home, a month of reserves, the feeling of ground underfoot. Svadhisthana is joy, children, craft, everything done out of wanting. Manipura is will, standing and the price a person can say out loud. Anahata is closeness and what it turns into in everyday life. Vishuddha is the word: whether promises are kept and whether a person can say no. Ajna is vision and trust in your own hunches. Sahasrara is the link to a larger design and the question of what will be left afterwards. The bottom row holds the upper ones: empty support is felt more sharply than rich meaning."
-   ]
-  },
-  {
-   "h2": "The Physics column: how a theme becomes action",
-   "paragraphs": [
-    "Physics is the observable form: what a person does, buys, arranges and finishes at the chosen level. In Muladhara it holds the arcanum of the birth year: stamina, housing, money in the account — the footing that long things rest on. In Manipura it is money and standing, the level of pay a person should not go below. In Vishuddha it is the work where a voice turns into a result: negotiation, writing, teaching, sales. A strong reading of this column names a deed and its circumstances. Checking it is simple: find one episode from last month where the theme of the row became visible action, and compare it with the description of the arcanum."
-   ]
-  },
-  {
-   "h2": "The Energy column: what starts a process and keeps it going",
-   "paragraphs": [
-    "Energy is the way a person switches on: through interest, order, contact, movement, a pause or a piece of research. In Muladhara it holds the karmic task, in Sahasrara the arcanum of the birth month, and in Manipura energy matches physics, because both cells take the arcanum of the centre. The column answers the question of stamina: is there enough spark after the first refusal, and does a person manage to come back to the work a second time. Read it next to physics — does action appear after the impulse, and does it hold on a repeat. Ordinary swings of strength come from load and tiredness, while the column is about the way of switching on."
-   ]
-  },
-  {
-   "h2": "The Emotions column: how the theme of a level is felt",
-   "paragraphs": [
-    "Emotions is the only column worked out from the other two: in every row it is the reduced sum of physics and energy. Hence its meaning — the response that is left after the action and the motive. In Manipura it is about anger and dignity: live anger holds a boundary, suppressed anger turns into resentment of people who succeed. In Anahata it is about attachment, jealousy and tenderness. In Vishuddha it is about being honest with yourself: you said what you thought, and you are calm after the conversation. When the response falls out of step with the two neighbouring cells of the row, it helps more to talk about words and boundaries than about a “closed” chakra."
-   ]
-  },
-  {
-   "h2": "Column totals, highs and lows",
-   "paragraphs": [
-    "Three totals stand under the table — the reduced sums of physics, energy and emotions. They show which plane a person lives on more often: work, effort or feeling. A high in a row means a resource and, at the same time, the habit of solving everything one way. A low is the easiest entry, a convenient place to start watching. The arithmetic gap between totals does not prove a tilt on its own: it needs facts beside it, showing where exactly the theme of a row runs into nothing. The most useful check is totals against the bottom rows: a full column of matter over empty support looks like a successful person living dry."
-   ]
-  },
-  {
-   "h2": "Repeated arcana and gaps between columns",
-   "paragraphs": [
-    "The same arcanum usually turns up in the table more than once: there are twenty-one cells and twenty-two arcana in all. A repeat means one shared way of acting that answers several row questions at once, and copying the wording across word for word is useless — action, motive and response sound different even under one number. A gap between the columns of one row shows where a theme lives on one plane and falls through on another: the work moves, and there is no joy in it at all. Such a gap is checked against the facts of the month, and the conclusion ends with an observation you can test, not with a verdict about the state of the body."
-   ]
-  },
-  {
-   "h2": "An example reading of the map for 4–3–22",
-   "paragraphs": [
-    "Top to bottom, the physics column of the reference matrix 4–3–22 goes: The Emperor, The Hanged Man, Strength, The Hanged Man, The Emperor, Strength, The Fool. The energy column goes: The Empress, The Wheel, The Chariot, Justice, The Emperor, The Devil, Justice. The three column totals come out as The Chariot, The Chariot and Temperance. Read the pattern, not a single number: The Emperor and The Hanged Man alternate, so structure and pause replace each other every other level. In Manipura both cells are taken by the four, because physics and energy there come from the centre, and the emotion comes out as Strength. Matching totals for physics and energy say that the material rhythm and the spread of effort agree here, while the emotional total is gentler than both."
-   ]
-  },
-  {
-   "h2": "Practice: read the map from a row to an action",
-   "paragraphs": [
-    "Pick one row where the three columns diverge the most. Write down three things from a single real episode: what you did, what switched you on, and what response was left afterwards. Then think of the smallest possible step — saying a need out loud, changing one condition, or finishing what you started. Work with one row for a week, then move to the next. That pace protects you from the main mistake: reading the whole table at once and remembering only the prettiest cells. Lasting questions about how you feel stay outside the map, and belong with a qualified specialist."
-   ]
-  }
- ],
- "faq": [
-  {
-   "q": "What do the chakras show in the destiny matrix?",
-   "a": "Seven levels of life in three planes at once: physics is what a person does, energy is what switches them on, emotions are the response that is left. The rows run from support at the bottom to meaning at the top. The conclusion comes from comparing columns, totals and repeats, not from one bright cell."
-  },
-  {
-   "q": "How do you read the energy map in the destiny matrix?",
-   "a": "Start with the weakest row, not the most noticeable one. Read it across the three columns, find one real episode from the month, and see which plane works and which one sags. Then check the row against the column totals under the table."
-  },
-  {
-   "q": "How is the chakra energy map worked out in the destiny matrix?",
-   "a": "Every row takes two arcana from the chart already worked out — physics and energy. The third value, emotions, is their reduced sum. A column total is found the same way: its seven values are added up and reduced to the range 1–22."
-  },
-  {
-   "q": "What does the lowest value in a row of the energy map mean?",
-   "a": "That this plane of the theme is worked out less than the others, and short steps are the easier way into it. A low describes how reachable a way of acting is. It says nothing about a person’s worth, and nothing about an area being off limits."
-  },
-  {
-   "q": "Does the energy map assess the state of the body?",
-   "a": "No. Rows and columns are a symbolic model of behaviour and feeling, not a medical examination. Lasting questions about how you feel are settled with a qualified specialist, while the map is used to watch deeds and responses."
-  }
- ]
 }

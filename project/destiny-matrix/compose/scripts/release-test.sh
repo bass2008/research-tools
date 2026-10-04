@@ -83,6 +83,9 @@ until "${TEST_CURL[@]}" -o /dev/null "$SITE/"; do sleep 3; done
 "${TEST_CURL[@]}" https://test.arcana-sense.com/version/current.txt
 "${TEST_CURL[@]}" "$SITE/" | grep '<html lang="ru"' >/dev/null
 "${TEST_CURL[@]}" https://test.arcana-sense.com/ | grep '<html lang="en"' >/dev/null
+echo "== отчёты PDF"
+ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" \
+  "cd /srv/arcana && docker compose -p arcana-test -f docker-compose.test.yml exec -T api python -m app.report_check --wait 900" || echo "ВНИМАНИЕ: не все PDF перепечатаны или скачиваются"
 mkdir -p ../reports/unified
 # Свидетельство для прод-релиза пишется только из чистого дерева: выкладка правок, которых нет
 # в коммите, ничего не говорит о самом коммите, а прод сверяет именно его.

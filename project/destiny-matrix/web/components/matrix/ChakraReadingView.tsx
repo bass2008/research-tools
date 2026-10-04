@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { forLocale as localizedArcana } from "@/lib/arcana";
+import { D } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n/lang";
-import type { ChakraReadingRow, LongformReading } from "@/lib/readingTypes";
+import { ENERGY_FIELD_HREF, type ChakraReadingRow, type LongformReading } from "@/lib/readingTypes";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { SiteProfile } from "@/lib/siteProfile";
 import ArcanumCard from "./ArcanumCard";
@@ -41,9 +42,9 @@ function ChakraReadingCards({ cells, locale, href, printing, eager }: {
   );
 }
 
-export function ChakraReadingBlock({ row, number, locale, site, printing = false, eager = true, id, titleTag = "h2", titleHref, labelId, note }: {
+export function ChakraReadingBlock({ row, number, locale, site, printing = false, eager = true, id, titleTag = "h2", titleHref, labelId, note, more }: {
   row: ChakraReadingRow;
-  number: number;
+  number?: number;
   locale: Lang;
   site?: SiteProfile;
   printing?: boolean;
@@ -53,6 +54,7 @@ export function ChakraReadingBlock({ row, number, locale, site, printing = false
   titleHref?: string;
   labelId: string;
   note?: ReactNode;
+  more?: { href: string; label: string };
 }) {
   const { publicHref } = localizedSite(locale, site);
   const href = (path: string) => printing ? publicHref(path) : path;
@@ -62,7 +64,7 @@ export function ChakraReadingBlock({ row, number, locale, site, printing = false
   return (
     <section className={styles.block} id={id} data-chakra={row.key} aria-labelledby={labelId}>
       <div className={styles.side}>
-        <span className={styles.number} aria-hidden="true">{String(number).padStart(2, "0")}</span>
+        {number ? <span className={styles.number} aria-hidden="true">{String(number).padStart(2, "0")}</span> : null}
         <Title className={styles.title} id={labelled ? labelId : undefined}>{title}</Title>
         <p className={styles.topic}>{row.topic}</p>
         <div className={styles.numbers}>
@@ -79,6 +81,7 @@ export function ChakraReadingBlock({ row, number, locale, site, printing = false
             <p key={i} className={i === 2 ? styles.tension : undefined}><Copy text={paragraph} /></p>
           ))}
         </div>
+        {more ? <p className={styles.more}><Link href={href(more.href)} data-testid={`chakra-more-${row.key}`}>{more.label}</Link></p> : null}
       </div>
     </section>
   );
@@ -95,8 +98,14 @@ export default function ChakraReadingView({ reading, locale, site, printing = fa
       {reading.lead ? <p className={styles.intro}>{reading.lead}</p> : null}
       {reading.chakraRows?.map((row, index) => (
         <ChakraReadingBlock key={row.key} row={row} number={index + 1} locale={locale} site={site} printing={printing}
-          titleHref={`/encyclopedia/chakra/${row.key}`} labelId={`${reading.testId}-${row.key}`} />
+          titleHref={`/encyclopedia/chakra/${row.key}`} labelId={`${reading.testId}-${row.key}`}
+          more={{ href: `/encyclopedia/chakra/${row.key}`, label: D.sheet.chakraMore[locale](row.title) }} />
       ))}
+      {reading.energyField ? (
+        <ChakraReadingBlock row={reading.energyField} locale={locale} site={site} printing={printing}
+          titleHref={ENERGY_FIELD_HREF} labelId={`${reading.testId}-energy-field`}
+          more={{ href: ENERGY_FIELD_HREF, label: D.sheet.energyFieldMore[locale] }} />
+      ) : null}
       {reading.chakraNote ? <p className={styles.note}>{reading.chakraNote}</p> : null}
     </article>
   );

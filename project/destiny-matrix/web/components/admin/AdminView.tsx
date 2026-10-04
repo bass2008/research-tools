@@ -8,8 +8,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ApiError, type AdminPayment, type AdminReportJob, type AdminUser,
-         type SweepRun } from "@/lib/api";
+         type AdminUserSort, type SweepRun } from "@/lib/api";
 import { buildInfo } from "@/lib/version";
+import ActionsMenu from "@/components/admin/ActionsMenu";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
 import AdminSettings from "@/components/admin/AdminSettings";
@@ -30,10 +31,12 @@ function accessLine(u: AdminUser): string {
 
 
   const [users, setUsers] = useState<AdminUser[] | null>(null);
-  // Список растёт, а в каждой строке считаются права и покупки: отдаём страницами, новые сверху.
+  // Список растёт, а в каждой строке считаются права и покупки: отдаём страницами.
   const [usersTotal, setUsersTotal] = useState(0);
   const [usersPage, setUsersPage] = useState(1);
   const [usersSize, setUsersSize] = useState(10);
+  const [usersSort, setUsersSort] = useState<AdminUserSort>("last_seen_at");
+  const [usersOrder, setUsersOrder] = useState<"asc" | "desc">("desc");
   const [payments, setPayments] = useState<AdminPayment[] | null>(null);
   const [jobs, setJobs] = useState<AdminReportJob[] | null>(null);
   const [jobsTotal, setJobsTotal] = useState(0);
@@ -58,7 +61,7 @@ function accessLine(u: AdminUser): string {
   const [rebuilding, setRebuilding] = useState<number | null>(null);
 
   const reloadUsers = () => {
-    void api.admin.users(usersPage, usersSize)
+    void api.admin.users(usersPage, usersSize, usersSort, usersOrder)
       .then((u) => { setUsers(u.items); setUsersTotal(u.total); })
       .catch(() => undefined);
   };
@@ -120,7 +123,7 @@ function accessLine(u: AdminUser): string {
       // Обе таблицы должны быть одним снимком. Пока перечитывались только люди, платёж,
       // пришедший между открытием админки и возвратом, попадал в покупатели, но отсутствовал
       // в платежах до F5.
-      void Promise.allSettled([api.admin.users(usersPage, usersSize), api.admin.payments()]).then(([freshUsers, freshPayments]) => {
+      void Promise.allSettled([api.admin.users(usersPage, usersSize, usersSort, usersOrder), api.admin.payments()]).then(([freshUsers, freshPayments]) => {
         if (freshUsers.status === "fulfilled") setUsers(freshUsers.value.items);
         if (freshPayments.status === "fulfilled") setPayments(freshPayments.value.items);
       });
@@ -171,13 +174,29 @@ function accessLine(u: AdminUser): string {
 
   // Список людей перезапрашивается при смене страницы и размера — остальные таблицы не трогаем.
   useEffect(() => {
-    void api.admin.users(usersPage, usersSize)
+    void api.admin.users(usersPage, usersSize, usersSort, usersOrder)
       .then((u) => { setUsers(u.items); setUsersTotal(u.total); })
       .catch((err: unknown) => {
         if (err instanceof ApiError && [401, 403, 404].includes(err.status)) setDenied(err);
         else setError((was) => was ?? "Список людей не пришёл.");
       });
-  }, [usersPage, usersSize, api]);
+  }, [usersPage, usersSize, usersSort, usersOrder, api]);
+
+  const sortUsers = (key: AdminUserSort) => {
+    if (key === usersSort) setUsersOrder((was) => (was === "desc" ? "asc" : "desc"));
+    else {
+      setUsersSort(key);
+      setUsersOrder(key === "email" ? "asc" : "desc");
+    }
+    setUsersPage(1);
+  };
+  const userHead = (key: AdminUserSort, label: string) => (
+    <th aria-sort={usersSort === key ? (usersOrder === "asc" ? "ascending" : "descending") : undefined}>
+      <button type="button" className="sorter" data-testid={`users-sort-${key}`} onClick={() => sortUsers(key)}>
+        {label}{usersSort === key ? (usersOrder === "asc" ? " ↑" : " ↓") : ""}
+      </button>
+    </th>
+  );
 
   const settled = (payments ?? []).filter((p) => p.state === "paid");
   const paidTotal = settled.reduce((sum, p) => sum + p.amount, 0);
@@ -239,14 +258,14 @@ function accessLine(u: AdminUser): string {
           <table className="admtable" data-testid="admin-users">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>{t("Почта")}</th>
-                <th>{t("Матриц")}</th>
-                <th>{t("Платежей")}</th>
-                <th>{t("Уплачено")}</th>
-                <th>{t("Доступ")}</th>
-                <th>{t("Последнее появление")}</th>
-                <th>{t("Зарегистрирован")}</th>
+                {userHead("id", "ID")}
+                {userHead("email", t("Почта"))}
+                {userHead("matrices", t("Матриц"))}
+                {userHead("payments", t("Платежей"))}
+                {userHead("spent", t("Уплачено"))}
+                {userHead("access", t("Доступ"))}
+                {userHead("last_seen_at", t("Последнее появление"))}
+                {userHead("created_at", t("Зарегистрирован"))}
                 <th className="act">{t("Действия")}</th>
               </tr>
             </thead>
@@ -324,7 +343,7 @@ function accessLine(u: AdminUser): string {
                 <th>{t("Статус")}</th>
                 <th>{t("За какую дату")}</th>
                 <th>{t("Номер")}</th>
-                <th aria-label={t("Действия")} />
+                <th className="act">{t("Действия")}</th>
               </tr>
             </thead>
             <tbody>
@@ -364,15 +383,9 @@ function accessLine(u: AdminUser): string {
                     <td className="small">{p.external_id}</td>
                     <td className="act">
                       {p.state === "paid" ? (
-                        <button
-                          type="button"
-                          className="btn ghost sm"
-                          data-testid="refund"
-                          disabled={refunding === p.id}
-                          onClick={() => refund(p)}
-                        >
-                          {refunding === p.id ? t("Возвращаем…") : t("Вернуть")}
-                        </button>
+                        <ActionsMenu testId="payment-actions" busy={refunding === p.id}
+                          label={refunding === p.id ? t("Возвращаем…") : undefined}
+                          actions={[{ label: t("Вернуть"), testId: "refund", onSelect: () => void refund(p) }]} />
                       ) : null}
                     </td>
                   </tr>

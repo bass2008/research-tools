@@ -29,7 +29,9 @@ def test_printed_chakras_fit_all_columns(page, mail, locale):
     expect(page.locator("html")).to_have_attribute("lang", locale)
     reading = page.locator(".printmode [data-testid=chakras-reading]")
     expect(reading).to_be_visible()
-    expect(reading.locator("section[data-chakra]")).to_have_count(7)
+    # Seven chakras plus the overall energy field, printed in both languages.
+    expect(reading.locator("section[data-chakra]")).to_have_count(8)
+    expect(reading.locator('section[data-chakra="energy_field"]')).to_have_count(1)
     page.evaluate("document.fonts.ready")
     sizes = reading.evaluate("""reading => {
       const right = reading.getBoundingClientRect().right;

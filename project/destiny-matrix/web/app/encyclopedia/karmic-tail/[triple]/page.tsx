@@ -1,6 +1,6 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import Related from "@/components/enc/Related";
-import Sections from "@/components/enc/Sections";
+import Sections, { Paragraphs } from "@/components/enc/Sections";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import { PriceOrFree } from "@/components/pay/Price";
@@ -114,6 +114,8 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
           </Link>
         ))}
       </div>
+
+      {item.intro.length ? <div className="section-gap"><Paragraphs items={item.intro} locale={L} /></div> : null}
 
       <Sections items={item.sections} locale={L} />
 

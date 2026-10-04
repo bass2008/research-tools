@@ -145,16 +145,13 @@ export const forLocale = localized((L: Locale) => {
               if (!article) throw new Error(`[sections] нет ordered-хвоста ${key}`);
               return {
                 personalHref: `/encyclopedia/karmic-tail/${key}`,
-                fullArticle: {
-                  short: article.short,
-                  sections: article.sections,
-                  faq: article.faq,
-                },
+                tailReading: { paragraphs: article.report.length ? article.report : [article.short] },
               };
             })()
             : personalSection && hasLongform
               ? {
-                personalHref: sectionReadingHref(personalSection, matrix),
+                // The report prints the full chakra reading itself; its personal page was retired.
+                ...(personalSection === "chakras" ? {} : { personalHref: sectionReadingHref(personalSection, matrix) }),
                 longform: buildSectionReading(personalSection, matrix),
               }
               : {}),

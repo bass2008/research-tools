@@ -56,7 +56,7 @@ def test_ru_checkout_and_shared_purchase_on_com(page, mail):
     assert page.request.post(COM + "/api/auth/register", data={"email": mail, "password": "123"}).ok
     page.goto(RU + "/pay/single")
     expect(page.get_by_test_id("pay-modal")).to_be_visible()
-    expect(page.get_by_test_id("language-en")).to_have_count(0)
+    expect(page.get_by_test_id("language-en")).to_have_count(1)
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     page.screenshot(path=str(ARTIFACTS / "ru-checkout.png"), full_page=True)
     response = page.request.post(RU + "/api/payments/start", data={

@@ -106,7 +106,7 @@ def test_registration_and_both_domains_share_one_account(page, browser, mail):
         rows = second.request.get(other + "/api/matrices").json()["items"]
         assert rows[0]["id"] == created.json()["id"]
         expect(second.locator("main")).to_contain_text("31 марта 1993")
-        expect(second.get_by_test_id("language-en")).to_have_count(0)
+        expect(second.get_by_test_id("language-en")).to_have_count(1)
 
 
 def test_paid_pdf_is_rendered_and_cached_per_locale(page, mail, tmp_path):

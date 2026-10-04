@@ -3,7 +3,7 @@ import type { Lang } from "./i18n/hosts";
 import { serverSettings } from "./settings/server";
 
 const LOCAL_SITES = JSON.stringify([
-  { origin: "http://localhost:3000", hosts: ["localhost:3000", "ru.localhost:3000"], defaultLocale: "ru", locales: ["ru"] },
+  { origin: "http://localhost:3000", hosts: ["localhost:3000", "ru.localhost:3000"], defaultLocale: "ru", locales: ["ru", "en"] },
   { origin: "http://127.0.0.1:3000", hosts: ["127.0.0.1:3000", "com.localhost:3000", "web:3000"], defaultLocale: "en", locales: ["en", "ru"] },
 ]);
 

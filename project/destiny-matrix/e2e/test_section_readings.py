@@ -154,14 +154,15 @@ def test_iter3_personal_articles_are_inside_encyclopedia_and_noindex(page: Page)
 
 
 def test_chakra_map_and_year_timeline_keep_exact_personal_context(page: Page) -> None:
-    chakra = "/encyclopedia/chakras/4-3-7-12-10-22-8-7-15-12-11-5-4-4-8-8-15-5-22-11-6-7-7-14"
-    response = page.goto(f"{BASE}{chakra}", wait_until="domcontentloaded")
-    assert response is not None and response.status == 200
-    reading = page.get_by_test_id("chakras-reading")
-    expect(page).to_have_title(re.compile(r"Чакры: карта энергий, толкование семи уровней для матрицы 4–3–22"))
-    assert reading.locator("section[data-chakra]").count() == 7
-    assert reading.locator("figure[data-column]").count() == 21
-    expect(page.locator('meta[name="robots"]')).to_have_attribute("content", "noindex, follow")
+    # The personal chakra page was retired: the paid report prints the full reading. Printed PDFs
+    # still link the old addresses, so they lead to the chakra guide instead of a 404.
+    for chakra in ("/encyclopedia/chakras/4-3-7-12-10-22-8-7-15-12-11-5-4-4-8-8-15-5-22-11-6-7-7-14",
+                   "/encyclopedia/chakras/4-12-8-12-4-8-22-7-7-14"):
+        response = page.goto(f"{BASE}{chakra}", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        assert response.request.redirected_from is not None
+        assert response.request.redirected_from.response().status == 308
+        assert page.url == f"{BASE}/encyclopedia/position/chakras"
 
     years = "/encyclopedia/years/4-7-3-7-22-6-11-15?birth=1993-03-31"
     response = page.goto(f"{BASE}{years}", wait_until="domcontentloaded")
@@ -176,8 +177,6 @@ def test_chakra_map_and_year_timeline_keep_exact_personal_context(page: Page) ->
     assert timeline.locator('[data-next="true"]').count() == 1
     expect(timeline).to_contain_text("Сейчас возраст 33")
 
-    response = page.goto(f"{BASE}/encyclopedia/chakras/4-12-8-12-4-8-22-7-7-14")
-    assert response is not None and response.status == 404
     response = page.goto(f"{BASE}/encyclopedia/years/4-7-3-7-22-6-11-15?birth=bad")
     assert response is not None and response.status == 404
 
@@ -193,7 +192,12 @@ def test_iter3_common_articles_are_full_and_indexable(page: Page) -> None:
         assert response is not None and response.status == 200
         assert page.locator("main h2").count() >= 10
         assert page.locator(".faq dt").count() >= 5
-        expect(page.get_by_role("link", name="Посмотреть персональный пример в энциклопедии →")).to_be_visible()
+        if key == "chakras":
+            # The guide shows a live example table instead of a personal page.
+            expect(page.get_by_test_id("chakra-atlas")).to_be_visible()
+            expect(page.locator('a[href^="/encyclopedia/chakras/"]')).to_have_count(0)
+        else:
+            expect(page.get_by_role("link", name="Посмотреть персональный пример в энциклопедии →")).to_be_visible()
         robots = page.locator('meta[name="robots"]')
         if robots.count():
             expect(robots).not_to_have_attribute("content", "noindex, follow")
@@ -217,7 +221,7 @@ def test_all_20_personal_article_layouts_fit_mobile_and_desktop(page: Page) -> N
         "/encyclopedia/parents_children/7-7-6",
         "/encyclopedia/ancestry/15-13-22-11",
         "/encyclopedia/body_resource/22-11-6",
-        "/encyclopedia/chakras/4-3-7-12-10-22-8-7-15-12-11-5-4-4-8-8-15-5-22-11-6-7-7-14",
+        "/encyclopedia/position/chakras",
         "/encyclopedia/rest/5-4",
         "/encyclopedia/loops/11-4-3",
         "/encyclopedia/years/4-7-3-7-22-6-11-15?birth=1993-03-31",
@@ -253,12 +257,9 @@ def test_all_20_personal_article_layouts_fit_mobile_and_desktop(page: Page) -> N
 
 
 def test_chakras_and_years_have_only_readable_interaction_captions(page: Page) -> None:
-    page.goto(
-        f"{BASE}/encyclopedia/chakras/4-3-7-12-10-22-8-7-15-12-11-5-4-4-8-8-15-5-22-11-6-7-7-14",
-        wait_until="domcontentloaded",
-    )
-    captions = page.locator("[data-testid=chakras-reading] figure[data-column] figcaption > span:first-child").all_inner_texts()
-    assert captions == ["Физика", "Энергия", "Эмоции"] * 7
+    page.goto(f"{BASE}/encyclopedia/chakra/manipura", wait_until="domcontentloaded")
+    captions = page.locator("main figure[data-column] figcaption > span:first-child").all_inner_texts()
+    assert captions == ["Физика", "Энергия", "Эмоции"] * 16
     assert not any(re.search(r"\b(?:physics|energy|emotions)\b", value) for value in captions)
     assert not any(value.strip() == "Позиции" for value in captions)
 
@@ -287,15 +288,25 @@ def test_paid_report_uses_personal_articles_for_every_long_section(page: Page, m
     for key in personal:
         section = page.get_by_test_id(f"section-{key}")
         expect(section).to_have_attribute("data-locked", "false")
-        expect(section.get_by_test_id(f"{key}-full-link")).to_have_attribute(
-            "href", re.compile(r"^/encyclopedia/")
-        )
+        if key == "chakras":
+            # The report already holds the whole chakra reading; no personal page to send to.
+            expect(section.locator('a[href^="/encyclopedia/chakras/"]')).to_have_count(0)
+            expect(section.get_by_test_id("chakras-hub-link")).to_have_attribute("href", "/encyclopedia/chakra")
+        else:
+            expect(section.get_by_test_id(f"{key}-full-link")).to_have_attribute(
+                "href", re.compile(r"^/encyclopedia/")
+            )
+        if key not in ("chakras", "past_lives"):
+            # The site report is as full as the PDF: links between positions are not left to the encyclopedia.
+            expect(section.locator(".character-interactions")).to_have_count(1)
         # В полном отчёте раскрыт только первый accordion. Проверяем ссылку в DOM, не меняя
         # состояние остальных разделов ради самой проверки.
         expect(section.locator(f'a[href="/encyclopedia/position/{key}"]')).to_have_count(1)
 
     tail = page.get_by_test_id("section-past_lives")
-    expect(tail.get_by_test_id("past-lives-full-article")).to_be_attached()
+    # The report keeps a short reading and invites to the free article instead of copying it.
+    expect(tail.get_by_test_id("past-lives-full-article")).to_have_count(0)
+    expect(tail.get_by_test_id("past-lives-tail-reading")).to_be_attached()
     expect(tail.get_by_test_id("past_lives-full-link")).to_have_attribute(
         "href", "/encyclopedia/karmic-tail/15-8-11"
     )

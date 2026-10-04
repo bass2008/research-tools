@@ -39,17 +39,22 @@ describe("загрузчик сгенерированного контента",
       // Правило 7 задаёт восемь глав как минимум: у части разделов к ним добавилась
       // отдельная глава с разобранным примером. Валидатор корпуса тоже проверяет `>= 8`.
       expect(article.sections.length, position.key).toBeGreaterThanOrEqual(8);
-      expect(article.faq.length, position.key).toBe(5);
+      expect(article.faq.length, position.key).toBeGreaterThanOrEqual(5);
       expect(new Set(article.sections.map((section) => section.h2)).size, position.key)
         .toBe(article.sections.length);
-      expect(new Set(article.faq.map((item) => item.q)).size, position.key).toBe(5);
+      expect(new Set(article.faq.map((item) => item.q)).size, position.key).toBe(article.faq.length);
 
       const paragraphs = article.sections.flatMap((section) => section.paragraphs.map(paragraphText));
       const words = paragraphs.join(" ").match(/[А-Яа-яЁёA-Za-z0-9–-]+/g) ?? [];
       expect(words.length, `${position.key}: статья слишком короткая`).toBeGreaterThanOrEqual(320);
-      for (const paragraph of paragraphs) {
-        expect(paragraph.length, position.key).toBeGreaterThanOrEqual(180);
-        expect(templateOpening.test(paragraph), `${position.key}: шаблонный абзац`).toBe(false);
+      // Same rule as content/validate.py: a chapter with tables or lists may keep short lead-ins.
+      for (const section of article.sections) {
+        const minimum = section.paragraphs.every((p) => typeof p === "string") ? 180 : 21;
+        for (const paragraph of section.paragraphs) {
+          if (typeof paragraph !== "string") continue;
+          expect(paragraph.length, position.key).toBeGreaterThanOrEqual(minimum);
+          expect(templateOpening.test(paragraph), `${position.key}: шаблонный абзац`).toBe(false);
+        }
       }
     }
   });

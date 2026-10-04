@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
@@ -60,20 +61,38 @@ def _row(db: Session, user: User) -> dict:
     }
 
 
+# last_seen_at reaches the DB with the hourly presence flush; until then registration is the
+# latest appearance, otherwise a fresh buyer sinks to the bottom of the list.
+USER_COLUMNS = {"id": User.id, "email": User.email,
+                "last_seen_at": func.coalesce(User.last_seen_at, User.created_at),
+                "created_at": User.created_at}
+# Counted per row, so these sort the computed rows rather than SQL.
+USER_COMPUTED = {"matrices": lambda r: r["matrices"], "payments": lambda r: r["payments"],
+                 "spent": lambda r: r["spent"], "access": lambda r: (r["rights"], r["owned"] + r["granted"])}
+
+
 @router.get("/users")
 def users(page: int = 1, page_size: int = 10,
+          sort: Literal["id", "email", "matrices", "payments", "spent", "access",
+                        "last_seen_at", "created_at"] = "last_seen_at",
+          order: Literal["asc", "desc"] = "desc",
           _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
-    """Страница списка: у каждой строки считаются права и покупки, поэтому отдавать всех разом
-    дорого. Порядок — от новых регистраций к старым."""
     page = max(1, page)
     page_size = min(max(page_size, 1), 200)
     total = db.scalar(select(func.count(User.id))) or 0
-    rows = db.scalars(
-        select(User).order_by(User.created_at.desc(), User.id.desc())
-        .offset((page - 1) * page_size).limit(page_size)
-    ).all()
-    return {"items": [_row(db, u) for u in rows], "total": int(total),
-            "page": page, "page_size": page_size}
+    start = (page - 1) * page_size
+    if sort in USER_COMPUTED:
+        rows = [_row(db, u) for u in db.scalars(select(User).order_by(User.id.desc())).all()]
+        rows.sort(key=USER_COMPUTED[sort], reverse=order == "desc")
+        items = rows[start:start + page_size]
+    else:
+        column = USER_COLUMNS[sort]
+        direction = column.desc() if order == "desc" else column.asc()
+        found = db.scalars(select(User).order_by(direction.nulls_last(), User.id.desc())
+                           .offset(start).limit(page_size)).all()
+        items = [_row(db, u) for u in found]
+    return {"items": items, "total": int(total), "page": page, "page_size": page_size,
+            "sort": sort, "order": order}
 
 
 @router.get("/payments")

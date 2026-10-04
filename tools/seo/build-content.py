@@ -91,7 +91,8 @@ def trim_description(item: dict, where: str) -> None:
     head = text[: DESC_LIMIT + 1]
     cut = None
     for sep in (". ", "! ", "? "):
-        if sep in head:
+        # The site drops an article whose description is under 60 characters.
+        if head.rfind(sep) + 1 >= 60:
             cut = head[: head.rfind(sep) + 1].strip()
             break
     if cut is None:
@@ -227,12 +228,26 @@ def check_article(item: dict, where: str, problems: list[str]) -> None:
             continue
         check_marks(str(qa["q"]), where, f"faq[{i}].q", problems, rich=False)
         check_marks(str(qa["a"]), where, f"faq[{i}].a", problems, rich=True)
+    intro = item.get("intro")
+    if intro is not None:
+        if not isinstance(intro, list):
+            fail(problems, where, "intro должен быть списком абзацев и блоков")
+        else:
+            check_paragraphs(intro, where, "intro", problems)
     check_reading_anchors(item, where, problems)
     check_seo(item.get("seo"), where, problems)
 
 
 def check_tail(item: dict, where: str, allowed: set[str], problems: list[str]) -> None:
     key = str(item.get("key") or "")
+    report = item.get("report")
+    if report is not None:
+        if not isinstance(report, list) or not report:
+            fail(problems, where, "report — непустой список абзацев")
+        else:
+            check_paragraphs(report, where, "report", problems)
+            if any(isinstance(p, dict) and next(iter(p)) not in ("h3", "ul", "ol") for p in report):
+                fail(problems, where, "report: только абзацы, h3 и списки")
     if key not in allowed:
         fail(problems, where, f"{key!r} не входит в ordered-реестр метода")
     expected = [int(part) for part in key.split("-")] if re.fullmatch(r"\d+-\d+-\d+", key) else []
@@ -273,9 +288,9 @@ def check_enrichment(item: dict, where: str, base_keys: set, key: str, problems:
             for section in sections
         ):
             fail(problems, where, "article_sections: у каждой главы нужны h2 и абзацы")
-        elif any(not isinstance(p, str) for section in sections for p in section["paragraphs"]):
-            # content/validate.py measures these paragraphs as strings
-            fail(problems, where, "article_sections: блоки h3/ul/ol/table пока только в статьях категорий")
+        elif where.startswith("arcana") and any(not isinstance(p, str) for section in sections
+                                                for p in section["paragraphs"]):
+            fail(problems, where, "article_sections: у арканов блоки h3/ul/ol/table не поддерживаются")
         else:
             for i, section in enumerate(sections):
                 check_marks(section["h2"], where, f"article_sections[{i}].h2", problems, rich=False)
@@ -293,6 +308,11 @@ def check_enrichment(item: dict, where: str, base_keys: set, key: str, problems:
             for entry in faq
         ):
             fail(problems, where, "faq: у каждого пункта нужны содержательные q и a")
+    if "h1" in item:
+        if not isinstance(item["h1"], str) or len(item["h1"].strip()) < 10:
+            fail(problems, where, "h1: строка от 10 знаков")
+        else:
+            check_marks(item["h1"], where, "h1", problems, rich=False)
     check_seo(item.get("seo"), where, problems)
 
 
@@ -300,12 +320,6 @@ def check_chakra_article(item: dict, where: str, base_keys: set, key: str, probl
     if key not in base_keys:
         fail(problems, where, f"чакры {key!r} нет в корпусе — обогащать нечего")
     check_article(item, where, problems)
-    intro = item.get("intro")
-    if intro is not None:
-        if not isinstance(intro, list):
-            fail(problems, where, "intro должен быть списком абзацев и блоков")
-        else:
-            check_paragraphs(intro, where, "intro", problems)
 
 
 def load(path: Path, problems: list[str]) -> dict | None:
@@ -331,6 +345,7 @@ def main() -> int:
     dst = DST_ROOT / args.lang
     corpus = json.loads((dst / "chakra-personal.json").read_text())
     CHAKRA_READINGS.update({key: set(chakra["readings"]) for key, chakra in corpus["chakras"].items()})
+    CHAKRA_READINGS["energy_field"] = set(corpus.get("energy_field", {}).get("readings", {}))
 
     problems: list[str] = []
     warnings: list[str] = []
@@ -423,7 +438,7 @@ def main() -> int:
             entry["meaning"] = item["meaning"]
             if isinstance(item.get("seo"), dict):
                 entry["seo"] = {**entry.get("seo", {}), **item["seo"]}
-            for field in ("article_sections", "faq"):
+            for field in ("article_sections", "faq", "h1"):
                 if field in item:
                     entry[field] = item[field]
             touched += 1

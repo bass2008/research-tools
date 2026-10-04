@@ -3,14 +3,13 @@ import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
 // пропсами и в браузерный чанк не попадают) и клиентский разбор в браузере, где платных
 // разделов нет вовсе.
-import Sections from "@/components/enc/Sections";
+import { Paragraphs } from "@/components/enc/Sections";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CharacterConclusionView from "@/components/matrix/CharacterConclusionView";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CharacterRoleParts from "@/components/matrix/CharacterRoleParts";
 import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
 import UnlockCta from "@/components/pay/UnlockCta";
-import Faq from "@/components/ui/Faq";
 import LockIcon from "@/components/ui/LockIcon";
 import { ALL_FREE } from "@/lib/access";
 import { forLocale as localizedArcana } from "@/lib/arcana";
@@ -37,13 +36,7 @@ export const forLocale = localized((L: Locale, site) => {
     return undefined;
   }
 
-  /** Подпись итога зависит от числа ролей: «тройка» стояла и над парой, и над четырьмя ролями. */
-  function conclusionLabel(roles: number | undefined): string {
-    if (roles === 2) return D.report.pairSummary[L];
-    if (roles && roles > 3) return D.report.rolesSummary[L];
-    return D.report.tripleSummary[L];
-  }
-  return { arcanumTitle, publicHref, gridColumns, conclusionLabel };
+  return { arcanumTitle, publicHref, gridColumns };
 });
 
 export default function ReportSections({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
@@ -63,7 +56,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
     matrixId,
     printing = false,
   } = localeProps;
-  const { arcanumTitle, publicHref, gridColumns, conclusionLabel } = forLocale(L, site);
+  const { arcanumTitle, publicHref, gridColumns } = forLocale(L, site);
 
   const open = sections.filter((s) => s.positions.length > 0).length;
   const locked = sections.length - open;
@@ -119,7 +112,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                       </a>
                       {readingRole ? (
                         <CharacterRoleParts locale={L} role={readingRole} />
-                      ) : p.text && !s.fullArticle ? (
+                      ) : p.text && !s.tailReading ? (
                         <p className="postext">{p.text}</p>
                       ) : null}
                       {/* Соседом карточки, а не внутри: карточка целиком обёрнута в ссылку на
@@ -140,18 +133,15 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                   );
                 })}
               </ul>
-              {s.fullArticle ? (
-                <article className="section-gap report-article" data-testid="past-lives-full-article">
-                  <p className="dim prose">{s.fullArticle.short}</p>
-                  <Sections items={s.fullArticle.sections} locale={L} />
-                  <Faq locale={L} items={s.fullArticle.faq} />
+              {s.tailReading ? (
+                <article className="section-gap report-article" data-testid="past-lives-tail-reading">
+                  <Paragraphs items={s.tailReading.paragraphs} locale={L} />
                 </article>
-              ) : printing && s.longform ? (
-                <CharacterReadingView site={site} locale={L} reading={s.longform} printing showRoles={false} />
-              ) : s.conclusion || s.longform ? (
+              ) : s.longform ? (
+                <CharacterReadingView site={site} locale={L} reading={s.longform} printing={printing} showRoles={false} />
+              ) : s.conclusion ? (
                 <CharacterConclusionView locale={L}
-                  reading={s.conclusion ?? s.longform!}
-                  label={conclusionLabel(s.longform?.roles.length)}
+                  reading={s.conclusion}
                   idPrefix={`${s.key}-reading`}
                 />
               ) : null}
@@ -174,7 +164,16 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                 </span>
               </span>
             ) : (
-              <UnlockCta locale={L} className="head" place={place} section={s.key} matrixId={matrixId}>
+              <UnlockCta locale={L} className="head" place={place} section={s.key} matrixId={matrixId}
+                unavailable={
+                  <span className="head">
+                    {s.title}
+                    <span className="unlock">
+                      <LockIcon /> {D.report.notOpened[L]}
+                    </span>
+                  </span>
+                }
+              >
                 {s.title}
                 <span className="unlock">
                   <LockIcon /> {D.report.unlock[L]}

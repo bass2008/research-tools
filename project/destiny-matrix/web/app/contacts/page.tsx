@@ -51,16 +51,13 @@ export default async function ContactsPage() {
         <dl className="kv">
           <dt>{D.pages.contactsName[L]}</dt>
           <dd>{LEGAL.entity}</dd>
-          {/* Номера и вид деятельности нужны проверяющему российской кассы: наименование в чеке
-              должно им соответствовать. Там, где кассы нет, нет и строк. */}
+          {/* Номера нужны только там, где есть российская касса; без неё нет и строк. */}
           {LEGAL.inn ? (
             <>
               <dt>{D.pages.contactsTaxId[L]}</dt>
               <dd>{LEGAL.inn}</dd>
               <dt>{D.pages.contactsRegistration[L]}</dt>
               <dd>{LEGAL.ogrnip}</dd>
-              <dt>{D.pages.contactsActivity[L]}</dt>
-              <dd>{D.pages.contactsActivityText[L]}</dd>
             </>
           ) : null}
           <dt>{D.pages.contactsSite[L]}</dt>

@@ -37,11 +37,20 @@ def remember(method: str, path: str, status: int, message: str, trace: str | Non
         log.warning("ошибка не записана: %s", exc)
 
 
-def _trim(db) -> None:
-    db.execute(delete(ErrorLog).where(ErrorLog.at < utcnow() - dt.timedelta(days=KEEP_DAYS)))
+def _trim(db) -> int:
+    removed = db.execute(delete(ErrorLog).where(ErrorLog.at < utcnow() - dt.timedelta(days=KEEP_DAYS))).rowcount
     keep = db.scalars(select(ErrorLog.id).order_by(ErrorLog.id.desc()).limit(KEEP_ROWS)).all()
     if len(keep) == KEEP_ROWS:
-        db.execute(delete(ErrorLog).where(ErrorLog.id < min(keep)))
+        removed += db.execute(delete(ErrorLog).where(ErrorLog.id < min(keep))).rowcount
+    return removed
+
+
+def trim() -> int:
+    # Without new errors the write path never trims, so old rows would stay in the admin forever.
+    with SessionLocal() as db:
+        removed = _trim(db)
+        db.commit()
+    return removed
 
 
 async def watch(request: Request, call_next):

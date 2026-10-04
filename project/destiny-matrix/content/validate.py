@@ -165,6 +165,17 @@ def check_combinations(rep: Report, items: list[dict], arcana: list[dict],
         check_seo(rep, who, c["seo"], min_queries=5)
 
 
+def block_text(paragraph: str | dict) -> str:
+    if isinstance(paragraph, str):
+        return paragraph
+    kind, value = next(iter(paragraph.items()))
+    if kind in ("ul", "ol"):
+        return " ".join(value)
+    if kind == "table":
+        return " ".join([*value["head"], *(cell for row in value["rows"] for cell in row)])
+    return ""
+
+
 def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]) -> None:
     rep.check(len(items) == 38, f"позиций {len(items)}, а нужно 38 (20 разделов + 18 точек)")
     by_key = {p["key"]: p for p in items}
@@ -190,11 +201,16 @@ def check_positions(rep: Report, items: list[dict], prose: list[tuple[str, str]]
             prose.append((f"{who} · глава {section_index} · h2", section.get("h2", "")))
             rep.check(bool(section.get("paragraphs")),
                       f"{who}: у главы {section_index} нет абзацев")
+            # A chapter with tables or lists keeps short lead-ins next to them; 21 is the loader minimum.
+            minimum = 21 if any(not isinstance(p, str) for p in section.get("paragraphs", ())) else MIN_MEANING
             for paragraph_index, paragraph in enumerate(section.get("paragraphs", ()), 1):
-                rep.check(len(paragraph) >= MIN_MEANING,
-                          f"{who}: глава {section_index}, абзац {paragraph_index} короче "
-                          f"{MIN_MEANING} знаков ({len(paragraph)})")
-                prose.append((f"{who} · глава {section_index}, абзац {paragraph_index}", paragraph))
+                if isinstance(paragraph, str):
+                    rep.check(len(paragraph) >= minimum,
+                              f"{who}: глава {section_index}, абзац {paragraph_index} короче "
+                              f"{minimum} знаков ({len(paragraph)})")
+                if block_text(paragraph):
+                    prose.append((f"{who} · глава {section_index}, абзац {paragraph_index}",
+                                  block_text(paragraph)))
         for faq_index, faq in enumerate(item.get("faq", ()), 1):
             rep.check(len(faq.get("q", "")) >= 9, f"{who}: вопрос FAQ {faq_index} слишком короткий")
             rep.check(len(faq.get("a", "")) >= 40, f"{who}: ответ FAQ {faq_index} слишком короткий")
@@ -242,7 +258,7 @@ def check_section_openings(rep: Report, items: list[dict]) -> None:
         if item.get("kind") != "section":
             continue
         for index, chapter in enumerate(item.get("article_sections", ()), 1):
-            paragraphs = chapter.get("paragraphs") or []
+            paragraphs = [p for p in chapter.get("paragraphs") or [] if isinstance(p, str)]
             if not paragraphs:
                 continue
             masked = paragraphs[0].replace(item["title"], "РАЗДЕЛ")

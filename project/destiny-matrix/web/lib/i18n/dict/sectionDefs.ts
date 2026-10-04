@@ -295,7 +295,7 @@ export const sectionDefs = {
     },
   },
   chakras: {
-    title: { ru: "Чакры: карта энергий, толкование семи уровней", en: "Energy map: reading the seven levels" } satisfies Phrase,
+    title: { ru: "Чакры: карта энергий, толкование семи уровней", en: "Chakras: the energy map, reading the seven levels" } satisfies Phrase,
     lead: { ru: "", en: "" } satisfies Phrase,
     rolesTitle: { ru: "", en: "" } satisfies Phrase,
     rolesLead: { ru: "", en: "" } satisfies Phrase,

@@ -15,7 +15,7 @@ import {
   type CharacterRoleReading
 } from "./characterTypes";
 import { forLocale as localizedComfortReading } from "./comfortReading";
-import type { Section } from "./contentReader";
+import type { Paragraph } from "./contentReader";
 import { D } from "./i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
@@ -74,12 +74,8 @@ export interface SectionOut {
   conclusion?: ReadingConclusion;
   /** Сервер вкладывает полный текст в оплаченный/PDF-отчёт; браузер бесплатного расчёта — нет. */
   longform?: LongformReading;
-  /** Для ordered-хвоста отчёт печатает готовую статью дословно, без сборки из трёх арканов. */
-  fullArticle?: {
-    short: string;
-    sections: Section[];
-    faq: Array<{ q: string; a: string }>;
-  };
+  /** Короткая расшифровка ordered-хвоста; полная статья остаётся бесплатной на сайте. */
+  tailReading?: { paragraphs: Paragraph[] };
 }
 
 /** Имя раздела — публичное: оно и в энциклопедии, и в списке «под замком». */

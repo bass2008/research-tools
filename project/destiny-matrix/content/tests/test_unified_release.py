@@ -7,6 +7,8 @@ import json
 import re
 from pathlib import Path
 
+from content.validate import block_text
+
 
 PROJECT = Path(__file__).resolve().parents[2]
 ROOT = PROJECT.parents[1]
@@ -89,7 +91,7 @@ def test_public_url_registry_is_total_unique_and_sitemap_safe():
 
 
 def _ngrams(item: dict, n: int = 5) -> set[tuple[str, ...]]:
-    text = " ".join([item["short"], *(p for section in item["sections"]
+    text = " ".join([item["short"], *(block_text(p) for section in item["sections"]
                                          for p in section["paragraphs"])])
     words = re.findall(r"[а-яёa-z0-9]+", text.lower())
     return set(zip(*(words[offset:] for offset in range(n))))

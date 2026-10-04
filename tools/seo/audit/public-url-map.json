@@ -545,6 +545,22 @@
       "release": "unified"
     },
     {
+      "old_url": "/encyclopedia/chakra/energy-field",
+      "entity_type": "energy_field",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/chakra/energy-field",
+      "sitemap": true,
+      "reason": "каноническая публичная страница",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
       "old_url": "/encyclopedia/chakra/manipura",
       "entity_type": "chakra",
       "index_now": true,

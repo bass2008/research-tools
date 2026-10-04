@@ -16,7 +16,7 @@ export function missingContentRoute(path: string, locale: Lang): boolean {
   }
   switch (section ?? root) {
     case "arcanum": return !/^\d{1,2}$/.test(key) || !content.arcanumContent(Number(key));
-    case "chakra": return !content.chakraContent(key);
+    case "chakra": return key === "energy-field" ? !content.categoryHub(key) : !content.chakraContent(key);
     case "position": return !content.positionContent(key);
     case "combination": return !content.combinationContent(key);
     case "karmic-tail": return !content.karmicTail(key);

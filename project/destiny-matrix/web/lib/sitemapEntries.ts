@@ -7,6 +7,7 @@ import { forLocale as localizedServicePages } from "@/lib/servicePages";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
 import { buildSettings } from "./settings/build";
+import { ENERGY_FIELD_HREF } from "./readingTypes";
 
 // По решению владельца от 27.09.2026 все адреса снова получают общую дату релиза, как до
 // 6abed77 (30.08). Тогда карта была статической и new Date() фиксировалась при сборке.
@@ -30,7 +31,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
   if (!site.indexable) return [];
   const L = site.defaultLocale;
   const { ARCANA } = localizedArcana(L);
-  const { hubKeys, indexedKarmicTailKeys, yearKeys } = localizedContent(L);
+  const { categoryHub, hubKeys, indexedKarmicTailKeys, yearKeys } = localizedContent(L);
   const { indexedRegistryItems, positionArcanumHref } = localizedPositionArcanum(L);
   const { SERVICE_PAGES, servicePages } = localizedServicePages(L);
   const { ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, KARMIC_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, allCombinationSlugs, arcanumHref, chakraHref, hasHubRoute, hubHref, karmicTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
@@ -61,6 +62,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
       priority: 0.75,
     })),
     ...CHAKRA_PAGES.map((c) => ({ url: abs(chakraHref(c.key)), priority: 0.6 })),
+    ...(categoryHub("energy-field") ? [{ url: abs(ENERGY_FIELD_HREF), priority: 0.6 }] : []),
     ...allCombinationSlugs().map((s) => ({
       url: abs(`/encyclopedia/combination/${s}`),
 

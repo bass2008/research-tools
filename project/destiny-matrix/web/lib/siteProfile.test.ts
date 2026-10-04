@@ -78,7 +78,7 @@ describe("one frontend, domain profiles", () => {
     headers.set(PATH_HEADER, "/account");
     expect(renderLocale(headers, com)).toBe("ru");
     headers.set("cookie", "arcana_locale=en");
-    expect(renderLocale(headers, ru)).toBe("ru");
+    expect(renderLocale(headers, ru)).toBe("en");
   });
 
   it("starts with the domain default regardless of browser language", () => {
@@ -91,7 +91,7 @@ describe("one frontend, domain profiles", () => {
     const headers = new Headers({ "accept-language": "en", cookie: "arcana_locale=ru", [PATH_HEADER]: "/api/matrices" });
     expect(selectedLocale(headers, com, true)).toBe("en");
     expect(renderLocale(headers, com)).toBe("en");
-    expect(renderLocale(headers, ru)).toBe("ru");
+    expect(renderLocale(headers, ru)).toBe("en");
   });
 
   it("does not change domain identity when the interface language changes", () => {

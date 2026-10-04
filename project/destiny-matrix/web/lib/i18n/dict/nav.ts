@@ -24,7 +24,6 @@ export const nav = {
     en: "Privacy policy",
   } satisfies Phrase,
   refund: { ru: "Условия возврата", en: "Refund policy" } satisfies Phrase,
-  arcanaEncyclopedia: { ru: "Энциклопедия арканов", en: "Encyclopedia of arcana" } satisfies Phrase,
   // 404
   notFoundTitle: { ru: "Такой страницы нет", en: "This page does not exist" } satisfies Phrase,
   notFoundText: {

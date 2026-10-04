@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import ArcanumCard from "@/components/matrix/ArcanumCard";
 import { ChakraReadingBlock } from "@/components/matrix/ChakraReadingView";
 import RichText from "@/components/ui/RichText";
 import type { Paragraph, Section, Slot } from "@/lib/content";
@@ -6,12 +7,61 @@ import type { Lang } from "@/lib/i18n/lang";
 
 export type Slots = Partial<Record<Slot, ReactNode>>;
 
-function SectionItem({ item, slots }: { item: Exclude<Paragraph, { chakra_reading: unknown }>; slots?: Slots }) {
+// A karmic tail role table: «**M** — вход | 12 · Повешенный | …». Recognised by its cells, so the
+// articles stay plain Markdown tables.
+const ROLE_POINT = /^\*\*([A-Z])\*\*\s*—\s*(.+)$/;
+const ROLE_ARCANUM = /^(\d{1,2})\s*·\s*([^(]+?)\s*(\(.+\))?$/;
+const ROLE_FROM = /^(Откуда число|Where the number comes from)$/;
+const ROLE_IMAGE = /^(Образ|Image)$/;
+
+function isRoleTable({ head, rows }: { head: string[]; rows: string[][] }): boolean {
+  return /^(Аркан|Arcanum)$/.test(head[1] ?? "") && rows.every((row) => ROLE_POINT.test(row[0]) && ROLE_ARCANUM.test(row[1]));
+}
+
+function RoleTable({ head, rows, locale }: { head: string[]; rows: string[][]; locale: Lang }) {
+  return (
+    <div className="tabscroll">
+      <table className="postab roletab">
+        <thead>
+          <tr>{head.map((cell, i) => <th key={i} scope="col">{cell}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((row, r) => {
+            const [, letter, label] = row[0].match(ROLE_POINT)!;
+            const [, n, name, note] = row[1].match(ROLE_ARCANUM)!;
+            return (
+              <tr key={r} data-point={letter}>
+                <td><span className="rt-pt"><span className={`rt-dot p${letter}`}>{letter}</span>{label}</span></td>
+                <td>
+                  <span className="rt-ac">
+                    <ArcanumCard locale={locale} n={Number(n)} size="mini" decorative />
+                    <span><b>{n} · {name}</b>{note ? <span className="rt-note">{note}</span> : null}</span>
+                  </span>
+                </td>
+                {row.slice(2).map((cell, c) => {
+                  const column = head[c + 2] ?? "";
+                  return (
+                    <td key={c} className={ROLE_IMAGE.test(column) ? "rt-img" : undefined}>
+                      {ROLE_FROM.test(column) ? <span className="rt-chip">{cell}</span> : <RichText text={cell} />}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SectionItem({ item, slots, locale }: { item: Exclude<Paragraph, { chakra_reading: unknown }>; slots?: Slots; locale: Lang }) {
   if (typeof item === "string") return <p><RichText text={item} /></p>;
   if ("h3" in item) return <h3>{item.h3}</h3>;
   if ("ul" in item) return <ul>{item.ul.map((text, i) => <li key={i}><RichText text={text} /></li>)}</ul>;
   if ("ol" in item) return <ol>{item.ol.map((text, i) => <li key={i}><RichText text={text} /></li>)}</ol>;
   if ("slot" in item) return <>{slots?.[item.slot] ?? null}</>;
+  if (isRoleTable(item.table)) return <RoleTable head={item.table.head} rows={item.table.rows} locale={locale} />;
   return (
     <div className="tabscroll">
       <table className="postab">
@@ -40,7 +90,7 @@ export function Paragraphs({ items, head, slots, locale }: {
   };
   items.forEach((item, i) => {
     if (typeof item === "string" || !("chakra_reading" in item)) {
-      prose.push(<SectionItem key={i} item={item} slots={slots} />);
+      prose.push(<SectionItem key={i} item={item} slots={slots} locale={locale} />);
       return;
     }
     flush(i);

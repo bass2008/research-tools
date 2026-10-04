@@ -1,100 +1,505 @@
 {
- "key": "9-15-6",
- "entity_type": "karmic_tail",
- "publication": {
-  "index": true,
-  "follow": true,
-  "primary_query": "karmic tail 9 15 6",
-  "exact_frequency": 2614,
-  "reviewed_at": "2026-08-30"
- },
- "title": "Karmic tail 9 15 6 in the destiny matrix: attraction plus solitude add up to The Devil",
- "arcana": [
-  9,
-  15,
-  6
- ],
- "seo": {
-  "title": "Karmic tail 9-15-6: meaning of the karmic program",
-  "description": "Karmic tail 9-15-6: a feeling carried into silence becomes attachment to an image. Explore how to bring the choice back from imagination into conversation.",
-  "queries": [
-   "karmic tail 9 15 6",
-   "9 15 6 destiny matrix tail",
-   "what 9 15 6 means in the matrix",
-   "9 15 6 arcana explained",
-   "destiny matrix love line 9 15 6"
+  "key": "9-15-6",
+  "entity_type": "karmic_tail",
+  "publication": {
+    "index": true,
+    "follow": true,
+    "primary_query": "karmic tail 9 15 6",
+    "exact_frequency": 2614,
+    "reviewed_at": "2026-08-30"
+  },
+  "title": "Karmic tail 9-15-6 in the destiny matrix: a world of passions and fairy tales, a lantern under the cloak and love without veils",
+  "arcana": [
+    9,
+    15,
+    6
+  ],
+  "seo": {
+    "title": "Karmic tail 9-15-6 in the destiny matrix: passions and fairy tales",
+    "description": "9-15-6 is the only one of 26 tails with the Devil in the middle. A ten-second date check, why its centre is always the Empress, how hidden passion becomes a chain.",
+    "queries": [
+      "karmic tail 9 15 6",
+      "9 15 6 destiny matrix tail",
+      "what 9 15 6 means in the matrix",
+      "9 15 6 arcana explained",
+      "destiny matrix love line 9 15 6"
+    ]
+  },
+  "short": "In popular readings of the destiny matrix, the 9-15-6 tail is called “the World of Passions and Fairy Tales”, less often “Passion or Love”. Its script is the double life of desire. The entry is the Hermit (9): whatever truly stirs a person, they first carry off under the cloak — into secrecy, into a daydream, into “this is mine and nobody else’s business”. The mechanism is the Devil (15): what is hidden in the dark gains strength and starts to hold on. An affair on the side, an unavailable person you think about for years, a forbidden pleasure — the links of this chain differ, but it is forged the same way. The root is the Lovers (6): to choose love in the light and stand before another person without veils, that is, to do exactly what the cloak was protecting you from. This is the only one of the 26 tails where the Devil works as the mechanism. It appears for only one sum of the birth-date numbers — 24. And everyone who has it has the same hidden fourth card in the centre of the chart — the Empress, 3. Why this is so, and why the key to the way out lies in her, we look at below.",
+  "sections": [
+    {
+      "h2": "Do you have the 9-15-6 tail? A ten-second check",
+      "paragraphs": [
+        "The tail depends entirely on one number — the sum of the first three arcana of the matrix. So you can find 9-15-6 without a calculator.",
+        {
+          "ol": [
+            "**Day arcanum** — the day you were born. If it is over 22, add its digits: 25 → 7, 29 → 11, 31 → 4.",
+            "**Month** — its number, from 1 to 12.",
+            "**Year arcanum** — the sum of the digits of the year. If the result is over 22, add the digits again: 1986 → 24 → 6, 1987 → 25 → 7."
+          ]
+        },
+        "Add the three numbers. If you get **exactly 24**, you have 9-15-6. Any other sum means you don’t have this tail: there is no other way to it.",
+        {
+          "ul": [
+            "09.09.1986: 9 + 9 + 6 = **24** → 9-15-6.",
+            "25.10.1987: 7 + 10 + 7 = **24** → 9-15-6 (25 → 7, 1987 → 25 → 7).",
+            "08.12.2002: 8 + 12 + 4 = **24** → 9-15-6.",
+            "05.07.1974: 5 + 7 + 21 = 33 → not this one. This is 18-6-6: the same Lovers at the root, but a different tail.",
+            "03.10.2000: 3 + 10 + 2 = 15 → not this one. This is 18-6-15: the same Lovers and Devil and even the same centre, but the roles have swapped places."
+          ]
+        },
+        "Why it works. The sum 24 puts D = 2 + 4 = 6 in the bottom corner of the chart. The centre E = 24 + 6 = 30 → 3. The entry of the tail M = D + E = 6 + 3 = 9, the middle N = D + M = 6 + 9 = 15. The other sums whose digits give 6 — 6, 33, 42 and 51 — lead to a centre of 12 and to a different tail. Going through every date from 1900 to 2100 confirms it: 9-15-6 has one sum and one centre.",
+        {
+          "table": {
+            "head": [
+              "Point",
+              "Arcanum",
+              "How it is derived"
+            ],
+            "rows": [
+              [
+                "E · centre",
+                "3 · The Empress",
+                ""
+              ],
+              [
+                "M · entry",
+                "9 · The Hermit",
+                ""
+              ],
+              [
+                "N · mechanism",
+                "15 · The Devil",
+                ""
+              ],
+              [
+                "D · root",
+                "6 · The Lovers",
+                "bottom corner of the chart"
+              ]
+            ]
+          }
+        },
+        "Sums whose digits add up to 6 give three neighbouring tails. They are often confused:",
+        {
+          "table": {
+            "head": [
+              "Sum of the three numbers",
+              "Tail",
+              "Centre of the chart"
+            ],
+            "rows": [
+              [
+                "24",
+                "**9-15-6**",
+                "3 · The Empress"
+              ],
+              [
+                "15",
+                "18-6-15",
+                "3 · The Empress"
+              ],
+              [
+                "33, 42, 51 (and the rare 6)",
+                "18-6-6",
+                "12 · The Hanged Man"
+              ]
+            ]
+          }
+        },
+        "The same arithmetic leads to facts you will rarely find elsewhere:",
+        {
+          "ul": [
+            "**The tail is “getting younger”.** Since 1900, 9-15-6 has come up in 3.4% of dates — roughly one in thirty, 12th place out of 26. But it is spread very unevenly across generations. Among people born in the 1930s–1960s it occurs in about one in 40, in the 1990s in one in 29, and among those born since 2000 in one in twenty, where it climbs to 9th place. The reason is arithmetic. The sum has to be exactly 24. Years of the 20th century often have a large arcanum (1983 → 21), and the day and month have only 3 left to add — in 1983 there are two such dates. Years of the 2000s have a small arcanum (2002 → 4), and many combinations of day and month reach 24 — in 2002 there are sixteen of them.",
+            "**There are years when the tail goes to a single date.** In 1948, 1957, 1966, 1975, 1984 and 1993 the year arcanum is 22, and only people born on 1 January have 9-15-6. In 1947, 1956, 1965, 1974, 1983 and 1992 (arcanum 21) it is two dates: 2 January and 1 February. And in 1999, 2008, 2017 and 2026 (arcanum 10) it is 21 dates, the maximum. Between 1900 and 2100 there is no year in which nobody gets this tail.",
+            "**This is the only tail with the Devil in the middle.** The Devil appears in four more of the 26 tails, but there it is the entry (15-5-8, 15-8-11, 15-20-5) or the root (18-6-15). Only here does it work as the mechanism — the thing that makes the script repeat.",
+            "**6-15-9 is the same tail.** If you see 6, 15 and 9 on the bottom ray of your chart, you are reading the same tail from the outer corner to the centre. The roles do not change: the Hermit is the entry, the six in the corner is the root."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "Where the names “the World of Passions and Fairy Tales” and “Passion or Love” come from",
+      "paragraphs": [
+        "In the most widespread list of karmic tail names, 9-15-6 is called “the World of Passions and Fairy Tales”. In other readings it is “Passion or Love” or “Passion and Love”. Its past-life legend goes like this: the soul stood before a choice between a lasting relationship with a beloved person and a riot of passions — and chose the passions. In this life the fork supposedly repeats from youth: the first serious relationship — and straight away affairs on the side. The person attracts people “like a magnet”, there is plenty of variety, but they never feel satisfied. Other retellings of the legend are softer: reserve, proud solitude, manipulation in love. It cannot be checked; numbers say nothing about events of the past. But as a metaphor it is accurate: this is how someone lives when their desire has split into “officially” and “in reality”.",
+        "Both names can be derived from the cards themselves.",
+        "**“Passion or Love”** is the lower pair of the tail: the Devil in the middle and the Lovers at the root. Benebell Wen sets these cards apart in one phrase: “Key 6 is about one choice. Key 15 is about being led astray.” And she adds: “If The Lovers presents a choice between virtue and desire, The Devil presents the aftermath of having abandoned virtue and indulged in desire.” The legend of 9-15-6 sounds like a retelling of this thought. Only the tail reads it backwards: from the “aftermath” (the mechanism) back to the choice (the root).",
+        "**“The World of Passions and Fairy Tales”** is a name about the two worlds this tail lives between. The passions are the Devil. The fairy tales are the Hermit’s inner world and the Empress’s garden in the centre of the chart. Wen writes that the Hermit’s lantern can be understood in two ways: as a light for others in the darkness — or as the light by which a person “sees the world through his or her own light”. The fairy tale of this tail is the second: the world as seen by the light of your own lantern.",
+        "There is also a detail from the history of the card itself that is hardly ever mentioned. The picture from the legend — a person at a fork between lasting love and passion — is the old image of the Lovers. In the Marseille decks a young man stands between two women, with Cupid and his bow above them. Waite rejected this scene and called such pictures “the later follies which depicted man between vice and virtue”. In its place his deck, drawn by Pamela Colman Smith, shows two figures “unveiled before each other”. Waite knew nothing about the destiny matrix, and this is no proof of the legend. But the difference between the two pictures describes the path of the tail precisely. The legend tells of a choice between two. The root of the tail asks for something else: not to choose between two, but to open up to one."
+      ]
+    },
+    {
+      "h2": "The garden, the cloak and the chain: how the loop works",
+      "paragraphs": [
+        "If you lay the four cards of this tail side by side and read what Waite writes about them, you find something strange. He describes three of the four through one and the same story — the story of the Garden of Eden.",
+        {
+          "ul": [
+            "**The Empress** in Waite is “the inferior Garden of Eden, the Earthly Paradise”, and the door by which “an entrance is obtained into this life, as into the Garden of Venus”.",
+            "**The Lovers** are a man and a woman “unveiled before each other, as if Adam and Eve when they first occupied the paradise of the earthly body”. Behind them are the Tree of Life and the Tree of Knowledge, with the serpent twined around it.",
+            "**The Devil** shows two figures chained to an altar, “as if Adam and Eve after the Fall”. Waite calls the figure above them the Dweller on the Threshold “without the Mystical Garden when those are driven forth therefrom who have eaten the forbidden fruit”. Wen puts it even more directly: on the Devil card, “The Lovers from Key 6 are chained”.",
+            "And above all this, on a height, stands **the Hermit** with his lantern."
+          ]
+        },
+        "Gathering these cards into one plot is our work, not a rule of the method. But the plot assembles itself: a garden, two people in the garden, the same two in chains outside the wall, and a person on a height with a lantern. **The 9-15-6 tail is the story of paradise lost, told within a single life.** Only here paradise is not lost in one go but bit by bit, and each time through the cloak.",
+        "Below is how it looks step by step. The scene is a sketch and does not describe everyone with this tail.",
+        "**Centre — the Empress: the garden.** Life is in order, and more than that: it has pleasure, beauty, plenty, a body that brings joy. The Empress is the card of fertility and abundance. For Wen the pomegranates on her robe “represent fertility, love, marriage, and passion”, and the pillows she rests on “denote comfort”. This is the comfort zone of 9-15-6: you feel good where your body feels good and where you are wanted. There is nothing wrong with that. The script begins when something comes into the garden that is stronger than its wall can hold.",
+        "**Entry — the Hermit: the cloak.** Something appears that takes your breath away: a person, a correspondence, a passion, a dream. And your first move is to hide it under the cloak. Not necessarily to deceive — more to keep it: “it’s mine”, “first I’ll work it out myself”, “nobody needs to know”. In Waite’s description of the Hermit there is a detail that reads almost like a caption for this tail. In older decks the Hermit’s lantern is half hidden in his cloak. Waite uncovered it, and he argued separately against the reading of the card as “occult isolation, as the protection of personal magnetism against admixture”, calling it one of “the frivolous renderings”. In our reading, the 9-15-6 tail lives by the old version of the card: the light is there, but under the cloak. In Waite’s divinatory list, the Hermit’s “Prudence, circumspection” stand next to “treason, dissimulation”, and reversed, next to “Concealment, disguise… fear”. The Hermit of this tail is not a sage on a mountain but a person with a cloak that hides something.",
+        "**Mechanism — the Devil: the chain.** Under the cloak it is dark, and in the dark the hidden thing grows. Wen notes that on the Devil card “Everything behind the beast and Lovers is black.” Secrecy gives desire an edge: the forbidden is sweeter than the permitted, the rare sweeter than the available. Wen’s Devil is a “preference for instant gratification over delayed gratification”, and you can see that clearly here: the secret is had in snatches and at once, without talking and without tomorrow. Soon it is no longer you keeping the secret but the secret keeping you. You have to remember who you told what, put your phone face down, live by two calendars. The arithmetic of the tail says the same: the Devil here is made of the Hermit and the Lovers, 9 + 6 = 15. Our reading of this sum: **love carried off under the cloak becomes a chain.** And one more detail from Waite: the one exalted above the chained figures “is not to be their master for ever. Even now, he is also a bondsman.” The keeper of a secret is chained to it no less than those it is kept from.",
+        "**Root — the Lovers: the fork.** Sooner or later a double life comes to a fork. The secret comes out, someone sets a condition, or you yourself get tired of living in two homes. This is that very fork from the legend: lasting love or passion. 9-15-6 has two habitual ways of not going through it. The first is to keep both: “I can’t choose”, “I need both”. The second is to lose both: the fork passes by on its own while the decision is put off. The root task is to go through it differently, that is, to choose in the light. Waite’s Lovers are not a choice between two but two people unveiled before each other, and love “before it is contaminated by gross material desire”. In the divinatory list this card has “Attraction, love, beauty, trials overcome”. The trial here is not a ban on passion but what passion is led through.",
+        "**Repeat.** If the fork is sidestepped, the loop starts again. After exposure, a break-up or shame, you want only one thing — to withdraw, let nobody near, “never again”. That is the Hermit again and the cloak again, only now what is hidden under it is not passion but a wound. Time passes, a new strong feeling comes into the garden — and it is carried off under the cloak again.",
+        "**In this tail the chain is forged not from passion but from secrecy.** A passion brought into the light is a strong feeling you can do something about: talk about it, choose, say no. A passion under the cloak decides for you."
+      ]
+    },
+    {
+      "h2": "The Passion, the Fairy Tale and the Cell: one and the same tail",
+      "paragraphs": [
+        "The name “the World of Passions and Fairy Tales” hints that the tail has at least two faces. Life adds a third. All three are one and the same cloak with different things hidden under it.",
+        {
+          "table": {
+            "head": [
+              "",
+              "The Passion",
+              "The Fairy Tale",
+              "The Cell",
+              "The tail lived through"
+            ],
+            "rows": [
+              [
+                "Where desire lives",
+                "in actions the people close to you don’t know about",
+                "in the imagination",
+                "under lock and key",
+                "in a relationship where it can be spoken about"
+              ],
+              [
+                "How it sounds inside",
+                "“you only live once”",
+                "“if only we had met sooner…”",
+                "“I don’t need it”",
+                "“I want this — and I say so”"
+              ],
+              [
+                "What the Hermit hides",
+                "a second life",
+                "a secret love",
+                "himself",
+                "nothing: the lantern is uncovered"
+              ],
+              [
+                "Where the Devil is",
+                "in the chase for the new and the forbidden",
+                "in attachment to the unavailable",
+                "in bans and in judging other people’s passions",
+                "in strength and zest spent openly"
+              ],
+              [
+                "What happens to the choice",
+                "“both”",
+                "the choice is put off until “someday”",
+                "the choice is made in advance: “no”",
+                "a choice with a price, made out loud"
+              ],
+              [
+                "The price",
+                "two lives and not one whole one",
+                "years in the subjunctive mood",
+                "safety without joy",
+                "sometimes you have to give something up"
+              ]
+            ]
+          }
+        },
+        "**The Passion** is the most recognisable form, and it is the one the legend talks about. Desire turns into action: an affair on the side, a string of short flings, the thrill of the new. Satisfaction never comes, because what satisfies is closeness, and there is no closeness with what you hide.",
+        "**The Fairy Tale** is the same passion lived in the imagination. Love for someone who is taken, someone who has moved away, an ex, a person from online whom you have never met. A secret crush lasting years that even its object knows nothing about. Here the other person is seen only by the light of your lantern, and they have no need of reality — it would spoil them. From the outside, the Fairy Tale looks innocent: nothing is actually happening. But the chain holds just as tight, and the years that go by are real.",
+        "**The Cell** is the inverted form. The person once got burnt by their own passion, was frightened by its force — and locked it up. “I don’t need it”, “all these passions are for the weak”, strict rules for oneself and a cold eye on other people’s infatuations. It looks like freedom from the Devil, but it is the same chain, only now it is called principles. Wen links the Devil, among other things, to “antagonism and dogma” and to viewing the world “with extreme negativity, distrust, and faithlessness” — and you can hear this in the Cell.",
+        "The forms easily take turns. After a stormy Passion and its consequences, a person retreats into the Cell. Years later the Fairy Tale knocks on the door of the Cell — safe, because it is out of reach. And when the dream suddenly comes within reach, the Passion wakes up. These are not three different people but one bottom ray of the chart in different years."
+      ]
+    },
+    {
+      "h2": "The hidden fourth card: everyone with 9-15-6 has the Empress in the centre",
+      "paragraphs": [
+        "“9-15-6 with a 3 in the centre” is a frequent question, and the answer is simple: it cannot be otherwise. The sum 24 always gives a centre of 24 + 6 = 30 → 3, so everyone with this tail has the Empress in the centre of the matrix. Apart from 9-15-6, only one other tail out of 26 has the Empress in the centre — 18-6-15, and it too contains the Lovers and the Devil.",
+        "In the method, the centre is the comfort zone: the state a person returns to when nothing is demanded of them. For 9-15-6 it is the garden. Pleasure, beauty, good food, nice things, bodily joy, the feeling that you are admired and desired. Among the images of the Empress, Waite gives this one too: she has been “correctly described as desire and the wings thereof”. Next to her rests a shield with the symbol of Venus. If the legend is right about the “magnet”, then the magnet of this tail is the Empress.",
+        "The tail grows out of the centre. The entry M is the root plus the centre: 6 + 3 = 9. The Hermit of this tail is made of the Lovers and the Empress. Our reading: this is love and the garden that a person fences off and carries inside. **The Hermit of 9-15-6 is the keeper of a secret garden.** After that comes the familiar sum: the secret garden plus love, 9 + 6, gives the Devil.",
+        "But the Empress in the centre is not only the source of the script; she is also the key to it. In Waite’s divinatory list, upright, she has “the unknown, clandestine”. And reversed: “Light, truth, the unravelling of involved matters, public rejoicings”. The reversed position is usually read as the bad one, but here it is the other way round, and nothing could fit this tail better. One card holds both the secret garden and a celebration to which everyone is invited. The task is not to leave the garden and turn to asceticism — that would be the Cell. The task is to open the gate: to live in a garden where you can invite the person you love.",
+        "Wen adds one more theme to the Empress — creativity. For her it is the card of “creativity and creative energy” and of fruition, of plans that come to life. For 9-15-6 this is an important hint. Strong desire needs an outlet. If it has no open and fruitful outlet, it will find a hidden one."
+      ]
+    },
+    {
+      "h2": "Where else 9, 15 and 6 sound in your chart",
+      "paragraphs": [
+        "The tail does not live alone on the bottom ray. Several of its numbers stand in the same places of the chart for everyone who has it, and for some the whole triple repeats.",
+        {
+          "ul": [
+            "**For everyone, the relationship line begins with the Hermit.** Point M, the entry of the tail, is shared in the method with the relationship line M–R1–R. A person with 9-15-6 enters closeness through the same door as the old script: first take a good look, test the ground, keep something back.",
+            "**For those born in 2019 and 2028** (last century, in 1902, 1911 and 1920), the relationship line matches the tail entirely: it is also 9-15-6. For them the tail’s script and the way they build closeness are described by the very same cards.",
+            "**For those born in 1929, 1938, 1947, 1956, 1965, 1974, 1983, 1992, 2001 and 2010** the relationship line is 9-6-15: the same three cards in a different order. The Lovers stand at point R1, which is called “the arcanum under the heart”, and the Devil at point R, where the relationship and money lines cross. In the 20th-century years there are few such people — only two birth dates a year, 2 January and 1 February. In 2001 and 2010 there are fifteen dates each.",
+            "**For those born in June** the personal talent line B–P–K is 6-15-9, the tail backwards. This holds for every June-born person with 9-15-6, without exception. In our reading, what works as a chain in the tail stands as a gift in the talent line: understanding desire from the inside.",
+            "**Chakras.** In the method’s chakra table, everyone with this tail has the same Manipura: 3-3-6, two Empresses and the Lovers in the Emotions column. The energy of Svadhisthana, the chakra of joy and creativity, is 9 for everyone, the Hermit. The energy of Muladhara is 6, the root of the tail."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "A parable from 1843: “Either/Or”",
+      "paragraphs": [
+        "The parallel below is ours, not part of the method’s tradition. But the hint for it comes from Benebell Wen herself. Writing about the Lovers, she recalls Søren Kierkegaard and “an existential choice between two life paths, either one willfully hedonistic or one grounded in our sense of ethical duty”. Kierkegaard described this choice in the book Either/Or (1843), and it can be read as a detailed map of the 9-15-6 tail.",
+        "The first volume is written in the voice of an aesthete — a man who lives for what is interesting and piquant. The volume ends with “The Seducer’s Diary”. Its hero, Johannes, slowly and calculatingly wins the love of young Cordelia, brings things as far as an engagement — and arranges it all so that she breaks it off herself. The preface to the diary says that his life “has been an attempt to accomplish the task of living poetically”. And the diary itself is written “not indicative but subjunctive”. That is the world of passions and fairy tales in one phrase. The passion is the Devil. The subjunctive is the fairy tale. And the private diary in which all this lives, and which nobody knows about, is the Hermit’s cloak.",
+        "The second volume is the letters of Judge William, a married man who answers the aesthete. He defends marriage and says the main thing about choice: what is important in choosing “is not so much to choose the right thing as the energy, the earnestness, and the pathos with which one chooses”. And further: even if a person chose the wrong thing, by virtue of the energy of their choice they will discover that they chose wrongly. For a tail with the Lovers at the root, this is perhaps the best hint of all. The fairy tale and the passion are never wrong, because they choose nothing. Only someone who has chosen can be wrong. But only they can put the mistake right.",
+        "The author’s biography makes the parable even more precise. A year and a half before the book came out, Kierkegaard broke off his engagement to Regine Olsen, whom he loved, and he never married. We won’t bend biographies to fit numbers. Counted by the same scheme, Kierkegaard himself, born on 5 May 1813, has a different tail — 15-20-5. It is not the man who matches but the book. It is about the same fork as 9-15-6: you can spend your whole life writing in the subjunctive, or you can choose and find out what you chose."
+      ]
+    },
+    {
+      "h2": "How 9-15-6 shows up in life",
+      "paragraphs": [
+        "The scenes below are sketches, not a description of everyone with this tail.",
+        {
+          "h3": "In relationships"
+        },
+        "Most often the tail is recognised by four plots.",
+        "**Two lives.** There is a relationship in which everything is “right”, and there is something running alongside it: an affair, a flirtation, an online correspondence, “just a friend” whom for some reason the partner can’t meet. The person sincerely holds on to both worlds and sincerely cannot choose. This is that very fork from the legend, stretched over years.",
+        "**Love for the unavailable.** The strongest pull is towards those you can’t have: the taken, the distant, the cold. Unavailability here is not an obstacle but a condition. Such love lives safely under the cloak: it doesn’t have to be shown to the world or tested by everyday life. Imagine a man who for five years has loved a colleague from another city, sees her twice a year at conferences and in between lives on messages. He is sure this is the love of his life. Perhaps it is. But the only way to find out is to leave the subjunctive mood.",
+        "**Hunger for the new.** A bright beginning, passion, the feeling of “this is it” — and a quick cooling when the other person becomes an ordinary living human being with habits. The legend speaks of exactly this: plenty of variety, but never satisfied. The reason lies in the mechanism. In this tail the edge comes from secrecy and novelty, and in any relationship there is less of both over time.",
+        "**The locked room.** Sometimes the tail shows not in actions but in how the partner feels. Nothing “like that” is going on, but the person with 9-15-6 has a room nobody is let into: their fantasies, their real desires, their loneliness. The partner knocks, gets a polite “everything’s fine”, and over time stops knocking.",
+        "The strong version is the same in all four plots — uncover the lantern. Tell your partner about your desires before you take them to someone else. Choose — and name the price of the choice out loud. Waite’s Lovers stand “unveiled before each other”, and this is not only about nakedness. Two people who have chosen each other have nothing to hide from each other.",
+        {
+          "h3": "In work and money"
+        },
+        "Money, things and pleasures are the natural territory of the Devil and the Empress, so the tail sounds here too. The mechanism is the same: desire goes under the cloak and starts to hold on. Purchases “just for me” that are not mentioned at home. A separate card, a separate account, a debt nobody knows about. Wen notes that the Devil often appears in readings for those “plagued by consumer debt”. The tail does not say that this will happen to you. But if you have a money secret, that is the first place to look.",
+        "Another variant is the golden cage. A job you stopped loving long ago, but which gives you the garden: money, status, comfort. Leaving is frightening; staying means putting on a chain wrapped in something soft every day. Wen describes the Devil as “bondage to the material and superficial”, at the cost of your own growth, and at work it looks exactly like that.",
+        "The same triple also has a strong side in work. The Hermit gives depth and the ability to work alone, long and with focus. The Devil gives strength and drive: in Waite’s divinatory list, next to “fatality”, stand “extraordinary efforts, force”. The Empress gives taste, a sense of beauty and the knack of making things people like. The tail works well where you need to understand human desire from the inside and not moralise: in psychology and counselling, art, design, the beauty industry, food, marketing, research. And where you can become a mentor: Wen sees the Hermit above all as a teacher — “the theme of the card is guidance and mentorship”. The trap at work is the same as in love: secret arrangements, a second job your first one doesn’t know about, an office romance. Whatever is done under the cloak sooner or later starts doing you.",
+        {
+          "h3": "Parents and children"
+        },
+        "If a parent has the tail, the children sense the locked room before they can put it into words. Double standards (“I can, you can’t”), family secrets that “everyone knows but nobody talks about” — for a child this is the first lesson that important things are hidden. The most valuable thing a parent with 9-15-6 can pass on is the experience of an uncovered lantern. In this family you can talk about desires, mistakes and difficult feelings, and nobody is punished for the truth.",
+        "What to do if the child has this tail is covered in the questions section."
+      ]
+    },
+    {
+      "h2": "Secrecy or privacy, passion or love: how to tell them apart",
+      "paragraphs": [
+        "The main difficulty of 9-15-6 is that the cloak is easy to mistake for a right to privacy, and the chain for a great love. The questions below help tell them apart.",
+        "**Privacy or a hiding place:**",
+        {
+          "ul": [
+            "Does what you are hiding concern only you — or do another person’s decisions depend on it? Privacy is your diary. A hiding place holds what would change someone else’s choice if they found out about it.",
+            "Do you have to lie to keep it? Privacy needs only silence; a hiding place needs lies.",
+            "What do you feel when you imagine it being found out: awkwardness or fear? Awkwardness comes from the personal, fear from the chain."
+          ]
+        },
+        {
+          "h3": "Passion or love"
+        },
+        {
+          "ul": [
+            "If the ban disappeared tomorrow — someone’s marriage, the distance, someone’s “you can’t” — would the desire remain? If it rests on the ban, it is the Devil, not the Lovers.",
+            "After you meet, do you feel fuller or emptier?",
+            "Do you want your friends and family to know about your relationship? Love wants the light; secret passion fears it."
+          ]
+        },
+        {
+          "h3": "Desire or chain"
+        },
+        {
+          "ul": [
+            "Can you put it off for a week without much effort?",
+            "How much energy goes not into the pleasure itself but into hiding it?",
+            "Who is choosing — you or it?"
+          ]
+        },
+        {
+          "h3": "Solitude or a cell"
+        },
+        {
+          "ul": [
+            "After time alone, do you come back to people with something — a thought, a decision, warmth — or go even deeper in?",
+            "Is your renunciation of passion calm — or is there a lot of judging of others in it?"
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "What to do with the 9-15-6 tail: eight practices",
+      "paragraphs": [
+        "These are the author’s exercises, derived from the logic of the three cards — not a rite and not a promise of results.",
+        {
+          "ol": [
+            "**An inventory of the secret garden.** Write down everything in your life that lives under the cloak: people, correspondence, spending, habits, dreams. Next to each item put one of two words — “private” or “secret” — using the questions from the section above. Nothing needs to be done about the private. The secret ones are the links of the chain, and now you know exactly how many there are.",
+            "**One witness.** Choose one person you can tell about the secret: a friend, a psychologist, someone outside the situation. The Devil needs darkness — no wonder Wen points out that everything behind the figures on his card is black. Said out loud, it loses half its power and becomes what it was from the start — a strong feeling you can do something about.",
+            "**A day between the spark and the action.** The Devil is instant gratification, and the Hermit knows how to wait. Make a deal with yourself: anything born of sudden attraction — a message at midnight, a purchase, a meeting — happens no sooner than a day later. If after a day you still want it, do it openly. This way the Hermit’s restraint, which used to hide things, starts giving you time to think.",
+            "**The permission test.** Ask yourself: would I want this if it were allowed and everyone knew about it? A desire that survives permission is yours. A desire that fades without the ban belongs to the secret, not to you.",
+            "**Let them into the garden.** Take your desires to where they can be lived openly — into your relationship. Tell your partner about fantasies, about what is missing, about what pulls at you. It is scarier than hiding. But only this way does the Devil become the Lovers again: the same force, only in the light.",
+            "**A choice with energy.** If you are standing at a fork, set a date for the decision. Remember Judge William: what matters is not so much choosing without error as choosing in earnest. A wrong choice made in earnest will in time show its mistake. Not choosing will show nothing — it will just extend the loop.",
+            "**Passions as an open affair.** The Devil’s force needs a legitimate outlet, or it will find a hidden one. Dance, sport, creative work, a big project where you can burn and everyone knows it. The Empress in the centre points the direction — create. Passion put into work does not disappear; it starts to bear fruit.",
+            "**Know where work with the tail ends.** If something holds you so that you cannot stop, even when it harms you or the people close to you, this is no longer a topic for self-observation by numbers. Here you need help from a professional: a psychologist, a psychotherapist, an addiction specialist. A reading of the tail gives you a language for watching yourself, but it does not replace help."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "The strength of 9-15-6: a garden with an open gate",
+      "paragraphs": [
+        "In its lived-through version this tail gives a rare combination. Depth and the ability to be with yourself — the Hermit. The force of desire and the knowledge of how it works, without prudishness — the Devil. The ability to choose and stand by the choice — the Lovers. And a taste for life, for beauty, the body, pleasure and fruits — the Empress. Such a person is not afraid of other people’s passions and does not lecture them about them. They know the chain from the inside and so can see clearly where someone has love and where a hook. People come to them for advice on the things that are usually kept quiet.",
+        "Waite left this tail three hints. In the Devil’s divinatory list there is a phrase worth remembering for everyone with 9-15-6: “that which is predestined but is not for this reason evil”. The force you know in yourself is not a vice but material. Of the attraction embodied on the Lovers card by the woman at the Tree of Knowledge, Waite writes that she is “rather the working of a Secret Law of Providence than a willing and conscious temptress”, and that it is “through her imputed lapse that man shall arise ultimately”. The fall here is part of the way, not its end. And finally, the Hermit. In Waite he holds the lantern uncovered, on a height, and the meaning of his light is “where I am, you also may be”.",
+        "**The lived-through 9-15-6 is a garden with an open gate and a lantern no longer hidden under the cloak.** The passion does not go anywhere. It simply stops being a secret and becomes love chosen in the light."
+      ]
+    },
+    {
+      "h2": "What this reading is based on",
+      "paragraphs": [
+        {
+          "ul": [
+            "**Calculation** — the classic destiny matrix scheme with points A–T: D = A + B + C, E = A + B + C + D, M = D + E, N = D + M; every sum over 22 is reduced by adding its digits. All the numerical facts in the article were obtained by going through every date: the single sum 24, the constant centre 3, frequencies by year and generation (from 1 January 1900 to 4 October 2026), matches with the relationship and talent lines, and the absence of the tail under the “minus 22” rule (from 1900 to 2100).",
+            "**Card meanings** — A. E. Waite, The Pictorial Key to the Tarot (1910, reissued 1922) and Benebell Wen, Holistic Tarot (2015). Quotations are given in the original English. Waite’s divinatory meanings are taken from Part III of his book and are always marked as the divinatory list, separate from his reading of the symbolism.",
+            "**Kierkegaard** — Either/Or (1843): “The Seducer’s Diary” from the first volume and Judge William’s letters from the second. Quotations follow the English edition. The link between the Lovers and Kierkegaard is Wen’s; the parallel between the book and the tail is ours.",
+            "**The names “the World of Passions and Fairy Tales” and “Passion or Love” and the past-life legend** come from popular interpretations of the destiny matrix. Neither Waite nor Wen wrote about the matrix or karmic tails. Assembling the three cards into a script, reading the Garden of Eden through four cards, the forms of the Passion, the Fairy Tale and the Cell, and the practices are the author’s interpretation.",
+            "This is an esoteric model for self-observation, not a forecast and not a substitute for a psychologist’s help. If a relationship involves violence, threats or coercion, the cause is not the tail and not you: what is needed is real help, not work with numbers."
+          ]
+        }
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "q": "What happened in the past life of a person with the 9-15-6 tail?",
+      "a": "Popular interpretations speak of a fork: the soul supposedly chose between a lasting relationship with a beloved person and a riot of passions — and chose the passions. In other versions it is a life of reserve and proud solitude, or manipulation in love. This is a legend of the tradition: neither numbers nor cards establish events of past lives. It is more useful to read it as a description of what you can notice right now: a habit of hiding strong desire and putting off a choice until it makes itself."
+    },
+    {
+      "q": "Does 9-15-6 mean I will cheat or be cheated on?",
+      "a": "No. The tail is three numbers from a birth date; it does not predict events. It describes a mechanism: strong desire is carried off under the cloak and gains power there. Cheating is only one form of this mechanism, and far from the most common. Much more often it is a secret crush, an unavailable person, a part of life closed to the partner or, the other way round, a strict ban on your own desires. Many people with 9-15-6 are faithful all their lives — and still recognise themselves in this tail."
+    },
+    {
+      "q": "Is the 9-15-6 tail only about love and sex?",
+      "a": "No. It sounds brightest in love, because the Lovers stand at the root and the Empress in the centre. But the Devil is the card of any unfreedom: money, food, games, work, status, the phone. The mechanism is the same everywhere: it pulls — I hide it — it holds me. Is the tail linked to addictions? Numbers cannot tell whether you have an addiction, and they do not predict one. But if something in your life already lives under the cloak and won’t let go, this tail advises starting right there."
+    },
+    {
+      "q": "I have 9-15-6 and a 3 in the centre — what does it mean?",
+      "a": "It is not a coincidence or a special case but a rule: everyone with 9-15-6 has 3, the Empress, in the centre of the matrix. The tail only occurs with the sum 24, and that always gives a centre of 30 → 3. The Empress is the comfort zone of this tail: pleasure, beauty, abundance, feeling desired. The script grows out of her, and the key to the way out lies in her too: not to leave the garden but to open the gate. More in the section on the hidden fourth card."
+    },
+    {
+      "q": "Are 9-15-6 and 6-15-9 the same tail?",
+      "a": "If 6, 15 and 9 stand on the bottom ray of your chart, it is the same tail read from the outer corner to the centre. The roles do not change: the Hermit is the entry, the six in the corner is the root. There is no separate karmic tail 6-15-9: a nine in the bottom corner gives only the tails 9-18-9 and 18-9-9. The triple 6-15-9 does occur in other lines of the chart — for example, as the talent line of everyone with 9-15-6 born in June. There it is read by the roles of its own line."
+    },
+    {
+      "q": "How is 9-15-6 different from 18-6-15 and 18-6-6?",
+      "a": "All three have the Lovers, and they are often confused. 18-6-15 (“the Dark Magician” in popular lists) is the closest relative: the same centre, the Empress, the same Lovers and Devil. But the order is reversed. In 18-6-15 the Lovers are the mechanism and the Devil the root: love seen by the light of the Moon leads to a chain, and the task is to break free of what already holds you. In 9-15-6 the Devil is the mechanism and the Lovers the root: the chain leads back to love, and the task is to choose. 18-6-6 (“Love Magic”) shares its root with 9-15-6, but its entry is the Moon and its centre the Hanged Man. It is a story about love for an image and about waiting, not about secrecy and a double life. All three come from different sums: 9-15-6 from 24, 18-6-15 from 15, 18-6-6 from 33, 42 or 51."
+    },
+    {
+      "q": "Is the Devil in the tail a curse or “dark” karma?",
+      "a": "No. The numbers in the matrix are calculated from the birth date and cannot show that someone has performed a ritual on you or that a “dark” force lies on you. The Devil here is a symbol, not a creature. Wen writes plainly that “The Devil is not a literal beast or demon” but a personification of human selfishness, and that the card “does not necessarily mean the Seeker is entirely to blame”. And in Waite’s divinatory list for the Devil there is a reservation: “that which is predestined but is not for this reason evil”. The tail shows where the script switches on; it does not pass a sentence."
+    },
+    {
+      "q": "Is 9-15-6 different for women and men?",
+      "a": "No. Sex plays no part in the calculation, and the meaning of the tail does not depend on it. Popular readings like to split it into “a woman drawn to fatal men” and “a man who can’t choose”, but these are stereotypes, not arithmetic. The Passion, the Fairy Tale and the Cell occur in everyone — and often in one person in different years."
+    },
+    {
+      "q": "Why doesn’t another calculator show 9-15-6 for me?",
+      "a": "It comes down to the reduction rule. In the classic scheme a sum over 22 is reduced by adding its digits: 24 → 6. Some calculators subtract 22 from it instead: 24 → 2. Under that rule the 9-15-6 tail never occurs at all, for any date: there a six in the bottom corner always gives a centre of 12 and an entry of 18. So if one calculator showed you 9-15-6 and another did not, the second one is simply counting by a different rule. The classic result is easy to check by hand: the day arcanum, the month and the year arcanum must add up to exactly 24."
+    },
+    {
+      "q": "Is 9-15-6 in the money line or the relationship line a tail too?",
+      "a": "No. A karmic tail is only the triple on the bottom ray in the order M–N–D. The same numbers in the money line L–R2–R or the relationship line M–R1–R are the programme of that channel, and they are read by its roles. In the money line the triple 9-15-6 appears for about 1.7% of dates, and none of them has the same tail. In the relationship line it matches the tail only for people born in years with arcanum 12: in 2019 and 2028, and last century in 1902, 1911 and 1920. Then the tail’s theme and the way of building closeness are described by the same cards, and the practices in this article apply to both."
+    },
+    {
+      "q": "Can the 9-15-6 tail be “closed”?",
+      "a": "The numbers are calculated from the birth date and do not change. What changes is how the script is played out. Signs of a lived-through tail: nothing is left under the cloak that someone else’s choice depends on. You talk about your desires with the person you love, not with the one you hide them from. You go through forks by naming the choice and its price out loud. Solitude for you is a place you come back from, not a place to hide. Then the tail remains a description of strengths, not a story that repeats."
+    },
+    {
+      "q": "What should I do if my child has 9-15-6?",
+      "a": "The question is not a rare one: among those born after 2000, about one in twenty has this tail. In 2026 the year arcanum is 10, so the tail goes to children whose day arcanum and month add up to 14. That is 21 dates: 13 January, 12 February, 11 and 29 March, 10 and 28 April, 9 and 27 May, 8 and 26 June, 7 and 25 July, 6 and 24 August, 5 and 23 September, 4 and 31 October, 3 and 30 November, 2 December. A child with 9-15-6 especially needs three things. The first is a right to privacy: their own room, their own diary, their own thoughts that nobody pries into without asking. The Hermit needs quiet, and if it is taken away by force, the child will learn to hide. The second is a right to the truth without punishment: “you can tell me anything, and I won’t shout”. The safer it is to talk, the less the cloak is needed. The third is a calm attitude to desires: to sweets, toys, the body, first crushes. Without shame, but with the ability to wait. A child who is shamed for wanting things risks learning to hide them — and that is the very entry into the loop of this tail."
+    }
+  ],
+  "related": [
+    "18-6-15",
+    "15-20-5",
+    "15-5-8",
+    "15-8-11",
+    "arcanum/9",
+    "arcanum/15",
+    "arcanum/6"
+  ],
+  "intro": [
+    {
+      "table": {
+        "head": [
+          "Position",
+          "Arcanum",
+          "Where the number comes from",
+          "Role in the script",
+          "Image"
+        ],
+        "rows": [
+          [
+            "**M** — entry",
+            "9 · The Hermit",
+            "D + E = 6 + 3",
+            "carry what is most alive off under the cloak: into secrecy, daydreams, solitude",
+            "a lantern half hidden by a cloak"
+          ],
+          [
+            "**N** — mechanism",
+            "15 · The Devil",
+            "D + M = 6 + 9",
+            "what is hidden gains strength and starts to hold on",
+            "two people in chains outside the garden wall"
+          ],
+          [
+            "**D** — root",
+            "6 · The Lovers",
+            "the sum of the first three numbers: 24 → 6",
+            "choose love in the light and open up to one person",
+            "two people unveiled before each other"
+          ],
+          [
+            "**E** — centre of the chart",
+            "3 · The Empress",
+            "24 + 6 = 30 → 3",
+            "the same for everyone with this tail: a garden of pleasure as the comfort zone",
+            "an earthly paradise, a ripening field, pomegranates"
+          ]
+        ]
+      }
+    }
+  ],
+  "report": [
+    "The scene behind the 9-15-6 legend is one Waite kept out of his deck. As the legend has it, in a past life the soul chose between lasting love and a riot of passions — and chose the passions. Hence the tail’s names, “Passion or Love” and “the World of Passions and Fairy Tales”. The legend cannot be checked: numbers say nothing about past lives. But a person at a fork between two is the old image of the Lovers, the card at the root of the tail.",
+    "Waite dismissed such scenes as “the later follies which depicted man between vice and virtue” and his deck, drawn by Pamela Colman Smith, shows instead two figures “unveiled before each other”. He knew nothing of the destiny matrix, yet the contrast between the two pictures maps the tail’s path exactly. The legend is about choosing between two. **The root of the tail asks for something else: opening up to one.**",
+    "Benebell Wen sets the Lovers and the Devil apart in one phrase: “Key 6 is about one choice. Key 15 is about being led astray.” Her Devil is “the aftermath of having abandoned virtue and indulged in desire”. The tail reads this backwards: the Devil sits in the middle, the Lovers at the root, and the path runs from the aftermath back to the choice.",
+    {
+      "h3": "Paradise lost within a single life"
+    },
+    "Everyone with 9-15-6 has the Empress in the centre of the chart — the hidden fourth card of the tail. Waite describes three of these four cards through a single story: Eden. His Empress is “the inferior Garden of Eden, the Earthly Paradise”. The Lovers are two figures, “as if Adam and Eve when they first occupied the paradise of the earthly body”. The Devil is two figures in chains, “as if Adam and Eve after the Fall”. Wen is blunter: “The Lovers from Key 6 are chained”. Above the garden, on a height, stands the Hermit with his lantern.",
+    "Gathering the cards into one plot is our reading, but it assembles itself: a garden, two people in it, the same two chained outside the wall, and a figure on a height with a lantern. **The 9-15-6 tail is the story of paradise lost, told within a single life.** Only here it is lost bit by bit, and each time through the cloak.",
+    {
+      "h3": "The chain is forged from secrecy, not passion"
+    },
+    "The Empress’s garden holds pleasure, beauty, a body that brings joy. The script starts when something stronger than the garden wall comes in: a person, a correspondence, a dream. The first move is to carry it off under the cloak. Not necessarily to deceive — rather to keep it: “it’s mine”, “nobody needs to know”.",
+    "Waite gives a detail that reads like a caption for this tail. In older decks the Hermit’s lantern is half hidden in his cloak. Waite uncovered it and called the idea that the card means “occult isolation” one of “the frivolous renderings”. In our reading, 9-15-6 lives by the old version of the card: the light is there, but under the cloak. Waite’s divinatory list puts the Hermit’s prudence right next to “treason, dissimulation”.",
+    "Under the cloak it is dark, and the hidden thing grows. Wen’s Devil is a “preference for instant gratification over delayed gratification”: the secret is taken in snatches and at once, without talk and without tomorrow. Soon the secret keeps the person, not the reverse: remembering who was told what, putting the phone face down, living by two calendars. This tail’s Devil is in fact made of the Hermit and the Lovers: 9 + 6 = 15. **Love carried off under the cloak becomes a chain.**",
+    "Different things hide under the cloak. The Passion is an affair on the side and the thrill of novelty, which never satisfies: closeness satisfies, and there is no closeness with what is hidden. The Fairy Tale is the same passion lived in the imagination: years of loving someone taken, someone who moved away, someone known only from messages. Nothing happens, but the years are real. The Cell is a passion that once burned and got locked away: “I don’t need it”, and a cold eye on other people’s infatuations. The same chain, only called principles. After exposure or a break-up comes the urge to withdraw — “never again” — and the loop restarts, now with a wound under the cloak.",
+    {
+      "h3": "Only someone who chooses can be wrong"
+    },
+    "Sooner or later a double life hits a fork, usually sidestepped in one of two ways: keeping both, or losing both while the decision waits.",
+    "Writing about the Lovers, Wen recalls Kierkegaard and the choice between a hedonistic life and one of ethical duty. The parallel with the tail is ours. The first volume of his “Either/Or” speaks in the voice of an aesthete and ends with “The Seducer’s Diary”, written “not indicative but subjunctive” — the world of passions and fairy tales in one phrase. In the second volume Judge William, a married man, answers the aesthete: what is important in choosing “is not so much to choose the right thing as the energy, the earnestness, and the pathos with which one chooses”. A wrong choice made in earnest will in time reveal its mistake. The fairy tale and the passion are never wrong: they choose nothing.",
+    {
+      "h3": "The key lies in the card the script grew from"
+    },
+    "In Waite’s divinatory list the Empress upright has “the unknown, clandestine”, and reversed, “Light, truth, the unravelling of involved matters, public rejoicings”. One card holds both the secret garden and a celebration open to all. The task is to open the gate: to live in a garden where a loved one can be invited in.",
+    "The cloak is easy to mistake for a right to privacy. But a hiding place holds what would change someone else’s choice if it came out. **Privacy needs only silence; a hiding place needs lies.** Hence a few practices:",
+    {
+      "ul": [
+        "Test a desire by permission: would it survive being allowed and known to all? A desire that fades once the ban is gone belongs to the secret, not to the person.",
+        "Tell one witness outside the situation — a friend or a psychologist. Said out loud, the secret loses half its power.",
+        "Put a day between spark and action: a midnight message, a purchase, a meeting can wait until tomorrow, and then happen openly.",
+        "Bring desires into the relationship and tell the partner before anyone else. This is how the Devil becomes the Lovers again — the same force, only in the light."
+      ]
+    },
+    "If stopping is impossible even when it hurts oneself and loved ones, that calls for a psychologist or an addiction specialist. If a relationship involves violence, threats or coercion, the cause is not the tail: what is needed is real help.",
+    {
+      "h3": "A garden with an open gate"
+    },
+    "In the lived-through version, a person knows the chain from the inside, does not lecture others on their passions, and sees where someone has love and where a hook. People bring them the questions that usually go unspoken.",
+    "Waite’s divinatory list for the Devil holds a line for everyone with 9-15-6: “that which is predestined but is not for this reason evil”. The force of desire is not a vice but material. **The lived-through 9-15-6 is a garden with an open gate and a lantern no longer hidden under the cloak.** The passion does not go away. It stops being a secret and becomes love chosen in the light."
   ]
- },
- "short": "Karmic tail (karmic program) 9-15-6 comes in through The Hermit: a strong response is carried off into silence instead of live contact. The Lovers ask for a clear choice, while The Devil holds the repeat in place, turning an unspoken feeling into attachment to an image. The whole triple describes how a response is converted into a leash — and the point where the pull can still be brought back from imagination to a real person.",
- "sections": [
-  {
-   "h2": "Passion lived alone thickens into attachment",
-   "paragraphs": [
-    "The Lovers need an answer: their energy catches fire on resonance, on a returned look and mutual liking, and they need a living union outside, in real contact. But The Hermit does not carry feeling outwards — depth needs solitude, and he takes the pull into silence: think it over, “sort myself out first”, understand it fully before making a move. Instead of a live connection tested in practice, you get a feeling that grows behind a closed door.",
-    "And a feeling that lives inside and is never checked against a real relationship does not burn out — it concentrates. This is the very place where the attraction of The Lovers tips over into The Devil: a pull never spent in real contact becomes a fixation. It has nothing to feed on and nothing to cool against, so it grows stronger on empty ground. The Hermit gave solitude; attraction left alone with no way out became The Devil."
-   ]
-  },
-  {
-   "h2": "Why a pull towards people plus withdrawal gives The Devil",
-   "paragraphs": [
-    "The core of this triple is visible in the formula for the middle position: M 9 The Hermit plus D 6 The Lovers give N 15 The Devil. At the root, The Lovers ask “whom or what do I choose”; at the entry, The Hermit carries what was felt into silence. Between them The Devil is not the outcome but the holding mechanism — an attraction that thickens without a live check and starts running the choice.",
-    "So 9-15-6 is not a mixed bag of a “strong” card and a “heavy” one, but a single chain of cause and effect. By nature the pull of The Lovers points outwards, towards another person. The Hermit turns it inwards. And attraction that draws you to people yet is lived alone cannot stay light — it thickens into a pull that owns you. The Devil here is not an extra “dark” trait of character but the name of a result: what a union turns into when it is never brought out into the light."
-   ]
-  },
-  {
-   "h2": "The circle: response, withdrawal, hook",
-   "paragraphs": [
-    "The whole triple folds into one self-reinforcing turn, and each new circle pulls harder than the one before:",
-    "1. A response flares up. Someone answers — a look, a liking, a “yes” coming back — and The Lovers light up: “there he is, my person”.",
-    "2. The feeling goes inwards. Instead of bringing it into a conversation and testing it in live contact, The Hermit carries it off into silence: think, go deeper, “I will understand it myself first”. The step towards the other person is put off.",
-    "3. The image grows stronger with nothing to check it. Alone there is nobody to object and nothing to test against. Imagination finishes the other person off — into an ideal or into a threat — and the pull now grows on that image, not on a living person.",
-    "4. The pull becomes a hook. A feeling never taken outside is never satisfied — and never lets go. That is The Devil: a person is tied, but not together with anyone. There is less and less freedom, still no union, and the unfed hunger drives them to look for a response again — back to step 1, now more dependent on whatever they are drawn to.",
-    "And here is the price The Devil takes: with every turn more strength goes into holding on to something that gives no closeness. The point where the circle is still easy to break is between step 1 and step 2, while the feeling is fresh and can still be carried outside. Once it has gone off to be finished in silence, the next retreat inwards already looks like the only sensible move."
-   ]
-  },
-  {
-   "h2": "In love with an image, not a person",
-   "paragraphs": [
-    "Since the feeling grows in solitude, it sticks to a picture put together inside, not to whoever is actually there. Idealisation and jealousy feed from one root — a story finished off in silence. The real person either falls short of the image or seems to betray it, although they know neither the image nor the story. That is how delight and suspicion live side by side inside one feeling, both built without the other person taking part.",
-    "At the same time The Lovers still pull towards a live response, so the person moves closer, then, frightened for the image, backs away into The Hermit. From outside it looks like a swing of “hot and cold out of nowhere”. Neither the idealising nor the jealous pulling-back can be pinned on one arcanum: The Lovers give the other person value, The Hermit takes them away to be finished off alone, The Devil chains you to the finished version. The story is born exactly at their joint."
-   ]
-  },
-  {
-   "h2": "Where the leash of this triple breaks",
-   "paragraphs": [
-    "The way out is not to unlearn falling in love or to stop going deep — attraction and a capacity for silence stay your strength. The circle has to be broken at its weak spot: do not let the pull go inwards and fuse with an image there. In practice that is three habits, and all three hit the joint between the arcana rather than each one separately.",
-    "Bring the feeling into contact while it is alive. The moment you want to “sort it out myself first and speak later”, that is The Hermit taking the attraction inside. Liking, hurt and jealousy are worth saying out loud in real contact before you finish the story in your head. A living person almost never matches the image built in silence, and that mismatch sets you free.",
-    "Check the image against the person. If you catch yourself at “he must have thought…”, “there is definitely something more between us”, that was assembled alone. One direct question or one simple shared experience puts the real person back where the invented one stood and brings down half the story.",
-    "Tell a pull apart from closeness. The Devil mixes up “I cannot let go” with “we are good together”. A simple check: does the attraction give you closeness and freedom, or does it hold you and drain your strength? If it is the second, this is a leash and not a union, and what holds you is the image, not the person.",
-    "Not one of these steps is heroic. The circle breaks not through willpower but through the habit of spending attraction in live contact before it thickens inside."
-   ]
-  }
- ],
- "faq": [
-  {
-   "q": "Are 9-15-6 and 6-15-9 the same tail or two different ones?",
-   "a": "Entry M — arcanum 9, The Hermit: a strong response is carried into solitude instead of conversation. Middle N — arcanum 15, The Devil: an untested feeling becomes attachment to an inner image. Root D — arcanum 6, The Lovers: the root task is to choose in a living encounter where the other person can actually respond. Rearranging the numbers changes these roles; it is not another spelling of the same program."
-  },
-  {
-   "q": "Is this always about love addiction?",
-   "a": "No. The triple sounds loudest in relationships, because The Lovers are about people. But The Devil is a pull towards anything: money, work, status, an object. The same mechanism — it draws you, sends you off to feel it alone, fuses you with the object — repeats anywhere a strong response is invested. The object changes, the circle stays the same."
-  },
-  {
-   "q": "Does The Devil in a tail mean a curse or dark magic?",
-   "a": "No. The arcanum has a dark reputation because of its name, but there is nothing mystical in the problem this tail describes and nothing to be scared of. The Devil here is attraction that has become the master: a pull lived through on the inside and therefore impossible to release. A karmic tail is a repeating script handed down the family line, which keeps turning until you live through it consciously. Being conscious of it means seeing the mechanism, not believing in a curse."
-  },
-  {
-   "q": "How do I begin working through 9-15-6?",
-   "a": "With one point: notice the moment when, after a flash of liking or jealousy, you go off to live through it alone instead of talking. That is where the response of The Lovers is taken inside and starts thickening into the pull of The Devil. After that: bring the feeling into live contact while it is small, and check the image you have built against the real person."
-  }
- ],
- "related": [
-  "18-6-15",
-  "15-20-5",
-  "15-5-8",
-  "15-8-11",
-  "arcanum/9",
-  "arcanum/15",
-  "arcanum/6"
- ]
 }

@@ -72,7 +72,7 @@ def test_global_404_html_keeps_domain_language_without_javascript(browser, origi
         for robots in page.locator('meta[name="robots"]').all():
             expect(robots).to_have_attribute("content", re.compile("noindex"))
         if locale == "ru":
-            expect(page.locator(".language-switch")).to_have_count(0)
+            expect(page.locator(".language-switch")).to_have_text("English version")
         else:
             assert not re.search("[А-Яа-яЁё]", page.locator("body").inner_text().replace("Русская версия", ""))
     finally:

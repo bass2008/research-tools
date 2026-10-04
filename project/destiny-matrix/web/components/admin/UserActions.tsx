@@ -2,11 +2,10 @@
 
 import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
 
-// Действия над чужим аккаунтом. Списком, а не рядом кнопок: их уже два, и в строке таблицы
-// каждая новая кнопка съедает колонку с данными.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import ActionsMenu from "@/components/admin/ActionsMenu";
 import { ApiError, type AdminUser } from "@/lib/api";
 import { type Sex } from "@/lib/matrix";
 import { exampleDay } from "@/lib/today";
@@ -26,7 +25,6 @@ export default function UserActions({ user, onGranted }: {
   onGranted?: () => void;
 }) {
   const { t, api, MONTHS_ACC, daysInMonth, toIso } = useAdminLocale();
-  const [open, setOpen] = useState(false);
   const [granting, setGranting] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useAdminMessage();
@@ -36,58 +34,22 @@ export default function UserActions({ user, onGranted }: {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(1990);
   const [sex, setSex] = useState<Sex>("f");
-  const box = useRef<HTMLDivElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
-  // Координаты меню считаем от кнопки: список живёт в body, потому что обёртка таблицы прокручивает
-  // содержимое, и внутри неё выпадашка обрезалась нижней границей — её просто не было видно.
-  const [at, setAt] = useState<{ top: number; right: number } | null>(null);
   // Окно уезжает в body порталом: ячейка таблицы прилипшая, а прилипшая ячейка создаёт свой
   // контекст наложения — модалка внутри неё оказывалась под кнопками соседних строк.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Клик мимо закрывает меню: без этого открытых списков в таблице набирается сколько угодно.
-  // Меню вынесено в body, поэтому «мимо» — это мимо и кнопки, и самого списка.
+  // Escape закрывает окно: без этого модалку приходилось закрывать мышью.
   useEffect(() => {
-    if (!open) return;
-    const away = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (box.current?.contains(target)) return;
-      if ((target as HTMLElement).closest?.(".actions-menu")) return;
-      setOpen(false);
-    };
-    // При прокрутке меню обязано ехать за кнопкой: оно в body и позиционируется от окна.
-    // Закрывать по scroll нельзя — таблица прокручивается от самого клика, и меню закрывалось
-    // в тот же миг, в который открылось.
-    const follow = () => {
-      const rect = trigger.current?.getBoundingClientRect();
-      if (rect) setAt({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
-    };
-    document.addEventListener("mousedown", away);
-    window.addEventListener("scroll", follow, true);
-    window.addEventListener("resize", follow);
-    return () => {
-      document.removeEventListener("mousedown", away);
-      window.removeEventListener("scroll", follow, true);
-      window.removeEventListener("resize", follow);
-    };
-  }, [open]);
-
-  // Escape закрывает то, что открыто: сперва окно, иначе меню. Без этого модалку приходилось
-  // закрывать мышью, а привычка нажать Escape ничего не делала.
-  useEffect(() => {
-    if (!open && !granting) return;
+    if (!granting) return;
     const escape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (granting) setGranting(false);
-      else setOpen(false);
+      if (event.key === "Escape") setGranting(false);
     };
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
-  }, [open, granting]);
+  }, [granting]);
 
   const enter = async () => {
-    setOpen(false);
     const ok = window.confirm(
       t("Войти под {0}?\n", user.email) +
         t("Ваша админская сессия закроется — вернуться можно только своим входом.\n") +
@@ -125,39 +87,11 @@ export default function UserActions({ user, onGranted }: {
   };
 
   return (
-    <div className="actions" ref={box}>
-      <button
-        type="button"
-        className="btn ghost sm"
-        data-testid="user-actions"
-        ref={trigger}
-        aria-expanded={open}
-        disabled={busy}
-        onClick={() => {
-          const rect = trigger.current?.getBoundingClientRect();
-          if (rect) setAt({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
-          setOpen((was) => !was);
-        }}
-      >
-        {t("Действия ▾")}</button>
-      {open && mounted && at ? createPortal(
-        <div className="actions-menu" role="menu" style={{ top: at.top, right: at.right }}>
-          <button type="button" role="menuitem" data-testid="action-impersonate" onClick={enter}>
-            {t("Войти")}</button>
-          <button
-            type="button"
-            role="menuitem"
-            data-testid="action-grant"
-            onClick={() => {
-              setOpen(false);
-              setDone(null);
-              setGranting(true);
-            }}
-          >
-            {t("Добавить матрицу")}</button>
-        </div>,
-        document.body,
-      ) : null}
+    <div className="actions">
+      <ActionsMenu testId="user-actions" busy={busy} actions={[
+        { label: t("Войти"), testId: "action-impersonate", onSelect: enter },
+        { label: t("Добавить матрицу"), testId: "action-grant", onSelect: () => { setDone(null); setGranting(true); } },
+      ]} />
 
       {granting && mounted ? createPortal(
         <div className="modal-back" onMouseDown={() => setGranting(false)}>

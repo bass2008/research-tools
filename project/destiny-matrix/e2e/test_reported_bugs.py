@@ -196,7 +196,8 @@ def test_refund_refreshes_users_and_payments_from_the_same_moment(page: Page, br
         context.close()
 
     page.once("dialog", lambda dialog: dialog.accept())
-    old.get_by_test_id("refund").click()
+    old.get_by_test_id("payment-actions").click()
+    page.get_by_test_id("refund").click()
     expect(old).to_contain_text("возвращён", timeout=30_000)
     fresh = page.locator("[data-testid=admin-payment-row]", has_text=second)
     expect(fresh).to_be_visible(timeout=30_000)
