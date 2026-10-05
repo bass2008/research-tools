@@ -110,7 +110,7 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
     spec = json.loads((Path(__file__).resolve().parents[1] / "spec" / "sections.json").read_text("utf-8"))
     title = {s["key"]: re.sub(r"\s+", "", s["title"]).lower() for s in spec["sections"]}
     tail = compact.split(title["past_lives"], 1)[1].split(title["purpose"], 1)[0]
-    for value in ("15дьявол", "8сила", "11справедливость"):
+    for value in ("15дьявол", "8справедливость", "11сила"):
         assert value in tail, f"в PDF-хвосте нет «{value}»"
 
     # Десять строк выше — точечный oracle; здесь проверяется состав целиком. Извлекаем pypdf,

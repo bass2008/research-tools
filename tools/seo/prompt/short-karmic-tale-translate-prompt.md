@@ -10,7 +10,7 @@
 - **Тот же голос:** рассказчик-исследователь, третье лицо или безлично. Никаких «you», «your» — как в русском тексте нет «вы». Практики — инфинитивом или безлично («notice the early signals», «no punishment at the height of anger»).
 - **Та же структура 1:1:** те же абзацы, подзаголовки ###, списки, жирные фразы. Ничего не добавлять и не выбрасывать.
 - **Подзаголовки и первое предложение** — переведи так, чтобы они цепляли по-английски: смысл тот же, но не калька.
-- **Имена арканов** — как на английском сайте: The Magician, The High Priestess, The Empress, The Emperor, The Hierophant, The Lovers, The Chariot, Strength (8), The Hermit, The Wheel of Fortune, Justice (11), The Hanged Man, Death, Temperance, The Devil, The Tower, The Star, The Moon, The Sun, Judgement, The World, The Fool.
+- **Имена арканов** — как на английском сайте: The Magician, The High Priestess, The Empress, The Emperor, The Hierophant, The Lovers, The Chariot, Justice (8), The Hermit, The Wheel of Fortune, Strength (11), The Hanged Man, Death, Temperance, The Devil, The Tower, The Star, The Moon, The Sun, Judgement, The World, The Fool.
 - **Термины:** матрица судьбы → destiny matrix (со строчной), кармический хвост → karmic tail, центр карты → centre of the chart, вход/механизм/корень → entry/mechanism/root, линия отношений → relationship line, линия таланта → talent line. Написание британское (centre, colour), как на английском сайте.
 - **Русская специфика:** пословицы и игру слов передай по-английски по смыслу; если смысл держится на русском слове — дай его латиницей с пояснением, как в английской полной статье. Российские телефоны доверия замени на «a local emergency number or crisis line».
 - **Числа и даты** — без изменений; разделители по-английски (1,951; 2.7%).

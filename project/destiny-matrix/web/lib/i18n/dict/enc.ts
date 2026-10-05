@@ -52,15 +52,17 @@ export const enc = {
   } satisfies Phrase,
   allCombinations: { ru: "Все сочетания", en: "All combinations" } satisfies Phrase,
   combinationsLead: {
-    ru: "Выберите свой аркан отношений в строке и аркан партнёра в столбце — порядок значения не имеет.",
-    en: "Pick your own relationship arcanum in the row and your partner's in the column — the order does not matter.",
+    ru: "Выберите в строке и столбце два аркана из связанных точек своей карты — порядок не важен: "
+      + "на странице пары разобраны оба.",
+    en: "Pick two arcana from linked points of your chart in the row and the column — the order "
+      + "does not matter: the page of the pair covers both.",
   } satisfies Phrase,
-  promoCombinationTitle: { ru: "Узнать свой аркан отношений", en: "Find your relationship arcanum" } satisfies Phrase,
+  promoCombinationTitle: { ru: "Узнать числа своей карты", en: "Find the numbers in your chart" } satisfies Phrase,
   promoCombinationLead: {
-    ru: "Карта по дате рождения строится бесплатно. Пара складывается из арканов отношений двоих, "
-      + "поэтому нужны две даты.",
-    en: "The chart is built from a date of birth for free. A pair is made of two relationship "
-      + "arcana, so two dates are needed.",
+    ru: "Карта по дате рождения строится бесплатно. Найдите в ней два аркана в связанных точках и "
+      + "откройте их пару в таблице.",
+    en: "The chart is built from a date of birth for free. Find two arcana in linked points of it "
+      + "and open their pair in the table.",
   } satisfies Phrase,
   tailsAnalysed: { ru: "Разобранные тройки", en: "Triples with a reading" } satisfies Phrase,
   tailsOne: { ru: "Пока одна тройка", en: "One triple so far" } satisfies Phrase,

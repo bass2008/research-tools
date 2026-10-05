@@ -34,7 +34,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
   const { categoryHub, hubKeys, indexedKarmicTailKeys, yearKeys } = localizedContent(L);
   const { indexedRegistryItems, positionArcanumHref } = localizedPositionArcanum(L);
   const { SERVICE_PAGES, servicePages } = localizedServicePages(L);
-  const { ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, KARMIC_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, allCombinationSlugs, arcanumHref, chakraHref, hasHubRoute, hubHref, karmicTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
+  const { ARCANUM_HUB, CHAKRA_HUB, KARMIC_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, hasHubRoute, hubHref, karmicTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
 
   const abs = (path: string) => new URL(path, site.origin).toString();
   // Один адрес — одна запись. Источников у карты несколько (хабы, реестр служебных страниц,
@@ -45,7 +45,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
     { url: abs("/encyclopedia"), priority: 0.9 },
     // Шапки разделов: у каждой свой текст и свой головной запрос. Приоритет выше листьев —
     // это цель обхода, с которой раздаётся весь раздел.
-    ...[ARCANUM_HUB, POSITION_HUB, CHAKRA_HUB, COMBINATION_HUB].map((url) => ({
+    ...[ARCANUM_HUB, POSITION_HUB, CHAKRA_HUB].map((url) => ({
       url: abs(url),
 
       priority: 0.85,
@@ -63,11 +63,6 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
     })),
     ...CHAKRA_PAGES.map((c) => ({ url: abs(chakraHref(c.key)), priority: 0.6 })),
     ...(categoryHub("energy-field") ? [{ url: abs(ENERGY_FIELD_HREF), priority: 0.6 }] : []),
-    ...allCombinationSlugs().map((s) => ({
-      url: abs(`/encyclopedia/combination/${s}`),
-
-      priority: 0.5,
-    })),
     // категории статей: в карту попадает только то, для чего есть написанный контент
     // шапки категорий в карте всегда: у них собственный текст, он не зависит от того, написаны
     // ли статьи внутри. По наличию статей строятся только сами статьи и корневые хабы.

@@ -51,14 +51,13 @@ STATIC_INDEXED = {
     "/encyclopedia/position": "position_hub",
     "/encyclopedia/chakra": "chakra_hub",
     "/encyclopedia/chakra/energy-field": "energy_field",
-    "/encyclopedia/combination": "combination_hub",
     "/encyclopedia/karmic-tail": "tail_hub", "/year": "year_hub",
     "/contacts": "legal", "/terms": "legal", "/privacy": "legal", "/refund": "legal",
 }
 # Публичная страница вне индекса — не то же, что личная. Каталог матриц остаётся путём человека
 # к конкретной карте, но спроса на список всех матриц нет (ноль показов за первые дни индексации
 # при наличии в карте сайта), а его содержимое — ссылки на 5 544 адреса, закрытых от обхода.
-STATIC_PUBLIC_NOINDEX = {"/matrix": "matrix_catalog"}
+STATIC_PUBLIC_NOINDEX = {"/matrix": "matrix_catalog", "/encyclopedia/combination": "combination_hub"}
 STATIC_NOINDEX = {
     "/account", "/admin", "/forgot", "/login", "/register", "/reset", "/report",
     "/matrices", "/pay", "/pay/done", "/pay/fail", "/print/report",
@@ -328,8 +327,8 @@ def url_registry(tails: list[dict]) -> list[dict]:
         add(f"/encyclopedia/chakra/{item['key']}", "chakra", "keep", True,
             "канонический уровень карты энергий")
     for item in item_list("combinations.json"):
-        add(f"/encyclopedia/combination/{item['key']}", "combination", "keep", True,
-            "каноническая неупорядоченная пара")
+        add(f"/encyclopedia/combination/{item['key']}", "combination", "noindex", False,
+            "закрыто от обхода 05.10.2026: трафика нет, намерение запроса не совпадает")
     for item in tails:
         add(f"/encyclopedia/karmic-tail/{item['key']}", "karmic_tail",
             "keep" if item["publication"]["index"] else "noindex",

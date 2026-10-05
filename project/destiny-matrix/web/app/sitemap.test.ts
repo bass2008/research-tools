@@ -44,21 +44,23 @@ describe("карта сайта", () => {
     "/encyclopedia/arcanum",
     "/encyclopedia/position",
     "/encyclopedia/chakra",
-    "/encyclopedia/combination",
     "/encyclopedia/karmic-tail",
     "/year",
   ])("содержит шапку раздела %s", (path) => {
     expect(paths).toContain(path);
   });
 
-  // Приоритет шапки выше листа: иначе карта заявляет, что 231 пара важнее страницы, с которой
-  // они раздаются.
+  it("не содержит сочетаний", () => {
+    expect(paths.filter((p) => p.startsWith("/encyclopedia/combination"))).toEqual([]);
+  });
+
+  // Приоритет шапки выше листа: иначе карта заявляет, что лист важнее страницы, с которой
+  // он раздаётся.
   it("ставит шапкам приоритет выше листьев", () => {
     const by = new Map(sitemap().map((e) => [new URL(e.url).pathname, e.priority ?? 0]));
     for (const [hub, leaf] of [
       ["/encyclopedia/arcanum", "/encyclopedia/arcanum/4"],
       ["/encyclopedia/chakra", "/encyclopedia/chakra/anahata"],
-      ["/encyclopedia/combination", "/encyclopedia/combination/8-11"],
       ["/encyclopedia/position", "/encyclopedia/position/center"],
     ] as const) {
       expect(by.get(hub)).toBeGreaterThan(by.get(leaf) ?? 0);
@@ -160,7 +162,7 @@ describe("дата релиза в карте сайта", () => {
       expect(sites.map((site) => site.defaultLocale).sort()).toEqual(["en", "ru"]);
       for (const site of sites) {
         const before = sitemapForSite(site);
-        expect(before.length).toBeGreaterThan(300);
+        expect(before.length).toBeGreaterThan(200);
         expect(new Set(before.map((entry) => entry.lastModified))).toEqual(new Set([releasedAt]));
         vi.advanceTimersByTime(86_400_000);
         expect(sitemapForSite(site)).toEqual(before);
@@ -176,7 +178,7 @@ describe("дата релиза в карте сайта", () => {
     vi.resetModules();
     const { sitemapForSite } = await import("@/lib/sitemapEntries");
     const before = sitemapForSite();
-    expect(before.length).toBeGreaterThan(300);
+    expect(before.length).toBeGreaterThan(200);
     expect(new Set(before.map((entry) => entry.lastModified))).toEqual(new Set([startedAt]));
     vi.advanceTimersByTime(86_400_000);
     expect(sitemapForSite()).toEqual(before);

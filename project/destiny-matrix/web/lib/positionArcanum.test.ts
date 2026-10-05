@@ -44,11 +44,11 @@ describe.each(["ru", "en"] as const)("смысл позиционного тек
     }
   });
 
-  // Эти 14 средних предложений описывают риски, а не преимущества. Они должны остаться
+  // Эти 13 средних предложений описывают риски, а не преимущества. Они должны остаться
   // в объяснении позиции, но не попадать под положительную подводку общего шаблона.
   it.each([
-    ["money", 8], ["money", 9], ["money", 19], ["money", 20], ["money", 21], ["money", 22],
-    ["relations", 3], ["relations", 4], ["relations", 6], ["relations", 8],
+    ["money", 9], ["money", 19], ["money", 20], ["money", 21], ["money", 22],
+    ["relations", 3], ["relations", 4], ["relations", 6], ["relations", 11],
     ["relations", 18], ["relations", 19], ["relations", 20], ["relations", 21],
   ] as const)("не называет риск преимуществом в %s/%i", (position, number) => {
     const raw = content.arcanumContent(number)!.inPositions[position]!;
@@ -59,10 +59,10 @@ describe.each(["ru", "en"] as const)("смысл позиционного тек
     expect(works.paragraphs[0]!.toLowerCase()).not.toContain(warning.toLowerCase());
   });
 
-  // Остальные пять одиночных середин не являются ошибочными рисками. Сохраняем их
+  // Остальные шесть одиночных середин не являются ошибочными рисками. Сохраняем их
   // содержание без автоматического переноса под отрицательную подводку.
   it.each([
-    ["relations", 9], ["relations", 15], ["relations", 17], ["relations", 22], ["money", 18],
+    ["relations", 9], ["relations", 15], ["relations", 17], ["relations", 22], ["money", 8], ["money", 18],
   ] as const)("сохраняет нейтральное или положительное пояснение в %s/%i", (position, number) => {
     const raw = content.arcanumContent(number)!.inPositions[position]!;
     const detail = raw.split(/(?<=[.!?…])\s+/)[1]!;

@@ -124,7 +124,7 @@ describe("one frontend, domain profiles", () => {
 
   it.each([ru, com])("generates sitemap and robots for the current host: $origin", (site) => {
     const sitemap = sitemapForSite(site);
-    expect(sitemap.length).toBeGreaterThan(300);
+    expect(sitemap.length).toBeGreaterThan(200);
     expect(sitemap.every((item) => new URL(item.url).origin === site.origin)).toBe(true);
     expect(robotsForSite(site).sitemap).toBe(site.origin + "/sitemap.xml");
   });

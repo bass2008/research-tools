@@ -58,7 +58,7 @@ def test_interleaved_hosts_do_not_share_rendered_language_or_canonical():
 def test_sitemap_and_robots_are_specific_to_host(host):
     xml, _ = read("/sitemap.xml", host, Cookie="arcana_locale=ru", **{"Accept-Language": "ru"})
     urls = re.findall(r"<loc>(.*?)</loc>", xml)
-    assert len(urls) > 300
+    assert len(urls) > 200
     assert all(url.startswith(f"https://{host}/") for url in urls)
     robots, _ = read("/robots.txt", host)
     assert f"Sitemap: https://{host}/sitemap.xml" in robots

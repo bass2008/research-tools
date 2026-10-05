@@ -53,6 +53,10 @@ describe("robots.txt", () => {
 
   // Хаб `/matrix` — обычная страница корпуса и стоит в карте сайта: закрыть его префиксом
   // без слеша значило бы выкинуть из поиска и его.
+  it("закрывает от обхода сочетания", () => {
+    expect([groupFor("*")?.disallow].flat()).toContain("/encyclopedia/combination");
+  });
+
   it("не закрывает хаб матриц", () => {
     expect([groupFor("*")?.disallow].flat()).not.toContain("/matrix");
   });

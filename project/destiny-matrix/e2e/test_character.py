@@ -124,5 +124,5 @@ def test_combination_page_contains_all_section_contexts(page: Page) -> None:
     ):
         expect(page.get_by_role("heading", name=context)).to_be_visible()
     # Хотя бы один допустимый порядок пары должен быть напечатан: печатаются только достижимые.
-    expect(page.get_by_role("heading", name=re.compile(r"(3 Императрица|11 Справедливость) в ")).first).to_be_visible()
+    expect(page.get_by_role("heading", name=re.compile(r"(3 Императрица|11 Сила) в ")).first).to_be_visible()
     expect(page.get_by_role("heading", name="Как проверить сочетание на практике")).to_be_visible()

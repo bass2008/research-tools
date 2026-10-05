@@ -411,7 +411,7 @@
     {
       "entity": "category_hub:combination",
       "source": "web/content/ru/category-hubs.json",
-      "primary_query": "матрица судьбы совместимость",
+      "primary_query": "сочетания арканов матрица судьбы",
       "search_intent": "category_hub",
       "formula_verified": false,
       "position_context_verified": false,

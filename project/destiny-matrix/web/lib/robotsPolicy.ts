@@ -28,6 +28,10 @@ const COMPUTED = [
   ...[...PERSONAL_SECTION_KEYS, "character"].map((section) => `/encyclopedia/${section}/`),
 ];
 
+// Сочетания закрыты 05.10.2026: трафика нет, а пара двух арканов в одной карте не отвечает
+// на то, что ищут под этим запросом. Страницы остаются для людей.
+const CLOSED = ["/encyclopedia/combination"];
+
 export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.Robots {
   if (!site.indexable) return { rules: [{ userAgent: "*", disallow: "/" }] };
   return {
@@ -38,7 +42,7 @@ export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.R
       // строку как «всё открыто» и считали результаты расчёта разрешёнными.
       {
         userAgent: "*",
-        disallow: [...PRIVATE, ...COMPUTED],
+        disallow: [...PRIVATE, ...COMPUTED, ...CLOSED],
         // Директива Яндекса: адреса с этими параметрами робот не скачивает вовсе. `canonical`
         // на них стоит верно, но он читается только после загрузки страницы — а норма обхода
         // у молодого домена тратится на каждой. `?tab=` — вкладки страницы аркана,

@@ -21,7 +21,7 @@
     "As a number of destiny, one is about authorship. Its bearer is not satisfied with taking part: it matters to them to put their own name on the result and to see a mark in the world that would not be there without them. This is the active, “daytime” side of the matrix — not storing up, but showing; not waiting for a sign, but making the first move. Hence the character of the energy: direct, impatient, turned outwards.",
     "On the tarot card, The Magician stands at a table with the symbols of all the elements and joins “above” and “below” with a single gesture. This is the image of a conductor: an idea turns into a thing directly, through the hand and the will, with no go-betweens and no long approvals. Being the first arcanum feels like a steady inner itch of “just do it” — a quiet pressure that looks for a way out in a concrete move rather than in thinking about it.",
     "Strong and weak versions are one energy turned in different directions. In the strong one the will goes into the object: a person makes what did not exist and measures themselves by what is done. In the weak one it turns back on the author — it matters more to feel capable than to carry an idea through to a thing, and the force leaks away into loud intentions and plans that never become a result. The difference is not in the amount of energy but in where the will points: at the work, or at the image of oneself.",
-    "Telling one apart from its neighbouring arcana is easiest by the direction of its force. The second arcanum, The High Priestess, carries force too, but the opposite kind: she knows and stays silent, gathers inside, waits for the right moment — while The Magician shows himself outwards and acts first. And from the eight, Strength, one is separated by distance: The Magician is good at the dash and at the start, Strength is good at holding out and finishing what was begun. The first arcanum is about taking something on, not about seeing it through to the end."
+    "Telling one apart from its neighbouring arcana is easiest by the direction of its force. The second arcanum, The High Priestess, carries force too, but the opposite kind: she knows and stays silent, gathers inside, waits for the right moment — while The Magician shows himself outwards and acts first. And from the eleventh, Strength, one is separated by distance: The Magician is good at the dash and at the start, Strength is good at holding out and finishing what was begun. The first arcanum is about taking something on, not about seeing it through to the end."
    ],
    "in_positions": {
     "character": "The core of this character is the first step. The person takes hold of a task before everyone else has finished talking, and you can see at once that they will not ask for permission. Charm comes with the package, but it rests on results rather than on manners.",
@@ -217,9 +217,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/1-8",
-     "short": "begins and finishes: a strong working pair"
+     "short": "an honest start: acts and answers for it"
     },
     {
      "with": 9,
@@ -235,9 +235,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/1-11",
-     "short": "an honest start: acts and answers for it"
+     "short": "begins and finishes: a strong working pair"
     },
     {
      "with": 12,
@@ -537,9 +537,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/2-8",
-     "short": "calm depth: holds on and understands"
+     "short": "sees the truth and names it plainly"
     },
     {
      "with": 9,
@@ -555,9 +555,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/2-11",
-     "short": "sees the truth and names it plainly"
+     "short": "calm depth: holds on and understands"
     },
     {
      "with": 12,
@@ -857,9 +857,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/3-8",
-     "short": "warmth with a strong root: holds and feeds"
+     "short": "cares by fairness, not by sympathy"
     },
     {
      "with": 9,
@@ -875,9 +875,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/3-11",
-     "short": "cares by fairness, not by sympathy"
+     "short": "warmth with a strong root: holds and feeds"
     },
     {
      "with": 12,
@@ -1177,9 +1177,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/4-8",
-     "short": "weight and order: carries a lot on themselves"
+     "short": "rule and fairness: law in its pure form"
     },
     {
      "with": 9,
@@ -1195,9 +1195,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/4-11",
-     "short": "rule and fairness: law in its pure form"
+     "short": "weight and order: carries a lot on themselves"
     },
     {
      "with": 12,
@@ -1497,9 +1497,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/5-8",
-     "short": "calm authority: teaches and holds out"
+     "short": "knowledge and measure: explains how it should be done"
     },
     {
      "with": 9,
@@ -1515,9 +1515,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/5-11",
-     "short": "knowledge and measure: explains how it should be done"
+     "short": "calm authority: teaches and holds out"
     },
     {
      "with": 12,
@@ -1817,9 +1817,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/6-8",
-     "short": "attraction and reliability: a pair for the long run"
+     "short": "choice and honesty: decides and answers for it"
     },
     {
      "with": 9,
@@ -1835,9 +1835,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/6-11",
-     "short": "choice and honesty: decides and answers for it"
+     "short": "attraction and reliability: a pair for the long run"
     },
     {
      "with": 12,
@@ -1941,7 +1941,7 @@
     "The inner motor of The Chariot is not ambition but the fear of stopping. Deep down lives the certainty: while I move, I am winning; the moment I stand still, I have lost. From there comes the number’s main conflict. Two forces pull the arcanum at once — the dash and the holding back — and the whole fate is decided by which of them leads. Power under control arrives first; the same power with no steering becomes a way to crash.",
     "Being a seven is living with the motor always running. Thought outruns the conversation, a decision ripens before the details have been thought through, and other people’s calm reads as slowness. It is hard for such a person to believe that you can do nothing and still lose nothing; that feeling reaches The Chariot last of all, and usually at a high price.",
     "The strong version of the number is gathered will: a clear goal, a chosen direction, and all the energy striking one point, so the seven gets through while others are still weighing things up. The weak version is the same power with no vector: thrill instead of sense, bravado instead of an outcome, constant tension because of everything standing in the way. The difference is not the size of the engine but whether it has a direction.",
-    "What sets The Chariot apart from its neighbours is action itself. The sixth arcanum, The Lovers, lives by choice and connection — it matters with whom and for whose sake; the seven dislikes choosing and wants to be driving already, and treats hesitation as time lost. The eighth arcanum, Strength, wins by composure and quiet, taming slowly; The Chariot wins by pressure and pace. Where Strength holds on and waits things out, the seven pushes and overtakes."
+    "What sets The Chariot apart from its neighbours is action itself. The sixth arcanum, The Lovers, lives by choice and connection — it matters with whom and for whose sake; the seven dislikes choosing and wants to be driving already, and treats hesitation as time lost. The eighth arcanum, Justice, weighs things first: it hears both sides and only then gives its decision; The Chariot decides on the move and wins by pressure and pace. Where Justice stops to check the account, the seven pushes and overtakes."
    ],
    "in_positions": {
     "character": "The pace gives them away at once: quick speech, quick decisions, a readiness to argue. This person is not interested in discussing things, they are interested in winning, and you can see it in the first five minutes of a conversation.",
@@ -2137,9 +2137,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/7-8",
-     "short": "drive and reserve: goes far without breaking down"
+     "short": "races by the rules: fast and fair"
     },
     {
      "with": 9,
@@ -2155,9 +2155,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/7-11",
-     "short": "races by the rules: fast and fair"
+     "short": "drive and reserve: goes far without breaking down"
     },
     {
      "with": 12,
@@ -2243,65 +2243,65 @@
   },
   {
    "n": 8,
-   "slug": "strength",
-   "title": "Strength",
+   "slug": "justice",
+   "title": "Justice",
    "roman": "VIII",
    "matrix_number": 8,
-   "short": "inner power without shouting: copes where others give up",
+   "short": "balance and honesty: weighs things and calls them by their names",
    "keywords": [
-    "strength",
-    "endurance",
-    "power",
-    "fairness",
-    "calm",
-    "taming"
+    "justice",
+    "honesty",
+    "balance",
+    "law",
+    "choice",
+    "consequence"
    ],
    "meaning": [
-    "The eighth arcanum in the destiny matrix answers for inner strength — the kind that rests on reserves rather than on force. What the eight means is calm power that does not need to raise its voice to be heard. Such a person takes things not with a dash but with the ability to hold out longer than everyone else and not break where others have already given up.",
-    "The engine of this arcanum is taming, not crushing. On the card a woman gently closes a lion’s jaws: what is wild here is not killed but tamed — one’s own fear, one’s own anger, somebody else’s panic, a task nobody can lift. Hence the paradox of the eight: the calmer the person looks from outside, the more force they hold inside. Power here is measured not by what they can break, but by what they can bear and keep in check.",
-    "The main inner conflict of the eight is between “I will hold out” and “time to stop”. The very endurance that makes a person a support easily becomes a trap: if I bear it, then I can bear more — and a huge reserve goes for years into something that should have been let go long ago. Strength with no outlet does not disappear, it goes stale: unspent power turns into a dull weight the person carries about and takes for normal.",
-    "In its strong version the arcanum is a conscious support: the person spends the reserve where it is needed, knows how to say “enough” in time, and asks for help without counting that as weakness. The weak version is the silent strongman who drags everything alone, takes pride in it and slowly burns out, while all that power turns into pressure on the people nearby. The difference between them is not how much strength there is, but whether it has a direction and a brake.",
-    "From its neighbouring arcana the eight differs in the way it acts. The seventh, The Chariot, takes things by pressure and speed — it rushes ahead and wins through movement; the eight wins by staying where it is and not giving in. The ninth, The Hermit, goes into silence in order to understand; the eight stays in the very thick of things and holds them up. Where one races and the other withdraws into itself, Strength simply endures — and by that alone it changes the situation."
+    "The eighth arcanum in the destiny matrix is the energy of balance and law. It weighs without stopping: where what was put in and what came back have met, and where someone has been left short — and it demands that an act and its consequence meet. If 8 stands in your calculation, you are driven by a sense of measure: the inner need for the account to add up and for a word given to be kept.",
+    "Being this arcanum means carrying scales inside that never switch off. A tilt and a lie are felt almost physically, and pretending that everything is fine does not work even for the sake of comfort. This gives rare clarity and directness, but it also keeps you tense: where someone else shrugs and forgets, the eighth notices the mismatch and cannot walk past it.",
+    "The main drive here is to bring balance back: to straighten what has tilted, to name the price, to close the debt. And the same drive hides the number’s main conflict — the thin line between putting right and punishing. Let the measure shift half a step, and the pull towards truth becomes a thirst for payback, and a clear mind becomes a prosecutor for whom everyone is guilty already.",
+    "A strong 8 keeps measure for the sake of clarity and connection: it can settle a matter on its merits, then close the subject and let it go. A weak one turns the same scales into a weapon — it passes sentence on everyone, keeps an endless register of grievances and confuses justice with revenge. The difference is not in how sharp the sense of truth is, but in whether it serves people or stands over them as a judge.",
+    "Among its neighbours in the deck, Justice stands sharply apart. The seventh arcanum, The Chariot, takes things by pressure and speed — it rushes ahead and wins through movement; the eighth first stops and asks whether the victory is deserved and who will pay for it. The ninth, The Hermit, goes into silence in order to understand; for the eighth understanding is not enough — it has to decide and hand down a verdict now, and the pause is exactly what it finds hardest to learn."
    ],
    "in_positions": {
-    "character": "The impression is one of weight and calm. This person does not raise their voice, does not rush and does not fuss, yet their decisions are heard without shouting. People who arrive looking for a row usually cool down beside them.",
-    "comfort": "Recovery comes through steady effort: your own rhythm, heavy work without hurry, quiet afterwards. Fuss and a drumbeat of small errands wear this centre out far more than real labour does.",
-    "profession": "A gift for holding up under weight and dealing with the hard part. They are taken on where steadiness is needed: crisis roles, work with difficult people, production, emergency services, sport. Light, fiddly tasks bore this talent, and within a year the heaviest job is picked up out of habit rather than out of force. Mature Strength knows in advance the limit of what it can carry and the moment to hand the result on, instead of proving its worth by endless strain.",
-    "realisation": "Here the person becomes the one who holds. They take on weight that others will not lift — not out of self-sacrifice, but because they have the reserve for it.",
-    "karma40": "In the first adult stretch the Eight learns not to put up with what it need not. It can bear almost anything, and years in the wrong job or the wrong couple get built on that. A different answer appears the first time the person ends something bearable but pointless.",
-    "resources": "Payment comes here for staying power and for force that can be seen from the outside: people want something to lean on, and they pay for that support. The condition is not to haul everyone who asks for free. The difference is simple: one kind of support is answered for, the other is simply passed to you.",
-    "family_gifts": "A sturdy breed came down this line: someone in it bore the unbearable and did not break. The reserve works almost by itself, and that is the trap — enduring starts before the person has asked themselves why. The inheritance holds as long as patience has a border, beyond which a request or a refusal is spoken.",
-    "soul_tasks": "The delicate subject here is anger. Calm on the outside, this arcanum stores things up and then discharges on the people closest to it. The task is to let irritation out in time and in words, not a year later and not through a wall.",
-    "past_lives": "A habit of enduring and not complaining was brought along. The stamina is real: this person carries loads that make others step back, and does it in silence. Someone else’s business drags on for years, resentment piles up, and then they leave suddenly and without explanation. Say the limit out loud on the day it is reached, not a year later.",
-    "purpose": "The purpose is to be the support for many: a team, a family, students, people who arrive in trouble. The measure is simple — those nearby grow calmer around this person, and they say so out loud.",
-    "money": "Endurance and reliability are what get paid for: long jobs, heavy projects, first-class physical work. What slows things down is modesty — this person does more than anyone and asks for less than anyone. Put a price on your reliability, and name separately which help no longer comes inside that price.",
-    "money40": "With the years the Eight sells calm: people come when everything is on fire and pay for the fact that they do not panic. That is worth more than any hourly rate — staying power proven by deeds counts higher than a diploma. The angle fails where staying power is confused with putting up with things: the person hauls for free what should have been charged for long ago. Raise the price on the single hardest service and see whether even one client walks away.",
-    "relations": "Life beside such a person is calm: reliability and patience, sometimes too much of it. The partner gets used to not trying, and for years the person pulls the relationship along alone, until they switch off completely. Strength here sounds like a border named quietly, not like patience piling up towards an explosion.",
-    "parents_children": "From the elders came steady support and an unspoken ban on showing weakness. The support gets passed on — it is safe beside this person; along with it comes the heavy weight of authority. It helps to talk about your own weak spots: otherwise the younger ones grow up feeling that being tired or afraid is not allowed.",
-    "ancestry": "Silent endurance counts as a virtue in this family line — and that is exactly what it is time to stop. Bearing everything without a word is the house rule, and the job is to show that you can leave, refuse, ask. Say one plain ‘this does not suit me’ where before you would have kept quiet, and watch what actually happens.",
-    "body_resource": "Strength has a large reserve, but not an endless one: tiredness arrives late, once several years have already been lived on patience. It stays whole as long as a refusal is spoken out loud the same day instead of being carried around for half a year. This person hauls their own bag and someone else’s as well, and notices the weight only when enduring has become the only way to live. Hand one borrowed task back and see what actually happens.",
-    "chakras": "Strength: the level works through the theme of calm power — to tame rather than to crush. The strong move is staying steady where everyone else snaps; the failure looks like patience stretched until there is nothing left to be patient about. One thing brings the support back: admitting tiredness before it turns into a breakdown.",
-    "rest": "What restores is physical and plain: a steam bath, the forest, water, work with the hands and no deadline. Noisy entertainment gives this person nothing but weariness from other people’s voices. You recognise such a day by the fact that in the evening you do not want to explain anything to anyone — and that is not fatigue.",
-    "loops": "The circle runs like this: I put up with it, I store it up, I blow up, I blame myself for blowing up. It is broken not by more staying power but by a conversation in the first week rather than in the third year.",
-    "years": "The decade of Strength is a climb with a heavy rucksack: a lot of work, responsibility for others, other people’s affairs that somehow became your own. People come out of such a climb tougher than they went in, if the weight was chosen to fit: what you took on can be carried for a year, and anything extra is handed back without guilt. Proving toughness at any cost is dangerous: the rucksack grows in silence, and those close to you notice first. Set the limit of one accepted responsibility in advance and check in a month whether it held.",
-    "day": "Arcanum “Strength” · A · The first impression is built around the theme: inner power without shouting, coping where others give up. At its strongest the person stays steady where everyone else snaps; under strain they put up with things for years instead of having one conversation. The image turns into a lasting reputation when they manage to admit tiredness before it becomes a breakdown.",
-    "month": "Arcanum “Strength” · B · The inborn spiritual task switches itself on: inner power without shouting, coping where others give up. So the person may not count it as a gift that they stay steady where everyone else snaps; the other side shows when they put up with things for years instead of having one conversation. The mature task of this position is to admit tiredness before it becomes a breakdown.",
-    "year": "Arcanum “Strength” · C · The material task carries the theme of inner power without shouting, coping where others give up, from plan into result. The strong side shows in what gets done: the person stays steady where everyone else snaps; when it tips over, they put up with things for years instead of having one conversation. This position is lived out not by a promise but by a readiness to admit tiredness before it becomes a breakdown.",
-    "mission": "Arcanum “Strength” · D · This is not a punishment but a storyline that keeps coming back: inner power without shouting, coping where others give up. The adult answer starts where the person stays steady while everyone else snaps, and the old circle starts with the opposite: putting up with things for years instead of having one conversation. One concrete decision breaks the repeat — admit tiredness before it becomes a breakdown.",
-    "center": "Arcanum “Strength” · E · At the centre of the chart lies quiet force: the person holds what others back away from, and does it without shouting. They do not snap, they carry a load for a long time, and beside them things stop being frightening. The support is lost by whoever hauls someone else’s weight in silence until nothing is left, because endurance has turned into a duty. Once a month name the limit out loud: what you no longer carry and from which day.",
-    "father_line": "Arcanum “Strength” · F · The spiritual male line keeps a principle: inner power without shouting, coping where others give up. The strong side of the inheritance shows like this — the person stays steady where everyone else snaps; the heavy side of the script is putting up with things for years instead of having one conversation. Taking the force of the line without its hardness means admitting tiredness before it becomes a breakdown.",
-    "mother_line": "Arcanum “Strength” · G · The spiritual female line keeps the rule of the house: inner power without shouting, coping where others give up. In the supportive version the person stays steady where everyone else snaps; in the tangled one they repeat something else — putting up with things for years instead of having one conversation. Rewriting the rule while keeping its value comes down to a choice: admit tiredness before it becomes a breakdown.",
-    "descendants": "Arcanum “Strength” · H · Here the principle of the family line turns into an act: inner power without shouting, coping where others give up. In its reliable form the person stays steady where everyone else snaps; the automatic form is putting up with things for years instead of having one conversation. A new continuation of the male line begins with the skill of admitting tiredness before it becomes a breakdown.",
-    "inheritance": "Arcanum “Strength” · I · Here the values of the family line enter everyday life: inner power without shouting, coping where others give up. The resource shows when the person stays steady where everyone else snaps; the usual tilt is putting up with things for years instead of having one conversation. Making the inheritance a support rather than a duty takes a willingness to admit tiredness before it becomes a breakdown.",
-    "comfort_west": "Arcanum “Strength” · J · The outer portrait A joins the centre E through the theme of inner power without shouting, coping where others give up. If the passage is clear, the person stays steady where everyone else snaps; if the role argues with the inner state, they put up with things for years instead of having one conversation. Bringing the outside and the inside together takes a decision: admit tiredness before it becomes a breakdown.",
-    "comfort_north": "Arcanum “Strength” · K · The talent on the B–P–K line takes shape: inner power without shouting, coping where others give up. A mature gift shows in the fact that the person stays steady where everyone else snaps; trying to earn recognition leads to putting up with things for years instead of having one conversation. The talent takes shape when they manage to admit tiredness before it becomes a breakdown.",
-    "comfort_east": "Arcanum “Strength” · L · The money line opens with the theme of inner power without shouting, coping where others give up. This is not a promise of income but a way in: at its best the person stays steady where everyone else snaps, and when it tips over they put up with things for years instead of having one conversation. To turn the impulse into lasting work it helps to admit tiredness before it becomes a breakdown.",
-    "comfort_south": "Arcanum “Strength” · M · At the fork between relationships and the karmic tail this shows up: inner power without shouting, coping where others give up. The first reaction helps closeness when the person stays steady where everyone else snaps, and it starts the old script when they put up with things for years instead of having one conversation. Not going round in circles takes a pause in which it is possible to admit tiredness before it becomes a breakdown.",
-    "love_middle": "Arcanum “Strength” · R1 · The couple holds together on endurance: this person pulls for a long time, does not snap and does not air the family’s dirty linen. It is calm beside them even in hard times: they will not drop things halfway or make a scene in front of others. The habit of enduring instead of talking piles up over years what one straight sentence would have settled, and it ends in a sudden departure. Name what you are unhappy with the same day, while it is still small and not yet the outcome.",
-    "harmony": "Arcanum “Strength” · spiritual · The personal and the social levels are joined by the theme of inner power without shouting, coping where others give up. Agreement with yourself is felt when the person stays steady where everyone else snaps; the inner argument returns when they put up with things for years instead of having one conversation. Tying the two levels into one direction takes a readiness to admit tiredness before it becomes a breakdown.",
-    "planetary": "Arcanum “Strength” · planetary · Reaching out beyond a personal biography is the theme of inner power without shouting, coping where others give up. The contribution becomes visible to many when the person stays steady where everyone else snaps; the scale stays a pretty idea if they put up with things for years instead of having one conversation. Starting from real influence rather than a loud role takes a decision: admit tiredness before it becomes a breakdown.",
-    "purpose_personal": "Arcanum “Strength” · personal · With no audience the person would choose the theme: inner power without shouting, coping where others give up. Being true to yourself shows in staying steady where everyone else snaps; walking away from your own task shows in putting up with things for years instead of having one conversation. This position comes alive when they manage to admit tiredness before it becomes a breakdown.",
-    "purpose_social": "Arcanum “Strength” · social · Others can lean on the theme: inner power without shouting, coping where others give up. In shared work they are especially useful when they stay steady where everyone else snaps; the role stops working when they put up with things for years instead of having one conversation. Lasting usefulness instead of an image comes from one concrete choice: admit tiredness before it becomes a breakdown."
+    "character": "Straightness shows at once: this person calls things what they are and cannot pretend that everything is fine. Lying around them is uncomfortable and agreeing with them is easy — they keep their word and expect the same back.",
+    "comfort": "Feels steady where everything is honest: clear terms, figures said out loud, nothing left unsaid. Vague arrangements and hints wear such a centre out faster than the hardest work does.",
+    "profession": "The strong side is sorting out what is disputed. Lawyer, auditor, judge, negotiator — anyone who weighs the arguments and decides on the merits. Work that asks you to look away from breaches breaks this person from the inside. This strength gets its price where the rules of a decision are visible and the final conclusion can be put on the table and defended with facts.",
+    "realisation": "Realisation goes through putting balance back: wherever something tilts, this person levels it out. The field itself can be anything; what matters is the right to say “this is unfair” and be heard.",
+    "karma40": "In early adult life the eighth arcanum learns not to pass sentence. Verdicts come out fast, and they land on yourself too; life may show that other people act for reasons nobody told you about.",
+    "resources": "Money comes for accuracy and honesty: where others get confused, this person counts correctly, and that is what gets paid for. The condition is asking for your share out loud instead of waiting for fairness to happen on its own.",
+    "family_gifts": "Somewhere in the family there was a person who restored the truth or stood their ground — in court and in life. That straight backbone came down by inheritance and holds this person where everyone else gives in. A sense of measure is useful in your own agreements; the role of household judge is already too much.",
+    "soul_tasks": "The argument with yourself is about forgiving. Remembering every grievance point by point is easy, closing the question is hard, and quiet inside comes only after the list is finally shut.",
+    "past_lives": "Keeping score of everything is the habit that carried over. The sense of measure is real: this person sees the tilt before others do and names it plainly. The books get balanced even where nobody is balancing them, and being right remains — with no one nearby. In one old argument, be the first to drop your rightness and look at what is left.",
+    "purpose": "The life task is to bring an honest measure into things: a contract, a court, a rule, an argument taken apart. Such people become the ones you come to with the question “how is it done properly”, and that role is no accident.",
+    "money": "Steady income starts with accuracy: contract, calculation, check, a fair price. Debts and unclear sums put this arcanum out faster than anything else, so clean accounts are literally a way of earning for it. Recount one arrangement on paper and say the figure out loud before the work starts — fairness rarely grows out of silence.",
+    "money40": "By mature years the eighth arcanum brings the reputation of an honest one: referrals, long-standing clients, the role of arbiter in disputes. Such a person’s word begins to cost money — they are called in when someone has to judge and call things by their names. Anything built on half-truths falls apart under that test: an old unsaid thing surfaces exactly when a big deal is being settled. Look over your agreements and rewrite the one whose terms still rest on a spoken “we will sort it out somehow”.",
+    "relations": "A couple holds on equal contributions. This person keeps an inner count, and if the tilt lasts, the relationship ends without a scene — simply by decision. What saves it is the habit of talking about balance before it collapses. A conversation about one specific episode works here; a conversation that sentences the whole person does not.",
+    "parents_children": "Honesty and what is earned — that is what this family valued: praise came for a deed, not just so. The person goes on judging fairly: with a child, a student, the youngest on the team there are sometimes more rules than warmth. A younger one needs to know that they are accepted apart from their behaviour, so praise has to be said separately from the verdict.",
+    "ancestry": "An old debt or dispute in the line has to be closed. Often it is undivided property, an inheritance never put on paper, a grudge between relatives — and sorting it out falls to this person. Close one dispute that is within your reach with a document, a calculation or an honest agreement, without taking on the role of judge for the whole line.",
+    "body_resource": "Unfairness reaches this arcanum through the body: a long conflict drains strength faster than any workload. It is calm where the score has been said out loud: the sum, the deadline and the answer are spoken, and attention moves on to the work instead of replaying the grievance. An open score comes back to mind at night, and being hard on yourself easily becomes a second such score. Close one hanging question in writing and notice how much attention comes free for ordinary things.",
+    "chakras": "Justice: this level works through the theme “balance: to each by their contribution”. The strong move is to see where things tilt and to name it; the failure looks like a verdict handed down before the other side has been heard. Only one thing brings the footing back: ask the other side before you draw a conclusion.",
+    "rest": "Real rest arrives when questions are closed: matters sorted, bills settled, nothing promised to anyone. A holiday with an unfinished job standing behind you is not felt at all. One loose end closed before the weekend is worth more than an extra day off, and the remaining debts are more honestly written down for later.",
+    "loops": "The script runs like this: noticed the tilt, demanded fairness, got a conflict, retreated into being right. The way out is to say what you want out of it before the tilt has turned into a grievance.",
+    "years": "A stretch under Justice lays contracts, calculations and conversations on the table that can no longer be kept in fog. What is sorted out fairly here serves for decades afterwards: terms made exact, deadlines named, your own share of the fault admitted. The most expensive habit is turning every story into a trial of yourself or of others. Rewrite one agreement to fit the conditions that have changed, instead of defending a rule that is no longer about this life.",
+    "day": "Arcanum “Justice” · A · First impressions gather around one theme: balance and honesty — weighs things up and calls them by their names. At full strength the person sees the tilt and names it plainly; under strain the person passes sentence on people instead of understanding them. The image becomes a steady reputation when you manage to ask the other side before you draw a conclusion.",
+    "month": "Arcanum “Justice” · B · A spiritual task you are born with switches on by itself: balance and honesty — weighs things up and calls them by their names. So the person may not count it as a gift that the person sees the tilt and names it plainly; the other side shows when the person passes sentence on people instead of understanding them. The mature task of this position is to ask the other side before you draw a conclusion.",
+    "year": "Arcanum “Justice” · C · Material work carries the theme “balance and honesty — weighs things up and calls them by their names” from intention to result. The strong side shows in deeds: the person sees the tilt and names it plainly; out of balance the person passes sentence on people instead of understanding them. This position is lived not by a promise but by a readiness to ask the other side before you draw a conclusion.",
+    "mission": "Arcanum “Justice” · D · Not a punishment here but a story that keeps returning: balance and honesty — weighs things up and calls them by their names. The grown-up answer starts where the person sees the tilt and names it plainly, and the old circle starts with the opposite: the person passes sentence on people instead of understanding them. One concrete decision breaks the repeat: ask the other side before you draw a conclusion.",
+    "center": "Arcanum “Justice” · E · At the centre of the chart stands balance: this person is calm when everything is honestly named and nobody owes anybody in silence. They weigh without hurrying, call things by their names and do not play along with the convenient version. The footing is lost by the one who puts the score above people, judges instead of living and stays right alone. In one argument, give way on purpose and see what changes besides the score.",
+    "father_line": "Arcanum “Justice” · F · Down the spiritual male line a principle is kept: balance and honesty — weighs things up and calls them by their names. The strong side of that inheritance shows like this: the person sees the tilt and names it plainly; the heavy side of the script is that the person passes sentence on people instead of understanding them. Taking the strength of the line without its hardness means learning to ask the other side before you draw a conclusion.",
+    "mother_line": "Arcanum “Justice” · G · Along the spiritual female line the house rule is kept: balance and honesty — weighs things up and calls them by their names. In the supporting version the person sees the tilt and names it plainly; in the tangled one the person repeats something else and passes sentence on people instead of understanding them. Rewriting the rule while keeping what it is worth comes down to a choice: ask the other side before you draw a conclusion.",
+    "descendants": "Arcanum “Justice” · H · Here the family principle turns into an act: balance and honesty — weighs things up and calls them by their names. In its reliable form the person sees the tilt and names it plainly; the automatic form passes sentence on people instead of understanding them. A new continuation of the male line starts with the skill to ask the other side before you draw a conclusion.",
+    "inheritance": "Arcanum “Justice” · I · Family values enter everyday life here: balance and honesty — weighs things up and calls them by their names. The resource shows when the person sees the tilt and names it plainly; the usual tilt is that the person passes sentence on people instead of understanding them. Making the inheritance a support rather than a duty takes a readiness to ask the other side before you draw a conclusion.",
+    "comfort_west": "Arcanum “Justice” · J · Outer portrait A meets the centre E through the theme “balance and honesty — weighs things up and calls them by their names”. If the passage is free, the person sees the tilt and names it plainly; if the role argues with the inner state, the person passes sentence on people instead of understanding them. Matching the outside to the inside comes from one decision: ask the other side before you draw a conclusion.",
+    "comfort_north": "Arcanum “Justice” · K · Talent on the B–P–K line takes its shape: balance and honesty — weighs things up and calls them by their names. The mature gift shows in the way the person sees the tilt and names it plainly; trying to earn recognition leads to the opposite, where the person passes sentence on people instead of understanding them. The talent takes form when you manage to ask the other side before you draw a conclusion.",
+    "comfort_east": "Arcanum “Justice” · L · The money line opens with the theme “balance and honesty — weighs things up and calls them by their names”. This is not a promise of income but a way in: at their best the person sees the tilt and names it plainly, out of balance the person passes sentence on people instead of understanding them. To turn the impulse into steady work, it helps to ask the other side before you draw a conclusion.",
+    "comfort_south": "Arcanum “Justice” · M · Where relationships fork away from the karmic tail, this shows up: balance and honesty — weighs things up and calls them by their names. The first reaction helps closeness when the person sees the tilt and names it plainly, and starts the old script when the person passes sentence on people instead of understanding them. Going round in circles stops with a pause long enough to ask the other side before you draw a conclusion.",
+    "love_middle": "Arcanum “Justice” · R1 · A couple runs into the count: who put in how much, is it fairly divided, was it honest. Straightness helps: with such a person you never have to guess where you stand or what they think. Then being right turns out to matter more than the person, the close one becomes a side in a dispute, and warmth is squeezed out by the balance of “you to me, me to you”. In a quarrel, drop your rightness once and see what is left besides the score.",
+    "harmony": "Arcanum “Justice” · spiritual · Personal and social levels are joined by the theme “balance and honesty — weighs things up and calls them by their names”. Agreement with yourself is felt when the person sees the tilt and names it plainly; the inner argument comes back when the person passes sentence on people instead of understanding them. Tying the two levels into one direction takes a readiness to ask the other side before you draw a conclusion.",
+    "planetary": "Arcanum “Justice” · planetary · Beyond a personal biography goes the theme “balance and honesty — weighs things up and calls them by their names”, out past a single life story. A contribution becomes visible to many when the person sees the tilt and names it plainly; the scale stays a pretty idea if the person passes sentence on people instead of understanding them. Starting from real influence rather than a loud role comes from one decision: ask the other side before you draw a conclusion.",
+    "purpose_personal": "Arcanum “Justice” · personal · With no audience the person would still choose the theme: balance and honesty — weighs things up and calls them by their names. Loyalty to yourself shows in the way the person sees the tilt and names it plainly; walking away from your task shows when the person passes sentence on people instead of understanding them. This position comes alive when you manage to ask the other side before you draw a conclusion.",
+    "purpose_social": "Arcanum “Justice” · social · Others can lean on the theme: balance and honesty — weighs things up and calls them by their names. In shared work this person is most useful when they see the tilt and name it plainly; the role stops working when the person passes sentence on people instead of understanding them. Steady use instead of an image comes from one concrete choice: ask the other side before you draw a conclusion."
    },
    "position_links": [
     {
@@ -2406,76 +2406,76 @@
     }
    ],
    "plus": [
-    "keeps calm where others break down",
-    "carries a long load without strain",
-    "calms people down by being there",
-    "handles fear without running from it"
+    "sees an imbalance and names it directly",
+    "decides on the merits, not on sympathy",
+    "keeps agreements to the letter",
+    "learns from consequences quickly"
    ],
    "minus": [
-    "endures for years instead of one conversation",
-    "presses with their weight even without meaning to",
-    "refuses to ask for help on principle",
-    "stores anger and discharges it on those close"
+    "judges people instead of understanding them",
+    "demands retribution and cannot forgive",
+    "freezes in being right and loses the relationship",
+    "torments themselves over old mistakes"
    ],
-   "repeat": "Endurance becomes the running theme: the person carries a load in several places at once and everywhere looks like someone who will not break. The problem is that patience replaces a conversation, and what one direct sentence would solve stretches into years of silent weight. Maturity here is not the size of the reserve but the moment when it is time not to endure once more but to speak and ask for help.",
+   "repeat": "The account is kept more than once, and the same measure spreads over everything: the person notices an imbalance in every matter and names it out loud. The other side of precision is a verdict instead of an attempt to understand, and a bill issued for every small thing. Weigh actions, and leave people the right to be wrong, or being right will remain and the relationship will not.",
    "combinations": [
     {
      "with": 1,
      "title": "The Magician",
      "href": "/encyclopedia/combination/1-8",
-     "short": "begins and finishes: a strong working pair"
+     "short": "an honest start: acts and answers for it"
     },
     {
      "with": 2,
      "title": "The High Priestess",
      "href": "/encyclopedia/combination/2-8",
-     "short": "calm depth: holds on and understands"
+     "short": "sees the truth and names it plainly"
     },
     {
      "with": 3,
      "title": "The Empress",
      "href": "/encyclopedia/combination/3-8",
-     "short": "warmth with a strong root: holds and feeds"
+     "short": "cares by fairness, not by sympathy"
     },
     {
      "with": 4,
      "title": "The Emperor",
      "href": "/encyclopedia/combination/4-8",
-     "short": "weight and order: carries a lot on themselves"
+     "short": "rule and fairness: law in its pure form"
     },
     {
      "with": 5,
      "title": "The Hierophant",
      "href": "/encyclopedia/combination/5-8",
-     "short": "calm authority: teaches and holds out"
+     "short": "knowledge and measure: explains how it should be done"
     },
     {
      "with": 6,
      "title": "The Lovers",
      "href": "/encyclopedia/combination/6-8",
-     "short": "attraction and reliability: a pair for the long run"
+     "short": "choice and honesty: decides and answers for it"
     },
     {
      "with": 7,
      "title": "The Chariot",
      "href": "/encyclopedia/combination/7-8",
-     "short": "drive and reserve: goes far without breaking down"
+     "short": "races by the rules: fast and fair"
     },
     {
      "with": 9,
      "title": "The Hermit",
      "href": "/encyclopedia/combination/8-9",
-     "short": "strength in silence: endures and understands deeply"
+     "short": "depth and honesty: digs in and judges on the facts"
     },
     {
      "with": 10,
      "title": "The Wheel",
      "href": "/encyclopedia/combination/8-10",
-     "short": "steady in rough water: holds on any wave"
+     "short": "chance and calculation: luck that gets checked"
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/8-11",
      "short": "strength and honesty: puts people right calmly"
     },
@@ -2483,72 +2483,72 @@
      "with": 12,
      "title": "The Hanged Man",
      "href": "/encyclopedia/combination/8-12",
-     "short": "patience and pause: bears a long wait"
+     "short": "honesty and pause: waits for the right call"
     },
     {
      "with": 13,
      "title": "Death",
      "href": "/encyclopedia/combination/8-13",
-     "short": "endured and ended it: the strength to let go"
+     "short": "a fair ending: closes cleanly and by the rules"
     },
     {
      "with": 14,
      "title": "Temperance",
      "href": "/encyclopedia/combination/8-14",
-     "short": "strength with measure: works long and without strain"
+     "short": "measure and fairness: judges without extremes"
     },
     {
      "with": 15,
      "title": "The Devil",
      "href": "/encyclopedia/combination/8-15",
-     "short": "power and passion: a strong body and strong wanting"
+     "short": "law and appetite: counts and wants"
     },
     {
      "with": 16,
      "title": "The Tower",
      "href": "/encyclopedia/combination/8-16",
-     "short": "endurance in disaster: holds on while things collapse"
+     "short": "truth that breaks things: speaks and wrecks"
     },
     {
      "with": 17,
      "title": "The Star",
      "href": "/encyclopedia/combination/8-17",
-     "short": "strength and hope: carries on and keeps believing"
+     "short": "fairness and faith: truth with hope"
     },
     {
      "with": 18,
      "title": "The Moon",
      "href": "/encyclopedia/combination/8-18",
-     "short": "carries other people’s pain: a quiet support"
+     "short": "justice and instinct: catches a lie"
     },
     {
      "with": 19,
      "title": "The Sun",
      "href": "/encyclopedia/combination/8-19",
-     "short": "calm strength in the light: respected and loved"
+     "short": "honesty in daylight: open and kind truth"
     },
     {
      "with": 20,
      "title": "Judgement",
      "href": "/encyclopedia/combination/8-20",
-     "short": "strength for the work: carries a calling"
+     "short": "judgement and the sum: really settles accounts"
     },
     {
      "with": 21,
      "title": "The World",
      "href": "/encyclopedia/combination/8-21",
-     "short": "great strength: holds a large undertaking"
+     "short": "fairness at scale: law for many people"
     },
     {
      "with": 22,
      "title": "The Fool",
      "href": "/encyclopedia/combination/8-22",
-     "short": "solid and free: strong but impossible to hold"
+     "short": "rules and freedom: an honest rule-breaker"
     }
    ],
    "seo": {
-    "title": "Destiny matrix 8 — Strength: meaning of the arcanum",
-    "description": "Strength, the eighth arcanum of the destiny matrix, is about inner power and composure. What 8 means, how its strong version differs from the weak one.",
+    "title": "Destiny matrix 8 — Justice: meaning of the arcanum",
+    "description": "8 in the destiny matrix is the arcanum of Justice: the energy of balance and law. What 8 means, its strong and weak side, how it differs from neighbours.",
     "queries": [
      "destiny matrix 8",
      "destiny matrix 8 arcana",
@@ -2558,7 +2558,7 @@
      "destiny matrix arcana 8",
      "destiny matrix chart 8 arcana",
      "destiny matrix chart 8 meaning",
-     "destiny matrix strength"
+     "destiny matrix justice"
     ]
    }
   },
@@ -2582,7 +2582,7 @@
     "The engine here is a question that will not let go. While other people move on, this one is still digging. The main inner conflict grows out of exactly that: depth needs solitude, but what depth produces needs people. Going into yourself is easy and familiar, bringing the finished thing out into the light is hard, and the arcanum spends its whole life on that seam.",
     "To be the ninth arcanum means carrying constant quiet work inside, work that nobody outside suspects. The world feels too loud for what the person is looking for; depth and silence pull harder than any company. A pause before answering and distance taken in advance are not coldness, they are a way of living.",
     "This energy has two versions, and from the outside they are easy to mix up. In the strong one the person runs their own solitude: they choose depth on purpose, dig out rare knowledge and share it with those who found their way to them. In the weak one the solitude runs the person — they once shut the door out of tiredness, coming back out gets harder every year, and the wall grows thicker without any decision being made. One slides into the other unnoticed, and the shift can only be caught from the inside.",
-    "What separates the ninth from its neighbours is precisely the silence. The eighth, Strength, takes what it needs from contact — it tames emotion and wins by warmth and direct pressure; the ninth finds the same footing by stepping away from people. The tenth, The Wheel, catches the moment and the luck in it and moves on the wave of events; the ninth is indifferent to timing and keeps digging at its own slow pace, whatever the world around it is busy with."
+    "What separates the ninth from its neighbours is precisely the silence. The eighth, Justice, gives its decision out loud — it weighs, judges and answers for its verdict in front of everyone; the ninth looks for the same truth in silence and finds it by stepping away from people. The tenth, The Wheel, catches the moment and the luck in it and moves on the wave of events; the ninth is indifferent to timing and keeps digging at its own slow pace, whatever the world around it is busy with."
    ],
    "in_positions": {
     "character": "Distance shows at once. The person answers after a pause, does not keep small talk going and looks like a guest in a noisy company. Meanwhile there is constant work going on inside that they never tell anyone about.",
@@ -2784,9 +2784,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-9",
-     "short": "strength in silence: endures and understands deeply"
+     "short": "depth and honesty: digs in and judges on the facts"
     },
     {
      "with": 10,
@@ -2796,9 +2796,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/9-11",
-     "short": "depth and honesty: digs in and judges on the facts"
+     "short": "strength in silence: endures and understands deeply"
     },
     {
      "with": 12,
@@ -2901,7 +2901,7 @@
     "A ten in the destiny matrix is the energy of the cycle and the turn: such a person’s life moves in circles rather than in a straight line, and what decides it is not years of even work but the rare moments when the wheel comes round and everything settles differently. What 10 means is living inside changing stretches, where a fall is followed by a rise, and luck and loss turn out to be two sides of one revolution.",
     "The character of this energy is mobile and quick to sense things. The inner engine of a ten is neither will nor calculation but a feel for the moment: it catches what is about to sway and is there before the change becomes obvious to everyone else. Hence the main inner conflict — between wanting to steer events and knowing that the wheel will come round on its own. Being this arcanum means deciding again and again where your move is, and where you simply have to sit the turn out and not take the pause for a defeat.",
     "In its strong version the ten is a navigator: it does not argue with the current but reads it and enters the new earlier than others, while the turn is only beginning. The weak version is the same character, sensitive to change but twisted into passivity: since so much is decided by chance, it seems that nothing needs changing and hoping is enough. The difference between them is not who gets more luck, but whether a person takes part in the turn of the wheel or watches it roll past.",
-    "From its neighbour The Hermit this arcanum differs in tempo and direction: the ninth goes inwards and ripens in silence, the tenth lives on the surface of the event and wins by the speed of its reaction. From Justice it differs in its attitude to cause: the eleventh arcanum is sure that every consequence has been earned and can be worked out in advance, while the tenth feels the world as a game of chances, where a case caught in time is worth more than a long plan."
+    "From its neighbour The Hermit this arcanum differs in tempo and direction: the ninth goes inwards and ripens in silence, the tenth lives on the surface of the event and wins by the speed of its reaction. From Strength it differs in how it meets circumstances: the eleventh arcanum tames them with patience and gentle endurance, while the tenth feels the world as a game of chances, where a case caught in time is worth more than long endurance."
    ],
    "in_positions": {
     "character": "There is a mild unpredictability about this person: they live in waves, turn without warning and have a knack for being in the right place. Five-year plans are not their thing, but the feel for the right moment is.",
@@ -3103,9 +3103,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-10",
-     "short": "steady in rough water: holds on any wave"
+     "short": "chance and calculation: luck that gets checked"
     },
     {
      "with": 9,
@@ -3115,9 +3115,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/10-11",
-     "short": "chance and calculation: luck that gets checked"
+     "short": "steady in rough water: holds on any wave"
     },
     {
      "with": 12,
@@ -3203,65 +3203,65 @@
   },
   {
    "n": 11,
-   "slug": "justice",
-   "title": "Justice",
+   "slug": "strength",
+   "title": "Strength",
    "roman": "XI",
    "matrix_number": 11,
-   "short": "balance and honesty: weighs things and calls them by their names",
+   "short": "inner power without shouting: copes where others give up",
    "keywords": [
-    "justice",
-    "honesty",
-    "balance",
-    "law",
-    "choice",
-    "consequence"
+    "strength",
+    "endurance",
+    "power",
+    "fairness",
+    "calm",
+    "taming"
    ],
    "meaning": [
-    "The eleventh arcanum in the destiny matrix is the energy of balance and law. It weighs without stopping: where what was put in and what came back have met, and where someone has been left short — and it demands that an act and its consequence meet. If 11 stands in your calculation, you are driven by a sense of measure: the inner need for the account to add up and for a word given to be kept.",
-    "Being this arcanum means carrying scales inside that never switch off. A tilt and a lie are felt almost physically, and pretending that everything is fine does not work even for the sake of comfort. This gives rare clarity and directness, but it also keeps you tense: where someone else shrugs and forgets, the eleventh notices the mismatch and cannot walk past it.",
-    "The main drive here is to bring balance back: to straighten what has tilted, to name the price, to close the debt. And the same drive hides the number’s main conflict — the thin line between putting right and punishing. Let the measure shift half a step, and the pull towards truth becomes a thirst for payback, and a clear mind becomes a prosecutor for whom everyone is guilty already.",
-    "A strong 11 keeps measure for the sake of clarity and connection: it can settle a matter on its merits, then close the subject and let it go. A weak one turns the same scales into a weapon — it passes sentence on everyone, keeps an endless register of grievances and confuses justice with revenge. The difference is not in how sharp the sense of truth is, but in whether it serves people or stands over them as a judge.",
-    "Among its neighbours in the deck, Justice stands sharply apart. The tenth arcanum, The Wheel, gives everything to chance and to the cycle — you are lucky or you are not; the eleventh is sure that nothing is accidental, that everything has been earned and paid for. The twelfth, The Hanged Man, knows how to wait, to give something up and to look at things another way, letting go of control; the eleventh has to decide and hand down a verdict now — and the pause is exactly what it finds hardest to learn."
+    "The eleventh arcanum in the destiny matrix answers for inner strength — the kind that rests on reserves rather than on force. What eleven means is calm power that does not need to raise its voice to be heard. Such a person takes things not with a dash but with the ability to hold out longer than everyone else and not break where others have already given up.",
+    "The engine of this arcanum is taming, not crushing. On the card a woman gently closes a lion’s jaws: what is wild here is not killed but tamed — one’s own fear, one’s own anger, somebody else’s panic, a task nobody can lift. Hence the paradox of Strength: the calmer the person looks from outside, the more force they hold inside. Power here is measured not by what they can break, but by what they can bear and keep in check.",
+    "The main inner conflict of Strength is between “I will hold out” and “time to stop”. The very endurance that makes a person a support easily becomes a trap: if I bear it, then I can bear more — and a huge reserve goes for years into something that should have been let go long ago. Strength with no outlet does not disappear, it goes stale: unspent power turns into a dull weight the person carries about and takes for normal.",
+    "In its strong version the arcanum is a conscious support: the person spends the reserve where it is needed, knows how to say “enough” in time, and asks for help without counting that as weakness. The weak version is the silent strongman who drags everything alone, takes pride in it and slowly burns out, while all that power turns into pressure on the people nearby. The difference between them is not how much strength there is, but whether it has a direction and a brake.",
+    "From its neighbouring arcana the eleventh differs in the way it acts. The tenth, The Wheel, gives everything to chance and to the cycle — you are lucky or you are not; the eleventh does not wait for the turn, it endures every turn of the wheel and stays on its feet. The twelfth, The Hanged Man, lets go of control and looks at everything another way; the eleventh stays in the very thick of things and holds them up. Where one trusts to luck and the other gives in to the current, Strength simply endures — and by that alone it changes the situation."
    ],
    "in_positions": {
-    "character": "Straightness shows at once: this person calls things what they are and cannot pretend that everything is fine. Lying around them is uncomfortable and agreeing with them is easy — they keep their word and expect the same back.",
-    "comfort": "Feels steady where everything is honest: clear terms, figures said out loud, nothing left unsaid. Vague arrangements and hints wear such a centre out faster than the hardest work does.",
-    "profession": "The strong side is sorting out what is disputed. Lawyer, auditor, judge, negotiator — anyone who weighs the arguments and decides on the merits. Work that asks you to look away from breaches breaks this person from the inside. This strength gets its price where the rules of a decision are visible and the final conclusion can be put on the table and defended with facts.",
-    "realisation": "Realisation goes through putting balance back: wherever something tilts, this person levels it out. The field itself can be anything; what matters is the right to say “this is unfair” and be heard.",
-    "karma40": "In early adult life the eleventh arcanum learns not to pass sentence. Verdicts come out fast, and they land on yourself too; life may show that other people act for reasons nobody told you about.",
-    "resources": "Money comes for accuracy and honesty: where others get confused, this person counts correctly, and that is what gets paid for. The condition is asking for your share out loud instead of waiting for fairness to happen on its own.",
-    "family_gifts": "Somewhere in the family there was a person who restored the truth or stood their ground — in court and in life. That straight backbone came down by inheritance and holds this person where everyone else gives in. A sense of measure is useful in your own agreements; the role of household judge is already too much.",
-    "soul_tasks": "The argument with yourself is about forgiving. Remembering every grievance point by point is easy, closing the question is hard, and quiet inside comes only after the list is finally shut.",
-    "past_lives": "Keeping score of everything is the habit that carried over. The sense of measure is real: this person sees the tilt before others do and names it plainly. The books get balanced even where nobody is balancing them, and being right remains — with no one nearby. In one old argument, be the first to drop your rightness and look at what is left.",
-    "purpose": "The life task is to bring an honest measure into things: a contract, a court, a rule, an argument taken apart. Such people become the ones you come to with the question “how is it done properly”, and that role is no accident.",
-    "money": "Steady income starts with accuracy: contract, calculation, check, a fair price. Debts and unclear sums put this arcanum out faster than anything else, so clean accounts are literally a way of earning for it. Recount one arrangement on paper and say the figure out loud before the work starts — fairness rarely grows out of silence.",
-    "money40": "By mature years the eleventh arcanum brings the reputation of an honest one: referrals, long-standing clients, the role of arbiter in disputes. Such a person’s word begins to cost money — they are called in when someone has to judge and call things by their names. Anything built on half-truths falls apart under that test: an old unsaid thing surfaces exactly when a big deal is being settled. Look over your agreements and rewrite the one whose terms still rest on a spoken “we will sort it out somehow”.",
-    "relations": "A couple holds on equal contributions. This person keeps an inner count, and if the tilt lasts, the relationship ends without a scene — simply by decision. What saves it is the habit of talking about balance before it collapses. A conversation about one specific episode works here; a conversation that sentences the whole person does not.",
-    "parents_children": "Honesty and what is earned — that is what this family valued: praise came for a deed, not just so. The person goes on judging fairly: with a child, a student, the youngest on the team there are sometimes more rules than warmth. A younger one needs to know that they are accepted apart from their behaviour, so praise has to be said separately from the verdict.",
-    "ancestry": "An old debt or dispute in the line has to be closed. Often it is undivided property, an inheritance never put on paper, a grudge between relatives — and sorting it out falls to this person. Close one dispute that is within your reach with a document, a calculation or an honest agreement, without taking on the role of judge for the whole line.",
-    "body_resource": "Unfairness reaches this arcanum through the body: a long conflict drains strength faster than any workload. It is calm where the score has been said out loud: the sum, the deadline and the answer are spoken, and attention moves on to the work instead of replaying the grievance. An open score comes back to mind at night, and being hard on yourself easily becomes a second such score. Close one hanging question in writing and notice how much attention comes free for ordinary things.",
-    "chakras": "Justice: this level works through the theme “balance: to each by their contribution”. The strong move is to see where things tilt and to name it; the failure looks like a verdict handed down before the other side has been heard. Only one thing brings the footing back: ask the other side before you draw a conclusion.",
-    "rest": "Real rest arrives when questions are closed: matters sorted, bills settled, nothing promised to anyone. A holiday with an unfinished job standing behind you is not felt at all. One loose end closed before the weekend is worth more than an extra day off, and the remaining debts are more honestly written down for later.",
-    "loops": "The script runs like this: noticed the tilt, demanded fairness, got a conflict, retreated into being right. The way out is to say what you want out of it before the tilt has turned into a grievance.",
-    "years": "A stretch under Justice lays contracts, calculations and conversations on the table that can no longer be kept in fog. What is sorted out fairly here serves for decades afterwards: terms made exact, deadlines named, your own share of the fault admitted. The most expensive habit is turning every story into a trial of yourself or of others. Rewrite one agreement to fit the conditions that have changed, instead of defending a rule that is no longer about this life.",
-    "day": "Arcanum “Justice” · A · First impressions gather around one theme: balance and honesty — weighs things up and calls them by their names. At full strength the person sees the tilt and names it plainly; under strain the person passes sentence on people instead of understanding them. The image becomes a steady reputation when you manage to ask the other side before you draw a conclusion.",
-    "month": "Arcanum “Justice” · B · A spiritual task you are born with switches on by itself: balance and honesty — weighs things up and calls them by their names. So the person may not count it as a gift that the person sees the tilt and names it plainly; the other side shows when the person passes sentence on people instead of understanding them. The mature task of this position is to ask the other side before you draw a conclusion.",
-    "year": "Arcanum “Justice” · C · Material work carries the theme “balance and honesty — weighs things up and calls them by their names” from intention to result. The strong side shows in deeds: the person sees the tilt and names it plainly; out of balance the person passes sentence on people instead of understanding them. This position is lived not by a promise but by a readiness to ask the other side before you draw a conclusion.",
-    "mission": "Arcanum “Justice” · D · Not a punishment here but a story that keeps returning: balance and honesty — weighs things up and calls them by their names. The grown-up answer starts where the person sees the tilt and names it plainly, and the old circle starts with the opposite: the person passes sentence on people instead of understanding them. One concrete decision breaks the repeat: ask the other side before you draw a conclusion.",
-    "center": "Arcanum “Justice” · E · At the centre of the chart stands balance: this person is calm when everything is honestly named and nobody owes anybody in silence. They weigh without hurrying, call things by their names and do not play along with the convenient version. The footing is lost by the one who puts the score above people, judges instead of living and stays right alone. In one argument, give way on purpose and see what changes besides the score.",
-    "father_line": "Arcanum “Justice” · F · Down the spiritual male line a principle is kept: balance and honesty — weighs things up and calls them by their names. The strong side of that inheritance shows like this: the person sees the tilt and names it plainly; the heavy side of the script is that the person passes sentence on people instead of understanding them. Taking the strength of the line without its hardness means learning to ask the other side before you draw a conclusion.",
-    "mother_line": "Arcanum “Justice” · G · Along the spiritual female line the house rule is kept: balance and honesty — weighs things up and calls them by their names. In the supporting version the person sees the tilt and names it plainly; in the tangled one the person repeats something else and passes sentence on people instead of understanding them. Rewriting the rule while keeping what it is worth comes down to a choice: ask the other side before you draw a conclusion.",
-    "descendants": "Arcanum “Justice” · H · Here the family principle turns into an act: balance and honesty — weighs things up and calls them by their names. In its reliable form the person sees the tilt and names it plainly; the automatic form passes sentence on people instead of understanding them. A new continuation of the male line starts with the skill to ask the other side before you draw a conclusion.",
-    "inheritance": "Arcanum “Justice” · I · Family values enter everyday life here: balance and honesty — weighs things up and calls them by their names. The resource shows when the person sees the tilt and names it plainly; the usual tilt is that the person passes sentence on people instead of understanding them. Making the inheritance a support rather than a duty takes a readiness to ask the other side before you draw a conclusion.",
-    "comfort_west": "Arcanum “Justice” · J · Outer portrait A meets the centre E through the theme “balance and honesty — weighs things up and calls them by their names”. If the passage is free, the person sees the tilt and names it plainly; if the role argues with the inner state, the person passes sentence on people instead of understanding them. Matching the outside to the inside comes from one decision: ask the other side before you draw a conclusion.",
-    "comfort_north": "Arcanum “Justice” · K · Talent on the B–P–K line takes its shape: balance and honesty — weighs things up and calls them by their names. The mature gift shows in the way the person sees the tilt and names it plainly; trying to earn recognition leads to the opposite, where the person passes sentence on people instead of understanding them. The talent takes form when you manage to ask the other side before you draw a conclusion.",
-    "comfort_east": "Arcanum “Justice” · L · The money line opens with the theme “balance and honesty — weighs things up and calls them by their names”. This is not a promise of income but a way in: at their best the person sees the tilt and names it plainly, out of balance the person passes sentence on people instead of understanding them. To turn the impulse into steady work, it helps to ask the other side before you draw a conclusion.",
-    "comfort_south": "Arcanum “Justice” · M · Where relationships fork away from the karmic tail, this shows up: balance and honesty — weighs things up and calls them by their names. The first reaction helps closeness when the person sees the tilt and names it plainly, and starts the old script when the person passes sentence on people instead of understanding them. Going round in circles stops with a pause long enough to ask the other side before you draw a conclusion.",
-    "love_middle": "Arcanum “Justice” · R1 · A couple runs into the count: who put in how much, is it fairly divided, was it honest. Straightness helps: with such a person you never have to guess where you stand or what they think. Then being right turns out to matter more than the person, the close one becomes a side in a dispute, and warmth is squeezed out by the balance of “you to me, me to you”. In a quarrel, drop your rightness once and see what is left besides the score.",
-    "harmony": "Arcanum “Justice” · spiritual · Personal and social levels are joined by the theme “balance and honesty — weighs things up and calls them by their names”. Agreement with yourself is felt when the person sees the tilt and names it plainly; the inner argument comes back when the person passes sentence on people instead of understanding them. Tying the two levels into one direction takes a readiness to ask the other side before you draw a conclusion.",
-    "planetary": "Arcanum “Justice” · planetary · Beyond a personal biography goes the theme “balance and honesty — weighs things up and calls them by their names”, out past a single life story. A contribution becomes visible to many when the person sees the tilt and names it plainly; the scale stays a pretty idea if the person passes sentence on people instead of understanding them. Starting from real influence rather than a loud role comes from one decision: ask the other side before you draw a conclusion.",
-    "purpose_personal": "Arcanum “Justice” · personal · With no audience the person would still choose the theme: balance and honesty — weighs things up and calls them by their names. Loyalty to yourself shows in the way the person sees the tilt and names it plainly; walking away from your task shows when the person passes sentence on people instead of understanding them. This position comes alive when you manage to ask the other side before you draw a conclusion.",
-    "purpose_social": "Arcanum “Justice” · social · Others can lean on the theme: balance and honesty — weighs things up and calls them by their names. In shared work this person is most useful when they see the tilt and name it plainly; the role stops working when the person passes sentence on people instead of understanding them. Steady use instead of an image comes from one concrete choice: ask the other side before you draw a conclusion."
+    "character": "The impression is one of weight and calm. This person does not raise their voice, does not rush and does not fuss, yet their decisions are heard without shouting. People who arrive looking for a row usually cool down beside them.",
+    "comfort": "Recovery comes through steady effort: your own rhythm, heavy work without hurry, quiet afterwards. Fuss and a drumbeat of small errands wear this centre out far more than real labour does.",
+    "profession": "A gift for holding up under weight and dealing with the hard part. They are taken on where steadiness is needed: crisis roles, work with difficult people, production, emergency services, sport. Light, fiddly tasks bore this talent, and within a year the heaviest job is picked up out of habit rather than out of force. Mature Strength knows in advance the limit of what it can carry and the moment to hand the result on, instead of proving its worth by endless strain.",
+    "realisation": "Here the person becomes the one who holds. They take on weight that others will not lift — not out of self-sacrifice, but because they have the reserve for it.",
+    "karma40": "In the first adult stretch the eleventh arcanum learns not to put up with what it need not. It can bear almost anything, and years in the wrong job or the wrong couple get built on that. A different answer appears the first time the person ends something bearable but pointless.",
+    "resources": "Payment comes here for staying power and for force that can be seen from the outside: people want something to lean on, and they pay for that support. The condition is not to haul everyone who asks for free. The difference is simple: one kind of support is answered for, the other is simply passed to you.",
+    "family_gifts": "A sturdy breed came down this line: someone in it bore the unbearable and did not break. The reserve works almost by itself, and that is the trap — enduring starts before the person has asked themselves why. The inheritance holds as long as patience has a border, beyond which a request or a refusal is spoken.",
+    "soul_tasks": "The delicate subject here is anger. Calm on the outside, this arcanum stores things up and then discharges on the people closest to it. The task is to let irritation out in time and in words, not a year later and not through a wall.",
+    "past_lives": "A habit of enduring and not complaining was brought along. The stamina is real: this person carries loads that make others step back, and does it in silence. Someone else’s business drags on for years, resentment piles up, and then they leave suddenly and without explanation. Say the limit out loud on the day it is reached, not a year later.",
+    "purpose": "The purpose is to be the support for many: a team, a family, students, people who arrive in trouble. The measure is simple — those nearby grow calmer around this person, and they say so out loud.",
+    "money": "Endurance and reliability are what get paid for: long jobs, heavy projects, first-class physical work. What slows things down is modesty — this person does more than anyone and asks for less than anyone. Put a price on your reliability, and name separately which help no longer comes inside that price.",
+    "money40": "With the years the eleventh arcanum sells calm: people come when everything is on fire and pay for the fact that they do not panic. That is worth more than any hourly rate — staying power proven by deeds counts higher than a diploma. The angle fails where staying power is confused with putting up with things: the person hauls for free what should have been charged for long ago. Raise the price on the single hardest service and see whether even one client walks away.",
+    "relations": "Life beside such a person is calm: reliability and patience, sometimes too much of it. The partner gets used to not trying, and for years the person pulls the relationship along alone, until they switch off completely. Strength here sounds like a border named quietly, not like patience piling up towards an explosion.",
+    "parents_children": "From the elders came steady support and an unspoken ban on showing weakness. The support gets passed on — it is safe beside this person; along with it comes the heavy weight of authority. It helps to talk about your own weak spots: otherwise the younger ones grow up feeling that being tired or afraid is not allowed.",
+    "ancestry": "Silent endurance counts as a virtue in this family line — and that is exactly what it is time to stop. Bearing everything without a word is the house rule, and the job is to show that you can leave, refuse, ask. Say one plain ‘this does not suit me’ where before you would have kept quiet, and watch what actually happens.",
+    "body_resource": "Strength has a large reserve, but not an endless one: tiredness arrives late, once several years have already been lived on patience. It stays whole as long as a refusal is spoken out loud the same day instead of being carried around for half a year. This person hauls their own bag and someone else’s as well, and notices the weight only when enduring has become the only way to live. Hand one borrowed task back and see what actually happens.",
+    "chakras": "Strength: the level works through the theme of calm power — to tame rather than to crush. The strong move is staying steady where everyone else snaps; the failure looks like patience stretched until there is nothing left to be patient about. One thing brings the support back: admitting tiredness before it turns into a breakdown.",
+    "rest": "What restores is physical and plain: a steam bath, the forest, water, work with the hands and no deadline. Noisy entertainment gives this person nothing but weariness from other people’s voices. You recognise such a day by the fact that in the evening you do not want to explain anything to anyone — and that is not fatigue.",
+    "loops": "The circle runs like this: I put up with it, I store it up, I blow up, I blame myself for blowing up. It is broken not by more staying power but by a conversation in the first week rather than in the third year.",
+    "years": "The decade of Strength is a climb with a heavy rucksack: a lot of work, responsibility for others, other people’s affairs that somehow became your own. People come out of such a climb tougher than they went in, if the weight was chosen to fit: what you took on can be carried for a year, and anything extra is handed back without guilt. Proving toughness at any cost is dangerous: the rucksack grows in silence, and those close to you notice first. Set the limit of one accepted responsibility in advance and check in a month whether it held.",
+    "day": "Arcanum “Strength” · A · The first impression is built around the theme: inner power without shouting, coping where others give up. At its strongest the person stays steady where everyone else snaps; under strain they put up with things for years instead of having one conversation. The image turns into a lasting reputation when they manage to admit tiredness before it becomes a breakdown.",
+    "month": "Arcanum “Strength” · B · The inborn spiritual task switches itself on: inner power without shouting, coping where others give up. So the person may not count it as a gift that they stay steady where everyone else snaps; the other side shows when they put up with things for years instead of having one conversation. The mature task of this position is to admit tiredness before it becomes a breakdown.",
+    "year": "Arcanum “Strength” · C · The material task carries the theme of inner power without shouting, coping where others give up, from plan into result. The strong side shows in what gets done: the person stays steady where everyone else snaps; when it tips over, they put up with things for years instead of having one conversation. This position is lived out not by a promise but by a readiness to admit tiredness before it becomes a breakdown.",
+    "mission": "Arcanum “Strength” · D · This is not a punishment but a storyline that keeps coming back: inner power without shouting, coping where others give up. The adult answer starts where the person stays steady while everyone else snaps, and the old circle starts with the opposite: putting up with things for years instead of having one conversation. One concrete decision breaks the repeat — admit tiredness before it becomes a breakdown.",
+    "center": "Arcanum “Strength” · E · At the centre of the chart lies quiet force: the person holds what others back away from, and does it without shouting. They do not snap, they carry a load for a long time, and beside them things stop being frightening. The support is lost by whoever hauls someone else’s weight in silence until nothing is left, because endurance has turned into a duty. Once a month name the limit out loud: what you no longer carry and from which day.",
+    "father_line": "Arcanum “Strength” · F · The spiritual male line keeps a principle: inner power without shouting, coping where others give up. The strong side of the inheritance shows like this — the person stays steady where everyone else snaps; the heavy side of the script is putting up with things for years instead of having one conversation. Taking the force of the line without its hardness means admitting tiredness before it becomes a breakdown.",
+    "mother_line": "Arcanum “Strength” · G · The spiritual female line keeps the rule of the house: inner power without shouting, coping where others give up. In the supportive version the person stays steady where everyone else snaps; in the tangled one they repeat something else — putting up with things for years instead of having one conversation. Rewriting the rule while keeping its value comes down to a choice: admit tiredness before it becomes a breakdown.",
+    "descendants": "Arcanum “Strength” · H · Here the principle of the family line turns into an act: inner power without shouting, coping where others give up. In its reliable form the person stays steady where everyone else snaps; the automatic form is putting up with things for years instead of having one conversation. A new continuation of the male line begins with the skill of admitting tiredness before it becomes a breakdown.",
+    "inheritance": "Arcanum “Strength” · I · Here the values of the family line enter everyday life: inner power without shouting, coping where others give up. The resource shows when the person stays steady where everyone else snaps; the usual tilt is putting up with things for years instead of having one conversation. Making the inheritance a support rather than a duty takes a willingness to admit tiredness before it becomes a breakdown.",
+    "comfort_west": "Arcanum “Strength” · J · The outer portrait A joins the centre E through the theme of inner power without shouting, coping where others give up. If the passage is clear, the person stays steady where everyone else snaps; if the role argues with the inner state, they put up with things for years instead of having one conversation. Bringing the outside and the inside together takes a decision: admit tiredness before it becomes a breakdown.",
+    "comfort_north": "Arcanum “Strength” · K · The talent on the B–P–K line takes shape: inner power without shouting, coping where others give up. A mature gift shows in the fact that the person stays steady where everyone else snaps; trying to earn recognition leads to putting up with things for years instead of having one conversation. The talent takes shape when they manage to admit tiredness before it becomes a breakdown.",
+    "comfort_east": "Arcanum “Strength” · L · The money line opens with the theme of inner power without shouting, coping where others give up. This is not a promise of income but a way in: at its best the person stays steady where everyone else snaps, and when it tips over they put up with things for years instead of having one conversation. To turn the impulse into lasting work it helps to admit tiredness before it becomes a breakdown.",
+    "comfort_south": "Arcanum “Strength” · M · At the fork between relationships and the karmic tail this shows up: inner power without shouting, coping where others give up. The first reaction helps closeness when the person stays steady where everyone else snaps, and it starts the old script when they put up with things for years instead of having one conversation. Not going round in circles takes a pause in which it is possible to admit tiredness before it becomes a breakdown.",
+    "love_middle": "Arcanum “Strength” · R1 · The couple holds together on endurance: this person pulls for a long time, does not snap and does not air the family’s dirty linen. It is calm beside them even in hard times: they will not drop things halfway or make a scene in front of others. The habit of enduring instead of talking piles up over years what one straight sentence would have settled, and it ends in a sudden departure. Name what you are unhappy with the same day, while it is still small and not yet the outcome.",
+    "harmony": "Arcanum “Strength” · spiritual · The personal and the social levels are joined by the theme of inner power without shouting, coping where others give up. Agreement with yourself is felt when the person stays steady where everyone else snaps; the inner argument returns when they put up with things for years instead of having one conversation. Tying the two levels into one direction takes a readiness to admit tiredness before it becomes a breakdown.",
+    "planetary": "Arcanum “Strength” · planetary · Reaching out beyond a personal biography is the theme of inner power without shouting, coping where others give up. The contribution becomes visible to many when the person stays steady where everyone else snaps; the scale stays a pretty idea if they put up with things for years instead of having one conversation. Starting from real influence rather than a loud role takes a decision: admit tiredness before it becomes a breakdown.",
+    "purpose_personal": "Arcanum “Strength” · personal · With no audience the person would choose the theme: inner power without shouting, coping where others give up. Being true to yourself shows in staying steady where everyone else snaps; walking away from your own task shows in putting up with things for years instead of having one conversation. This position comes alive when they manage to admit tiredness before it becomes a breakdown.",
+    "purpose_social": "Arcanum “Strength” · social · Others can lean on the theme: inner power without shouting, coping where others give up. In shared work they are especially useful when they stay steady where everyone else snaps; the role stops working when they put up with things for years instead of having one conversation. Lasting usefulness instead of an image comes from one concrete choice: admit tiredness before it becomes a breakdown."
    },
    "position_links": [
     {
@@ -3366,64 +3366,64 @@
     }
    ],
    "plus": [
-    "sees an imbalance and names it directly",
-    "decides on the merits, not on sympathy",
-    "keeps agreements to the letter",
-    "learns from consequences quickly"
+    "keeps calm where others break down",
+    "carries a long load without strain",
+    "calms people down by being there",
+    "handles fear without running from it"
    ],
    "minus": [
-    "judges people instead of understanding them",
-    "demands retribution and cannot forgive",
-    "freezes in being right and loses the relationship",
-    "torments themselves over old mistakes"
+    "endures for years instead of one conversation",
+    "presses with their weight even without meaning to",
+    "refuses to ask for help on principle",
+    "stores anger and discharges it on those close"
    ],
-   "repeat": "The account is kept more than once, and the same measure spreads over everything: the person notices an imbalance in every matter and names it out loud. The other side of precision is a verdict instead of an attempt to understand, and a bill issued for every small thing. Weigh actions, and leave people the right to be wrong, or being right will remain and the relationship will not.",
+   "repeat": "Endurance becomes the running theme: the person carries a load in several places at once and everywhere looks like someone who will not break. The problem is that patience replaces a conversation, and what one direct sentence would solve stretches into years of silent weight. Maturity here is not the size of the reserve but the moment when it is time not to endure once more but to speak and ask for help.",
    "combinations": [
     {
      "with": 1,
      "title": "The Magician",
      "href": "/encyclopedia/combination/1-11",
-     "short": "an honest start: acts and answers for it"
+     "short": "begins and finishes: a strong working pair"
     },
     {
      "with": 2,
      "title": "The High Priestess",
      "href": "/encyclopedia/combination/2-11",
-     "short": "sees the truth and names it plainly"
+     "short": "calm depth: holds on and understands"
     },
     {
      "with": 3,
      "title": "The Empress",
      "href": "/encyclopedia/combination/3-11",
-     "short": "cares by fairness, not by sympathy"
+     "short": "warmth with a strong root: holds and feeds"
     },
     {
      "with": 4,
      "title": "The Emperor",
      "href": "/encyclopedia/combination/4-11",
-     "short": "rule and fairness: law in its pure form"
+     "short": "weight and order: carries a lot on themselves"
     },
     {
      "with": 5,
      "title": "The Hierophant",
      "href": "/encyclopedia/combination/5-11",
-     "short": "knowledge and measure: explains how it should be done"
+     "short": "calm authority: teaches and holds out"
     },
     {
      "with": 6,
      "title": "The Lovers",
      "href": "/encyclopedia/combination/6-11",
-     "short": "choice and honesty: decides and answers for it"
+     "short": "attraction and reliability: a pair for the long run"
     },
     {
      "with": 7,
      "title": "The Chariot",
      "href": "/encyclopedia/combination/7-11",
-     "short": "races by the rules: fast and fair"
+     "short": "drive and reserve: goes far without breaking down"
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-11",
      "short": "strength and honesty: puts people right calmly"
     },
@@ -3431,91 +3431,91 @@
      "with": 9,
      "title": "The Hermit",
      "href": "/encyclopedia/combination/9-11",
-     "short": "depth and honesty: digs in and judges on the facts"
+     "short": "strength in silence: endures and understands deeply"
     },
     {
      "with": 10,
      "title": "The Wheel",
      "href": "/encyclopedia/combination/10-11",
-     "short": "chance and calculation: luck that gets checked"
+     "short": "steady in rough water: holds on any wave"
     },
     {
      "with": 12,
      "title": "The Hanged Man",
      "href": "/encyclopedia/combination/11-12",
-     "short": "honesty and pause: waits for the right call"
+     "short": "patience and pause: bears a long wait"
     },
     {
      "with": 13,
      "title": "Death",
      "href": "/encyclopedia/combination/11-13",
-     "short": "a fair ending: closes cleanly and by the rules"
+     "short": "endured and ended it: the strength to let go"
     },
     {
      "with": 14,
      "title": "Temperance",
      "href": "/encyclopedia/combination/11-14",
-     "short": "measure and fairness: judges without extremes"
+     "short": "strength with measure: works long and without strain"
     },
     {
      "with": 15,
      "title": "The Devil",
      "href": "/encyclopedia/combination/11-15",
-     "short": "law and appetite: counts and wants"
+     "short": "power and passion: a strong body and strong wanting"
     },
     {
      "with": 16,
      "title": "The Tower",
      "href": "/encyclopedia/combination/11-16",
-     "short": "truth that breaks things: speaks and wrecks"
+     "short": "endurance in disaster: holds on while things collapse"
     },
     {
      "with": 17,
      "title": "The Star",
      "href": "/encyclopedia/combination/11-17",
-     "short": "fairness and faith: truth with hope"
+     "short": "strength and hope: carries on and keeps believing"
     },
     {
      "with": 18,
      "title": "The Moon",
      "href": "/encyclopedia/combination/11-18",
-     "short": "justice and instinct: catches a lie"
+     "short": "carries other people’s pain: a quiet support"
     },
     {
      "with": 19,
      "title": "The Sun",
      "href": "/encyclopedia/combination/11-19",
-     "short": "honesty in daylight: open and kind truth"
+     "short": "calm strength in the light: respected and loved"
     },
     {
      "with": 20,
      "title": "Judgement",
      "href": "/encyclopedia/combination/11-20",
-     "short": "judgement and the sum: really settles accounts"
+     "short": "strength for the work: carries a calling"
     },
     {
      "with": 21,
      "title": "The World",
      "href": "/encyclopedia/combination/11-21",
-     "short": "fairness at scale: law for many people"
+     "short": "great strength: holds a large undertaking"
     },
     {
      "with": 22,
      "title": "The Fool",
      "href": "/encyclopedia/combination/11-22",
-     "short": "rules and freedom: an honest rule-breaker"
+     "short": "solid and free: strong but impossible to hold"
     }
    ],
    "seo": {
-    "title": "Destiny matrix 11 — Justice: meaning of the arcanum",
-    "description": "11 in the destiny matrix is the arcanum of Justice: the energy of balance and law. What 11 means, its strong and weak side, how it differs from neighbours.",
+    "title": "Destiny matrix 11 — Strength: meaning of the arcanum",
+    "description": "Strength, the eleventh arcanum of the destiny matrix, is about inner power and composure. What 11 means, how its strong version differs from the weak one.",
     "queries": [
      "destiny matrix 11",
      "destiny matrix 11 arcana",
      "destiny matrix 11 meaning",
      "destiny matrix arcana 11",
      "destiny matrix chart arcana 11",
-     "destiny matrix justice",
+     "destiny matrix strength",
      "11 in the destiny matrix",
      "arcanum 11 in the destiny matrix"
     ]
@@ -3540,7 +3540,7 @@
     "The twelfth arcanum in the destiny matrix is the energy of the stop and of the changed angle. It is not about acting, but about what happens when acting is impossible: life puts a person on pause, turns them round and makes them see the same thing differently. Its main idea is simple — the winner is not the one who pushes hardest, but the one who agreed to hang upside down and watch the picture to the end.",
     "The engine inside The Hanged Man is the clash between will and letting go. He keeps wanting to press harder, to speed things up, to take control back, yet it is exactly this grip that leaves him hanging. The energy is released only through giving something up on purpose: dropping the quick and the small for the real and the own. While a person holds on, they hang; the moment they open their hand, they fall forward and gain movement.",
     "To be the twelfth arcanum is to live at a pace that a hurrying world finds alien. From the inside it feels like slowness and frequent idle spells, behind which the strong version does quiet inner work: the pause becomes a source of precise, hard-won decisions and of a rare view that people who answer at a run never get. The weak version turns the same pause into being stuck and a pretty name for doing nothing — years of waiting in which nothing was given away and nothing received.",
-    "The twelfth is easy to tell apart from the cards standing next to it, and the difference shows up in what it does with time. The eleventh, Justice, demands an act here and now — weigh it up and answer for the result; the twelfth asks the opposite, not to hurry with an answer. The thirteenth, Death, cuts off and shuts the door for good, while The Hanged Man does not shut it — he keeps it ajar and waits until it becomes clear whether to walk in. His strength lies neither in the blow nor in the ending, but in the ability to wait it out and turn the point of view around."
+    "The twelfth is easy to tell apart from the cards standing next to it, and the difference shows up in what it does with time. The eleventh, Strength, is in no hurry either, but its patience is an effort: it holds the lion and does not loosen its grip; the twelfth holds nothing — it lets go and asks you not to hurry with an answer. The thirteenth, Death, cuts off and shuts the door for good, while The Hanged Man does not shut it — he keeps it ajar and waits until it becomes clear whether to walk in. His strength lies neither in the blow nor in the ending, but in the ability to wait it out and turn the point of view around."
    ],
    "in_positions": {
     "character": "A calm person who seems to move at half speed and never hurries an answer. Inside, though, their own work is going on, and their decisions often turn out more accurate than those of people who replied at once.",
@@ -3742,9 +3742,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-12",
-     "short": "patience and pause: bears a long wait"
+     "short": "honesty and pause: waits for the right call"
     },
     {
      "with": 9,
@@ -3760,9 +3760,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-12",
-     "short": "honesty and pause: waits for the right call"
+     "short": "patience and pause: bears a long wait"
     },
     {
      "with": 13,
@@ -4062,9 +4062,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-13",
-     "short": "endured and ended it: the strength to let go"
+     "short": "a fair ending: closes cleanly and by the rules"
     },
     {
      "with": 9,
@@ -4080,9 +4080,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-13",
-     "short": "a fair ending: closes cleanly and by the rules"
+     "short": "endured and ended it: the strength to let go"
     },
     {
      "with": 12,
@@ -4382,9 +4382,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-14",
-     "short": "strength with measure: works long and without strain"
+     "short": "measure and fairness: judges without extremes"
     },
     {
      "with": 9,
@@ -4400,9 +4400,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-14",
-     "short": "measure and fairness: judges without extremes"
+     "short": "strength with measure: works long and without strain"
     },
     {
      "with": 12,
@@ -4702,9 +4702,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-15",
-     "short": "power and passion: a strong body and strong wanting"
+     "short": "law and appetite: counts and wants"
     },
     {
      "with": 9,
@@ -4720,9 +4720,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-15",
-     "short": "law and appetite: counts and wants"
+     "short": "power and passion: a strong body and strong wanting"
     },
     {
      "with": 12,
@@ -5022,9 +5022,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-16",
-     "short": "endurance in disaster: holds on while things collapse"
+     "short": "truth that breaks things: speaks and wrecks"
     },
     {
      "with": 9,
@@ -5040,9 +5040,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-16",
-     "short": "truth that breaks things: speaks and wrecks"
+     "short": "endurance in disaster: holds on while things collapse"
     },
     {
      "with": 12,
@@ -5342,9 +5342,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-17",
-     "short": "strength and hope: carries on and keeps believing"
+     "short": "fairness and faith: truth with hope"
     },
     {
      "with": 9,
@@ -5360,9 +5360,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-17",
-     "short": "fairness and faith: truth with hope"
+     "short": "strength and hope: carries on and keeps believing"
     },
     {
      "with": 12,
@@ -5662,9 +5662,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-18",
-     "short": "carries other people’s pain: a quiet support"
+     "short": "justice and instinct: catches a lie"
     },
     {
      "with": 9,
@@ -5680,9 +5680,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-18",
-     "short": "justice and instinct: catches a lie"
+     "short": "carries other people’s pain: a quiet support"
     },
     {
      "with": 12,
@@ -5982,9 +5982,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-19",
-     "short": "calm strength in the light: respected and loved"
+     "short": "honesty in daylight: open and kind truth"
     },
     {
      "with": 9,
@@ -6000,9 +6000,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-19",
-     "short": "honesty in daylight: open and kind truth"
+     "short": "calm strength in the light: respected and loved"
     },
     {
      "with": 12,
@@ -6302,9 +6302,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-20",
-     "short": "strength for the work: carries a calling"
+     "short": "judgement and the sum: really settles accounts"
     },
     {
      "with": 9,
@@ -6320,9 +6320,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-20",
-     "short": "judgement and the sum: really settles accounts"
+     "short": "strength for the work: carries a calling"
     },
     {
      "with": 12,
@@ -6622,9 +6622,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-21",
-     "short": "great strength: holds a large undertaking"
+     "short": "fairness at scale: law for many people"
     },
     {
      "with": 9,
@@ -6640,9 +6640,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-21",
-     "short": "fairness at scale: law for many people"
+     "short": "great strength: holds a large undertaking"
     },
     {
      "with": 12,
@@ -6942,9 +6942,9 @@
     },
     {
      "with": 8,
-     "title": "Strength",
+     "title": "Justice",
      "href": "/encyclopedia/combination/8-22",
-     "short": "solid and free: strong but impossible to hold"
+     "short": "rules and freedom: an honest rule-breaker"
     },
     {
      "with": 9,
@@ -6960,9 +6960,9 @@
     },
     {
      "with": 11,
-     "title": "Justice",
+     "title": "Strength",
      "href": "/encyclopedia/combination/11-22",
-     "short": "rules and freedom: an honest rule-breaker"
+     "short": "solid and free: strong but impossible to hold"
     },
     {
      "with": 12,
