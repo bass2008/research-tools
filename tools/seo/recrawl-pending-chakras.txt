@@ -1,0 +1,16 @@
+# ОЖИДАЕТ ОТДЕЛЬНОЙ КОМАНДЫ: после релиза не отправлять автоматически.
+# Только RU. Отправлять только после выкладки, иначе робот придёт на прежний текст.
+# Раздел чакр переведён на марсельскую нумерацию (8 — Справедливость, 11 — Сила):
+# каталог, семь статей, общее энергополе и руководство «Чакры».
+# Адреса отправлялись ранее, поэтому нужен --again:
+#     python3 tools/seo/yandex-recrawl.py send --again --only tools/seo/recrawl-pending-chakras.txt
+/encyclopedia/chakra
+/encyclopedia/chakra/muladhara
+/encyclopedia/chakra/svadhisthana
+/encyclopedia/chakra/manipura
+/encyclopedia/chakra/anahata
+/encyclopedia/chakra/vishuddha
+/encyclopedia/chakra/ajna
+/encyclopedia/chakra/sahasrara
+/encyclopedia/chakra/energy-field
+/encyclopedia/position/chakras

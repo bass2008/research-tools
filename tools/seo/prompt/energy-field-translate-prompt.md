@@ -18,7 +18,7 @@
 - **Голос как в оригинале:** это персональный отчёт, обращение на «вы» → «you/your» сохраняется. Спокойный, тёплый, конкретный тон, без мистического тумана.
 - **heading** — короткая живая фраза по-английски, не калька; заголовки внутри пакета не должны повторяться.
 - **captions** — по 2–5 слов на каждую из трёх карт, в том же порядке (физика, энергия, эмоции).
-- **Имена арканов** — как на английском сайте: The Magician, The High Priestess, The Empress, The Emperor, The Hierophant, The Lovers, The Chariot, Strength (8), The Hermit, The Wheel of Fortune, Justice (11), The Hanged Man, Death, Temperance, The Devil, The Tower, The Star, The Moon, The Sun, Judgement, The World, The Fool. Внутри предложения — со строчным артиклем (the Magician), как в английских текстах сайта.
+- **Имена арканов** — как на английском сайте: The Magician, The High Priestess, The Empress, The Emperor, The Hierophant, The Lovers, The Chariot, Justice (8), The Hermit, The Wheel of Fortune, Strength (11), The Hanged Man, Death, Temperance, The Devil, The Tower, The Star, The Moon, The Sun, Judgement, The World, The Fool. Внутри предложения — со строчным артиклем (the Magician), как в английских текстах сайта.
 - **Термины:** энергополе → energy field (overall energy field), физика/энергия/эмоции → physics/energy/emotions, чакра → chakra. Написание британское (centre, colour).
 - **Жирный `**…**`** — там же, где в оригинале. Курсив одной звёздочкой не использовать.
 - **Без предсказаний событий, диагнозов и медицинских обещаний** — как в оригинале.

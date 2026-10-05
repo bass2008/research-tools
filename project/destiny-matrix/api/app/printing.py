@@ -34,7 +34,7 @@ _report_locks: dict[tuple[int, int, str], tuple[threading.Lock, int]] = {}
 
 # Bump when the printed content changes: older PDFs are reprinted on the next owner download,
 # historical objects stay. v2: internal print Host links; v3: rewritten chakra readings.
-PDF_REVISION = "v4"
+PDF_REVISION = "v5"
 
 
 @contextmanager

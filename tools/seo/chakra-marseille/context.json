@@ -1,0 +1,150 @@
+{
+ "ru": {
+  "sahasrara": {
+   "topic": "Смысл и ориентиры",
+   "intro": "Тема ценностей и смысла: поступки, внутренняя опора и чувства, сопровождающие выбранный путь.",
+   "columns": {
+    "physics": "Как ценности проявляются в решениях и делах. В первой колонке стоит аркан дня рождения; его читают через поступки, а не через отвлечённую оценку духовности.",
+    "energy": "На что человек опирается в поиске смысла и почему выбирает определённый путь. Здесь стоит месяц рождения: допустимы значения от 1 до 12.",
+    "emotions": "Как переживается выбранный путь: интерес, согласие с собой, сомнение или чувство долга. Третье число получено из первых двух и не оценивает правильность убеждений."
+   }
+  },
+  "ajna": {
+   "topic": "Восприятие и понимание",
+   "intro": "Тема понимания и внимания: как вы проверяете идеи, поддерживаете интерес и переживаете неопределённость.",
+   "columns": {
+    "physics": "Как вы строите и проверяете представление о задаче: наблюдаете, планируете, сопоставляете сведения. Читайте аркан через конкретный способ работы с информацией.",
+    "energy": "Что поддерживает мыслительный поиск: ясная структура, новизна, глубина или возможность посмотреть иначе. Номер не определяет способности к учёбе.",
+    "emotions": "Как вы реагируете на ясность, ошибку и неизвестность. Сильное ощущение не служит доказательством верности догадки; его можно использовать как повод задать вопрос."
+   }
+  },
+  "vishuddha": {
+   "topic": "Речь и влияние",
+   "intro": "Тема речи и слушания: как вы выражаете мысль, зачем вступаете в разговор и как воспринимаете ответ.",
+   "columns": {
+    "physics": "Как мысль становится словом и договорённостью: формулировка просьбы, объяснение, отказ, слушание. Сверяйте смысл аркана с конкретным разговором.",
+    "energy": "Зачем вы вступаете в контакт и что помогает продолжать его: поиск решения, понимания, согласия или возможности выразить себя.",
+    "emotions": "Как переживается ответ собеседника: радость, обида, напряжение или облегчение. Здесь полезно отделить сказанное человеком от вашего предположения о его намерении."
+   }
+  },
+  "anahata": {
+   "topic": "Близость и взаимная забота",
+   "intro": "Тема близости и границ: как вы проявляете заботу, что поддерживает участие и какие чувства возникают в контакте.",
+   "columns": {
+    "physics": "Как близость становится поступком: помощь, совместный быт, время и соблюдение границ. Читайте число как тему для проверки своего поведения, а не как меру любви.",
+    "energy": "Что поддерживает участие в отношениях: потребность во взаимности, устойчивости, свободе или ясности. Здесь важно назвать собственную мотивацию, не приписывая её партнёру.",
+    "emotions": "Как переживается контакт: тепло, доверие, обида, ревность или сомнение. Число предлагает тему наблюдения; конкретное чувство определяется ситуацией."
+   }
+  },
+  "manipura": {
+   "topic": "Воля и самостоятельность",
+   "intro": "Тема самостоятельности и ответственности: ваши действия, мотивация и отклик на собственные решения.",
+   "columns": {
+    "physics": "Как вы действуете: выбираете задачу, планируете, договариваетесь об условиях и доводите дело до результата. Номер обозначает способ, а не объём сделанной работы.",
+    "energy": "Что помогает действовать и сохранять самостоятельность. Число совпадает с физикой, но здесь его читают через мотивацию и отношение к препятствиям.",
+    "emotions": "Как вы переживаете успех, отказ, оценку и неопределённость. Этот аркан получен из двух первых, но читается как отдельный вопрос об отклике."
+   }
+  },
+  "svadhisthana": {
+   "topic": "Желания и удовольствие",
+   "intro": "Тема радости и творчества: чем вы занимаетесь с интересом, что побуждает продолжать и какой отклик остаётся.",
+   "columns": {
+    "physics": "Как интерес проявляется в занятиях, отдыхе и творчестве. Смотрите на реальные способы проводить время, а не на представление о том, как правильно отдыхать.",
+    "energy": "Что вызывает желание и поддерживает вовлечённость. В этой колонке нашего расчёта встречаются 3, 6, 9, 12, 15, 18 и 21; это номера арканов, а не шкала удовольствия.",
+    "emotions": "Какое чувство остаётся после занятия: удовлетворение, вина, азарт или скука. Сверяйте описание с собственным опытом, а не только с привлекательностью идеи."
+   }
+  },
+  "muladhara": {
+   "topic": "Опора в повседневной жизни",
+   "intro": "Тема повседневной опоры: устройство быта, мотивация его поддерживать и переживание безопасности.",
+   "columns": {
+    "physics": "Как устроена повседневная опора: быт, жильё, расходы и привычные действия. Число помогает выбрать вопрос для разбора, но не описывает материальное положение само по себе.",
+    "energy": "Что побуждает поддерживать устойчивость и как вы действуете при её нарушении. Это разговор о мотивации и привычках, а не измерение запаса сил.",
+    "emotions": "Как переживается безопасность и зависимость от обстоятельств. Чувство тревоги или спокойствия проверяют по реальной ситуации, а не выводят автоматически из номера."
+   }
+  },
+  "energy_field": {
+   "topic": "Общее энергополе",
+   "intro": "Строка итогов под таблицей семи чакр: свёрнутая сумма каждой колонки по всем семи чакрам. Не восьмая чакра, а общий тон, в котором звучат все семь уровней вместе. Одно и то же энергополе получается у очень разных карт: не приписывай человеку значения отдельных чакр, не пиши «ваша Анахата…» и не выводи числа других позиций.",
+   "columns": {
+    "physics": "Общий материальный ритм: как человек в целом действует, берётся за дела, обращается со временем, вещами, усилием тела в деле. Без медицины и здоровья.",
+    "energy": "Как распределяется усилие между сферами жизни: откуда в целом берутся силы, на что они уходят, как восполняются.",
+    "emotions": "Общий эмоциональный отклик: как человек в целом переживает происходящее, чем откликается на успех, потерю, неопределённость, близость."
+   }
+  }
+ },
+ "en": {
+  "sahasrara": {
+   "topic": "Meaning and direction",
+   "intro": "Values and meaning: your actions, inner motivation and feelings about the path you choose.",
+   "columns": {
+    "physics": "In matter this is about the end result: which of a person’s deeds outlive them — what they wrote, what they built, the people they taught. The same column shows whether they manage to do anything not only for themselves.",
+    "energy": "Gives a reserve of meaning that strength is drawn from in the hard years. With that reserve a person comes through losses without falling apart; with none, they break on the first serious injustice.",
+    "emotions": "Felt as quiet gratitude and a sense that life is not an accident. Out of balance it turns into either exaltation and an endless search for a teacher, or a cold emptiness in which everything looks pointless."
+   }
+  },
+  "ajna": {
+   "topic": "Perception and understanding",
+   "intro": "Understanding and attention: how you test ideas, sustain interest and respond to uncertainty.",
+   "columns": {
+    "physics": "Shows what seeing turns into in practice: planning, strategy, work with other people’s ideas. A weak column looks like good ideas that never make it as far as a timetable.",
+    "energy": "Feeds intuition and curiosity. This column shows the way a person learns: one needs a teacher and a structure, another just sits in silence and works it all out alone.",
+    "emotions": "About trusting yourself. At its best, a calm confidence in your own reading of a situation; at its worst, nagging pictures of the future that frighten more than anything real ever does."
+   }
+  },
+  "vishuddha": {
+   "topic": "Speech and influence",
+   "intro": "Speaking and listening: how you express an idea, why you start a conversation and how you feel about the response.",
+   "columns": {
+    "physics": "The work where a voice turns into a result: negotiations, texts, teaching, sales. The column also shows whether a person is paid for what they say and write.",
+    "energy": "Puts drive into a conversation and carries the weight of someone else’s pressure without snapping and without going silent. An empty column: the voice gives out exactly when it is time to answer.",
+    "emotions": "Honesty with yourself lives here. At its best a person says what they think and is calm once the talk is over; at its worst they store up the unsaid, then pour it all out at once and at the wrong person."
+   }
+  },
+  "anahata": {
+   "topic": "Closeness and mutual care",
+   "intro": "Closeness and boundaries: how you show care, what motivates your involvement and how you feel in a relationship.",
+   "columns": {
+    "physics": "Shows what love turns into day to day: who cooks the soup, who pays, who keeps the house running. An empty column looks like big feelings with no shared life behind them.",
+    "energy": "Answers for the ability to carry a relationship for years — through quarrels, dull spells and boredom. The parental reserve sits here too: how much warmth a person can give away without running empty.",
+    "emotions": "The core: how attachment is felt and what someone does with jealousy, hurt and tenderness. In the minus it is either icy politeness or life on an emotional swing."
+   }
+  },
+  "manipura": {
+   "topic": "Will and independence",
+   "intro": "Independence and responsibility: your actions, motivation and feelings about your own decisions.",
+   "columns": {
+    "physics": "Straight about money and position: how much a person earns, what they own, how they behave in a bargain. It also shows the line below which they should not be agreeing to anything.",
+    "energy": "Gives will and the power to push a thing through. A full column means someone does not fall apart at a refusal and goes to the end; an empty one means a good start and then waiting for somebody else to decide.",
+    "emotions": "This column is about anger and dignity. Anger in good order lifts a person and guards their boundaries; suppressed, it turns into resentment towards those who do well; overheated, into contempt for the weak."
+   }
+  },
+  "svadhisthana": {
+   "topic": "Desire and pleasure",
+   "intro": "Enjoyment and creativity: what you like doing, what encourages you to continue and how you feel afterwards.",
+   "columns": {
+    "physics": "What a person makes with their hands for pleasure and how they treat their body: food, movement, sex, craft. Children belong here in the most everyday sense too — playing, messing about, spending time for no reason at all.",
+    "energy": "The source of live interest. A full column means ideas and wants arrive by themselves; an empty one means someone runs on willpower and coffee, with nothing left to want.",
+    "emotions": "About being able to enjoy things and to allow yourself something good. In the minus: guilt over pleasure, envy of people who know how to rest, and slips into snacking or other quick comforts."
+   }
+  },
+  "muladhara": {
+   "topic": "Everyday support",
+   "intro": "Everyday support: how you organise daily life, what motivates you to maintain it and how secure you feel.",
+   "columns": {
+    "physics": "The most literal column of the three: body, stamina, a place to live, money left in the account. It shows whether a person has a foundation solid enough to build something lasting on.",
+    "energy": "Gives staying power and the ability to hold on when everything is falling apart. A full column means a person gets back on their feet with sleep and a proper meal; an empty one means a single conversation drains them and every change of season knocks them out of action.",
+    "emotions": "This is about the basic sense of safety. At its best it gives calm and trust in life; at its worst, a fear of not having enough, which makes a person accept bad terms and then cling to them."
+   }
+  },
+  "energy_field": {
+   "topic": "Overall energy field",
+   "intro": "The totals row under the table of seven chakras: the reduced sum of each column across all seven chakras. Not an eighth chakra but the overall tone in which all seven levels sound together. The same energy field comes from very different charts: do not attribute meanings of separate chakras to the person.",
+   "columns": {
+    "physics": "The overall material rhythm: how the person acts in general, takes on tasks, handles time, things and physical effort. No medicine or health.",
+    "energy": "How effort is distributed across areas of life: where strength comes from overall, what it goes to, how it is restored.",
+    "emotions": "The overall emotional response: how the person lives through events, how they respond to success, loss, uncertainty, closeness."
+   }
+  }
+ }
+}

@@ -26,7 +26,7 @@ describe.each(["ru", "en"] as const)("readable role names (%s)", (locale) => {
       expect(html).toContain(`/encyclopedia/chakra/${row.key}`);
     }
     if (locale === "ru") {
-      expect(html).toContain("Вам легче идти в новое, когда есть к кому возвращаться.");
+      expect(html).toContain("Ваша опора — не запасы, а спокойствие и близость, которые вы носите с собой.");
     } else {
       expect(html.replace(/<[^>]*>/g, " ")).not.toMatch(/[А-Яа-яЁё]/);
     }
@@ -44,7 +44,7 @@ describe.each(["ru", "en"] as const)("readable role names (%s)", (locale) => {
     expect(reading.chakraRows!.every((row) => row.cells.every((cell) => cell.caption !== ""))).toBe(true);
     const html = renderToStaticMarkup(<CharacterReadingView reading={reading} locale={locale} />);
     expect(html).not.toContain('data-empty="true"');
-    expect(html).not.toContain("Вам легче идти в новое");
+    expect(html).not.toContain("Ваша опора — не запасы");
   });
 
   it("renders translated names in summaries, role cards, repeats and interactions", () => {
