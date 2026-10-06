@@ -29,6 +29,18 @@ interface Row {
   indexed: boolean;
 }
 
+const ENDING = /(ами|ями|ого|ему|ому|ах|ях|ам|ям|ов|ей|ой|ом|ем|ые|ый|ых|ым|ий|ь|[аеиоуыэюя])$/;
+const FILLER = new Set(["в", "во", "и"]);
+
+// Один запрос с точностью до формы и порядка слов: «22 аркана матрица судьбы» и «22 аркан в матрице
+// судьбы» Вордстат считает одной фразой. Порядок чисел значим: «18 9 9» и «9 9 18» — разные хвосты.
+function queryKey(query: string): string {
+  const words = query.toLowerCase().replace(/ё/g, "е").match(/[\p{L}\p{N}_]+/gu) ?? [];
+  const numbers = words.filter((w) => /^\d+$/.test(w));
+  const stems = [...new Set(words.filter((w) => !/^\d+$/.test(w) && !FILLER.has(w)).map((w) => w.replace(ENDING, "")))];
+  return `${numbers.join(" ")}|${stems.sort().join(" ")}`;
+}
+
 function rows(): Row[] {
   const out: Row[] = [];
   for (const [file, keyField] of Object.entries(SOURCES)) {
@@ -47,6 +59,17 @@ function rows(): Row[] {
       });
     }
   }
+  const crossings = JSON.parse(readFileSync(path.join(CONTENT, "position-arcanum.json"), "utf8"));
+  for (const item of crossings.items ?? []) {
+    const queries = [item.primary_query, ...(item.queries ?? [])].filter(
+      (q): q is string => typeof q === "string" && q.trim() !== "",
+    );
+    out.push({
+      who: `position-arcanum/${item.position}/${item.arcanum}`,
+      queries: queries.map((q) => q.trim().toLowerCase()),
+      indexed: item.publication?.index !== false,
+    });
+  }
   return out;
 }
 
@@ -61,15 +84,18 @@ describe("целевые запросы", () => {
   // заявлены были ровно два — и оба оказались дефектами. Значит полная уникальность держится, и
   // любое новое пересечение — ошибка, а не норма.
   it("не заявлены двумя индексируемыми адресами", () => {
-    const byQuery = new Map<string, string[]>();
+    const byQuery = new Map<string, { text: string; who: string[] }>();
     for (const row of indexed) {
-      for (const query of new Set(row.queries)) {
-        byQuery.set(query, [...(byQuery.get(query) ?? []), row.who]);
+      for (const key of new Set(row.queries.map(queryKey))) {
+        const text = row.queries.find((q) => queryKey(q) === key) ?? key;
+        const seen = byQuery.get(key) ?? { text, who: [] };
+        seen.who.push(row.who);
+        byQuery.set(key, seen);
       }
     }
-    const clashes = [...byQuery.entries()]
-      .filter(([, who]) => who.length > 1)
-      .map(([query, who]) => `«${query}» → ${who.sort().join(", ")}`);
+    const clashes = [...byQuery.values()]
+      .filter(({ who }) => who.length > 1)
+      .map(({ text, who }) => `«${text}» → ${who.sort().join(", ")}`);
     expect(clashes).toEqual([]);
   });
 

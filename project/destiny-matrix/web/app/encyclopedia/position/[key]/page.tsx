@@ -2,6 +2,7 @@ import { requestSite } from "@/lib/siteProfile.server";
 import PositionMap from "@/components/enc/PositionMap";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
+import TocHeading from "@/components/enc/TocHeading";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
 import Price from "@/components/pay/Price";
@@ -166,7 +167,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
       />
 
       {guide ? null : <div className="panel section-gap">
-        <h2>{D.encPosition.howCounted[L]}</h2>
+        <TocHeading id="formula">{D.encPosition.howCounted[L]}</TocHeading>
         <div className="cap">{D.encPosition.howCountedHint[L]}</div>
         <p style={{ margin: 0 }}>{extra.formula}</p>
         {section ? (
@@ -202,7 +203,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
       {p.key === "character" ? (
         <div className="panel section-gap">
-          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <TocHeading id="example">{D.encPosition.personalExampleTitle[L]}</TocHeading>
           <div className="cap">{D.encPosition.characterExampleHint[L]}</div>
           <p>{D.encPosition.characterExampleText[L]}</p>
           <p className="encref">
@@ -215,7 +216,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
       {p.key === "comfort" ? (
         <div className="panel section-gap">
-          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <TocHeading id="example">{D.encPosition.personalExampleTitle[L]}</TocHeading>
           <div className="cap">{D.encPosition.comfortExampleHint[L]}</div>
           <p>{D.encPosition.comfortExampleText[L]}</p>
           <p className="encref">
@@ -228,7 +229,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
       {p.key === "profession" ? (
         <div className="panel section-gap">
-          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <TocHeading id="example">{D.encPosition.personalExampleTitle[L]}</TocHeading>
           <div className="cap">{D.encPosition.professionExampleHint[L]}</div>
           <p>{D.encPosition.professionExampleText[L]}</p>
           <p className="encref">
@@ -241,7 +242,7 @@ export default async function PositionPage({ params }: { params: Promise<Params>
 
       {exampleHref && exampleCode && !["character", "comfort", "profession"].includes(p.key) ? (
         <div className="panel section-gap">
-          <h2>{D.encPosition.personalExampleTitle[L]}</h2>
+          <TocHeading id="example">{D.encPosition.personalExampleTitle[L]}</TocHeading>
           <div className="cap">
             {p.key === "chakras"
               ? D.encPosition.chakraExampleHint[L]

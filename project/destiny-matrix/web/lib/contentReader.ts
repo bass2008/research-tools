@@ -58,7 +58,7 @@ export interface QA {
   a: string;
 }
 
-/** Статья категории по схеме `docs/article-requirements.md` D2: проза в полях, связи — списком ключей. */
+/** Статья категории по схеме `.agents/skills/arcana-product-skill/references/content-format.md`, «Схема по категориям»: проза в полях, связи — списком ключей. */
 export interface ArticleContent {
   key: string;
   title: string;
@@ -100,6 +100,8 @@ export interface ArcanumContent {
   seo: { title: string; description: string };
   sections: Section[];
   faq: QA[];
+  /** Полная статья аркана: если она есть, страница рисуется по ней, а `meaning` и панели уходят. */
+  article?: ChakraArticle;
 }
 
 export interface PositionContent {
@@ -126,6 +128,8 @@ export interface PositionArcanumRow {
   frequency: number;
   /** Головной запрос есть только у записи, которую видит поиск: без спроса заявлять его нельзя. */
   primaryQuery: string | null;
+  /** Другие формулировки того же вопроса из Вордстата: «матрица судьбы любовь 7» при главном «отношения 7». */
+  queries: string[];
   wording: string;
   wordings: Record<string, number>;
   publication: { index: boolean; follow: boolean };
@@ -588,6 +592,7 @@ export function createContent(L: Locale, source: ContentSource) {
       seo,
       sections: sectionsOf(raw.sections, `аркан ${n}`) ?? [],
       faq: faqOf(raw.faq, `аркан ${n}`) ?? [],
+      article: raw.article === undefined ? undefined : chakraArticleOf(raw.article, String(n), `аркан ${n}, статья`),
     };
   }
 
@@ -611,6 +616,7 @@ export function createContent(L: Locale, source: ContentSource) {
       arcanum,
       frequency: typeof raw.frequency === "number" ? raw.frequency : 0,
       primaryQuery: query,
+      queries: Array.isArray(raw.queries) ? raw.queries.filter((q): q is string => typeof q === "string" && q.trim() !== "") : [],
       wording,
       wordings: (raw.wordings ?? {}) as Record<string, number>,
       publication: {
@@ -695,9 +701,8 @@ export function createContent(L: Locale, source: ContentSource) {
     };
   }
 
-  function chakraArticleOf(v: unknown, key: string): ChakraArticle {
+  function chakraArticleOf(v: unknown, key: string, where = `чакра ${key}, статья`): ChakraArticle {
     const raw = (v && typeof v === "object" && !Array.isArray(v) ? v : {}) as Bag;
-    const where = `чакра ${key}, статья`;
     const title = typeof raw.title === "string" ? raw.title.trim() : "";
     const short = typeof raw.short === "string" ? raw.short.trim() : "";
     const seo = seoOf(raw.seo);

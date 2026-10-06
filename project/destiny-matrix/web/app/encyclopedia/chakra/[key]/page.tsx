@@ -1,6 +1,7 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import PositionMap from "@/components/enc/PositionMap";
 import Sections, { Paragraphs } from "@/components/enc/Sections";
+import TocHeading from "@/components/enc/TocHeading";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
 import Price from "@/components/pay/Price";
@@ -139,7 +140,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         {!extra.readings.length && paragraphs.map((text, i) => (
           <p key={i}>{text}</p>
         ))}
-        <h2 id="calculation">{D.encChakra.howCounted[L]}</h2>
+        <TocHeading id="calculation">{D.encChakra.howCounted[L]}</TocHeading>
         <p>
           {D.encChakra.howCountedText[L](c.title, c.physics, c.energy)}
         </p>
@@ -154,7 +155,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
 
       {extra.columns.length ? (
         <div className="panel section-gap">
-          <h2>{D.encChakra.threeColumns[L]}</h2>
+          <TocHeading id="columns">{D.encChakra.threeColumns[L]}</TocHeading>
           <div className="cap">{D.encChakra.threeColumnsHint[L]}</div>
           <dl className="kv">
             {extra.columns.map((col) => (
@@ -167,11 +168,11 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         </div>
       ) : null}
 
-      <div id="reading"><Sections items={extra.sections} locale={L} /></div>
+      <div id="reading"><Sections items={extra.sections} locale={L} idPrefix="r" /></div>
 
       {extra.examples.length ? (
         <section className="prose section-gap" id="examples">
-          <h2>{D.encChakra.examples[L]}</h2>
+          <TocHeading id="examples-title">{D.encChakra.examples[L]}</TocHeading>
           {extra.examples.map((example) => (
             <section key={example.birth}>
               <h3>{example.numbers.join(" / ")}</h3>
@@ -184,7 +185,7 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
 
       {extra.readings.length ? (
         <section className="section-gap" id="numbers">
-          <h2>{D.encChakra.numbers[L]}</h2>
+          <TocHeading id="numbers-title">{D.encChakra.numbers[L]}</TocHeading>
           <p className="prose">{D.encChakra.numbersHint[L]}</p>
           <nav className="taglist" aria-label={D.encChakra.numbers[L]}>
             {extra.readings.map((row) => (

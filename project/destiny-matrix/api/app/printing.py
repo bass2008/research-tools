@@ -34,7 +34,7 @@ _report_locks: dict[tuple[int, int, str], tuple[threading.Lock, int]] = {}
 
 # Bump when the printed content changes: older PDFs are reprinted on the next owner download,
 # historical objects stay. v2: internal print Host links; v3: rewritten chakra readings.
-PDF_REVISION = "v5"
+PDF_REVISION = "v6"
 
 
 @contextmanager
@@ -257,7 +257,6 @@ def _reprint(user_id: int, matrix_id: int, locale: str) -> bool:
 
 
 def _reprint_all(groups: list[tuple[int, int, str]]) -> None:
-    # The API can come up before web on a release, so the first prints may fail: retry with a pause.
     for group in groups:
         for attempt in range(REPRINT_ATTEMPTS):
             if _reprint(*group):
@@ -266,11 +265,10 @@ def _reprint_all(groups: list[tuple[int, int, str]]) -> None:
                 time.sleep(REPRINT_PAUSE_SECONDS)
 
 
-# Release-time migration, safe on every start: PDFs of an older PDF_REVISION are reprinted in the
-# background; once all are current it does nothing.
-def reprint_stale() -> int:
+def stale() -> list[tuple[int, int, str]]:
+    """Готовые PDF прежней PDF_REVISION, которые надо перепечатать."""
     if not settings.print_warmup or not settings.pdf_enabled:
-        return 0
+        return []
     try:
         with SessionLocal() as db:
             groups = db.execute(select(ReportJob.user_id, ReportJob.matrix_id, ReportJob.locale).distinct()
@@ -278,9 +276,16 @@ def reprint_stale() -> int:
                                        ReportJob.object_key.not_like(f"{PDF_REVISION}/%"))).all()
     except Exception as exc:                       # noqa: BLE001
         log.warning("устаревшие PDF не найдены: %s", exc)
-        return 0
+        return []
+    return [tuple(g) for g in groups]
+
+
+# Release-time migration, safe on every start: PDFs of an older PDF_REVISION are reprinted in the
+# background; once all are current it does nothing.
+def reprint_stale() -> int:
+    groups = stale()
     if groups:
-        _pool.submit(_reprint_all, [tuple(g) for g in groups])
+        _pool.submit(_reprint_all, groups)
         log.info("перепечатка устаревших PDF: %s", len(groups))
     return len(groups)
 

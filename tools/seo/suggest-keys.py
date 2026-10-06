@@ -537,7 +537,7 @@ def apply_keys(suggests, rec, crossings):
             pub["primary_query"] = primary
         if folder == "arcana":
             # Ищут число, а не имя: заголовок начинается с формы запроса, имя аркана остаётся
-            # пояснением. Длина держится в пределах 70 знаков (`article-requirements.md`).
+            # пояснением. Длина держится в пределах 70 знаков (`arcana-product-skill/references/content-format.md`).
             title = page.get("title") or ""
             page["seo"]["title"] = f"Destiny matrix {name} — {title}: meaning of the arcanum"[:70]
         f.write_text(json.dumps(page, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

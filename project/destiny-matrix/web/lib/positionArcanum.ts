@@ -297,6 +297,7 @@ export const forLocale = localized((L: Locale) => {
     const out = [item.primaryQuery];
     const head = inline(name.h1(arcanum));
     const extras = [
+      ...item.queries,
       DR.crossing.matrixWord[L].test(head) ? head : DR.crossing.queryMatrix[L](head),
     ];
     for (const extra of extras) {

@@ -1,6 +1,8 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import Related from "@/components/enc/Related";
-import Sections from "@/components/enc/Sections";
+import Sections, { Paragraphs } from "@/components/enc/Sections";
+import TocHeading from "@/components/enc/TocHeading";
+import CalcPromo from "@/components/matrix/CalcPromo";
 import ArcanumCard, { forLocale as localizedArcanumCard } from "@/components/matrix/ArcanumCard";
 import { PriceOrFree } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
@@ -23,6 +25,7 @@ import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Fragment } from "react";
 
 type Params = { n: string };
 
@@ -72,9 +75,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   // несуществующая страница выглядела как главная.
   if (!n) return NOT_FOUND_META;
   const e = entry(n);
+  const seo = e.article?.seo ?? e.seo;
   return pageMeta({
-    title: e.seo.title,
-    description: e.seo.description,
+    title: seo.title,
+    description: seo.description,
     path: arcanumHref(n),
     article: true,
   });
@@ -205,16 +209,121 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
     </>
   );
 
+  const crumbs = (
+    <CrumbsLd locale={L}
+      trail={[
+        { name: D.nav.home[L], path: "/" },
+        { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
+        encyclopediaSectionCrumb("arc"),
+        { name: `${n} · ${e.title}` },
+      ]}
+    />
+  );
+
+  if (e.article) {
+    const a = e.article;
+    // калькулятор — после первой трети статьи: раньше он перебивает ответ, позже до него не доходят
+    const calcAt = Math.min(a.sections.length - 1, Math.max(1, Math.round(a.sections.length / 3)));
+    const waiteAt = a.sections.findIndex((section) => /Уэйт|Waite/i.test(section.h2));
+    // на что статья уже сослалась в тексте, блок связанных материалов не повторяет
+    const linked = [...JSON.stringify(a.sections).matchAll(/\]\((\/[^)\s]*)\)/g)].map((m) => m[1]);
+    return (
+      <>
+        {crumbs}
+        <JsonLd
+          data={articleLd({
+            headline: a.seo.title,
+            description: a.seo.description,
+            path: arcanumHref(n),
+            image: arcanumImage(n),
+            keywords: e.keywords,
+          })}
+        />
+        <div className="arc-top arc-hero">
+          <figure className="arc-side">
+            <ArcanumCard locale={L} n={n} size="grid" eager decorative />
+            <figcaption className="arc-cap">
+              {n} · {e.title}
+            </figcaption>
+          </figure>
+          <div className="arc-body">
+            <p className="arc-eyebrow">{D.encArcanum.eyebrow[L](n)}</p>
+            <h1>{a.title}</h1>
+            <p className="hero-lead">{a.short}</p>
+          </div>
+        </div>
+
+        <div className="arc-article" data-toc-root="">
+          {a.sections.map((section, i) => (
+            <Fragment key={section.h2}>
+              {i === calcAt ? (
+                <CalcPromo locale={L} arcanum={n} title={D.encArcanum.calcTitle[L](e.title)} place="arcanum" />
+              ) : null}
+              <section className="arc-sec">
+                <Paragraphs
+                  locale={L}
+                  items={section.paragraphs}
+                  head={
+                    <>
+                      <TocHeading id={`s${i + 1}`}>{section.h2}</TocHeading>
+                      {i === waiteAt ? (
+                        <figure className="arc-waite">
+                          <img src={`/img/arcana/waite/${n}.webp`} width={360} height={620} loading="lazy" decoding="async"
+                            alt={D.encArcanum.waiteCaption[L](e.title)} />
+                          <figcaption>{D.encArcanum.waiteCaption[L](e.title)}</figcaption>
+                        </figure>
+                      ) : null}
+                    </>
+                  }
+                />
+              </section>
+            </Fragment>
+          ))}
+        </div>
+
+        <nav className="arc-nb" aria-label={D.encArcanum.neighbors[L]}>
+          <Link href={arcanumHref(prev)}>
+            <small>← {D.encArcanum.arcanumNumber[L](prev)}</small>
+            <b>{ARCANA[prev - 1].title}</b>
+          </Link>
+          <Link href={arcanumHref(next)}>
+            <small>{D.encArcanum.arcanumNumber[L](next)} →</small>
+            <b>{ARCANA[next - 1].title}</b>
+          </Link>
+        </nav>
+
+        <Tabs
+          items={[
+            { key: "combos", title: D.encArcanum.tabCombos[L], body: combos },
+            { key: "where", title: D.encArcanum.tabWhere[L], body: elsewhereTab },
+          ]}
+        />
+
+        <Related locale={L}
+          path={arcanumHref(n)}
+          refs={[]}
+          skip={[...tails.map((t) => karmicTailHref(t.key)), ...linked]}
+          title={D.encArcanum.relatedTitle[L]}
+          hint={D.encArcanum.relatedHint[L]}
+        />
+
+        <div className="allbox">
+          <h3>{D.encArcanum.whereInYourChart[L]}</h3>
+          <p>{D.encArcanum.whereInChartArticle[L](n, e.title)}</p>
+          <Link className="btn" href="/#calc">
+            {D.matrixPages.calcFree[L]}
+          </Link>
+          <p className="small" style={{ marginTop: 10 }}>
+            {D.encArcanum.fullReadingAll[L]} <PriceOrFree locale={L} />.
+          </p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      <CrumbsLd locale={L}
-        trail={[
-          { name: D.nav.home[L], path: "/" },
-          { name: D.nav.encyclopedia[L], path: "/encyclopedia" },
-          encyclopediaSectionCrumb("arc"),
-          { name: `${n} · ${e.title}` },
-        ]}
-      />
+      {crumbs}
 
       <JsonLd
         data={articleLd({

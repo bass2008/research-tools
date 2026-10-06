@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Матрица пары — исходный</title>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <p class="kicker">Матрица совместимости · эксперимент</p>
+      <h1 id="title"></h1>
+      <p class="dates" id="dates"></p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="panel oct-panel">
+        <h2>Матрица пары</h2>
+        <div id="pair-oct"></div>
+        <p class="note">Каждая точка — сумма одноимённых точек двух личных матриц. Наведите на карточку, чтобы увидеть её точки.</p>
+      </div>
+      <div class="side-col">
+        <div class="summary" id="summary"></div>
+        <div class="panel">
+          <h2>Как получилось</h2>
+          <div id="howto"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Разбор по точкам пары</h2>
+      <div class="cards" id="sections"></div>
+    </section>
+
+    <section class="block">
+      <h2>Личные матрицы</h2>
+      <div class="persons">
+        <div class="panel person" id="person-a"></div>
+        <div class="panel person" id="person-b"></div>
+      </div>
+    </section>
+
+    <details class="block panel">
+      <summary>Все точки: личные матрицы и пара</summary>
+      <div class="dbg-wrap" id="debug"></div>
+    </details>
+
+    <p class="foot">Расчёт: школа Ю. Лисовской («Матрица судьбы: совместимость», 2024) на личных матрицах по схеме Ладини. Тексты карточек — роль точки в паре, не толкование.</p>
+  </main>
+
+  <script src="pair.js"></script>
+  <script src="shared.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

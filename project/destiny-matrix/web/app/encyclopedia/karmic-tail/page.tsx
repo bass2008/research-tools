@@ -129,7 +129,7 @@ export default async function KarmicTailHubPage() {
         ))}
       </div>
 
-      <Sections items={hub.sections.slice(1)} locale={L} />
+      <Sections items={hub.sections.slice(1)} locale={L} start={1} />
 
       <div className="section-gap">
         <CalcPromo locale={L}

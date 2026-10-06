@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from sqlalchemy.orm import Session
 
 from fastapi import Depends, FastAPI, Request
@@ -7,7 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import errors, monitor, payments, presence, printing, sites, store, tariffs
+from . import errors, payments, presence, sites, store, tariffs
 from .config import settings
 from .db import get_db
 from .deps import ghost_session, optional_user
@@ -15,6 +17,7 @@ from .models import User
 from .http_errors import LocalizedHTTPException, message_translations
 from .routers import ROUTERS
 from .schemas import PulseIn
+from .startup import startup
 from .i18n import current_locale, negotiate_locale, using_locale, validation_message, say
 
 
@@ -24,8 +27,13 @@ def create_app() -> FastAPI:
     # Локальное хранилище чистится ровно здесь, при поднятии приложения: ленивая чистка при первой
     # печати снесла бы файлы, ссылки на которые уже выданы.
     store.prepare()
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        startup()
+        yield
+
     app = FastAPI(title=settings.app_name, version="0.1.0",
-                  docs_url="/api/docs", openapi_url="/api/openapi.json")
+                  docs_url="/api/docs", openapi_url="/api/openapi.json", lifespan=lifespan)
     if settings.origins:
         app.add_middleware(
             CORSMiddleware,
@@ -132,9 +140,6 @@ def create_app() -> FastAPI:
             status_code=422,
         )
 
-    monitor.start()
-    presence.start()
-    printing.reprint_stale()
     return app
 
 

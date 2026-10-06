@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
-from app import monitor, printing, report_check, reports
+from app import monitor, printing, report_check, reports, startup
 from app.config import settings
 from app.models import ReportJob, User
 
@@ -186,6 +186,46 @@ def test_failed_reprint_is_retried_and_keeps_the_old_file(client, db, printer, m
     statuses = [j.status for j in db.scalars(select(ReportJob).order_by(ReportJob.id))]
     assert statuses == ["done"] + ["failed"] * printing.REPRINT_ATTEMPTS
     assert printing.reprint_stale() == 1, "неудачная перепечатка должна повториться при следующем старте"
+
+
+def test_startup_waits_for_web_before_reprinting(client, db, printer, monkeypatch):
+    """On a release the API came up before web: the first print failed on an unresolved host."""
+    buy(client)
+    old = db.scalars(select(ReportJob)).one()
+    old.object_key = "v0/" + old.object_key.split("/", 1)[1]
+    db.commit()
+    answers = iter([False, False, True])
+    monkeypatch.setattr(startup, "web_ready", lambda: next(answers))
+    monkeypatch.setattr(startup, "WEB_POLL_SECONDS", 0)
+
+    startup.when_web_is_up()
+    db.expire_all()
+    assert [j.status for j in db.scalars(select(ReportJob).order_by(ReportJob.id))] == ["expired", "done"]
+    assert len(printer) == 2
+
+
+def test_startup_postpones_reprint_while_web_is_down(client, db, printer, monkeypatch):
+    buy(client)
+    old = db.scalars(select(ReportJob)).one()
+    old.object_key = "v0/" + old.object_key.split("/", 1)[1]
+    db.commit()
+    monkeypatch.setattr(startup, "web_ready", lambda: False)
+    monkeypatch.setattr(startup, "WEB_WAIT_SECONDS", 0)
+    monkeypatch.setattr(startup, "WEB_POLL_SECONDS", 0)
+
+    startup.when_web_is_up()
+    db.expire_all()
+    assert [j.status for j in db.scalars(select(ReportJob))] == ["done"], "без сайта печать не начинается"
+    assert len(printer) == 1
+    assert len(printing.stale()) == 1, "отложенная перепечатка должна повториться при следующем старте"
+
+
+def test_startup_does_not_wait_for_web_without_stale_pdfs(client, db, printer, monkeypatch):
+    buy(client)
+    monkeypatch.setattr(startup, "web_ready", lambda: pytest.fail("ждать сайт незачем"))
+
+    startup.when_web_is_up()
+    assert len(printer) == 1
 
 
 def test_reprint_skips_a_report_the_owner_already_reprinted(client, db, printer):

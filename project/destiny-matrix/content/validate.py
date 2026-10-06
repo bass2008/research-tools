@@ -353,18 +353,34 @@ def check_seo(rep: Report, who: str, seo: dict, min_queries: int) -> None:
     rep.check(len(set(queries)) == len(queries), f"{who}: дубли запросов")
 
 
+QUERY_ENDING = re.compile(r"(ами|ями|ого|ему|ому|ах|ях|ам|ям|ов|ей|ой|ом|ем|ые|ый|ых|ым|ий|ь|[аеиоуыэюя])$")
+
+
+def query_key(query: str) -> tuple:
+    """Один запрос с точностью до формы и порядка слов; порядок чисел значим — у хвостов это разные сущности."""
+    words = re.findall(r"\w+", query.lower().replace("ё", "е"))
+    numbers = tuple(w for w in words if w.isdigit())
+    return numbers, frozenset(QUERY_ENDING.sub("", w) for w in words if not w.isdigit() and w not in {"в", "во", "и"})
+
+
 def check_queries(rep: Report, data: dict[str, dict]) -> None:
     """Один запрос — одна страница: иначе страницы конкурируют друг с другом в выдаче."""
-    owner: dict[str, str] = {}
-    for name, items in data.items():
-        for item in items["items"]:
-            who = f"{name}:{item.get('n') or item.get('key')}"
-            for query in item["seo"]["queries"]:
-                key = query.strip().lower()
-                if key in owner and owner[key] != who:
-                    rep.fail(f"запрос «{query}» стоит и у {owner[key]}, и у {who}")
-                else:
-                    owner.setdefault(key, who)
+    pages = [(f"{name}:{item.get('n') or item.get('key')}", item["seo"]["queries"])
+             for name, items in data.items() for item in items["items"]]
+    crossings = CONTENT_DIR / "position-arcanum.json"
+    if crossings.exists():
+        for item in json.loads(crossings.read_text(encoding="utf-8"))["items"]:
+            if item["publication"].get("index") and item.get("primary_query"):
+                pages.append((f"position-arcanum:{item['position']}/{item['arcanum']}",
+                              [item["primary_query"], *item.get("queries", [])]))
+    owner: dict[tuple, str] = {}
+    for who, queries in pages:
+        for query in queries:
+            key = query_key(query)
+            if key in owner and owner[key] != who:
+                rep.fail(f"запрос «{query}» стоит и у {owner[key]}, и у {who}")
+            else:
+                owner.setdefault(key, who)
 
 
 def check_links(rep: Report, data: dict[str, dict]) -> None:

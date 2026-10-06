@@ -37,10 +37,18 @@ def plain(text: str) -> str:
     return text.replace("**", "")
 
 
+# Статьи арканов держат внутренние ссылки `[текст](/путь)`: сайт рисует их сам, адреса проверяет сборка.
+KEEP_INTERNAL_LINKS = False
+
+
 def inline(text: str, rep: Report) -> str:
     if LINK.search(text):
-        rep.warn(f"ссылка заменена своим текстом: «{text[:60]}»")
-        text = LINK.sub(r"\1", text)
+        def drop(match: re.Match) -> str:
+            if KEEP_INTERNAL_LINKS and match.group(0).split("](", 1)[1].startswith("/"):
+                return match.group(0)
+            rep.warn(f"ссылка заменена своим текстом: «{match.group(0)[:60]}»")
+            return match.group(1)
+        text = LINK.sub(drop, text)
     text = CODE.sub(r"\1", text)
     text = ITALIC.sub(r"\1", text)
     return re.sub(r"\s+", " ", text).strip()
@@ -305,6 +313,16 @@ def convert(md: str, base: dict, rep: Report, keep_intro: bool = False) -> dict:
     return item
 
 
+def convert_arcanum(md: str, base: dict, rep: Report) -> dict:
+    body = convert(md, {}, rep)
+    if body.get("faq"):
+        rep.warn("у арканов FAQ нет (content-format.md, «Разметка»): вопросы-ответы выброшены")
+    article = {"title": body["title"], "short": body["short"],
+               "seo": {k: v for k, v in body.get("seo", {}).items() if k in ("title", "description")},
+               "sections": body["sections"]}
+    return {**base, "article": article}
+
+
 def load_build_content():
     spec = importlib.util.spec_from_file_location("build_content", ROOT / "tools/seo/build-content.py")
     module = importlib.util.module_from_spec(spec)
@@ -316,7 +334,12 @@ def check(item: dict, category: str, lang: str) -> tuple[list[str], list[str]]:
     build = load_build_content()
     problems: list[str] = []
     warnings: list[str] = []
-    where = f"{category}/{item.get('key', '?')}"
+    where = f"{category}/{item.get('key', item.get('n', '?'))}"
+    if category == "arcana":
+        build.check_article(item["article"], where, problems)
+        build.check_links(item["article"], where, problems, build.known_paths(lang))
+        build.hygiene(item["article"], where, "", warnings, lang)
+        return problems, warnings
     build.check_article(item, where, problems)
     if category == "karmic-tails":
         allowed = {t["triple"] for t in json.loads(METHOD.read_text())["reachable_karmic_tails"]}
@@ -344,7 +367,12 @@ def main() -> int:
     base = json.loads(base_path.read_text()) if base_path.exists() else {"key": key}
 
     rep = Report()
-    item = convert(args.markdown.read_text(), base, rep, keep_intro=args.category == "chakras")
+    if args.category == "arcana":
+        global KEEP_INTERNAL_LINKS
+        KEEP_INTERNAL_LINKS = True
+        item = convert_arcanum(args.markdown.read_text(), base, rep)
+    else:
+        item = convert(args.markdown.read_text(), base, rep, keep_intro=args.category == "chakras")
     problems, warnings = check(item, args.category, args.lang)
 
     payload = json.dumps(item, ensure_ascii=False, indent=2) + "\n"

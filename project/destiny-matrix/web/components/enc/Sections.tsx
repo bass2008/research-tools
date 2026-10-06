@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import { ChakraReadingBlock } from "@/components/matrix/ChakraReadingView";
+import TocHeading, { TOC_MIN } from "@/components/enc/TocHeading";
 import RichText from "@/components/ui/RichText";
 import type { Paragraph, Section, Slot } from "@/lib/content";
 import type { Lang } from "@/lib/i18n/lang";
@@ -102,13 +103,17 @@ export function Paragraphs({ items, head, slots, locale }: {
   return <>{out}</>;
 }
 
-export default function Sections({ items, slots, locale }: { items: Section[]; slots?: Slots; locale: Lang }) {
+// Anchors stay unique across blocks on one page: a split list continues its numbering (start),
+// a different list takes its own prefix.
+export default function Sections({ items, slots, locale, idPrefix = "s", start = 0 }: {
+  items: Section[]; slots?: Slots; locale: Lang; idPrefix?: string; start?: number;
+}) {
   if (!items.length) return null;
   return (
-    <div className="section-gap">
-      {items.map((s) => (
+    <div className="section-gap" data-toc-root={items.length >= TOC_MIN ? "" : undefined}>
+      {items.map((s, i) => (
         <section key={s.h2}>
-          <Paragraphs items={s.paragraphs} head={<h2>{s.h2}</h2>} slots={slots} locale={locale} />
+          <Paragraphs items={s.paragraphs} head={<TocHeading id={`${idPrefix}${start + i + 1}`}>{s.h2}</TocHeading>} slots={slots} locale={locale} />
         </section>
       ))}
     </div>

@@ -1,0 +1,46 @@
+.v5 { background: #0d1820; overflow: hidden; }
+.stage { height: calc(100svh - var(--bar-h)); display: grid; place-items: center; padding: 12px; }
+.phone { position: relative; width: min(420px, 100%); height: min(860px, 100%); border-radius: 26px; overflow: hidden; background: #000; box-shadow: 0 40px 80px -40px #000, 0 0 0 1px rgba(255, 255, 255, 0.08); }
+@media (max-width: 480px) { .stage { padding: 0; } .phone { width: 100%; height: 100%; border-radius: 0; } }
+
+.bars { position: absolute; z-index: 5; top: 10px; left: 12px; right: 12px; display: flex; gap: 4px; pointer-events: none; }
+.bars i { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.28); transition: background 0.2s; }
+.bars i.done { background: #fff; }
+
+.track { display: flex; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.track::-webkit-scrollbar { display: none; }
+.slide { position: relative; flex: 0 0 100%; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; display: flex; flex-direction: column; justify-content: flex-end; color: #fff; overflow: hidden; }
+.count { position: absolute; z-index: 3; top: 22px; right: 16px; font: 700 11px var(--sans); letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.85); }
+.content { position: relative; z-index: 2; padding: 22px 22px 30px; display: grid; gap: 6px; }
+.s-kicker { font: 700 11px var(--sans); letter-spacing: 0.18em; text-transform: uppercase; color: #f0d58c; }
+
+.sec { background: #111 var(--img) center top / cover no-repeat; }
+.sec::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 28%, rgba(8, 14, 20, 0.72) 55%, rgba(8, 14, 20, 0.96) 100%); }
+.s-num { font: 600 64px/1 var(--ser); }
+.s-names { font: 600 22px var(--ser); color: rgba(255, 255, 255, 0.86); }
+.sec p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: rgba(255, 255, 255, 0.86); }
+.mini { position: absolute; z-index: 3; top: 26px; left: 14px; width: 104px; padding: 4px; border-radius: 50%; background: rgba(8, 14, 20, 0.55); backdrop-filter: blur(6px); }
+.mini .oct { --oct-ring: rgba(255, 255, 255, 0.15); --oct-side: rgba(255, 255, 255, 0.6); --oct-diag: rgba(255, 255, 255, 0.25); --oct-axis: rgba(255, 255, 255, 0.15); }
+.mini .oct.has-hl .node { opacity: 0.12; }
+
+.cover { background: radial-gradient(120% 70% at 50% 10%, #1f4552 0%, #0f2029 55%, #081016 100%); justify-content: center; }
+.cover .content { text-align: center; }
+.cover h1 { font-size: 44px; line-height: 1.05; display: grid; }
+.cover h1 span { font-size: 22px; color: #f0d58c; margin: 4px 0; }
+.c-dates { margin: 6px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.7); }
+.c-oct { width: min(300px, 80%); margin: 14px auto 0; --oct-ring: rgba(255, 255, 255, 0.12); --oct-side: rgba(240, 213, 140, 0.8); --oct-diag: rgba(255, 255, 255, 0.22); --oct-axis: rgba(255, 255, 255, 0.12); }
+.c-hint { margin: 10px 0 0; font: 700 12px var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
+
+.final { background: linear-gradient(180deg, #13262f, #0a141a); justify-content: flex-start; padding-top: 40px; overflow-y: auto; }
+.f-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; }
+.f-list li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 14px; }
+.f-list b { font: 700 14px ui-monospace, monospace; color: #f0d58c; }
+.f-people { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.f-people figure { margin: 0; --oct-ring: rgba(255, 255, 255, 0.12); --oct-side: rgba(255, 255, 255, 0.5); --oct-diag: rgba(255, 255, 255, 0.2); --oct-axis: rgba(255, 255, 255, 0.12); }
+.f-people figcaption { text-align: center; font: 600 16px var(--ser); }
+.f-note { margin: 10px 0 0; font-size: 12.5px; color: rgba(255, 255, 255, 0.6); }
+
+.nav { position: absolute; z-index: 6; top: 50%; translate: 0 -50%; width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.16); color: #fff; font: 600 24px/1 var(--sans); cursor: pointer; backdrop-filter: blur(4px); }
+.nav.prev { left: 8px; }
+.nav.next { right: 8px; }
+@media (hover: none) { .nav { display: none; } }

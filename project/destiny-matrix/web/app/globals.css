@@ -1491,7 +1491,8 @@ table.mx td.self { background: var(--card2); }
 }
 @media (max-width: 900px) {
   .enc-layout { grid-template-columns: minmax(0, 1fr); }
-  .enc-nav { position: static; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 6px; }
+  .enc-nav { position: static; }
+  .enc-cats { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 6px; }
   .enc-navi { border: 1px solid var(--line2); border-radius: 999px; white-space: nowrap; }
 }
 @media (max-width: 640px) {
@@ -1534,6 +1535,69 @@ table.mx td.self { background: var(--card2); }
 .arc-pm h3 { font-size: 17px; }
 .arc-pm .cap { font-size: 13px; }
 .arc-pm .pmlist { font-size: 14.8px; line-height: 1.6; }
+
+/* Меню справочника на странице со статьёй: вкладки «Энциклопедия | Эта статья» и оглавление-путь.
+   Анимация только прозрачностью: сдвиг вбок на миг расширял меню, и мелькала полоса прокрутки. */
+.enc-cats { display: grid; gap: 2px; }
+.enc-cats[hidden], .enc-toc[hidden] { display: none; }
+/* вкладки и оглавление есть только у страниц с размеченной статьёй: решает HTML, а не скрипт */
+.enc-layout:not(:has([data-toc-root])) :is(.enc-tabs, .enc-toc) { display: none; }
+.enc-layout:has([data-toc-root]) .enc-nav { max-height: calc(100vh - 100px); overflow: hidden auto; overscroll-behavior: contain; }
+.enc-tabs { position: sticky; top: 0; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; padding: 3px; margin-bottom: 10px;
+  border-radius: 11px; background: var(--card2); box-shadow: 0 0 0 4px var(--card); }
+.enc-tabs::before { content: ""; position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 8px;
+  background: var(--card); box-shadow: 0 1px 4px rgba(18, 40, 60, .16); transition: transform .3s ease; }
+.enc-nav[data-pane="art"] .enc-tabs::before { transform: translateX(100%); }
+.enc-tabs button { position: relative; border: 0; background: none; padding: 7px 4px; margin: 0; cursor: pointer;
+  font: 600 13px var(--sans); letter-spacing: 0; text-transform: none; color: var(--dim); transition: color .3s; }
+.enc-tabs button[aria-selected="true"] { color: var(--gold2); }
+.enc-layout:has([data-toc-root]) .enc-cats:not([hidden]), .enc-toc:not([hidden]) { animation: encin .25s ease; }
+@keyframes encin { from { opacity: 0; } }
+.enc-toc { list-style: none; margin: 0; padding: 0 0 6px; }
+.enc-toc li { position: relative; padding-left: 22px; margin: 0; }
+.enc-toc li::before { content: ""; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--line); }
+.enc-toc li:first-child::before { top: 14px; }
+.enc-toc li:last-child::before { bottom: auto; height: 14px; }
+.enc-toc li:has(a.done)::before { background: var(--gold); }
+.enc-toc a { display: block; padding: 6px 8px 9px; border-radius: 8px; font-size: 13.4px; line-height: 1.38; color: var(--text); }
+.enc-toc a:hover { background: var(--card2); text-decoration: none; }
+.enc-toc a::before { content: ""; position: absolute; left: 3px; top: 10px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--card); border: 2px solid #c3d1d8; box-sizing: border-box; transition: all .25s; }
+.enc-toc a.done { color: var(--dim); }
+.enc-toc a.done::before { background: var(--gold); border-color: var(--gold); }
+.enc-toc a.on { color: var(--gold2); font-weight: 600; }
+.enc-toc a.on::before { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(14, 143, 136, .16); }
+
+/* Страница аркана со статьёй: шапка с картой, главы с оглавлением в меню */
+.arc-eyebrow { font: 700 11.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--gold2); margin: 6px 0 0; }
+.arc-hero .arc-body h1 { margin-top: 8px; }
+.arc-hero .hero-lead { font-size: 16.4px; line-height: 1.7; color: var(--text); }
+.arc-article { border-top: 1px solid var(--line); }
+.enc-panes .arc-article .prose { max-width: 760px; }
+.arc-article .prose h2 { font: 600 clamp(23px, 2.6vw, 30px)/1.2 var(--ser); color: var(--text); margin: 44px 0 14px; scroll-margin-top: 96px; }
+.arc-article .arc-sec:first-child .prose h2 { margin-top: 26px; }
+.arc-article .prose p, .arc-article .prose li { font-size: 16.2px; line-height: 1.72; color: var(--text); }
+.arc-article .prose .tabscroll { clear: both; margin: 18px 0 22px; }
+.arc-article .promo { margin: 36px 0 8px; }
+.arc-waite { float: right; width: 190px; margin: 4px 0 16px 24px; text-align: center; }
+.arc-waite img { display: block; width: 100%; height: auto; border-radius: 10px; box-shadow: 0 14px 30px -18px rgba(18, 40, 60, .5); }
+.arc-waite figcaption { margin-top: 8px; font-size: 12.6px; line-height: 1.4; color: var(--dim2); }
+/* соседние арканы — одна полоса: на телефоне не разваливается на два блока */
+.arc-nb { display: flex; margin: 40px 0 26px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.arc-nb a { flex: 1; min-width: 0; padding: 12px 16px; color: var(--text); }
+.arc-nb a + a { text-align: right; border-left: 1px solid var(--line); }
+.arc-nb a:hover { background: var(--card2); text-decoration: none; }
+.arc-nb small { display: block; font-size: 12px; color: var(--dim2); }
+.arc-nb b { font: 600 18px var(--ser); }
+@media (max-width: 900px) {
+  .enc-tabs, .enc-toc { display: none; }
+  .enc-nav .enc-cats[hidden] { display: grid; }
+  .enc-layout:has([data-toc-root]) .enc-nav { max-height: none; overflow: visible; }
+}
+@media (max-width: 640px) {
+  .arc-waite { float: none; width: 170px; margin: 0 auto 16px; }
+  .arc-article .prose p, .arc-article .prose li { font-size: 15.8px; }
+}
 
 /* вкладки рабочей области */
 .tabbar { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 16px; }

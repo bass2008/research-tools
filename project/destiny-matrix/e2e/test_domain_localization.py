@@ -70,7 +70,7 @@ def test_rendered_page_without_explicit_choice_uses_domain_default(browser, agen
         page = context.new_page()
         page.goto(BASE + "/encyclopedia/arcanum/4?lang=ru")
         expect(page.locator("html")).to_have_attribute("lang", "en")
-        expect(page.locator("h1")).to_have_text("4 in the destiny matrix: The Emperor")
+        expect(page.locator("h1")).to_contain_text("4 in the destiny matrix: The Emperor")
         assert "lang=" not in page.url
         assert not any(cookie["name"] == "arcana_locale" for cookie in context.cookies())
         # A real interaction confirms hydration; automatic browser language never wins.

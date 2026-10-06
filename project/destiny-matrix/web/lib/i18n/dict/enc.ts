@@ -4,6 +4,9 @@ export const enc = {
   tailPlaceM: { ru: "начало M", en: "entry M" } satisfies Phrase,
   tailPlaceN: { ru: "середина N", en: "middle N" } satisfies Phrase,
   tailPlaceD: { ru: "конец D", en: "end D" } satisfies Phrase,
+  navEncyclopedia: { ru: "Энциклопедия", en: "Encyclopedia" } satisfies Phrase,
+  navThisArticle: { ru: "Эта статья", en: "This article" } satisfies Phrase,
+  navTocAria: { ru: "Разделы этой статьи", en: "Sections of this article" } satisfies Phrase,
   title: {
     ru: "Энциклопедия матрицы судьбы: арканы, позиции, чакры",
     en: "Destiny matrix encyclopedia: arcana, positions, chakras",
@@ -155,6 +158,29 @@ export const encArcanum = {
       + "octagram: the calculation is free and runs in the browser.",
   } satisfies PhraseFn<[number, string]>,
   fullReadingAll: { ru: "Полный разбор всех 20 разделов —", en: "The full reading of all 20 sections —" } satisfies Phrase,
+  eyebrow: {
+    ru: (n: number) => `${n} аркан · Старший аркан`,
+    en: (n: number) => `Arcanum ${n} · Major Arcana`,
+  } satisfies PhraseFn<[number]>,
+  calcTitle: {
+    ru: (title: string) => `Где ${title} в вашей карте`,
+    en: (title: string) => `Where ${title} sits in your chart`,
+  } satisfies PhraseFn<[string]>,
+  whereInChartArticle: {
+    ru: (n: number, title: string) => `Покажем, в каких точках вашей карты стоит аркан ${n} — ${title} — и что `
+      + "он значит именно там. Расчёт бесплатный и идёт в браузере.",
+    en: (n: number, title: string) => `We will show which points of your chart hold arcanum ${n}, ${title}, `
+      + "and what it means there. The calculation is free and runs in the browser.",
+  } satisfies PhraseFn<[number, string]>,
+  waiteCaption: {
+    ru: (title: string) => `${title} в колоде Уэйта, 1909`,
+    en: (title: string) => `${title} in the Rider–Waite deck, 1909`,
+  } satisfies PhraseFn<[string]>,
+  neighbors: { ru: "Соседние арканы", en: "Neighbouring arcana" } satisfies Phrase,
+  arcanumNumber: {
+    ru: (n: number) => `${n} аркан`,
+    en: (n: number) => `Arcanum ${n}`,
+  } satisfies PhraseFn<[number]>,
 };
 
 export const encChakra = {

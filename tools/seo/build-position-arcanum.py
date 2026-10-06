@@ -82,6 +82,61 @@ WORDING: dict[str, dict[str, str]] = {
 # двадцати двух, а полный перебор добавил бы шестьдесят страниц без спроса и без нужды продукта.
 BY_METHOD = ("center", "love_middle")
 
+# Другие формулировки того же вопроса: главный запрос они не выбирают и в частоту не входят,
+# но страница пересечения отвечает и на них. «Сердце» в поиске — это точка под сердцем, а не центр
+# (уточнения «матрица судьбы сердце»: 7 987 из 9 189 — «…под сердцем»).
+VARIANTS: dict[str, str] = {
+    "center": r"центр|середин|комфорт",
+    "relations": r"отношени|любов|брак|партн",
+    "money": r"деньг|денег|денежн|финанс|доход|доллар",
+    "love_middle": r"под сердц|сердечк|сердц",
+    "profession": r"талант|професси",
+    "day": r"визитк|визитн",
+}
+OTHER_INTENT = re.compile(r"совместим|таро|программ|хвост|\bгод|\bлет\b|возраст|(19|20)\d\d")
+VARIANT_FLOOR = 40
+VARIANT_LIMIT = 8
+ENDING = re.compile(r"(ами|ями|ого|ему|ому|ах|ях|ам|ям|ов|ей|ой|ом|ем|ые|ый|ых|ым|ий|ь|[аеиоуыэюя])$")
+FILLER = {"в", "во", "и"}
+CONTENT = PROJECT / "web/content/ru"
+OWNED_FILES = ("arcana", "positions", "year-arcana", "karmic-tails", "combinations", "chakras", "hubs",
+               "category-hubs")
+
+
+def query_key(phrase: str) -> tuple:
+    """Одна формулировка с точностью до формы слова и порядка слов; порядок чисел значим — у хвостов
+    перестановка чисел меняет сущность."""
+    words = re.findall(r"\w+", phrase.lower().replace("ё", "е"))
+    numbers = tuple(w for w in words if w.isdigit())
+    stems = frozenset(ENDING.sub("", w) for w in words if not w.isdigit() and w not in FILLER)
+    return numbers, stems
+
+
+def owned_elsewhere() -> set[tuple]:
+    out = set()
+    for name in OWNED_FILES:
+        data = json.loads((CONTENT / f"{name}.json").read_text(encoding="utf-8"))
+        for item in data["items"] if isinstance(data, dict) else data:
+            out |= {query_key(q) for q in (item.get("seo") or {}).get("queries") or []}
+    return out
+
+
+def variants(phrases: dict[str, int], position: str, arcanum: int, primary: str, owned: set[tuple]) -> list[str]:
+    rx = re.compile(VARIANTS[position])
+    seen = {query_key(primary)} | owned
+    out = []
+    for phrase, freq in sorted(phrases.items(), key=lambda x: (-x[1], x[0])):
+        if freq < VARIANT_FLOOR or len(out) >= VARIANT_LIMIT:
+            break
+        if not rx.search(phrase) or OTHER_INTENT.search(phrase) or NUMBER.findall(phrase) != [str(arcanum)]:
+            continue
+        key = query_key(phrase)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(phrase)
+    return out
+
 
 def domains() -> dict[str, set[int]]:
     """Позиция реестра → какие арканы в ней вообще бывают.
@@ -152,7 +207,9 @@ def main() -> int:
         raise SystemExit(f"нет {DB}: реестр строится из оплаченного Вордстата")
     domain = domains()
     with sqlite3.connect(f"file:{DB}?mode=ro", uri=True) as conn:
-        raw = collect(subtree(conn))
+        phrases = subtree(conn)
+        raw = collect(phrases)
+    owned = owned_elsewhere()
 
     items, skipped = [], 0
     for position, per in raw.items():
@@ -174,6 +231,7 @@ def main() -> int:
                 "arcanum": arcanum,
                 "frequency": row["frequency"],
                 "primary_query": phrase,
+                "queries": variants(phrases, position, arcanum, phrase, owned) if phrase else [],
                 "wording": wording,
                 "wordings": {k: v for k, v in sorted(row["wordings"].items(), key=lambda x: -x[1])},
                 "publication": {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arcana Product"
+  short_description: "Продукт Arcana Sense и как его ищут: схема, страницы, маппинг запросов, ошибки, промпты статей"
+  default_prompt: "Используй $arcana-product-skill: сверь текст или запросы с продуктом и с маппингом поиска."

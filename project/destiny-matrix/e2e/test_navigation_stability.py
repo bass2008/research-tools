@@ -147,3 +147,16 @@ def test_hard_refresh_is_stable_on_every_page_type(page: Page) -> None:
             )
 
     assert not failures, "нестабильное обновление страниц:\n" + "\n".join(failures)
+
+
+def test_back_after_article_contents_link_shows_previous_page(page):
+    """Пункт оглавления добавлял запись истории без состояния роутера: «Назад» со следующей
+    страницы менял адрес, но оставлял на экране её содержимое."""
+    page.set_viewport_size({"width": 1360, "height": 860})
+    page.goto(f"{BASE}/encyclopedia/karmic-tail/18-9-9", wait_until="networkidle")
+    page.locator(".enc-tabs [role=tab]").nth(1).click()
+    page.locator(".enc-toc a").nth(4).click()
+    page.locator(".enc-panes a[href='/encyclopedia/arcanum/9']").first.click()
+    page.wait_for_url("**/encyclopedia/arcanum/9")
+    page.go_back()
+    expect(page.locator(".enc-panes h1")).to_contain_text("18-9-9")

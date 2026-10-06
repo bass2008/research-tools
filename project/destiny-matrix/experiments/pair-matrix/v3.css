@@ -1,0 +1,56 @@
+.v3 { background: var(--bg2); }
+.app { display: grid; grid-template-columns: minmax(340px, 0.95fr) minmax(0, 1.05fr); gap: 0; max-width: 1400px; margin: 0 auto; }
+
+.map { position: sticky; top: var(--bar-h); align-self: start; height: calc(100vh - var(--bar-h)); display: flex; flex-direction: column; padding: 18px 20px; background: var(--card); border-right: 1px solid var(--line); }
+.map-oct { flex: 1; min-height: 0; display: grid; place-items: center; }
+.map-oct .oct { max-height: 100%; width: auto; max-width: 100%; aspect-ratio: 1; }
+.now { border-top: 1px solid var(--line); padding-top: 12px; min-height: 150px; }
+.now-lbl { font: 700 10px var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold2); }
+.now h2 { font-size: 26px; margin-top: 2px; }
+.now-num { margin: 2px 0 0; font: 600 30px/1.1 var(--ser); color: var(--gold2); }
+.now-names { margin: 2px 0 0; font-weight: 600; color: var(--dim); }
+.now-txt { margin: 6px 0 0; font-size: 13.5px; color: var(--dim2); }
+
+.pane { padding: 22px clamp(16px, 3vw, 40px) 60vh; min-width: 0; }
+.pane-head { position: sticky; top: var(--bar-h); z-index: 5; background: var(--bg2); padding: 10px 0 12px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+.kicker { margin: 0; font: 700 11px var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold2); }
+.v3 h1 { font-size: clamp(28px, 3.4vw, 40px); }
+.dates { margin: 2px 0 10px; color: var(--dim); font-size: 13.5px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab-btn { font: 600 13px var(--sans); padding: 7px 13px; border-radius: 9px; border: 1px solid var(--line2); background: #fff; color: var(--dim); cursor: pointer; }
+.tab-btn.on { background: var(--text); border-color: var(--text); color: #fff; }
+
+.row { display: flex; gap: 14px; padding: 16px 14px; margin: 8px 0; border-radius: 12px; border: 1px solid transparent; border-left: 3px solid var(--line2); background: transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.row:hover { background: var(--card); }
+.row.on { background: var(--card); border-color: var(--line); border-left-color: var(--gold); box-shadow: var(--sh); }
+.idx { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 12px var(--sans); color: var(--dim); background: #e7eef1; }
+.row.on .idx { background: var(--gold); color: #fff; }
+.row-main { min-width: 0; flex: 1; }
+.row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.row h3 { font-size: 21px; }
+.row-num { font: 700 14px ui-monospace, monospace; color: var(--gold2); white-space: nowrap; }
+.row p { margin: 8px 0 0; font-size: 13.5px; color: var(--dim); }
+
+.people { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.people figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.people figcaption { font: 600 18px var(--ser); text-align: center; }
+.tbl-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th, .tbl td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+.tbl th { font: 700 10px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim2); }
+.tbl .mono { font-family: ui-monospace, monospace; color: var(--dim); }
+.tbl .num { text-align: right; }
+.tbl .strong { font-weight: 700; color: var(--gold2); }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .map { z-index: 10; height: auto; flex-direction: row; gap: 12px; align-items: center; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--line); box-shadow: var(--sh); }
+  .map-oct { flex: none; width: 132px; }
+  .map-oct .oct { width: 132px; }
+  .now { border-top: 0; padding-top: 0; min-height: 0; }
+  .now h2 { font-size: 19px; }
+  .now-num { font-size: 22px; }
+  .now-txt, .now-names { display: none; }
+  .pane-head { position: static; }
+  .people { grid-template-columns: minmax(0, 1fr); }
+}

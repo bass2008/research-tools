@@ -1,5 +1,6 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import Related from "@/components/enc/Related";
+import TocHeading from "@/components/enc/TocHeading";
 import Sections, { Paragraphs } from "@/components/enc/Sections";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import CalcPromo from "@/components/matrix/CalcPromo";
@@ -120,7 +121,7 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
       <Sections items={item.sections} locale={L} />
 
       <div className="panel section-gap">
-        <h2>{D.encTail.howCounted[L]}</h2>
+        <TocHeading id="formula">{D.encTail.howCounted[L]}</TocHeading>
         <div className="cap">{D.encTail.formulaHint[L]}</div>
         {formula ? (
           <p style={{ margin: 0 }}>

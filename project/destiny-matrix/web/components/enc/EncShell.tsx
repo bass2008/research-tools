@@ -64,6 +64,7 @@ export const forLocale = localized((L: Locale) => {
   function articlePaths(): string[] {
     return articleList().map((a) => a.href);
   }
+
   return { ARCANA, CHAKRA_PAGES, KARMIC_TAIL_HUB, POSITIONS, YEAR_HUB, allCombinationSlugs, hubCrumb, hubHref, categoryHub, hub, hubKeys, karmicTails, yearKeys, ENCYCLOPEDIA_SLIDES, ENCYCLOPEDIA_SECTIONS, encSections, articleList, articlePaths };
 });
 

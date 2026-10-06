@@ -112,13 +112,18 @@ SLOTS = ("calc",)
 CHAKRA_READINGS: dict[str, set[str]] = {}
 
 
+LINK = re.compile(r"\[([^\]]+)\]\(([^)]*)\)")
+
+
 def check_marks(text: str, where: str, path: str, problems: list[str], rich: bool) -> None:
     if not rich:
         if "*" in text:
             fail(problems, where, f"{path}: здесь выводится голый текст, звёздочки останутся на странице")
+        if LINK.search(text):
+            fail(problems, where, f"{path}: здесь выводится голый текст, ссылка останется разметкой")
         return
-    # The site renders only `**bold**`; any other asterisk would be printed as is.
-    if "*" in re.sub(r"\*\*[^*]+\*\*", "", text):
+    # The site renders only `**bold**` and internal `[text](/path)`; any other asterisk is printed as is.
+    if "*" in re.sub(r"\*\*[^*]+\*\*", "", LINK.sub(r"\1", text)):
         fail(problems, where, f"{path}: непарные ** или одиночная * — на странице останутся звёздочки")
 
 
@@ -322,6 +327,34 @@ def check_chakra_article(item: dict, where: str, base_keys: set, key: str, probl
     check_article(item, where, problems)
 
 
+def known_paths(lang: str) -> set[str]:
+    dst = DST_ROOT / lang
+    paths = {"/encyclopedia", "/encyclopedia/arcanum", "/encyclopedia/karmic-tail", "/encyclopedia/combination",
+             "/encyclopedia/position", "/encyclopedia/chakra", "/encyclopedia/chakra/energy-field", "/year"}
+    paths |= {f"/encyclopedia/arcanum/{x['n']}" for x in base_items(dst, "arcana.json")}
+    paths |= {f"/year/{x['n']}" for x in base_items(dst, "year-arcana.json")}
+    paths |= {f"/encyclopedia/karmic-tail/{x['key']}" for x in base_items(dst, "karmic-tails.json")}
+    paths |= {f"/encyclopedia/combination/{x['key']}" for x in base_items(dst, "combinations.json")}
+    paths |= {f"/encyclopedia/position/{x['key']}" for x in base_items(dst, "positions.json")}
+    paths |= {f"/encyclopedia/position/{x['position']}/{x['arcanum']}" for x in base_items(dst, "position-arcanum.json")}
+    paths |= {f"/encyclopedia/chakra/{x['key']}" for x in base_items(dst, "chakras.json")}
+    paths |= {f"/{x['key']}" for x in base_items(dst, "hubs.json")}
+    return paths
+
+
+def check_links(value: object, where: str, problems: list[str], paths: set[str]) -> None:
+    if isinstance(value, str):
+        for text, href in LINK.findall(value):
+            if href.split("#")[0] not in paths:
+                fail(problems, where, f"ссылка «{text}» ведёт на {href!r} — такой страницы на сайте нет")
+    elif isinstance(value, list):
+        for item in value:
+            check_links(item, where, problems, paths)
+    elif isinstance(value, dict):
+        for item in value.values():
+            check_links(item, where, problems, paths)
+
+
 def load(path: Path, problems: list[str]) -> dict | None:
     try:
         return json.loads(path.read_text())
@@ -426,6 +459,10 @@ def main() -> int:
                 check_chakra_article(item, where, set(index), key, problems)
             else:
                 check_enrichment(item, where, set(index), key, problems)
+            if category == "arcana" and "article" in item:
+                trim_description(item["article"], where)
+                check_article(item["article"], where, problems)
+                check_links(item["article"], where, problems, known_paths(args.lang))
             hygiene(item, where, "", warnings, args.lang)
             entry = index.get(key)
             if entry is None:
@@ -438,7 +475,7 @@ def main() -> int:
             entry["meaning"] = item["meaning"]
             if isinstance(item.get("seo"), dict):
                 entry["seo"] = {**entry.get("seo", {}), **item["seo"]}
-            for field in ("article_sections", "faq", "h1"):
+            for field in ("article_sections", "faq", "h1", "article"):
                 if field in item:
                     entry[field] = item[field]
             touched += 1

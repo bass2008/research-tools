@@ -1,3 +1,4 @@
+import TocHeading from "@/components/enc/TocHeading";
 import JsonLd from "@/components/ui/JsonLd";
 import RichText from "@/components/ui/RichText";
 import type { QA } from "@/lib/content";
@@ -23,7 +24,7 @@ export default function Faq({ locale: requestedLocale, ...localeProps }: ({ item
   return (
     <div className="panel section-gap">
       <JsonLd data={faqLd(items)} />
-      <h2>{title}</h2>
+      <TocHeading id="faq">{title}</TocHeading>
       <dl className="faq">
         {items.map((item) => (
           <div key={item.q}>

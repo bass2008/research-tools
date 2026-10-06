@@ -1,13 +1,13 @@
 {
   "from": "1900-01-01",
-  "through": "2026-10-05",
+  "through": "2026-10-07",
   "sex_order": [
     "f",
     "m"
   ],
   "serialization": "UTF-8 JSON sorted recursively, compact separators, LF after each case",
-  "cases": 92598,
-  "sha256": "1620622cd550579a10ec164879b2feecc6e2ad911ffcfc927211e75ba633130a",
+  "cases": 92602,
+  "sha256": "4756df35b718abed8ac8b78137f42f35d60cba0b75fa71ba1d2490a845394551",
   "years": {
     "1900": {
       "cases": 730,
@@ -514,8 +514,8 @@
       "sha256": "17c130ec3fdb44b6f53917e14d13f7f1f607b6b7951a408b7739ce0a72390955"
     },
     "2026": {
-      "cases": 556,
-      "sha256": "459c5956025491b6edb1d80ea4ddd75dfb827d71750722212304bfc01f8b2729"
+      "cases": 560,
+      "sha256": "11dd450442ea71292710f57c5afbd1926bcc6d71d70b2a6a4c006473d93e2f7d"
     }
   }
 }
