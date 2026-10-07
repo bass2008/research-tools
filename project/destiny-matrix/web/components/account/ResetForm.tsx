@@ -4,6 +4,7 @@ import { forLocale as localizedUseSession } from "@/components/account/useSessio
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
 import { useHydrated } from "@/lib/hydrated";
+import { reportFormCheck } from "@/lib/errors";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
@@ -34,7 +35,10 @@ export default function ResetForm({ locale: requestedLocale, ...localeProps }: (
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 3) return setError((locale) => D.auth.shortPassword[locale]);
+    if (password.length < 3) {
+      reportFormCheck("reset", "password:short");
+      return setError((locale) => D.auth.shortPassword[locale]);
+    }
     setBusy(true);
     try {
       await api.resetApply(token, password);

@@ -87,6 +87,7 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
       <section className="wrap section-gap" style={{ padding: 0 }}>
         <MatrixResult locale={L} m={matrix} example={example}
           chakraReading={access.reading}
+          chakraReadingStatus={access.readingStatus}
           chakraUnlocked={access.unlocked}
           matrixId={access.matrixId} />
         <ReportSections locale={L} sections={sections} place="landing" />

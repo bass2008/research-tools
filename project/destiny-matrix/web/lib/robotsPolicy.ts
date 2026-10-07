@@ -29,7 +29,8 @@ const COMPUTED = [
 ];
 
 // Сочетания закрыты 05.10.2026: трафика нет, а пара двух арканов в одной карте не отвечает
-// на то, что ищут под этим запросом. Страницы остаются для людей.
+// на то, что ищут под этим запросом. Страницы остаются для людей. Яндекс выводит закрытое
+// `Disallow` из поиска сам, Google — нет: ему обход открыт, чтобы он прочитал `noindex`.
 const CLOSED = ["/encyclopedia/combination"];
 
 export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.Robots {
@@ -49,6 +50,8 @@ export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.R
         // `?sec=` — прежний фильтр разделов справочника, который поиск ещё помнит.
         other: { "Clean-param": "tab&sec&lang" },
       },
+      // Своя группа отменяет для Googlebot группу `*` целиком, поэтому запреты повторены.
+      { userAgent: "Googlebot", disallow: [...PRIVATE, ...COMPUTED] },
       ...UNWANTED.map((userAgent) => ({ userAgent, disallow: "/" })),
     ],
     sitemap: `${site.origin}/sitemap.xml`,

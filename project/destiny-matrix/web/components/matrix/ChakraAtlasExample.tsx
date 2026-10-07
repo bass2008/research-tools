@@ -23,7 +23,7 @@ export default function ChakraAtlasExample({ m: initial, locale: L, site, promoT
     <>
       {m ? <div className="section-gap">
         <ChakraTable site={site} locale={L} m={m} heading="h3" title={copy.exampleTitle[L]}
-          reading={access.reading} unlocked={access.unlocked} matrixId={access.matrixId} />
+          reading={access.reading} readingStatus={access.readingStatus} unlocked={access.unlocked} matrixId={access.matrixId} />
       </div> : null}
       <div className="section-gap">
         <CalcPromo locale={L} title={promoTitle} lead={promoLead} place={place} onPreview={setMatrix} />

@@ -3,6 +3,7 @@
 import { useLead, usePriceKnown, usePaymentProviders } from "@/components/pay/TariffsProvider";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { track } from "@/lib/analytics";
+import { alignBirth, type StoredBirth } from "@/lib/storage";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import Link from "next/link";
@@ -21,6 +22,7 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
   children?: React.ReactNode;
   testId?: string;
   matrixId?: number | null;
+  birth?: StoredBirth;
   unavailable?: React.ReactNode;
 }) & { locale?: Locale }) {
   const activeLocale = useLocale();
@@ -32,6 +34,7 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
     children,
     testId,
     matrixId,
+    birth,
     unavailable = <p className="dim">{D.pay.regionUnavailable[L]}</p>,
   } = localeProps;
 
@@ -51,7 +54,11 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
       className={className}
       data-testid={testId}
       href={matrixId ? `/pay?m=${matrixId}` : "/pay"}
-      onClick={() => track("buy_click", { tariff: lead.id, place, ...(section ? { section } : {}) })}
+      onClick={() => {
+        // A live preview may not have been submitted. Checkout must use the displayed date.
+        if (!matrixId && birth) alignBirth(birth);
+        track("buy_click", { tariff: lead.id, place, ...(section ? { section } : {}) });
+      }}
     >
       {children ?? D.nav.buy[L]}
     </Link>

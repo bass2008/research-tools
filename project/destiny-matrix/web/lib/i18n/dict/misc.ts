@@ -152,9 +152,13 @@ export const payTarget = {
 
 /** Отказы обращения к серверу: их пишет фронт, когда ответа нет или он не разобран. */
 export const apiErrors = {
-  offline: {
-    ru: "Сервер не отвечает. Попробуйте позже.",
-    en: "The server is not responding. Please try again later.",
+  noInternet: {
+    ru: "Нет подключения к интернету. Проверьте связь и попробуйте ещё раз.",
+    en: "No internet connection. Check your connection and try again.",
+  } satisfies Phrase,
+  unreachable: {
+    ru: "Сайт сейчас не отвечает. Попробуйте ещё раз через минуту.",
+    en: "The site is not responding right now. Please try again in a minute.",
   } satisfies Phrase,
   missing: { ru: "Сервис пока недоступен.", en: "The service is not available yet." } satisfies Phrase,
   status: {
@@ -165,6 +169,29 @@ export const apiErrors = {
     ru: "Сервер ответил в неожиданном формате.",
     en: "The server answered in an unexpected format.",
   } satisfies Phrase,
+};
+
+/** Плашка, пока запрос повторяется сам. */
+export const networkBanner = {
+  offline: {
+    ru: "Нет интернета — повторим, как только связь вернётся",
+    en: "No internet — we will retry as soon as the connection is back",
+  } satisfies Phrase,
+  retrying: {
+    ru: "Сайт не отвечает — пробуем ещё раз…",
+    en: "The site is not responding — trying again…",
+  } satisfies Phrase,
+};
+
+/** Экран вместо страницы, которая упала при отрисовке. */
+export const errorScreen = {
+  title: { ru: "Страница не открылась", en: "This page did not open" } satisfies Phrase,
+  lead: {
+    ru: "Во время показа страницы произошла ошибка. Попробуйте ещё раз или вернитесь на главную.",
+    en: "Something went wrong while showing this page. Try again or go back to the home page.",
+  } satisfies Phrase,
+  retry: { ru: "Попробовать ещё раз", en: "Try again" } satisfies Phrase,
+  home: { ru: "На главную", en: "Home page" } satisfies Phrase,
 };
 
 /** Отказы BFF: он проверяет форму полей до обращения к серверу приложения, и его сообщения

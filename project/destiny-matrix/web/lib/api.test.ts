@@ -53,11 +53,57 @@ describe("клиент API", () => {
     await expect(api.me()).rejects.toBeInstanceOf(ApiError);
   });
 
-  it("недоступная сеть превращается в ApiError со статусом 0", async () => {
+  it("недоступная сеть превращается в ApiError со статусом 0, оплата не повторяется", async () => {
+    const request = vi.fn(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    vi.stubGlobal("fetch", request);
+    const error = await forLocale("ru").api.payMock("full", "a@b.c").catch((err) => err);
+    expect(error).toMatchObject({ status: 0 });
+    expect(error.messageFor("ru")).toBe("Сайт сейчас не отвечает. Попробуйте ещё раз через минуту.");
+    expect(request).toHaveBeenCalledOnce();
+  });
+
+  it("без интернета говорит про связь, а не про сайт", async () => {
+    vi.stubGlobal("navigator", { onLine: false });
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new TypeError("Failed to fetch");
     }));
-    await expect(api.login("a@b.c", "12345678")).rejects.toMatchObject({ status: 0 });
+    const error = await forLocale("ru").api.payMock("full", "a@b.c").catch((err) => err);
+    expect(error.messageFor("ru")).toBe("Нет подключения к интернету. Проверьте связь и попробуйте ещё раз.");
+  });
+
+  it("чтение повторяется один раз, если сайт не ответил", async () => {
+    vi.useFakeTimers();
+    const request = vi.fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }));
+    vi.stubGlobal("fetch", request);
+    const pending = api.matrices();
+    await vi.advanceTimersByTimeAsync(1500);
+    await expect(pending).resolves.toEqual({ items: [] });
+    expect(request).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it("вход ждёт возврата связи около двух минут, а не сдаётся сразу", async () => {
+    vi.useFakeTimers();
+    const request = vi.fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ user: { id: 1, email: "a@b.c" } }), { status: 200 }));
+    vi.stubGlobal("fetch", request);
+    const pending = api.login("a@b.c", "12345678");
+    await vi.advanceTimersByTimeAsync(1500 + 3000 + 6000);
+    await expect(pending).resolves.toMatchObject({ user: { id: 1 } });
+    expect(request).toHaveBeenCalledTimes(4);
+    vi.useRealTimers();
+  });
+
+  it("гость — не ошибка: пустой user превращается в null", async () => {
+    stubFetch(200, JSON.stringify({ user: null }));
+    await expect(api.me()).resolves.toBeNull();
   });
 
   it("права читаются из access, а не из поля тарифа", async () => {
@@ -72,7 +118,7 @@ describe("клиент API", () => {
       matrices_used: 3,
       matrices_limit: null,
     }));
-    const me = await api.me();
+    const me = (await api.me())!;
     expect(me.scopes).toEqual(["single", "matrix", "all"]);
     expect(me.can_store).toBe(true);
     expect(me.unlimited).toBe(true);
@@ -91,13 +137,13 @@ describe("клиент API", () => {
       matrices_used: 2,
       matrices_limit: 3,
     }));
-    const me = await api.me();
+    const me = (await api.me())!;
     expect(me.matrices_limit).toBe(3);
   });
 
   it("без прав scope пустой, а сроков нет", async () => {
     stubFetch(200, JSON.stringify({ user: { id: 2, email: "n@b.c" }, access: { scopes: [] } }));
-    const me = await api.me();
+    const me = (await api.me())!;
     expect(me.scopes).toEqual([]);
     expect(me.unlimited).toBe(false);
     expect(me.until).toBeNull();

@@ -7,7 +7,7 @@ export type PhraseFn<A extends unknown[]> = Record<Lang, (...args: A) => string>
 
 import { mapPoints, octagram } from "./map";
 import { matrixPages } from "./matrixPages";
-import { apiErrors, bffErrors, clause, emailErrors, encSections, payTarget, relatedLinks } from "./misc";
+import { apiErrors, bffErrors, clause, emailErrors, encSections, errorScreen, networkBanner, payTarget, relatedLinks } from "./misc";
 import { nav } from "./nav";
 import { pages } from "./pages";
 import { report, reportSheet } from "./report";
@@ -43,6 +43,8 @@ export const D = {
   octagram,
   matrixPages,
   apiErrors,
+  networkBanner,
+  errorScreen,
   bffErrors,
   clause,
   emailErrors,

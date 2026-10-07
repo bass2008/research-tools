@@ -80,9 +80,9 @@ health="$(curl -s --max-time 20 "${base}/api/health")"
 printf '  /api/health -> %s\n' "${health:-<none>}"
 grep -q '"ok":true' <<<"${health}" || fail "/api/health не отвечает ok:true"
 
-me="$(code "${base}/api/auth/me")"
+me="$(curl -s --max-time 20 "${base}/api/auth/me")"
 printf '  /api/auth/me без куки -> %s\n' "${me}"
-[[ "${me}" == "401" ]] || fail "/api/auth/me без куки вернул ${me}, ожидался 401"
+[[ "${me}" == '{"user":null}' ]] || fail "/api/auth/me без куки вернул ${me}, ожидался гость {\"user\":null}"
 
 printf 'Токен недоступен из JS:\n'
 html="$(curl -s --max-time 20 "${base}/")"

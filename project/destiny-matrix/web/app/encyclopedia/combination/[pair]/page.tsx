@@ -63,6 +63,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     description: extra.seo.description,
     path: combinationHref(a, b),
     article: true,
+    noindex: true,
+    follow: true,
   });
 }
 

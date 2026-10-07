@@ -1,4 +1,6 @@
+import { reportBadFormat } from "./errors";
 import { D } from "./i18n";
+import { beginRetry, failureCause, waitForOnline, waitForRetry } from "./netwatch";
 
 // Клиент к BFF (`web/app/api/**`), а не к api напрямую. Адрес всегда свой origin:
 // токен лежит в httpOnly-куке, поэтому кросс-доменный базовый адрес её бы не отправил, а
@@ -252,20 +254,53 @@ export interface SecurityAuditPage {
 export const forLocale = localized((L: Locale) => {
 
   const API_BASE = "/api";
+  const RETRY_SHORT = [1500];
+  const RETRY_LONG = [1500, 3000, 6000, 12000, 20000, 30000, 30000];
+  const OFFLINE_WAIT = 60_000;
 
-  async function request<T>(path: string, init?: RequestInit): Promise<T> {
-    const headers: Record<string, string> = { Accept: "application/json", "Accept-Language": L };
-    if (init?.body) headers["Content-Type"] = "application/json";
-    let res: Response;
+  interface RequestOptions extends RequestInit {
+    /** "long": the person waits on this action (sign-in), so keep trying for about two minutes. */
+    retry?: "long";
+  }
+
+  // Only requests that are safe to repeat are retried: a lost answer to a payment must not start a second one.
+  async function send(path: string, init: RequestOptions, headers: Record<string, string>): Promise<Response> {
+    const { retry, ...rest } = init;
+    const method = rest.method ?? "GET";
+    const schedule = retry === "long" ? RETRY_LONG : method === "GET" ? RETRY_SHORT : [];
+    let stopRetry: (() => void) | null = null;
+    let offlineWaits = 0;
     try {
-      res = await fetch(`${API_BASE}${path}`, {
-        ...init,
-        credentials: "same-origin",
-        headers: { ...headers, ...init?.headers },
-      });
-    } catch {
-      throw new ApiError(D.apiErrors.offline[L], 0, L, D.apiErrors.offline);
+      for (let attempt = 0; ; ) {
+        try {
+          return await fetch(`${API_BASE}${path}`, { ...rest, credentials: "same-origin", headers: { ...headers, ...rest.headers } });
+        } catch (error) {
+          const cause = failureCause(error);
+          const phrase = cause === "offline" ? D.apiErrors.noInternet : D.apiErrors.unreachable;
+          if (cause === "aborted" || !schedule.length) throw new ApiError(phrase[L], 0, L, phrase);
+          if (cause === "offline" && offlineWaits < 3) {
+            offlineWaits += 1;
+            stopRetry ??= beginRetry();
+            if (!(await waitForOnline(OFFLINE_WAIT))) throw new ApiError(phrase[L], 0, L, phrase);
+            continue;
+          }
+          if (attempt >= schedule.length) throw new ApiError(phrase[L], 0, L, phrase);
+          stopRetry ??= beginRetry();
+          await waitForRetry(schedule[attempt]);
+          attempt += 1;
+        }
+      }
+    } finally {
+      stopRetry?.();
     }
+  }
+
+  async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
+    const headers: Record<string, string> = { Accept: "application/json", "Accept-Language": L };
+    if (init.body) headers["Content-Type"] = "application/json";
+    const method = init.method ?? "GET";
+    const started = performance.now();
+    const res = await send(path, init, headers);
     // Тело может быть не JSON: пока api не поднят, на /api/* приходит HTML-страница 404.
     // Ронять здесь исключение нельзя — иначе вызывающий не отличит отказ сервера от своей ошибки
     // и потеряет уже собранную почту.
@@ -280,6 +315,7 @@ export const forLocale = localized((L: Locale) => {
       }
     }
     if (!res.ok) {
+      if (!parsed && res.status < 500) reportBadFormat(method, API_BASE + path, res.status, performance.now() - started);
       const detail =
         parsed && data && typeof data === "object" && "detail" in data
           ? String((data as { detail: unknown }).detail)
@@ -301,7 +337,10 @@ export const forLocale = localized((L: Locale) => {
       }
       throw new ApiError(detail, res.status, L, messages);
     }
-    if (!parsed) throw new ApiError(D.apiErrors.unexpected[L], res.status, L, D.apiErrors.unexpected);
+    if (!parsed) {
+      reportBadFormat(method, API_BASE + path, res.status, performance.now() - started);
+      throw new ApiError(D.apiErrors.unexpected[L], res.status, L, D.apiErrors.unexpected);
+    }
     return data as T;
   }
 
@@ -315,7 +354,7 @@ export const forLocale = localized((L: Locale) => {
       request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
 
     login: (email: string, password: string) =>
-      request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+      request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }), retry: "long" }),
 
     logout: () => request<{ ok: true }>("/auth/logout", { method: "POST" }),
 
@@ -334,8 +373,10 @@ export const forLocale = localized((L: Locale) => {
 
     // Признак доступа берётся только отсюда: в localStorage он не хранится, а лишь кешируется
     // для мгновенной отрисовки (см. lib/storage.ts).
-    me: async (): Promise<MeResponse> => {
+    /** null — гость: сессии нет или она истекла. */
+    me: async (): Promise<MeResponse | null> => {
       const raw = await request<Record<string, unknown>>("/auth/me");
+      if (!raw.user) return null;
       const rights = (raw.access ?? {}) as Record<string, unknown>;
       return {
         user: raw.user as User,

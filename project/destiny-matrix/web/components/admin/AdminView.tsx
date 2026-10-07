@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { ApiError, type AdminPayment, type AdminReportJob, type AdminUser,
          type AdminUserSort, type SweepRun } from "@/lib/api";
 import { buildInfo } from "@/lib/version";
+import { useSession } from "@/components/account/useSession";
 import ActionsMenu from "@/components/admin/ActionsMenu";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
@@ -18,7 +19,31 @@ import UserActions from "@/components/admin/UserActions";
 
 const USER_SIZES = [10, 25, 50, 100];
 
+// Access is checked before any admin request: a guest or a regular account never fires them.
+// The session is rechecked on every return to the tab; until it settles the panel stays mounted.
 export default function AdminView() {
+  const { t } = useAdminLocale();
+  const session = useSession();
+  const [granted, setGranted] = useState(false);
+  const settled = session.status === "user" || session.status === "guest";
+  const admin = session.status === "user" && session.admin;
+  if (settled && granted !== admin) setGranted(admin);
+  if (admin || (granted && !settled)) return <AdminData />;
+  if (session.status === "loading") return <p className="dim">{t("Смотрим…")}</p>;
+  const reason = session.status === "guest" ? t("Войдите под учётной записью администратора.")
+    : session.status === "user" ? t("У этой учётной записи нет прав администратора.")
+      : session.error ?? t("Не удалось проверить вход.");
+  return (
+    <div className="panel narrow">
+      <h3>{t("Админка недоступна")}</h3>
+      <p className="dim">{reason}</p>
+      <Link className="btn wide" href={session.status === "guest" ? "/login" : "/account"}>
+        {session.status === "guest" ? t("Войти") : t("В кабинет")}</Link>
+    </div>
+  );
+}
+
+function AdminData() {
   const { t, api, when, day, money, paymentTargetLabel, counted } = useAdminLocale();
 /** Что у пользователя открыто — одной строкой: покупки и подписка живут одновременно. */
 function accessLine(u: AdminUser): string {

@@ -116,6 +116,19 @@ describe("one frontend, domain profiles", () => {
     }
   });
 
+  it("takes the error collector address from the contour profile and fails closed on garbage", () => {
+    const profile = (errorsDsn?: string) => JSON.stringify([{
+      origin: "https://test.arcana-sense.ru", defaultLocale: "ru", locales: ["ru"], errorsDsn,
+    }]);
+    const dsn = "https://abc123@k1.hawk.so/0";
+    expect(siteForHost("test.arcana-sense.ru", configuredSites(profile(dsn)))?.errorsDsn).toBe(dsn);
+    expect(siteForHost("test.arcana-sense.ru", configuredSites(profile("")))?.errorsDsn).toBeUndefined();
+    expect(ru.errorsDsn).toBeUndefined();
+    for (const bad of ["http://abc@k1.hawk.so/0", "https://k1.hawk.so/0", "https://abc@k1.hawk.so/x"]) {
+      expect(() => configuredSites(profile(bad))).toThrow("Invalid errors DSN");
+    }
+  });
+
   it("keeps verification codes specific to the domain", () => {
     const site = { ...com, verification: { google: "international-code" } };
     expect(seoView("ru", site).verification()).toEqual({ google: "international-code" });

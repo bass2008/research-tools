@@ -11,6 +11,7 @@ export interface SiteProfile {
   indexable: boolean;
   verification?: { google?: string; yandex?: string };
   metrikaId?: number;
+  errorsDsn?: string;
 }
 
 // Compatibility for pure helpers and build-time route enumeration. HTTP requests use
@@ -43,6 +44,16 @@ const productionSites = (["ru", "en"] as const).map((locale): HostedSite => ({
   indexable: true,
 }));
 
+function isDsn(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && Boolean(url.username) && /^\/\d+$/.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 /** Extra profiles are runtime configuration, e.g. local/test hosts. Unknown hosts fail closed. */
 export function configuredSites(raw?: string): readonly HostedSite[] {
   const extra: unknown = raw ? JSON.parse(raw) : [];
@@ -60,6 +71,9 @@ export function configuredSites(raw?: string): readonly HostedSite[] {
         (!Number.isSafeInteger(value.metrikaId) || value.metrikaId < 0)) {
       throw new Error("Invalid Metrika counter");
     }
+    if (value.errorsDsn !== undefined && value.errorsDsn !== "" && !isDsn(value.errorsDsn)) {
+      throw new Error("Invalid errors DSN");
+    }
     if (!Array.isArray(hosts) || !hosts.length || hosts.some((host) => typeof host !== "string" || !normalizeHost(host))) {
       throw new Error("Invalid site hosts");
     }
@@ -71,6 +85,7 @@ export function configuredSites(raw?: string): readonly HostedSite[] {
       indexable: value.indexable !== false && origin.origin === SITE_HOSTS[value.defaultLocale as Lang],
       verification: value.verification,
       metrikaId: value.metrikaId,
+      errorsDsn: value.errorsDsn || undefined,
     });
   }
   const seen = new Set<string>();

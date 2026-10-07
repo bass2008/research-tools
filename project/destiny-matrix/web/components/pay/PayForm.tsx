@@ -5,7 +5,8 @@ import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixRe
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { track } from "@/lib/analytics";
 import { ApiError, forLocale as localizedApi, type MatrixListItem } from "@/lib/api";
-import { forLocale as localizedEmail } from "@/lib/email";
+import { emailProblem, forLocale as localizedEmail } from "@/lib/email";
+import { reportFormCheck } from "@/lib/errors";
 import { useHydrated } from "@/lib/hydrated";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -168,21 +169,30 @@ export default function PayForm({ locale: requestedLocale, ...localeProps }: ({
     setError(null);
     const mail = normalizeEmail(email);
     const wrongMail = emailError(email);
-    if (wrongMail) return setError((locale) => localizedEmail(locale).emailError(email));
-    if (!agreed) return setError((locale) => D.payForm.errors.consent[locale]);
+    if (wrongMail) {
+      reportFormCheck("pay", `email:${emailProblem(mail)}`);
+      return setError((locale) => localizedEmail(locale).emailError(email));
+    }
+    if (!agreed) {
+      reportFormCheck("pay", "consent");
+      return setError((locale) => D.payForm.errors.consent[locale]);
+    }
     // Про чужую почту говорим раньше, чем про пароль: вошедшему человеку бессмысленно требовать
     // пароль от аккаунта, которым он не пользуется.
     if (session.status === "user" && session.email && session.email !== mail) {
+      reportFormCheck("pay", "other-account");
       return setError(
         (locale) => D.payForm.errors.otherAccount[locale](session.email ?? ""),
       );
     }
     const typed = password;
     if (!signedIn && typed.length < MIN_PASSWORD) {
+      reportFormCheck("pay", "password:short");
       return setError((locale) => D.payForm.errors.shortPassword[locale](MIN_PASSWORD));
     }
     const forAll = tariff.scope.includes("all");
     if (!forAll && target === null) {
+      reportFormCheck("pay", "no-date");
       return setError((locale) => D.payForm.errors.noDate[locale]);
     }
 

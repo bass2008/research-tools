@@ -2,7 +2,8 @@
 
 import { useLocale, useSite } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
-import { forLocale as localizedEmail } from "@/lib/email";
+import { emailProblem, forLocale as localizedEmail } from "@/lib/email";
+import { reportFormCheck } from "@/lib/errors";
 import { useHydrated } from "@/lib/hydrated";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -36,7 +37,10 @@ export default function ForgotForm({ locale: requestedLocale, ...localeProps }: 
     e.preventDefault();
     setError(null);
     const wrong = emailError(email);
-    if (wrong) return setError((locale) => localizedEmail(locale).emailError(email));
+    if (wrong) {
+      reportFormCheck("forgot", `email:${emailProblem(normalizeEmail(email))}`);
+      return setError((locale) => localizedEmail(locale).emailError(email));
+    }
     setBusy(true);
     try {
       await api.resetRequest(normalizeEmail(email));

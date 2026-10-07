@@ -5,7 +5,10 @@ import Header from "@/components/ui/Header";
 import LocaleProvider from "@/components/ui/LocaleProvider";
 import Metrika from "@/components/ui/Metrika";
 import PulseBeacon from "@/components/ui/PulseBeacon";
+import ErrorReporter from "@/components/ui/ErrorReporter";
+import NetworkBanner from "@/components/ui/NetworkBanner";
 import { D } from "@/lib/i18n";
+import { buildInfo } from "@/lib/version";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
@@ -71,6 +74,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </TariffsProvider>
           <Metrika />
           <PulseBeacon />
+          <ErrorReporter release={buildInfo().commit} />
+          <NetworkBanner />
         </LocaleProvider>
       </body>
     </html>

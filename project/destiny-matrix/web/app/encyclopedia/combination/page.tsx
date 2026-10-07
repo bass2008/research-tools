@@ -35,6 +35,8 @@ const forLocale = localized((L: Locale, site) => {
     description: HUB.seo.description,
     path: COMBINATION_HUB,
     article: true,
+    noindex: true,
+    follow: true,
   });
   return { categoryHub, COMBINATION_HUB, allCombinationSlugs, encyclopediaSection, articleLd, itemListLd, pageMeta, KEY, HUB, metadata };
 });

@@ -15,6 +15,7 @@
     "test:parity": "vitest run lib/matrix.parity.test.ts"
   },
   "dependencies": {
+    "@sentry/browser": "^11.5.0",
     "next": "^16.3.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

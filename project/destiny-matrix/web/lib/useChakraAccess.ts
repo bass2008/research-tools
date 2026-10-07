@@ -3,11 +3,14 @@
 import { useSession } from "@/components/account/useSession";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ALL_FREE } from "./access";
+import type { Lang } from "./i18n/lang";
 import type { MatrixListItem } from "./api";
 import type { Matrix } from "./matrix";
 import type { SectionOut } from "./publicSpec";
 import type { LongformReading } from "./readingTypes";
 import { useEffect, useState } from "react";
+
+export type ChakraReadingStatus = "loading" | "error";
 
 // One access rule for the chart on every page. Access is by date, not by date and sex: sex
 // changes no number in the chart (engine/tests/test_method_contract.py), and the offer promises
@@ -20,30 +23,37 @@ export function useChakraAccess(m: Matrix | null, dates: MatrixListItem[], full:
     ? dates.find((row) => row.birth === m.birth && row.sex === m.sex) ?? dates.find((row) => row.birth === m.birth)
     : undefined;
   const paidId = ALL_FREE ? undefined : paid?.id;
-  const [own, setOwn] = useState<{ id: number; reading: LongformReading } | null>(null);
+  const [own, setOwn] = useState<{ id: number; locale: Lang; reading?: LongformReading; status?: ChakraReadingStatus } | null>(null);
 
   useEffect(() => {
     if (paidId === undefined) return;
     let alive = true;
+    setOwn({ id: paidId, locale: L, status: "loading" });
     fetch(`/api/sections?m=${paidId}&section=chakras`, { headers: { "Accept-Language": L } })
       .then((response) => (response.ok ? response.json() : null))
       .then((body: { sections?: SectionOut[] } | null) => {
         const reading = body?.sections?.find((s) => s.key === "chakras")?.longform;
-        if (alive && reading) setOwn({ id: paidId, reading });
+        if (alive) setOwn({ id: paidId, locale: L, reading, status: reading ? undefined : "error" });
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (alive) setOwn({ id: paidId, locale: L, status: "error" });
+      });
     return () => {
       alive = false;
     };
   }, [paidId, L]);
 
   const anyDate = session.status === "user" && session.unlimited;
+  // Hide the old locale immediately, including the render before the new effect runs.
+  const current = own?.id === paidId && own?.locale === L ? own : null;
+  const reading = full?.find((s) => s.key === "chakras")?.longform ?? current?.reading;
   return {
     paid,
     saved,
     anyDate,
     unlocked: ALL_FREE || Boolean(paid) || anyDate,
-    reading: full?.find((s) => s.key === "chakras")?.longform ?? (own?.id === paidId ? own?.reading : undefined),
+    reading,
+    readingStatus: !reading && paidId !== undefined ? current?.status ?? "loading" : undefined,
     matrixId: saved?.id,
   };
 }

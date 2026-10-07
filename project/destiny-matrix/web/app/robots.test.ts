@@ -18,7 +18,7 @@ describe("robots.txt", () => {
 
   // Поисковые боты ИИ-сервисов приводят людей и ставят ссылку на источник — их закрывать нельзя,
   // хотя имена похожи на обучающие краулеры тех же компаний.
-  it.each(["Googlebot", "YandexBot", "OAI-SearchBot", "ChatGPT-User", "PerplexityBot"])(
+  it.each(["YandexBot", "OAI-SearchBot", "ChatGPT-User", "PerplexityBot"])(
     "не мешает %s",
     (agent) => {
       expect(groupFor(agent)).toBeUndefined();
@@ -55,6 +55,13 @@ describe("robots.txt", () => {
   // без слеша значило бы выкинуть из поиска и его.
   it("закрывает от обхода сочетания", () => {
     expect([groupFor("*")?.disallow].flat()).toContain("/encyclopedia/combination");
+  });
+
+  // Google не выводит из индекса закрытое `Disallow`: сочетания ему открыты, чтобы он прочитал
+  // их `noindex`. Своя группа отменяет общую, поэтому остальные запреты обязаны совпадать.
+  it("открывает Googlebot только сочетания", () => {
+    const common = [groupFor("*")?.disallow].flat().filter((path) => path !== "/encyclopedia/combination");
+    expect([groupFor("Googlebot")?.disallow].flat()).toEqual(common);
   });
 
   it("не закрывает хаб матриц", () => {

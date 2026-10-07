@@ -76,6 +76,10 @@ export function refreshSession(L: Lang = SITE_LANG): Promise<Session> {
   inflight = api
     .me()
     .then((me) => {
+      if (!me) {
+        forgetSession();
+        return publish({ ...EMPTY, status: "guest" });
+      }
       const paid = me.scopes.length > 0;
       cachePaid(paid);
       // Вошли другим человеком в этой же вкладке: его кабинет не должен предлагать сохранить

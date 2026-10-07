@@ -12,6 +12,7 @@ export const chakraAtlas = {
   locked: { ru: "Толкование доступно после оплаты", en: "Interpretation available after purchase" } satisfies Phrase,
   unlockHint: { ru: "Полный разбор объясняет сочетание трёх арканов в каждой чакре вашей матрицы.", en: "The full reading explains the three arcana together in each chakra of your matrix." } satisfies Phrase,
   openSaved: { ru: "Сохраните эту дату, чтобы открыть её полный разбор по вашему доступу.", en: "Save this date to open its full reading using your access." } satisfies Phrase,
+  loadFailed: { ru: "Не удалось загрузить толкование. Обновите страницу, чтобы попробовать ещё раз.", en: "The interpretation could not be loaded. Refresh the page to try again." } satisfies Phrase,
   origin: { ru: "Откуда числа", en: "Where the numbers come from" } satisfies Phrase,
   energyField: { ru: "Общее энергополе", en: "Overall energy field" } satisfies Phrase,
   energyFieldShort: { ru: "Энергополе", en: "Energy field" } satisfies Phrase,

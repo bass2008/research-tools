@@ -222,7 +222,7 @@ def test_a8_no_account_is_created_without_a_target(page, mail):
     page.wait_for_timeout(2500)
 
     answer = page.request.get(f"{BASE}/api/auth/me")
-    assert answer.status != 200, "аккаунт создан и сессия выдана, хотя платёж не начинался"
+    assert answer.json()["user"] is None, "аккаунт создан и сессия выдана, хотя платёж не начинался"
 
 
 def test_a9_buy_button_after_payment_opens_the_form(page, mail):

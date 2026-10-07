@@ -12,6 +12,7 @@ import { chakraAtlas as copy } from "@/lib/i18n/dict/chakraAtlas";
 import { SITE_LANG as defaultLocale, type Lang } from "@/lib/i18n/lang";
 import { forLocale as localizedPublicLabels } from "@/lib/i18n/publicLabels";
 import type { Matrix } from "@/lib/matrix";
+import type { ChakraReadingStatus } from "@/lib/useChakraAccess";
 import { ENERGY_FIELD_HREF, ENERGY_FIELD_KEY, type LongformReading } from "@/lib/readingTypes";
 import { forLocale as localizedSite } from "@/lib/site";
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
@@ -45,6 +46,7 @@ export interface ChakraTableProps {
   site?: SiteProfile;
   /** Только данные раздела, который уже разрешил сервер. Корпус здесь не импортируется. */
   reading?: LongformReading;
+  readingStatus?: ChakraReadingStatus;
   unlocked?: boolean;
   matrixId?: number | null;
   reportHref?: string;
@@ -54,7 +56,7 @@ export interface ChakraTableProps {
 
 export default function ChakraTable({ m, title, heading: Heading = "h3", printing = false,
   locale: L = defaultLocale, site = DEFAULT_SITE, reading, unlocked = false,
-  matrixId, reportHref, referenceOnly = false }: ChakraTableProps) {
+  matrixId, reportHref, referenceOnly = false, readingStatus }: ChakraTableProps) {
   const { arcanumTitle } = localizedArcana(L);
   const { columnTitle } = localizedPublicLabels(L);
   const { publicHref } = localizedSite(L, site);
@@ -171,9 +173,12 @@ export default function ChakraTable({ m, title, heading: Heading = "h3", printin
             </div>
             {locked ? <div className={styles.lockedCopy} data-testid="chakra-locked">
               <p><LockIcon /> {copy.locked[L]}</p><p>{copy.unlockHint[L]}</p>
-              <UnlockCta locale={L} place="report" section="chakras" matrixId={matrixId}>{D.nav.buy[L]}</UnlockCta>
+              <UnlockCta locale={L} place="report" section="chakras" matrixId={matrixId}
+                birth={{ birth: m.birth, sex: m.sex }}>{D.nav.buy[L]}</UnlockCta>
             </div> : fieldMissing ? null : detail ? <div className={styles.copy} data-testid="chakra-copy" data-empty={detail.paragraphs.every((text) => !text) || undefined}>
               {detail.paragraphs.map((text, index) => <p key={index}><RichText text={text} /></p>)}
+            </div> : readingStatus ? <div className={styles.lockedCopy} role="status">
+              <p>{readingStatus === "loading" ? D.common.loading[L] : copy.loadFailed[L]}</p>
             </div> : <div className={styles.lockedCopy}>
               <p>{copy.openSaved[L]}</p>
               <SaveMatrixButton locale={L} birth={m.birth} sex={m.sex} label={D.unlockBox.saveAndOpen[L]} />

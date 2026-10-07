@@ -24,6 +24,8 @@ const config: NextConfig = {
   // заголовком главной — страница живёт только в RSC-пейлоаде.
   experimental: { globalNotFound: true },
   poweredByHeader: false,
+  // Maps are uploaded to the error collector at release; the runtime image does not ship them.
+  productionBrowserSourceMaps: true,
   // Адрес, с которого браузер берёт `_next/static`. Пусто — раздаёт тот же сервер. Значение
   // вшивается в разметку на сборке, поэтому смена адреса требует пересборки фронта.
   assetPrefix: serverSettings.get("assetPrefix") || undefined,

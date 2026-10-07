@@ -41,16 +41,24 @@ docker buildx build --push -f api.Dockerfile \
   --output "type=image,name=$REGISTRY/api:$TAG,$ZSTD" ..
 docker buildx build --push -f browser.Dockerfile \
   --output "type=image,name=$REGISTRY/browser:$TAG,$ZSTD" .
-docker buildx build --push -f web.Dockerfile \
-  --build-arg "NEXT_PUBLIC_SITE_URL=$SITE" \
-  --build-arg "NEXT_PUBLIC_METRIKA_ID=${METRIKA_ID:-111856670}" \
-  --build-arg "NEXT_PUBLIC_YANDEX_VERIFICATION=${YANDEX_VERIFICATION:-}" \
-  --build-arg "NEXT_PUBLIC_GOOGLE_VERIFICATION=${GOOGLE_VERIFICATION:-}" \
-  --build-arg "BUILD_COMMIT=$BUILD_COMMIT" \
-  --build-arg "BUILD_BRANCH=$BUILD_BRANCH" \
-  --build-arg "BUILD_TIME=$BUILD_TIME" \
-  --build-arg "BUILD_ISO=$BUILD_ISO" \
+WEB_ARGS=(
+  --build-arg "NEXT_PUBLIC_SITE_URL=$SITE"
+  --build-arg "NEXT_PUBLIC_METRIKA_ID=${METRIKA_ID:-111856670}"
+  --build-arg "NEXT_PUBLIC_YANDEX_VERIFICATION=${YANDEX_VERIFICATION:-}"
+  --build-arg "NEXT_PUBLIC_GOOGLE_VERIFICATION=${GOOGLE_VERIFICATION:-}"
+  --build-arg "BUILD_COMMIT=$BUILD_COMMIT"
+  --build-arg "BUILD_BRANCH=$BUILD_BRANCH"
+  --build-arg "BUILD_TIME=$BUILD_TIME"
+  --build-arg "BUILD_ISO=$BUILD_ISO"
+)
+docker buildx build --push -f web.Dockerfile "${WEB_ARGS[@]}" \
   --output "type=image,name=$REGISTRY/web:$TAG,$ZSTD" ../web
+# Same arguments hit the build cache, so the maps belong to the chunks of the pushed image.
+MAPS="$(mktemp -d)"
+docker buildx build -f web.Dockerfile "${WEB_ARGS[@]}" --target maps --output "type=local,dest=$MAPS" ../web
+(. "${HAWK_ENV:-$HOME/.config/arcana/hawk.env}" && scripts/hawk-sourcemaps.sh "$HAWK_TOKEN_PROD" "$BUILD_COMMIT" "$MAPS") \
+  || echo "ВНИМАНИЕ: карты исходников в Hawk не загружены, стеки ошибок этого релиза будут без имён"
+rm -rf "$MAPS"
 
 # Язык развёртки и режим витрины обязательны в compose-файле, а в `.env` на машине их не было:
 # любой вызов `docker compose` там падал на интерполяции. Дописываем до снимка — он тоже compose.

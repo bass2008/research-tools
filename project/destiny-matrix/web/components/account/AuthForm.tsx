@@ -3,7 +3,8 @@
 import { forLocale as localizedUseSession } from "@/components/account/useSession";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
-import { forLocale as localizedEmail } from "@/lib/email";
+import { emailProblem, forLocale as localizedEmail } from "@/lib/email";
+import { reportFormCheck } from "@/lib/errors";
 import { useHydrated } from "@/lib/hydrated";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -49,16 +50,19 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
     const mail = normalizeEmail(email);
     const wrong = emailError(email);
     if (wrong) {
+      reportFormCheck(mode, `email:${emailProblem(mail)}`);
       setError((locale) => localizedEmail(locale).emailError(email));
       emailInput.current?.focus();
       return;
     }
     if (password.length < 3) {
+      reportFormCheck(mode, "password:short");
       setError((locale) => D.auth.shortPassword[locale]);
       passwordInput.current?.focus();
       return;
     }
     if (isRegister && !agreed) {
+      reportFormCheck(mode, "consent");
       setError((locale) => D.auth.consentRequired[locale]);
       consentInput.current?.focus();
       return;

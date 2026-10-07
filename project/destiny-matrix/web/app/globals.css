@@ -1768,3 +1768,14 @@ table.mx td.self { background: var(--card2); }
 .language-switch { border: 0; padding: 0; background: none; color: var(--gold); font: inherit; cursor: pointer; }
 .language-switch:hover { text-decoration: underline; }
 .language-switch:disabled { cursor: wait; opacity: .6; }
+
+.net-banner {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  z-index: 60; max-width: calc(100vw - 32px); padding: 10px 16px; border-radius: 10px;
+  background: var(--text); color: var(--card); font-size: 14px; line-height: 1.35; box-shadow: var(--sh2);
+}
+
+.error-screen { display: grid; gap: 14px; justify-items: start; padding-block: 40px; }
+.error-screen h1 { margin: 0; }
+.error-screen p { margin: 0; color: var(--dim); max-width: 60ch; }
+.error-screen .actions { display: flex; flex-wrap: wrap; gap: 10px; }

@@ -52,6 +52,21 @@ ENV NEXT_PUBLIC_BUILD_COMMIT=${BUILD_COMMIT} \
 # внутри rust-части сборщика.
 RUN --mount=type=cache,target=/app/.next/cache,sharing=locked npm run build
 
+# Browser source maps leave the build only through the `maps` target: they go to the error
+# collector, and the site must not serve its sources. Turbopack names a map apart from its chunk,
+# while the collector looks a map up by the chunk name, so each map is exported under that name.
+FROM build AS static
+RUN mkdir /maps && cd .next/static \
+    && find . -name '*.js' | while read -r js; do \
+         dir="$(dirname "$js")"; \
+         map="$(tail -c 300 "$js" | sed -n 's|^//# sourceMappingURL=\(.*\.map\)$|\1|p')"; \
+         if [ -n "$map" ] && [ -f "$dir/$map" ]; then mkdir -p "/maps/$dir" && cp "$dir/$map" "/maps/$dir/$(basename "$js").map"; fi; \
+       done \
+    && find . -name '*.map' -delete
+
+FROM scratch AS maps
+COPY --from=static /maps /
+
 FROM node:22-alpine AS runtime
 WORKDIR /app
 ARG NEXT_ASSET_PREFIX=""
@@ -63,7 +78,7 @@ ENV NODE_ENV=production \
 
 # standalone тянет за собой только нужные модули; статику и public он не копирует сам
 COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
+COPY --from=static /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 
 EXPOSE 3000

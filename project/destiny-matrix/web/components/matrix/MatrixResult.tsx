@@ -1,6 +1,6 @@
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
-import ChakraTable from "@/components/matrix/ChakraTable";
+import ChakraTable, { type ChakraTableProps } from "@/components/matrix/ChakraTable";
 import type { LongformReading } from "@/lib/readingTypes";
 import Octagram from "@/components/matrix/Octagram";
 import chakraMapStyles from "./ChakraMapHover.module.css";
@@ -45,6 +45,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
   /** карта построена по дате-заглушке, а не по введённой: назвать её своей нельзя */
   example?: boolean;
   chakraReading?: LongformReading;
+  chakraReadingStatus?: ChakraTableProps["readingStatus"];
   chakraUnlocked?: boolean;
   matrixId?: number | null;
 }) & { locale?: Locale; site?: SiteProfile }) {
@@ -54,6 +55,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
     printing = false,
     example = false,
     chakraReading,
+    chakraReadingStatus,
     chakraUnlocked = false,
     matrixId,
   } = localeProps;
@@ -87,7 +89,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
 
         <div>
           <ChakraTable site={site} locale={L} m={m} heading="h2" printing={printing}
-            reading={chakraReading} unlocked={chakraUnlocked} matrixId={matrixId} />
+            reading={chakraReading} readingStatus={chakraReadingStatus} unlocked={chakraUnlocked} matrixId={matrixId} />
 
           <div className="mini">
             <div className="mb">
