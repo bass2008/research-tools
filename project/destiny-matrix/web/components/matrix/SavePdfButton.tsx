@@ -24,7 +24,7 @@ export const forLocale = localized((L: Locale) => {
 });
 
 export default function SavePdfButton({ locale: requestedLocale, ...localeProps }: ({
-  matrixId: number;
+  readingId: number;
   label?: string;
   /** дата открытого разбора: попадает в подсказку, чтобы было видно, что скачается именно он */
   hint?: string;
@@ -32,7 +32,7 @@ export default function SavePdfButton({ locale: requestedLocale, ...localeProps 
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
   const {
-    matrixId,
+    readingId,
     label = D.report.savePdf[L],
     hint,
   } = localeProps;
@@ -41,25 +41,25 @@ export default function SavePdfButton({ locale: requestedLocale, ...localeProps 
   // до гидратации обработчик клика не подключён: без этого кнопка выглядела рабочей, а нажатие
   // не делало ничего
   const [ready, setReady] = useState(false);
-  const [download, setDownload] = useState<{ locale: Locale; matrixId: number; state: State } | null>(null);
-  const state = download?.locale === L && download.matrixId === matrixId ? download.state : "idle";
-  const setState = (state: State) => setDownload({ locale: L, matrixId, state });
+  const [download, setDownload] = useState<{ locale: Locale; readingId: number; state: State } | null>(null);
+  const state = download?.locale === L && download.readingId === readingId ? download.state : "idle";
+  const setState = (state: State) => setDownload({ locale: L, readingId, state });
   const [note, setNote] = useMessage(L);
 
   useEffect(() => setReady(true), []);
 
   // Печать начинается сразу после оплаты, поэтому к первому нажатию файл обычно уже готов.
   // Спрашиваем состояние один раз: если готов — кнопка так и говорит и не обещает ожидания.
-  const [cached, setCached] = useState<{ locale: Locale; matrixId: number; ready: boolean } | null>(null);
-  const warm = cached?.locale === L && cached.matrixId === matrixId && cached.ready;
+  const [cached, setCached] = useState<{ locale: Locale; readingId: number; ready: boolean } | null>(null);
+  const warm = cached?.locale === L && cached.readingId === readingId && cached.ready;
   useEffect(() => {
     let alive = true;
     api
       .reportJobs()
       .then((res) => {
         if (!alive) return;
-        setCached({ locale: L, matrixId,
-          ready: res.items.some((job) => job.matrix_id === matrixId && job.locale === L && job.status === "done") });
+        setCached({ locale: L, readingId,
+          ready: res.items.some((job) => (job.reading_id ?? job.matrix_id) === readingId && job.locale === L && job.status === "done") });
       })
       .catch(() => {
         /* состояние печати — подсказка, без неё кнопка работает как раньше */
@@ -67,7 +67,7 @@ export default function SavePdfButton({ locale: requestedLocale, ...localeProps 
     return () => {
       alive = false;
     };
-  }, [matrixId, L]);
+  }, [readingId, L]);
 
   const open = (href: string) => window.open(href, "_blank", "noopener");
 
@@ -79,7 +79,7 @@ export default function SavePdfButton({ locale: requestedLocale, ...localeProps 
     setNote(null);
     track("pdf_click", { place: "report" });
     try {
-      const res = await api.reportPdf(matrixId);
+      const res = await api.reportPdf(readingId);
       setState("ready");
       open(res.url);
     } catch (err) {

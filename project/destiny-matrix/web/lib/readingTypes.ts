@@ -59,6 +59,10 @@ export interface ChakraReadingRow {
   heading: string;
   paragraphs: string[];
   cells: ChakraReadingCell[];
+  /** Locked row: heading, captions and paragraphs are filler; the count is of the real reading. */
+  lockedWords?: number;
+  /** Label shown over the locked reading. */
+  lockedLabel?: string;
 }
 
 export interface AgeReadingPeriod extends ReadingRoleTemplate {

@@ -32,9 +32,9 @@ def test_declined_payment_retry_keeps_older_matrix(page, mail):
     }))
     page.goto(BASE + "/pay/fail?order=decline-regression")
     retry = page.locator('.paybox a.btn').first
-    expect(retry).to_have_attribute("href", f"/pay?m={ids[0]}")
+    expect(retry).to_have_attribute("href", f"/pay/single?m={ids[0]}")
     retry.click()
-    expect(page.get_by_test_id("pay-target")).to_have_value(str(ids[0]))
+    expect(page.get_by_test_id("pay-target")).to_have_attribute("data-value", str(ids[0]))
     expect(page.get_by_test_id("pay-submit")).to_contain_text("31 марта 1993")
 
 

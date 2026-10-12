@@ -77,7 +77,10 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
   if (!item) notFound();
 
   const formula = tailByFormula(parseTail(item.key) ?? []);
+  const karmicHub = localizedContent(L).hub("karmic-compatibility");
   const displayArcana = formula?.triple ?? parseTail(item.key) ?? item.arcana;
+  const compatibility = item.sections.find((section) => section.h2 === D.encTail.inCompatibilityTitle[L]);
+  const personalSections = item.sections.filter((section) => section !== compatibility);
 
   return (
     <>
@@ -118,7 +121,20 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
 
       {item.intro.length ? <div className="section-gap"><Paragraphs items={item.intro} locale={L} /></div> : null}
 
-      <Sections items={item.sections} locale={L} />
+      <Sections items={personalSections} locale={L} />
+
+      {compatibility ? (
+        <div className="panel section-gap" data-testid="tail-compatibility">
+          <TocHeading id="compatibility">{D.encTail.inCompatibilityTitle[L]}</TocHeading>
+          <Paragraphs items={compatibility.paragraphs} locale={L} />
+          <p className="encref">
+            <Link href="/compatibility">{D.encTail.inCompatibilityCalc[L]}</Link>
+            {" · "}
+            <Link href="/encyclopedia/compatibility">{D.encTail.inCompatibilityHub[L]}</Link>
+            {karmicHub ? <>{" · "}<Link href="/karmic-compatibility">{karmicHub.crumb ?? karmicHub.title}</Link></> : null}
+          </p>
+        </div>
+      ) : null}
 
       <div className="panel section-gap">
         <TocHeading id="formula">{D.encTail.howCounted[L]}</TocHeading>

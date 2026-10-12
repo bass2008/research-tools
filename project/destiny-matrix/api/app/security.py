@@ -117,14 +117,14 @@ def read_file_token(token: str) -> tuple[str, str] | None:
         return None
 
 
-def create_print_token(matrix_id: int, user_id: int) -> str:
+def create_print_token(reading_id: int, user_id: int) -> str:
     """Пропуск для печати: браузерный сервис открывает платную страницу без куки владельца.
-    Живёт минуту и годится только на чтение одной матрицы, поэтому утечка ничего не открывает."""
+    Живёт минуту и годится только на чтение одного разбора, поэтому утечка ничего не открывает."""
     now = dt.datetime.now(dt.timezone.utc)
     payload = {
         "sub": str(user_id),
         "typ": "print",
-        "mid": int(matrix_id),
+        "rid": int(reading_id),
         "iat": int(now.timestamp()),
         "exp": int((now + dt.timedelta(seconds=settings.print_token_ttl_seconds)).timestamp()),
     }
@@ -132,11 +132,28 @@ def create_print_token(matrix_id: int, user_id: int) -> str:
 
 
 def read_print_token(token: str) -> tuple[int, int] | None:
-    """Возвращает id пользователя и id матрицы, на которые выдан пропуск."""
+    """Возвращает id пользователя и id разбора, на которые выдан пропуск."""
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         if payload.get("typ") != "print":
             return None
-        return int(payload["sub"]), int(payload["mid"])
+        return int(payload["sub"]), int(payload["rid"])
     except (jwt.PyJWTError, KeyError, TypeError, ValueError):
         return None
+
+
+def create_worker_token() -> str:
+    """Токен исполнителя очереди (MCP `arcana-tasks`): выдаёт админ, годится только на /internal/tasks."""
+    now = dt.datetime.now(dt.timezone.utc)
+    payload = {"sub": "worker", "typ": "worker", "iat": int(now.timestamp()),
+               "exp": int((now + dt.timedelta(days=365)).timestamp())}
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def read_worker_token(token: str | None) -> bool:
+    try:
+        return bool(token) and jwt.decode(token, settings.jwt_secret,
+                                          algorithms=[settings.jwt_algorithm]).get("typ") == "worker"
+    except jwt.PyJWTError:
+        return False
+

@@ -132,7 +132,7 @@ export default function AdminPulse() {
           {counted(pulse.online.tabs, "вкладка", "вкладки", "вкладок")} {t(" сейчас")}</span>
         <span><b>{pulse.online.robots}</b> {t(" роботов")}</span>
         <span><b>{pulse.print.active}</b> {t(" печатается, ")}{pulse.print.waiting} {t(" в очереди")}</span>
-        <span><b>{pulse.payments.stuck}</b> {t(" платежей застряло")}</span>
+        <span title={t("Платежи, начатые более 30 минут назад и остающиеся в статусе ожидания оплаты.")}>{t("Незавершённые платежи")}: <b>{pulse.payments.stuck}</b></span>
         <span><b>{pulse.errors.hour}</b> {t(" ошибок за час")}</span>
         <span className="dim">{t("сборка ")}{pulse.version}</span>
       </div>

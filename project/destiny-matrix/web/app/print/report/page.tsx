@@ -68,7 +68,6 @@ export default async function PrintReportPage({ searchParams }: { searchParams: 
         <ReportSheet locale={L}
           matrix={matrix}
           sections={withPositionArticles(matrix, build(matrix, page.unlocked))}
-          planName={page.plan}
           unlocked={page.unlocked}
           saved={[]}
           currentId={page.id}

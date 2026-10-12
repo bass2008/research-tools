@@ -115,6 +115,10 @@ export const encSections = {
       en: "the arcanum inside the frame of a personal year",
     } satisfies Phrase,
   },
+  cmp: {
+    title: { ru: "Арканы в совместимости", en: "Arcana in compatibility" } satisfies Phrase,
+    hint: { ru: "что значит аркан в матрице пары", en: "what an arcanum means in a couple's matrix" } satisfies Phrase,
+  },
   cmb: {
     title: { ru: "Сочетания арканов", en: "Combinations of arcana" } satisfies Phrase,
     hint: { ru: "пары арканов рядом", en: "pairs of arcana side by side" } satisfies Phrase,
@@ -140,6 +144,7 @@ export const relatedLinks = {
 
 /** Выбор цели оплаты: откуда взята дата и как различить две записи на одну дату. */
 export const payTarget = {
+  pair: { ru: "Пара", en: "Couple" } satisfies Phrase,
   female: { ru: "ж", en: "f" } satisfies Phrase,
   male: { ru: "м", en: "m" } satisfies Phrase,
   fromBrowser: { ru: "браузер", en: "browser" } satisfies Phrase,

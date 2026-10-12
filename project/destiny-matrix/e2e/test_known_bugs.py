@@ -149,14 +149,14 @@ def test_a4_target_list_button_and_request_agree(page, mail):
     page.wait_for_timeout(1500)
 
     chosen = page.evaluate("""() => {
-      const s = document.querySelector('[data-testid=pay-target]');
-      return s && s.selectedIndex >= 0 ? s.options[s.selectedIndex].text : null;
+      const s = document.querySelector('[data-testid=pay-target-note]');
+      return s ? s.innerText : null;
     }""")
     button = page.get_by_test_id("pay-submit").inner_text()
-    page.get_by_test_id("pay-email").fill(mail)
+    flows.fill_email(page, mail)
     if page.get_by_test_id("pay-password").count():
         page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click(force=True)
     page.wait_for_timeout(1500)
 
@@ -171,18 +171,16 @@ def test_a4_target_list_button_and_request_agree(page, mail):
         f"кнопка обещает «{button}», а запрос уходит за {sent}"
 
 
-def test_a6_button_is_disabled_without_a_target(page, mail):
-    """A6. Экран пишет «дата не выбрана» — значит платить нечем, кнопка должна быть неактивна."""
-    flows.calculate(page, 7, 7, 1987)
-    page.goto(f"{BASE}/pay", wait_until="networkidle")
-    page.evaluate("() => sessionStorage.clear()")
+def test_a6_button_names_the_date_in_the_fields(page, mail):
+    """A6. Без даты платить нечем: поля формы всегда стоят на дате, и кнопка называет именно её."""
+    page.goto(f"{BASE}/pay/single", wait_until="networkidle")
+    page.evaluate("() => { sessionStorage.clear(); localStorage.clear(); }")
     page.reload()
-    page.wait_for_selector("[data-testid=pay-submit]")
-    page.wait_for_timeout(1000)
-    hint = page.inner_text("main")
-    if "Дата не выбрана" in hint:
-        assert page.get_by_test_id("pay-submit").is_disabled(), \
-            "цели нет, а кнопка оплаты активна"
+    page.wait_for_selector("[data-testid=pay-submit]:not([disabled])")
+    page.select_option("[data-testid=pay-d]", "7")
+    page.select_option("[data-testid=pay-m]", "7")
+    page.select_option("[data-testid=pay-y]", "1987")
+    expect(page.get_by_test_id("pay-submit")).to_contain_text("7 июля 1987")
 
 
 def test_a7_back_after_payment_shows_the_paid_report(page, mail):
@@ -209,17 +207,18 @@ def test_a7_back_after_payment_shows_the_paid_report(page, mail):
 
 
 def test_a8_no_account_is_created_without_a_target(page, mail):
-    """A8. Отказ по причине «нет даты» не должен создавать аккаунт и сессию."""
-    page.goto(f"{BASE}/pay", wait_until="networkidle")
-    page.evaluate("() => sessionStorage.clear()")
-    page.reload()
-    page.wait_for_selector("[data-testid=pay-email]")
+    """A8. Отказ по причине «нет такой даты» не должен создавать аккаунт и сессию."""
+    page.goto(f"{BASE}/pay/single", wait_until="networkidle")
+    page.wait_for_selector("[data-testid=pay-submit]:not([disabled])")
+    page.select_option("[data-testid=pay-d]", "31")
+    page.select_option("[data-testid=pay-m]", "2")
+    page.select_option("[data-testid=pay-y]", "1995")
     page.get_by_test_id("pay-email").fill(mail)
     if page.get_by_test_id("pay-password").count():
         page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click(force=True)
-    page.wait_for_timeout(2500)
+    expect(page.locator(".err")).to_contain_text("28")
 
     answer = page.request.get(f"{BASE}/api/auth/me")
     assert answer.json()["user"] is None, "аккаунт создан и сессия выдана, хотя платёж не начинался"
@@ -228,8 +227,7 @@ def test_a8_no_account_is_created_without_a_target(page, mail):
 def test_a9_buy_button_after_payment_opens_the_form(page, mail):
     """A9. «Купить» после оплаты должен открывать форму, а не прошлый чек."""
     flows.buy(page, mail, 9, 9, 1989)
-    page.get_by_test_id("buy-top").click()
-    page.wait_for_timeout(1500)
+    flows.open_pay(page)
     assert page.get_by_test_id("pay-submit").count() == 1, \
         "на /pay остался чек, формы оплаты нет"
 

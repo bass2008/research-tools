@@ -5,6 +5,7 @@ export const home = {
   heroBuy: { ru: "Купить полный разбор — ", en: "Buy the full reading — " } satisfies Phrase,
   heroFree: { ru: "Рассчитать полный разбор бесплатно", en: "Get the full reading for free" } satisfies Phrase,
   heroToReport: { ru: "Перейти к полному разбору", en: "Go to the full reading" } satisfies Phrase,
+  heroSubscribed: { ru: "Рассчитать полный разбор", en: "Get the full reading" } satisfies Phrase,
   showSlide: {
     ru: (heading: string) => `Показать: ${heading}`,
     en: (heading: string) => `Show: ${heading}`,
@@ -14,36 +15,12 @@ export const home = {
   // промо-блок справочника
   promoTitle: { ru: "Постройте свою матрицу", en: "Build your own matrix" } satisfies Phrase,
   // витрина
-  priceWhat: {
-    ru: (period: string) => `полный разбор, все 20 разделов, ${period}`,
-    en: (period: string) => `the full reading, all 20 sections, ${period}`,
-  } satisfies PhraseFn<[string]>,
-  priceUnknown: {
-    ru: "Цена уточняется — справочник сейчас недоступен. Расчёт карты работает и без него.",
-    en: "The price is being updated — the price list is unavailable. The chart still works without it.",
-  } satisfies Phrase,
-  freeAllSections: {
-    ru: "полный разбор, все 20 разделов",
-    en: "the full reading, all 20 sections",
-  } satisfies Phrase,
-  freeNote: {
-    ru: "карта и 2 раздела — бесплатно, без регистрации",
-    en: "the chart and 2 sections — free, no sign-up",
-  } satisfies Phrase,
-  freeNoteAll: {
-    ru: "карта и все разделы — без регистрации",
-    en: "the chart and every section — no sign-up",
-  } satisfies Phrase,
   chipSections: { ru: "20 разделов отчёта", en: "20 sections of the reading" } satisfies Phrase,
   chipChakras: { ru: "Карта энергий по чакрам", en: "Chakra energy map" } satisfies Phrase,
   chipDecades: { ru: "Разбор по десятилетиям до 80 лет", en: "Reading by decades up to 80" } satisfies Phrase,
+  subscribedLead: { ru: "Открыто по подписке", en: "Open with your subscription" } satisfies Phrase,
   chipOnePayment: { ru: "Один платёж, без списаний", en: "One payment, no recurring charges" } satisfies Phrase,
   chipNoPayment: { ru: "Без оплаты и регистрации", en: "No payment, no sign-up" } satisfies Phrase,
-  plansLink: { ru: "Что входит", en: "What is included" } satisfies Phrase,
-  tariffsLine: {
-    ru: (list: string) => `Тарифы: ${list}. `,
-    en: (list: string) => `Plans: ${list}. `,
-  } satisfies PhraseFn<[string]>,
   // блок «что вы держите в руках»
   pillarsEyebrow: { ru: "Что вы держите в руках", en: "What you are holding" } satisfies Phrase,
   pillarsTitle: {
@@ -199,6 +176,14 @@ export const unlockBox = {
     ru: "Все 20 разделов по вашей дате открыты без оплаты. ",
     en: "All 20 sections for your date are open without payment. ",
   } satisfies Phrase,
+  openLeadSubscribed: {
+    ru: "Все 20 разделов по вашей дате открыты по подписке. ",
+    en: "All 20 sections for your date are open with your subscription. ",
+  } satisfies Phrase,
+  reportOpenSubscribed: {
+    ru: "Все 20 разделов по этой дате открыты по подписке. Чтобы вернуться к ним с другого устройства и скачать PDF, сохраните дату в кабинет.",
+    en: "All 20 sections for this date are open with your subscription. To come back to them from another device and download the PDF, save the date to your account.",
+  } satisfies Phrase,
   saveForPdf: {
     ru: "Чтобы вернуться к разбору с другого устройства и скачать PDF, сохраните дату в кабинет.",
     en: "To open the reading from another device and download the PDF, save the date to your account.",
@@ -224,8 +209,8 @@ export const unlockBox = {
   } satisfies PhraseFn<[string]>,
   priceUnknown: { ru: "Цена уточняется.", en: "The price is being updated." } satisfies Phrase,
   alreadyPaid: {
-    ru: "Разбор уже оплачен. Толкования печатает сервер, поэтому дата открывается на отдельной странице.",
-    en: "The reading is already paid for. The server prints the texts, so the date opens on its own page.",
+    ru: "Разбор уже открыт. Толкования печатает сервер, поэтому дата открывается на отдельной странице.",
+    en: "The reading is already open. The server prints the texts, so the date opens on its own page.",
   } satisfies Phrase,
   unlimitedPlan: {
     ru: "Ваш тариф открывает любые даты. Толкования печатает сервер, поэтому сохраните эту дату в кабинет — разбор откроется на отдельной странице.",

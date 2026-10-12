@@ -4,7 +4,7 @@ import { localized } from "./i18n/localized";
 
 /** Экран возврата из формы оплаты. */
 
-export type PayStage = "checking" | "paid" | "refunded" | "pending" | "failed" | "error";
+export type PayStage = "checking" | "paid" | "refunded" | "pending" | "failed" | "error" | "sign-in";
 
 /** A locale-bound view; safe to use alongside other languages. */
 export const forLocale = localized((L: Locale) => {
@@ -24,6 +24,8 @@ export const forLocale = localized((L: Locale) => {
         return D.payResult.stageFailed[L];
       case "pending":
         return D.payResult.stagePending[L];
+      case "sign-in":
+        return D.payResult.stageSignIn[L];
       case "error":
         return D.payResult.stageUnknown[L];
       default:

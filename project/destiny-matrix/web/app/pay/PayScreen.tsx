@@ -17,6 +17,7 @@ export default function PayScreen({ locale: requestedLocale, ...localeProps }: (
   /** true — деньги ненастоящие (мок). Приходит с сервера: вшитое обещание «оплата тестовая»
    *  показывалось покупателям и после подключения боевого терминала. */
   test: boolean;
+  product?: string;
 }) & { locale?: Locale }) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
@@ -25,6 +26,7 @@ export default function PayScreen({ locale: requestedLocale, ...localeProps }: (
     providers,
     initial,
     test,
+    product,
   } = localeProps;
 
   return (
@@ -39,8 +41,8 @@ export default function PayScreen({ locale: requestedLocale, ...localeProps }: (
         {providers?.length === 0 ? (
           <div className="panel paybox" role="status">{D.pay.regionUnavailable[L]}</div>
         ) : tariffs.length && providers?.length ? (
-          <TariffsProvider locale={L} server={tariffs} providers={providers}>
-            <PayForm locale={L} tariffs={tariffs} initial={initial} test={test} providers={providers} />
+          <TariffsProvider product={product ?? "personal"} locale={L} server={tariffs} providers={providers}>
+            <PayForm locale={L} tariffs={tariffs} initial={initial} test={test} providers={providers} product={product} />
           </TariffsProvider>
         ) : (
           <div className="panel paybox">

@@ -1,21 +1,35 @@
 "use client";
 
 import { useSession } from "@/components/account/useSession";
+import { useOfferMode } from "@/components/pay/useOfferMode";
 import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
-import { useTariffs } from "@/components/pay/TariffsProvider";
+import AccessBadge from "@/components/account/AccessBadge";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ALL_FREE } from "@/lib/access";
-import { ApiError, forLocale as localizedApi, type MatrixListItem, type PaymentItem } from "@/lib/api";
+import { ApiError, forLocale as localizedApi, type PaymentItem, type ReadingItem } from "@/lib/api";
+import { DP } from "@/lib/i18n/dict/pair";
 import { D, forLocale as localizedI18n } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useMessage, type Message } from "@/lib/i18n/useMessage";
 import { forLocale as localizedMatrix } from "@/lib/matrix";
+import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { useBirth } from "@/lib/useBirth";
-import Link from "next/link";
+import { buyHref } from "@/lib/readingLinks";
+import Link, { useLinkStatus } from "next/link";
 import { useCallback, useEffect, useState } from "react";
+
+function OpenReadingLabel({ locale }: { locale: Locale }) {
+  const { pending } = useLinkStatus();
+  return (
+    <span className="account-open-label" aria-live="polite" aria-busy={pending}>
+      {pending ? <span className="account-open-spinner" aria-hidden="true" /> : null}
+      {pending ? D.account.opening[locale] : D.account.open[locale]}
+    </span>
+  );
+}
 
 export const forLocale = localized((L: Locale) => {
   const { dateTimeLabel, dayLabel } = localizedI18n(L);
@@ -41,16 +55,17 @@ export const forLocale = localized((L: Locale) => {
  * нескольких дат читался — «Матрица 31 марта 1993» не говорит, чья она.
  */
 function MatrixName({ locale: requestedLocale, ...localeProps }: ({
-  item: MatrixListItem;
+  item: ReadingItem;
+  fallback: string;
   onSave: (title: string) => Promise<Message | null>;
 }) & { locale?: Locale }) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
   const {
     item,
+    fallback,
     onSave,
   } = localeProps;
-  const { birthLabel } = forLocale(L);
 
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(item.title ?? "");
@@ -75,7 +90,7 @@ function MatrixName({ locale: requestedLocale, ...localeProps }: ({
   if (!editing) {
     return (
       <span className="matname">
-        <span>{item.title ?? birthLabel(item.birth)}</span>
+        <span>{item.title ?? fallback}</span>
         <button
           type="button"
           className="iconbtn"
@@ -102,7 +117,7 @@ function MatrixName({ locale: requestedLocale, ...localeProps }: ({
         data-testid="rename-input"
         maxLength={200}
         value={value}
-        placeholder={birthLabel(item.birth)}
+        placeholder={fallback}
         onChange={(e) => {
           setFailed(null);
           setValue(e.target.value);
@@ -133,67 +148,15 @@ function MatrixName({ locale: requestedLocale, ...localeProps }: ({
   );
 }
 
-/**
- * Метка доступа у строки матрицы. Купленная выделена особо: она остаётся у человека, даже когда
- * подписка кончится, — это разные вещи, и в списке они не должны выглядеть одинаково. Знак
- * пожизненного владения — ∞ в золотом круге: понятен без подписи и не спорит с текстом бейджа.
- * Выданная админом открыта так же, но золота не получает: подарок — не покупка.
- */
-function AccessBadge({ locale: requestedLocale, ...localeProps }: ({ item: MatrixListItem }) & { locale?: Locale }) {
-  const activeLocale = useLocale();
-  const L = requestedLocale ?? activeLocale;
-  const { item } = localeProps;
-  const { dayLabel } = forLocale(L);
-
-  if (item.access === "forever") {
-    return (
-      <span className="badge own" data-testid="access-badge">
-        <i className="lifetime" aria-hidden="true">
-          ∞
-        </i>
-        {D.account.badgeBought[L]}
-      </span>
-    );
-  }
-  if (item.access === "open") {
-    // витрина без оплаты: открыта всем, покупкой не является
-    return (
-      <span className="badge sub" data-testid="access-badge">
-        {D.account.badgeOpen[L]}
-      </span>
-    );
-  }
-  if (item.access === "granted") {
-    // Выдана без оплаты. Бейдж обычный: знак владения (∞ в золоте) принадлежит купленным.
-    return (
-      <span className="badge sub" data-testid="access-badge">
-        {D.account.badgeOpen[L]}
-      </span>
-    );
-  }
-  if (item.access === "subscription") {
-    const until = item.access_until ? new Date(item.access_until) : null;
-    return (
-      <span className="badge sub" data-testid="access-badge">
-        {D.account.badgeSubscription[L](until ? dayLabel(item.access_until) : "")}
-      </span>
-    );
-  }
-  return (
-    <span className="badge off" data-testid="access-badge">
-      {D.account.badgeClosed[L]}
-    </span>
-  );
-}
-
 export default function AccountView({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
-  const { dayLabel, api, priceLabel, birthLabel, dateCount, safeCenter } = forLocale(L);
+  const { api, birthLabel, safeCenter } = forLocale(L);
+  const { holdingLines } = localizedHoldings(L);
 
-  const tariffs = useTariffs();
   const session = useSession();
-  const [items, setItems] = useState<MatrixListItem[] | null>(null);
+  const mode = useOfferMode();
+  const [items, setItems] = useState<ReadingItem[] | null>(null);
   const [error, setError] = useMessage(L);
   const [note, setNote] = useMessage(L);
   // дата из браузера — общим хуком: своё чтение при монтировании не замечало смену даты
@@ -201,7 +164,7 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
 
   const reload = useCallback(async () => {
     try {
-      const res = await api.matrices();
+      const res = await api.readings();
       setItems(res.items);
       setError(null);
     } catch (err) {
@@ -224,7 +187,7 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
   /** Возвращает текст отказа: строка сама решает, что показать рядом с полем. */
   const rename = async (id: number, title: string): Promise<Message | null> => {
     try {
-      const row = await api.renameMatrix(id, title);
+      const row = await api.renameReading(id, title);
       setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, title: row.title } : x)) ?? prev);
       setNote((locale) => D.account.renamed[locale]);
       setError(null);
@@ -259,15 +222,15 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
   }
 
   const list = items ?? [];
+  const personal = list.filter((row) => row.product === "personal" && row.birth && row.sex);
   // «Мой разбор» ведёт на купленную дату, а не на первую в списке: список отсортирован по
   // сохранению, и после нового расчёта пункт уводил на закрытую матрицу с предложением купить.
-  const paidFirst = list.find((row) => row.access !== "locked") ?? null;
-  // Доступ описывают права, а не поле тарифа: разовое привязано к своей дате, месячное
-  // открывает любые. Имя и цена — из справочника в базе, чтобы не расходились с витриной.
-  const unlimitedPlan = tariffs.find((t) => t.scope.includes("all"));
-  const singlePlan = tariffs.find((t) => !t.scope.includes("all"));
-  const plan = session.unlimited ? unlimitedPlan : session.paid ? singlePlan : undefined;
-  const until = session.until ? new Date(session.until) : null;
+  const paidFirst = personal.find((row) => row.access !== "locked") ?? null;
+  const pairDates = (row: ReadingItem) => {
+    const a = (row.inputs.a as { birth?: string } | undefined)?.birth;
+    const b = (row.inputs.b as { birth?: string } | undefined)?.birth;
+    return a && b ? `${birthLabel(a)} + ${birthLabel(b)}` : "";
+  };
 
   return (
     <>
@@ -279,38 +242,20 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
         <dl className="kv">
           <dt>{D.account.accessWord[L]}</dt>
           <dd data-testid="account-access">
-            {/* покупки и подписка выводятся отдельными строками: они живут одновременно, и
-                одна не отменяет другую — раньше подписка затирала купленные даты */}
-            {session.owned > 0 ? (
-              <div>
-                <i className="lifetime" aria-hidden="true">
-                  ∞
-                </i>{" "}
-                {D.account.boughtForever[L](dateCount(session.owned))}
-                {singlePlan ? ` · ${D.common.quoted[L](singlePlan.name)}` : ""}
-              </div>
-            ) : null}
-            {/* тариф «на все даты» снят с витрины, и по его отсутствию в справочнике блок
-                оказывался пустым: у оплатившего доступ строка «Доступ» была пустой, а рядом
-                висело предложение купить */}
-            {!ALL_FREE && session.unlimited ? (
-              <div>
-                {unlimitedPlan
-                  ? `${unlimitedPlan.name} — ${priceLabel(unlimitedPlan)}`
-                  : D.account.allDatesAccess[L]}
-                {session.until ? D.account.until[L](dayLabel(session.until)) : ""}
-              </div>
-            ) : null}
-            {ALL_FREE ? (
+            {/* строки — сводка прав с сервера (`access.holdings`): покупки, выданное и подписка
+                живут одновременно, экран их только выводит */}
+            {mode === "free" ? (
               <div>{D.account.allFreeAccess[L]}</div>
-            ) : null}
-            {!ALL_FREE && session.owned === 0 && !session.unlimited ? (
-              <div>
-                {plan ? `${plan.name} — ${priceLabel(plan)}` : D.account.notPaid[L]}
-                {plan ? "" : D.account.twoFreeSections[L]}
-                {session.until ? D.account.until[L](dayLabel(session.until)) : ""}
-              </div>
-            ) : null}
+            ) : session.holdings.length ? (
+              holdingLines(session.holdings).map((line) => (
+                <div key={line.text}>
+                  {line.lifetime ? <><i className="lifetime" aria-hidden="true">∞</i>{" "}</> : null}
+                  {line.text}
+                </div>
+              ))
+            ) : (
+              <div>{D.account.notPaid[L]}{D.account.twoFreeSections[L]}</div>
+            )}
           </dd>
           <dt>{D.account.matricesWord[L]}</dt>
           <dd>
@@ -330,16 +275,16 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
             <span className="dim" aria-disabled="true">{D.account.reportLoading[L]}</span>
           ) : paidFirst ? (
             <Link data-testid="account-report" href={`/matrices/${paidFirst.id}`}>{D.nav.myReading[L]}</Link>
-          ) : list.length ? (
-            <Link data-testid="account-report" href={`/matrices/${list[0].id}`}>{D.nav.myReading[L]}</Link>
+          ) : personal.length ? (
+            <Link data-testid="account-report" href={`/matrices/${personal[0].id}`}>{D.nav.myReading[L]}</Link>
           ) : (
             <Link data-testid="account-report" href="/report">{D.nav.myReading[L]}</Link>
           )}
           <Link href="/#calc">{D.nav.newCalculation[L]}</Link>
           {/* покупку предлагаем тем, у кого прав нет. Смотрим на права, а не на найденный
               тариф: «на все даты» снят с витрины, и оплатившему предлагали купить снова */}
-          {ALL_FREE || session.paid || session.unlimited ? null : (
-            <Link href="/pay">{D.account.buyFullReading[L]}</Link>
+          {mode !== "sell" || session.paid ? null : (
+            <Link href={buyHref("personal")}>{D.account.buyFullReading[L]}</Link>
           )}
           {session.admin ? <Link href="/admin">{D.account.admin[L]}</Link> : null}
         </div>
@@ -373,41 +318,50 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
           ) : list.length === 0 ? (
             <li className="dim">{D.account.listEmpty[L]}</li>
           ) : (
-            list.map((it) => (
-              <li
-                className={it.access === "locked" ? "matrow locked" : `matrow ${it.access}`}
-                key={it.id}
-                data-testid="matrix-card"
-                data-birth={it.birth}
-                data-access={it.access}
-              >
-                <div>
-                  <MatrixName locale={L} item={it} onSave={(title) => rename(it.id, title)} />
-                  <div className="small">
-                    {birthLabel(it.birth)} ·{" "}
-                    {it.sex === "f" ? D.calc.femaleChart[L] : D.calc.maleChart[L]}{" "}
-                    {D.account.chartWord[L]} · {D.account.centreArcanum[L]}{" "}
-                    {safeCenter(it.birth, it.sex)}
+            list.map((it) => {
+              const pair = it.product === "pair";
+              const open = pair ? `/readings/${it.id}` : `/matrices/${it.id}`;
+              return (
+                <li
+                  className={it.access === "locked" ? "matrow locked" : `matrow ${it.access}`}
+                  key={it.id}
+                  data-testid={pair ? "pair-card" : "matrix-card"}
+                  data-product={it.product}
+                  data-birth={it.birth}
+                  data-access={it.access}
+                >
+                  <div>
+                    <span className="badge sub mattype">{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span>
+                    <MatrixName locale={L} item={it} fallback={pair ? pairDates(it) : birthLabel(it.birth!)}
+                      onSave={(title) => rename(it.id, title)} />
+                    <div className="small">
+                      {pair ? pairDates(it) : <>
+                        {birthLabel(it.birth!)} ·{" "}
+                        {it.sex === "f" ? D.calc.femaleChart[L] : D.calc.maleChart[L]}{" "}
+                        {D.account.chartWord[L]} · {D.account.centreArcanum[L]}{" "}
+                        {safeCenter(it.birth!, it.sex!)}
+                      </>}
+                    </div>
                   </div>
-                </div>
-                {it.access === "locked" ? (
-                  <span className="matact">
-                    <Link className="btn ghost sm" href={`/matrices/${it.id}`}>
-                      {D.account.twoSections[L]}
+                  {it.access === "locked" ? (
+                    <span className="matact">
+                      <Link className="btn ghost sm" href={open}>
+                        <OpenReadingLabel locale={L} />
+                      </Link>
+                      {/* id разбора уходит в ссылку: на экране оплаты он уже выбран, и платёж
+                          открывает именно его, а не «первый сохранённый» */}
+                      <Link className="btn sm" href={buyHref(pair ? "pair" : "personal", it.id)}>
+                        {D.nav.buy[L]}
+                      </Link>
+                    </span>
+                  ) : (
+                    <Link className="btn ghost sm" href={open}>
+                      <OpenReadingLabel locale={L} />
                     </Link>
-                    {/* id даты уходит в ссылку: на экране оплаты она уже выбрана, и платёж
-                        открывает именно её, а не «первую сохранённую» */}
-                    <Link className="btn sm" href={`/pay?m=${it.id}`}>
-                      {singlePlan ? D.account.openFor[L](priceLabel(singlePlan)) : D.account.open[L]}
-                    </Link>
-                  </span>
-                ) : (
-                  <Link className="btn ghost sm" href={`/matrices/${it.id}`}>
-                    {D.account.open[L]}
-                  </Link>
-                )}
-              </li>
-            ))
+                  )}
+                </li>
+              );
+            })
           )}
         </ul>
 
@@ -415,7 +369,7 @@ export default function AccountView({ locale: requestedLocale, ...localeProps }:
             иначе предложение висело под карточкой той же даты, а кнопка ничего не делала */}
         {/* пока список не пришёл, мы не знаем, сохранена дата или нет: предлагать сохранение
             поверх ошибки загрузки — третье состояние на том же экране */}
-        {items !== null && local && !list.some((it) => it.birth === local.birth && it.sex === local.sex) ? (
+        {items !== null && local && !personal.some((it) => it.birth === local.birth && it.sex === local.sex) ? (
           <div style={{ marginTop: 14 }}>
             <p className="small">
               {D.account.localCalc[L](birthLabel(local.birth))}
@@ -481,7 +435,7 @@ function PaymentsPanel({ locale: requestedLocale, ...localeProps }: ({}) & { loc
                 <span className="pw">
                   <b>{p.tariff.display_name ?? p.tariff.name ?? D.account.planWord[L]}</b>
                   <span className="small">
-                    {dateTimeLabel(p.created_at)} · {p.external_id}
+                    {dateTimeLabel(p.paid_at ?? p.created_at)} · {p.external_id}
                   </span>
                 </span>
                 <span className="pa">

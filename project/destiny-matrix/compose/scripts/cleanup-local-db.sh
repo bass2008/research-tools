@@ -14,8 +14,9 @@ if [ -f "$DB" ]; then
   "$PY" - "$DB" "$COPY" <<'PY'
 import sqlite3, sys
 src = sqlite3.connect(sys.argv[1])
+have = {row[0] for row in src.execute("select name from sqlite_master where type = 'table'")}
 counts = {t: src.execute(f"select count(*) from {t}").fetchone()[0]
-          for t in ("users", "matrices", "payments", "entitlements")}
+          for t in ("users", "readings", "matrices", "purchases", "payments", "entitlements") if t in have}
 print("удаляю:", ", ".join(f"{k} {v}" for k, v in counts.items()))
 print("пользователи:", ", ".join(r[0] for r in src.execute("select email from users")) or "нет")
 dst = sqlite3.connect(sys.argv[2])

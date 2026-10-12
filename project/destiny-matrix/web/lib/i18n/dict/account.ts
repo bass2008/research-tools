@@ -96,6 +96,7 @@ export const account = {
   cancel: { ru: "Отменить", en: "Cancel" } satisfies Phrase,
   badgeBought: { ru: "Куплена", en: "Bought" } satisfies Phrase,
   badgeOpen: { ru: "Открыта", en: "Open" } satisfies Phrase,
+  badgeGranted: { ru: "Выдана", en: "Granted" } satisfies Phrase,
   badgeSubscription: {
     ru: (until: string) => `По подписке${until ? ` · до ${until}` : ""}`,
     en: (until: string) => `By subscription${until ? ` · until ${until}` : ""}`,
@@ -131,6 +132,25 @@ export const account = {
     en: (n: number) => `${n} ${n === 1 ? "date" : "dates"}`,
   } satisfies PhraseFn<[number]>,
   allDatesAccess: { ru: "Доступ ко всем датам", en: "Access to every date" } satisfies Phrase,
+  subscriptionAll: { ru: "Подписка на все разборы", en: "Subscription to every reading" } satisfies Phrase,
+  readingsBought: {
+    ru: (what: string) => `Куплено навсегда: ${what}`,
+    en: (what: string) => `Bought forever: ${what}`,
+  } satisfies PhraseFn<[string]>,
+  readingsGranted: {
+    ru: (what: string) => `Выдано: ${what}`,
+    en: (what: string) => `Granted: ${what}`,
+  } satisfies PhraseFn<[string]>,
+  pairsCount: {
+    ru: (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "пара"
+      : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "пары" : "пар"}`,
+    en: (n: number) => `${n} ${n === 1 ? "couple" : "couples"}`,
+  } satisfies PhraseFn<[number]>,
+  readingsCount: {
+    ru: (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "разбор"
+      : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "разбора" : "разборов"}`,
+    en: (n: number) => `${n} ${n === 1 ? "reading" : "readings"}`,
+  } satisfies PhraseFn<[number]>,
   until: {
     ru: (day: string) => ` · до ${day}`,
     en: (day: string) => ` · until ${day}`,
@@ -157,16 +177,18 @@ export const account = {
     en: (used: number, limit: number) => `${used} of ${limit} · every opened reading gives a slot`,
   } satisfies PhraseFn<[number, number]>,
   reportLoading: { ru: "Мой разбор загружается…", en: "Your reading is loading…" } satisfies Phrase,
+  grantedTail: { ru: " · выдана", en: " · granted" } satisfies Phrase,
   buyFullReading: { ru: "Купить полный разбор", en: "Buy the full reading" } satisfies Phrase,
   admin: { ru: "Админка", en: "Admin" } satisfies Phrase,
   accessLivesInAccount: {
     ru: "Доступ живёт в аккаунте, поэтому разбор открывается с любого устройства.",
     en: "Access lives in the account, so the reading opens from any device.",
   } satisfies Phrase,
-  savedMatrices: { ru: "Сохранённые матрицы", en: "Saved matrices" } satisfies Phrase,
+  savedMatrices: { ru: "Мои разборы", en: "My readings" } satisfies Phrase,
+  kindPersonal: { ru: "Личная матрица", en: "Personal matrix" } satisfies Phrase,
   savedMatricesHint: {
-    ru: "Дата рождения уходит на сервер по вашему действию: этой кнопкой или при оплате разбора",
-    en: "The date of birth goes to the server only when you act: with this button or when paying",
+    ru: "Личные матрицы и совместимость пар. Даты уходят на сервер по вашему действию: при сохранении или оплате разбора",
+    en: "Personal matrices and couple compatibility. Dates go to the server only when you act: when you save or pay for a reading",
   } satisfies Phrase,
   savedMatricesHintFree: {
     ru: "Дата рождения уходит на сервер по вашему действию — этой кнопкой",
@@ -182,6 +204,7 @@ export const account = {
   centreArcanum: { ru: "аркан центра", en: "centre arcanum" } satisfies Phrase,
   twoSections: { ru: "Два раздела", en: "Two sections" } satisfies Phrase,
   open: { ru: "Открыть", en: "Open" } satisfies Phrase,
+  opening: { ru: "Открываем…", en: "Opening…" } satisfies Phrase,
   openFor: {
     ru: (price: string) => `Открыть — ${price}`,
     en: (price: string) => `Open — ${price}`,

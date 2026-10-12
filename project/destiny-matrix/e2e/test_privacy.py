@@ -30,9 +30,11 @@ def test_logout_forgets_the_date_in_this_browser(page, mail):
     flows.buy(page, mail, 21, 9, 1997)
     flows.logout(page)
     assert page.evaluate("() => sessionStorage.getItem('destiny.birth')") is None
+    # без даты «Мой разбор» ведёт к расчёту: в форме не должна стоять дата прежнего человека
     page.goto(f"{BASE}/report", wait_until="networkidle")
     page.wait_for_timeout(700)
-    assert "1997" not in page.inner_text("main")
+    assert [page.locator(f"#{part}").input_value() for part in "dmy"] != ["21", "9", "1997"]
+    assert "21 сентября 1997" not in page.inner_text("main")
 
 
 def test_print_page_needs_a_pass(page):
@@ -107,13 +109,15 @@ def test_documents_do_not_contradict_each_other(page):
     # сроки ответа: 10 рабочих дней по претензиям в обоих документах
     assert "10 рабочих дней" in terms and "10 рабочих дней" in contacts
 
-    # состав договора читается и на телефоне: третья колонка таблицы тарифа не скрывается
+    # состав договора читается и на телефоне: строка тарифа становится карточкой, и у состава
+    # остаётся своя подпись вместо спрятанной шапки
     page.set_viewport_size({"width": 390, "height": 900})
     page.goto(f"{BASE}/terms", wait_until="domcontentloaded")
     page.wait_for_timeout(400)
-    head = page.locator("table.postab th").nth(2)
-    assert head.is_visible(), "на телефоне из договора исчезла колонка «Что входит в результат»"
-    assert page.locator("table.postab td.vl").first.is_visible(), "состав тарифа скрыт"
+    composition = page.locator("table.postab td.vl").first
+    assert composition.is_visible(), "состав тарифа скрыт"
+    label = composition.evaluate("cell => getComputedStyle(cell, '::before').content")
+    assert "входит" in label.lower(), f"у состава тарифа нет подписи: {label}"
     page.set_viewport_size({"width": 1360, "height": 950})
 
 

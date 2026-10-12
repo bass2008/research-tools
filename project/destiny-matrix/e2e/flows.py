@@ -51,18 +51,40 @@ def matrix_slugs(page: Page, limit: int = 60) -> list[str]:
     return list(dict.fromkeys(slugs))[:limit]
 
 
-def open_pay(page: Page) -> None:
+def open_pay(page: Page, plan: str = "single") -> None:
+    """«Купить» в шапке ведёт к выбору предложений; дальше — форма выбранного."""
     page.get_by_test_id("buy-top").click()
+    page.get_by_test_id(f"plan-{plan}").click()
     expect(page.get_by_test_id("pay-submit")).to_be_visible()
     page.wait_for_timeout(600)
 
 
+def open_pair_pay(page: Page) -> None:
+    """Тарифы под разбором пары — как на главной: карточка пары ведёт в её форму."""
+    page.get_by_test_id("plan-pair").click()
+    expect(page.get_by_test_id("pay-submit")).to_be_visible()
+
+
+def fill_email(page: Page, email: str) -> None:
+    """Почту спрашивают только у гостя: вошедший платит в свой аккаунт."""
+    page.wait_for_selector("[data-testid=pay-account], [data-testid=pay-email]", timeout=15_000)
+    if page.get_by_test_id("pay-email").count():
+        page.get_by_test_id("pay-email").fill(email)
+
+
+def agree(page: Page) -> None:
+    """Галочка согласия есть только у гостя: вошедший принимает оферту оплатой."""
+    page.wait_for_selector("[data-testid=pay-account], .consent input", timeout=15_000)
+    if page.locator(".consent input").count():
+        page.locator(".consent input[type=checkbox]").check()
+
+
 def pay(page: Page, email: str, password: str = "1234") -> str:
     """Нажать «Оплатить» и дождаться исхода: либо экран «Доступ открыт», либо ошибка."""
-    page.get_by_test_id("pay-email").fill(email)
+    fill_email(page, email)
     if page.get_by_test_id("pay-password").count():
         page.get_by_test_id("pay-password").fill(password)
-    page.locator(".consent input[type=checkbox]").check()
+    agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_function(
         """() => document.querySelector('[data-testid=paid-matrix]')
@@ -151,6 +173,9 @@ def matrix_ids(page: Page) -> list[int]:
 
 
 def logout(page: Page) -> None:
+    # Шапка узнаёт сессию запросом после отрисовки: без ожидания кнопки ещё нет, и выход молча
+    # пропускался сразу после покупки.
+    page.locator("[data-testid=logout], [data-testid=nav-login]").first.wait_for(timeout=10_000)
     if page.get_by_test_id("logout").count():
         page.get_by_test_id("logout").click()
         page.wait_for_timeout(700)
@@ -183,10 +208,10 @@ def pay_on_bank_form(page: Page, card: str) -> None:
 
 def pay_on_bank_form_start(page: Page, email: str, password: str = "1234") -> None:
     """Заполнить нашу форму и уйти на форму банка."""
-    page.get_by_test_id("pay-email").fill(email)
+    fill_email(page, email)
     if page.get_by_test_id("pay-password").count():
         page.get_by_test_id("pay-password").fill(password)
-    page.locator(".consent input[type=checkbox]").check()
+    agree(page)
     page.get_by_test_id("pay-submit").click()
 
 

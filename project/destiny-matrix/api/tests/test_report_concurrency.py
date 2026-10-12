@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app import printing, reports
 from app.db import Base
 from app.i18n import using_locale
-from app.models import Entitlement, ReportJob, SavedMatrix, User
+from app.models import Entitlement, Reading, ReportJob, User
 from app.routers.reports import render
 from app.schemas import ReportRequest
 
@@ -22,10 +22,11 @@ def test_concurrent_cold_downloads_share_job(tmp_path, monkeypatch):
         user = User(email="concurrent@example.ru", password_hash="unused")
         db.add(user)
         db.flush()
-        matrix = SavedMatrix(user_id=user.id, birth=dt.date(1993, 3, 31), sex="f")
+        matrix = Reading(user_id=user.id, product="personal",
+                         inputs='{"birth": "1993-03-31", "sex": "f"}', subject_key="1993-03-31|f")
         db.add(matrix)
         db.flush()
-        db.add(Entitlement(user_id=user.id, matrix_id=matrix.id, scope='["single"]'))
+        db.add(Entitlement(user_id=user.id, reading_id=matrix.id, products='["personal"]'))
         db.commit()
         uid, mid = user.id, matrix.id
 

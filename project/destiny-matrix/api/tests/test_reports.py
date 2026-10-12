@@ -92,7 +92,7 @@ def test_second_click_returns_the_same_file(client, db, printing):
 def test_old_pdf_revision_is_reprinted_with_current_links(client, db, printing):
     headers, mid = buy(client, "old-pdf@example.ru")
     uid = client.get("/api/auth/me", headers=headers).json()["user"]["id"]
-    old = ReportJob(user_id=uid, matrix_id=mid, locale="ru", status="done", object_key=f"{uid}/{mid}/ru/old.pdf")
+    old = ReportJob(user_id=uid, reading_id=mid, locale="ru", status="done", object_key=f"{uid}/{mid}/ru/old.pdf")
     db.add(old)
     db.commit()
     response = client.post("/api/reports/render", json={"matrix_id": mid}, headers=headers)
@@ -168,7 +168,7 @@ def test_admin_queue_expires_an_abandoned_running_job(client, auth, db, printing
     uid = client.get("/api/auth/me", headers=headers).json()["user"]["id"]
     stale = ReportJob(
         user_id=uid,
-        matrix_id=mid,
+        reading_id=mid,
         status="running",
         started_at=utcnow() - dt.timedelta(seconds=settings.browser_timeout_seconds + 31),
     )

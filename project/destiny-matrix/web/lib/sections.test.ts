@@ -5,7 +5,9 @@ import { buildFree, sectionEntityLink } from "@/lib/publicSpec";
 import { arcanumInPosition, karmicTail } from "./content";
 import { paragraphText } from "./contentReader";
 import { calculate } from "./matrix";
-import { SPEC, build, freePositionTexts } from "./sections";
+import { wordCount } from "./lockedText";
+import type { SectionOut } from "./publicSpec";
+import { SPEC, build, freePositionTexts, withLockedPreview } from "./sections";
 
 const m = calculate("1990-05-17", "f");
 
@@ -202,5 +204,82 @@ describe("разделы разбора", () => {
     expect(text.length).toBeGreaterThan(60);
     expect(text.length).toBeLessThan(full.length / 3);
     expect(tail.longform).toBeUndefined();
+  });
+});
+
+// Всё, за что платят: толкования позиций, связный разбор раздела, хвост и тексты троек чакр.
+// Вступление, примечание и темы чакр в закрытом разделе видны намеренно — их не собираем.
+function paidStrings(sections: SectionOut[]): string[] {
+  const shown = new Set(["lead", "chakraNote", "topic", "title", "label", "href", "slug", "testId"]);
+  const out: string[] = [];
+  const walk = (value: unknown, key: string) => {
+    if (typeof value === "string") {
+      if (value.length > 30 && !shown.has(key)) out.push(value);
+    } else if (Array.isArray(value)) {
+      for (const item of value) walk(item, key);
+    } else if (value && typeof value === "object") {
+      for (const [k, v] of Object.entries(value)) walk(v, k);
+    }
+  };
+  for (const s of sections) {
+    if (s.access !== "paid") continue;
+    for (const p of s.positions) walk(p.text, "text");
+    walk(s.longform, "");
+    walk(s.tailReading, "");
+  }
+  return out;
+}
+
+describe("закрытые разделы: что внутри, без толкований", () => {
+  const preview = withLockedPreview(m, build(m, false));
+  const full = build(m, true);
+
+  it("каждый платный раздел помечен закрытым и несёт карты своих позиций", () => {
+    for (const s of preview) {
+      const open = full.find((x) => x.key === s.key)!;
+      expect(Boolean(s.locked), s.key).toBe(s.access === "paid");
+      if (!s.locked) continue;
+      expect(s.positions.map((p) => [p.label, p.arcanum]), s.key)
+        .toEqual(open.positions.map((p) => [p.label, p.arcanum]));
+      for (const p of s.positions) expect(Object.keys(p).sort()).toEqual(["arcanum", "href", "label"]);
+      expect(s.tailReading, s.key).toBeUndefined();
+      expect(s.conclusion, s.key).toBeUndefined();
+      if (s.key !== "chakras") expect(s.longform, s.key).toBeUndefined();
+    }
+  });
+
+  it("чакры — та же раскладка, текст заменён заглушкой той же формы", () => {
+    const locked = preview.find((s) => s.key === "chakras")!.longform!;
+    const open = full.find((s) => s.key === "chakras")!.longform!;
+    expect(locked.layout).toBe("chakras");
+    expect(locked.lead).toBe(open.lead);
+    expect(locked.chakraNote).toBe(open.chakraNote);
+    const rows = [...locked.chakraRows!, locked.energyField!];
+    const real = [...open.chakraRows!, open.energyField!];
+    expect(rows).toHaveLength(8);
+    rows.forEach((row, i) => {
+      const source = real[i];
+      expect(row.key).toBe(source.key);
+      expect(row.topic).toBe(source.topic);
+      expect(row.cells.map((c) => [c.title, c.arcanum])).toEqual(source.cells.map((c) => [c.title, c.arcanum]));
+      expect(row.lockedWords).toBe(wordCount(source.paragraphs));
+      expect(row.lockedWords).toBeGreaterThan(100);
+      expect(row.paragraphs).toHaveLength(source.paragraphs.length);
+      row.paragraphs.forEach((text, j) => {
+        expect(text).not.toBe(source.paragraphs[j]);
+        expect(Math.abs(text.length - source.paragraphs[j].length), `${row.key} ${j}`).toBeLessThan(25);
+      });
+    });
+  });
+
+  it("в закрытом разделе нет ни одного платного текста", () => {
+    const sent = JSON.stringify(preview.filter((s) => s.locked));
+    const paid = paidStrings(full);
+    expect(paid.length).toBeGreaterThan(50);
+    for (const text of paid) expect(sent.includes(text), text.slice(0, 60)).toBe(false);
+  });
+
+  it("открытый разбор проход не трогает", () => {
+    expect(withLockedPreview(m, full)).toEqual(full);
   });
 });

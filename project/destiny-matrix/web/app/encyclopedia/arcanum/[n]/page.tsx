@@ -14,6 +14,7 @@ import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
+import { DP } from "@/lib/i18n/dict/pair";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
@@ -36,8 +37,8 @@ export const dynamicParams = false;
 const forLocale = localized((L: Locale, site) => {
   const { arcanumImage } = localizedArcanumCard(L);
   const { ARCANA } = localizedArcana(L);
-  const { KARMIC_TAIL_HUB, arcanumHref, positionByKey, karmicTailHref, positionHref } = localizedEncyclopedia(L);
-  const { arcanumContent, combinationContent, karmicTails } = localizedContent(L);
+  const { KARMIC_TAIL_HUB, arcanumHref, compatibilityHref, positionByKey, karmicTailHref, positionHref } = localizedEncyclopedia(L);
+  const { arcanumContent, combinationContent, compatibilityArcanum, karmicTails } = localizedContent(L);
   const { pageMeta } = localizedSite(L, site);
   const { sentence } = localizedText(L);
   const { articleLd } = localizedSchema(L, site);
@@ -56,7 +57,7 @@ const forLocale = localized((L: Locale, site) => {
     const n = Number(raw);
     return n >= 1 && n <= 22 ? n : null;
   }
-  return { arcanumImage, ARCANA, KARMIC_TAIL_HUB, arcanumHref, positionByKey, karmicTailHref, positionHref, arcanumContent, combinationContent, karmicTails, pageMeta, sentence, articleLd, positionArcanumHref, positionArcanumLabel, registryItems, NOT_FOUND_META, encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref, entry, num };
+  return { arcanumImage, ARCANA, KARMIC_TAIL_HUB, arcanumHref, compatibilityHref, compatibilityArcanum, positionByKey, karmicTailHref, positionHref, arcanumContent, combinationContent, karmicTails, pageMeta, sentence, articleLd, positionArcanumHref, positionArcanumLabel, registryItems, NOT_FOUND_META, encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref, entry, num };
 });
 
 export function generateStaticParams(): Params[] {
@@ -86,7 +87,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function ArcanumPage({ params }: { params: Promise<Params> }) {
   const L = await requestLocale();
-  const { arcanumImage, ARCANA, KARMIC_TAIL_HUB, arcanumHref, positionByKey, karmicTailHref, positionHref, combinationContent, karmicTails, sentence, articleLd, positionArcanumHref, positionArcanumLabel, registryItems, encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref, entry, num } = forLocale(L, await requestSite());
+  const { arcanumImage, ARCANA, KARMIC_TAIL_HUB, arcanumHref, compatibilityHref, compatibilityArcanum, positionByKey, karmicTailHref, positionHref, combinationContent, karmicTails, sentence, articleLd, positionArcanumHref, positionArcanumLabel, registryItems, encyclopediaSection, encyclopediaSectionCrumb, encyclopediaSectionHref, entry, num } = forLocale(L, await requestSite());
 
   const n = num((await params).n);
   if (!n) notFound();
@@ -225,6 +226,14 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
     // калькулятор — после первой трети статьи: раньше он перебивает ответ, позже до него не доходят
     const calcAt = Math.min(a.sections.length - 1, Math.max(1, Math.round(a.sections.length / 3)));
     const waiteAt = a.sections.findIndex((section) => /Уэйт|Waite/i.test(section.h2));
+    // the article marks its couple section with {"slot": "pair"}; the link goes where the mark is
+    const pairLink = (
+      <p className="encref">
+        {compatibilityArcanum(n)
+          ? <Link href={compatibilityHref(n)}>{DP.inCompatibility[L](e.title)} →</Link>
+          : <Link href="/compatibility">{D.encArcanum.pairCalc[L]} →</Link>}
+      </p>
+    );
     // на что статья уже сослалась в тексте, блок связанных материалов не повторяет
     const linked = [...JSON.stringify(a.sections).matchAll(/\]\((\/[^)\s]*)\)/g)].map((m) => m[1]);
     return (
@@ -263,6 +272,7 @@ export default async function ArcanumPage({ params }: { params: Promise<Params> 
                 <Paragraphs
                   locale={L}
                   items={section.paragraphs}
+                  slots={{ pair: pairLink }}
                   head={
                     <>
                       <TocHeading id={`s${i + 1}`}>{section.h2}</TocHeading>

@@ -50,7 +50,7 @@ def test_d3_link_without_a_session_does_not_silently_switch_the_date(page, mail)
     page.get_by_test_id("pay-email").fill(mail)
     if page.get_by_test_id("pay-password").count():
         page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click(force=True)
     page.wait_for_timeout(1200)
     assert sent.get("matrix_id") == wanted, (
@@ -66,7 +66,7 @@ def test_d5_password_reset_works_while_another_session_is_alive(page, mail, api_
     page.goto(f"{BASE}/register", wait_until="networkidle")
     page.get_by_test_id("auth-email").fill(mail)
     page.get_by_test_id("auth-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("auth-submit").click()
     page.wait_for_timeout(1500)
     flows.logout(page)

@@ -39,14 +39,18 @@ export const { positionsOfKind } = forLocale(defaultLocale);
 // проверена браузерными сценариями, и менять её заодно с адресами значило бы менять две вещи
 // разом.
 
-export function ArcanaDeck({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
+/** Колода с картинками: все арканы или раздел энциклопедии со своими адресами («N в совместимости»). */
+export function ArcanaDeck({ locale: requestedLocale, numbers, href }: {
+  locale?: Locale; numbers?: number[]; href?: (n: number) => string;
+} = {}) {
   const L = requestedLocale ?? defaultLocale;
   const { ARCANA, arcanumHref } = forLocale(L);
+  const shown = numbers ? ARCANA.filter((a) => numbers.includes(a.n)) : ARCANA;
 
   return (
     <div className="enc-deck">
-      {ARCANA.map((a) => (
-        <Link className="enc-card" key={a.n} href={arcanumHref(a.n)} prefetch={false}>
+      {shown.map((a) => (
+        <Link className="enc-card" key={a.n} href={(href ?? arcanumHref)(a.n)} prefetch={false}>
           <ArcanumCard locale={L} n={a.n} size="grid" decorative />
           <span className="dn">
             {a.n} · {a.title}

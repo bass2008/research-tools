@@ -3,7 +3,7 @@ import json
 
 from sqlalchemy import select
 
-from app.models import Entitlement, Payment, SavedMatrix, User
+from app.models import Entitlement, Payment, Reading, User
 
 
 def test_month_purchase_grants_all(client, db):
@@ -24,7 +24,7 @@ def test_single_purchase_binds_matrix(client, db):
     assert body["entitlement"]["scope"] == ["single"]
     assert body["entitlement"]["expires_at"] is None           # разовый бессрочен
     assert body["matrix_id"] is not None
-    row = db.scalar(select(SavedMatrix).where(SavedMatrix.id == body["matrix_id"]))
+    row = db.scalar(select(Reading).where(Reading.id == body["matrix_id"]))
     assert row.birth.isoformat() == "1987-06-14" and row.sex == "m"
 
 
@@ -41,22 +41,23 @@ def test_second_payment_for_the_same_date_is_refused(client, db):
     assert again.status_code == 409, again.text
     assert "уже открыт" in again.json()["detail"]
 
-    rights = db.scalars(select(Entitlement).where(Entitlement.matrix_id == matrix_id)).all()
+    rights = db.scalars(select(Entitlement).where(Entitlement.reading_id == matrix_id)).all()
     assert len(rights) == 1, f"прав на одну дату: {len(rights)}"
 
 
-def test_two_active_rights_for_one_date_are_impossible(client, db):
+def test_two_paid_rights_for_one_date_are_impossible(client, db):
     """Проверка перед записью гонку не ловит: два параллельных платежа читали «дата закрыта»
-    оба. Уникальный индекс переводит гонку в ошибку записи."""
+    оба. Уникальный индекс переводит гонку в ошибку записи. Выданное рядом с купленным
+    допускается — его проверяет test_products."""
     from sqlalchemy.exc import IntegrityError
 
     paid = client.post("/api/payments/mock", json={"tariff": "single", "email": "race@example.ru",
                                                    "birth": "1993-07-07", "sex": "f"})
     assert paid.status_code == 200, paid.text
-    right = db.scalar(select(Entitlement).where(Entitlement.matrix_id == paid.json()["matrix_id"]))
+    right = db.scalar(select(Entitlement).where(Entitlement.reading_id == paid.json()["matrix_id"]))
 
-    twin = Entitlement(user_id=right.user_id, scope=right.scope, matrix_id=right.matrix_id,
-                       starts_at=right.starts_at)
+    twin = Entitlement(user_id=right.user_id, products=right.products, reading_id=right.reading_id,
+                       purchase_id=right.purchase_id, starts_at=right.starts_at)
     db.add(twin)
     try:
         db.commit()
@@ -69,21 +70,21 @@ def test_payment_keeps_snapshot_of_tariff(client, db):
     r = client.post("/api/payments/mock", json={"tariff": "single", "email": "sn@example.ru",
                                                "birth": "1990-01-01"})
     payment = db.scalar(select(Payment).where(Payment.external_id == r.json()["payment_id"]))
-    snapshot = json.loads(payment.tariff_body)
-    assert snapshot["id"] == "single" and snapshot["price"] == 25_000
+    snapshot = payment.purchase.body()
+    assert snapshot["id"] == "single" and snapshot["price"] == 39_000
     assert snapshot["scope"] == ["single"] and snapshot["period_days"] is None
-    assert payment.amount == 25_000 and payment.paid_at is not None
+    assert payment.amount == 39_000 and payment.paid_at is not None
     assert payment.refunded_at is None
 
 
 def test_prices_come_from_database(client, db):
     """Цену меняем в базе — витрина и платёж обязаны взять новую, без пересборки кода."""
-    # витрина отдаёт только то, что продаём: подписка в справочнике есть, но скрыта
+    # витрина личного разбора: разовый разбор и подписка, парный разбор сюда не попадает
     listing = {t["id"]: t["price"] for t in client.get("/api/tariffs").json()["items"]}
-    assert listing == {"single": 25_000}
+    assert listing == {"single": 39_000, "month": 59_000}
 
-    from app.models import Tariff
-    db.get(Tariff, "single").price = 19_900
+    from app.models import Offer
+    db.get(Offer, "single").price = 19_900
     db.commit()
 
     assert client.get("/api/tariffs").json()["items"][0]["price"] == 19_900
@@ -175,7 +176,7 @@ def test_repeated_save_of_same_date_does_not_spend_slot(client, db):
     again = client.post("/api/matrices", json={"birth": "1991-01-01", "sex": "f"},
                         headers=headers).json()
     assert again["id"] == first["id"] and again["unlocked"] is True
-    assert len(client.get("/api/matrices", headers=headers).json()["items"]) == 1
+    assert len(client.get("/api/readings?product=personal", headers=headers).json()["items"]) == 1
 
 
 def test_subscription_stores_any_number_of_dates(client, db):
@@ -208,8 +209,9 @@ def test_unknown_tariff_is_404(client):
 
 
 def test_payment_ids_are_unique(client):
+    # вторую подписку тому же человеку не продают — номера сверяем у двух покупателей
     first = client.post("/api/payments/mock", json={"tariff": "month", "email": "u@example.ru"})
-    second = client.post("/api/payments/mock", json={"tariff": "month", "email": "u@example.ru"})
+    second = client.post("/api/payments/mock", json={"tariff": "month", "email": "u2@example.ru"})
     assert first.json()["payment_id"] != second.json()["payment_id"]
 
 
@@ -248,7 +250,7 @@ def test_payments_listing_shows_own_history(client, auth, db):
     rows = client.get("/api/payments", headers=headers).json()["items"]
     assert [r["tariff"]["id"] for r in rows] == ["month", "single"]
     assert all(r["paid_at"] and r["refunded_at"] is None for r in rows)
-    assert [r["amount"] for r in rows] == [24_000, 25_000]
+    assert [r["amount"] for r in rows] == [59_000, 39_000]
 
     stranger = auth("stranger@example.ru")
     assert client.get("/api/payments", headers=stranger).json()["items"] == []
@@ -274,7 +276,7 @@ def test_payment_opens_the_chosen_date(client, db):
                         json={"tariff": "single", "email": "pick@example.ru",
                               "matrix_id": second["id"]}).json()
     assert again["matrix_id"] == second["id"]
-    rows = {r["id"]: r for r in client.get("/api/matrices", headers=headers).json()["items"]}
+    rows = {r["id"]: r for r in client.get("/api/readings?product=personal", headers=headers).json()["items"]}
     assert rows[second["id"]]["access"] == "forever"
     assert rows[first["id"]]["access"] == "forever"
 
@@ -315,8 +317,8 @@ def test_every_single_right_has_a_date(client, db):
     user = db.scalar(select(User).where(User.email == "inv@example.ru"))
     rights = db.scalars(select(Entitlement).where(Entitlement.user_id == user.id)).all()
     payments = db.scalars(select(Payment).where(Payment.user_id == user.id)).all()
-    assert len(rights) == 3 and all(r.matrix_id is not None for r in rights)
-    assert {p.matrix_id for p in payments} == {r.matrix_id for r in rights}
+    assert len(rights) == 3 and all(r.reading_id is not None for r in rights)
+    assert {p.reading_id for p in payments} == {r.reading_id for r in rights}
 
 
 def test_showcase_knows_whether_money_is_real(client, monkeypatch):

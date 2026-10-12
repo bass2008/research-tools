@@ -11,10 +11,18 @@ vi.mock("@/components/pay/TariffsProvider", () => ({
   usePaymentProviders: () => ["mock"],
 }));
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
+const session = vi.hoisted(() => ({ subscribed: false }));
+vi.mock("@/components/account/useSession", () => ({
+  useSession: () => ({ status: "user" }),
+  subscribedTo: () => session.subscribed,
+}));
 
 const preview = { birth: "1993-03-31", sex: "f" as const };
 const previous = { birth: "1990-01-01", sex: "m" as const };
-afterEach(() => clearBirth());
+afterEach(() => {
+  clearBirth();
+  session.subscribed = false;
+});
 
 function purchaseLink(props: ComponentProps<typeof UnlockCta>) {
   const element = UnlockCta(props);
@@ -27,7 +35,7 @@ it.each([false, true])("buys the displayed preview with previous calculation=%s"
   const button = purchaseLink({ place: "report", birth: preview });
   // Merely rendering an example must not replace the visitor's calculation.
   expect(loadBirth()).toEqual(hasPrevious ? previous : null);
-  expect(button.props.href).toBe("/pay");
+  expect(button.props.href).toBe("/pay?for=personal");
   button.props.onClick();
   expect(loadBirth()).toEqual(preview);
   const { pickTarget, targetLabel } = forLocale("ru");
@@ -41,7 +49,7 @@ it.each([false, true])("buys the displayed preview with previous calculation=%s"
 it("preserves an explicit saved matrix as the checkout target", () => {
   alignBirth(previous);
   const button = purchaseLink({ place: "report", birth: preview, matrixId: 42 });
-  expect(button.props.href).toBe("/pay?m=42");
+  expect(button.props.href).toBe("/pay?for=personal&m=42");
   button.props.onClick();
   expect(loadBirth()).toEqual(previous);
 });
@@ -50,4 +58,9 @@ it("keeps the existing target for a generic purchase link", () => {
   alignBirth(previous);
   purchaseLink({ place: "header" }).props.onClick();
   expect(loadBirth()).toEqual(previous);
+});
+
+it("offers nothing to a subscriber", () => {
+  session.subscribed = true;
+  expect(UnlockCta({ place: "report", birth: preview })).toBeNull();
 });

@@ -4,11 +4,10 @@ import Sections, { Paragraphs } from "@/components/enc/Sections";
 import TocHeading from "@/components/enc/TocHeading";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
-import Price from "@/components/pay/Price";
+import Price, { OfferText } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
-import { ALL_FREE } from "@/lib/access";
 import { exampleDay } from "@/lib/today";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { forLocale as localizedContent } from "@/lib/content";
@@ -248,11 +247,9 @@ export default async function ChakraPage({ params }: { params: Promise<Params> }
         <h3>{D.encChakra.buildEnergyMap[L]}</h3>
         <p>
           {D.encChakra.buildEnergyMapText[L]}{" "}
-          {ALL_FREE ? (
-            <>{D.encChakra.fullMapOpen[L]}</>
-          ) : (
-            <>{D.encChakra.fullMapPaid[L]} <Price locale={L} />.</>
-          )}
+          <OfferText free={D.encChakra.fullMapOpen[L]} subscription={D.encChakra.fullMapOpen[L]}>
+            {D.encChakra.fullMapPaid[L]} <Price locale={L} />.
+          </OfferText>
         </p>
         <Link className="btn" href="/#calc">
           {D.matrixPages.calcMatrix[L]}
@@ -278,7 +275,9 @@ async function ChakraArticlePage({ locale: L, chakraKey }: { locale: Locale; cha
       <h3>{D.encChakra.buildEnergyMap[L]}</h3>
       <p>
         {D.encChakra.buildEnergyMapText[L]}{" "}
-        {ALL_FREE ? <>{D.encChakra.fullMapOpen[L]}</> : <>{D.encChakra.fullMapPaid[L]} <Price locale={L} />.</>}
+        <OfferText free={D.encChakra.fullMapOpen[L]} subscription={D.encChakra.fullMapOpen[L]}>
+          {D.encChakra.fullMapPaid[L]} <Price locale={L} />.
+        </OfferText>
       </p>
       <Link className="btn" href="/#calc">{D.matrixPages.calcMatrix[L]}</Link>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
 
 // Админка: только чтение. Права проверяет апстрим по списку почт в своём конфиге, поэтому
@@ -15,6 +16,7 @@ import ActionsMenu from "@/components/admin/ActionsMenu";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminTasks from "@/components/admin/AdminTasks";
 import UserActions from "@/components/admin/UserActions";
 
 const USER_SIZES = [10, 25, 50, 100];
@@ -44,18 +46,17 @@ export default function AdminView() {
 }
 
 function AdminData() {
-  const { t, api, when, day, money, paymentTargetLabel, counted } = useAdminLocale();
-/** Что у пользователя открыто — одной строкой: покупки и подписка живут одновременно. */
+  const { L, t, api, when, money, paymentTargetLabel, counted } = useAdminLocale();
+  const { holdingLines } = localizedHoldings(L);
+/** Что у пользователя открыто — одной строкой, из той же сводки прав, что и кабинет. */
 function accessLine(u: AdminUser): string {
-  const parts: string[] = [];
-  if (u.owned > 0) parts.push(t("куплено {0} навсегда", u.owned));
-  if (u.granted > 0) parts.push(t("выдано {0}", u.granted));
-  if (u.scopes.includes("all")) parts.push(u.until ? t("подписка до {0}", day(u.until)) : t("подписка"));
-  return parts.length ? parts.join(" · ") : t("нет прав");
+  const lines = holdingLines(u.holdings ?? []).map((line) => line.text);
+  return lines.length ? lines.join(" · ") : t("нет прав");
 }
 
 
   const [users, setUsers] = useState<AdminUser[] | null>(null);
+  const [notices, setNotices] = useState<HTMLElement | null>(null);
   // Список растёт, а в каждой строке считаются права и покупки: отдаём страницами.
   const [usersTotal, setUsersTotal] = useState(0);
   const [usersPage, setUsersPage] = useState(1);
@@ -123,10 +124,12 @@ function accessLine(u: AdminUser): string {
   // Возврат необратим и трогает деньги, поэтому спрашиваем подтверждение и называем платёж целиком:
   // у покупателя с двумя оплатами сумма и почта совпадают, и по ним строки не различить.
   const refund = async (p: AdminPayment) => {
+    const preview = await api.admin.refundPreview(p.id).catch(() => null);
     const ok = window.confirm(
       t("Вернуть {0} ₽ покупателю {1}?\n", money(p.amount), p.email) +
         t("Платёж {0}, {1}.\n", p.external_id, paymentTargetLabel(p)) +
-        t("Разбор закроется, покупателю уйдёт письмо. Отменить возврат нельзя."),
+        (preview ? `${preview.outcome}\n` : "") +
+        t("Покупателю уйдёт письмо. Отменить возврат нельзя."),
     );
     if (!ok) return;
     setRefunding(p.id);
@@ -279,13 +282,14 @@ function accessLine(u: AdminUser): string {
               t(" · всего {0}", counted(payments.length, "заявка", "заявки", "заявок"))
             : ""}
         </div>
+        <div className="admin-notices" ref={setNotices} data-testid="admin-notices" />
         <div className="tablewrap">
           <table className="admtable" data-testid="admin-users">
             <thead>
               <tr>
                 {userHead("id", "ID")}
                 {userHead("email", t("Почта"))}
-                {userHead("matrices", t("Матриц"))}
+                {userHead("matrices", t("Разборов"))}
                 {userHead("payments", t("Платежей"))}
                 {userHead("spent", t("Уплачено"))}
                 {userHead("access", t("Доступ"))}
@@ -315,7 +319,7 @@ function accessLine(u: AdminUser): string {
                     <td className="small">{when(u.last_seen_at)}</td>
                     <td className="small">{when(u.created_at)}</td>
                     <td className="act">
-                      <UserActions user={u} onGranted={reloadUsers} />
+                      <UserActions user={u} onGranted={reloadUsers} notices={notices} />
                     </td>
                   </tr>
                 ))
@@ -526,6 +530,8 @@ function accessLine(u: AdminUser): string {
           </label>
         </div>
       </div>
+
+      <AdminTasks />
 
       <div className="panel section-gap">
         <h3>{t("Досверка платежей")}</h3>

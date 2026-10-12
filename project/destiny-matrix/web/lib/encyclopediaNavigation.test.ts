@@ -18,7 +18,7 @@ describe("единый реестр навигации энциклопедии"
   const keys = ENCYCLOPEDIA_SECTIONS.map((section) => section.key);
 
   it("содержит восемь уникальных разделов", () => {
-    expect(keys).toEqual(["arc", "sec", "pts", "chk", "tls", "yer", "cmb", "art"]);
+    expect(keys).toEqual(["arc", "sec", "pts", "chk", "tls", "yer", "cmp", "cmb", "art"]);
     expect(new Set(keys).size).toBe(keys.length);
   });
 

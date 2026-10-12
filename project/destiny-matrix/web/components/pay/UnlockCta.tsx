@@ -1,8 +1,10 @@
 "use client";
 
 import { useLead, usePriceKnown, usePaymentProviders } from "@/components/pay/TariffsProvider";
+import { useOfferMode } from "@/components/pay/useOfferMode";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { track } from "@/lib/analytics";
+import { buyHref } from "@/lib/readingLinks";
 import { alignBirth, type StoredBirth } from "@/lib/storage";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -11,9 +13,9 @@ import Link from "next/link";
 /**
  * Кнопка покупки. Отдельным клиентским компонентом, чтобы вокруг неё жила серверная разметка:
  * страница разбора печатается на сервере, а цель Метрики без обработчика клика не поставить.
- * Ведёт на `/pay`: цену и состав человек видит на экране оплаты, а не угадывает по кнопке.
- * С `matrixId` — на оплату именно этой даты: иначе экран оплаты предложит первую закрытую,
- * и деньги откроют не то, что человек читал.
+ * Ведёт на выбор «эта дата или подписка»: цену и состав человек видит там, а не угадывает по
+ * кнопке. С `matrixId` форма откроет именно эту дату: иначе предложит первую закрытую, и деньги
+ * откроют не то, что человек читал.
  */
 export default function UnlockCta({ locale: requestedLocale, ...localeProps }: ({
   place: string;
@@ -41,6 +43,7 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
   const lead = useLead();
   const known = usePriceKnown();
   const providers = usePaymentProviders();
+  if (useOfferMode() !== "sell") return null;
   if (providers?.length === 0) return unavailable;
   if (!known || !lead) {
     return (
@@ -53,7 +56,7 @@ export default function UnlockCta({ locale: requestedLocale, ...localeProps }: (
     <Link
       className={className}
       data-testid={testId}
-      href={matrixId ? `/pay?m=${matrixId}` : "/pay"}
+      href={buyHref("personal", matrixId)}
       onClick={() => {
         // A live preview may not have been submitted. Checkout must use the displayed date.
         if (!matrixId && birth) alignBirth(birth);

@@ -49,11 +49,22 @@ class ResetApply(BaseModel):
     password: str = Field(min_length=3, max_length=200)
 
 
+class ReadingIn(BaseModel):
+    product: str = Field(min_length=1, max_length=32)
+    # ввод продукта; проверяет и приводит к хранимому виду сам продукт (`products.py`)
+    inputs: dict
+    title: str | None = Field(default=None, max_length=200)
+
+
 class PaymentIn(BaseModel):
     provider: str | None = Field(default=None, pattern=r"^[a-z][a-z0-9_-]{0,31}$")
+    # код предложения; поле зовётся по-старому, потому что так его шлёт фронт
     tariff: TariffId
     email: EmailStr
-    # разовый тариф привязывается к матрице: либо она уже сохранена, либо сервер создаст её сам
+    # разовое предложение привязывается к разбору: либо он уже сохранён, либо сервер создаст его
+    # из ввода. matrix_id и birth/sex — прежняя форма для личного разбора
+    reading_id: int | None = None
+    inputs: dict | None = None
     matrix_id: int | None = None
     birth: dt.date | None = None
     sex: Sex | None = None
@@ -64,7 +75,9 @@ class PaymentIn(BaseModel):
 
 
 class ReportRequest(BaseModel):
-    matrix_id: int
+    reading_id: int | None = None
+    # прежнее имя поля для личного разбора
+    matrix_id: int | None = None
     # печать заново поверх готового файла: нужна, когда в отчёте оказалось не то
     fresh: bool = False
 
@@ -80,3 +93,8 @@ class PulseIn(BaseModel):
     # присылают только visitor. Для них visitor одновременно служит ключом вкладки.
     tab: str | None = Field(default=None, min_length=6, max_length=64)
     path: str = Field(default="/", max_length=200)
+
+
+class MetrikaClientIn(BaseModel):
+    counter_id: int = Field(gt=0, le=9007199254740991)
+    client_id: str = Field(pattern=r"^[0-9]{1,64}$")

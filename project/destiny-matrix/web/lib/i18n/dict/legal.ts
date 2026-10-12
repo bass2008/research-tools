@@ -5,6 +5,9 @@ export const legal = {
   priceHead: { ru: "Стоимость", en: "Price" } satisfies Phrase,
   includedHead: { ru: "Что входит в результат", en: "What is included" } satisfies Phrase,
   sections: { ru: "все 20 разделов страницы", en: "all 20 sections of the reading" } satisfies Phrase,
+  pairSections: { ru: "все сферы разбора совместимости", en: "all spheres of the compatibility reading" } satisfies Phrase,
+  onePair: { ru: "одна пара — задание из двух дат рождения", en: "one couple — two dates of birth" } satisfies Phrase,
+  anyReading: { ru: "любое число заданий, включая разборы пар", en: "any number of dates of birth and couples" } satisfies Phrase,
   anyDate: { ru: "любое число заданий", en: "any number of dates of birth" } satisfies Phrase,
   oneDate: {
     ru: "одно задание (одна дата рождения)",

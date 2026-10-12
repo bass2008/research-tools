@@ -13,6 +13,7 @@ import { browserDay, exampleDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import DateFields from "./DateFields";
 
 /**
  * Что происходит после расчёта. Дата в любом случае уже в браузере, различается только то,
@@ -23,10 +24,8 @@ export type Finish =
   | { kind: "go"; href: string };
 
 export const forLocale = localized((L: Locale) => {
-  const { MONTHS_ACC, calculate, daysInMonth, toIso } = localizedMatrix(L);
-
-  const MIN_YEAR = 1900;
-  return { MONTHS_ACC, calculate, daysInMonth, toIso, MIN_YEAR };
+  const { calculate, daysInMonth, toIso } = localizedMatrix(L);
+  return { calculate, daysInMonth, toIso };
 });
 
 /**
@@ -55,7 +54,7 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
     place = "landing",
     onPreview,
   } = localeProps;
-  const { MONTHS_ACC, calculate, daysInMonth, toIso, MIN_YEAR } = forLocale(L);
+  const { calculate, daysInMonth, toIso } = forLocale(L);
 
   const promo = name === "promo";
   const fieldId = (short: string) => (promo ? `p${short}` : short);
@@ -105,9 +104,6 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
     }
   }, [day, month, year, sex, calculate, toIso, onPreview, setError]);
 
-  const years: number[] = [];
-  for (let y = maxYear; y >= MIN_YEAR; y--) years.push(y);
-
   // До гидратации обработчик не подключён, и нажатие «Рассчитать» не делало ничего: человек на
   // медленном телефоне решал, что сайт сломан. Пока не готовы — говорим это прямо.
   // Поля тоже выключены до гидратации, а не только кнопка: React монтируется с начальным
@@ -148,53 +144,8 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
     <div className="form" id={promo ? undefined : "calc"}>
       <div className="fh2">{title}</div>
       <div className="sub">{lead}</div>
-      <div className="fields">
-        <div>
-          <label htmlFor={fieldId("d")}>{D.calc.day[L]}</label>
-          <select
-            id={fieldId("d")}
-            disabled={!ready}
-            value={day}
-            onChange={(e) => change(() => setDay(Number(e.target.value)))}
-          >
-            {Array.from({ length: 31 }, (_, i) => i + 1).map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor={fieldId("m")}>{D.calc.month[L]}</label>
-          <select
-            id={fieldId("m")}
-            disabled={!ready}
-            value={month}
-            onChange={(e) => change(() => setMonth(Number(e.target.value)))}
-          >
-            {MONTHS_ACC.map((nm, i) => (
-              <option key={nm} value={i + 1}>
-                {nm}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor={fieldId("y")}>{D.calc.year[L]}</label>
-          <select
-            id={fieldId("y")}
-            disabled={!ready}
-            value={year}
-            onChange={(e) => change(() => setYear(Number(e.target.value)))}
-          >
-            {years.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <DateFields locale={L} id={fieldId} value={{ day, month, year }} maxYear={maxYear} disabled={!ready}
+        onChange={(part, value) => change(() => (part === "day" ? setDay : part === "month" ? setMonth : setYear)(value))} />
       <div className="sexrow" role="group" aria-label={D.calc.sex[L]}>
         <button
           type="button"

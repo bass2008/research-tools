@@ -173,7 +173,7 @@ docker inspect arcana-localized-web-1 --format '{{.Created}}'   # сверить
 
 ```bash
 cd /home/sergey/Personal/research-tools
-git add -A project/destiny-matrix tools/seo
+git add -A project/destiny-matrix tools/seo .agents/skills/arcana-product-skill
 git commit -F - <<'MSG'
 <Название итерации> Release
 
@@ -181,7 +181,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 MSG
 ```
 
-Одна строка subject, без тела. Push не делать.
+Одна строка subject, без тела. Push не делать. Изменённые правила и промпты продукта входят в коммит вместе с контентом.
 
 ## 5. Выкладка
 
@@ -247,9 +247,10 @@ scripts/assert-release-candidate.sh
 стираются при перезапуске api — они идут отдельной строкой «стёрты при перезапуске» и ошибкой
 не считаются.
 
-Откат этого перехода: остановить общий web, вернуть `/srv/arcana/docker-compose.previous.yml`
-и значения из `.env.previous.tag`, затем поднять прежний русский compose и сохранённые
-английские контейнеры. Том русской БД сохраняется; английский том не изменяется.
+**Отката нет.** Если после выкладки что-то сломалось, чиним вперёд: быстрое исправление или
+сборка с нужного коммита тем же порядком — тест, затем прод. Готового сценария отката нет и не
+поддерживается (`decisions.md`, Decision 17). Снимок базы перед релизом остаётся страховкой
+данных, а не путём назад.
 
 ## 6. Приёмка прода
 

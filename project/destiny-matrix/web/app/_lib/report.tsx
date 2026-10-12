@@ -1,17 +1,17 @@
 import ReportSheet from "@/components/matrix/ReportSheet";
+import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedMatrix } from "@/lib/matrix";
 import { forLocale as localizedSections } from "@/lib/sections";
-import { getTariffs } from "@/lib/tariffs.server";
 import { notFound } from "next/navigation";
-import { planLabel, readMatrixUnlocked, type Access, type SavedMatrix } from "./access";
+import { readMatrixCard, type Access, type SavedMatrix } from "./access";
 
 export const forLocale = localized((L: Locale) => {
   const { calculate } = localizedMatrix(L);
-  const { build, withPositionArticles } = localizedSections(L);
+  const { build, withLockedPreview, withPositionArticles } = localizedSections(L);
 
-  return { calculate, build, withPositionArticles };
+  return { calculate, build, withLockedPreview, withPositionArticles };
 });
 
 /**
@@ -40,7 +40,7 @@ export async function SavedReport({ locale: requestedLocale, ...localeProps }: (
     access,
     embedded = false,
   } = localeProps;
-  const { calculate, build, withPositionArticles } = forLocale(L);
+  const { calculate, build, withLockedPreview, withPositionArticles } = forLocale(L);
 
   let matrix;
   try {
@@ -49,12 +49,12 @@ export async function SavedReport({ locale: requestedLocale, ...localeProps }: (
     notFound();
   }
 
-  const unlocked = await readMatrixUnlocked(chosen.id);
+  const { unlocked, plan } = await readMatrixCard(chosen.id);
   return (
     <ReportSheet locale={L}
       matrix={matrix}
-      sections={withPositionArticles(matrix, build(matrix, unlocked))}
-      planName={planLabel(access, await getTariffs(), unlocked, L)}
+      sections={withLockedPreview(matrix, withPositionArticles(matrix, build(matrix, unlocked)))}
+      planName={plan ?? D.sheet.planReading[L]}
       unlocked={unlocked}
       saved={saved}
       currentId={chosen.id}

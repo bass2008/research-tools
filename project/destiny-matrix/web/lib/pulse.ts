@@ -26,7 +26,7 @@ export function troubles(p: Pulse, locale: Lang = "ru"): string[] {
   if (p.cpu.percent >= BAD) out.push(t("процессор загружен на {0}%", p.cpu.percent));
   if (p.print.failures_hour > 0)
     out.push(t("печать падала {0} раз за час", p.print.failures_hour));
-  if (p.payments.stuck > 0) out.push(t("платежей застряло: {0}", p.payments.stuck));
+  if (p.payments.stuck > 0) out.push(t("Незавершённые платежи: {0}", p.payments.stuck));
   if (p.errors.last10min > 5) out.push(t("ошибок за 10 минут: {0}", p.errors.last10min));
   return out;
 }

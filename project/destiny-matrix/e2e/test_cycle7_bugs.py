@@ -109,7 +109,7 @@ def test_receipt_survives_reload_on_its_own_address(page: Page):
     page.get_by_test_id("calc-submit").click()
     page.wait_for_timeout(900)
 
-    page.goto(f"{BASE}/pay", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/pay/single", wait_until="domcontentloaded")
     page.wait_for_selector('[data-testid="pay-submit"]')
     page.get_by_test_id("pay-email").fill(f"agent-receipt-{uuid.uuid4().hex[:8]}@example.com")
     page.get_by_test_id("pay-password").fill("test-pass-123")
@@ -193,13 +193,12 @@ def test_pay_link_to_an_open_matrix_does_not_swap_the_date(page: Page):
     page.goto(f"{BASE}/pay?m={open_id}", wait_until="domcontentloaded")
     page.wait_for_selector("[data-testid=pay-submit]")
     page.wait_for_timeout(1200)
-    picked = page.get_by_test_id("pay-target").input_value()
-    assert picked in (None, "none"), (
-        f"ссылка на открытую матрицу {open_id} выбрала другую цель: {picked}"
-    )
+    year = page.get_by_test_id("pay-y").input_value()
+    assert year == "1979", f"ссылка на открытую матрицу {open_id} поставила в поля другую дату: {year}"
     assert page.get_by_test_id("pay-open-note").count(), (
         "нет объяснения, что эта дата уже открыта"
     )
+    assert page.get_by_test_id("pay-submit").is_disabled(), "открытую дату предлагают оплатить второй раз"
 
 
 @pytest.mark.parametrize(

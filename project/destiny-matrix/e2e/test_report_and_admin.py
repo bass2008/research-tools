@@ -84,7 +84,7 @@ def test_admin_returns_a_payment_from_the_interface(page, mail):
     page.get_by_test_id("refund").click()
     expect(row).to_contain_text("возвращён", timeout=30_000)
     assert asked, "интерфейс не спросил подтверждения"
-    assert mail in asked[0] and "250" in asked[0], asked[0]
+    assert mail in asked[0] and "390" in asked[0], asked[0]
     external = row.locator("td").nth(6).inner_text().strip()
     assert external and external in asked[0], f"в подтверждении нет номера платежа: {asked[0]}"
     expect(row).to_contain_text("возвращён", timeout=30_000)
@@ -148,7 +148,7 @@ def test_admin_sees_what_happens_right_now(page, browser, mail):
     assert re.match(r"[1-9]\d* человек", online), f"живой гость не посчитан: {online}"
 
     text = panel.inner_text()
-    for word in ("Память", "Процессор", "Диск", "Том с базой", "печатается", "платежей застряло"):
+    for word in ("Память", "Процессор", "Диск", "Том с базой", "печатается", "Незавершённые платежи"):
         assert word in text, f"в панели нет: {word}"
     assert "%" in text
 
@@ -269,7 +269,8 @@ def test_printing_starts_by_itself_after_payment(page, mail):
     matrix_id = flows.matrix_ids(page)[0]
 
     ready = None
-    for _ in range(40):                      # печать локально идёт около пяти секунд
+    # печать идёт около пяти секунд, но в общем прогоне прогрев ждёт места в очереди печати
+    for _ in range(240):
         page.wait_for_timeout(500)
         jobs = page.request.get(f"{BASE}/api/reports").json()["items"]
         mine = [j for j in jobs if j["matrix_id"] == matrix_id]
@@ -404,8 +405,8 @@ def test_download_takes_the_report_you_are_looking_at(page, mail):
     button.click()
     page.wait_for_timeout(1200)
 
-    assert sent.get("matrix_id") == first, (
-        f"скачивается разбор {sent.get('matrix_id')}, а на экране {first}")
+    assert sent.get("reading_id") == first, (
+        f"скачивается разбор {sent.get('reading_id')}, а на экране {first}")
     assert "7 марта 1990" in (button.get_attribute("title") or ""), \
         f"подсказка кнопки не называет открытую дату: {button.get_attribute('title')}"
     assert page.locator("[data-testid=matrix-switch]").count() == 0, \

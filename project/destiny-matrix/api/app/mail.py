@@ -70,10 +70,16 @@ def send(to: str, subject: str, body: str) -> bool:
 
 
 def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = None,
-             matrix_id: int | None = None) -> bool:
-    # Без номера даты ссылка вела на «последнюю сохранённую», а купить могли не её:
-    # человек шёл по письму и попадал в чужой по смыслу разбор.
-    report = f"{sites.current().origin}/report?" + (f"m={matrix_id}&" if matrix_id else "") + f"lang={current_locale()}"
+             reading=None, subscription: bool = False) -> bool:
+    # Без номера разбора ссылка вела на «последний сохранённый», а купить могли не его:
+    # человек шёл по письму и попадал в чужой по смыслу разбор. Подписка разбора не имеет —
+    # она ведёт на личный разбор, как и раньше.
+    if subscription:
+        return _subscription(to, tariff_name, payment_id, password)
+    from . import products
+    product = products.get(reading.product) if reading is not None else None
+    page = product.page(reading.id) if product else "/report"
+    report = f"{sites.current().origin}{page}{'&' if '?' in page else '?'}lang={current_locale()}"
     lines = [
         say("mail.purchase.ready", tariff=tariff_name),
         say("mail.purchase.payment", id=payment_id),
@@ -85,6 +91,17 @@ def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = 
         lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
     lines += ["", say("mail.purchase.help")]
     return send(to, say("mail.purchase.subject"), "\n".join(lines))
+
+
+def _subscription(to: str, tariff_name: str, payment_id: str, password: str | None) -> bool:
+    # У подписки нет одного разбора: «ваш разбор готов» и ссылка на личный уводили на главную.
+    account = f"{sites.current().origin}/account?lang={current_locale()}"
+    lines = [say("mail.subscription.ready", tariff=tariff_name), say("mail.purchase.payment", id=payment_id),
+             "", say("mail.subscription.open", url=account)]
+    if password:
+        lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
+    lines += ["", say("mail.subscription.help")]
+    return send(to, say("mail.subscription.subject"), "\n".join(lines))
 
 
 def welcome(to: str) -> bool:
@@ -102,15 +119,14 @@ def welcome(to: str) -> bool:
     return send(to, say("mail.welcome.subject"), body)
 
 
-def refund(to: str, tariff_name: str, payment_id: str) -> bool:
-    # «Разбор закрыт» звучало так, будто закрыт весь доступ: у покупателя нескольких дат
-    # закрывается ровно одна — та, за которую вернули деньги. Саму дату не называем:
-    # дата рождения в письмах не участвует.
+def refund(to: str, tariff_name: str, payment_id: str, outcome: str) -> bool:
+    # Что стало с доступом, считает `access.refund_outcome`: разбор, выданный или открытый
+    # подпиской, остаётся открытым. Саму дату не называем: дата рождения в письмах не участвует.
     body = "\n".join([
         say("mail.refund.done", tariff=tariff_name),
         say("mail.purchase.payment", id=payment_id),
         "",
-        say("mail.refund.closed"),
+        outcome,
         say("mail.refund.saved"),
         say("mail.refund.money"),
         "",

@@ -67,6 +67,8 @@ export interface SectionOut {
   lead: string;
   access: Access;
   positions: PositionOut[];
+  /** Платный раздел без доступа. Позиции у него, если пришли, — только карты: номер и подпись. */
+  locked?: boolean;
   teaser?: string;
   /** Полноэкранный персональный материал для разделов, где нужен связный разбор сочетания. */
   personalHref?: string;
@@ -268,6 +270,7 @@ export const forLocale = localized((L: Locale) => {
         title: meta.title,
         lead: detail?.lead ?? "",
         access: meta.access,
+        ...(meta.access === "paid" ? { locked: true } : {}),
         ...(meta.key === "character"
           ? { personalHref: characterHref(m) }
           : meta.key === "comfort"

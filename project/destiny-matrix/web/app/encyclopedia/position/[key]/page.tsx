@@ -5,7 +5,7 @@ import Sections from "@/components/enc/Sections";
 import TocHeading from "@/components/enc/TocHeading";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
-import Price from "@/components/pay/Price";
+import Price, { OfferText } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
@@ -173,12 +173,12 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         {section ? (
           <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
             {D.encPosition.sectionInReport[L]}{" "}
-            {isFree || ALL_FREE ? (
+            {isFree ? (
               D.encPosition.openFree[L]
             ) : (
-              <>
+              <OfferText free={D.encPosition.openFree[L]} subscription={D.encPosition.opensBySubscription[L]}>
                 {D.encPosition.opensInFull[L]} <Price locale={L} />.
-              </>
+              </OfferText>
             )}{" "}
             <Link href="/report">{D.encPosition.seeYourReport[L]}</Link>
           </p>

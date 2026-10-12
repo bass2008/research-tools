@@ -238,7 +238,7 @@
     {
      "h2": "Combinations and compatibility: common mistakes",
      "paragraphs": [
-      "“I can calculate compatibility with my partner here.” No. The catalogue covers pairs inside one chart. Compatibility of two people from two dates of birth is a different question, and the site does not calculate it.",
+      "“I can calculate compatibility with my partner here.” No. The catalogue covers pairs inside one chart. Compatibility of two people from two dates of birth is a separate calculation: [destiny matrix compatibility](/compatibility).",
       "“There are good pairs and bad pairs.” The method has no such division: every pair describes both a resource and a cost.",
       "“If the pair is difficult, it is a verdict.” The chart describes energy, not events. The same pair plays out differently in different people, and the difference comes from what the person does with what they notice, not from the number itself."
      ]
@@ -273,6 +273,311 @@
     "arcanum/3",
     "arcanum/9",
     "method"
+   ]
+  },
+  {
+   "key": "compatibility",
+   "seo": {
+    "title": "Destiny matrix compatibility arcana: meanings of 2–22",
+    "description": "Destiny matrix compatibility arcana explained: how an arcanum lands in a couple’s chart, what 2–22 mean, the couple’s karmic tail and the point under the heart.",
+    "queries": [
+     "destiny matrix compatibility arcana",
+     "destiny matrix compatibility chart meaning",
+     "destiny matrix compatibility chart explained",
+     "destiny matrix compatibility chart how to read",
+     "matrix of destiny compatibility explained"
+    ]
+   },
+   "title": "Arcana in destiny matrix compatibility: what each arcanum means in a couple",
+   "short": "A compatibility matrix is put together from two dates of birth, and it has points and arcana of its own — from 2 to 22. Here is how an arcanum gets into a couple’s matrix, why it never holds a 1 and rarely a 2, what each arcanum means in a couple, what the couple’s karmic tail is and where to find the point under the heart.",
+   "sections": [
+    {
+     "h2": "What a couple’s matrix is",
+     "paragraphs": [
+      "Compatibility in the destiny matrix is not a comparison of two numbers or a table of which arcanum goes with which. It is a third chart built from two personal ones. First each partner’s personal matrix is calculated. Then their matching points are added together — centre with centre, day with day, tail with tail — and each sum is reduced to a number from 1 to 22: if the sum is above 22, its digits are added. The result is the couple’s matrix: it has numbers of its own, not an average of two charts.",
+      "This is how Yuliana Lisovskaya calculates it step by step in her book Matritsa sudby: sovmestimost (Destiny Matrix: Compatibility, 2024) — the only written source where the couple’s calculation is set out with examples. It is her school: Natalia Ladini, who created the destiny matrix method, does not describe her own compatibility formula in public. Our calculator follows the book, and every number in its couple examples matches.",
+      "**An example.** The partners in the book were born on 3 December 1997 and 27 May 1999. Their personal centres are 10 and 3: 10 + 3 = 13, and the couple’s centre holds Death. Their day points are 3 and 9 — the couple’s image is 12. In the tail they have 15 and 9, 20 and 15, 5 and 6: 24 → 6, 35 → 8 and 11. The couple’s tail is 6-8-11, and it matches the tail of neither partner: theirs are 15-20-5 and 9-15-6.",
+      "The couple’s points do not mean what they mean in a personal chart. The couple’s centre is the shared atmosphere between the partners, the day is the couple’s image for others, the month is why the couple met, and the tail is its tasks. So personal readings are not carried over to the couple’s matrix: the same 6 in a person’s centre and in a couple’s centre is read differently. The method gives no compatibility percentages and passes no verdicts."
+     ]
+    },
+    {
+     "h2": "How an arcanum gets into a couple’s matrix",
+     "paragraphs": [
+      "The sum of two points ranges from 2 to 44. Everything up to 22 stays as it is; everything above is reduced to a number from 3 to 12: 23 → 5, 30 → 3, 39 → 12, 44 → 8. This simple rule produces several features that a personal chart does not have.",
+      {
+       "ul": [
+        "**A 1 never comes up in a couple.** The sum of two numbers cannot equal 1, either directly or after reduction.",
+        "**A 2 appears in only two points** — the image of the couple and “What to create together”, that is, where the days and months of birth are added. A 2 comes only from 1 + 1, and a person has a 1 only if they were born on the 1st or in January. A 2 in “What to create together” turns up for about one couple in a hundred and forty, in the image of the couple for one in nine hundred.",
+        "**Arcana 3–12 are more frequent in most points of a couple.** They come from both direct and reduced sums: a 6 comes from 6, 24, 33 and 42. Arcana 13–22 come only from sums up to 22.",
+        "**The couple’s centre is most often 13–18.** People’s personal centres are usually 5 to 11, and their sums fall into this range. Low arcana in a couple’s centre are rare: a 3 or a 4 turns up for two couples in a thousand. Which arcana appear in the couple’s centre and how often is covered in the article [“The centre of compatibility”](/compatibility-center).",
+        "**The couple’s common language holds only 3, 6, 9, 12, 15, 18 or 21.** That is how this point is calculated: no one ever gets the other numbers there."
+       ]
+      },
+      "If both partners have the same arcanum in one point, the couple will have not that arcanum but the sum: two 6s give 12, two 9s give 18. A match of arcana between partners says nothing about the union on its own."
+     ]
+    },
+    {
+     "h2": "The points of a couple’s matrix and what they show",
+     "paragraphs": [
+      "In our couple reading the points are grouped into spheres. Here is where each point is, what it shows and how it is read; in brackets is the point’s letter in Lisovskaya’s book, transliterated from Russian.",
+      {
+       "table": {
+        "head": [
+         "Sphere and card in the couple reading",
+         "What it shows",
+         "How it is read"
+        ],
+        "rows": [
+         [
+          "“The atmosphere inside the couple”, centre (A)",
+          "what is between you when nobody is watching",
+          "plus and minus"
+         ],
+         [
+          "“How others see the couple” — “How you are seen” (B)",
+          "how friends, family and colleagues see the union",
+          "plus and minus"
+         ],
+         [
+          "“Why you met” — “What to create together” (V)",
+          "what the couple is to create together and what to learn",
+          "plus only"
+         ],
+         [
+          "“Attitude to material things” — “Home and things” (G)",
+          "home, things, spending, savings",
+          "plus and minus"
+         ],
+         [
+          "“What fills the union” (E)",
+          "what restores the couple’s strength",
+          "plus, even in the minus"
+         ],
+         [
+          "“What can spoil it” — “Where it sparks” (Yo)",
+          "what causes serious quarrels",
+          "minus"
+         ],
+         [
+          "“The couple’s money” — “Way into money” (G1)",
+          "difficulties with income and how to get round them",
+          "—"
+         ],
+         [
+          "“The couple’s money” — “Path to prosperity” (L)",
+          "what prosperity comes through",
+          "—"
+         ],
+         [
+          "“The couple’s money” — “Where it leaks”, in the relationship — “Success and the union” (K)",
+          "money leaks and how each partner’s status affects the union",
+          "—"
+         ],
+         [
+          "“Relationship and common language” — “What connects” (I)",
+          "shared events and activities that connect you",
+          "plus"
+         ],
+         [
+          "“Relationship and common language” — “Common language”, in the tasks — “Entry to the task” (D1)",
+          "shared wishes and agreements",
+          "both ways"
+         ],
+         [
+          "“The couple’s karmic tail” — “Middle of the task” (D2)",
+          "how the main task unfolds",
+          "—"
+         ],
+         [
+          "“The couple’s karmic tail” — “Main task” (D)",
+          "the union’s main trials",
+          "mostly minus"
+         ],
+         [
+          "“The couple as parents” — “Parents together” (B1)",
+          "what you are like together as the elders",
+          "—"
+         ],
+         [
+          "“The couple as parents” — “What you teach” (B2)",
+          "what you teach children and everyone you look after",
+          "—"
+         ],
+         [
+          "“The couple’s values” — spiritual purpose",
+          "the couple’s values and the path to walk together",
+          "the main point of the purposes block"
+         ]
+        ]
+       }
+      },
+      "The image of the couple and “What to create together” are read together — that is the answer to why fate brought you together. One more sphere of the reading, “The couple’s values”, is calculated differently: from the couple’s purposes, which are recalculated from its own sums. The “Compatibility at work” section is built on the sum of the dates, not of the matrices — how it is calculated and what its points mean is covered in the article [“Business compatibility in the destiny matrix”](/business-compatibility).",
+      {
+       "h3": "Under the heart in the compatibility matrix"
+      },
+      "In searches, “under the heart” in compatibility refers to the “What connects” point — Lisovskaya’s I, on the couple’s relationship line. It shows the union’s positive potential: the events and activities around which the two come together — a shared home, a road, a business, a hobby."
+     ]
+    },
+    {
+     "h2": "Why you met",
+     "paragraphs": [
+      "The first sphere of the reading and one of the two free ones. It has two cards: “Image of the couple”, built from the partners’ days of birth (Lisovskaya’s B), and “What to create together”, built from the months (V). Both points can be seen almost without calculation, and they share one meaning: why fate brought the two together.",
+      "Lisovskaya reads them together: the pluses of the two energies weave into the positive meaning of the union, the minuses into the negative one. “What to create together” on its own is read only in the plus. This is not a karmic task — that is in the couple’s tail — but something earthly: what the couple is to build, what to learn, which trials to go through. The sphere is open free in the [compatibility calculator](/compatibility), and what each number means in these points is on the arcana compatibility pages."
+     ]
+    },
+    {
+     "h2": "Compatibility of characters",
+     "paragraphs": [
+      "This sphere compares not the couple’s matrix but the two personal matrices. It makes two checks. The first is the core of one partner’s character: the point where the money and relationship lines cross, Lisovskaya’s dual. If this number is among the main points of the other’s matrix, the characters match. The second is wishes: the entry point of the relationship line, Lisovskaya’s half-dual. If one partner’s wishes sound in the other’s chart, the two share a direction.",
+      "The sphere appears only when there is a match: “no match” is not news, and some couples do not have it in their reading. Lisovskaya stresses that this is compatibility of characters, not a verdict on the union: a couple without matches can rest on other, often spiritual, reasons. The numbers in this sphere are arcana from the partners’ personal matrices, not points of the couple’s matrix."
+     ]
+    },
+    {
+     "h2": "What each arcanum means in a couple",
+     "paragraphs": [
+      "In brief, the essence of each arcanum in a couple’s matrix. In detail, point by point, it is on each arcanum’s own compatibility page: the list is below.",
+      {
+       "ul": [
+        "**2 · The High Priestess.** A rare guest: only in the image of the couple and in “What to create together”, if both were born on the 1st or both in January. Understanding without words and a life kept to themselves; the lesson is to talk about feelings out loud.",
+        "**3 · The Empress.** Growth and abundance: a home, children, a shared business, money invested in the future. The minus is a tally of “who has put in more”, jealousy and relatives who decide for the two of them.",
+        "**4 · The Emperor.** Support and order: rules of their own, savings for a rainy day, roles shared out and passion behind a closed door. The minus is coldness, control and a struggle over who is in charge.",
+        "**5 · The Hierophant.** Shared rules, traditions and friendship: the partners also share a view of life, and money is handled carefully. The minus is lecturing, the urge to remake each other and relatives inside the couple’s boundaries.",
+        "**6 · The Lovers.** Love as a daily choice: openness, tenderness, generosity, a beautiful life. The minus is jealousy born of insecurity and a seesaw of “peace one day, war the next”.",
+        "**7 · The Chariot.** A team on the move: relocations, shared projects, a road of one’s own for each. The minus is a fight for the wheel, haste and risky decisions.",
+        "**8 · Justice.** An honest union: duties are shared, big purchases are decided together, quarrels pass without scenes. The minus is living like neighbours and responsibility that has turned into control.",
+        "**9 · The Hermit.** Quiet for two: deep conversations, respect for boundaries, love shown in deeds. The minus is each living on their own while problems pile up in silence.",
+        "**10 · The Wheel of Fortune.** A union that lives in cycles: rises and crises, luck and a sense of a fated meeting. The minus is a seesaw of “silence — conflict” and a habit of blaming fate.",
+        "**11 · Strength.** Two strong people who charge each other up; the tension goes into passion. The minus is a struggle for the lead and money controlled by one.",
+        "**12 · The Hanged Man.** Quiet care and willingness to give way; the partners sense each other at a distance. The minus is a sacrifice nobody asked for and living for the picture.",
+        "**13 · Death.** A union of renewal: two people who accept each other’s past and take on change easily; often a living example that life goes on after hard times. The minus is so much change that there is nothing to lean on.",
+        "**14 · Temperance.** Measure and harmony: arguments are settled by talking, life is lived within means, peace of mind matters more than things. The minus is one partner always giving way while the other does not notice.",
+        "**15 · The Devil.** Passion and strong attraction: a vivid couple who talk openly about desires and accept each other’s dark sides. The minus is a wish to possess, jealousy and a union held together by intimacy alone.",
+        "**16 · The Tower.** A union that grows stronger through trials: they build, rebuild and get through troubles hand in hand. The minus is sudden upheavals and words said in a quarrel that are never forgotten.",
+        "**17 · The Star.** Inspiration: next to the partner, each understands who they want to be. The minus is a pretty picture without substance and a fear of responsibility.",
+        "**18 · The Moon.** Deep sensitivity and understanding without words; the partner is first of all a friend. The minus is secrets, fears and jealousy built on imagined stories.",
+        "**19 · The Sun.** Warmth and success: a bright, hospitable couple where each is fulfilled and family comes first. The minus is control, arrogance and a contest over whose victory it is.",
+        "**20 · Judgement.** Family and kin: traditions, comfort, complete trust, relatives who accept the partner. The minus is relatives meddling and a union “for the sake of something” in which it is hard to say what you feel.",
+        "**21 · The World.** Freedom and scale: travel, a shared philosophy of life, duties split in half. The minus is a wish to re-educate the partner to suit oneself and the routine of Groundhog Day.",
+        "**22 · The Fool.** Lightness and a trust that gives freedom: a couple like best friends who easily start from scratch. The minus is no clarity about status and no one taking charge of serious steps."
+       ]
+      }
+     ]
+    },
+    {
+     "h2": "The couple’s karmic tail",
+     "paragraphs": [
+      "The couple’s karmic tail is three points at the bottom of the couple’s matrix: “Entry to the task”, “Middle of the task” and “Main task”, Lisovskaya’s D1, D2 and D. In the reading it is a sphere of its own with the same name. These are the union’s tasks — the main trials the couple has to go through. The tail is written from the entry to the main task, for example 6-8-11, and its first number is always a multiple of three. The main task is read mostly in the minus; the middle and the entry reveal it. The entry is the same point as “Common language” on the relationship line, so it is read both ways: as the couple’s shared wishes and as the first obstacle to them. The couple’s tail appears at once in the calculator’s “Key numbers”, and the reading of the triple is in the full reading.",
+      "A couple’s tail is the sum of the partners’ tails point by point, and the middle is not recalculated from the ends as in a personal chart: the couple in the book born on 16 July 2003 and 1 September 2005 has the tail 9-9-9, while the personal formula would give a middle of 18. That is why couples can have 97 different tails while people have 26, and personal readings are not carried over to a couple. How the couple’s tail is calculated, which tails are most common and how to read the three points is covered in the article [“Karmic compatibility in the destiny matrix”](/karmic-compatibility)."
+     ]
+    },
+    {
+     "h2": "The couple’s values",
+     "paragraphs": [
+      "The fifth main card of the reading is “The couple’s values”, Lisovskaya’s spiritual purpose of the couple: its values and the path the two are to walk together, one more answer to “why we met”. It is calculated not by adding matching points but from the couple’s purposes, which are recalculated from its own sums. That is why only multiples of three occur here — just as in a personal matrix.",
+      {
+       "table": {
+        "head": [
+         "Arcanum in the values",
+         "Share of couples",
+         "The couple’s value"
+        ],
+        "rows": [
+         [
+          "[9 · The Hermit](/encyclopedia/compatibility/9)",
+          "22.4%",
+          "Seek meaning and go deep rather than wide"
+         ],
+         [
+          "[6 · The Lovers](/encyclopedia/compatibility/6)",
+          "22.0%",
+          "Choose each other again, and for real"
+         ],
+         [
+          "[21 · The World](/encyclopedia/compatibility/21)",
+          "12.6%",
+          "Freedom, trust and the union of two worlds"
+         ],
+         [
+          "[3 · The Empress](/encyclopedia/compatibility/3)",
+          "11.8%",
+          "Grow living things: a home, a venture, a family"
+         ],
+         [
+          "[15 · The Devil](/encyclopedia/compatibility/15)",
+          "11.4%",
+          "Desire openly and never own each other"
+         ],
+         [
+          "[18 · The Moon](/encyclopedia/compatibility/18)",
+          "11.0%",
+          "Trust intuition and guard your inner world"
+         ],
+         [
+          "[12 · The Hanged Man](/encyclopedia/compatibility/12)",
+          "8.9%",
+          "Give without counting and see differently"
+         ]
+        ]
+       }
+      },
+      "Lisovskaya reads the spiritual purpose on its own and together with the centre, the image of the couple, why the couple met, what fills the union and what can spoil it. For the six and the nine the values are one of the two most frequent places in a couple; for 12, 15, 18 and 21 they are the most frequent."
+     ]
+    },
+    {
+     "h2": "The couple’s chakras",
+     "paragraphs": [
+      "The couple’s chakras are a section of our reading that the book does not have: Lisovskaya does not include chakras in a couple’s matrix. We calculate them by her own rule of addition. Each partner gets a personal map of seven chakras from the date of birth — physics, energy and emotions. The couple’s chakra map adds the matching numbers of the two maps and reduces each sum to 22.",
+      "The result is seven spheres of shared life — from your shared footing in Muladhara to what inspires you both in Sahasrara — and the overall energy field of the union. The couple’s chakra map is open free in the [compatibility calculator](/compatibility). A reading of each chakra for the couple’s numbers is part of the full reading. Readings of all seven chakras and the overall energy field for your couple’s numbers open immediately after purchase."
+     ]
+    },
+    {
+     "h2": "How to read arcana in a couple",
+     "paragraphs": [
+      {
+       "ul": [
+        "**The point matters more than the number.** The same arcanum in the couple’s atmosphere, money and tasks means different things. Read it in the role of its point.",
+        "**Repetition makes a theme louder.** If an arcanum appears in a couple two or three times, its theme is more noticeable for the union. But each point is read in its own role.",
+        "**A couple is not the sum of two characters.** The couple’s arcanum belongs to neither partner: it is what arises between them.",
+        "**A combination of arcana is something else.** A combination is two arcana of one personal chart in linked points. Compatibility is a separate chart put together from two dates.",
+        "**No grades.** No arcanum in a couple is “good” or “bad”: each has a plus and a minus, and which outweighs the other is up to the two people."
+       ]
+      }
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "How do I find out my couple’s arcana?",
+     "a": "Enter two dates of birth into the compatibility calculator. It builds both partners’ personal matrices and the couple’s matrix, which shows which arcanum stands in the atmosphere, in the image of the couple, in “Why you met”, in the tail and in the other points. The time and place of birth are not needed."
+    },
+    {
+     "q": "Where in the destiny matrix do I look for compatibility?",
+     "a": "A personal matrix has no separate compatibility point. In one person’s chart, partnership is covered by [“Relationships in the destiny matrix”](/encyclopedia/position/relations) and the [under-the-heart point](/encyclopedia/position/love_middle). Compatibility of two people is a separate couple’s matrix, built from two dates of birth in the [compatibility calculator](/compatibility)."
+    },
+    {
+     "q": "Why is there never a 1 in a couple’s matrix?",
+     "a": "Each point of a couple is the sum of two numbers from 1 to 22. Such a sum cannot equal 1 and does not reduce to 1, so The Magician never comes up in a couple’s matrix. A 2 appears only in the image of the couple and in “What to create together” — when both partners have a 1 there."
+    },
+    {
+     "q": "What is the karmic tail in compatibility?",
+     "a": "It is the sphere “The couple’s karmic tail” — the three bottom points of the couple’s matrix: entry to the task, the middle and the main task. They show what trials the union has to go through. A couple’s tail is the sum of the partners’ tails point by point, so couples can have tails that no single person has, such as 9-9-9. More in the article [“Karmic compatibility”](/karmic-compatibility)."
+    },
+    {
+     "q": "What does “under the heart” mean in compatibility?",
+     "a": "In a couple’s matrix, under the heart is the “What connects” point on the relationship line, Lisovskaya’s I. It shows what the couple comes together around: a shared home, a business, a road, a hobby. It is the union’s positive potential."
+    },
+    {
+     "q": "Which lines are read in a compatibility matrix?",
+     "a": "In a couple’s matrix three lines are read: the karmic tail line — the couple’s tasks, the finance line — the union’s money potential, and the relationship line — how the two reach agreement and respect each other. The parent–child line here speaks of the couple as parents. Lisovskaya does not count the male and female ancestral lines in a couple’s matrix."
+    },
+    {
+     "q": "Which arcana are compatible?",
+     "a": "A couple’s matrix does not put the question that way. Tables like “6 goes with 2, 4 and 14” compare arcana, not people. Compatibility here is a separate chart of two dates, and each arcanum in it describes what the union rests on and where it stumbles, but gives no grades and no percentages."
+    },
+    {
+     "q": "If both partners have the same arcanum, will it be in the couple’s matrix?",
+     "a": "Not in the same point — never. A couple’s point is the sum of the partners’ points: if both have 7 in the centre, the couple’s centre is 14, and two 12s give 24, that is, a 6. That is why personal readings are not carried over to the couple’s matrix, and the same number in a personal chart and in a couple’s chart is read differently."
+    }
    ]
   },
   {
@@ -1208,7 +1513,7 @@
     {
      "h2": "Why search shows more triples than the calculator produces",
      "paragraphs": [
-      "Search mixes several different things together: tails from different schools, programs from other places in the chart, combinations with no position at all, and various reorderings of one set. A popular query on its own is therefore no proof that such a triple can appear on the lower ray in Arcana Sense. Our closed list comes not from an SEO table but from running real dates through the M–N–D formula.",
+      "Search mixes several different things together: tails from different schools, programs from other places in the chart, combinations with no position at all, and various reorderings of one set. A popular query on its own is therefore no proof that such a triple can appear on the lower ray in Arcana Sense. Our closed list comes not from an SEO table but from running real dates through the M–N–D formula. Some triples in search are couple tails: a compatibility matrix has 97 of them, and 71 never occur in one person. They are covered in the article [“Karmic compatibility”](/karmic-compatibility).",
       "That is why the Arcana Sense encyclopedia publishes only the 26 sequences the current formula really produces. A wider list of keywords does not automatically become a list of pages in the product. If a similar triple belongs to another position or another system of calculation, it cannot be offered to a person as a result of this matrix, or called an alternative way of writing their tail."
      ]
     },

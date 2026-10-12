@@ -13,7 +13,7 @@ def test_created_at_carries_timezone(client, auth):
     matrix = client.post("/api/matrices", json={"birth": "1987-06-14", "sex": "m"},
                          headers=headers).json()
     assert _parsed(matrix["created_at"]).tzinfo is not None
-    item = client.get("/api/matrices", headers=headers).json()["items"][0]
+    item = client.get("/api/readings?product=personal", headers=headers).json()["items"][0]
     assert _parsed(item["created_at"]).tzinfo is not None
 
 

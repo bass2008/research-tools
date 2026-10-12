@@ -29,6 +29,24 @@ CATEGORIES = {
         "query": lambda k: f"destiny matrix {k}",
         "waite": True,
     },
+    "compatibility-arcana": {
+        "source": lambda k: load(f"{ROOT}/tools/seo/content/ru/compatibility-arcana/{k}.json"),
+        "result": f"{ROOT}/tools/seo/content/en/compatibility-arcana/{{}}.json",
+        "query": lambda k: f"destiny matrix compatibility {k}",
+        "waite": False,
+    },
+    "compatibility-hub": {
+        "source": lambda k: load(f"{ROOT}/tools/seo/content/ru/category-hubs/compatibility.json"),
+        "result": f"{ROOT}/tools/seo/content/en/category-hubs/compatibility.json",
+        "query": lambda k: "destiny matrix compatibility arcana",
+        "waite": False,
+    },
+    "hubs": {
+        "source": lambda k: load(f"{ROOT}/tools/seo/content/ru/hubs/{k}.json"),
+        "result": f"{ROOT}/tools/seo/content/en/hubs/{{}}.json",
+        "query": lambda k: load(f"{ROOT}/tools/seo/content/en/hubs/{k}.json")["seo"]["queries"][0],
+        "waite": False,
+    },
     "chakras": {
         "source": lambda k: {f: v for f, v in load(f"{ROOT}/tools/seo/content/ru/chakras/{k}.json").items() if f in build.CHAKRA_ARTICLE},
         "result": "/home/sergey/Personal/chakra-en/{}.json",

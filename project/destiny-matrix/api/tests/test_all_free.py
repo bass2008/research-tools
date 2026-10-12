@@ -39,7 +39,7 @@ def test_storage_limit_lifted(client, auth, all_free):
         created = client.post("/api/matrices", json={"birth": f"1987-06-0{day}", "sex": "f"},
                               headers=headers)
         assert created.status_code == 200, created.text
-    assert len(client.get("/api/matrices", headers=headers).json()["items"]) == 4
+    assert len(client.get("/api/readings?product=personal", headers=headers).json()["items"]) == 4
 
 
 def test_second_matrix_needs_right_without_flag(client, auth):

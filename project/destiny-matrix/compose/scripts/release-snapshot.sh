@@ -21,10 +21,15 @@ import sqlite3
 
 db = sqlite3.connect("/srv/api/var/api.db")
 db.row_factory = sqlite3.Row
-tables = ("users", "matrices", "payments", "entitlements", "report_jobs")
+have = {row[0] for row in db.execute("select name from sqlite_master where type = 'table'")}
+# Снимок «до» релиза с миграцией 001 снимается со старой схемы (matrices, оплаты в payments),
+# «после» — с новой (readings, оплаты в purchases): считаем то, что есть.
+dates = "readings" if "readings" in have else "matrices"
+orders = "purchases" if "purchases" in have else "payments"
+tables = [name for name in ("users", dates, "purchases", "payments", "entitlements", "report_jobs") if name in have]
 counts = {name: db.execute(f"select count(*) from {name}").fetchone()[0] for name in tables}
 paid = db.execute(
-    "select count(*) from payments where paid_at is not null and refunded_at is null"
+    f"select count(*) from {orders} where paid_at is not null and refunded_at is null"
 ).fetchone()[0]
 pending = db.execute(
     "select count(*) from payments where paid_at is null and refunded_at is null "

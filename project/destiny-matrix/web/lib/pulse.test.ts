@@ -56,13 +56,13 @@ describe("оценка состояния", () => {
     expect(troubles(same)).toEqual(["диск занят на 90%"]);
   });
 
-  it("видит упавшую печать и застрявшие платежи при здоровой машине", () => {
+  it("видит упавшую печать и незавершённые платежи при здоровой машине", () => {
     const bad = {
       ...calm,
       print: { active: 0, waiting: 0, failures_hour: 2 },
       payments: { stuck: 3 },
     };
-    expect(troubles(bad)).toEqual(["печать падала 2 раз за час", "платежей застряло: 3"]);
+    expect(troubles(bad)).toEqual(["печать падала 2 раз за час", "Незавершённые платежи: 3"]);
     expect(worst(bad)).toBe("warn");
   });
 

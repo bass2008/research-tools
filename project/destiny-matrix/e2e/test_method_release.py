@@ -31,8 +31,10 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
         "Вход денежной линии": 8,
         "Вход линии отношений": 15,
     }
+    main_points = page.locator(".panel").filter(has=page.get_by_role("heading", name="Главные точки", exact=True))
+    expect(main_points).to_have_count(1)
     for label, value in expected_main.items():
-        card = page.locator(f'.mpc[data-position="{label}"]')
+        card = main_points.locator(f'.mpc[data-position="{label}"]')
         expect(card).to_have_attribute("data-arcanum", str(value))
 
     artifact_dir = os.environ.get("UNIFIED_RELEASE_ARTIFACT_DIR")

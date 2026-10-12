@@ -20,7 +20,8 @@ from . import access, reports
 from .config import settings
 from .i18n import current_locale, using_locale
 from .db import SessionLocal
-from .models import ReportJob, SavedMatrix, User, as_utc, utcnow
+from . import products
+from .models import Reading, ReportJob, User, as_utc, utcnow
 from .store import store
 from .security import create_print_token
 
@@ -33,14 +34,15 @@ _lock = threading.Lock()
 _report_locks: dict[tuple[int, int, str], tuple[threading.Lock, int]] = {}
 
 # Bump when the printed content changes: older PDFs are reprinted on the next owner download,
-# historical objects stay. v2: internal print Host links; v3: rewritten chakra readings.
-PDF_REVISION = "v6"
+# historical objects stay. v2: internal print Host links; v3: rewritten chakra readings;
+# v7: no access label in the file; v8: full couple corpus, couple links to the document's language.
+PDF_REVISION = "v9"
 
 
 @contextmanager
-def exclusive(user_id: int, matrix_id: int):
+def exclusive(user_id: int, reading_id: int):
     """One report operation across HTTP threads and the warmup thread of this API process."""
-    key = (user_id, matrix_id, current_locale())
+    key = (user_id, reading_id, current_locale())
     with _lock:
         mutex, users = _report_locks.get(key, (threading.Lock(), 0))
         _report_locks[key] = (mutex, users + 1)
@@ -88,11 +90,11 @@ def available(db: Session, row: ReportJob) -> bool:
     return False
 
 
-def ready(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
+def ready(db: Session, user_id: int, reading_id: int) -> ReportJob | None:
     """Готовый файл, если он и правда существует. Хранилище чистит отчёты по сроку, а запись
     остаётся `done` — без этой проверки кнопка отдала бы ссылку на удалённый объект."""
     row = db.scalars(select(ReportJob)
-                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id, ReportJob.locale == current_locale(),
+                     .where(ReportJob.user_id == user_id, ReportJob.reading_id == reading_id, ReportJob.locale == current_locale(),
                             ReportJob.status == "done")
                      .order_by(ReportJob.id.desc())).first()
     if row is None:
@@ -127,18 +129,25 @@ def expire_stale(db: Session) -> int:
     return changed
 
 
-def running(db: Session, user_id: int, matrix_id: int) -> ReportJob | None:
-    """Печать этой же матрицы, уже запущенная кем-то. Задачу старше окна печати считаем брошенной:
+def running(db: Session, user_id: int, reading_id: int) -> ReportJob | None:
+    """Печать этого же разбора, уже запущенная кем-то. Задачу старше окна печати считаем брошенной:
     браузер мог умереть, и ждать её бессмысленно."""
     expire_stale(db)
     row = db.scalars(select(ReportJob)
-                     .where(ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id, ReportJob.locale == current_locale(),
+                     .where(ReportJob.user_id == user_id, ReportJob.reading_id == reading_id, ReportJob.locale == current_locale(),
                             ReportJob.status == "running")
                      .order_by(ReportJob.id.desc())).first()
     return row
 
 
-def run(db: Session, user_id: int, matrix_id: int) -> ReportJob:
+def print_url(reading: Reading, token: str) -> str:
+    """Адрес страницы печати: у каждого продукта своя, номер разбора — в её параметре."""
+    product = products.PRODUCTS[reading.product]
+    return (f"{settings.web_internal_url.rstrip('/')}{product.print_path}"
+            f"?{product.print_param}={reading.id}&t={token}&lang={current_locale()}")
+
+
+def run(db: Session, user_id: int, reading_id: int) -> ReportJob:
     """Напечатать и положить файл в хранилище. Задача в очереди нужна админу: видно, что печатали,
     сколько это заняло и что упало."""
     global _active, _waiting
@@ -153,15 +162,13 @@ def run(db: Session, user_id: int, matrix_id: int) -> ReportJob:
         raise Busy("все места печати заняты")
     with _lock:
         _active += 1
-    job = ReportJob(user_id=user_id, matrix_id=matrix_id, locale=current_locale(), status="running", started_at=utcnow())
+    job = ReportJob(user_id=user_id, reading_id=reading_id, locale=current_locale(), status="running", started_at=utcnow())
     db.add(job)
     db.commit()
     db.refresh(job)
     try:
-        token = create_print_token(matrix_id, user_id)
-        url = f"{settings.web_internal_url.rstrip('/')}/print/report?m={matrix_id}&t={token}&lang={current_locale()}"
-        pdf = reports.render(url)
-        key = f"{PDF_REVISION}/{user_id}/{matrix_id}/{current_locale()}/{job.id}.pdf"
+        pdf = reports.render(print_url(db.get(Reading, reading_id), create_print_token(reading_id, user_id)))
+        key = f"{PDF_REVISION}/{user_id}/{reading_id}/{current_locale()}/{job.id}.pdf"
         reports.upload(key, pdf)
     except Exception as exc:                       # noqa: BLE001
         job.status = "failed"
@@ -182,29 +189,29 @@ def run(db: Session, user_id: int, matrix_id: int) -> ReportJob:
     return job
 
 
-def _warm(user_id: int, matrix_id: int, locale: str) -> None:
+def _warm(user_id: int, reading_id: int, locale: str) -> None:
     with using_locale(locale), SessionLocal() as db:
         try:
-            with exclusive(user_id, matrix_id):
+            with exclusive(user_id, reading_id):
                 user = db.get(User, user_id)
-                row = db.get(SavedMatrix, matrix_id)
+                row = db.get(Reading, reading_id)
                 if user is None or row is None or row.user_id != user_id:
                     return
-                if not access.unlocked_matrix(db, user, matrix_id):
+                if not access.can_open(db, user, row):
                     return
-                if ready(db, user_id, matrix_id) is not None:
+                if ready(db, user_id, reading_id) is not None:
                     return
-                if running(db, user_id, matrix_id) is not None:
+                if running(db, user_id, reading_id) is not None:
                     return
-                job = run(db, user_id, matrix_id)
-            log.info("прогрет разбор матрицы %s: %s Б за %s c", matrix_id, job.size_bytes,
+                job = run(db, user_id, reading_id)
+            log.info("прогрет разбор %s: %s Б за %s c", reading_id, job.size_bytes,
                      job.seconds())
         except Exception as exc:                   # noqa: BLE001
             # прогрев — удобство, а не обязательство: его отказ не должен ломать оплату
-            log.warning("прогрев разбора матрицы %s не удался: %s", matrix_id, exc)
+            log.warning("прогрев разбора %s не удался: %s", reading_id, exc)
         finally:
             with _lock:
-                _started.discard((user_id, matrix_id, locale))
+                _started.discard((user_id, reading_id, locale))
 
 
 def pending() -> int:
@@ -232,19 +239,19 @@ REPRINT_ATTEMPTS = 3
 REPRINT_PAUSE_SECONDS = 20
 
 
-def _reprint(user_id: int, matrix_id: int, locale: str) -> bool:
+def _reprint(user_id: int, reading_id: int, locale: str) -> bool:
     current = f"{PDF_REVISION}/%"
     with using_locale(locale), SessionLocal() as db:
         try:
-            with exclusive(user_id, matrix_id):
-                group = (ReportJob.user_id == user_id, ReportJob.matrix_id == matrix_id,
+            with exclusive(user_id, reading_id):
+                group = (ReportJob.user_id == user_id, ReportJob.reading_id == reading_id,
                          ReportJob.locale == locale, ReportJob.status == "done")
                 user = db.get(User, user_id)
-                if (user is not None and access.unlocked_matrix(db, user, matrix_id)
+                if (user is not None and access.unlocked(db, user, reading_id)
                         and db.scalars(select(ReportJob.id).where(*group, ReportJob.object_key.like(current))).first() is None
-                        and running(db, user_id, matrix_id) is None):
-                    job = run(db, user_id, matrix_id)
-                    log.info("перепечатан разбор матрицы %s: %s Б за %s c", matrix_id, job.size_bytes, job.seconds())
+                        and running(db, user_id, reading_id) is None):
+                    job = run(db, user_id, reading_id)
+                    log.info("перепечатан разбор %s: %s Б за %s c", reading_id, job.size_bytes, job.seconds())
                 # Expire only after a successful reprint: a failed one stays stale and is retried next start.
                 for old in db.scalars(select(ReportJob).where(*group, ReportJob.object_key.not_like(current))).all():
                     old.status = "expired"
@@ -252,7 +259,7 @@ def _reprint(user_id: int, matrix_id: int, locale: str) -> bool:
                 db.commit()
             return True
         except Exception as exc:                   # noqa: BLE001
-            log.warning("перепечатка разбора матрицы %s не удалась: %s", matrix_id, exc)
+            log.warning("перепечатка разбора %s не удалась: %s", reading_id, exc)
             return False
 
 
@@ -271,7 +278,7 @@ def stale() -> list[tuple[int, int, str]]:
         return []
     try:
         with SessionLocal() as db:
-            groups = db.execute(select(ReportJob.user_id, ReportJob.matrix_id, ReportJob.locale).distinct()
+            groups = db.execute(select(ReportJob.user_id, ReportJob.reading_id, ReportJob.locale).distinct()
                                 .where(ReportJob.status == "done",
                                        ReportJob.object_key.not_like(f"{PDF_REVISION}/%"))).all()
     except Exception as exc:                       # noqa: BLE001
@@ -290,14 +297,14 @@ def reprint_stale() -> int:
     return len(groups)
 
 
-def warm(user_id: int, matrix_id: int | None) -> bool:
+def warm(user_id: int, reading_id: int | None) -> bool:
     """Поставить печать в фон сразу после оплаты. Возвращает, взялись ли за работу."""
-    if matrix_id is None or not settings.print_warmup or not settings.pdf_enabled:
+    if reading_id is None or not settings.print_warmup or not settings.pdf_enabled:
         return False
     locale = current_locale()
     with _lock:
-        if (user_id, matrix_id, locale) in _started:
+        if (user_id, reading_id, locale) in _started:
             return False
-        _started.add((user_id, matrix_id, locale))
-    _pool.submit(_warm, user_id, matrix_id, locale)
+        _started.add((user_id, reading_id, locale))
+    _pool.submit(_warm, user_id, reading_id, locale)
     return True

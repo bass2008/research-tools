@@ -6,13 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..i18n import say
-from .. import access, printing, reports, tariffs
+from ..i18n import say, say_for
+from .. import access, printing, products, readings, reports
 from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import ReportJob, SavedMatrix, User, default_title, utcnow
+from ..models import Reading, ReportJob, User, utcnow
 from ..schemas import ReportRequest
 from ..security import create_print_token, read_file_token, read_print_token
 from ..store import disposition, store
@@ -20,16 +20,10 @@ from ..store import disposition, store
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
-def _own_matrix(db: Session, user: User, matrix_id: int) -> SavedMatrix:
-    row = db.get(SavedMatrix, matrix_id)
-    if row is None or row.user_id != user.id:
-        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
-    return row
-
-
-def _filename(row: SavedMatrix) -> str:
-    """Имя файла в загрузках: дата разбора, а не номер задачи печати."""
-    return f"{default_title(row.birth)}.pdf".replace("/", "-")
+def _filename(row: Reading) -> str:
+    """Имя файла в загрузках: подпись разбора, а не номер задачи печати."""
+    product = products.PRODUCTS[row.product]
+    return f"{product.default_title(row.data())}.pdf".replace("/", "-")
 
 
 def _wait_for(db: Session, job: ReportJob) -> ReportJob | None:
@@ -68,25 +62,28 @@ def file(token: str = Query(..., min_length=16)) -> Response:
 @router.post("/render")
 def render(payload: ReportRequest, user: User = Depends(current_user),
            db: Session = Depends(get_db)) -> dict:
+    reading_id = payload.reading_id if payload.reading_id is not None else payload.matrix_id
+    if reading_id is None:
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
     try:
-        with printing.exclusive(user.id, payload.matrix_id):
+        with printing.exclusive(user.id, reading_id):
             # A preceding operation may have completed while this request waited.
             db.expire_all()
-            return _render(payload, user, db)
+            return _render(reading_id, payload.fresh, user, db)
     except printing.Busy as exc:
         raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
                                      detail=lambda: say("report.print_busy")) from exc
 
 
-def _render(payload: ReportRequest, user: User, db: Session) -> dict:
+def _render(reading_id: int, fresh: bool, user: User, db: Session) -> dict:
     """Синхронно: пока запрос идёт, PDF печатается. Задача в очереди нужна не клиенту, а админу —
     видеть, что печатали, сколько это заняло и что упало."""
-    row = _own_matrix(db, user, payload.matrix_id)
-    if not access.unlocked_matrix(db, user, row.id):
+    row = readings.own(db, user, reading_id)
+    if not access.can_open(db, user, row):
         raise LocalizedHTTPException(status.HTTP_402_PAYMENT_REQUIRED,
-                            detail=lambda: say("report.not_paid"))
+                            detail=lambda: say_for("report.not_paid", row.product))
 
-    done = None if payload.fresh else printing.ready(db, user.id, row.id)
+    done = None if fresh else printing.ready(db, user.id, row.id)
     if done is not None and done.object_key:
         # тот же файл, а не новая печать: повторное нажатие не должно ни ждать, ни платить CPU
         return {"job_id": done.id, "status": "done", "cached": True,
@@ -121,34 +118,26 @@ def _render(payload: ReportRequest, user: User, db: Session) -> dict:
             "seconds": job.seconds()}
 
 
-@router.get("/page/{matrix_id}")
-def page(matrix_id: int, t: str = Query(..., description="print-токен"),
+@router.get("/page/{reading_id}")
+def page(reading_id: int, t: str = Query(..., description="print-токен"),
          db: Session = Depends(get_db)) -> dict:
-    """Данные для страницы печати. Пропуск годится только на одну матрицу и живёт минуту,
+    """Данные для страницы печати. Пропуск годится только на один разбор и живёт минуту,
     поэтому куку владельца браузерному сервису отдавать не нужно."""
     read = read_print_token(t)
     if read is None:
         raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("report.pass_invalid"))
     user_id, allowed = read
-    if allowed != matrix_id:
+    if allowed != reading_id:
         raise LocalizedHTTPException(status.HTTP_403_FORBIDDEN, detail=lambda: say("report.pass_other_matrix"))
     user = db.get(User, user_id)
     if user is None:
         raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("report.pass_invalid"))
-    row = _own_matrix(db, user, matrix_id)
-    # страница печати считает матрицу сама, как и обычный разбор: ей нужны дата, пол и признак
+    row = readings.own(db, user, reading_id)
+    # страница печати считает разбор сама, как и обычная страница: ей нужны ввод и признак
     # оплаты, а не готовые разделы
-    unlocked = access.unlocked_matrix(db, user, row.id)
-    plan = tariffs.get(db, tariffs.SINGLE_ID)
-    # Название плана берётся из тарифа только там, где тарифы и правда показываются: на витрине
-    # без кассы их имена остаются русскими из посевной таблицы, и они уезжали в шапку PDF.
-    if not unlocked:
-        plan_name = say("report.plan_free")
-    elif plan and not settings.all_free_without_payment:
-        plan_name = plan.public()["name"]
-    else:
-        plan_name = say("report.plan_full")
-    return {**row.item(), "unlocked": unlocked, "plan": plan_name}
+    rights = access.active_rights(db, user)
+    unlocked = access.can_open(db, user, row, rights=rights)
+    return {**row.item(), "unlocked": unlocked, "plan": access.plan_label(db, rights, row)}
 
 
 @router.get("")

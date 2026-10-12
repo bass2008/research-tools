@@ -95,17 +95,17 @@ def test_legal_translation_keeps_international_document(page, path, title):
     page.context.add_cookies([{"name": "arcana_locale", "value": "en", "url": BASE}])
     page.goto(BASE + "/" + path)
     original_headings = page.locator("h2").all_text_contents()
-    expect(page.locator("main")).to_contain_text("20 September 2026")
+    expect(page.locator("main")).to_contain_text("11 October 2026")
     assert not re.search("[А-Яа-я]", page.locator("main").inner_text())
     switch(page, "ru")
     expect(page.locator("h1")).to_have_text(title)
-    expect(page.locator("main")).to_contain_text("20 сентября 2026")
+    expect(page.locator("main")).to_contain_text("11 октября 2026")
     assert len(page.locator("h2").all_text_contents()) == len(original_headings)
     text = page.locator("main").inner_text()
     assert "ИНН" not in text and "ОГРНИП" not in text and "September" not in text
     assert "Arcana Sense" in text
     switch(page, "en")
-    expect(page.locator("main")).to_contain_text("20 September 2026")
+    expect(page.locator("main")).to_contain_text("11 October 2026")
     assert page.locator("h2").all_text_contents() == original_headings
 
 
@@ -116,7 +116,7 @@ def test_provider_error_switches_without_repeating_payment(page, mail):
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill(mail)
     page.get_by_test_id("pay-password").fill("123")
-    page.locator(".consent input").check()
+    flows.agree(page)
     messages = {"ru": "Платёжный провайдер отклонил запрос (код 123).",
                 "en": "The payment provider rejected the request (code 123)."}
     calls = []
@@ -148,8 +148,8 @@ def test_legal_public_html_uses_domain_language(path, host, locale):
         main = unescape(re.sub(r"<[^>]+>", " ", main))
         if locale == "en":
             assert not re.search("[А-Яа-я]", main), main
-            assert "20 September 2026" in main
+            assert "11 October 2026" in main
         else:
-            assert "20 сентября 2026" in main
+            assert "11 октября 2026" in main
             assert "ИП Бородаенко" in main
         assert f'href="https://{host}{path}"' in html

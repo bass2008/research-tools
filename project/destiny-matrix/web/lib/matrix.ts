@@ -229,11 +229,17 @@ export const forLocale = localized((L: Locale) => {
     if (isAfter(parts, todayParts())) throw new MatrixError(D.calc.errors.future[L], D.calc.errors.future);
     if (parts.year < 1900) throw new MatrixError(D.calc.errors.tooOld[L], D.calc.errors.tooOld);
 
-    const m = { birth: toIso(parts), sex } as Matrix;
+    return fromPoints(fold(parts.day), fold(parts.month), foldYear(parts.year), toIso(parts), sex);
+  }
 
-    m.day = fold(parts.day);
-    m.month = fold(parts.month);
-    m.year = foldYear(parts.year);
+  /** Матрица по трём уже свёрнутым числам дня, месяца и года. Так же строится матрица на
+   *  «дату» из сложения двух дат (совместимость в работе), где месяц не ограничен двенадцатью. */
+  function fromPoints(day: number, month: number, year: number, birth: string, sex: Sex = "f"): Matrix {
+    const m = { birth, sex } as Matrix;
+
+    m.day = day;
+    m.month = month;
+    m.year = year;
     m.mission = fold(m.day + m.month + m.year);
     m.center = fold(m.day + m.month + m.year + m.mission);
 
@@ -284,8 +290,8 @@ export const forLocale = localized((L: Locale) => {
     for (const p of m.age_scale) out.push(p.arcanum);
     return out;
   }
-  return { ARCANA_MAX, MONTHS_ACC, birthLabel, sexLabel, CHAKRAS, fold, digitSum, foldYear, parseBirth, daysInMonth, isRealDate, toIso, calculate, values };
+  return { ARCANA_MAX, MONTHS_ACC, birthLabel, sexLabel, CHAKRAS, fold, digitSum, foldYear, parseBirth, daysInMonth, isRealDate, toIso, calculate, fromPoints, values };
 });
 
 // Compatibility for callers that explicitly use the deployment default.
-export const { ARCANA_MAX, MONTHS_ACC, birthLabel, sexLabel, CHAKRAS, fold, digitSum, foldYear, parseBirth, daysInMonth, isRealDate, toIso, calculate, values } = forLocale(defaultLocale);
+export const { ARCANA_MAX, MONTHS_ACC, birthLabel, sexLabel, CHAKRAS, fold, digitSum, foldYear, parseBirth, daysInMonth, isRealDate, toIso, calculate, fromPoints, values } = forLocale(defaultLocale);

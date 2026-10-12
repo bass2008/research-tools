@@ -139,8 +139,16 @@ function deliver(s: Sentry, item: Item): void {
   s.captureException(error, { level: item.level, tags: item.tags, extra: item.extra, fingerprint: item.fingerprint });
 }
 
+// Поисковые роботы рендерят страницы и обрывают фоновые запросы: в Hawk это шло пачками
+// NetworkError, хотя у людей всё работало. HeadlessChrome — это наши прогоны, его не отсекаем.
+const BOT = /bot\b|bot\/|crawler|spider|slurp|bingpreview|facebookexternalhit/i;
+
+export function isBot(ua: string): boolean {
+  return BOT.test(ua);
+}
+
 export function queueItem(item: Omit<Item, "at">): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || isBot(navigator.userAgent)) return;
   const key = (item.fingerprint ?? [item.name, item.message]).join("|");
   const now = Date.now();
   if (now - (lastSent.get(key) ?? -Infinity) < REPEAT_MS) return;
@@ -236,7 +244,7 @@ if (typeof window !== "undefined") {
 }
 
 export function startErrorReports(dsn: string | undefined, release?: string): void {
-  if (!dsn || started || typeof window === "undefined") return;
+  if (!dsn || started || typeof window === "undefined" || isBot(navigator.userAgent)) return;
   started = true;
   let attempts = 0;
   const load = (): void => {

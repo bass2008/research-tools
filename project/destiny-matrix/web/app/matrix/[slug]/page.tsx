@@ -1,10 +1,11 @@
 import { requestSite } from "@/lib/siteProfile.server";
+import { cardColumns } from "@/lib/cardColumns";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraTable from "@/components/matrix/ChakraTable";
 import Octagram from "@/components/matrix/Octagram";
 import chakraMapStyles from "@/components/matrix/ChakraMapHover.module.css";
 import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
-import Price from "@/components/pay/Price";
+import Price, { OfferText } from "@/components/pay/Price";
 import Crumbs from "@/components/ui/Crumbs";
 import JsonLd from "@/components/ui/JsonLd";
 import { ALL_FREE } from "@/lib/access";
@@ -240,19 +241,16 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
 
         <h2 className="section-gap">{D.matrixPages.readingHere[L]}</h2>
         <p className="dim">
-          {ALL_FREE ? (
-            <>{D.matrixPages.allOpenFree[L](free.length)}</>
-          ) : (
-            <>
-              {D.matrixPages.freeOpenPaidTail[L](paid.length)} <Price locale={L} />.
-            </>
-          )}
+          <OfferText free={D.matrixPages.allOpenFree[L](free.length)}
+            subscription={D.matrixPages.freeOpenSubscribedTail[L](paid.length)}>
+            {D.matrixPages.freeOpenPaidTail[L](paid.length)} <Price locale={L} />.
+          </OfferText>
         </p>
         {free.map((s) => (
           <div className="panel section-gap" key={s.key}>
             <h3>{s.title}</h3>
             <div className="cap">{s.lead}</div>
-            <ul className="poslist">
+            <ul className="poslist" style={cardColumns(s.positions.length)}>
               {s.positions.map((p) => (
                 <li key={p.label}>
                   <Link className="bub g" href={p.href}>
@@ -353,11 +351,9 @@ export default async function MatrixPage({ params }: { params: Promise<Params> }
           <h2>{D.matrixPages.yoursMayDiffer[L]}</h2>
           <p>
             {D.matrixPages.yoursMayDifferText[L](slug)}{" "}
-            {ALL_FREE ? (
-              <>{D.matrixPages.chartAndAllOpen[L]}</>
-            ) : (
-              <>{D.matrixPages.chartAndTwoOpen[L]} <Price locale={L} />.</>
-            )}
+            <OfferText free={D.matrixPages.chartAndAllOpen[L]} subscription={D.matrixPages.chartAndTwoOpenSubscribed[L]}>
+              {D.matrixPages.chartAndTwoOpen[L]} <Price locale={L} />.
+            </OfferText>
           </p>
           <Link className="btn" href="/#calc">
             {D.matrixPages.calcMine[L]}

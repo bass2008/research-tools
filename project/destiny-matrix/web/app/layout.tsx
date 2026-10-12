@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <LocaleProvider locale={L} site={site}>
-          <TariffsProvider locale={L}>
+          <TariffsProvider product="personal" locale={L}>
             <Header locale={L} />
             {children}
             <Footer locale={L} />

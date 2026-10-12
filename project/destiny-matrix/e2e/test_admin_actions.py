@@ -80,7 +80,9 @@ def test_admin_grants_a_matrix_and_it_is_open_but_not_bought(page, mail):
     dialog.get_by_test_id("grant-year").select_option("1984")
     dialog.get_by_test_id("grant-sex-m").click()
     dialog.get_by_test_id("grant-submit").click()
-    expect(row.get_by_test_id("grant-done")).to_be_visible(timeout=20_000)
+    # итог выдачи — строкой над таблицей: в закреплённой колонке он закрывал «Доступ» у всех строк
+    expect(page.get_by_test_id("admin-notices").get_by_test_id("grant-done")).to_be_visible(timeout=20_000)
+    expect(page.get_by_test_id("admin-notices")).to_contain_text(mail)
 
     flows.logout(page)
     flows.login(page, mail)
@@ -89,7 +91,7 @@ def test_admin_grants_a_matrix_and_it_is_open_but_not_bought(page, mail):
     body = page.inner_text("main")
     assert "17 марта 1984" in body, f"выданной даты нет в кабинете: {body[:200]}"
     granted = page.locator(".matrow", has_text="17 марта 1984").first
-    assert "открыта" in granted.inner_text().lower(), granted.inner_text()
+    assert "выдана" in granted.inner_text().lower(), granted.inner_text()
     assert "куплена" not in granted.inner_text().lower(), \
         f"подарок выглядит купленным: {granted.inner_text()}"
     # у купленной метка остаётся прежней — две строки в списке не должны слиться в одну

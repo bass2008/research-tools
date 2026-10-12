@@ -1,7 +1,7 @@
 """Сохранённые матрицы: хранение — отдельное право, доступ к разбору — тоже."""
 from sqlalchemy import select
 
-from app.models import SavedMatrix
+from app.models import Reading
 
 BIRTH = {"birth": "1987-06-14", "sex": "m"}
 
@@ -17,7 +17,7 @@ def test_create_and_read_back(client, auth):
 
     again = client.get(f"/api/matrices/{body['id']}", headers=headers).json()
     assert again["id"] == body["id"] and again["birth"] == body["birth"]
-    assert client.get("/api/matrices", headers=headers).json()["items"][0]["id"] == body["id"]
+    assert client.get("/api/readings?product=personal", headers=headers).json()["items"][0]["id"] == body["id"]
 
 
 def test_title_defaults_to_date(client, auth):
@@ -26,7 +26,7 @@ def test_title_defaults_to_date(client, auth):
 
 
 def test_no_token_is_401(client):
-    assert client.get("/api/matrices").status_code == 401
+    assert client.get("/api/readings?product=personal").status_code == 401
     assert client.post("/api/matrices", json=BIRTH).status_code == 401
 
 
@@ -58,7 +58,7 @@ def test_month_right_allows_many(client, paid):
         r = client.post("/api/matrices", json={"birth": f"1990-01-0{day}", "sex": "f"},
                         headers=headers)
         assert r.status_code == 200, r.text
-    assert len(client.get("/api/matrices", headers=headers).json()["items"]) == 4
+    assert len(client.get("/api/readings?product=personal", headers=headers).json()["items"]) == 4
 
 
 def test_month_right_unlocks_every_matrix(client, paid):
@@ -93,7 +93,7 @@ def test_future_date_is_400_and_saves_nothing(client, auth, db):
     headers = auth("fut@example.ru")
     r = client.post("/api/matrices", json={"birth": "2999-01-01", "sex": "f"}, headers=headers)
     assert r.status_code == 400 and "будущем" in r.json()["detail"]
-    assert db.scalar(select(SavedMatrix).limit(1)) is None
+    assert db.scalar(select(Reading).limit(1)) is None
 
 
 def test_listing_marks_paid_and_locked_dates(client, db):
@@ -104,7 +104,7 @@ def test_listing_marks_paid_and_locked_dates(client, db):
     bought = paid["matrix"]                       # дату из платежа сервер сохранил сам
     free = client.post("/api/matrices", json={"birth": "1992-02-02", "sex": "f"},
                        headers=headers).json()
-    by_id = {row["id"]: row for row in client.get("/api/matrices", headers=headers).json()["items"]}
+    by_id = {row["id"]: row for row in client.get("/api/readings?product=personal", headers=headers).json()["items"]}
     assert by_id[bought["id"]]["access"] == "forever"
     assert by_id[bought["id"]]["access_until"] is None
     assert by_id[free["id"]]["access"] == "locked"
@@ -117,7 +117,7 @@ def test_subscription_marks_every_date_with_end_date(client, db):
     headers = {"Authorization": f"Bearer {paid['token']}"}
     for day in ("01", "02"):
         client.post("/api/matrices", json={"birth": f"1993-03-{day}", "sex": "f"}, headers=headers)
-    rows = client.get("/api/matrices", headers=headers).json()["items"]
+    rows = client.get("/api/readings?product=personal", headers=headers).json()["items"]
     assert [r["access"] for r in rows] == ["subscription", "subscription"]
     assert all(r["access_until"] for r in rows)
 
@@ -129,7 +129,7 @@ def test_rename_matrix(client, auth, db):
                       headers=headers).json()
     named = client.patch(f"/api/matrices/{row['id']}", json={"title": "  Мама  "}, headers=headers)
     assert named.status_code == 200 and named.json()["title"] == "Мама"
-    assert client.get("/api/matrices", headers=headers).json()["items"][0]["title"] == "Мама"
+    assert client.get("/api/readings?product=personal", headers=headers).json()["items"][0]["title"] == "Мама"
 
     reset = client.patch(f"/api/matrices/{row['id']}", json={"title": ""}, headers=headers)
     assert reset.json()["title"] == "Матрица 1 января 1991"

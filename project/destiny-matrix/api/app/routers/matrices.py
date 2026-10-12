@@ -1,113 +1,49 @@
+"""Личные разборы прежним адресом: `/matrices` — это `/readings` продукта `personal`.
+
+Фронт личного разбора и старые вкладки ходят сюда; ответы те же, что и раньше.
+"""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from engine.matrix import calculate
-
-from ..i18n import say, validation_message
-from .. import access, tariffs
-from ..http_errors import LocalizedHTTPException
-from ..config import settings
+from .. import access, products, readings
 from ..db import get_db
 from ..deps import current_user
-from ..models import SavedMatrix, User
+from ..models import User
 from ..schemas import MatrixIn, MatrixTitleIn
 
 router = APIRouter(prefix="/matrices", tags=["matrices"])
 
-def _saved(db: Session, user_id: int) -> int:
-    return int(db.scalar(select(func.count(SavedMatrix.id))
-                         .where(SavedMatrix.user_id == user_id)) or 0)
-
-
-def _needs_storage_right(db: Session, used: int) -> HTTPException:
-    """Слоты кончились: одна дата бесплатно плюс по одной за каждое купленное разовое право.
-
-    Названия тарифов берём из справочника: они живут в базе и меняются без правки кода.
-    """
-    single = next((t for t in tariffs.public_tariffs(db) if access.ALL not in t.scopes()), None)
-    # Про «оплаченные даты» говорить нельзя: чаще всего человек ещё ничего не покупал, и такой
-    # текст читается как отказ в том, за что он уже заплатил.
-    return LocalizedHTTPException(
-        status.HTTP_402_PAYMENT_REQUIRED,
-        detail=lambda: say("matrix.no_slots", used=used,
-                           offer=say("matrix.slots_offer", name=single.public()["name"]) if single else ""),
-    )
-
-
-@router.get("")
-def listing(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
-    rows = db.scalars(
-        select(SavedMatrix).where(SavedMatrix.user_id == user.id).order_by(SavedMatrix.id.desc())
-    ).all()
-    # права читаем один раз на весь список: в кабинете видно, какая дата куплена, какая открыта
-    # подпиской, а какая закрыта
-    rights = access.active_rights(db, user)
-    return {"items": [{**row.item(), **access.matrix_state(rights, row.id)} for row in rows]}
+PERSONAL = products.PRODUCTS[products.PERSONAL]
 
 
 @router.post("")
 def create(payload: MatrixIn, user: User = Depends(current_user),
            db: Session = Depends(get_db)) -> dict:
-    used = _saved(db, user.id)
-    # та же дата второй раз — повторное сохранение, а не новая матрица: слот не тратится
-    row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
-                                             SavedMatrix.birth == payload.birth,
-                                             SavedMatrix.sex == payload.sex))
-    if row is None:
-        if used >= settings.matrices_hard_cap:
-            raise LocalizedHTTPException(
-                status.HTTP_402_PAYMENT_REQUIRED,
-                detail=lambda: say("matrix.hard_cap", cap=settings.matrices_hard_cap))
-        if not access.can_save_more(db, user):
-            raise _needs_storage_right(db, used)
-        try:
-            # движок решает, бывает ли такая дата вообще: будущее и годы до 1900 он не считает
-            calculate(payload.birth, payload.sex)
-        except ValueError as exc:
-            raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST, detail=lambda: validation_message(exc)) from exc
-        row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
-                          title=(payload.title or None))
-
-        db.add(row)
-        db.commit()
-        db.refresh(row)
+    row = readings.create(db, user, PERSONAL, {"birth": payload.birth, "sex": payload.sex},
+                          payload.title)
+    db.commit()
+    db.refresh(row)
     # разовое право могло быть куплено до ввода даты — эта матрица и есть оплаченная;
     # уже открытую дату вторым правом не занимаем
-    if not access.unlocked_matrix(db, user, row.id):
-        access.bind_single(db, user, row.id)
-    return one_body(db, user, row)
-
-
-def one_body(db: Session, user: User, row: SavedMatrix) -> dict:
-    """Карточка матрицы: дата, пол, подпись и права. Разделы сюда не кладём — разбор считает
-    фронт на том же движке, портированном в TypeScript, и второй его экземпляр здесь означал бы
-    два места, куда обязана доехать каждая правка состава разделов."""
-    return {**row.item(), **access.matrix_state(access.active_rights(db, user), row.id),
-            "unlocked": access.unlocked_matrix(db, user, row.id)}
+    if not access.can_open(db, user, row):
+        access.bind_unbound(db, user, row)
+    return readings.card(db, user, row)
 
 
 @router.get("/{matrix_id}")
 def one(matrix_id: int, user: User = Depends(current_user),
         db: Session = Depends(get_db)) -> dict:
-    row = db.get(SavedMatrix, matrix_id)
-    # чужая матрица отдаёт 404, а не 403: существование чужих записей знать незачем
-    if row is None or row.user_id != user.id:
-        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
-    return one_body(db, user, row)
+    return readings.card(db, user, readings.own(db, user, matrix_id, products.PERSONAL))
 
 
 @router.patch("/{matrix_id}")
 def rename(matrix_id: int, payload: MatrixTitleIn, user: User = Depends(current_user),
            db: Session = Depends(get_db)) -> dict:
     """Подписать матрицу. Кроме имени менять нечего: дата и пол — это и есть сама матрица."""
-    row = db.get(SavedMatrix, matrix_id)
-    if row is None or row.user_id != user.id:
-        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("matrix.not_found"))
-    title = (payload.title or "").strip()
-    row.title = title or None
+    row = readings.own(db, user, matrix_id, products.PERSONAL)
+    row.title = (payload.title or "").strip() or None
     db.commit()
     db.refresh(row)
-    return {**row.item(), **access.matrix_state(access.active_rights(db, user), row.id)}
+    return {**row.item(), **access.reading_state(access.active_rights(db, user), row)}

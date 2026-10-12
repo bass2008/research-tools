@@ -35,11 +35,11 @@ TITLE_LIMIT = 70
 
 # Минимумы повторяют загрузчик сайта (web/lib/content.ts): что не проходит здесь, не попадёт на
 # страницу и там — только там об этом узнают после сборки.
-ARTICLE = ("karmic-tails", "year-arcana", "category-hubs", "hubs")
+ARTICLE = ("karmic-tails", "year-arcana", "category-hubs", "hubs", "compatibility-arcana")
 ENRICH = {"arcana": ("arcana.json", "n"), "positions": ("positions.json", "key"),
           "chakras": ("chakras.json", "key")}
 CHAKRA_ARTICLE = ("title", "short", "seo", "intro", "sections", "faq")
-KEY_FIELD = {"year-arcana": "n"}
+KEY_FIELD = {"year-arcana": "n", "compatibility-arcana": "n"}
 
 
 def fail(problems: list[str], where: str, text: str) -> None:
@@ -107,7 +107,7 @@ def trim_description(item: dict, where: str) -> None:
     print(f"  ~ {where}: описание подрезано с {len(text)} до {len(cut)} знаков")
 
 BLOCKS = ("h3", "ul", "ol", "table", "slot", "chakra_reading")
-SLOTS = ("calc",)
+SLOTS = ("calc", "pair")
 # chakra -> triples of the paid-report corpus (chakra-personal.json); filled in main()
 CHAKRA_READINGS: dict[str, set[str]] = {}
 
@@ -330,7 +330,9 @@ def check_chakra_article(item: dict, where: str, base_keys: set, key: str, probl
 def known_paths(lang: str) -> set[str]:
     dst = DST_ROOT / lang
     paths = {"/encyclopedia", "/encyclopedia/arcanum", "/encyclopedia/karmic-tail", "/encyclopedia/combination",
-             "/encyclopedia/position", "/encyclopedia/chakra", "/encyclopedia/chakra/energy-field", "/year"}
+             "/encyclopedia/position", "/encyclopedia/chakra", "/encyclopedia/chakra/energy-field", "/year",
+             "/encyclopedia/compatibility", "/compatibility"}
+    paths |= {f"/encyclopedia/compatibility/{x['n']}" for x in base_items(dst, "compatibility-arcana.json")}
     paths |= {f"/encyclopedia/arcanum/{x['n']}" for x in base_items(dst, "arcana.json")}
     paths |= {f"/year/{x['n']}" for x in base_items(dst, "year-arcana.json")}
     paths |= {f"/encyclopedia/karmic-tail/{x['key']}" for x in base_items(dst, "karmic-tails.json")}

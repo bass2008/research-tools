@@ -16,6 +16,11 @@ export interface Tariff {
   scope: string[];
   /** null — бессрочно */
   period_days: number | null;
+  /** продукты предложения; "*" — все, включая будущие */
+  products?: string[];
+  /** право на один разбор; иначе — на любые разборы этих продуктов (подписка) */
+  per_reading?: boolean;
+  store_unlimited?: boolean;
 }
 
 /** A locale-bound view; safe to use alongside other languages. */
@@ -46,6 +51,7 @@ export const forLocale = localized((L: Locale) => {
   function capLabel(t: Tariff): string {
     // срок в тарифе — это подписка: доступ живёт, пока она активна
     if (t.period_days !== null) return D.pay.subscription[L];
+    if (t.products?.length === 1 && t.products[0] === "pair") return D.pay.onePairCap[L];
     return t.scope.includes("all") ? D.pay.anyDates[L] : D.pay.oneDate[L];
   }
 

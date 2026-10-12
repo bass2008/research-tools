@@ -33,7 +33,7 @@ def test_registration_replaces_the_form_in_browser_history(page: Page):
     page.get_by_test_id("nav-register").click()
     page.get_by_test_id("auth-email").fill(_mail("history"))
     page.get_by_test_id("auth-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("auth-submit").click()
     page.wait_for_url(f"{BASE}/account")
 
@@ -63,7 +63,7 @@ def test_failed_auth_returns_focus_to_an_editable_field(page: Page):
     email = page.get_by_test_id("auth-email")
     email.fill(known)
     page.get_by_test_id("auth-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("auth-submit").click()
     expect(page.locator(".err")).to_be_visible()
     assert page.evaluate("document.activeElement?.id") == "email"
@@ -118,13 +118,14 @@ def test_refunded_date_keeps_the_exact_payment_target(page: Page):
     expect(buy).to_be_visible()
     # Пока не приехал прайс, кнопка живёт как `button` без адреса: чтение атрибута сразу после
     # появления давало плавающее падение под нагрузкой полного прогона.
-    expect(buy).to_have_attribute("href", f"/pay?m={bought_id}", timeout=15_000)
+    expect(buy).to_have_attribute("href", f"/pay?for=personal&m={bought_id}", timeout=15_000)
 
     buy.click()
-    page.wait_for_url(re.compile(rf"/pay\?m={bought_id}$"))
-    expect(page.get_by_test_id("pay-target")).to_have_value(str(bought_id))
+    page.get_by_test_id("plan-single").click()
+    page.wait_for_url(re.compile(rf"/pay/single\?m={bought_id}$"))
+    expect(page.get_by_test_id("pay-target")).to_have_attribute("data-value", str(bought_id))
 
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     expect(page.get_by_test_id("paid-matrix")).to_be_visible(timeout=30_000)
     assert "5 мая 1985" in page.get_by_test_id("paid-matrix").inner_text()
@@ -214,12 +215,12 @@ def test_pay_link_shows_loading_before_it_decides_the_date_is_missing(page: Page
     pending = []
 
     def hold(route):
-        if route.request.url.rstrip("/").endswith("/api/matrices"):
+        if "/api/readings?product=personal" in route.request.url:
             pending.append(route)
             return
         route.continue_()
 
-    page.route("**/api/matrices*", hold)
+    page.route("**/api/readings*", hold)
     page.goto(f"{BASE}/pay?m={matrix_id}", wait_until="domcontentloaded")
     expect(page.get_by_test_id("pay-target-loading")).to_be_visible(timeout=10_000)
     assert page.get_by_test_id("pay-missing-note").count() == 0
@@ -231,5 +232,5 @@ def test_pay_link_shows_loading_before_it_decides_the_date_is_missing(page: Page
     assert pending, "запрос списка матриц не был задержан"
 
     pending[0].continue_()
-    expect(page.get_by_test_id("pay-target")).to_have_value(str(matrix_id), timeout=15_000)
+    expect(page.get_by_test_id("pay-target")).to_have_attribute("data-value", str(matrix_id), timeout=15_000)
     assert page.get_by_test_id("pay-missing-note").count() == 0

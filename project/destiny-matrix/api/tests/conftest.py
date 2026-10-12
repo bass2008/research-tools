@@ -9,7 +9,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
 
 API_DIR = Path(__file__).resolve().parents[1]
 if str(API_DIR) not in sys.path:
@@ -17,7 +16,7 @@ if str(API_DIR) not in sys.path:
 
 from app.db import Base, get_db  # noqa: E402
 from app.main import create_app  # noqa: E402
-from app import tariffs  # noqa: E402
+from app import offers  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
@@ -58,13 +57,15 @@ def no_warmup(monkeypatch):
 
 
 @pytest.fixture()
-def db_engine():
-    engine = create_engine("sqlite+pysqlite:///:memory:", future=True,
-                           connect_args={"check_same_thread": False}, poolclass=StaticPool)
+def db_engine(tmp_path):
+    # Файл, а не память: у каждого потока своё соединение, как на проде. Одно общее соединение
+    # в памяти портило строки параллельных запросов (IndexError внутри SQLAlchemy).
+    engine = create_engine(f"sqlite+pysqlite:///{tmp_path / 'api.db'}", future=True,
+                           connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     # тарифы теперь в базе, а не в коде: без справочника оплата отвечает 404
     with sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)() as session:
-        tariffs.seed(session)
+        offers.seed(session)
     yield engine
     Base.metadata.drop_all(engine)
     engine.dispose()

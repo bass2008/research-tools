@@ -27,7 +27,8 @@ def test_buy_button_on_a_matrix_page_pays_for_that_matrix(page: Page, mail: str)
 
     page.goto(f"{BASE}/matrices/{closed_id}", wait_until="domcontentloaded")
     page.get_by_test_id("buy-top").click()
-    expect(page.get_by_test_id("pay-target")).to_have_value(str(closed_id), timeout=15_000)
+    page.get_by_test_id("plan-single").click()
+    expect(page.get_by_test_id("pay-target")).to_have_attribute("data-value", str(closed_id), timeout=15_000)
 
 
 def test_sex_switch_keeps_the_paid_report_open(page: Page, mail: str) -> None:

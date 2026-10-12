@@ -33,7 +33,7 @@ def _register(page: Page) -> str:
     page.goto(f"{BASE}/register", wait_until="domcontentloaded")
     page.get_by_test_id("auth-email").fill(mail)
     page.get_by_test_id("auth-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("auth-submit").click()
     page.wait_for_url(f"{BASE}/account", timeout=20_000)
     return mail
@@ -57,7 +57,7 @@ def _matrix_for_report(page: Page) -> int:
                                    data={"birth": "1998-08-08", "sex": "m"})
         assert answer.status in (200, 201), f"матрица не создалась: {answer.status} {answer.text()[:200]}"
 
-    listed = page.request.get(f"{BASE}/api/matrices")
+    listed = page.request.get(f"{BASE}/api/readings?product=personal")
     assert listed.status == 200, f"список матриц: {listed.status}"
     items = listed.json()["items"]
     assert items, "после покупки или сохранения список матриц пуст"

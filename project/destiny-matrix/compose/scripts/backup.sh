@@ -40,8 +40,11 @@ python3 - "$LOCAL.db" <<'PY'
 import sqlite3, sys
 db = sqlite3.connect(sys.argv[1])
 assert db.execute("pragma integrity_check").fetchone()[0] == "ok", "битая копия"
+have = {row[0] for row in db.execute("select name from sqlite_master where type = 'table'")}
+# до миграции 001 даты лежат в matrices, после — в readings
+dates = "readings" if "readings" in have else "matrices"
 counts = {t: db.execute(f"select count(*) from {t}").fetchone()[0]
-          for t in ("users", "payments", "matrices", "entitlements")}
+          for t in ("users", "payments", dates, "entitlements")}
 print("  проверено:", ", ".join(f"{k} {v}" for k, v in counts.items()))
 PY
 

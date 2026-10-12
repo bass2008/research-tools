@@ -2,6 +2,7 @@
 
 import type { SavedMatrix } from "@/app/_lib/access";
 import { useSession } from "@/components/account/useSession";
+import { useOfferMode } from "@/components/pay/useOfferMode";
 import MatrixResult, { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
 import ReportSections from "@/components/matrix/ReportSections";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
@@ -20,8 +21,10 @@ import { forLocale as localizedPublicSpec, type PositionArticles, type PositionT
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { useBirth } from "@/lib/useBirth";
 import { useFullSections } from "@/lib/useFullSections";
+import { useLockedPreview, withPreview } from "@/lib/useLockedPreview";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 export const forLocale = localized((L: Locale) => {
   const { calculate } = localizedMatrix(L);
@@ -70,48 +73,23 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
       return null;
     }
   }, [birth, L]);
-  // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
-  const full = useFullSections(matrix);
+  // на витрине без оплаты и подписчику сервер досылает толкования всех разделов по слагу карты
+  const mode = useOfferMode();
+  const open = mode !== "sell";
+  const full = useFullSections(matrix, open);
+  const preview = useLockedPreview(matrix, !open);
+  const router = useRouter();
+  // Даты нет — разбирать нечего: человек попадает на главную, к расчёту, а не на экран-объяснение.
+  useEffect(() => {
+    if (hydrated && !matrix) router.replace("/");
+  }, [hydrated, matrix, router]);
 
-  if (!hydrated) {
+  if (!hydrated || !matrix) {
     return <p className="skeleton">{D.unlockBox.buildingReport[L]}</p>;
   }
 
-  if (!matrix) {
-    return (
-      <div className="panel narrow">
-        <h1>{D.unlockBox.noDateTitle[L]}</h1>
-        {/* Купленный разбор живёт в аккаунте: по ссылке из письма человек приходит без сессии, и
-            без этой подсказки экран выглядел так, будто покупки не было. */}
-        {/* вошедшему советовать вход бессмысленно: он уже здесь. Ему нужен путь к своим
-            датам, а не повтор того, что он сделал */}
-        {session.status === "user" ? (
-          <p className="dim">
-            {D.unlockBox.signedInNoDate[L](session.email ?? "")}{" "}
-            <Link href="/account">{D.unlockBox.accountWord[L]}</Link>
-            {D.unlockBox.noDateTail[L]}
-          </p>
-        ) : ALL_FREE ? (
-          <p className="dim">
-            {D.unlockBox.savedEarlier[L]} <Link href="/login">{D.unlockBox.signIn[L]}</Link>{" "}
-            {D.unlockBox.accountHasList[L]}
-          </p>
-        ) : (
-          <p className="dim">
-            {D.unlockBox.paidNoSession[L]} <Link href="/login">{D.unlockBox.signIn[L]}</Link>{" "}
-            {D.unlockBox.paidNoSessionTail[L]}
-          </p>
-        )}
-        <p className="dim">{D.unlockBox.browserOnly[L]}</p>
-        <Link className="btn wide" href="/#calc">
-          {D.unlockBox.setDate[L]}
-        </Link>
-      </div>
-    );
-  }
-
-  const sections = full ?? buildFree(matrix, texts, articles);
-  const locked = sections.filter((s) => !s.positions.length);
+  const sections = full ?? withPreview(buildFree(matrix, texts, articles), preview);
+  const locked = sections.filter((s) => s.locked);
   const currentSaved = saved.find((row) => row.birth === matrix.birth && row.sex === matrix.sex);
 
   return (
@@ -123,20 +101,20 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
       <p className="dim">
         {birthLabel(matrix.birth)} ·{" "}
         {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]} ·{" "}
-        {D.unlockBox.sectionsOpen[L](sections.filter((s) => s.positions.length).length)}
+        {D.unlockBox.sectionsOpen[L](sections.filter((s) => !s.locked).length)}
       </p>
 
       <div className="section-gap">
-        <MatrixResult locale={L} m={matrix} chakraUnlocked={session.unlimited || ALL_FREE}
+        <MatrixResult locale={L} m={matrix} chakraUnlocked={open}
           chakraReading={full?.find((s) => s.key === "chakras")?.longform} matrixId={currentSaved?.id} />
       </div>
 
       <ReportSections locale={L} sections={sections} />
 
-      {ALL_FREE ? (
+      {open ? (
         <div className="allbox">
           <h3>{D.unlockBox.openTitleFree[L]}</h3>
-          <p>{D.unlockBox.reportOpenFree[L]}</p>
+          <p>{mode === "free" ? D.unlockBox.reportOpenFree[L] : D.unlockBox.reportOpenSubscribed[L]}</p>
           <SaveMatrixButton locale={L}
             birth={matrix.birth}
             sex={matrix.sex}
@@ -191,7 +169,7 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
         </div>
       )}
 
-      {!ALL_FREE && locked.length ? <Plans locale={L} place="report" /> : null}
+      {!open && locked.length ? <Plans locale={L} place="report" /> : null}
     </>
   );
 }

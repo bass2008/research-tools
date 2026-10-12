@@ -1,4 +1,4 @@
-import { pickMatrix, readMatrixUnlocked, readSavedMatrices } from "@/app/_lib/access";
+import { pickMatrix, readAccess, readMatrixUnlocked, readSavedMatrices } from "@/app/_lib/access";
 import { parseSlug } from "@/app/matrix/matrices";
 import { ALL_FREE } from "@/lib/access";
 import { forLocale as contentForLocale } from "@/lib/content";
@@ -17,16 +17,28 @@ export const dynamic = "force-dynamic";
  * дату не восстановить, и правило «дата не уходит с клиента» остаётся в силе. Пол не спрашиваем
  * — на числа карты он не влияет.
  *
- * Пока касса работает, по слагу маршрут не отвечает: иначе платные толкования забирал бы кто
- * угодно одним запросом.
+ * Пока касса работает, по слагу маршрут отвечает только подписчику: иначе платные толкования
+ * забирал бы кто угодно одним запросом.
+ *
+ * `preview=locked` отвечает всем: закрытые разделы без толкований — карты позиций и заглушка
+ * вместо текста чакр.
  */
 export async function GET(request: Request) {
   const locale = await requestLocale(request);
   const { matrixItem } = contentForLocale(locale);
-  const { build, withPositionArticles } = sectionsForLocale(locale);
+  const { build, withLockedPreview, withPositionArticles } = sectionsForLocale(locale);
   const params = new URL(request.url).searchParams;
   const only = params.get("section");
   const id = params.get("m");
+  if (params.get("preview") === "locked") {
+    const slug = params.get("slug") ?? "";
+    const item = parseSlug(slug) && matrixItem(slug);
+    if (!item) return new NextResponse("Not found", { status: 404 });
+    return NextResponse.json(
+      { sections: withLockedPreview(item.matrix, build(item.matrix, false)).filter((s) => s.locked) },
+      { headers: { "Cache-Control": "private, no-store", "Content-Language": locale } },
+    );
+  }
   // A paid saved matrix: same owner list and upstream unlock check as the report page.
   if (id !== null) {
     const chosen = /^\d+$/.test(id) ? pickMatrix(await readSavedMatrices(), id) : null;
@@ -40,7 +52,7 @@ export async function GET(request: Request) {
       { headers: { "Cache-Control": "private, no-store", "Content-Language": locale } },
     );
   }
-  if (!ALL_FREE) return new NextResponse("Not found", { status: 404 });
+  if (!ALL_FREE && !(await readAccess()).unlimited) return new NextResponse("Not found", { status: 404 });
   const slug = params.get("slug") ?? "";
   const item = parseSlug(slug) && matrixItem(slug);
   if (!item) return new NextResponse("Not found", { status: 404 });

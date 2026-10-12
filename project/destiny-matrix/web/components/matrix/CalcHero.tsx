@@ -3,7 +3,7 @@
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import Price from "@/components/pay/Price";
 import { useLocale } from "@/components/ui/LocaleProvider";
-import { ALL_FREE } from "@/lib/access";
+import { useOfferMode } from "@/components/pay/useOfferMode";
 import { track } from "@/lib/analytics";
 import { forLocale as localizedHeroSlides, type HeroSlide } from "@/lib/heroSlides";
 import { D } from "@/lib/i18n";
@@ -186,6 +186,12 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
   below?: ReactNode;
   /** На главной уже напечатан оплаченный отчёт: первая кнопка ведёт к нему, не к покупке. */
   fullReport?: boolean;
+  /** первая кнопка слайда вместо покупки личного разбора — у страницы другого продукта */
+  action?: ReactNode;
+  /** абзац под заголовком первого слайда */
+  lead?: ReactNode;
+  /** строка над каруселью и виджетом — например, крошки */
+  top?: ReactNode;
 }) & { locale?: Locale }) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
@@ -197,9 +203,13 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
     children,
     below,
     fullReport = false,
+    action,
+    lead,
+    top,
   } = localeProps;
 
   const path = usePathname();
+  const mode = useOfferMode();
   const total = slides.length;
   const [i, setI] = useState(0);
   const [live, setLive] = useState(true);
@@ -231,10 +241,18 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
   }
 
   function primaryAction() {
-    if (ALL_FREE) {
+    if (action) return action;
+    if (mode === "free") {
       return (
         <Link className="btn gold" href={fullReport ? "#result" : "/#calc"}>
           {fullReport ? D.home.heroToReport[L] : D.home.heroFree[L]}
+        </Link>
+      );
+    }
+    if (mode === "subscription") {
+      return (
+        <Link className="btn gold" href={fullReport ? "#result" : "/#calc"}>
+          {fullReport ? D.home.heroToReport[L] : D.home.heroSubscribed[L]}
         </Link>
       );
     }
@@ -345,6 +363,7 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
               <span className="eyebrow">{s.eyebrow}</span>
             </div>
             {h1 && k === i ? <h1>{s.heading}</h1> : <div className="hero-h">{s.heading}</div>}
+            {lead ? <p className="lede">{lead}</p> : null}
             <div className="btnrow">
               {primaryAction()}
               <Link className="btn ghost" href={secondLink(s).href}>
@@ -359,6 +378,7 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
   return (
     <section className="hero">
       <div className="wrap hgrid">
+        {top ? <div className="hero-top">{top}</div> : null}
         {/* пауза только под курсором: остановка по фокусу глушила листание насовсем — после
             клика по точке кнопка оставалась в фокусе, и blur больше не приходил */}
         <div

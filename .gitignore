@@ -43,3 +43,5 @@ project/destiny-matrix/legacy/gen/
 # Страницы предпросмотра колоды — их пишет tools/generators/pages.py при каждом прогоне
 project/destiny-matrix/legacy/g100-*.html
 project/destiny-matrix/legacy/card-100-*.html
+# Купленные книги: репозиторий публичный
+library/conversion/sources/

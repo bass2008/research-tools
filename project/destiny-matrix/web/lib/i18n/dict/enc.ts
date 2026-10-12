@@ -162,6 +162,10 @@ export const encArcanum = {
     ru: (n: number) => `${n} аркан · Старший аркан`,
     en: (n: number) => `Arcanum ${n} · Major Arcana`,
   } satisfies PhraseFn<[number]>,
+  pairCalc: {
+    ru: "Рассчитать совместимость по матрице судьбы для своей пары",
+    en: "Calculate destiny matrix compatibility for your couple",
+  } satisfies Phrase,
   calcTitle: {
     ru: (title: string) => `Где ${title} в вашей карте`,
     en: (title: string) => `Where ${title} sits in your chart`,
@@ -359,6 +363,7 @@ export const encPosition = {
   sectionInReport: { ru: "Раздел в отчёте", en: "The section in the reading" } satisfies Phrase,
   openFree: { ru: "открыт бесплатно, без регистрации.", en: "is open for free, with no sign-up." } satisfies Phrase,
   opensInFull: { ru: "открывается в полном разборе за", en: "opens with the full reading for" } satisfies Phrase,
+  opensBySubscription: { ru: "открыт по вашей подписке.", en: "is open with your subscription." } satisfies Phrase,
   seeYourReport: { ru: "Посмотреть свой отчёт", en: "See your own reading" } satisfies Phrase,
   moreAboutCharacter: {
     ru: "Подробнее о полном разделе «Характер и личные качества» →",

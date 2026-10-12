@@ -15,4 +15,4 @@ const files: ContentSource = {
 };
 
 export const forLocale = localized((locale) => createContent(locale, files));
-export const { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, yearArcanum, yearKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats } = forLocale(SITE_LANG);
+export const { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats } = forLocale(SITE_LANG);

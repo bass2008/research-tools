@@ -143,6 +143,24 @@ PHRASES: dict[str, dict[str, str]] = {
         "ru": "Эта дата уже открыта — второй раз платить не нужно",
         "en": "This date is already open — there is no need to pay twice",
     },
+    # Тексты другого продукта: ключ с суффиксом продукта, `say_for` берёт его, если он есть.
+    "pay.already_open.pair": {
+        "ru": "Эта пара уже открыта — второй раз платить не нужно",
+        "en": "This couple is already open — there is no need to pay twice",
+    },
+    "pay.already_open_dot.pair": {
+        "ru": "Разбор этой пары уже открыт — платить второй раз не нужно.",
+        "en": "The reading for this couple is already open — there is no need to pay again.",
+    },
+    "pay.target_required.pair": {
+        "ru": "Укажите пару, за которую платите: сначала посчитайте совместимость",
+        "en": "Name the couple you are paying for: calculate the compatibility first",
+    },
+    "report.not_paid.pair": {
+        "ru": "Разбор этой пары не оплачен",
+        "en": "The reading for this couple has not been paid for",
+    },
+    "matrix.not_found.pair": {"ru": "Разбор не найден", "en": "Reading not found"},
     "pay.already_open_dot": {
         "ru": "Разбор этой даты уже открыт — платить второй раз не нужно.",
         "en": "The reading for this date is already open — there is no need to pay again.",
@@ -156,6 +174,14 @@ PHRASES: dict[str, dict[str, str]] = {
         "en": "The account could not be created",
     },
     "pay.no_tariff": {"ru": "Такого тарифа нет", "en": "There is no such plan"},
+    "pay.subscription_active": {
+        "ru": "Подписка уже действует до {until}: все разборы открыты, покупать ничего не нужно",
+        "en": "Your subscription is active until {until}: every reading is open, there is nothing to buy",
+    },
+    "pay.subscription_forever": {
+        "ru": "Все разборы уже открыты: покупать ничего не нужно",
+        "en": "Every reading is already open: there is nothing to buy",
+    },
     "pay.provider_down": {
         "ru": "Этот способ оплаты сейчас недоступен",
         "en": "This payment method is unavailable right now",
@@ -170,6 +196,19 @@ PHRASES: dict[str, dict[str, str]] = {
         "en": "Arcana Sense — your reading is ready",
     },
     "mail.purchase.ready": {"ru": "Ваш разбор готов: {tariff}.", "en": "Your reading is ready: {tariff}."},
+    "mail.subscription.subject": {
+        "ru": "Arcana Sense — подписка оформлена",
+        "en": "Arcana Sense — your subscription is active",
+    },
+    "mail.subscription.ready": {
+        "ru": "Подписка оформлена: {tariff}. На весь срок открыты все разборы — личные и пары.",
+        "en": "Your subscription is active: {tariff}. All readings, personal and couple, are open for its whole term.",
+    },
+    "mail.subscription.open": {"ru": "Ваши разборы — {url}", "en": "Your readings — {url}"},
+    "mail.subscription.help": {
+        "ru": "Если что-то не открылось, ответьте на это письмо.",
+        "en": "If something did not open, just reply to this email.",
+    },
     "mail.purchase.payment": {"ru": "Номер платежа: {id}.", "en": "Payment number: {id}."},
     "mail.purchase.open": {"ru": "Смотреть разбор — {url}", "en": "Open the reading — {url}"},
     "mail.account": {"ru": "Кабинет — {url}", "en": "Your account — {url}"},
@@ -201,9 +240,70 @@ PHRASES: dict[str, dict[str, str]] = {
         "en": "Arcana Sense — your payment has been refunded",
     },
     "mail.refund.done": {"ru": "Платёж возвращён: {tariff}.", "en": "Payment refunded: {tariff}."},
-    "mail.refund.closed": {
-        "ru": "Разбор по этому платежу закрыт; другие оплаченные даты остаются открытыми.",
-        "en": "The reading covered by this payment is closed; other paid dates stay open.",
+    "refund.closes": {"ru": "Разбор этой даты закроется.", "en": "The reading for this date will close."},
+    "refund.closes.pair": {"ru": "Разбор этой пары закроется.", "en": "The reading for this couple will close."},
+    "refund.stays_open": {
+        "ru": "Разбор этой даты останется открытым: он выдан бесплатно.",
+        "en": "The reading for this date stays open: it was granted free of charge.",
+    },
+    "refund.stays_open.pair": {
+        "ru": "Разбор этой пары останется открытым: он выдан бесплатно.",
+        "en": "The reading for this couple stays open: it was granted free of charge.",
+    },
+    "refund.stays_subscription": {
+        "ru": "Разбор этой даты останется открытым по подписке до {until}.",
+        "en": "The reading for this date stays open with the subscription until {until}.",
+    },
+    "refund.stays_subscription.pair": {
+        "ru": "Разбор этой пары останется открытым по подписке до {until}.",
+        "en": "The reading for this couple stays open with the subscription until {until}.",
+    },
+    "refund.subscription_ends": {
+        "ru": "Подписка закончится. Разборы, купленные отдельно или выданные, останутся открытыми.",
+        "en": "The subscription ends. Readings bought separately or granted stay open.",
+    },
+    "refund.subscription_stays": {
+        "ru": "Подписка по этому платежу закончится, но доступ останется по другой подписке до {until}.",
+        "en": "The subscription from this payment ends, but access stays with another subscription until {until}.",
+    },
+    "refund.subscription_stays_forever": {
+        "ru": "Подписка по этому платежу закончится, но доступ останется по другой подписке.",
+        "en": "The subscription from this payment ends, but access stays with another subscription.",
+    },
+    "refund.done.closes": {"ru": "Разбор этой даты закрыт.", "en": "The reading for this date is closed."},
+    "refund.done.closes.pair": {"ru": "Разбор этой пары закрыт.", "en": "The reading for this couple is closed."},
+    "refund.done.stays_open": {
+        "ru": "Разбор этой даты остаётся открытым: он выдан бесплатно.",
+        "en": "The reading for this date stays open: it was granted free of charge.",
+    },
+    "refund.done.stays_open.pair": {
+        "ru": "Разбор этой пары остаётся открытым: он выдан бесплатно.",
+        "en": "The reading for this couple stays open: it was granted free of charge.",
+    },
+    "refund.done.stays_subscription": {
+        "ru": "Разбор этой даты остаётся открытым по подписке до {until}.",
+        "en": "The reading for this date stays open with the subscription until {until}.",
+    },
+    "refund.done.stays_subscription.pair": {
+        "ru": "Разбор этой пары остаётся открытым по подписке до {until}.",
+        "en": "The reading for this couple stays open with the subscription until {until}.",
+    },
+    "refund.done.subscription_ends": {
+        "ru": "Подписка закончилась. Разборы, купленные отдельно или выданные, остаются открытыми.",
+        "en": "The subscription has ended. Readings bought separately or granted stay open.",
+    },
+    "refund.done.subscription_stays": {
+        "ru": "Подписка по этому платежу закончилась, но доступ остаётся по другой подписке до {until}.",
+        "en": "The subscription from this payment has ended, but access stays with another subscription until {until}.",
+    },
+    "refund.done.subscription_stays_forever": {
+        "ru": "Подписка по этому платежу закончилась, но доступ остаётся по другой подписке.",
+        "en": "The subscription from this payment has ended, but access stays with another subscription.",
+    },
+    "refund.done.rights_revoked": {"ru": "Права по этому платежу сняты.", "en": "The access from this payment has been removed."},
+    "refund.rights_revoked": {
+        "ru": "Права по этому платежу будут сняты.",
+        "en": "The access from this payment will be removed.",
     },
     "mail.refund.saved": {
         "ru": "Сохранённые даты остаются в кабинете.",
@@ -232,12 +332,19 @@ PHRASES: dict[str, dict[str, str]] = {
         "ru": "Матрица {day} {month} {year}",
         "en": "Chart of {day} {month} {year}",
     },
+    "reading.no_product": {"ru": "Такого разбора нет", "en": "There is no such reading"},
+    "reading.bad_date": {"ru": "Неверная дата рождения", "en": "Invalid birth date"},
+    "reading.date": {"ru": "{day} {month} {year}", "en": "{day} {month} {year}"},
+    "reading.pair_names": {"ru": "{a} и {b}", "en": "{a} and {b}"},
+    "reading.pair_dates": {"ru": "Пара {a} и {b}", "en": "Couple {a} and {b}"},
     "matrix.months": {
         "ru": "января февраля марта апреля мая июня июля августа сентября октября ноября декабря",
         "en": "January February March April May June July August September October November December",
     },
     # Что напечатано в шапке PDF вместо названия тарифа: на витрине без кассы плана нет вовсе.
     "report.plan_full": {"ru": "Полный разбор", "en": "Full reading"},
+    "report.plan_granted": {"ru": "выдан бесплатно", "en": "granted free of charge"},
+    "report.plan_named": {"ru": "тариф «{name}»", "en": "plan “{name}”"},
     "report.plan_free": {"ru": "Бесплатный просмотр", "en": "Free preview"},
     "error.internal": {"ru": "Внутренняя ошибка", "en": "Internal error"},
     "mail.reset.expires": {
@@ -251,6 +358,12 @@ def say(key: str, **values: object) -> str:
     phrase = PHRASES[key]
     text = phrase.get(current_locale(), phrase["ru"])
     return text.format(**values) if values else text
+
+
+def say_for(key: str, product: str | None = None, **values: object) -> str:
+    """Фраза для продукта: `key.<продукт>`, если она есть, иначе общая."""
+    specific = f"{key}.{product}" if product else ""
+    return say(specific if specific in PHRASES else key, **values)
 
 
 def validation_message(error: ValueError) -> str:

@@ -27,9 +27,11 @@ export default function HashScroll() {
       if (!el) return;
       const header = document.querySelector<HTMLElement>(".site-header");
       const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
-      // После router.push оплаченный отчёт меняет высоту уже после первого scrollIntoView.
-      // Повторяем выравнивание, только если target снова оказался за липкой шапкой.
-      if (force || el.getBoundingClientRect().top < headerBottom - 1) {
+      // После router.push оплаченный отчёт меняет высоту уже после первого scrollIntoView, а
+      // закрытые разделы дорисовывают карты, когда придут с сервера. Повторяем выравнивание,
+      // только если target ушёл с экрана: за липкую шапку или ниже нижнего края.
+      const top = el.getBoundingClientRect().top;
+      if (force || top < headerBottom - 1 || top > window.innerHeight) {
         el.scrollIntoView({ block: "start" });
       }
     };

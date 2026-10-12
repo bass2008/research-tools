@@ -1,7 +1,7 @@
 // Цели внешней Метрики. Дата рождения в параметры не попадает никогда: разрешены только
 // код тарифа, раздел и год-десятилетие — ничего, по чему восстанавливается дата.
 export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "purchase"
-  | "pdf_click";
+  | "pdf_click" | "pair_calc";
 
 export interface GoalParams {
   tariff?: string;
@@ -58,6 +58,28 @@ export function track(goal: Goal, params?: GoalParams): void {
   (window.dataLayer = window.dataLayer ?? []).push(
     payload ? { event: goal, ...payload } : { event: goal },
   );
+}
+
+const trackedPurchases = new Set<string>();
+
+/** Один платёж не становится новой покупкой при обновлении чека.
+ * Номер хранится только в браузере, в параметры Метрики не передаётся. */
+export function trackPurchase(paymentId: string, params?: GoalParams): void {
+  if (typeof window === "undefined" || !paymentId) return;
+  const key = `destiny.purchase:${metrikaId()}:${paymentId}`;
+  if (trackedPurchases.has(key)) return;
+  try {
+    if (localStorage.getItem(key)) return;
+  } catch {
+    // При запрете хранилища защита от повторных эффектов остаётся в памяти.
+  }
+  track("purchase", params);
+  trackedPurchases.add(key);
+  try {
+    localStorage.setItem(key, "1");
+  } catch {
+    // Аналитика не должна мешать открытию оплаченного разбора.
+  }
 }
 
 /** Отметка присутствия: продлевает время визита, не считаясь просмотром страницы. */

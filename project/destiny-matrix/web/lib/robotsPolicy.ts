@@ -15,7 +15,7 @@ import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
 const UNWANTED = ["GPTBot", "ClaudeBot", "CCBot", "AhrefsBot"];
 
 // Приватные адреса: содержат чужую дату рождения либо оплату.
-const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/pay", "/login", "/register", "/api/"];
+const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/readings", "/pay", "/login", "/register", "/api/"];
 
 // Результаты расчёта. Их 5 544 (`/matrix/`) плюс 446 персональных разборов разделов, и все они
 // помечены `noindex`: это почти-дубли одной формы, в выдаче им делать нечего. Но `noindex`

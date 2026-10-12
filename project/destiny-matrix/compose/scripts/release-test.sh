@@ -48,8 +48,6 @@ echo "== сборка и отправка $TAG"
 echo "$CRAAS_TOKEN" | docker login cr.selcloud.ru -u "$CRAAS_USER" --password-stdin >/dev/null
 docker buildx build --push -f api.Dockerfile \
   --output "type=image,name=$REGISTRY/api:$TAG,$ZSTD" ..
-docker buildx build --push -f browser.Dockerfile \
-  --output "type=image,name=$REGISTRY/browser:$TAG,$ZSTD" .
 # NEXT_PUBLIC_METRIKA_ID не передаём намеренно: тестовые визиты не должны попадать в статистику
 WEB_ARGS=(
   --build-arg "NEXT_PUBLIC_SITE_URL=$SITE"
@@ -71,8 +69,7 @@ echo "== запуск на $IP"
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.test.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.test.yml"
 scp -q -o StrictHostKeyChecking=accept-new ../infra/prune-images.sh "$SSH_USER@$IP:/usr/local/bin/arcana-prune-images"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "chmod 755 /usr/local/bin/arcana-prune-images"
-# Браузер печати тестовый контур берёт у прода, поэтому свой образ browser ему нужен только как
-# запас — сервис в docker-compose.test.yml не поднимается. Чистка сразу после старта: на тесте
+# Браузер печати тестовый контур берёт у прода. Чистка сразу после старта: на тесте
 # откатываться незачем, а сборок в день бывает несколько, и диск машины 20 ГБ.
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && sed -i '/^TEST_TAG=/d' .env.test 2>/dev/null || true \

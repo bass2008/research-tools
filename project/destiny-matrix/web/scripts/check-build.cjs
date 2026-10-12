@@ -547,6 +547,23 @@ for (const f of chunks) {
   }
 }
 
+// Корпус пары читается только на сервере (lib/pair/corpus.ts): браузер получает тексты по числам
+// через BFF и только открытые. Текст юнита в клиентском чанке — это пейволл, открытый всем.
+const pairFile = `${CORPUS_DIR}/pair-units.json`;
+if (fs.existsSync(pairFile)) {
+  const pairTexts = (JSON.parse(fs.readFileSync(pairFile, "utf8")).items ?? [])
+    .flatMap((u) => (Array.isArray(u.text) ? u.text : u.text ? [u.text] : []))
+    .filter((t) => typeof t === "string" && t.length > 60)
+    .map((t) => t.slice(0, 60));
+  if (!pairTexts.length) fail("сторож корпуса пары ослеп: текстов для проверки нет");
+  for (const f of chunks) {
+    const js = fs.readFileSync(f, "utf8");
+    for (const t of pairTexts) {
+      if (js.includes(t)) fail(`текст разбора пары «${t}…» в клиентском чанке ${path.basename(f)}`);
+    }
+  }
+}
+
 if (fs.existsSync(path.join(ROOT, "report.html"))) {
   fail("/report предрендерен: платные разделы попали бы в готовый HTML (нужен force-dynamic)");
 }

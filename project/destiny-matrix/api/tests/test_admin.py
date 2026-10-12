@@ -18,7 +18,7 @@ def test_admin_sees_users_and_payments(client, auth, db):
     assert by_mail[settings.admins[0]]["is_admin"] is True
     assert by_mail["buyer@example.ru"]["matrices"] == 1
     assert by_mail["buyer@example.ru"]["payments"] == 1
-    assert by_mail["buyer@example.ru"]["spent"] == 25_000
+    assert by_mail["buyer@example.ru"]["spent"] == 39_000
     assert by_mail["buyer@example.ru"]["owned"] == 1
     assert by_mail["buyer@example.ru"]["last_seen_at"] is None
 

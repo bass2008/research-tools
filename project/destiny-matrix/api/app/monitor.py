@@ -216,7 +216,7 @@ def last_errors(db: Session, limit: int = 20) -> list[dict]:
 
 
 def stuck_payments(db: Session, minutes: int = 30) -> int:
-    """Платежи, застрявшие на форме банка: человек ушёл, деньги не дошли. Какие статусы считать
+    """Незавершённые платежи старше порога: подтверждение оплаты пока не получено. Какие статусы считать
     незавершёнными, решает провайдер — знание о банке в этот модуль не переезжает."""
     edge = utcnow() - dt.timedelta(minutes=minutes)
     rows = db.scalars(select(Payment).where(Payment.paid_at.is_(None),

@@ -47,7 +47,6 @@ scripts/run.sh            # поднять API и next dev со значком N
 | `scripts/release-test.sh` | задеплоить текущее дерево на `test.arcana-sense.ru` и `.com` |
 | `scripts/backup.sh` | копия боевой базы в Object Storage |
 | `scripts/release-snapshot.sh` | read-only агрегаты prod-БД до/после релиза |
-| `scripts/rollback-prod.sh` | dry-run/откат на tag перед последним prod-релизом |
 | `scripts/cleanup-local-db.sh` | снести локальную базу и засеять заново |
 | `scripts/prepare-content.sh` | собрать базовый контент, SEO-обогащение, аудит и parity, затем проверить итог |
 | `scripts/run-tests.sh` | все тесты подряд: api, компонентные, браузерные, приёмка |
@@ -121,7 +120,7 @@ scripts/release-prod.sh
 `reports/unified/release-manifest.json` и `tested-commit.txt`; dirty tree не релизится.
 
 Скрипт собирает и отправляет образы, снимает read-only диагностический снимок и проверенный backup
-prod-БД, сохраняет прежний tag в `/srv/arcana/.env.previous.tag`, затем выполняет `docker compose
+prod-БД, затем выполняет `docker compose
 pull` с перезапуском службы и снимает второй диагностический снимок.
 Сборки на машине нет вовсе — 2 vCPU с гарантией 5 % печатали бы 5 854 страницы десятки минут.
 

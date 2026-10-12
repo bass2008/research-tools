@@ -1,7 +1,7 @@
 import type { ErrorEvent } from "@sentry/browser";
 import { describe, expect, it } from "vitest";
 
-import { deviceTags, isOurError, isOurEvent, pathTemplate, scrubEvent, scrubText, stripQuery } from "./errors";
+import { deviceTags, isBot, isOurError, isOurEvent, pathTemplate, scrubEvent, scrubText, stripQuery } from "./errors";
 
 describe("error reports carry no personal data", () => {
   it("hides e-mails and birth dates in any text", () => {
@@ -65,5 +65,16 @@ describe("error reports carry no personal data", () => {
     expect(event.request).toEqual({ url: "https://arcana-sense.ru/report", headers: { Referer: "https://arcana-sense.ru/pay", "User-Agent": "UA" } });
     expect(event.extra).toEqual({ page: "/matrix/[date]", note: "почта [email]" });
     expect(event.exception?.values?.[0].stacktrace?.frames?.[0].filename).toBe("https://arcana-sense.ru/_next/app.js");
+  });
+});
+
+describe("search robots send no reports", () => {
+  it("recognises the robots that filled Hawk on prod and keeps people and our own runs", () => {
+    expect(isBot("Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1 (compatible; YandexMobileBot/3.0; +http://yandex.com/bots)")).toBe(true);
+    expect(isBot("Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Reflectionbot/1.0; +https://reflection.ai/bot) Chrome/151.0.0.0 Safari/537.36")).toBe(true);
+    expect(isBot("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")).toBe(true);
+    expect(isBot("Mozilla/5.0 (iPhone; CPU iPhone OS 17_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Mobile/15E148 Safari/604.1")).toBe(false);
+    expect(isBot("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36")).toBe(false);
+    expect(isBot("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36")).toBe(false);
   });
 });

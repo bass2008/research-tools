@@ -9,7 +9,7 @@ import { requestLocale, publicLocale } from "@/lib/i18n/request";
 import { TERMS } from "@/lib/legal/terms";
 import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
-import { getTariffs } from "@/lib/tariffs.server";
+import { allOffers } from "@/lib/tariffs.server";
 import type { Metadata } from "next";
 
 // Оферта — договор: цены в ней обязаны совпадать с теми, что спишет касса, поэтому страница
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const L = await publicLocale();
   const { pageMeta, priceLabel } = forLocale(L, await requestSite());
 
-  const prices = (await getTariffs()).map((t) => priceLabel(t)).join(" / ");
+  const prices = (await allOffers()).map((t) => priceLabel(t)).join(" / ");
   return pageMeta({
     title: D.pages.termsTitle[L],
     description: ALL_FREE
@@ -40,6 +40,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OfertaPage() {
   const L = await requestLocale();
 
-  const tariffs = await getTariffs();
+  const tariffs = await allOffers();
   return <LegalDocView locale={L} doc={(await requestSite()).legalLocale === "en" && L === "ru" ? INTERNATIONAL_RU.terms : TERMS[L]} crumb={D.nav.terms[L]} tariffs={tariffs} />;
 }

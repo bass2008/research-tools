@@ -1,4 +1,5 @@
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
+import { cardColumns } from "@/lib/cardColumns";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraTable, { type ChakraTableProps } from "@/components/matrix/ChakraTable";
 import type { LongformReading } from "@/lib/readingTypes";
@@ -134,7 +135,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
       <div className="panel section-gap">
         <h2>{D.report.mainPoints[L]}</h2>
         <div className="cap">{D.report.mainPointsHint[L]}</div>
-        <div className="mp">
+        <div className="mp" style={cardColumns(main.length)}>
           {main.map(([who, v, hint]) => (
             <a
               className="mpc"

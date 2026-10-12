@@ -114,6 +114,15 @@ li { margin-bottom: 0.35em; }
   .hrow { flex-wrap: wrap; row-gap: 6px; }
   .hnav { order: 10; width: 100%; padding-bottom: 2px; }
 }
+/* Три раздела в меню: с полями 12 px последний уходил за край уже на 360 px. */
+@media (max-width: 400px) {
+  .hnav a { padding: 7px 6px; }
+}
+/* С пунктом «Совместимость» на 320–350 px «Энциклопедия» обрезалась на краю. */
+@media (max-width: 350px) {
+  .hnav { gap: 0; }
+  .hnav a { padding: 7px 4px; font-size: 12px; }
+}
 
 /* buttons */
 .btn {
@@ -161,6 +170,9 @@ li { margin-bottom: 0.35em; }
 /* MatrixForm отдаёт фрагментом форму и результат, поэтому оба — элементы этой же сетки.
    Без растяжки результат печатался в колонке 1fr и был вдвое уже страницы. */
 .hgrid > #result { grid-column: 1 / -1; }
+.hgrid > .hero-top { grid-column: 1 / -1; }
+.hgrid > .hero-top .crumbs { margin: 0; }
+.v-fan .lede { margin: 0 auto 14px; }
 /* прокрутка к результату и к любому якорю останавливается под липкой шапкой, а не под ней */
 #result, [id] { scroll-margin-top: 78px; }
 @media (max-width: 980px) { #result, [id] { scroll-margin-top: 118px; } }
@@ -168,20 +180,6 @@ li { margin-bottom: 0.35em; }
 .offer h1 { margin-bottom: 10px; }
 .slide h1 { font-size: clamp(24px, 2.6vw, 33px); }
 .offer .lede { font-size: 16.5px; color: var(--dim); max-width: 56ch; }
-.pricelead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
-  margin: 14px 0 12px;
-  padding: 13px 16px;
-  border: 1px solid var(--gold);
-  border-radius: 14px;
-  background: linear-gradient(180deg, #eaf6f5, #fff);
-}
-.pricelead b { font: 700 26px var(--sans); letter-spacing: -0.02em; }
-.pricelead .what { font-size: 14px; color: var(--dim); }
-.pricelead .free { font-size: 13px; color: var(--gold2); font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
 .chip {
   font-size: 12.8px;
@@ -354,15 +352,23 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   color: var(--text);
 }
 .bub.g { border-color: var(--gold); background: #e6f2f1; color: var(--gold2); }
-/* Шесть карт в один ряд: карта сверху, подпись под ней. Размер крутится одним значением —
-   --cardmp; сетка сама решает, сколько колонок влезло. */
+/* Сетки карт: число колонок задаёт ширина экрана, ряды ровные (--c2…--c6 из cardColumns), а
+   неполный последний ряд встаёт по центру — три карты в две колонки дают треугольник. */
 .mp {
-  --cardmp: 168px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--cardmp), 1fr));
-  gap: 18px 14px;
+  --gx: 14px;
+  --k: var(--c6, 6);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px var(--gx);
   margin-top: 14px;
 }
+.mp > .mpc { flex: 0 0 calc((100% - (var(--k) - 1) * var(--gx)) / var(--k)); min-width: 0; }
+@media (max-width: 1150px) { .mp { --k: var(--c5, 5); } }
+@media (max-width: 950px) { .mp { --k: var(--c4, 4); } }
+@media (max-width: 760px) { .mp { --k: var(--c3, 3); } }
+@media (max-width: 560px) { .mp { --k: var(--c2, 2); } }
+@media (max-width: 340px) { .mp { --k: 1; } }
 .mpc { display: block; text-align: center; }
 .mpc:hover { text-decoration: none; }
 .mpc:hover .arccard { border-color: var(--gold); }
@@ -404,6 +410,17 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   .postab.short td, .postab.short th { padding-left: 3px; padding-right: 3px; }
 }
 .postab .vl { color: var(--dim); font-size: 13.2px; }
+@media (max-width: 400px) {
+  /* Три предложения с длинными названиями не помещаются тремя колонками в 320 px: строка
+     тарифа становится карточкой — название, цена и состав друг под другом. */
+  .postab.tariffs thead { display: none; }
+  .postab.tariffs tr, .postab.tariffs td { display: block; }
+  .postab.tariffs tr { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .postab.tariffs tr:last-child { border-bottom: 0; }
+  .postab.tariffs td { border-bottom: 0; padding: 2px 0; }
+  /* шапка спрятана — подпись колонки идёт перед значением */
+  .postab.tariffs td[data-label]::before { content: attr(data-label); display: block; margin-top: 6px; font: 700 10px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); }
+}
 .tabscroll { overflow-x: auto; }
 .personal-chakras { min-width: 1120px; table-layout: fixed; }
 /* При `table-layout: fixed` ширины колонок берутся из первой строки, то есть из thead: правило
@@ -441,27 +458,41 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .acc.lock .ic { color: var(--dim2); font-size: 14px; }
 .acc.lock .unlock { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 7px; font: 700 13px var(--sans); color: var(--gold); border-bottom: 1px dashed rgba(14, 143, 136, 0.5); }
 .acc.lock:hover { border-color: var(--gold); background: #f7fbfb; }
+/* Карты закрытого раздела — в сетке «Главных точек». На двух-трёх позициях колонка шире карты,
+   и без предела карта раздувалась бы на всю колонку. */
+.acc.lock .mp .mpc { display: flex; flex-direction: column; align-items: center; }
+.acc.lock .mp .mpc > * { width: 100%; max-width: 190px; }
+.acc.lock .mp { --k: var(--c5, 5); }
+@media (max-width: 899px) { .acc.lock .mp { --k: var(--c3, 3); } }
+@media (max-width: 489px) { .acc.lock .mp { --k: var(--c2, 2); } }
+@media (max-width: 349px) { .acc.lock .mp { --k: 1; } }
+.acc.lock .lockcta { margin: 14px 0 4px; text-align: center; }
+.acc.lock .lockcta:empty { display: none; }
 /* Позиции раздела — карточками, карта во всю ширину колонки. Размер крутится одним
    значением: --cardpos. Строчный список делал карты 56 px, и их было не разглядеть. */
 .poslist {
   --cardpos: 250px;
-  display: grid;
-  /* auto-fit + 1fr: колонки растягиваются по ширине панели, поэтому три позиции занимают
-     всю строку, а восемь встают в два ряда — пустой половины не остаётся ни в одном случае.
-     Карта внутри колонки держит свою ширину (--cardpos), иначе на трёх позициях она
-     раздувалась бы до 400 px. */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 22px 24px;
+  --gx: 24px;
+  --k: var(--c3, 3);
+  /* как у .mp: колонок по ширине панели, неполный ряд по центру. Карта внутри колонки держит
+     свою ширину (--cardpos), иначе на трёх позициях она раздувалась бы до 400 px. */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px var(--gx);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-/* Явное число колонок ставит ReportSections (см. gridColumns): min 0, иначе четыре колонки
-   по 300 px не влезают в панель. На узких экранах раскладка сжимается до двух и одной. */
-.poslist[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.poslist[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-@media (max-width: 900px) { .poslist[data-cols="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 620px) { .poslist[data-cols] { grid-template-columns: minmax(0, 1fr); } }
+.poslist > li { flex: 0 0 calc((100% - (var(--k) - 1) * var(--gx)) / var(--k)); min-width: 0; }
+/* Явное число колонок ставит ReportSections (см. gridColumns); на узких экранах раскладка
+   сжимается до двух и одной. */
+.poslist[data-cols="2"] { --k: var(--c2, 2); }
+.poslist[data-cols="4"] { --k: var(--c4, 4); }
+@media (max-width: 1050px) { .poslist:not([data-cols]) { --k: var(--c2, 2); } }
+@media (max-width: 900px) { .poslist[data-cols="4"] { --k: var(--c2, 2); } }
+@media (max-width: 700px) { .poslist:not([data-cols]) { --k: 1; } }
+@media (max-width: 620px) { .poslist[data-cols] { --k: 1; } }
 .poslist li { margin: 0; }
 .poscard { display: block; text-align: center; color: var(--text); }
 .poscard:hover { text-decoration: none; }
@@ -627,22 +658,21 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   margin-left: auto;
   margin-right: auto;
 }
-@media (max-width: 620px) { .plans { grid-template-columns: minmax(0, 1fr); } }
+.plans.three { max-width: 980px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+@media (max-width: 620px) { .plans, .plans.three { grid-template-columns: minmax(0, 1fr); } }
 .plan { border: 1px solid var(--line); border-radius: var(--r); background: var(--card); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh); }
 .plan .pcap { padding: 11px; text-align: center; font: 700 11.5px var(--sans); letter-spacing: 0.12em; text-transform: uppercase; background: var(--gold); color: #fff; }
 /* Премиальный тариф выделяется материалом, а не цветом: тёплая бумага вместо белого,
-   тонкая золотая рамка, лёгкий подъём и золотые маркеры. Тёмная карточка на светлом сайте
+   тонкая золотая рамка и золотые маркеры; верх у карточек на одном уровне. Тёмная карточка на светлом сайте
    выглядела чужой, а жёлтая заливка — грязной. Шапка у обоих тарифов бирюзовая, у дорогого
    на полтона глубже. */
 .plan.premium {
   border-color: var(--accent);
   background: linear-gradient(180deg, #fffdf5 0%, #f7f0de 100%);
   box-shadow: 0 26px 56px -26px rgba(18, 40, 60, 0.3);
-  transform: translateY(-6px);
 }
-@media (max-width: 620px) { .plan.premium { transform: none; } }
 .plan.premium .pcap { background: var(--gold2); letter-spacing: 0.16em; }
-.plan.premium .pcap::after { content: " · выгоднее"; color: rgba(255, 255, 255, 0.72); }
+.plan.premium .pcap .plan-value { color: rgba(255, 255, 255, 0.72); }
 .plan.premium .price { color: var(--text); }
 .plan .in { padding: 20px; display: flex; flex-direction: column; flex: 1; }
 .plan h3 { font-family: var(--ser); font-size: 20px; margin-bottom: 6px; }
@@ -882,7 +912,6 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 @media (max-width: 560px) {
   .arccard.big { width: 190px; }
   .arccard.grid { width: 104px; }
-  .mp { --cardmp: 128px; }
   .poslist { --cardpos: 180px; }
 }
 
@@ -923,6 +952,10 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235a6d7d' stroke-width='1.6'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 11px center; }
 .paytarget .hint { margin-top: 7px; }
+.paytarget-l { margin: 0 0 6px; font: 700 10.5px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim2); }
+.paybirth .sexrow { margin-top: 10px; }
+.paypartner + .paypartner { margin-top: 12px; }
+.paypartner-t { margin: 0 0 4px; font: 600 12.5px var(--sans); color: var(--dim2); }
 
 /* почта и пароль в одну строку: пароль спрашиваем сразу, а не после оплаты */
 .payfields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
@@ -984,10 +1017,15 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .badge.own { color: #8a6a12; background: linear-gradient(180deg, #fffdf5 0%, #f7f0de 100%); border: 1px solid var(--accent); }
 .badge.sub { color: var(--gold2); background: #e6f2f1; }
 .badge.off { color: var(--dim2); background: #eef2f5; }
+.badge.down { color: var(--warn); background: #fbecea; }
 .matrow.forever { border-color: var(--accent); background: linear-gradient(180deg, #fffdf5 0%, #fdfbf4 100%); }
 .matrow.locked { border-style: dashed; }
 .matrow.locked .small { color: var(--dim2); }
-.matrow .badge { vertical-align: 1px; white-space: nowrap; }
+.matrow .badge { vertical-align: 1px; white-space: nowrap; max-width: 100%; }
+@media (max-width: 400px) {
+  /* «По подписке · до … · выдана» шире экрана 320 px: на телефоне бейдж переносится */
+  .matrow .badge { white-space: normal; }
+}
 /* Знак пожизненного владения: ∞ в золотом круге. Читается без подписи и одинаков в строке
    матрицы и в блоке доступа. */
 .lifetime {
@@ -1006,6 +1044,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 /* подпись матрицы правится тут же, в строке: имя, карандаш, метка доступа */
 .matname { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
 .matname { min-width: 0; }
+.badge.mattype { display: inline-block; margin-bottom: 6px; }
 .matname input { width: auto; min-width: 0; flex: 1 1 140px; padding: 7px 10px; font: 600 14px var(--sans); }
 .iconbtn {
   background: none;
@@ -1063,7 +1102,12 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 
 .admtable tr:hover td.act { background: var(--card2); }
 /* «куплено 2 навсегда» ломалось на три строки и растило высоту каждой строки таблицы. */
-.admtable td.acc { white-space: nowrap; }
+/* длинная строка «Доступ» переносится: в одну строку её конец уходил под закреплённую колонку
+   «Действия» */
+.admtable td.acc { white-space: normal; min-width: 220px; }
+.admin-notices { display: grid; gap: 2px; }
+.admin-notices .notice { margin: 0; }
+.admin-notices .notice span + span::before { content: " · "; color: var(--dim2); }
 
 /* Модалка админки: выдать матрицу. Одна на весь раздел, поэтому без отдельного компонента. */
 .modal-back {
@@ -1078,6 +1122,11 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
 }
 .modal .fields { gap: 8px; }
+/* в окне пары две колонки, дата шире имени: в трети окна дата обрезалась до «2/28/1993» */
+.modal .pairwho { border: 0; margin: 14px 0 0; padding: 0; min-width: 0; }
+.modal .pairwho + .pairwho { padding-top: 14px; border-top: 1px dashed var(--line2); }
+.modal .pairwho legend { padding: 0; margin-bottom: 8px; font: 700 12px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+.modal .pairwho .pairname { margin-top: 10px; }
 .modal .btn.ghost.sm { align-self: center; }
 .modal { text-align: left; }
 .modal .cap { white-space: normal; }
@@ -1153,9 +1202,6 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
   .offer h1 { font-size: 23px; }
   .offer .lede { display: none; }
   .chips { display: none; }
-  .pricelead { margin: 12px 0 10px; padding: 11px 13px; gap: 6px 10px; }
-  .pricelead b { font-size: 23px; }
-  .pricelead .what { font-size: 12.6px; }
   .form { padding: 16px; border-radius: 15px; }
   .form h2 { font-size: 19px; }
   .form .sub { font-size: 12.4px; margin-bottom: 12px; }
@@ -1202,7 +1248,10 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
    читается нормально, в отличие от разрезанной пополам карты. */
 /* Шесть главных точек — это ряд из шести карт. На сайте колонки подбирает auto-fit по ширине
    окна, а в печати ширина фиксированная, и шестая карта срывалась на вторую строку. */
-.printmode .mp { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.printmode .mp { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.printmode .poslist { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.printmode .poslist[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.printmode .poslist[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .printmode .acc,
 .printmode .mp,
 .printmode .poslist,
@@ -1502,8 +1551,6 @@ table.mx td.self { background: var(--card2); }
 
 /* Цена и состав отчёта под первым экраном: раньше стояли в оффере, но карусель заняла его место. */
 .offerbar { margin-top: 18px; }
-.offerbar .pricelead { margin: 0; }
-.offerbar .small { margin-top: 10px; }
 
 /* Крошки и заголовок справочника стоят под каруселью: первый экран одинаков с главной,
    поэтому карусель прижата к шапке — верхний отступ страницы её больше не отодвигает. */
@@ -1779,3 +1826,14 @@ table.mx td.self { background: var(--card2); }
 .error-screen h1 { margin: 0; }
 .error-screen p { margin: 0; color: var(--dim); max-width: 60ch; }
 .error-screen .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.visits-modal { width: min(980px, 100%); min-width: 0; }
+.visits-scroll { overflow-x: auto; }
+.visits-scroll table { width: 100%; border-collapse: collapse; }
+.visits-scroll th, .visits-scroll td { padding: 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.visits-scroll code { white-space: nowrap; user-select: all; }
+
+.account-open-label { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 8em; }
+.account-open-spinner { width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: account-open-spin .8s linear infinite; }
+@keyframes account-open-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .account-open-spinner { animation: none; } }

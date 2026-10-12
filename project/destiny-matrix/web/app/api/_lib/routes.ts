@@ -57,6 +57,16 @@ export async function payment(req: Request, path = "/payments/mock") {
     return jsonError(D.bffErrors.badDate, L, 400);
   }
   if (sex !== undefined && sex !== "m" && sex !== "f") return jsonError(D.bffErrors.badSex, L, 400);
+  // Цель другого продукта: номер сохранённого разбора или ввод, который сервер сохранит сам.
+  const rawReading = body.reading_id;
+  const readingId = rawReading === undefined || rawReading === null || rawReading === "" ? undefined : Number(rawReading);
+  if (readingId !== undefined && (!Number.isInteger(readingId) || readingId <= 0)) {
+    return jsonError(D.bffErrors.badMatrix, L, 400);
+  }
+  const inputs = body.inputs === undefined || body.inputs === null ? undefined : body.inputs;
+  if (inputs !== undefined && (typeof inputs !== "object" || JSON.stringify(inputs).length > 2000)) {
+    return jsonError(D.bffErrors.badDate, L, 400);
+  }
   return forward(path, {
     source: req,
     method: "POST",
@@ -67,6 +77,8 @@ export async function payment(req: Request, path = "/payments/mock") {
       ...(matrixId === undefined ? {} : { matrix_id: matrixId }),
       ...(birth === undefined ? {} : { birth }),
       ...(sex === undefined ? {} : { sex }),
+      ...(readingId === undefined ? {} : { reading_id: readingId }),
+      ...(inputs === undefined ? {} : { inputs }),
     },
     capture: true,
   });

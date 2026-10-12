@@ -21,8 +21,8 @@ it("keeps domain legal details while formatting display fields in the selected l
   const site = {...DEFAULT_SITE, legalLocale: "en" as const};
   const ru = forLocale("ru", site).LEGAL, en = forLocale("en", site).LEGAL;
   for (const key of ["entity", "inn", "ogrnip", "email", "site", "bank"] as const) expect(ru[key]).toBe(en[key]);
-  expect(ru.updated).toBe("20 сентября 2026");
-  expect(en.updated).toBe("20 September 2026");
+  expect(ru.updated).toBe("11 октября 2026");
+  expect(en.updated).toBe("11 October 2026");
   expect(ru.entity).toBe("Arcana Sense");
   expect(ru.inn).toBe("");
 });

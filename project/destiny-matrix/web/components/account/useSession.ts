@@ -2,6 +2,7 @@
 
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { forLocale as apiForLocale } from "@/lib/api";
+import type { Holding } from "@/lib/holdings";
 import { SITE_LANG, type Lang } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 
@@ -36,6 +37,10 @@ export interface Session {
   owned: number;
   /** доступна ли админка */
   admin: boolean;
+  /** продукты, которые открывает действующая подписка: покупать их не предлагаем нигде */
+  subscribed: string[];
+  /** сводка прав для экранов — строки «Доступ» */
+  holdings: Holding[];
   /** подсказка из кеша браузера: доступ не даёт, только объясняет ожидание */
   cached: boolean;
   error: string | null;
@@ -54,6 +59,8 @@ const EMPTY: Session = {
   limit: 1,
   owned: 0,
   admin: false,
+  subscribed: [],
+  holdings: [],
   cached: false,
   error: null,
 };
@@ -100,6 +107,8 @@ export function refreshSession(L: Lang = SITE_LANG): Promise<Session> {
         limit: me.matrices_limit,
         owned: me.owned,
         admin: me.is_admin,
+        subscribed: Object.entries(me.products).filter(([, p]) => p.unlimited).map(([code]) => code),
+        holdings: me.holdings,
         cached: paid,
         error: null,
       });
@@ -248,3 +257,8 @@ export const forLocale = localized((locale: Lang) => ({
   refreshSession: () => refreshSession(locale),
   signOutSession: () => signOutSession(locale),
 }));
+
+/** Действующая подписка открывает этот продукт: кнопок покупки для него быть не должно. */
+export function subscribedTo(session: Session, product = "personal"): boolean {
+  return session.status === "user" && session.subscribed.includes(product);
+}

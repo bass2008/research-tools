@@ -6,22 +6,18 @@ import type { Lang } from "@/lib/i18n/lang";
 import { ENERGY_FIELD_HREF, type ChakraReadingRow, type LongformReading } from "@/lib/readingTypes";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { SiteProfile } from "@/lib/siteProfile";
+import LockIcon from "@/components/ui/LockIcon";
+import RichText from "@/components/ui/RichText";
 import ArcanumCard from "./ArcanumCard";
 import styles from "./ChakraReadingView.module.css";
 
-/** Единственная поддержанная разметка в корпусе — выделение мысли; HTML не исполняется. */
-function Copy({ text }: { text: string }) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => part.startsWith("**")
-    ? <strong key={i}>{part.slice(2, -2)}</strong>
-    : part);
-}
-
-function ChakraReadingCards({ cells, locale, href, printing, eager }: {
+function ChakraReadingCards({ cells, locale, href, printing, eager, locked }: {
   cells: ChakraReadingRow["cells"];
   locale: Lang;
   href: (path: string) => string;
   printing: boolean;
   eager: boolean;
+  locked: boolean;
 }) {
   const { arcanumTitle } = localizedArcana(locale);
   return (
@@ -34,7 +30,8 @@ function ChakraReadingCards({ cells, locale, href, printing, eager }: {
           <figcaption>
             <span className={styles.role}>{cell.title}</span>
             <strong>{cell.arcanum} · {arcanumTitle(cell.arcanum)}</strong>
-            <span className={styles.caption}>{cell.caption}</span>
+            <span className={locked ? `${styles.caption} ${styles.blurred}` : styles.caption}
+              aria-hidden={locked || undefined}>{cell.caption}</span>
           </figcaption>
         </figure>
       ))}
@@ -42,7 +39,9 @@ function ChakraReadingCards({ cells, locale, href, printing, eager }: {
   );
 }
 
-export function ChakraReadingBlock({ row, number, locale, site, printing = false, eager = true, id, titleTag = "h2", titleHref, labelId, note, more }: {
+export type UnlockLink = (className: string, label: ReactNode) => ReactNode;
+
+export function ChakraReadingBlock({ row, number, locale, site, printing = false, eager = true, id, titleTag = "h2", titleHref, labelId, note, more, linkHref, unlock }: {
   row: ChakraReadingRow;
   number?: number;
   locale: Lang;
@@ -55,12 +54,17 @@ export function ChakraReadingBlock({ row, number, locale, site, printing = false
   labelId: string;
   note?: ReactNode;
   more?: { href: string; label: string };
+  /** Pages that already resolve print links (the couple reading) pass their own builder. */
+  linkHref?: (path: string) => string;
+  unlock?: UnlockLink;
 }) {
   const { publicHref } = localizedSite(locale, site);
-  const href = (path: string) => printing ? publicHref(path) : path;
+  const href = linkHref ?? ((path: string) => printing ? publicHref(path) : path);
   const Title = titleTag;
   const title = titleHref ? <Link href={href(titleHref)}>{row.title}</Link> : row.title;
   const labelled = titleTag === "h2";
+  const locked = row.lockedWords !== undefined || row.lockedLabel !== undefined;
+  const plate = locked ? <><LockIcon /> {row.lockedLabel ?? D.report.lockedWords[locale](row.lockedWords!)}</> : null;
   return (
     <section className={styles.block} id={id} data-chakra={row.key} aria-labelledby={labelId}>
       <div className={styles.side}>
@@ -74,35 +78,47 @@ export function ChakraReadingBlock({ row, number, locale, site, printing = false
         {note ? <p className={styles.share}>{note}</p> : null}
       </div>
       <div className={styles.main}>
-        {row.heading ? <h3 className={styles.heading} id={labelled ? undefined : labelId}>{row.heading}</h3> : null}
-        <ChakraReadingCards cells={row.cells} locale={locale} href={href} printing={printing} eager={eager} />
-        <div className={styles.copy} data-empty={row.paragraphs.every((p) => !p) || undefined}>
+        {row.heading ? <h3 className={locked ? `${styles.heading} ${styles.blurred}` : styles.heading}
+          id={labelled ? undefined : labelId} aria-hidden={locked || undefined}>{row.heading}</h3> : null}
+        <ChakraReadingCards cells={row.cells} locale={locale} href={href} printing={printing} eager={eager && !locked} locked={locked} />
+        {locked ? <div className={styles.locked}>
+          <p className={styles.lockPlate} data-testid={`chakra-lock-${row.key}`}>
+            {unlock ? unlock(styles.pill, plate) : <span className={styles.pill}>{plate}</span>}
+          </p>
+          <div className={`${styles.copy} ${styles.blurred}`} aria-hidden="true">
+            {row.paragraphs.map((paragraph, i) => (
+              <p key={i} className={i === 2 ? styles.tension : undefined}>{paragraph}</p>
+            ))}
+          </div>
+        </div> : <div className={styles.copy} data-empty={row.paragraphs.every((p) => !p) || undefined}>
           {row.paragraphs.map((paragraph, i) => (
-            <p key={i} className={i === 2 ? styles.tension : undefined}><Copy text={paragraph} /></p>
+            <p key={i} className={i === 2 ? styles.tension : undefined}><RichText text={paragraph} /></p>
           ))}
-        </div>
+        </div>}
         {more ? <p className={styles.more}><Link href={href(more.href)} data-testid={`chakra-more-${row.key}`}>{more.label}</Link></p> : null}
       </div>
     </section>
   );
 }
 
-export default function ChakraReadingView({ reading, locale, site, printing = false }: {
+export default function ChakraReadingView({ reading, locale, site, printing = false, linkHref, unlock }: {
   reading: LongformReading;
   locale: Lang;
-  site: SiteProfile;
+  site?: SiteProfile;
   printing?: boolean;
+  linkHref?: (path: string) => string;
+  unlock?: UnlockLink;
 }) {
   return (
     <article className={styles.reading} data-testid={reading.testId}>
       {reading.lead ? <p className={styles.intro}>{reading.lead}</p> : null}
       {reading.chakraRows?.map((row, index) => (
-        <ChakraReadingBlock key={row.key} row={row} number={index + 1} locale={locale} site={site} printing={printing}
+        <ChakraReadingBlock key={row.key} row={row} number={index + 1} locale={locale} site={site} printing={printing} linkHref={linkHref} unlock={unlock}
           titleHref={`/encyclopedia/chakra/${row.key}`} labelId={`${reading.testId}-${row.key}`}
           more={{ href: `/encyclopedia/chakra/${row.key}`, label: D.sheet.chakraMore[locale](row.title) }} />
       ))}
       {reading.energyField ? (
-        <ChakraReadingBlock row={reading.energyField} locale={locale} site={site} printing={printing}
+        <ChakraReadingBlock row={reading.energyField} locale={locale} site={site} printing={printing} linkHref={linkHref} unlock={unlock}
           titleHref={ENERGY_FIELD_HREF} labelId={`${reading.testId}-energy-field`}
           more={{ href: ENERGY_FIELD_HREF, label: D.sheet.energyFieldMore[locale] }} />
       ) : null}

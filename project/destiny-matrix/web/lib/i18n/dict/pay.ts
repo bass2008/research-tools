@@ -24,6 +24,7 @@ export const pay = {
     ru: (n: number) => `на ${n} дней`,
     en: (n: number) => `for ${n} days`,
   } satisfies PhraseFn<[number]>,
+  betterValue: { ru: "выгоднее", en: "better value" } satisfies Phrase,
   subscription: { ru: "Подписка", en: "Subscription" } satisfies Phrase,
   pageTitle: { ru: "Оплата разбора", en: "Paying for the reading" } satisfies Phrase,
   pageDescription: {
@@ -38,18 +39,13 @@ export const pay = {
     ru: (name: string, price: string, period: string) => `${name}: ${price}, ${period}.`,
     en: (name: string, price: string, period: string) => `${name}: ${price}, ${period}.`,
   } satisfies PhraseFn<[string, string, string]>,
-  privacyNote: {
-    ru: "Платёжному провайдеру дата рождения не передаётся: в ссылку оплаты она не попадает. "
-      + "Выбранная дата сохраняется в ваш кабинет — по ней сервер печатает платные разделы.",
-    en: "The date of birth is not passed to the payment provider: it never goes into the payment "
-      + "link. The chosen date is kept in your account — the server prints the paid sections from it.",
-  } satisfies Phrase,
   checkFailed: {
     ru: "Не удалось проверить доступ.",
     en: "The access could not be checked.",
   } satisfies Phrase,
   anyDates: { ru: "Любое число дат", en: "Any number of dates" } satisfies Phrase,
   oneDate: { ru: "Одна дата", en: "One date" } satisfies Phrase,
+  onePairCap: { ru: "Одна пара", en: "One couple" } satisfies Phrase,
   onePayment: { ru: "один платёж", en: "one payment" } satisfies Phrase,
   // тарифная карточка
   allSections: { ru: "Все 20 разделов разбора", en: "All 20 sections of the reading" } satisfies Phrase,
@@ -59,6 +55,15 @@ export const pay = {
   noSubscription: { ru: "Один платёж, без подписки", en: "One payment, no subscription" } satisfies Phrase,
   opensAtOnce: { ru: "Открывается сразу после оплаты", en: "Opens right after payment" } satisfies Phrase,
   downloadsAsPdf: { ru: "Скачивается в PDF и остаётся у вас", en: "Downloads as a PDF and stays with you" } satisfies Phrase,
+  allReadings: { ru: "Все разделы личных разборов и разборов пары", en: "Every section of personal and couple readings" } satisfies Phrase,
+  unlimitedReadings: { ru: "Любые даты рождения и пары", en: "Any dates of birth and couples" } satisfies Phrase,
+  pairSections: { ru: "Все сферы разбора совместимости", en: "Every sphere of the compatibility reading" } satisfies Phrase,
+  pairDates: { ru: "Одна пара — две даты рождения", en: "One couple — two dates of birth" } satisfies Phrase,
+  pairOpens: {
+    ru: "Полный разбор совместимости, включая толкования семи чакр и общего энергополя, открывается сразу после оплаты.",
+    en: "The full compatibility reading, including all seven chakras and the overall energy field, opens immediately after payment.",
+  } satisfies Phrase,
+  chooseTitle: { ru: "Что покупаем", en: "What would you like to buy" } satisfies Phrase,
   openedFor: {
     ru: (period: string) => `Открыто ${period}, дальше закрывается`,
     en: (period: string) => `Open ${period}, then it closes`,
@@ -73,11 +78,30 @@ export const pay = {
   } satisfies PhraseFn<[string]>,
   priceBeingUpdated: { ru: "уточняется", en: "being updated" } satisfies Phrase,
   freeWord: { ru: "бесплатно", en: "free" } satisfies Phrase,
+  openBySubscription: { ru: "открыт по вашей подписке", en: "open with your subscription" } satisfies Phrase,
 };
 
 export const payForm = {
   anyDates: { ru: "любое число дат", en: "any number of dates" } satisfies Phrase,
   oneDate: { ru: "одна дата", en: "one date" } satisfies Phrase,
+  onePair: { ru: "одна пара", en: "one couple" } satisfies Phrase,
+  manyPlansPair: {
+    ru: "Разбор пары открывает все сферы совместимости этой пары, подписка — все разборы сайта на срок.",
+    en: "The couple reading opens every sphere for this couple; the subscription opens every reading on the site for its term.",
+  } satisfies Phrase,
+  subscribedTitle: { ru: "Подписка действует", en: "Your subscription is active" } satisfies Phrase,
+  subscribedUntil: {
+    ru: (date: string) => `До ${date} все разборы открыты — покупать ничего не нужно.`,
+    en: (date: string) => `Until ${date} every reading is open — there is nothing to buy.`,
+  } satisfies PhraseFn<[string]>,
+  openMyReading: { ru: "Открыть мой разбор", en: "Open my reading" } satisfies Phrase,
+  openCompatibility: { ru: "Посчитать совместимость", en: "Calculate compatibility" } satisfies Phrase,
+  anyReadings: { ru: "все разборы: даты и пары", en: "all readings: dates and couples" } satisfies Phrase,
+  noPairChosen: { ru: "Пара не выбрана", en: "No couple chosen" } satisfies Phrase,
+  noPairHint: {
+    ru: "Сначала посчитайте совместимость — платёж откроет эту пару.",
+    en: "Calculate the compatibility first — the payment will unlock that couple.",
+  } satisfies Phrase,
   storedInAccount: { ru: "матрицы хранятся в кабинете", en: "matrices are kept in your account" } satisfies Phrase,
   noSubscription: {
     ru: "без подписки: открыт в аккаунте и скачивается в PDF",
@@ -98,10 +122,25 @@ export const payForm = {
     en: (price: string) => `All 20 sections of the reading for one date of birth. The price is ${price}, `
       + "one payment with no subscription; the reading downloads as a PDF.",
   } satisfies PhraseFn<[string]>,
+  onePlanPair: {
+    ru: (price: string) => `Все сферы разбора совместимости для одной пары. Стоимость — ${price}, `
+      + "один платёж без подписки; разбор скачивается в PDF.",
+    en: (price: string) => `Every sphere of the compatibility reading for one couple. The price is ${price}, `
+      + "one payment with no subscription; the reading downloads as a PDF.",
+  } satisfies PhraseFn<[string]>,
+  onePlanAll: {
+    ru: (price: string, period: string, everything: boolean) => (everything
+      ? `Все разделы личных разборов и разборов пары — для любых дат и пар ${period}. `
+      : `Все 20 разделов разбора — для любых дат ${period}. `)
+      + `Стоимость — ${price}, без автосписаний: продление вручную.`,
+    en: (price: string, period: string, everything: boolean) => (everything
+      ? `All sections of personal and couple readings, for any dates and couples, ${period}. `
+      : `All 20 sections of the reading, for any dates, ${period}. `)
+      + `The price is ${price}, with no auto-renewal: you renew by hand.`,
+  } satisfies PhraseFn<[string, string, boolean]>,
   planGroup: { ru: "Тариф", en: "Plan" } satisfies Phrase,
   paymentOpens: { ru: "Платёж откроет", en: "The payment opens" } satisfies Phrase,
   checkingDate: { ru: "Проверяем дату…", en: "Checking the date…" } satisfies Phrase,
-  noDateChosen: { ru: "Дата не выбрана", en: "No date chosen" } satisfies Phrase,
   checkingLink: {
     ru: "Проверяем дату из ссылки в вашем кабинете…",
     en: "Checking the date from the link in your account…",
@@ -114,32 +153,29 @@ export const payForm = {
     ru: ", чтобы открыть именно её. Другую дату можно",
     en: " to open that one. Another date can be",
   } satisfies Phrase,
+  pickWithoutLogin: { ru: "выбрать без входа", en: "chosen without signing in" } satisfies Phrase,
+  loginForPair: {
+    ru: "Эта пара сохранена в аккаунте —",
+    en: "This couple is saved in an account —",
+  } satisfies Phrase,
+  loginForPairTail: {
+    ru: ", чтобы открыть именно её. Другую пару можно",
+    en: " to open that one. Another couple can be",
+  } satisfies Phrase,
   calcOnHome: { ru: "посчитать на главной", en: "calculated on the home page" } satisfies Phrase,
   alreadyOpen: {
     ru: (label: string) => `Разбор «${label}» уже открыт — второй раз платить не нужно.`,
     en: (label: string) => `The “${label}” reading is already open — no need to pay again.`,
   } satisfies PhraseFn<[string]>,
   openReading: { ru: "Открыть разбор", en: "Open the reading" } satisfies Phrase,
-  anotherDate: { ru: "Другую дату можно", en: "Another date can be" } satisfies Phrase,
-  missingDate: {
-    ru: "Даты из ссылки в вашем кабинете нет: платёж за неё не пройдёт. Выберите дату из списка или",
-    en: "The date from the link is not in your account, so a payment for it will not go through. Pick a date from the list or",
-  } satisfies Phrase,
-  calcItOnHome: { ru: "посчитайте её на главной", en: "calculate it on the home page" } satisfies Phrase,
-  noDateChosenHint: {
-    ru: "Дата не выбрана: платёж открывает конкретную дату.",
-    en: "No date is chosen: a payment opens one specific date.",
-  } satisfies Phrase,
-  enterOnHome: { ru: "Введите её на главной", en: "Enter it on the home page" } satisfies Phrase,
-  freeCalc: { ru: "— расчёт бесплатный.", en: "— the calculation is free." } satisfies Phrase,
   willOpen: {
-    ru: (label: string) => `Откроется «${label}». Платёжному провайдеру дата не передаётся.`,
-    en: (label: string) => `“${label}” will open. The date is never passed to the payment provider.`,
+    ru: (label: string) => `Откроется «${label}».`,
+    en: (label: string) => `“${label}” will open.`,
   } satisfies PhraseFn<[string]>,
   emailLabel: { ru: "Почта для доступа", en: "Email for access" } satisfies Phrase,
   signedInAs: {
-    ru: (email: string) => `Вы вошли как ${email}: тариф начислится этому аккаунту.`,
-    en: (email: string) => `You are signed in as ${email}: the plan will be added to this account.`,
+    ru: (email: string) => `Вы вошли как ${email}: покупка будет в этом аккаунте.`,
+    en: (email: string) => `You are signed in as ${email}: the purchase goes to this account.`,
   } satisfies PhraseFn<[string]>,
   passwordKnown: { ru: "Пароль этого аккаунта", en: "Password of this account" } satisfies Phrase,
   passwordNew: { ru: "Пароль для входа", en: "Password to sign in" } satisfies Phrase,
@@ -154,14 +190,15 @@ export const payForm = {
   } satisfies Phrase,
   restorePassword: { ru: "Восстановить пароль", en: "Reset the password" } satisfies Phrase,
   newPairHint: {
-    ru: "С этой парой вход работает с любого устройства. На эту почту придёт письмо о покупке.",
-    en: "This pair signs you in from any device. A receipt will be sent to this address.",
+    ru: "С этой почтой и паролем вход работает с любого устройства. На эту почту придёт письмо о покупке.",
+    en: "This email and password sign you in from any device. A receipt will be sent to this address.",
   } satisfies Phrase,
   consentHead: {
     ru: "Согласен(на) на обработку персональных данных на условиях",
     en: "I agree to the processing of personal data under the",
   } satisfies Phrase,
   consentPolicy: { ru: "политики", en: "privacy policy" } satisfies Phrase,
+  termsByPaying: { ru: "Нажимая «Оплатить», вы принимаете", en: "By paying, you accept the" } satisfies Phrase,
   consentAccept: { ru: ", принимаю", en: ", I accept the" } satisfies Phrase,
   consentTerms: { ru: "оферту", en: "terms" } satisfies Phrase,
   consentAnd: { ru: "и", en: "and the" } satisfies Phrase,
@@ -188,9 +225,9 @@ export const payForm = {
       en: "Consent to the processing of personal data is required.",
     } satisfies Phrase,
     otherAccount: {
-      ru: (email: string) => `Вы вошли как ${email}: тариф начислится этому аккаунту. Чтобы `
+      ru: (email: string) => `Вы вошли как ${email}: покупка будет в этом аккаунте. Чтобы `
         + "оплатить на другую почту, сначала выйдите из аккаунта.",
-      en: (email: string) => `You are signed in as ${email}: the plan will go to this account. To `
+      en: (email: string) => `You are signed in as ${email}: the purchase goes to this account. To `
         + "pay with another address, sign out first.",
     } satisfies PhraseFn<[string]>,
     shortPassword: {
@@ -246,6 +283,16 @@ export const payResult = {
     en: "The payment went through and the reading is saved in your account.",
   } satisfies Phrase,
   openFull: { ru: "Открыть полный разбор", en: "Open the full reading" } satisfies Phrase,
+  subscriptionPaid: {
+    ru: (until: string) => `Платёж прошёл: подписка действует${until ? ` до ${until}` : ""}, все разборы открыты.`,
+    en: (until: string) => `The payment went through: the subscription is active${until ? ` until ${until}` : ""}, every reading is open.`,
+  } satisfies PhraseFn<[string]>,
+  calculate: { ru: "Рассчитать разбор", en: "Calculate a reading" } satisfies Phrase,
+  calculatePair: { ru: "Рассчитать совместимость", en: "Calculate compatibility" } satisfies Phrase,
+  moneyBack: {
+    ru: "Деньги вернулись тем же способом, которым платили.",
+    en: "The money has been returned the way you paid.",
+  } satisfies Phrase,
   refundedTitle: { ru: "Платёж возвращён", en: "The payment was refunded" } satisfies Phrase,
   refundedText: {
     ru: "Деньги вернулись тем же способом, которым платили. Разбор закрыт, сохранённая дата "
@@ -267,6 +314,10 @@ export const payResult = {
   } satisfies Phrase,
   unknownTitle: { ru: "Не удалось проверить платёж", en: "The payment could not be checked" } satisfies Phrase,
   pendingTitle: { ru: "Платёж ещё обрабатывается", en: "The payment is still being processed" } satisfies Phrase,
+  signInTitle: {
+    ru: "Войдите, чтобы проверить оплату и открыть разбор",
+    en: "Sign in to check your payment and open the reading",
+  } satisfies Phrase,
   pendingText: {
     ru: "Банк пока не подтвердил оплату. Как только подтвердит, доступ откроется сам — "
       + "обновите кабинет через минуту.",
@@ -279,6 +330,7 @@ export const payResult = {
   stageRefunded: { ru: "Платёж возвращён", en: "Payment refunded" } satisfies Phrase,
   stageFailed: { ru: "Платёж не прошёл", en: "Payment failed" } satisfies Phrase,
   stagePending: { ru: "Платёж ещё в обработке", en: "Payment still processing" } satisfies Phrase,
+  stageSignIn: { ru: "Войдите для проверки оплаты", en: "Sign in to check your payment" } satisfies Phrase,
   stageUnknown: { ru: "Не удалось проверить платёж", en: "Payment could not be checked" } satisfies Phrase,
   stageChecking: { ru: "Проверяем платёж", en: "Checking the payment" } satisfies Phrase,
   // чек

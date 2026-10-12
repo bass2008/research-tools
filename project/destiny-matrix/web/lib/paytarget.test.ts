@@ -84,5 +84,7 @@ describe("цель платежа", () => {
     expect(paymentTargetLabel({ matrix: { birth: "1993-03-14", sex: "f", title: null }, matrix_id: 7 }))
       .toBe(`${birthLabel("1993-03-14")}, ${sexLabel("f")}`);
     expect(paymentTargetLabel({ matrix: null, matrix_id: null })).toBe("—");
+    expect(paymentTargetLabel({ matrix: null, matrix_id: null, tariff: { display_name: "Подписка на 3 месяца" } }))
+      .toBe("Подписка на 3 месяца");
   });
 });

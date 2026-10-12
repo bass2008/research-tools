@@ -12,8 +12,11 @@ function links(text: string) {
   });
 }
 
+// «29,1 %»: знак не должен уходить на следующую строку от числа
+const PERCENT = /(\d) %/g;
+
 export default function RichText({ text }: { text: string }) {
-  return text.split(BOLD).map((part, i) => part.startsWith("**")
+  return text.replace(PERCENT, "$1\u00a0%").split(BOLD).map((part, i) => part.startsWith("**")
     ? <strong key={i}>{links(part.slice(2, -2))}</strong>
     : <Fragment key={i}>{links(part)}</Fragment>);
 }

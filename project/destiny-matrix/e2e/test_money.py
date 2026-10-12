@@ -8,14 +8,15 @@ from conftest import ADMIN, BASE
 
 
 def test_buying_a_locked_date_from_account_opens_that_date(page, mail):
-    """В кабинете лежит закрытая дата; «Открыть» из её карточки должно оплатить именно её."""
+    """В кабинете лежит закрытая дата; «Купить» из её карточки должно оплатить именно её."""
     flows.register(page, mail)
     flows.calculate(page, 12, 12, 1988)
     flows.save_current(page)
 
     card = flows.matrix_cards(page).first
     assert "12 декабря 1988" in card.inner_text()
-    card.get_by_role("link", name="Открыть").click()
+    card.get_by_role("link", name="Купить").click()
+    page.get_by_test_id("plan-single").click()
     expect(page.get_by_test_id("pay-submit")).to_contain_text("12 декабря 1988")
 
     flows.pay(page, mail)
@@ -43,16 +44,18 @@ def test_refund_by_admin_closes_the_access(page, mail):
     assert "куплена" not in card, card
 
 
-def test_paying_for_another_email_while_signed_in_is_stopped(page, mail):
+def test_signed_in_pays_into_own_account_without_email_and_consent(page, mail):
+    """Вошедшему не нужны ни почта, ни вторая галочка: платёж идёт в его аккаунт, оферту он
+    принимает оплатой."""
     flows.register(page, mail)
     flows.calculate(page, 14, 2, 1990)
     flows.open_pay(page)
-    page.get_by_test_id("pay-email").fill("someone-else@example.ru")
-    page.locator(".consent input[type=checkbox]").check()
+    expect(page.get_by_test_id("pay-account")).to_contain_text(mail)
+    expect(page.get_by_test_id("pay-email")).to_have_count(0)
+    expect(page.locator(".consent input")).to_have_count(0)
+    expect(page.get_by_test_id("pay-terms")).to_contain_text("оферту")
     page.get_by_test_id("pay-submit").click()
-    page.wait_for_timeout(1200)
-    expect(page.locator(".err")).to_contain_text("вошли как")
-    assert page.get_by_test_id("paid-matrix").count() == 0
+    expect(page.get_by_test_id("paid-matrix")).to_be_visible(timeout=30_000)
 
 
 def test_double_click_makes_one_payment(page, mail):
@@ -60,7 +63,7 @@ def test_double_click_makes_one_payment(page, mail):
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill(mail)
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     button = page.get_by_test_id("pay-submit")
     button.click()
     button.click(force=True, timeout=2000)
@@ -88,7 +91,7 @@ def test_short_password_is_refused(page, mail):
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill(mail)
     page.get_by_test_id("pay-password").fill("12")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(900)
     expect(page.locator(".err")).to_contain_text("Пароль")
@@ -100,7 +103,7 @@ def test_broken_email_is_refused(page):
     flows.calculate(page, 18, 6, 1994)
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill("почта-без-собаки")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(900)
     assert page.get_by_test_id("paid-matrix").count() == 0

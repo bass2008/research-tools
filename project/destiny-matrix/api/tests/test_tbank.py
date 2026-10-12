@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import pytest
 from sqlalchemy import select
@@ -10,10 +11,118 @@ from sqlalchemy import select
 from app import payments
 from app.payments.tbank import Tbank
 from app.payments.base import PaymentUrls
-from app.models import Entitlement, Payment, User
+from app.models import Entitlement, Payment, Purchase, User
 
 
 BANK = Tbank()
+
+WEBHOOK_LOG = "uvicorn.error.payment_webhook"
+
+
+def webhook_records(caplog):
+    return [json.loads(record.getMessage()) for record in caplog.records if record.name == WEBHOOK_LOG]
+
+
+def test_webhook_logs_full_payload_with_recursive_secret_masking(client, db, bank, caplog):
+    body = start(client, "buyer@gmail.com")
+    note = signed({
+        "TerminalKey": "1234DEMO", "PaymentId": body["payment_id"], "OrderId": body["order_id"],
+        "Status": "CONFIRMED", "Amount": 39000, "Success": True, "ErrorCode": "0",
+        "Pan": "4000000000000101", "CardId": "card-secret", "RebillId": "rebill-secret",
+        "ExpDate": "1230", "Email": "buyer@gmail.com",
+        "DATA": {"Email": "buyer@gmail.com", "Access_Token": "nested-token",
+                 "items": [{"pAsSwOrD": "nested-password", "CVV": "123",
+                            "customField": "сохранить\nцеликом", "nullable": None}]},
+    })
+    caplog.set_level(logging.INFO, logger=WEBHOOK_LOG)
+    response = client.post("/api/payments/notify/tbank", json=note)
+    assert response.status_code == 200, response.text
+    received, completed = webhook_records(caplog)
+    assert received["event"] == "received" and completed["event"] == "completed"
+    assert received["webhook_id"] == completed["webhook_id"]
+    assert received["at"] <= completed["at"]
+    assert received["provider"] == "tbank"
+    masked = received["payload"]
+    assert masked.keys() == note.keys()
+    for field in ("Token", "TerminalKey", "Pan", "CardId", "RebillId", "ExpDate"):
+        assert masked[field] == "[REDACTED]"
+    assert masked["Email"] == masked["DATA"]["Email"] == "buyer@gmail.com"
+    assert masked["DATA"]["Access_Token"] == "[REDACTED]"
+    assert masked["DATA"]["items"] == [{"pAsSwOrD": "[REDACTED]", "CVV": "[REDACTED]",
+                                         "customField": "сохранить\nцеликом", "nullable": None}]
+    for field in ("PaymentId", "OrderId", "Status", "Amount", "Success", "ErrorCode"):
+        assert masked[field] == note[field]
+    assert completed["signature_valid"] is True
+    assert completed["status_before"] == "NEW" and completed["status_after"] == "CONFIRMED"
+    assert completed["result"] == "applied" and completed["http_status"] == 200
+    assert completed["payment_id"] == db.scalars(select(Payment)).one().id
+    assert note["Token"] not in json.dumps(webhook_records(caplog))
+
+
+def test_webhook_logs_invalid_signature_without_changing_payment(client, db, bank, caplog):
+    body = start(client)
+    note = {"PaymentId": body["payment_id"], "Status": "CONFIRMED", "Token": "wrong-secret"}
+    caplog.set_level(logging.INFO, logger=WEBHOOK_LOG)
+    assert client.post("/api/payments/notify", json=note).status_code == 403
+    received, completed = webhook_records(caplog)
+    assert received["payload"]["Token"] == "[REDACTED]"
+    assert completed["signature_valid"] is False
+    assert completed["result"] == "invalid_signature" and completed["http_status"] == 403
+    assert db.scalars(select(Payment)).one().status == "NEW"
+    assert db.scalars(select(Entitlement)).all() == []
+
+
+def test_webhook_logs_unknown_payment(client, bank, caplog):
+    caplog.set_level(logging.INFO, logger=WEBHOOK_LOG)
+    note = signed({"PaymentId": "missing", "Status": "CONFIRMED", "Amount": 39000})
+    assert client.post("/api/payments/notify", json=note).status_code == 404
+    received, completed = webhook_records(caplog)
+    assert received["payload"]["PaymentId"] == "missing"
+    assert completed["signature_valid"] is True
+    assert completed["result"] == "payment_not_found" and completed["http_status"] == 404
+
+
+def test_webhook_logs_existing_status_transitions_without_changing_them(client, db, bank, caplog, monkeypatch):
+    from app import mail
+    body = start(client)
+    sent = []
+    monkeypatch.setattr(mail, "purchase", lambda *args, **kwargs: sent.append("purchase"))
+    caplog.set_level(logging.INFO, logger=WEBHOOK_LOG)
+    states = ["CONFIRMED", "CONFIRMED", "AUTHORIZED", "CONFIRMED", "REFUNDED"]
+    for state in states:
+        note = signed({"PaymentId": body["payment_id"], "OrderId": body["order_id"],
+                       "Status": state, "Amount": 39000})
+        response = client.post("/api/payments/notify", json=note)
+        assert response.status_code == 200 and response.json()["status"] == state
+    completed = [r for r in webhook_records(caplog) if r["event"] == "completed"]
+    assert [r["status_before"] for r in completed] == ["NEW", *states[:-1]]
+    assert [r["status_after"] for r in completed] == states
+    assert len({r["webhook_id"] for r in completed}) == len(states)
+    assert sent == ["purchase"]
+    rights = db.scalars(select(Entitlement)).all()
+    assert len(rights) == 1 and rights[0].revoked_at is not None
+    assert [method for method, _ in bank] == ["Init"]  # никаких дополнительных GetState
+
+
+def test_webhook_logs_processing_error_and_reraises_it(client, db, bank, caplog, monkeypatch):
+    from app.routers import payments as router
+    body = start(client)
+    note = signed({"PaymentId": body["payment_id"], "Status": "CONFIRMED"})
+    failure = RuntimeError("failure containing " + note["Token"])
+
+    def fail(*args):
+        raise failure
+
+    monkeypatch.setattr(router, "apply", fail)
+    caplog.set_level(logging.INFO, logger=WEBHOOK_LOG)
+    with pytest.raises(RuntimeError) as caught:
+        router.notify("tbank", note, db)
+    assert caught.value is failure
+    received, completed = webhook_records(caplog)
+    assert completed["result"] == "error" and completed["http_status"] == 500
+    assert completed["error_type"] == "RuntimeError"
+    assert completed["status_before"] == "NEW" and completed["status_after"] is None
+    assert note["Token"] not in json.dumps(webhook_records(caplog))
 
 DOC_EXAMPLE = {"TerminalKey": "MerchantTerminalKey", "Amount": 19200, "OrderId": "00000",
                "Description": "Подарочная карта на 1000 рублей"}
@@ -72,33 +181,46 @@ def test_start_creates_pending_payment(client, db, bank):
     assert db.scalars(select(Entitlement)).all() == []
     method, payload = bank[0]
     assert method == "Init" and payload["OrderId"].startswith(f"arcana-{payment.id}-")
-    assert payload["Amount"] == 25_000
+    assert payload["Amount"] == 39_000
     assert payload["NotificationURL"].endswith("/api/payments/notify/tbank")
 
 
 def test_notification_opens_access_once(client, db, bank):
     body = start(client, "once@example.ru")
     note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 39_000})
     assert client.post("/api/payments/notify", json=note).json()["status"] == "CONFIRMED"
     assert client.post("/api/payments/notify", json=note).status_code == 200
 
     payment = db.scalars(select(Payment)).one()
     rights = db.scalars(select(Entitlement)).all()
     assert payment.paid_at is not None and len(rights) == 1
-    assert rights[0].matrix_id == payment.matrix_id
+    assert rights[0].reading_id == payment.reading_id
+
+
+def second_order(db, reading_id: int, order: str, external: str) -> None:
+    """Второй заказ на тот же разбор, выставленный в обход проверки «уже открыт»."""
+    user_id = db.scalars(select(User)).one().id
+    purchase = Purchase(user_id=user_id, offer_id="single", reading_id=reading_id, amount=39_000,
+                        offer_body=json.dumps({"id": "single", "name": "Полный разбор одной даты",
+                                               "products": ["personal"], "per_reading": True}))
+    db.add(purchase)
+    db.flush()
+    db.add(Payment(user_id=user_id, purchase_id=purchase.id, provider="tbank", status="NEW",
+                   amount=39_000, order_id=order, external_id=external))
+    db.commit()
 
 
 def test_authorized_then_confirmed_gives_one_right(client, db, bank):
     body = start(client, "two@example.ru")
     for state in ("AUTHORIZED", "CONFIRMED"):
         note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                       "Status": state, "PaymentId": body["payment_id"], "Amount": 25_000})
+                       "Status": state, "PaymentId": body["payment_id"], "Amount": 39_000})
         assert client.post("/api/payments/notify", json=note).status_code == 200
     assert len(db.scalars(select(Entitlement)).all()) == 1
 
 
-def test_second_payment_for_the_same_date_is_accepted_by_the_bank_and_grants_nothing(client, db, bank):
+def test_second_payment_for_the_same_date_is_accepted_by_the_bank_and_grants_nothing(client, db, bank, caplog):
     """Уведомление о втором платеже за уже открытую дату — приём, а не 500.
 
     Живой прогон на тестовом терминале 09.09 дал четыре `500 Internal Server Error` на
@@ -108,22 +230,22 @@ def test_second_payment_for_the_same_date_is_accepted_by_the_bank_and_grants_not
     """
     first = start(client, "twice@example.ru")
     note = signed({"TerminalKey": "1234DEMO", "OrderId": first["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": first["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": first["payment_id"], "Amount": 39_000})
     assert client.post("/api/payments/notify", json=note).status_code == 200
 
-    matrix_id = db.scalars(select(Payment)).first().matrix_id
-    second = Payment(user_id=db.scalars(select(User)).one().id, provider="tbank",
-                     status="NEW", amount=25_000, matrix_id=matrix_id,
-                     order_id="arcana-999-x", external_id="999",
-                     tariff_body=json.dumps({"id": "single", "name": "Полный разбор одной даты"}))
-    db.add(second)
-    db.commit()
+    second_order(db, db.scalars(select(Payment)).first().reading_id, "arcana-999-x", "999")
 
     late = signed({"TerminalKey": "1234DEMO", "OrderId": "arcana-999-x", "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": "999", "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": "999", "Amount": 39_000})
+    caplog.set_level(logging.INFO, logger=WEBHOOK_LOG)
+    caplog.clear()
     answer = client.post("/api/payments/notify", json=late)
     assert answer.status_code == 200, answer.text
     assert answer.json()["duplicate"] is True
+    received, completed = webhook_records(caplog)
+    assert received["payload"]["PaymentId"] == "999"
+    assert completed["result"] == "duplicate" and completed["http_status"] == 200
+    assert completed["status_before"] == completed["status_after"] == "NEW"
     assert len(db.scalars(select(Entitlement)).all()) == 1
 
 
@@ -131,7 +253,7 @@ def test_repeated_notification_never_answers_5xx(client, db, bank):
     """Провайдер шлёт одно и то же уведомление сколько угодно раз — ответ всегда 2xx."""
     body = start(client, "storm@example.ru")
     note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 39_000})
     codes = [client.post("/api/payments/notify", json=note).status_code for _ in range(6)]
     assert codes == [200] * 6, codes
     assert len(db.scalars(select(Entitlement)).all()) == 1
@@ -142,18 +264,11 @@ def test_date_can_be_bought_again_after_a_refund(client, db, bank):
     body = start(client, "again@example.ru")
     for state in ("CONFIRMED", "REFUNDED"):
         note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                       "Status": state, "PaymentId": body["payment_id"], "Amount": 25_000})
+                       "Status": state, "PaymentId": body["payment_id"], "Amount": 39_000})
         assert client.post("/api/payments/notify", json=note).status_code == 200
-    matrix_id = db.scalars(select(Payment)).first().matrix_id
-
-    again = Payment(user_id=db.scalars(select(User)).one().id, provider="tbank",
-                    status="NEW", amount=25_000, matrix_id=matrix_id,
-                    order_id="arcana-777-x", external_id="777",
-                    tariff_body=json.dumps({"id": "single", "name": "Полный разбор одной даты"}))
-    db.add(again)
-    db.commit()
+    second_order(db, db.scalars(select(Payment)).first().reading_id, "arcana-777-x", "777")
     note = signed({"TerminalKey": "1234DEMO", "OrderId": "arcana-777-x", "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": "777", "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": "777", "Amount": 39_000})
     assert client.post("/api/payments/notify", json=note).status_code == 200
     active = [r for r in db.scalars(select(Entitlement)).all() if r.revoked_at is None]
     assert len(active) == 1, "после возврата новая покупка не выдала право"
@@ -171,7 +286,7 @@ def test_refund_revokes_access(client, db, bank):
     body = start(client, "back@example.ru")
     for state in ("CONFIRMED", "REFUNDED"):
         note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                       "Status": state, "PaymentId": body["payment_id"], "Amount": 25_000})
+                       "Status": state, "PaymentId": body["payment_id"], "Amount": 39_000})
         client.post("/api/payments/notify", json=note)
     payment = db.scalars(select(Payment)).one()
     right = db.scalars(select(Entitlement)).one()
@@ -201,7 +316,7 @@ def test_admin_refund_revokes_access(client, auth, db, bank, monkeypatch):
 
     body = start(client, "refund@example.ru")
     note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 39_000})
     client.post("/api/payments/notify", json=note)
 
     monkeypatch.setattr(payments.PROVIDERS["tbank"], "cancel",
@@ -260,7 +375,7 @@ def test_mock_provider_pays_at_once(client, db):
     assert body["provider"] == "mock" and body["paid"] is True and body["payment_url"] is None
     payment = db.scalars(select(Payment)).one()
     assert payment.paid_at is not None
-    assert db.scalars(select(Entitlement)).one().payment_id == payment.id
+    assert db.scalars(select(Entitlement)).one().purchase_id == payment.purchase_id
 
 
 def test_second_provider_plugs_in_without_touching_the_router(client, db, monkeypatch):
@@ -302,20 +417,20 @@ def test_second_provider_plugs_in_without_touching_the_router(client, db, monkey
 
     note = client.post("/api/payments/notify/fake", json={"id": body["payment_id"]})
     assert note.status_code == 200 and note.json()["status"] == "succeeded"
-    assert db.scalars(select(Entitlement)).one().payment_id == db.scalars(select(Payment)).one().id
+    assert db.scalars(select(Entitlement)).one().purchase_id == db.scalars(select(Payment)).one().purchase_id
 
 
 def paid_once(client, bank, email="ref@example.ru", birth="1992-02-02"):
     body = start(client, email, birth)
     note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 39_000})
     client.post("/api/payments/notify", json=note)
     return body
 
 
 def refund_note(body, status="REFUNDED"):
     return signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": status, "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": status, "PaymentId": body["payment_id"], "Amount": 39_000})
 
 
 def test_refund_closes_the_report_and_pdf(client, db, bank, monkeypatch):
@@ -339,7 +454,7 @@ def test_refund_keeps_the_saved_date(client, db, bank):
     headers = {"Authorization": f"Bearer {body['token']}"}
     client.post("/api/payments/notify", json=refund_note(body))
 
-    rows = client.get("/api/matrices", headers=headers).json()["items"]
+    rows = client.get("/api/readings?product=personal", headers=headers).json()["items"]
     assert [row["id"] for row in rows] == [body["matrix_id"]]
     assert rows[0]["access"] == "locked"
 
@@ -414,7 +529,7 @@ def test_sweep_finishes_the_payment_nobody_confirmed(client, db, bank, monkeypat
 
     db.refresh(payment)
     assert payment.paid_at is not None
-    assert db.scalars(select(Entitlement)).one().matrix_id == body["matrix_id"]
+    assert db.scalars(select(Entitlement)).one().reading_id == body["matrix_id"]
 
 
 def test_sweep_writes_down_provider_errors(client, db, bank, monkeypatch):
@@ -482,7 +597,7 @@ def test_init_carries_the_receipt(client, db, bank):
     assert item["Name"].startswith("Адаптация web-страницы"), item["Name"]
     assert "матрицы судьбы" in item["Name"], item["Name"]
     assert item["Quantity"] == 1
-    assert (item["Price"], item["Amount"]) == (25_000, 25_000)
+    assert (item["Price"], item["Amount"]) == (39_000, 39_000)
     assert item["Tax"] == "none"
     # «job» — «работа» по ФФД; «work» боевой терминал не признаёт и считает поле пустым
     assert item["PaymentObject"] == "job" and item["PaymentMethod"] == "full_payment"
@@ -490,9 +605,9 @@ def test_init_carries_the_receipt(client, db, bank):
 
 def test_receipt_sum_always_matches_the_payment(client, db, bank):
     """Сумма позиций чека обязана совпасть с суммой платежа — иначе банк откажет в приёме."""
-    from app.models import Tariff
+    from app.models import Offer
 
-    db.get(Tariff, "single").price = 99_900
+    db.get(Offer, "single").price = 99_900
     db.commit()
     start(client, "sum@example.ru")
     payload = init_of(bank)
@@ -516,9 +631,9 @@ def test_receipt_names_the_subject_of_the_contract_not_the_tariff(client, db, ba
     """В чеке — предмет договора, а не витринное название. Патент выдан на разработку ПО, поэтому
     наименование позиции и описание платежа обязаны говорить о работах по адаптации страницы,
     как бы ни назывался тариф на витрине."""
-    from app.models import Tariff
+    from app.models import Offer
 
-    db.get(Tariff, "single").name = "Полный разбор одной даты со скидкой"
+    db.get(Offer, "single").name = "Полный разбор одной даты со скидкой"
     db.commit()
     start(client, "subject@example.ru")
 
@@ -553,7 +668,7 @@ def test_receipt_follows_the_tax_mode_from_settings(client, db, bank, monkeypatc
 def test_payment_without_email_never_reaches_the_bank(bank):
     """Чек без адреса покупателя не примут, поэтому такой платёж не начинаем вовсе."""
     with pytest.raises(payments.PaymentError):
-        payments.PROVIDERS["tbank"].start("arcana-1-x", 25_000, "Разбор", None,
+        payments.PROVIDERS["tbank"].start("arcana-1-x", 39_000, "Разбор", None,
                                             urls=PaymentUrls("", "", ""))
     assert bank == [], "в банк ушёл запрос без чека"
 
@@ -596,7 +711,7 @@ def test_sweep_stops_asking_about_an_abandoned_payment(client, db, bank, monkeyp
     assert sweep.run(db) is None, "досверка снова взялась за брошенный платёж"
 
     note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 39_000})
     assert client.post("/api/payments/notify", json=note).status_code == 200
     db.refresh(payment)
     assert payment.paid_at is not None, "опоздавшая оплата обязана открыть доступ"

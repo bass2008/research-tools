@@ -1,6 +1,7 @@
 // Серверная половина спецификации отчёта. Платные подписи и ключи позиций не попадают
 // в клиентский чанк; сам корпус трактовок читается строго из web/content/arcana.json.
 import sectionSpec from "./__fixtures__/sections.json";
+import { lockChakraReading } from "./lockedText";
 import { forLocale as localizedCharacter } from "./character";
 import { forLocale as localizedCharacterTypes, type CharacterPositionKey } from "./characterTypes";
 import { forLocale as localizedContent } from "./content";
@@ -159,6 +160,7 @@ export const forLocale = localized((L: Locale) => {
       if (spec.access === "paid" && !unlocked) {
         out.teaser = D.report.positionsInFull[L](positions.length);
         out.positions = [];
+        out.locked = true;
       }
       return out;
     });
@@ -173,7 +175,7 @@ export const forLocale = localized((L: Locale) => {
   function withPositionArticles(matrix: Matrix, sections: SectionOut[]): SectionOut[] {
     return sections.map((section) => {
       const spec = SPEC.find((row) => row.key === section.key);
-      if (!spec || !section.positions.length) return section;
+      if (!spec || section.locked || !section.positions.length) return section;
       const resolved = spec.positions(matrix);
       const seen = new Set<string>();
       return {
@@ -187,6 +189,23 @@ export const forLocale = localized((L: Locale) => {
           const article = positionArticle(key, position.arcanum);
           return article ? { ...position, article } : position;
         }),
+      };
+    });
+  }
+
+  /** Что внутри закрытого раздела: карты его позиций (номер и подпись, без толкования), у чакр —
+   *  их раскладка с заглушкой вместо текста. Отдельным проходом по той же причине, что и ссылки:
+   *  `build` сверяется с Python-движком, а у него закрытый раздел пуст. */
+  function withLockedPreview(matrix: Matrix, sections: SectionOut[]): SectionOut[] {
+    return sections.map((section) => {
+      const spec = section.locked ? SPEC.find((row) => row.key === section.key) : undefined;
+      if (!spec) return section;
+      return {
+        ...section,
+        positions: spec.positions(matrix).map(([label, arcanum]) => ({ label, arcanum, href: arcanumHref(arcanum) })),
+        ...(section.key === "chakras"
+          ? { longform: lockChakraReading(buildSectionReading("chakras", matrix), L) }
+          : {}),
       };
     });
   }
@@ -254,8 +273,8 @@ export const forLocale = localized((L: Locale) => {
   function sectionByKey(key: string): SectionSpec | undefined {
     return SPEC.find((section) => section.key === key);
   }
-  return { arcanumHref, SPEC, FREE_KEYS, PAID_KEYS, SECTION_KEYS, build, withPositionArticles, freePositionArticles, freePositionTexts, referencedArcana, sectionByKey };
+  return { arcanumHref, SPEC, FREE_KEYS, PAID_KEYS, SECTION_KEYS, build, withPositionArticles, withLockedPreview, freePositionArticles, freePositionTexts, referencedArcana, sectionByKey };
 });
 
 // Compatibility for callers that explicitly use the deployment default.
-export const { SPEC, FREE_KEYS, PAID_KEYS, SECTION_KEYS, build, withPositionArticles, freePositionArticles, freePositionTexts, referencedArcana, sectionByKey } = forLocale(defaultLocale);
+export const { SPEC, FREE_KEYS, PAID_KEYS, SECTION_KEYS, build, withPositionArticles, withLockedPreview, freePositionArticles, freePositionTexts, referencedArcana, sectionByKey } = forLocale(defaultLocale);

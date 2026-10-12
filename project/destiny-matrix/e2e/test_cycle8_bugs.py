@@ -30,7 +30,7 @@ def test_form_error_clears_once_the_field_is_fixed(page: Page):
     page.get_by_test_id("auth-submit").click()
     expect(page.locator(".err")).to_be_visible(timeout=10_000)
 
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.wait_for_timeout(600)
     assert page.locator(".err").count() == 0, (
         f"после исправления поля осталось: «{page.locator('.err').first.inner_text()}»"
@@ -45,15 +45,15 @@ def test_pay_form_forgets_the_other_account_when_the_email_changes(page: Page):
     flows.logout(page)
 
     flows.calculate(page, 9, 2, 1985)
-    page.goto(f"{BASE}/pay", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/pay/single", wait_until="domcontentloaded")
     page.wait_for_selector("[data-testid=pay-submit]")
     page.get_by_test_id("pay-email").fill(known)
     page.get_by_test_id("pay-password").fill("wrongpass")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     expect(page.locator(".err")).to_be_visible(timeout=30_000)
 
-    page.get_by_test_id("pay-email").fill(_mail("fresh"))
+    flows.fill_email(page, _mail("fresh"))
     page.wait_for_timeout(700)
     hint = page.inner_text("form")
     assert "уже есть аккаунт" not in hint, "форма всё ещё говорит про чужой аккаунт"
@@ -67,7 +67,7 @@ def test_rename_keeps_the_typed_name_when_the_server_refuses(page: Page):
     flows.calculate(page, 3, 3, 1993)
     flows.save_current(page)
 
-    page.route("**/api/matrices/*", lambda route: route.abort())
+    page.route("**/api/readings/*", lambda route: route.abort())
     page.get_by_test_id("rename-matrix").first.click()
     field = page.get_by_test_id("rename-input").first
     field.fill("Ценное имя")
@@ -92,7 +92,7 @@ def test_rename_by_enter_sends_one_request(page: Page):
         page.wait_for_timeout(1200)
         route.continue_()
 
-    page.route("**/api/matrices/*", slow)
+    page.route("**/api/readings/*", slow)
     page.get_by_test_id("rename-matrix").first.click()
     field = page.get_by_test_id("rename-input").first
     field.fill("Имя ААА")
@@ -187,17 +187,21 @@ def test_logout_goes_to_the_home_page(page: Page):
 
 
 def test_unknown_matrix_in_pay_link_does_not_substitute_another(page: Page):
-    """`?m=` с несуществующим номером молча вставлял в платёж другую дату."""
+    """`?m=` с несуществующим номером молча вставлял в платёж другую дату. Теперь дата стоит в
+    полях на виду: это дата из браузера, а не чужая запись кабинета."""
     mail = _mail("unknown")
     flows.register(page, mail)
-    flows.calculate(page, 5, 12, 1994)
+    flows.calculate(page, 1, 2, 1980)
     flows.save_current(page)
+    other = flows.matrix_ids(page)[0]
+    flows.calculate(page, 5, 12, 1994)
 
     page.goto(f"{BASE}/pay?m=999999", wait_until="domcontentloaded")
     page.wait_for_selector("[data-testid=pay-submit]")
     page.wait_for_timeout(1500)
-    picked = page.get_by_test_id("pay-target").input_value()
-    assert picked == "none", f"неизвестный номер подставил цель {picked}"
+    picked = page.get_by_test_id("pay-target").get_attribute("data-value")
+    assert picked != str(other), f"неизвестный номер подставил чужую запись {picked}"
+    assert page.get_by_test_id("pay-y").input_value() == "1994"
 
 
 @pytest.mark.parametrize("path", ("/matrices/abc", "/matrices/1e3", "/matrices/null"))

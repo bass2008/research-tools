@@ -34,7 +34,8 @@ export const forLocale = localized((L: Locale, site) => {
 export default async function ReportSheet({ locale: requestedLocale, ...localeProps }: ({
   matrix: Matrix;
   sections: SectionOut[];
-  planName: string;
+  /** чем открыт разбор — только для страницы, в PDF не печатается */
+  planName?: string;
   /** Доступ к платным разделам подтверждён именно для этой сохранённой матрицы. */
   unlocked: boolean;
   saved: SavedMatrix[];
@@ -59,8 +60,8 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
   const linkSite = printing ? resolvePrintLinkSite(site, L) : site;
   const { DISCLAIMER, birthLabel, printedBy } = forLocale(L, site);
 
-  const open = sections.filter((s) => s.positions.length).length;
-  const locked = sections.filter((s) => !s.positions.length);
+  const open = sections.filter((s) => !s.locked).length;
+  const locked = sections.filter((s) => s.locked);
   const Heading = embedded ? "h2" : "h1";
 
   return (
@@ -76,9 +77,10 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
       <div className="rsub">
         <p className="dim">
           {birthLabel(matrix.birth)} ·{" "}
-          {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]} ·{" "}
-          {/* тариф называем только там, где он есть: без кассы имя тарифа обещает покупку */}
-          {!ALL_FREE && unlocked ? D.sheet.planNamed[L](planName) : D.sheet.freeAccess[L]} —{" "}
+          {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]}
+          {/* Чем открыт разбор, в PDF не печатаем: файл живёт дольше прав — после возврата или
+              выдачи подпись в нём устарела бы. Живая подпись — на странице и в кабинете. */}
+          {printing ? null : <> · {!ALL_FREE && unlocked ? planName : D.sheet.freeAccess[L]}</>} —{" "}
           {D.sheet.openOf[L](open, sections.length)}
         </p>
         {printing || locked.length ? null : (
@@ -87,7 +89,7 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
              На закрытом разборе кнопки нет вовсе: она была активной и всегда отвечала
              «Разбор этой даты не оплачен» — обещание, которого страница не выполняет */
           <span className="pdfslot">
-            <SavePdfButton locale={L} matrixId={currentId} hint={birthLabel(matrix.birth)} />
+            <SavePdfButton locale={L} readingId={currentId} hint={birthLabel(matrix.birth)} />
           </span>
         )}
       </div>

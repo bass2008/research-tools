@@ -40,28 +40,58 @@ def _sqlite_pragmas(dbapi_connection, _record) -> None:
         cur.close()
 
 
-class Tariff(Base):
-    """Витрина и правила доступа. Цену меняем часто, поэтому она живёт здесь, а не в коде."""
+class Offer(Base):
+    """Цена продукта в канале продаж. Цену меняем часто, поэтому она живёт здесь, а не в коде.
 
-    __tablename__ = "tariffs"
+    Один продукт может продаваться в разных каналах по разной цене: на сайте, на лендинге, позже в
+    приложении. Канал определяет сервер, а не браузер (`offers.for_channel`).
+    """
 
-    id: Mapped[str] = mapped_column(String(16), primary_key=True)          # 'single' | 'month'
+    __tablename__ = "offers"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)          # 'single' | 'month' | 'pair'
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     price: Mapped[int] = mapped_column(Integer, nullable=False)            # копейки
-    scope: Mapped[str] = mapped_column(Text, nullable=False)               # JSON-массив
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="RUB",
+                                          server_default="RUB")
+    channel: Mapped[str] = mapped_column(String(32), nullable=False, default="site",
+                                         server_default="site")
+    # JSON-массив кодов продуктов; "*" — все продукты, включая будущие
+    products: Mapped[str] = mapped_column(Text, nullable=False)
+    # право привязано к одному разбору; иначе открывает любые разборы этих продуктов
+    per_reading: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True,
+                                              server_default=text("1"))
+    store_unlimited: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False,
+                                                  server_default=text("0"))
     period_days: Mapped[int | None] = mapped_column(Integer)               # NULL — бессрочно
+    # на витрине; скрытое предложение можно купить только по прямой ссылке
+    public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True,
+                                         server_default=text("1"))
+    sort: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+
+    def product_list(self) -> list[str]:
+        return json.loads(self.products)
 
     def scopes(self) -> list[str]:
-        return json.loads(self.scope)
+        return legacy_scope(self.per_reading, self.store_unlimited)
 
     def body(self) -> dict:
-        """Снимок для платежа: всё, что нужно, чтобы объяснить покупку без справочника."""
-        return {"id": self.id, "name": self.name, "price": self.price,
-                "scope": self.scopes(), "period_days": self.period_days}
+        """Снимок для заказа: всё, что нужно, чтобы объяснить покупку без справочника."""
+        return {"id": self.id, "name": self.name, "price": self.price, "currency": self.currency,
+                "channel": self.channel, "products": self.product_list(),
+                "per_reading": self.per_reading, "store_unlimited": self.store_unlimited,
+                "period_days": self.period_days, "scope": self.scopes()}
 
-    def public(self) -> dict:
-        from .tariffs import display_name
+    def public_body(self) -> dict:
+        from .offers import display_name
         return {**self.body(), "name": display_name(self.id, self.name)}
+
+
+def legacy_scope(per_reading: bool, store_unlimited: bool) -> list[str]:
+    """Прежние виды доступа (`single`, `matrix`, `all`) для фронта, который ещё читает их."""
+    if per_reading:
+        return ["single"]
+    return ["single", "matrix", "all"] if store_unlimited else ["single", "all"]
 
 
 class User(Base):
@@ -76,8 +106,10 @@ class User(Base):
     # открытая вкладка превращала бы SQLite WAL в непрерывный журнал служебных записей.
     last_seen_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
 
-    matrices: Mapped[list["SavedMatrix"]] = relationship(back_populates="user",
-                                                        cascade="all, delete-orphan")
+    readings: Mapped[list["Reading"]] = relationship(back_populates="user",
+                                                     cascade="all, delete-orphan")
+    purchases: Mapped[list["Purchase"]] = relationship(back_populates="user",
+                                                       cascade="all, delete-orphan")
     payments: Mapped[list["Payment"]] = relationship(back_populates="user",
                                                      cascade="all, delete-orphan")
     entitlements: Mapped[list["Entitlement"]] = relationship(back_populates="user",
@@ -85,6 +117,22 @@ class User(Base):
 
     def public(self) -> dict:
         return {"id": self.id, "email": self.email, "created_at": iso(self.created_at)}
+
+
+class MetrikaClient(Base):
+    __tablename__ = "metrika_clients"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    counter_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    client_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    site_origin: Mapped[str] = mapped_column(String(255), nullable=False)
+    first_seen_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    def item(self) -> dict:
+        return {"client_id": self.client_id, "counter_id": self.counter_id,
+                "site_origin": self.site_origin, "first_seen_at": iso(self.first_seen_at),
+                "last_seen_at": iso(self.last_seen_at)}
 
 
 def default_title(birth: dt.date) -> str:
@@ -99,36 +147,133 @@ def default_title(birth: dt.date) -> str:
                year=birth.year)
 
 
-class SavedMatrix(Base):
-    __tablename__ = "matrices"
+class Reading(Base):
+    """Разбор: продукт и введённые данные. Его хранят в кабинете, покупают и печатают.
+
+    Номера личных разборов совпадают с номерами прежней таблицы `matrices`, поэтому старые адреса
+    `/matrices/<id>` и `/report?m=<id>` и ссылки в письмах ведут туда же.
+    """
+
+    __tablename__ = "readings"
+    __table_args__ = (Index("ix_readings_subject", "user_id", "product", "subject_key"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
                                          index=True, nullable=False)
-    birth: Mapped[dt.date] = mapped_column(Date, nullable=False)
-    sex: Mapped[str] = mapped_column(String(1), nullable=False)
+    product: Mapped[str] = mapped_column(String(32), nullable=False)
+    inputs: Mapped[str] = mapped_column(Text, nullable=False)              # JSON
+    subject_key: Mapped[str] = mapped_column(String(200), nullable=False)
     title: Mapped[str | None] = mapped_column(String(200))
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                     default=utcnow, server_default=func.now())
 
-    user: Mapped[User] = relationship(back_populates="matrices")
+    user: Mapped[User] = relationship(back_populates="readings")
+
+    def data(self) -> dict:
+        return json.loads(self.inputs)
+
+    @property
+    def birth(self) -> dt.date | None:
+        value = self.data().get("birth")
+        return dt.date.fromisoformat(value) if value else None
+
+    @property
+    def sex(self) -> str | None:
+        return self.data().get("sex")
+
+    def label(self) -> str:
+        from . import products
+        product = products.get(self.product)
+        return self.title or (product.default_title(self.data()) if product else str(self.id))
 
     def item(self) -> dict:
-        return {"id": self.id, "birth": self.birth.isoformat(), "sex": self.sex,
-                "title": self.title or default_title(self.birth), "created_at": iso(self.created_at)}
+        out = {"id": self.id, "product": self.product, "inputs": self.data(),
+               "title": self.label(), "created_at": iso(self.created_at)}
+        if self.product == "personal":
+            out |= {"birth": self.data()["birth"], "sex": self.data()["sex"]}
+        return out
+
+
+class Purchase(Base):
+    """Заказ: что купили, за сколько и где. Платёж — попытка его оплатить: карту отклонили —
+    у того же заказа появляется новая попытка, а не второй заказ.
+
+    Снимок предложения обязателен: цену меняем часто, история переписываться не должна. В снимке
+    же язык, сайт и подключение оплаты — по ним письмо и досверка работают без запроса.
+    """
+
+    __tablename__ = "purchases"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
+                                         index=True, nullable=False)
+    offer_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    offer_body: Mapped[str] = mapped_column(Text, nullable=False)          # JSON на момент покупки
+    reading_id: Mapped[int | None] = mapped_column(ForeignKey("readings.id", ondelete="SET NULL"),
+                                                   index=True)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)           # копейки
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="RUB",
+                                          server_default="RUB")
+    channel: Mapped[str] = mapped_column(String(32), nullable=False, default="site",
+                                         server_default="site")
+    # Оплата и возврат — факты заказа. Остальные состояния (новый, не прошёл, брошен) берутся
+    # у последней попытки: отдельная колонка здесь разошлась бы с досверкой, которая ставит
+    # попытке «брошен».
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                                    default=utcnow, server_default=func.now())
+    paid_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    refunded_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[User] = relationship(back_populates="purchases")
+    reading: Mapped["Reading | None"] = relationship()
+    payments: Mapped[list["Payment"]] = relationship(back_populates="purchase",
+                                                     cascade="all, delete-orphan",
+                                                     order_by="Payment.id")
+
+    def body(self) -> dict:
+        return json.loads(self.offer_body)
+
+    def state(self) -> str:
+        if self.refunded_at is not None:
+            return "refunded"
+        if self.paid_at is not None:
+            return "paid"
+        attempt = self.last_payment()
+        return attempt.state() if attempt else "new"
+
+    def last_payment(self) -> "Payment | None":
+        paid = [p for p in self.payments if p.paid_at is not None]
+        return (paid or self.payments or [None])[-1]
+
+    def item(self) -> dict:
+        """Строка истории покупок. Поля платежа — от попытки, которая прошла, иначе от последней."""
+        from .offers import display_name
+        offer = self.body()
+        if isinstance(offer.get("name"), str):
+            offer["display_name"] = display_name(offer.get("id", ""), offer["name"])
+        attempt = self.last_payment()
+        return {"id": self.id, "amount": self.amount, "currency": self.currency, "tariff": offer,
+                "reading_id": self.reading_id, "matrix_id": self.reading_id,
+                "reading": self.reading.item() if self.reading else None,
+                "product": (offer.get("products") or [None])[0] if offer.get("per_reading") else None,
+                "external_id": attempt.external_id if attempt else None,
+                "provider": attempt.provider if attempt else None,
+                "status": attempt.status if attempt else "NEW", "state": self.state(),
+                "created_at": iso(self.created_at), "paid_at": iso(self.paid_at),
+                "refunded_at": iso(self.refunded_at)}
 
 
 class Payment(Base):
-    """Деньги. Снимок тарифа обязателен: цену меняем часто, история переписываться не должна."""
+    """Попытка оплатить заказ у провайдера: номер у банка, ссылка на форму, банковский статус."""
 
     __tablename__ = "payments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
                                          index=True, nullable=False)
-    tariff_body: Mapped[str] = mapped_column(Text, nullable=False)          # JSON на момент покупки
-    amount: Mapped[int] = mapped_column(Integer, nullable=False)            # уплачено, копейки
-    matrix_id: Mapped[int | None] = mapped_column(ForeignKey("matrices.id", ondelete="SET NULL"))
+    purchase_id: Mapped[int] = mapped_column(ForeignKey("purchases.id", ondelete="CASCADE"),
+                                             index=True, nullable=False)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)            # копейки
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                     default=utcnow, server_default=func.now())
     paid_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
@@ -143,9 +288,14 @@ class Payment(Base):
     # выставлять второй счёт за ту же дату
     order_id: Mapped[str | None] = mapped_column(String(64), index=True)
     user: Mapped[User] = relationship(back_populates="payments")
+    purchase: Mapped[Purchase] = relationship(back_populates="payments")
 
     def body(self) -> dict:
-        return json.loads(self.tariff_body)
+        return self.purchase.body()
+
+    @property
+    def reading_id(self) -> int | None:
+        return self.purchase.reading_id
 
     def state(self) -> str:
         """Одно состояние вместо трёх отметок. Раньше каждый экран собирал исход сам, и порядок
@@ -164,12 +314,14 @@ class Payment(Base):
         return "new"
 
     def item(self) -> dict:
-        from .tariffs import display_name
+        from .offers import display_name
         tariff = self.body()
         if isinstance(tariff.get("name"), str):
             tariff["display_name"] = display_name(tariff.get("id", ""), tariff["name"])
         return {"id": self.id, "amount": self.amount, "tariff": tariff,
-                "matrix_id": self.matrix_id, "external_id": self.external_id,
+                "purchase_id": self.purchase_id,
+                "reading_id": self.reading_id, "matrix_id": self.reading_id,
+                "external_id": self.external_id,
                 "provider": self.provider, "status": self.status, "state": self.state(),
                 "created_at": iso(self.created_at), "paid_at": iso(self.paid_at),
                 "refunded_at": iso(self.refunded_at)}
@@ -179,23 +331,34 @@ PAYMENT_STATES = ("new", "paid", "refunded", "failed", "abandoned")
 
 
 class Entitlement(Base):
-    """Право доступа. Отдельно от платежа: доступ бывает без денег (промо, компенсация),
-    а платёж бывает без доступа (возврат, неоплаченная попытка)."""
+    """Право доступа. Отдельно от заказа: доступ бывает без денег (промо, компенсация),
+    а заказ бывает без доступа (возврат, неоплаченная попытка)."""
 
     __tablename__ = "entitlements"
-    # Два одновременных платежа за одну дату читали «доступа ещё нет» оба и оба его выдавали:
-    # списывалось вдвое. Проверка перед записью гонку не ловит — ловит индекс.
+    # Два одновременных платежа за один разбор читали «доступа ещё нет» оба и оба его выдавали:
+    # списывалось вдвое. Проверка перед записью гонку не ловит — ловит индекс. Купленное и
+    # выданное — разные факты: выданное поверх покупки обязано пережить её возврат, поэтому на
+    # разбор допускается одно купленное и одно выданное право.
     __table_args__ = (
-        Index("ux_entitlement_active_matrix", "user_id", "matrix_id", unique=True,
-              sqlite_where=text("matrix_id IS NOT NULL AND revoked_at IS NULL")),
+        Index("ux_entitlement_active_purchase", "purchase_id", unique=True,
+              sqlite_where=text("purchase_id IS NOT NULL AND revoked_at IS NULL")),
+        Index("ux_entitlement_active_reading", "user_id", "reading_id", unique=True,
+              sqlite_where=text("reading_id IS NOT NULL AND revoked_at IS NULL AND purchase_id IS NOT NULL")),
+        Index("ux_entitlement_granted_reading", "user_id", "reading_id", unique=True,
+              sqlite_where=text("reading_id IS NOT NULL AND revoked_at IS NULL AND purchase_id IS NULL")),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
                                          index=True, nullable=False)
-    payment_id: Mapped[int | None] = mapped_column(ForeignKey("payments.id", ondelete="SET NULL"))
-    scope: Mapped[str] = mapped_column(Text, nullable=False)                # JSON-массив
-    matrix_id: Mapped[int | None] = mapped_column(ForeignKey("matrices.id", ondelete="CASCADE"))
+    purchase_id: Mapped[int | None] = mapped_column(ForeignKey("purchases.id", ondelete="SET NULL"),
+                                                    index=True)
+    products: Mapped[str] = mapped_column(Text, nullable=False)              # JSON, снимок предложения
+    per_reading: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True,
+                                              server_default=text("1"))
+    store_unlimited: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False,
+                                                  server_default=text("0"))
+    reading_id: Mapped[int | None] = mapped_column(ForeignKey("readings.id", ondelete="CASCADE"))
     starts_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                    default=utcnow, server_default=func.now())
     expires_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
@@ -204,8 +367,15 @@ class Entitlement(Base):
 
     user: Mapped[User] = relationship(back_populates="entitlements")
 
+    def product_list(self) -> list[str]:
+        return json.loads(self.products)
+
+    def covers(self, product: str) -> bool:
+        from .products import covers
+        return covers(self.product_list(), product)
+
     def scopes(self) -> list[str]:
-        return json.loads(self.scope)
+        return legacy_scope(self.per_reading, self.store_unlimited)
 
     def active(self, now: dt.datetime | None = None) -> bool:
         now = now or utcnow()
@@ -216,7 +386,10 @@ class Entitlement(Base):
         return self.expires_at is None or as_utc(self.expires_at) > now
 
     def item(self) -> dict:
-        return {"id": self.id, "scope": self.scopes(), "matrix_id": self.matrix_id,
+        return {"id": self.id, "products": self.product_list(), "per_reading": self.per_reading,
+                "store_unlimited": self.store_unlimited, "scope": self.scopes(),
+                "reading_id": self.reading_id, "matrix_id": self.reading_id,
+                "purchase_id": self.purchase_id,
                 "starts_at": iso(self.starts_at), "expires_at": iso(self.expires_at),
                 "revoked_at": iso(self.revoked_at), "note": self.note}
 
@@ -229,8 +402,8 @@ class ReportJob(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
                                         index=True, nullable=False)
-    matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id", ondelete="CASCADE"),
-                                           index=True, nullable=False)
+    reading_id: Mapped[int] = mapped_column(ForeignKey("readings.id", ondelete="CASCADE"),
+                                            index=True, nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="running")
     locale: Mapped[str] = mapped_column(String(16), nullable=False, default=current_locale)
     object_key: Mapped[str | None] = mapped_column(String(300))
@@ -242,7 +415,7 @@ class ReportJob(Base):
     finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
 
     user: Mapped[User] = relationship()
-    matrix: Mapped[SavedMatrix] = relationship()
+    reading: Mapped[Reading] = relationship()
 
     def seconds(self) -> float | None:
         if self.started_at is None or self.finished_at is None:
@@ -250,7 +423,8 @@ class ReportJob(Base):
         return round((as_utc(self.finished_at) - as_utc(self.started_at)).total_seconds(), 1)
 
     def item(self) -> dict:
-        return {"id": self.id, "matrix_id": self.matrix_id, "status": self.status, "locale": self.locale,
+        return {"id": self.id, "reading_id": self.reading_id, "matrix_id": self.reading_id,
+                "status": self.status, "locale": self.locale,
                 "created_at": iso(self.created_at), "started_at": iso(self.started_at),
                 "finished_at": iso(self.finished_at), "seconds": self.seconds(),
                 "size_bytes": self.size_bytes, "error": self.error}
@@ -284,6 +458,41 @@ class PaymentSweep(Base):
                 "changed": self.changed, "seconds": self.seconds(),
                 "started_at": iso(self.started_at), "finished_at": iso(self.finished_at),
                 "error": self.error, "log": self.entries()}
+
+
+class WorkTask(Base):
+    """Задача для исполнителя (Claude Code / Codex через MCP `arcana-tasks`).
+
+    queued → (watch выдал сигнал) signalled → done | failed. Сигнал выдаётся один раз; задача,
+    которую не сдали за `task_lease_hours`, снова попадает в выдачу."""
+    __tablename__ = "work_tasks"
+    # Исполнитель может вернуть результат после удаления задачи: её ID нельзя выдать снова.
+    __table_args__ = {"sqlite_autoincrement": True}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="queued", index=True)
+    reading_id: Mapped[int | None] = mapped_column(ForeignKey("readings.id", ondelete="SET NULL"), index=True)
+    reason: Mapped[str | None] = mapped_column(String(64))
+    params: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    problems: Mapped[str | None] = mapped_column(Text)
+    error: Mapped[str | None] = mapped_column(String(500))
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                                    default=utcnow, server_default=func.now())
+    signalled_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+
+    def data(self) -> dict:
+        return json.loads(self.params)
+
+    def item(self) -> dict:
+        return {"id": self.id, "kind": self.kind, "status": self.status, "reading_id": self.reading_id,
+                "reason": self.reason, "params": self.data(), "error": self.error,
+                "problems": json.loads(self.problems) if self.problems else [],
+                "attempts": self.attempts, "created_at": iso(self.created_at),
+                "due_at": iso(as_utc(self.created_at) + dt.timedelta(days=1)),
+                "signalled_at": iso(self.signalled_at), "finished_at": iso(self.finished_at)}
 
 
 class ErrorLog(Base):

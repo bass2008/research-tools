@@ -3,11 +3,10 @@ import Related from "@/components/enc/Related";
 import Sections, { Paragraphs } from "@/components/enc/Sections";
 import { ChakraList } from "@/components/enc/lists";
 import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
-import Price from "@/components/pay/Price";
+import Price, { OfferText } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
-import { ALL_FREE } from "@/lib/access";
 import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
@@ -85,7 +84,9 @@ export default async function EnergyFieldPage() {
         <h3>{D.encChakra.buildEnergyMap[L]}</h3>
         <p>
           {D.encChakra.buildEnergyMapText[L]}{" "}
-          {ALL_FREE ? <>{D.encChakra.fullMapOpen[L]}</> : <>{D.encChakra.fullMapPaid[L]} <Price locale={L} />.</>}
+          <OfferText free={D.encChakra.fullMapOpen[L]} subscription={D.encChakra.fullMapOpen[L]}>
+            {D.encChakra.fullMapPaid[L]} <Price locale={L} />.
+          </OfferText>
         </p>
         <Link className="btn" href="/#calc">{D.matrixPages.calcMatrix[L]}</Link>
       </div>

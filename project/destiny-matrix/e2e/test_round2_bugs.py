@@ -122,11 +122,11 @@ def test_c3_link_from_account_pays_for_the_date_it_promises(page, mail):
     page.wait_for_timeout(2000)
 
     chosen = page.evaluate("""() => {
-      const s = document.querySelector('[data-testid=pay-target]');
-      return s && s.selectedIndex >= 0 ? s.options[s.selectedIndex].text : null;
+      const s = document.querySelector('[data-testid=pay-target-note]');
+      return s ? s.innerText : null;
     }""")
-    page.get_by_test_id("pay-email").fill(mail)
-    page.locator(".consent input[type=checkbox]").check()
+    flows.fill_email(page, mail)
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click(force=True)
     page.wait_for_timeout(1500)
 
@@ -143,7 +143,7 @@ def test_c4_paid_promise_names_the_tariff_and_the_right_date(page, mail):
     page.wait_for_timeout(1500)
     text = page.inner_text("body")
 
-    said = [line.strip() for line in text.split("\n") if "уже оплачен" in line]
+    said = [line.strip() for line in text.split("\n") if "уже оплачен" in line or "Разбор уже открыт" in line]
     assert not any("«»" in line for line in said), f"пустое название тарифа: {said}"
     assert not said, f"про неоплаченную дату сказано, что она оплачена: {said}"
 
@@ -214,37 +214,29 @@ def test_c7_no_horizontal_scroll_on_every_public_page(page, mail, width):
 
 
 @pytest.mark.parametrize("width", PHONE_WIDTHS)
-def test_c8_target_option_text_fits_on_phones(page, mail, width):
-    """C8 (и A12 первого круга). Подпись выбранной цели платежа не должна обрезаться.
+def test_c8_target_fields_fit_on_phones(page, mail, width):
+    """C8 (и A12 первого круга). Выбор цели платежа не должен вылезать за экран телефона.
 
-    A12 мерил `select.scrollWidth` на одной ширине, а у списка он обрезку не показывает — поэтому
-    измеряем ширину самой строки шрифтом поля и проверяем все телефонные ширины.
+    Раньше цель была списком с обрезанной подписью; теперь это поля даты и пола — проверяем, что
+    ни одно не выходит за край, а страница не прокручивается вбок.
     """
     page.set_viewport_size({"width": width, "height": 780})
     flows.calculate(page, 12, 12, 1999)
     flows.open_pay(page)
     page.wait_for_timeout(800)
 
-    # scrollWidth у select не показывает обрезку — меряем ширину самой строки шрифтом поля
     room = page.evaluate("""() => {
-      const s = document.querySelector('[data-testid=pay-target]');
-      if (!s) return null;
-      const css = getComputedStyle(s);
-      const canvas = document.createElement('canvas').getContext('2d');
-      canvas.font = `${css.fontWeight} ${css.fontSize} ${css.fontFamily}`;
-      const text = s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : '';
-      const arrow = 26;   // место под стрелку списка
-      return {
-        text,
-        needed: Math.round(canvas.measureText(text).width),
-        available: Math.round(s.clientWidth - parseFloat(css.paddingLeft)
-                              - parseFloat(css.paddingRight) - arrow),
-      };
+      const box = document.querySelector('[data-testid=pay-target]');
+      if (!box) return null;
+      const edge = document.documentElement.clientWidth;
+      const out = [...box.querySelectorAll('select, button')]
+        .filter(el => el.getBoundingClientRect().right > edge + 0.5)
+        .map(el => el.getAttribute('data-testid') || el.textContent);
+      return { out, scroll: document.documentElement.scrollWidth, edge };
     }""")
-    assert room, "списка цели нет на странице"
-    assert room["needed"] <= room["available"], (
-        f"на {width}px подпись «{room['text']}» не влезает: нужно {room['needed']}px, "
-        f"есть {room['available']}px")
+    assert room, "полей цели нет на странице"
+    assert not room["out"], f"на {width}px за край выходят: {room['out']}"
+    assert room["scroll"] <= room["edge"], f"на {width}px страница едет вбок: {room['scroll']} > {room['edge']}"
 
 
 @pytest.mark.parametrize("width", (320, 360))

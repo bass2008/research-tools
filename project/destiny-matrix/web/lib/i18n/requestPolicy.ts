@@ -5,7 +5,7 @@ export const PATH_HEADER = "x-arcana-path";
 export const INTERACTIVE_HEADER = "x-arcana-interactive";
 
 export function privateLocalePath(path: string): boolean {
-  return /^\/(api|account|admin|report|matrices|pay|login|register|forgot|reset|print|matrix)(\/|$)/.test(path);
+  return /^\/(api|account|admin|report|matrices|readings|pay|login|register|forgot|reset|print|matrix)(\/|$)/.test(path);
 }
 
 export function selectedLocale(headers: Headers, site: SiteProfile, api = false) {

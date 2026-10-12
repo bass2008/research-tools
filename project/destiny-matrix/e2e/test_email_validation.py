@@ -39,7 +39,7 @@ def test_pay_refuses_dot_before_at_without_asking_the_server(page):
 
     page.get_by_test_id("pay-email").fill(BROKEN)
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(800)
 
@@ -52,7 +52,7 @@ def test_pay_error_names_the_dot(page):
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill(BROKEN)
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(800)
 
@@ -67,7 +67,7 @@ def test_pay_after_fixing_the_address_goes_through(page, mail):
     flows.open_pay(page)
     page.get_by_test_id("pay-email").fill(BROKEN)
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(600)
     expect(page.locator(".err")).to_be_visible()
@@ -106,7 +106,7 @@ def test_register_refuses_dot_before_at_without_asking_the_server(page):
 
     page.get_by_test_id("auth-email").fill(BROKEN)
     page.get_by_test_id("auth-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("auth-submit").click()
     page.wait_for_timeout(800)
 
@@ -146,7 +146,7 @@ def test_pay_form_refuses_every_broken_address_from_the_corpus(page):
     flows.calculate(page, 31, 3, 1993, "f")
     flows.open_pay(page)
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     seen = watch_api(page)
 
     for case in CASES["invalid"]:
@@ -178,7 +178,7 @@ def test_server_refusal_still_reaches_the_person(page):
 
     page.get_by_test_id("pay-email").fill("someone@mail.ru")
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(1500)
 
@@ -198,7 +198,7 @@ def test_pay_refuses_typo_in_the_domain_tail_without_asking_the_server(page):
 
     page.get_by_test_id("pay-email").fill("tatyana@mail.ru2")
     page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_timeout(800)
 
@@ -216,7 +216,7 @@ def test_register_refuses_service_domain(page):
 
     page.get_by_test_id("auth-email").fill("ivan@pc.local")
     page.get_by_test_id("auth-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("auth-submit").click()
     page.wait_for_timeout(800)
 

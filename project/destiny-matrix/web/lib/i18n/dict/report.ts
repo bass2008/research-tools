@@ -115,6 +115,17 @@ export const report = {
   // а не запертая покупка. Предлагать «Открыть» там, где платить негде, значит вести человека
   // на страницу оплаты, которой нет.
   notLoaded: { ru: "Не загрузился", en: "Not loaded" } satisfies Phrase,
+  unlockSection: { ru: "Открыть раздел — ", en: "Unlock this section — " } satisfies Phrase,
+  lockedWords: {
+    ru: (n: number) => `Откроется в полном разборе · ${n} ${n % 10 === 1 && n % 100 !== 11 ? "слово"
+      : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "слова" : "слов"}`,
+    en: (n: number) => `Opens in the full reading · ${n} ${n === 1 ? "word" : "words"}`,
+  } satisfies PhraseFn<[number]>,
+  // Stands under the blur in place of the paid text; only its shape matters.
+  lockedFiller: {
+    ru: "Этот текст откроется вместе с полным разбором. Здесь описано, как три аркана работают вместе на этом уровне матрицы. Толкование написано для вашего сочетания чисел и читается как одна связная история. Оно показывает, что даёт опору, где сила уходит впустую и что с этим можно сделать. В конце стоит наблюдение, которое легко сверить со своим опытом.",
+    en: "This text opens together with the full reading. It describes how the three arcana work together on this level of the matrix. The reading is written for your combination of numbers and reads as one connected story. It shows what gives support, where strength is wasted and what can be done about it. At the end there is an observation that is easy to check against your own experience.",
+  } satisfies Phrase,
   tripleSummary: { ru: "Как складывается тройка", en: "How the three work together" } satisfies Phrase,
   // кнопки сохранения
   saveMatrix: { ru: "Сохранить матрицу в кабинет", en: "Save the matrix to your account" } satisfies Phrase,

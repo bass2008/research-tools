@@ -145,9 +145,10 @@ async function printPage(url) {
       throw new Error(`страница печати ответила HTTP ${response?.status() ?? "без ответа"}`);
     }
     // Next can also stream an error inside an HTTP 200 response. A valid PDF header alone
-    // cannot distinguish that page from a paid reading.
-    // Use the existing report markup so browser/web can roll out in either order.
-    await page.waitForSelector('main.printmode [data-testid="report"] .poslist', { timeout: 5000 });
+    // cannot distinguish that page from a paid reading. Any product's print page marks its
+    // reading with data-print-ready; the old report markup keeps browser/web rollout order-free.
+    await page.waitForSelector('main.printmode [data-print-ready], main.printmode [data-testid="report"] .poslist',
+                               { timeout: 5000 });
     if (await page.$('main.printmode [data-locked="true"]')) {
       throw new Error("страница печати содержит закрытые разделы");
     }

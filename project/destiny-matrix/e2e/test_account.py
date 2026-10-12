@@ -38,7 +38,7 @@ def test_paid_matrix_is_marked_and_can_be_renamed(page, mail):
 def test_payment_appears_in_history(page, mail):
     flows.buy(page, mail, 6, 6, 1996)
     flows.account(page)
-    expect(page.get_by_test_id("payments-panel")).to_contain_text("250")
+    expect(page.get_by_test_id("payments-panel")).to_contain_text("390")
 
 
 def test_access_survives_logout_and_login(page, mail):

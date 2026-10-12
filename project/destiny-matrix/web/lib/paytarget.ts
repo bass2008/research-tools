@@ -139,10 +139,17 @@ export const forLocale = localized((L: Locale) => {
 
   /** Что открыл платёж — для админки: номер записи о списании ничего не говорит. */
   function paymentTargetLabel(payment: {
-    matrix?: { birth: string; sex: Sex; title: string | null } | null;
+    matrix?: { birth?: string; sex?: Sex; title: string | null; product?: string } | null;
     matrix_id: number | null;
+    tariff?: { name?: string; display_name?: string };
   }): string {
-    if (payment.matrix) {
+    // разбор другого продукта: даты пола нет, подпись — название разбора
+    if (payment.matrix && (!payment.matrix.birth || !payment.matrix.sex)) {
+      const title = payment.matrix.title;
+      // автоматическая подпись пары уже начинается с «Пара»
+      return title?.startsWith(D.payTarget.pair[L]) ? title : `${D.payTarget.pair[L]}: ${title ?? payment.matrix_id}`;
+    }
+    if (payment.matrix?.birth && payment.matrix.sex) {
       // Подпись придумывает покупатель: «Котик Барсик» вместо даты не даёт админу ничего, а
       // длинная подпись раздувала строку таблицы вчетверо. Дата первая, подпись — коротким хвостом.
       const base = `${birthLabel(payment.matrix.birth)}, ${sexLabel(payment.matrix.sex)}`;
@@ -151,7 +158,9 @@ export const forLocale = localized((L: Locale) => {
       const short = title.length > 40 ? `${title.slice(0, 39)}…` : title;
       return `${base} · ${short}`;
     }
-    return payment.matrix_id === null ? D.common.dash[L] : D.payTarget.removed[L](payment.matrix_id);
+    // заказ не на разбор (подписка): что куплено, называет сервер в снимке предложения
+    if (payment.matrix_id === null) return payment.tariff?.display_name ?? payment.tariff?.name ?? D.common.dash[L];
+    return D.payTarget.removed[L](payment.matrix_id);
   }
   return { sameDate, canPickLocal, label, options, pickTarget, askedOpen, alreadyOpen, stillValid, targetValue, targetLabel, paymentTargetLabel };
 });

@@ -17,7 +17,7 @@ def test_lost_response_does_not_claim_the_money_is_safe(page: Page):
     """Ответ на оплату терялся, платёж проходил, а форма писала «деньги не списаны»."""
     mail = f"agent-lost-{uuid.uuid4().hex[:8]}@example.com"
     flows.calculate(page, 14, 6, 1990)
-    page.goto(f"{BASE}/pay", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/pay/single", wait_until="domcontentloaded")
     page.wait_for_selector("[data-testid=pay-submit]")
 
     def cut(route):
@@ -27,7 +27,7 @@ def test_lost_response_does_not_claim_the_money_is_safe(page: Page):
     page.get_by_test_id("pay-email").fill(mail)
     if page.get_by_test_id("pay-password").count():
         page.get_by_test_id("pay-password").fill("1234")
-    page.locator(".consent input[type=checkbox]").check()
+    flows.agree(page)
     page.get_by_test_id("pay-submit").click()
     page.wait_for_selector(".err", timeout=30_000)
     text = page.locator(".err").first.inner_text()
@@ -65,7 +65,7 @@ def test_account_shows_one_state_when_the_list_fails(page: Page):
     mail = f"agent-acc-{uuid.uuid4().hex[:8]}@example.com"
     flows.register(page, mail)
     flows.calculate(page, 3, 3, 1993)
-    page.route("**/api/matrices", lambda route: route.abort())
+    page.route("**/api/readings", lambda route: route.abort())
     page.goto(f"{BASE}/account", wait_until="domcontentloaded")
     page.wait_for_timeout(2500)
     text = page.inner_text("main")

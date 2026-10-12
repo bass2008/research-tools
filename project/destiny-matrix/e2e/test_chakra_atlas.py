@@ -53,10 +53,13 @@ def test_locked_widget_and_payment_link(page):
     expect(dialog).to_be_visible()
     expect(dialog.get_by_test_id('chakra-locked')).to_be_visible()
     expect(dialog.get_by_test_id('chakra-copy')).to_have_count(0)
-    expect(dialog.locator('a[href="/pay"]')).to_be_visible()
-    dialog.locator('a[href="/pay"]').click()
-    expect(page).to_have_url(re.compile('/pay'))
-    expect(page.get_by_test_id('pay-modal')).to_be_visible()
+    link = dialog.locator('a[href="/pay?for=personal"]')
+    expect(link).to_be_visible()
+    link.click()
+    expect(page).to_have_url(re.compile(r'/pay\?for=personal'))
+    expect(page.get_by_test_id('plan-single')).to_be_visible()
+    expect(page.get_by_test_id('plan-month')).to_be_visible()
+    expect(page.get_by_test_id('plan-pair')).to_have_count(0)
 
 
 def test_paid_widget_all_chakras_desktop_mobile_and_other_date(page, mail):

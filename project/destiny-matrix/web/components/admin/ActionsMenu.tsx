@@ -9,18 +9,24 @@ import { createPortal } from "react-dom";
 
 export type MenuAction = { label: string; testId: string; onSelect: () => void };
 
-export default function ActionsMenu({ actions, busy, testId, label }: {
+export default function ActionsMenu({ actions, busy, testId, label, className }: {
   actions: MenuAction[];
   busy?: boolean;
   testId: string;
   label?: string;
+  className?: string;
 }) {
   const { t } = useAdminLocale();
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   // Координаты меню считаем от кнопки: список живёт в body, потому что обёртка таблицы прокручивает
   // содержимое, и внутри неё выпадашка обрезалась нижней границей — её просто не было видно.
-  const [at, setAt] = useState<{ top: number; right: number } | null>(null);
+  const [at, setAt] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  // Кнопка в левой половине экрана — меню от её левого края, иначе от правого. Только от правого
+  // оно на телефоне уходило за левый край в карточке пользователя, где кнопка стоит слева.
+  const place = (rect: DOMRect) => rect.left + rect.width / 2 < window.innerWidth / 2
+    ? { top: rect.bottom + 4, left: rect.left }
+    : { top: rect.bottom + 4, right: window.innerWidth - rect.right };
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -39,7 +45,7 @@ export default function ActionsMenu({ actions, busy, testId, label }: {
     // в тот же миг, в который открылось.
     const follow = () => {
       const rect = trigger.current?.getBoundingClientRect();
-      if (rect) setAt({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+      if (rect) setAt(place(rect));
     };
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -60,20 +66,20 @@ export default function ActionsMenu({ actions, busy, testId, label }: {
     <>
       <button
         type="button"
-        className="btn ghost sm"
+        className={className ?? "btn ghost sm"}
         data-testid={testId}
         ref={trigger}
         aria-expanded={open}
         disabled={busy}
         onClick={() => {
           const rect = trigger.current?.getBoundingClientRect();
-          if (rect) setAt({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+          if (rect) setAt(place(rect));
           setOpen((was) => !was);
         }}
       >
         {label ?? t("Действия ▾")}</button>
       {open && mounted && at ? createPortal(
-        <div className="actions-menu" role="menu" style={{ top: at.top, right: at.right }}>
+        <div className="actions-menu" role="menu" style={at}>
           {actions.map((action) => (
             <button key={action.testId} type="button" role="menuitem" data-testid={action.testId}
                     onClick={() => { setOpen(false); action.onSelect(); }}>

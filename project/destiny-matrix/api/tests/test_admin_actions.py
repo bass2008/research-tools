@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app import audit, presence
 from app.config import settings
-from app.models import ReportJob, SavedMatrix, SecurityAudit, User, as_utc, utcnow
+from app.models import Reading, ReportJob, SecurityAudit, User, as_utc, utcnow
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def test_granted_matrix_is_open_but_not_bought(client, auth, db):
     assert given.json()["access"] == "granted", "подарок не должен выглядеть купленным"
 
     # в кабинете покупателя она открыта и лежит рядом с купленной
-    mine = client.get("/api/matrices", headers={"Authorization": f"Bearer {token}"}).json()["items"]
+    mine = client.get("/api/readings?product=personal", headers={"Authorization": f"Bearer {token}"}).json()["items"]
     by_birth = {m["birth"]: m["access"] for m in mine}
     assert by_birth == {"1984-03-17": "granted", "1990-05-05": "forever"}
 
@@ -93,7 +93,7 @@ def test_granting_the_same_date_twice_changes_nothing(client, auth, db):
     second = client.post(f"/api/admin/users/{target}/matrices", json=body, headers=admin).json()
 
     assert first["id"] == second["id"]
-    assert db.query(SavedMatrix).filter(SavedMatrix.user_id == target).count() == 2
+    assert db.query(Reading).filter(Reading.user_id == target).count() == 2
 
 
 def test_impossible_date_is_refused(client, auth, db):
@@ -110,8 +110,8 @@ def test_report_link_returns_the_file_of_any_user(client, auth, db, monkeypatch)
     buyer(client)
     admin = auth(settings.admins[0])
     target = user_id(db)
-    matrix = db.query(SavedMatrix).filter(SavedMatrix.user_id == target).one()
-    db.add(ReportJob(user_id=target, matrix_id=matrix.id, status="done",
+    matrix = db.query(Reading).filter(Reading.user_id == target).one()
+    db.add(ReportJob(user_id=target, reading_id=matrix.id, status="done",
                      object_key=f"{target}/{matrix.id}/7.pdf", size_bytes=1_200_000))
     db.commit()
     job = db.query(ReportJob).one()
@@ -131,8 +131,8 @@ def test_unfinished_report_has_nothing_to_download(client, auth, db):
     buyer(client)
     admin = auth(settings.admins[0])
     target = user_id(db)
-    matrix = db.query(SavedMatrix).filter(SavedMatrix.user_id == target).one()
-    db.add(ReportJob(user_id=target, matrix_id=matrix.id, status="running"))
+    matrix = db.query(Reading).filter(Reading.user_id == target).one()
+    db.add(ReportJob(user_id=target, reading_id=matrix.id, status="running"))
     db.commit()
 
     answer = client.get(f"/api/admin/reports/{db.query(ReportJob).one().id}/link", headers=admin)
@@ -147,8 +147,8 @@ def test_missing_report_is_expired_in_admin_list_and_has_no_download_link(client
     buyer(client)
     admin = auth(settings.admins[0])
     target = user_id(db)
-    matrix = db.query(SavedMatrix).filter(SavedMatrix.user_id == target).one()
-    job = ReportJob(user_id=target, matrix_id=matrix.id, status="done", object_key="missing.pdf")
+    matrix = db.query(Reading).filter(Reading.user_id == target).one()
+    job = ReportJob(user_id=target, reading_id=matrix.id, status="done", object_key="missing.pdf")
     db.add(job)
     db.commit()
     monkeypatch.setattr(printing, "store", lambda: SimpleNamespace(exists=lambda key: False))
@@ -167,8 +167,8 @@ def test_report_disappearing_after_admin_list_does_not_produce_a_dead_link(clien
     buyer(client)
     admin = auth(settings.admins[0])
     target = user_id(db)
-    matrix = db.query(SavedMatrix).filter(SavedMatrix.user_id == target).one()
-    job = ReportJob(user_id=target, matrix_id=matrix.id, status="done", object_key="removed.pdf")
+    matrix = db.query(Reading).filter(Reading.user_id == target).one()
+    job = ReportJob(user_id=target, reading_id=matrix.id, status="done", object_key="removed.pdf")
     db.add(job)
     db.commit()
     monkeypatch.setattr(printing, "store", lambda: SimpleNamespace(exists=lambda key: False))

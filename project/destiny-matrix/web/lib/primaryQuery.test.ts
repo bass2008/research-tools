@@ -19,6 +19,7 @@ const SOURCES: Record<string, string> = {
   "combinations.json": "slug",
   "karmic-tails.json": "key",
   "year-arcana.json": "n",
+  "compatibility-arcana.json": "n",
   "category-hubs.json": "key",
   "hubs.json": "key",
 };

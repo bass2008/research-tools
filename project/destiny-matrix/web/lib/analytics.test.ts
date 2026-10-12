@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { alive, metrikaId, notBounce, track } from "./analytics";
+import { alive, metrikaId, notBounce, track, trackPurchase } from "./analytics";
 import { configuredSites, siteForHost } from "./siteProfile";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -36,4 +36,27 @@ it.each([-1, 1.5, "111856670"])("rejects an invalid configured counter: %s", (me
   expect(() => configuredSites(JSON.stringify([{
     origin: "https://arcana-sense.com", defaultLocale: "en", locales: ["en", "ru"], metrikaId,
   }]))).toThrow("Invalid Metrika counter");
+});
+
+it("tracks separate payments once even when browser storage is blocked, without sending their IDs", () => {
+  const ym = vi.fn();
+  vi.stubGlobal("window", { ym });
+  vi.stubGlobal("document", { documentElement: { getAttribute: () => "111856670" } });
+  vi.stubGlobal("localStorage", {
+    getItem: () => { throw new Error("Storage blocked"); },
+    setItem: () => { throw new Error("Storage blocked"); },
+  });
+
+  trackPurchase("storage-blocked-payment-1", { tariff: "single" });
+  trackPurchase("storage-blocked-payment-1", { tariff: "single" });
+  trackPurchase("storage-blocked-payment-2", { tariff: "pair" });
+
+  expect(ym.mock.calls).toEqual([
+    [111856670, "reachGoal", "purchase", { tariff: "single" }],
+    [111856670, "reachGoal", "purchase", { tariff: "pair" }],
+  ]);
+  expect(window.dataLayer).toEqual([
+    { event: "purchase", tariff: "single" },
+    { event: "purchase", tariff: "pair" },
+  ]);
 });

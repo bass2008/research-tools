@@ -29,7 +29,9 @@ export interface ChakraReadingItem {
 }
 
 // Places where a page inserts its own component inside the article.
-export const SLOTS = ["calc"] as const;
+export const SLOTS = ["calc", "pair"] as const;
+// hub articles about a couple: they promote the pair calculator instead of the personal one
+export const COMPATIBILITY_HUBS: readonly string[] = ["business-compatibility", "karmic-compatibility", "compatibility-center"];
 export type Slot = (typeof SLOTS)[number];
 
 // Body text allows only `**bold**`; headings and table heads stay plain.
@@ -466,6 +468,9 @@ export function createContent(L: Locale, source: ContentSource) {
 
   const YEAR_ARCANA = articles("year-arcana.json", "n");
 
+  // «N аркан в совместимости»: по странице на энергию, которая бывает в матрице пары (2–22)
+  const COMPATIBILITY_ARCANA = articles("compatibility-arcana.json", "n");
+
   const HUBS = articles("hubs.json");
 
   for (const [name, actual, expected] of [
@@ -475,8 +480,10 @@ export function createContent(L: Locale, source: ContentSource) {
     ["combinations.json", COMBINATIONS_JSON.size, 231],
     ["karmic-tails.json", KARMIC_TAILS.size, 26],
     ["year-arcana.json", YEAR_ARCANA.size, 23],
-    ["category-hubs.json", CATEGORY_HUBS.size, 7],
-    ["hubs.json", HUBS.size, 10],
+    // раздел «Арканы в совместимости» язык получает целиком: шапка и все 21 страница, либо ничего
+    ["category-hubs.json", CATEGORY_HUBS.size, CATEGORY_HUBS.has("compatibility") ? 8 : 7],
+    ["compatibility-arcana.json", COMPATIBILITY_ARCANA.size, CATEGORY_HUBS.has("compatibility") ? 21 : 0],
+    ["hubs.json", HUBS.size, 10 + COMPATIBILITY_HUBS.filter((key) => HUBS.has(key)).length],
   ] as const) {
     if (actual !== expected) throw new Error(`[content] ${name}: ожидалось ${expected}, получено ${actual}`);
   }
@@ -505,6 +512,14 @@ export function createContent(L: Locale, source: ContentSource) {
 
   function yearKeys(): string[] {
     return [...YEAR_ARCANA.keys()];
+  }
+
+  function compatibilityArcanum(n: string | number): ArticleContent | null {
+    return COMPATIBILITY_ARCANA.get(String(n)) ?? null;
+  }
+
+  function compatibilityKeys(): string[] {
+    return [...COMPATIBILITY_ARCANA.keys()].sort((a, b) => Number(a) - Number(b));
   }
 
   function categoryHub(key: string): ArticleContent | null {
@@ -878,5 +893,5 @@ export function createContent(L: Locale, source: ContentSource) {
       hubs: HUBS.size,
     };
   }
-  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, yearArcanum, yearKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats };
+  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats };
 }

@@ -10,6 +10,7 @@
  * только собирает дату.
  */
 import { useSession } from "@/components/account/useSession";
+import { useOfferMode } from "@/components/pay/useOfferMode";
 import { useOwnDates } from "@/components/matrix/CalculationProvider";
 import MatrixResult from "@/components/matrix/MatrixResult";
 import ReportSections from "@/components/matrix/ReportSections";
@@ -19,7 +20,6 @@ import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import UnlockCta from "@/components/pay/UnlockCta";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import LockIcon from "@/components/ui/LockIcon";
-import { ALL_FREE } from "@/lib/access";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
@@ -30,6 +30,7 @@ import { exampleDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
 import { useChakraAccess } from "@/lib/useChakraAccess";
 import { useFullSections } from "@/lib/useFullSections";
+import { useLockedPreview, withPreview } from "@/lib/useLockedPreview";
 import Link from "next/link";
 import { useMemo } from "react";
 
@@ -71,14 +72,17 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
       return null;
     }
   }, [birth, seed, L]);
-  // на витрине без оплаты сервер досылает толкования всех разделов по слагу карты
-  const full = useFullSections(matrix);
+  // на витрине без оплаты и подписчику сервер досылает толкования всех разделов по слагу карты
+  const mode = useOfferMode();
+  const open = mode !== "sell";
+  const full = useFullSections(matrix, open);
+  const preview = useLockedPreview(matrix, !open);
   const access = useChakraAccess(matrix, ownDates, full);
 
   if (!matrix) return <div id="result" />;
 
-  const sections = full ?? buildFree(matrix, texts, articles);
-  const locked = sections.filter((s) => !s.positions.length);
+  const sections = full ?? withPreview(buildFree(matrix, texts, articles), preview);
+  const locked = sections.filter((s) => s.locked);
   const { anyDate, paid: thisDate, saved: thisDateSaved } = access;
   const thisDatePaid = Boolean(thisDate);
 
@@ -92,11 +96,11 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
           matrixId={access.matrixId} />
         <ReportSections locale={L} sections={sections} place="landing" />
 
-        {ALL_FREE ? (
+        {open ? (
           <div className="allbox">
             <h3>{example ? D.unlockBox.exampleTitleFree[L] : D.unlockBox.openTitleFree[L]}</h3>
             <p>
-              {example ? D.unlockBox.exampleLeadFree[L] : D.unlockBox.openLeadFree[L]}
+              {example ? D.unlockBox.exampleLeadFree[L] : mode === "free" ? D.unlockBox.openLeadFree[L] : D.unlockBox.openLeadSubscribed[L]}
               {D.unlockBox.saveForPdf[L]}
             </p>
             {example ? null : (
@@ -167,7 +171,7 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
 
         {/* тарифы не показываем тому, у кого эта дата уже открыта: на /report блок тоже
             скрыт при полном доступе, а здесь предлагал купить купленное */}
-        {ALL_FREE || thisDatePaid || anyDate ? null : <Plans locale={L} place="landing" />}
+        {open || thisDatePaid || anyDate ? null : <Plans locale={L} place="landing" />}
       </section>
     </div>
   );

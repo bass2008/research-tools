@@ -1,0 +1,17 @@
+/files/science/marketing/
+/files/science/commercials/
+/files/applied/business/sales/
+-/files/applied/business/sales/mlm/
+/files/applied/comp/ux_ui_design/
+/files/applied/comp/web/
+/files/applied/comp/seo/
+/files/science/informatics/ui/
+/files/science/psychology/marketing_ad_pr/
+/files/science/psychology/economic/
+/files/science/financial/behavioral/
+/files/science/financial/priceforming/
+/files/applied/comp/searchengines/
+-/files/applied/comp/searchengines/apache_lucene_solr/
+-/files/applied/comp/searchengines/elasticsearch/
+-/files/applied/comp/searchengines/shodan/
+-/files/applied/comp/searchengines/sphinx/

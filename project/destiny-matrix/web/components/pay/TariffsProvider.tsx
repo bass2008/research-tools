@@ -31,6 +31,7 @@ export const forLocale = localized((L: Locale) => {
 });
 
 export default function TariffsProvider({ locale: requestedLocale, ...localeProps }: ({
+  product: string;
   server?: Tariff[];
   providers?: PaymentProvider[] | null;
   children: React.ReactNode;
@@ -40,26 +41,28 @@ export default function TariffsProvider({ locale: requestedLocale, ...localeProp
   const {
     /** прайс, прочитанный на сервере: статические страницы приходят без него */
     server,
+    product,
     providers = null,
     children,
   } = localeProps;
   const { EMPTY } = forLocale(L);
 
-  const [pricesLocale, setPricesLocale] = useState(L);
+  const key = `${product}:${L}`;
+  const [pricesKey, setPricesKey] = useState(key);
   const [prices, setPrices] = useState<Prices>(
     server && server.length ? { items: server, known: true, providers } : EMPTY,
   );
 
   useEffect(() => {
-    if (prices.known && prices.providers !== null && pricesLocale === L) return;
+    if (prices.known && prices.providers !== null && pricesKey === key) return;
     let alive = true;
-    fetch("/api/tariffs", { cache: "no-store", headers: { "Accept-Language": L } })
+    fetch(`/api/tariffs?product=${encodeURIComponent(product)}`, { cache: "no-store", headers: { "Accept-Language": L } })
       .then((res) => (res.ok ? res.json() : null))
       .then((body) => {
         const list = (body as { items?: Tariff[] } | null)?.items;
         if (alive && Array.isArray(list) && list.length) {
           setPrices({ items: list, known: true, providers: Array.isArray(body.payment_providers) ? body.payment_providers : null });
-          setPricesLocale(L);
+          setPricesKey(key);
         }
       })
       .catch(() => {
@@ -68,9 +71,9 @@ export default function TariffsProvider({ locale: requestedLocale, ...localeProp
     return () => {
       alive = false;
     };
-  }, [prices.known, prices.providers, pricesLocale, L]);
+  }, [prices.known, prices.providers, pricesKey, key, product, L]);
 
-  return <Ctx.Provider value={pricesLocale === L ? prices : EMPTY}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={pricesKey === key ? prices : EMPTY}>{children}</Ctx.Provider>;
 }
 
 /** Тарифы для показа. Пока цена не подтверждена базой — список пуст: печатать нечего. */

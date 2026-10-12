@@ -72,9 +72,9 @@ def main() -> int:
     print(f"PDF ревизии {PDF_REVISION}: готовых {len(jobs)}, старых {len(stale)}, "
           f"не скачиваются {len(broken)}" + (f", стёрты при перезапуске {wiped}" if wiped else ""))
     for job in stale:
-        print(f"  старый: задача {job.id}, матрица {job.matrix_id}, {job.locale}, {job.object_key}")
+        print(f"  старый: задача {job.id}, разбор {job.reading_id}, {job.locale}, {job.object_key}")
     for job in broken:
-        print(f"  не скачивается: задача {job.id}, матрица {job.matrix_id}, {job.object_key}")
+        print(f"  не скачивается: задача {job.id}, разбор {job.reading_id}, {job.object_key}")
     return 1 if stale or broken else 0
 
 

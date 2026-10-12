@@ -1,4 +1,5 @@
 import { D } from "@/lib/i18n";
+import type { ReadingItem } from "@/lib/api";
 import { SITE_LANG, type Lang } from "@/lib/i18n/lang";
 import { requestLocale } from "@/lib/i18n/request";
 // Доступ к платным разделам определяется здесь — на сервере, по httpOnly-куке. В браузер
@@ -6,7 +7,6 @@ import { requestLocale } from "@/lib/i18n/request";
 // разделами, либо без них.
 //
 // Каталог `_lib` приватный: App Router не делает из папок с подчёркиванием маршрутов.
-import type { Tariff } from "@/lib/tariffs";
 import { sessionToken, upstreamUrl } from "../api/_lib/upstream";
 
 export interface SavedMatrix {
@@ -37,6 +37,8 @@ export interface Access {
   allFree: boolean;
   /** право открывать любые даты */
   unlimited: boolean;
+  /** продукты, открытые подпиской целиком */
+  subscribed: string[];
   /** до какого числа действует срочное право; null — бессрочно или прав нет */
   until: string | null;
   used: number;
@@ -51,6 +53,7 @@ const NO_ACCESS: Access = {
   paid: false,
   allFree: false,
   unlimited: false,
+  subscribed: [],
   until: null,
   used: 0,
   offline: false,
@@ -103,6 +106,8 @@ export async function readAccess(): Promise<Access> {
     allFree,
     paid: scopes.length > 0,
     unlimited: raw.unlimited === true,
+    subscribed: Object.entries((rights.products ?? {}) as Record<string, { unlimited?: unknown } | null>)
+      .filter(([, p]) => p?.unlimited === true).map(([code]) => code),
     until: typeof raw.until === "string" ? raw.until : null,
     used: Number(raw.matrices_used ?? 0),
     offline: false,
@@ -114,10 +119,16 @@ export async function readAccess(): Promise<Access> {
  * матрице, и повторять здесь его правила означало бы держать две копии одной логики.
  */
 export async function readMatrixUnlocked(id: number): Promise<boolean> {
+  return (await readMatrixCard(id)).unlocked;
+}
+
+/** Открыт ли разбор и чем: подпись для шапки (`access.plan_label`) решает апстрим по правам. */
+export async function readMatrixCard(id: number): Promise<{ unlocked: boolean; plan: string | null }> {
   const token = await sessionToken();
-  if (!token) return false;
+  if (!token) return { unlocked: false, plan: null };
   const res = await upstream(`/matrices/${id}`, token);
-  return res.ok && (res.body as { unlocked?: unknown } | null)?.unlocked === true;
+  const body = (res.ok ? res.body : null) as { unlocked?: unknown; plan?: unknown } | null;
+  return { unlocked: body?.unlocked === true, plan: typeof body?.plan === "string" ? body.plan : null };
 }
 
 export interface PrintPage {
@@ -149,17 +160,6 @@ export async function readPrintPage(id: number, token: string, L: Lang = SITE_LA
   };
 }
 
-/** Как назвать доступ в отчёте: имя тарифа берём из базы, а не из кода. */
-export function planLabel(access: Access, tariffs: Tariff[], unlocked: boolean, L: Lang = SITE_LANG): string {
-  if (access.unlimited) {
-    return tariffs.find((t) => t.scope.includes("all"))?.name ?? D.sheet.planUnlimited[L];
-  }
-  if (unlocked) {
-    return tariffs.find((t) => !t.scope.includes("all"))?.name ?? D.sheet.planSingle[L];
-  }
-  return D.sheet.planFree[L];
-}
-
 /**
  * Сохранённые матрицы владельца куки. Список — единственный источник дат: чужой `id` в него не
  * попадает, поэтому проверка «моя ли это матрица» сводится к поиску по нему.
@@ -167,7 +167,7 @@ export function planLabel(access: Access, tariffs: Tariff[], unlocked: boolean, 
 export async function readSavedMatrices(): Promise<SavedMatrix[]> {
   const token = await sessionToken();
   if (!token) return [];
-  const res = await upstream("/matrices", token);
+  const res = await upstream("/readings?product=personal", token);
   if (!res.ok) return [];
   const items = (res.body as { items?: unknown })?.items;
   if (!Array.isArray(items)) return [];
@@ -202,4 +202,50 @@ export function pickMatrix(saved: SavedMatrix[], wanted?: string | string[]): Sa
   // без параметра открываем оплаченную: человек заплатил за одну дату, а список отсортирован
   // по свежести, и «Мой разбор» показывал последнюю сохранённую
   return saved.find((m) => m.unlocked) ?? saved[0] ?? null;
+}
+
+/** Разбор любого продукта владельца — как его отдаёт апстрим: продукт, ввод и признак оплаты. */
+export interface ReadingRow {
+  id: number;
+  product: string;
+  inputs: Record<string, unknown>;
+  title: string | null;
+  unlocked: boolean;
+  plan?: string;
+}
+
+function readingRow(body: unknown): ReadingRow | null {
+  if (!body || typeof body !== "object") return null;
+  const row = body as Record<string, unknown>;
+  if (typeof row.product !== "string" || !row.inputs || typeof row.inputs !== "object") return null;
+  return {
+    id: Number(row.id),
+    product: row.product,
+    inputs: row.inputs as Record<string, unknown>,
+    title: typeof row.title === "string" ? row.title : null,
+    unlocked: row.unlocked === true,
+    plan: typeof row.plan === "string" ? row.plan : undefined,
+  };
+}
+
+export async function readReading(id: number): Promise<ReadingRow | null> {
+  const token = await sessionToken();
+  if (!token) return null;
+  const res = await upstream(`/readings/${id}`, token);
+  return res.ok ? readingRow(res.body) : null;
+}
+
+/** Страница печати разбора любого продукта: пропуск на один разбор, живущий минуту. */
+export async function readPrintReading(id: number, token: string, L: Lang = SITE_LANG): Promise<ReadingRow | null> {
+  const res = await upstream(`/reports/page/${id}?t=${encodeURIComponent(token)}`, "", L);
+  return res.ok ? readingRow(res.body) : null;
+}
+
+/** Разборы продукта в кабинете — для страниц, которые открывают «свою» запись, как /report. */
+export async function readReadings(product: string): Promise<ReadingItem[]> {
+  const token = await sessionToken();
+  if (!token) return [];
+  const res = await upstream(`/readings?product=${encodeURIComponent(product)}`, token);
+  const items = res.ok && res.body && typeof res.body === "object" ? (res.body as { items?: unknown }).items : null;
+  return Array.isArray(items) ? (items as ReadingItem[]) : [];
 }

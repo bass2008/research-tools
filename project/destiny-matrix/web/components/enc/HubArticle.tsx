@@ -7,10 +7,12 @@ import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
 import type { ArticleContent } from "@/lib/content";
+import { COMPATIBILITY_HUBS } from "@/lib/contentReader";
 import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
+import { DP } from "@/lib/i18n/dict/pair";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedSchema } from "@/lib/schema";
@@ -52,6 +54,7 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
   const { hubCrumb, hubHref, hub, hubKeys, articleLd, encyclopediaSectionCrumb } = forLocale(L, await requestSite());
 
   const path = hubHref(item.key);
+  const pair = COMPATIBILITY_HUBS.includes(item.key);
 
   return (
     <>
@@ -78,13 +81,21 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
 
       <Sections items={item.sections} locale={L} />
 
-      <div className="section-gap">
-        <CalcPromo locale={L}
-          title={D.octagram.hubPromoTitle[L]}
-          lead={D.octagram.hubPromoLead[L]}
-          place={`hub-${item.key}`}
-        />
-      </div>
+      {pair ? (
+        <div className="allbox section-gap" data-testid="hub-pair-calc">
+          <h3>{DP.encCompat.calcTitle[L]}</h3>
+          <p>{DP.encCompat.hubLead[L]}</p>
+          <Link className="btn" href="/compatibility">{DP.encCompat.calcButton[L]}</Link>
+        </div>
+      ) : (
+        <div className="section-gap">
+          <CalcPromo locale={L}
+            title={D.octagram.hubPromoTitle[L]}
+            lead={D.octagram.hubPromoLead[L]}
+            place={`hub-${item.key}`}
+          />
+        </div>
+      )}
 
       <Faq locale={L} items={item.faq} />
 
@@ -94,6 +105,8 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
         <h3>{D.octagram.hubWhereNext[L]}</h3>
         <div className="cap">{D.octagram.hubWhereNextHint[L]}</div>
         <div className="taglist">
+          {pair && <Link href="/compatibility">{DP.encCompat.calcLink[L]}</Link>}
+          {pair && <Link href="/encyclopedia/compatibility">{DP.encCompat.all[L]}</Link>}
           <Link href="/encyclopedia">{D.octagram.encTitle[L]}</Link>
           <Link href="/encyclopedia/karmic-tail">{D.octagram.karmicTail[L]}</Link>
           <Link href="/year">{D.octagram.matrixForYear[L]}</Link>
@@ -107,7 +120,7 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
         </div>
       </div>
 
-      <div className="allbox">
+      {!pair && <div className="allbox">
         <h3>{D.enc.buildYourChart[L]}</h3>
         <p>
           {D.octagram.calcFreeLead[L]} {D.octagram.fullReadingAll[L]} <PriceOrFree locale={L} />.
@@ -115,7 +128,7 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
         <Link className="btn" href="/#calc">
           {D.matrixPages.calcFree[L]}
         </Link>
-      </div>
+      </div>}
     </>
   );
 }

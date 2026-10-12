@@ -7,8 +7,7 @@ import type { Matrix } from "@/lib/matrix";
 import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
 import { forLocale as localizedSite } from "@/lib/site";
 import chakraLevels from "@/lib/__fixtures__/chakras.json";
-import type { CSSProperties } from "react";
-import styles from "./ChakraMapHover.module.css";
+import { C, CHAKRA_COLORS, fmt, OctagramFrame, OctagramPoint, pt, R, RIN } from "./OctagramParts";
 
 type NodeSpec = {
   pointKey: string;
@@ -26,26 +25,7 @@ export const forLocale = localized((L: Locale, site) => {
   const { mapPoint } = localizedMatrixMap(L);
   const { publicHref } = localizedSite(L, site);
 
-  // Геометрия перенесена из рукописного лендинга: viewBox 620×620, центр 310,
-  // внешний радиус 248, внутренний 142. Возрастная шкала идёт по кругу от запада
-  // по часовой стрелке — тем же порядком, что age_scale в движке.
-  const C = 310;
-
-  const R = 248;
-
-  const RIN = 142;
-
-  const CHAKRA_COLORS = ["#c9453a", "#dd7b2a", "#d9ac1e", "#159c69", "#1f9ed6", "#3f5ec9", "#8e5bc4"];
-
-  function pt(angle: number, radius: number): [number, number] {
-    const a = (angle * Math.PI) / 180;
-    return [C + radius * Math.cos(a), C + radius * Math.sin(a)];
-  }
-
-  function fmt(n: number): string {
-    return n.toFixed(1);
-  }
-  return { arcanumTitle, mapPoint, publicHref, C, R, RIN, CHAKRA_COLORS, pt, fmt };
+  return { arcanumTitle, mapPoint, publicHref };
 });
 
 export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
@@ -61,7 +41,7 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
     linked = true,
     printing = false,
   } = localeProps;
-  const { arcanumTitle, mapPoint, publicHref, C, R, RIN, CHAKRA_COLORS, pt, fmt } = forLocale(L, site);
+  const { arcanumTitle, mapPoint, publicHref } = forLocale(L, site);
 
   const outer: NodeSpec[] = [
     { pointKey: "day", angle: 180, value: m.day, label: D.octagram.portrait[L], color: CHAKRA_COLORS[2], big: true },
@@ -140,69 +120,22 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
   }
 
   const node = (spec: NodeSpec, radius: number, size: number, font: number, key: string, small = false) => {
-    const [x, y] = pt(spec.angle, spec.radius ?? radius);
-    const title = D.octagram.nodeTitle[L](spec.label, spec.value, arcanumTitle(spec.value));
     const symbol = mapPoint(spec.pointKey)?.symbol;
     // Сопоставляем позиции по канону, а не одинаковые номера арканов в разных местах карты.
     const chakras = chakraLevels.filter((level) => level.physics === symbol || level.energy === symbol)
       .map((level) => level.key).join(" ");
-    const pointProps = {
-      className: styles.node,
-      style: { "--point-color": spec.color } as CSSProperties,
-      "data-map-point": spec.pointKey,
-      "data-map-chakras": printing ? undefined : chakras || undefined,
-    };
-    const body = (
-      <>
-        <title>{title}</title>
-        {!printing && chakras ? <circle className={styles.halo} data-chakra-halo="true"
-          cx={fmt(x)} cy={fmt(y)} r={size + 7} aria-hidden="true" /> : null}
-        <circle cx={fmt(x)} cy={fmt(y)} r={size} fill={spec.color} />
-        <text className={small ? "n sm" : "n"} x={fmt(x)} y={fmt(y)} fontSize={font}>
-          {spec.value}
-        </text>
-      </>
-    );
-    return linked ? (
-      <a
-        key={key}
-        href={printing
-          ? publicHref(`/encyclopedia/arcanum/${spec.value}`)
-          : `/encyclopedia/arcanum/${spec.value}`}
-        aria-label={title}
-        {...pointProps}
-      >
-        {body}
-      </a>
-    ) : (
-      <g key={key} aria-label={title} {...pointProps}>
-        {body}
-      </g>
+    const href = `/encyclopedia/arcanum/${spec.value}`;
+    return (
+      <OctagramPoint key={key} pointKey={spec.pointKey} angle={spec.angle} radius={spec.radius ?? radius}
+        size={size} font={font} small={small} value={spec.value} color={spec.color}
+        title={D.octagram.nodeTitle[L](spec.label, spec.value, arcanumTitle(spec.value))}
+        href={linked ? (printing ? publicHref(href) : href) : undefined}
+        chakras={printing ? undefined : chakras} />
     );
   };
 
-  const octagon = outer.map((o) => pt(o.angle, R).map(fmt).join(",")).join(" ");
-  const square1 = [-90, 0, 90, 180].map((a) => pt(a, RIN).map(fmt).join(",")).join(" ");
-  const square2 = [-45, 45, 135, 225].map((a) => pt(a, RIN).map(fmt).join(",")).join(" ");
-
   return (
-    <svg
-      className="oct"
-      viewBox="0 0 620 620"
-      role="img"
-      aria-label={D.octagram.diagramAria[L]}
-    >
-      <circle className="ring" cx={C} cy={C} r={R + 38} />
-      <circle className="ring" cx={C} cy={C} r={R + 22} />
-      {ticks}
-      <polygon className="side" points={octagon} />
-      <polygon className="diag" points={square1} />
-      <polygon className="diag" points={square2} />
-      {[180, 225, -90, -45].map((a) => {
-        const [x1, y1] = pt(a, R);
-        const [x2, y2] = pt(a + 180, R);
-        return <line key={`ax${a}`} className="axis" x1={fmt(x1)} y1={fmt(y1)} x2={fmt(x2)} y2={fmt(y2)} />;
-      })}
+    <OctagramFrame label={D.octagram.diagramAria[L]} under={ticks}>
       {/* небо — вертикальная ось точек комфорта, земля — горизонтальная. Подписи «небо» стоят
           внутри квадрата: снаружи, на радиусе 195, теперь сидят точки P и N. */}
       <text className="lbl" x={C} y={C - RIN + 30}>
@@ -227,6 +160,6 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
         23,
         "center",
       )}
-    </svg>
+    </OctagramFrame>
   );
 }

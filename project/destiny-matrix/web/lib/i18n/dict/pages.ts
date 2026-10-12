@@ -57,6 +57,12 @@ export const pages = {
     en: "Saved matrices open only for the owner of the account: the date of birth is given to "
       + "nobody else.",
   } satisfies Phrase,
+  savedReadingOwnerOnly: {
+    ru: "Сохранённые разборы открываются только владельцу аккаунта: даты рождения не отдаются "
+      + "никому, кроме него.",
+    en: "Saved readings open only for the owner of the account: the dates of birth are given to "
+      + "nobody else.",
+  } satisfies Phrase,
   calcWithoutSignup: {
     ru: "Считать матрицу без регистрации можно и так —",
     en: "A matrix can also be calculated without signing up —",

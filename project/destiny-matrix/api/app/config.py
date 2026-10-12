@@ -99,6 +99,7 @@ class Settings(BaseSettings):
     # адрес, по которому браузер видит фронт (внутренняя сеть compose)
     web_internal_url: str = "http://web:3000"
     print_token_ttl_seconds: int = Field(default=120, ge=30, le=900)
+    task_lease_hours: int = Field(default=6, ge=1, le=72)
 
     # Object Storage под готовые отчёты. Без ключей печать отключена — файлу негде лежать.
     # где лежат готовые отчёты: s3 на проде, local на стендах (см. app/store.py)

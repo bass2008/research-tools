@@ -6,6 +6,17 @@ export const encTail = {
     en: (n: number) => `arcanum ${n}`,
   } satisfies PhraseFn<[number]>,
   howCounted: { ru: "Как считается хвост", en: "How the tail is calculated" } satisfies Phrase,
+  inCompatibilityTitle: { ru: "Этот хвост в совместимости", en: "This tail in compatibility" } satisfies Phrase,
+  inCompatibilityText: {
+    ru: (triple: string) => `Тройка ${triple} бывает и кармическим хвостом пары — в матрице, сложенной из двух дат рождения. `
+      + "Там она говорит о задачах союза, а не одного человека: чему двоим предстоит научиться вместе. "
+      + "Хвост своей пары показывает калькулятор совместимости.",
+    en: (triple: string) => `The ${triple} triple can also be a couple's karmic tail — in the matrix built from two dates of birth. `
+      + "There it speaks of the union's tasks rather than one person's: what the two of you have to learn together. "
+      + "The compatibility calculator shows your couple's tail.",
+  } satisfies PhraseFn<[string]>,
+  inCompatibilityCalc: { ru: "Рассчитать совместимость", en: "Calculate compatibility" } satisfies Phrase,
+  inCompatibilityHub: { ru: "Арканы в совместимости", en: "Arcana in compatibility" } satisfies Phrase,
   formulaHint: { ru: "Формула методики", en: "The formula of the method" } satisfies Phrase,
   formulaHead: {
     ru: "В классической схеме порядок фиксирован: M–N–D. Для этой формы это",

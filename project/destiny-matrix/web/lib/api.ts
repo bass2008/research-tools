@@ -1,4 +1,5 @@
 import { reportBadFormat } from "./errors";
+import { holdingList, type Holding } from "@/lib/holdings";
 import { D } from "./i18n";
 import { beginRetry, failureCause, waitForOnline, waitForRetry } from "./netwatch";
 
@@ -35,6 +36,10 @@ export interface MeResponse {
   owned: number;
   /** доступна ли админка: список админских почт живёт в конфиге апстрима */
   is_admin: boolean;
+  /** доступ по продуктам: `unlimited` — подписка открывает любые разборы продукта */
+  products: Record<string, { unlimited: boolean }>;
+  /** сводка прав для экранов (`access.holdings`) */
+  holdings: Holding[];
 }
 
 /** Как открыта матрица: витриной без оплаты, куплена бессрочно, выдана без оплаты, открыта
@@ -51,6 +56,24 @@ export interface MatrixListItem {
   access: MatrixAccess;
   /** до какого числа открыта по подписке; null — бессрочно или закрыта */
   access_until: string | null;
+  /** открыта выданным правом, в том числе выданной подпиской */
+  access_granted?: boolean;
+}
+
+/** Разбор любого продукта: продукт и введённые данные. */
+export interface ReadingItem {
+  id: number;
+  product: string;
+  inputs: Record<string, unknown>;
+  /** у личного разбора — дата и пол, как в `MatrixListItem` */
+  birth?: string;
+  sex?: Sex;
+  title: string | null;
+  created_at: string;
+  access: MatrixAccess;
+  access_until: string | null;
+  access_granted?: boolean;
+  unlocked?: boolean;
 }
 
 /** Карточка сохранённой матрицы. Разделов здесь нет: разбор считает фронт. */
@@ -66,6 +89,8 @@ export interface PaymentItem {
   matrix_id: number | null;
   /** какую дату открыл платёж: номер записи админу ничего не говорит */
   matrix?: MatrixListItem | null;
+  /** разбор любого продукта, который открыл заказ */
+  reading?: { id: number; product: string; title: string | null; birth?: string; sex?: "m" | "f" } | null;
   external_id: string;
   created_at: string;
   paid_at: string | null;
@@ -79,6 +104,14 @@ export interface PaymentItem {
 export type AdminUserSort = "id" | "email" | "matrices" | "payments" | "spent" | "access" | "last_seen_at" | "created_at";
 
 /** Строка списка пользователей в админке. */
+export interface AdminVisit {
+  client_id: string;
+  counter_id: number;
+  site_origin: string;
+  first_seen_at: string;
+  last_seen_at: string;
+}
+
 export interface AdminUser {
   id: number;
   email: string;
@@ -95,6 +128,8 @@ export interface AdminUser {
   granted: number;
   until: string | null;
   rights: number;
+  /** сводка прав (`access.holdings`): верхние поля выше — только про личный разбор */
+  holdings?: Holding[];
 }
 
 export interface ReportJobItem {
@@ -114,6 +149,28 @@ export interface ReportJobItem {
 export interface AdminReportJob extends ReportJobItem {
   user_id: number;
   email: string;
+}
+
+export interface WorkerStatus {
+  online: boolean;
+  last_seen_at: string | null;
+  offline_after: number;
+}
+
+export interface WorkTask {
+  id: number;
+  kind: string;
+  status: "queued" | "signalled" | "done" | "failed";
+  reading_id: number | null;
+  reason: string | null;
+  params: { keys?: string[]; response?: string };
+  error: string | null;
+  problems: string[];
+  attempts: number;
+  created_at: string;
+  due_at: string;
+  signalled_at: string | null;
+  finished_at: string | null;
 }
 
 export interface SweepRun {
@@ -153,6 +210,8 @@ export interface ApplicationSettings {
 export interface AdminUserCard {
   user: AdminUser;
   matrices: MatrixListItem[];
+  /** разборы всех продуктов */
+  readings?: ReadingItem[];
   payments: PaymentItem[];
   rights: Array<{
     id: number;
@@ -175,7 +234,7 @@ export interface PaymentResponse {
   requires_login?: boolean;
   /** какая дата открыта платежом — по данным сервера, а не по состоянию браузера */
   matrix_id: number | null;
-  matrix: { id: number; birth: string; sex: "m" | "f"; title: string | null } | null;
+  matrix: { id: number; birth?: string; sex?: "m" | "f"; title: string | null; product?: string } | null;
 }
 
 export class ApiError extends Error {
@@ -390,10 +449,23 @@ export const forLocale = localized((L: Locale) => {
           : Number(raw.matrices_limit),
         owned: Number(raw.owned ?? 0),
         is_admin: raw.is_admin === true,
+        products: Object.fromEntries(Object.entries((rights.products ?? {}) as Record<string, Record<string, unknown>>)
+          .map(([code, value]) => [code, { unlimited: value?.unlimited === true }])),
+        holdings: holdingList(rights.holdings),
       };
     },
 
-    matrices: () => request<{ items: MatrixListItem[] }>("/matrices"),
+    matrices: () => request<{ items: MatrixListItem[] }>("/readings?product=personal"),
+
+    /** Разборы кабинета: без продукта — все, с типом каждого. */
+    readings: (product?: string) => request<{ items: ReadingItem[] }>(product ? `/readings?product=${encodeURIComponent(product)}` : "/readings"),
+
+    renameReading: (id: number, title: string) =>
+      request<ReadingItem>(`/readings/${id}`, { method: "PATCH", body: JSON.stringify({ title }) }),
+
+    /** Сохранить разбор: дата уходит на сервер только по явному действию вошедшего человека. */
+    saveReading: (product: string, inputs: unknown) =>
+      request<ReadingItem>("/readings", { method: "POST", body: JSON.stringify({ product, inputs }) }),
 
     payments: () => request<{ items: PaymentItem[] }>("/payments"),
 
@@ -405,6 +477,7 @@ export const forLocale = localized((L: Locale) => {
         );
       },
       payments: () => request<{ items: AdminPayment[] }>("/admin/payments"),
+      visits: (id: number) => request<{ items: AdminVisit[] }>(`/admin/users/${id}/visits`),
       user: (id: number) => request<AdminUserCard>(`/admin/users/${id}`),
       reports: (page = 1, pageSize = 10) => {
         const q = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
@@ -416,9 +489,15 @@ export const forLocale = localized((L: Locale) => {
         );
       },
       sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
+      tasks: (page = 1) => request<{ items: WorkTask[]; pending: number; total: number; worker: WorkerStatus }>(`/admin/tasks?page=${page}`),
+      createTestTask: () => request<WorkTask>("/admin/tasks", { method: "POST", body: JSON.stringify({ kind: "test" }) }),
+      deleteTask: (id: number) => request<{ ok: boolean }>(`/admin/tasks/${id}`, { method: "DELETE" }),
+      retryTask: (id: number) => request<WorkTask>(`/admin/tasks/${id}/retry`, { method: "POST" }),
       pulse: () => request<Pulse>("/admin/pulse"),
       settings: () => request<ApplicationSettings>("/admin/settings"),
-      /** Вернуть платёж: снимает право, закрывает разбор и пишет покупателю письмо. */
+      /** Что станет с доступом после возврата: текст считает сервер по тем же правам, что кабинет. */
+      refundPreview: (id: number) => request<{ outcome: string }>(`/admin/payments/${id}/refund-preview`),
+      /** Вернуть платёж: снимает права заказа и пишет покупателю письмо. */
       refund: (id: number) =>
         request<{ ok: true; status: string; refunded_at: string | null }>(
           `/admin/payments/${id}/refund`,
@@ -435,9 +514,23 @@ export const forLocale = localized((L: Locale) => {
 
       /** Выдать матрицу без оплаты: в кабинете она открыта, но помечена как выданная. */
       addMatrix: (userId: number, birth: string, sex: Sex) =>
-        request<MatrixListItem>("/admin/matrices", {
+        request<MatrixListItem & { granted_now?: boolean }>("/admin/matrices", {
           method: "POST",
           body: JSON.stringify({ user_id: userId, birth, sex }),
+        }),
+
+      /** Выдать разбор любого продукта без оплаты: так принимают продукт на тестовом контуре. */
+      addReading: (userId: number, product: string, inputs: Record<string, unknown>) =>
+        request<ReadingItem & { granted_now?: boolean }>("/admin/readings", {
+          method: "POST",
+          body: JSON.stringify({ user_id: userId, product, inputs }),
+        }),
+
+      /** Выдать подписку без оплаты: все продукты на срок предложения `month`. */
+      addSubscription: (userId: number) =>
+        request<{ ok: true; already: boolean; until: string | null }>("/admin/subscription", {
+          method: "POST",
+          body: JSON.stringify({ user_id: userId }),
         }),
 
       /** Подписанная ссылка на чужой готовый PDF — проверить, что человек получил нужный файл. */
@@ -468,13 +561,6 @@ export const forLocale = localized((L: Locale) => {
         body: JSON.stringify({ birth, sex, title }),
       }),
 
-    /** Подписать матрицу. Пустое имя возвращает подпись по умолчанию — дату. */
-    renameMatrix: (id: number, title: string) =>
-      request<MatrixListItem>(`/matrices/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ title }),
-      }),
-
     /** `matrixId` — какую сохранённую дату открыть; без него право ждёт следующую сохранённую. */
     payMock: (
       tariff: string,
@@ -494,7 +580,7 @@ export const forLocale = localized((L: Locale) => {
     payStart: (
       tariff: string,
       email: string,
-      target?: { matrixId?: number; birth?: string; sex?: "m" | "f" },
+      target?: { matrixId?: number; birth?: string; sex?: "m" | "f"; readingId?: number; inputs?: unknown },
       provider?: string,
     ) =>
       request<PaymentResponse & { order_id: string; payment_url: string | null; status: string }>(
@@ -507,6 +593,8 @@ export const forLocale = localized((L: Locale) => {
             email,
             ...(target?.matrixId ? { matrix_id: target.matrixId } : {}),
             ...(target?.birth ? { birth: target.birth, sex: target.sex ?? "f" } : {}),
+            ...(target?.readingId ? { reading_id: target.readingId } : {}),
+            ...(target?.inputs ? { inputs: target.inputs } : {}),
           }),
         },
       ),
@@ -516,7 +604,13 @@ export const forLocale = localized((L: Locale) => {
         ok: true; status: string;
         /** состояние, решённое сервером: экраны его не пересчитывают */
         state: "new" | "paid" | "refunded" | "failed" | "abandoned";
-        paid: boolean; matrix_id: number | null;
+        paid: boolean; matrix_id: number | null; product?: string | null;
+        /** куплена подписка, а не разбор */
+        subscription?: boolean;
+        until?: string | null;
+        /** после возврата: что стало с доступом — текст сервера; открыт ли ещё разбор */
+        outcome?: string;
+        still_open?: boolean;
         payment_id: string
       }>("/payments/sync", {
         method: "POST",
@@ -526,18 +620,18 @@ export const forLocale = localized((L: Locale) => {
     reportJobs: () =>
       request<{
         items: Array<{
-          id: number; matrix_id: number; locale: Locale; status: string;
+          id: number; matrix_id: number; reading_id?: number; locale: Locale; status: string;
           size_bytes: number | null; seconds: number | null
         }>
       }>("/reports"),
 
-    reportPdf: (matrixId: number) =>
+    reportPdf: (readingId: number) =>
       request<{
         job_id: number; status: string; cached: boolean; url: string; size_bytes: number | null;
         seconds: number | null
       }>("/reports/pdf", {
         method: "POST",
-        body: JSON.stringify({ matrix_id: matrixId }),
+        body: JSON.stringify({ reading_id: readingId }),
       }),
 
   };

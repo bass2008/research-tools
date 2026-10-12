@@ -5,17 +5,18 @@ import time
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import access, reports
+from . import access, printing, reports
 from .config import settings
 from .db import SessionLocal
-from .models import SavedMatrix, User
+from .i18n import using_locale
+from .models import Reading, User
 from .security import create_print_token
 
 
-def target(db: Session) -> SavedMatrix | None:
-    for row in db.scalars(select(SavedMatrix).order_by(SavedMatrix.id.desc())):
+def target(db: Session) -> Reading | None:
+    for row in db.scalars(select(Reading).order_by(Reading.id.desc())):
         owner = db.get(User, row.user_id)
-        if owner is not None and access.unlocked_matrix(db, owner, row.id):
+        if owner is not None and access.can_open(db, owner, row):
             return row
     return None
 
@@ -31,11 +32,11 @@ def main() -> None:
     if row is None:
         print("открытых разборов нет: прогревать нечем")
         return
-    token = create_print_token(row.id, row.user_id)
-    url = f"{settings.web_internal_url.rstrip('/')}/print/report?m={row.id}&t={token}&lang=ru"
+    with using_locale("ru"):
+        url = printing.print_url(row, create_print_token(row.id, row.user_id))
     started = time.monotonic()
     pdf = reports.render(url)
-    print(f"печать прогрета: матрица {row.id}, {len(pdf)} Б за {time.monotonic() - started:.1f} с")
+    print(f"печать прогрета: разбор {row.id}, {len(pdf)} Б за {time.monotonic() - started:.1f} с")
 
 
 if __name__ == "__main__":

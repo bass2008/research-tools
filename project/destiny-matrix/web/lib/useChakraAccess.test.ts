@@ -16,8 +16,7 @@ vi.mock("react", async (original) => ({
   useEffect: (effect: typeof hooks.effect) => { hooks.effect = effect; },
 }));
 vi.mock("@/components/ui/LocaleProvider", () => ({ useLocale: () => hooks.locale }));
-vi.mock("@/components/account/useSession", () => ({ useSession: () => ({ status: "user", unlimited: false }) }));
-vi.mock("./access", () => ({ ALL_FREE: false }));
+vi.mock("@/components/pay/useOfferMode", () => ({ useOfferMode: () => "sell" }));
 
 const matrix = calculate("1993-03-31", "f");
 const dates = [{ id: 42, birth: matrix.birth, sex: matrix.sex, access: "forever" }] as MatrixListItem[];

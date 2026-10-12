@@ -2,13 +2,17 @@ import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 // Разметка разделов. Без "use client" и без своих данных намеренно: этот же компонент
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
 // пропсами и в браузерный чанк не попадают) и клиентский разбор в браузере, где платных
-// разделов нет вовсе.
+// толкований нет вовсе: закрытый раздел приходит картами позиций и заглушкой.
 import { Paragraphs } from "@/components/enc/Sections";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
+import ChakraReadingView from "@/components/matrix/ChakraReadingView";
 import CharacterConclusionView from "@/components/matrix/CharacterConclusionView";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CharacterRoleParts from "@/components/matrix/CharacterRoleParts";
+import { LockedBody, LockedCards } from "@/components/matrix/LockedSection";
+import { cardColumns } from "@/lib/cardColumns";
 import SectionEncyclopediaLinks from "@/components/matrix/SectionEncyclopediaLinks";
+import Price from "@/components/pay/Price";
 import UnlockCta from "@/components/pay/UnlockCta";
 import LockIcon from "@/components/ui/LockIcon";
 import { ALL_FREE } from "@/lib/access";
@@ -58,11 +62,11 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
   } = localeProps;
   const { arcanumTitle, publicHref, gridColumns } = forLocale(L, site);
 
-  const open = sections.filter((s) => s.positions.length > 0).length;
+  const open = sections.filter((s) => !s.locked).length;
   const locked = sections.length - open;
 
   return (
-    <div className="section-gap" data-testid="report">
+    <div className="section-gap" data-testid="report" data-print-ready="">
       <div className="rhead">
         <h2>{D.report.readingTitle[L]}</h2>
         {/* Счётчик «столько открыто, столько под замком» нужен только там, где замок можно снять
@@ -75,7 +79,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
       </div>
 
       {sections.map((s, i) => {
-        return s.positions.length ? (
+        return !s.locked ? (
           <details
             className="acc"
             key={s.key}
@@ -92,7 +96,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                 <CharacterReadingView site={site} locale={L} reading={s.longform} printing={printing} />
               ) : <>
               <p className="lead">{s.lead}</p>
-              <ul className="poslist" data-cols={gridColumns(s.positions.length)}>
+              <ul className="poslist" data-cols={gridColumns(s.positions.length)} style={cardColumns(s.positions.length)}>
                 {s.positions.map((p, j) => {
                   const readingRole = p.role ?? (s.longform?.layout ? undefined : s.longform?.roles[j]);
                   return (
@@ -179,6 +183,21 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                   <LockIcon /> {D.report.unlock[L]}
                 </span>
               </UnlockCta>
+            )}
+            {checking || printing || ALL_FREE || !(s.positions.length || s.longform) ? null : (
+              <LockedBody testId={`preview-${s.key}`} lead={s.lead} cta={
+                <UnlockCta locale={L} className="btn gold" place={place} section={s.key} matrixId={matrixId}
+                  testId={`section-buy-${s.key}`} unavailable={null}>
+                  <span>{D.report.unlockSection[L]}<Price locale={L} /></span>
+                </UnlockCta>
+              }>
+                {s.longform?.layout === "chakras"
+                  ? <ChakraReadingView site={site} locale={L} reading={s.longform} unlock={(className, label) => (
+                    <UnlockCta locale={L} className={className} place={place} section={s.key} matrixId={matrixId}
+                      unavailable={<span className={className}>{label}</span>}>{label}</UnlockCta>
+                  )} />
+                  : <LockedCards locale={L} cards={s.positions.map((p) => ({ n: p.arcanum, who: p.label, href: p.href }))} />}
+              </LockedBody>
             )}
           </div>
         );

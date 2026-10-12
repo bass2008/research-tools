@@ -15,7 +15,7 @@ import {
 // у языка, где страницы нет, её не должно быть и в карте.
 const SERVICE_PATHS = servicePages().map((key) => SERVICE_PAGES[key].path);
 // адреса первого уровня, которые не являются концепт-хабами
-const STATIC_PATHS = ["/", "/encyclopedia", "/year", ...SERVICE_PATHS];
+const STATIC_PATHS = ["/", "/encyclopedia", "/year", "/compatibility", ...SERVICE_PATHS];
 
 describe("карта сайта", () => {
   const paths = sitemap().map((entry) => new URL(entry.url).pathname);

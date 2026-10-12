@@ -121,6 +121,8 @@ export const forLocale = localized((L: Locale) => {
 
   const YEAR_HUB = "/year";
 
+  const COMPATIBILITY_HUB = "/encyclopedia/compatibility";
+
   // Шапка каждого типа страниц справочника. Хаб обязан лежать на префиксе своих листьев:
   // `/encyclopedia/combination` над `/encyclopedia/combination/8-11`. Так адрес совпадает с
   // заявленным в крошке родителем, и уровень «Сочетания арканов» перестаёт быть фильтром
@@ -139,6 +141,10 @@ export const forLocale = localized((L: Locale) => {
 
   function yearHref(key: string | number): string {
     return `${YEAR_HUB}/${key}`;
+  }
+
+  function compatibilityHref(n: number | string): string {
+    return `${COMPATIBILITY_HUB}/${n}`;
   }
 
   const HUB_ROUTES: HubRoute[] = hubs.items.map((item) => {
@@ -214,8 +220,8 @@ export const forLocale = localized((L: Locale) => {
 
   const ENCYCLOPEDIA_PAGE_COUNT =
     1 + ARCANA.length + POSITIONS.length + allCombinationSlugs().length + CHAKRA_PAGES.length;
-  return { POSITIONS, POSITION_KEYS, CHAKRA_PAGES, positionByKey, chakraByKey, arcanumHref, positionHref, chakraHref, combinationHref, allCombinationSlugs, parseCombinationSlug, KARMIC_TAIL_HUB, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, karmicTailHref, yearHref, ROOT_HUBS, hubCrumb, hubHref, hasHubRoute, parseTail, tailShape, tailByFormula, encyclopediaIndex, ENCYCLOPEDIA_PAGE_COUNT };
+  return { POSITIONS, POSITION_KEYS, CHAKRA_PAGES, positionByKey, chakraByKey, arcanumHref, positionHref, chakraHref, combinationHref, allCombinationSlugs, parseCombinationSlug, KARMIC_TAIL_HUB, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, COMPATIBILITY_HUB, karmicTailHref, yearHref, compatibilityHref, ROOT_HUBS, hubCrumb, hubHref, hasHubRoute, parseTail, tailShape, tailByFormula, encyclopediaIndex, ENCYCLOPEDIA_PAGE_COUNT };
 });
 
 // Compatibility for callers that explicitly use the deployment default.
-export const { POSITIONS, POSITION_KEYS, CHAKRA_PAGES, positionByKey, chakraByKey, arcanumHref, positionHref, chakraHref, combinationHref, allCombinationSlugs, parseCombinationSlug, KARMIC_TAIL_HUB, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, karmicTailHref, yearHref, ROOT_HUBS, hubCrumb, hubHref, hasHubRoute, parseTail, tailShape, tailByFormula, encyclopediaIndex, ENCYCLOPEDIA_PAGE_COUNT } = forLocale(defaultLocale);
+export const { POSITIONS, POSITION_KEYS, CHAKRA_PAGES, positionByKey, chakraByKey, arcanumHref, positionHref, chakraHref, combinationHref, allCombinationSlugs, parseCombinationSlug, KARMIC_TAIL_HUB, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, COMPATIBILITY_HUB, karmicTailHref, yearHref, compatibilityHref, ROOT_HUBS, hubCrumb, hubHref, hasHubRoute, parseTail, tailShape, tailByFormula, encyclopediaIndex, ENCYCLOPEDIA_PAGE_COUNT } = forLocale(defaultLocale);

@@ -138,3 +138,53 @@ export function forgetSession(): void {
   }
 }
 
+
+// Пара для расчёта совместимости живёт так же, как дата: в sessionStorage, не в URL.
+const PAIR_KEY = "destiny.pair";
+
+export interface StoredPartner {
+  birth: string;
+  name?: string;
+}
+
+export interface StoredPair {
+  a: StoredPartner;
+  b: StoredPartner;
+}
+
+let pairMemory: StoredPair | null = null;
+
+export const PAIR_EVENT = "destiny:pair";
+
+function validPair(value: unknown): value is StoredPair {
+  const pair = value as StoredPair | null;
+  const ok = (p: StoredPartner | undefined) => typeof p?.birth === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.birth);
+  return Boolean(pair) && ok(pair!.a) && ok(pair!.b);
+}
+
+export function savePair(v: StoredPair): void {
+  pairMemory = v;
+  try {
+    sessionStorage.setItem(PAIR_KEY, JSON.stringify(v));
+  } catch {
+    /* приватный режим: пара остаётся в памяти вкладки */
+  }
+  try {
+    window.dispatchEvent(new CustomEvent(PAIR_EVENT, { detail: v }));
+  } catch {
+    /* сервер */
+  }
+}
+
+export function loadPair(): StoredPair | null {
+  try {
+    const raw = sessionStorage.getItem(PAIR_KEY);
+    if (raw) {
+      const value = JSON.parse(raw) as unknown;
+      if (validPair(value)) return value;
+    }
+  } catch {
+    /* приватный режим */
+  }
+  return pairMemory;
+}

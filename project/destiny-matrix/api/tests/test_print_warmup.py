@@ -67,7 +67,7 @@ def test_granted_matrix_is_printed_too(client, db, printer, auth):
                         json={"birth": "1984-03-17", "sex": "m"}, headers=auth(settings.admins[0]))
 
     assert given.status_code == 200, given.text
-    job = db.scalars(select(ReportJob).where(ReportJob.matrix_id == given.json()["id"])).one()
+    job = db.scalars(select(ReportJob).where(ReportJob.reading_id == given.json()["id"])).one()
     assert job.status == "done", f"печать не дошла до конца: {job.status} {job.error}"
     assert len(printer) == 1, f"рендеров: {len(printer)}"
 
@@ -231,7 +231,7 @@ def test_startup_does_not_wait_for_web_without_stale_pdfs(client, db, printer, m
 def test_reprint_skips_a_report_the_owner_already_reprinted(client, db, printer):
     buy(client)
     fresh = db.scalars(select(ReportJob)).one()
-    stale = ReportJob(user_id=fresh.user_id, matrix_id=fresh.matrix_id, locale=fresh.locale,
+    stale = ReportJob(user_id=fresh.user_id, reading_id=fresh.reading_id, locale=fresh.locale,
                       status="done", object_key="v0/old.pdf", size_bytes=1)
     db.add(stale)
     db.commit()

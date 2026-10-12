@@ -336,6 +336,11 @@ def url_registry(tails: list[dict]) -> list[dict]:
             "ordered-хвост метода; индексируется только после demand gate")
     for item in item_list("year-arcana.json"):
         add(f"/year/{item['n']}", "year", "keep", True, "каноническая годовая статья")
+    add("/compatibility", "pair_calculator", "keep", True, "калькулятор совместимости пары")
+    add("/encyclopedia/compatibility", "compatibility_hub", "keep", True, "шапка раздела «Арканы в совместимости»")
+    for item in item_list("compatibility-arcana.json"):
+        add(f"/encyclopedia/compatibility/{item['n']}", "compatibility_arcanum", "keep", True,
+            "аркан в матрице пары")
     for item in item_list("matrices.json"):
         add(f"/matrix/{item['slug']}", "calculated_matrix", "noindex", False,
             "производный продуктовый результат, не SEO landing")

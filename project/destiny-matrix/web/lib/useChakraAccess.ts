@@ -1,8 +1,7 @@
 "use client";
 
-import { useSession } from "@/components/account/useSession";
+import { useOfferMode } from "@/components/pay/useOfferMode";
 import { useLocale } from "@/components/ui/LocaleProvider";
-import { ALL_FREE } from "./access";
 import type { Lang } from "./i18n/lang";
 import type { MatrixListItem } from "./api";
 import type { Matrix } from "./matrix";
@@ -17,12 +16,12 @@ export type ChakraReadingStatus = "loading" | "error";
 // all 20 sections for one birth date.
 export function useChakraAccess(m: Matrix | null, dates: MatrixListItem[], full: SectionOut[] | null) {
   const L = useLocale();
-  const session = useSession();
+  const mode = useOfferMode();
   const paid = m ? dates.find((row) => row.birth === m.birth && row.access !== "locked") : undefined;
   const saved = m
     ? dates.find((row) => row.birth === m.birth && row.sex === m.sex) ?? dates.find((row) => row.birth === m.birth)
     : undefined;
-  const paidId = ALL_FREE ? undefined : paid?.id;
+  const paidId = mode === "free" ? undefined : paid?.id;
   const [own, setOwn] = useState<{ id: number; locale: Lang; reading?: LongformReading; status?: ChakraReadingStatus } | null>(null);
 
   useEffect(() => {
@@ -43,7 +42,7 @@ export function useChakraAccess(m: Matrix | null, dates: MatrixListItem[], full:
     };
   }, [paidId, L]);
 
-  const anyDate = session.status === "user" && session.unlimited;
+  const anyDate = mode === "subscription";
   // Hide the old locale immediately, including the render before the new effect runs.
   const current = own?.id === paidId && own?.locale === L ? own : null;
   const reading = full?.find((s) => s.key === "chakras")?.longform ?? current?.reading;
@@ -51,7 +50,7 @@ export function useChakraAccess(m: Matrix | null, dates: MatrixListItem[], full:
     paid,
     saved,
     anyDate,
-    unlocked: ALL_FREE || Boolean(paid) || anyDate,
+    unlocked: mode !== "sell" || Boolean(paid),
     reading,
     readingStatus: !reading && paidId !== undefined ? current?.status ?? "loading" : undefined,
     matrixId: saved?.id,

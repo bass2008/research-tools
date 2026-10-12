@@ -21,6 +21,8 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       # локальная разработка платит игрушечными деньгами
       MOCK_PAYMENTS: ${MOCK_PAYMENTS:-1}
+      # постоянный ключ: токен исполнителя из `python -m app.worktasks` и сессии переживают перезапуск
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-not-for-prod-000}
       SITE_PROFILES: *site-profiles
       # локально платим моком и читаем письма из логов; живой банк — PAYMENT_PROVIDER=tbank
       # отчёты остаются в контейнере: раньше прогоны e2e складывали PDF в боевой бакет

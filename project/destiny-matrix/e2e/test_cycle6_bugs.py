@@ -233,16 +233,13 @@ def test_guest_can_pay_for_the_local_date_when_link_asks_for_a_saved_one(page: P
     page.wait_for_timeout(800)
 
     page.goto(f"{BASE}/pay?m=999999", wait_until="domcontentloaded")
-    page.wait_for_selector('[data-testid="pay-target"]')
-    select = page.get_by_test_id("pay-target")
-    values = select.evaluate("el => [...el.options].map(o => o.value)")
-    local = [v for v in values if v.startswith("local")]
-    assert local, f"в списке целей нет посчитанной даты: {values}"
-
-    select.select_option(local[0])
+    # гостю дату из кабинета не подменяют датой браузера: сначала просят войти
+    expect(page.get_by_test_id("pay-login-note")).to_be_visible(timeout=10_000)
+    page.get_by_test_id("pay-login-note").get_by_role("link", name="выбрать без входа").click()
+    target = page.get_by_test_id("pay-target")
+    expect(target).to_have_attribute("data-value", "local", timeout=10_000)
     page.wait_for_timeout(600)
-    assert select.input_value() == local[0], (
-        f"выбор сбросился сам: в списке {select.input_value()}, выбирали {local[0]}"
-    )
+    expect(target).to_have_attribute("data-value", "local")
+    assert page.get_by_test_id("pay-y").input_value() == "1988"
     disabled = page.get_by_test_id("pay-submit").is_disabled()
     assert not disabled, "кнопка оплаты осталась серой при выбранной дате"

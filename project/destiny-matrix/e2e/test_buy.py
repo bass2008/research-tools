@@ -117,3 +117,42 @@ def test_sex_of_a_date_nobody_bought_stays_as_chosen(page, mail):
     page.wait_for_timeout(1200)
     assert page.get_by_test_id("sex-m").get_attribute("aria-pressed") == "true"
     assert page.get_by_test_id("sex-f").get_attribute("aria-pressed") == "false"
+
+
+def test_buy_offers_what_the_page_is_about(page):
+    """«Купить» без выбора — все три предложения; со страницы разбора даты — эта дата или подписка,
+    и дата встаёт в форму; с совместимости — эта пара или подписка."""
+    page.goto(f"{BASE}/encyclopedia", wait_until="domcontentloaded")
+    page.get_by_test_id("buy-top").click()
+    expect(page.locator(".plan")).to_have_count(3)
+
+    flows.calculate(page, 7, 5, 1971, "m")
+    page.get_by_test_id("buy-top").click()
+    expect(page.locator(".plan")).to_have_count(2)
+    expect(page.get_by_test_id("plan-pair")).to_have_count(0)
+    page.get_by_test_id("plan-single").click()
+    expect(page.get_by_test_id("pay-submit")).to_contain_text(flows.label(7, 5, 1971))
+
+    from test_pair import calc_pair
+    calc_pair(page)
+    page.get_by_test_id("buy-top").click()
+    expect(page.locator(".plan")).to_have_count(2)
+    expect(page.get_by_test_id("plan-single")).to_have_count(0)
+    page.get_by_test_id("plan-pair").click()
+    expect(page.get_by_test_id("pay-target-note")).to_contain_text("Сергей и Виктория")
+
+
+def test_subscription_form_describes_the_subscription(page):
+    """Форма подписки описывала разбор одной даты «без подписки» и обещала сохранить дату."""
+    page.goto(f"{BASE}/pay/month", wait_until="networkidle")
+    what = page.locator(".paybox .cap").first
+    expect(what).to_contain_text("на 3 месяца")
+    expect(what).not_to_contain_text("одной дате")
+    expect(page.locator(".paybox")).not_to_contain_text("Выбранная дата")
+
+
+def test_subscription_receipt_leads_to_the_calculator(page, mail):
+    """Чек подписки без посчитанной даты звал «Открыть полный разбор», а /report перебрасывал на главную."""
+    page.goto(f"{BASE}/pay/month", wait_until="networkidle")
+    assert flows.pay(page, mail) == ""
+    expect(page.get_by_test_id("receipt-calculate")).to_have_attribute("href", "/#calc")

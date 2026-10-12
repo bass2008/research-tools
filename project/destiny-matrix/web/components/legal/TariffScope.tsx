@@ -9,10 +9,15 @@ export const forLocale = localized((L: Locale) => {
   // Состав результата собирается из `scope` тарифа, а не пишется в тексте документа: цена и то,
   // что за неё получают, обязаны совпадать с прайсом, по которому спишет касса.
   function included(t: Tariff): string {
-    const parts = [
-      D.legal.sections[L],
-      t.scope.includes("all") ? D.legal.anyDate[L] : D.legal.oneDate[L],
-    ];
+    const products = t.products ?? ["personal"];
+    const parts = products.length === 1 && products[0] === "pair"
+      ? [D.legal.pairSections[L], D.legal.onePair[L]]
+      : [
+        D.legal.sections[L],
+        t.scope.includes("all")
+          ? (products.includes("*") ? D.legal.anyReading[L] : D.legal.anyDate[L])
+          : D.legal.oneDate[L],
+      ];
     if (t.scope.includes("matrix")) parts.push(D.legal.storage[L]);
     parts.push(t.period_days === null
       ? D.legal.forever[L]
@@ -41,7 +46,7 @@ export default function TariffScope({ locale: requestedLocale, ...localeProps }:
     );
   }
   return (
-    <table className="postab">
+    <table className="postab tariffs">
       <thead>
         <tr>
           <th>{D.legal.scopeHead[L]}</th>
@@ -53,12 +58,12 @@ export default function TariffScope({ locale: requestedLocale, ...localeProps }:
         {tariffs.map((t) => (
           <tr key={t.id}>
             <td className="pn">{t.name}</td>
-            <td>
+            <td data-label={D.legal.priceHead[L]}>
               <b>{money(t.price)} ₽</b>
               <br />
               <span className="small">{periodLabel(t)}</span>
             </td>
-            <td className="vl">{included(t)}.</td>
+            <td className="vl" data-label={D.legal.includedHead[L]}>{included(t)}.</td>
           </tr>
         ))}
       </tbody>

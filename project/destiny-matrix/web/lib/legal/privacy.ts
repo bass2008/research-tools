@@ -31,6 +31,11 @@ export const PRIVACY: LegalDocs = {
             + "привязывается к конкретной дате, иначе открывать было бы нечего. Свободный расчёт "
             + "выполняется в вашем браузере: дата рождения не передаётся на сервер, не попадает в "
             + "адрес страницы оплаты, не передаётся платёжному провайдеру и в системы аналитики."],
+          [{ b: "Даты рождения двух человек и их имена" }, " — для разбора совместимости пары, тоже "
+            + "только по вашему действию: при сохранении пары в кабинете и при оплате её разбора. "
+            + "Имена необязательны и нужны только для подписи разбора. Указывая дату рождения "
+            + "другого человека, вы подтверждаете, что вправе ею распоряжаться. Расчёт без "
+            + "сохранения выполняется в браузере, на сервер уходят только числа матрицы пары."],
           [{ b: "Технические данные" }, " — IP-адрес, тип устройства и браузера, страницы "
             + "просмотра, источник перехода. Собираются обезличенно средствами Яндекс Метрики и "
             + "журналами сервера."],
@@ -152,6 +157,12 @@ export const PRIVACY: LegalDocs = {
         p: [{ b: "Date of birth and sex" }, " — only when you save a chart to your account. A "
           + "calculation that is not saved runs in the browser, and the date never leaves the "
           + "device."],
+      },
+      {
+        p: [{ b: "Two dates of birth and names" }, " — for a couple compatibility reading, only "
+          + "when you save the couple to your account or pay for its reading. Names are optional "
+          + "and only title the reading. By entering another person's date of birth you confirm "
+          + "you are entitled to share it."],
       },
       {
         only: "paid",

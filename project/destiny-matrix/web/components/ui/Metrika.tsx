@@ -2,7 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { useSession } from "@/components/account/useSession";
+import { linkMetrikaClient } from "@/lib/metrikaClient";
 
 import { alive, metrikaId, notBounce } from "@/lib/analytics";
 import { trackEngagement } from "@/lib/engagement";
@@ -16,6 +19,15 @@ export default function Metrika() {
   const id = metrikaId(useSite());
   const path = usePathname();
   const previous = useRef<string | null>(null);
+  const session = useSession();
+  const [ready, setReady] = useState(false);
+
+  // Срабатывает и для старой сессии, и после входа/регистрации без перезагрузки.
+  // onReady гарантирует, что очередь ym уже создана, даже если внешний tag.js ещё грузится.
+  useEffect(() => {
+    if (!id || !ready || session.status !== "user" || path.startsWith("/print")) return;
+    return linkMetrikaClient(id);
+  }, [id, ready, session.status, session.email, path]);
 
   useEffect(() => {
     if (!id) return;
@@ -61,7 +73,7 @@ export default function Metrika() {
 
   return (
     <>
-      <Script id="metrika" strategy="afterInteractive">
+      <Script id="metrika" strategy="afterInteractive" onReady={() => setReady(true)}>
         {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
 m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
 k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})

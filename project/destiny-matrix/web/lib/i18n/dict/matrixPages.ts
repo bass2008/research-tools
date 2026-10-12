@@ -37,6 +37,10 @@ export const matrixPages = {
     en: "— the day reduces to 14, the month to 6, the year to 7. This is the matrix of everyone "
       + "born on 14 June of a year whose digits add up to 7 (2005, for example).",
   } satisfies Phrase,
+  subscribedTail: {
+    ru: "Карта и два раздела на каждой странице открыты бесплатно, остальные 18 по вашей подписке открываются в расчёте по дате.",
+    en: "The chart and two sections are free on every page; with your subscription the other 18 open when you calculate by date.",
+  } satisfies Phrase,
   allFreeSections: {
     ru: "Карта и все 20 разделов разбора на каждой странице открыты бесплатно.",
     en: "The chart and all 20 sections of the reading are free on every page.",
@@ -137,6 +141,10 @@ export const matrixPages = {
   } satisfies Phrase,
   allPositionsHere: { ru: "Все позиции этой карты", en: "Every position of this chart" } satisfies Phrase,
   readingHere: { ru: "Разбор по этой матрице", en: "The reading of this matrix" } satisfies Phrase,
+  freeOpenSubscribedTail: {
+    ru: (paid: number) => `Открыты без регистрации и оплаты. Остальные ${paid} разделов по вашей подписке открываются в расчёте по дате.`,
+    en: (paid: number) => `Open with no sign-up and no payment. With your subscription the other ${paid} sections open when you calculate by date.`,
+  } satisfies PhraseFn<[number]>,
   allOpenFree: {
     ru: (n: number) => `Все ${n} разделов открыты без регистрации и оплаты.`,
     en: (n: number) => `All ${n} sections are open with no sign-up and no payment.`,
@@ -188,6 +196,10 @@ export const matrixPages = {
     en: (slug: string) => `This page is built for the triple ${slug}. Build your own chart from your `
       + "date of birth: the calculation is free and runs in the browser — the date never goes to the server.",
   } satisfies PhraseFn<[string]>,
+  chartAndTwoOpenSubscribed: {
+    ru: "Карта и два раздела открываются сразу, полный разбор открыт по вашей подписке.",
+    en: "The chart and two sections open at once; the full reading is open with your subscription.",
+  } satisfies Phrase,
   chartAndAllOpen: {
     ru: "Карта и все разделы разбора открываются сразу.",
     en: "The chart and every section of the reading open at once.",

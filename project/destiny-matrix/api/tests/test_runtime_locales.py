@@ -40,7 +40,7 @@ def test_payment_history_translates_display_name_without_changing_snapshot(clien
                            json={"email": "history-locale@example.ru", "tariff": "single", "birth": "1993-03-31"})
     assert purchase.status_code == 200
     headers = {"Authorization": f"Bearer {purchase.json()['token']}"}
-    snapshot = db.query(Payment).one().tariff_body
+    snapshot = db.query(Payment).one().purchase.offer_body
     for locale, expected in (("en", "Full reading for one date"), ("ru", "Полный разбор одной даты")):
         response = client.get("/api/payments", headers={**headers, "Accept-Language": locale})
         assert response.status_code == 200
@@ -48,7 +48,7 @@ def test_payment_history_translates_display_name_without_changing_snapshot(clien
         assert item["tariff"]["display_name"] == expected
         assert item["tariff"]["name"] == "Полный разбор одной даты"
     db.expire_all()
-    assert db.query(Payment).one().tariff_body == snapshot
+    assert db.query(Payment).one().purchase.offer_body == snapshot
 
 
 def test_request_locales_are_isolated(client):
@@ -68,15 +68,15 @@ def test_language_keeps_account_matrix_and_rights(client):
                                  "birth": "1993-03-31"})
     assert purchase.status_code == 200, purchase.text
     token = {"Authorization": f"Bearer {purchase.json()['token']}"}
-    ru = client.get("/api/matrices", headers={**token, "Accept-Language": "ru"}).json()["items"]
-    en = client.get("/api/matrices", headers={**token, "Accept-Language": "en"}).json()["items"]
+    ru = client.get("/api/readings?product=personal", headers={**token, "Accept-Language": "ru"}).json()["items"]
+    en = client.get("/api/readings?product=personal", headers={**token, "Accept-Language": "en"}).json()["items"]
     assert len(ru) == len(en) == 1
     assert ru[0]["id"] == en[0]["id"]
     assert ru[0]["access"] == en[0]["access"] == "forever"
     assert ru[0]["title"] == "Матрица 31 марта 1993"
     assert en[0]["title"] == "Chart of 31 March 1993"
     client.patch(f"/api/matrices/{ru[0]['id']}", headers=token, json={"title": "Моя карта"})
-    assert client.get("/api/matrices", headers={**token, "Accept-Language": "en"}).json()["items"][0]["title"] == "Моя карта"
+    assert client.get("/api/readings?product=personal", headers={**token, "Accept-Language": "en"}).json()["items"][0]["title"] == "Моя карта"
 
 
 def test_pdf_cache_is_separate_for_each_language(client, auth, monkeypatch):

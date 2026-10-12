@@ -1,7 +1,6 @@
 import { requestSite } from "@/lib/siteProfile.server";
-import Price from "@/components/pay/Price";
+import Price, { OfferText } from "@/components/pay/Price";
 import Crumbs from "@/components/ui/Crumbs";
-import { ALL_FREE } from "@/lib/access";
 import { forLocale as localizedContent } from "@/lib/content";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -66,13 +65,9 @@ export default async function MatrixIndexPage() {
           <div className="cap">{D.matrixPages.addressHint[L]}</div>
           <p style={{ margin: 0 }}>
             <code>/matrix/14-6-7</code> {D.matrixPages.addressExample[L]}{" "}
-            {ALL_FREE ? (
-              <>{D.matrixPages.allFreeSections[L]}</>
-            ) : (
-              <>
-                {D.matrixPages.paidTail[L]} <Price locale={L} />.
-              </>
-            )}
+            <OfferText free={D.matrixPages.allFreeSections[L]} subscription={D.matrixPages.subscribedTail[L]}>
+              {D.matrixPages.paidTail[L]} <Price locale={L} />.
+            </OfferText>
           </p>
         </div>
 

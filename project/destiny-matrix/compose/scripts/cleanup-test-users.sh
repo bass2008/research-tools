@@ -25,7 +25,10 @@ if not ids:
     raise SystemExit(0)
 
 holes = ",".join("?" * len(ids))
-for table in ("payments", "entitlements", "matrices", "report_jobs"):
+have = {row[0] for row in db.execute("select name from sqlite_master where type = 'table'")}
+# схема до миграции 001 (matrices) и после неё (readings, purchases); удаляем детей раньше родителей
+order = [t for t in ("report_jobs", "entitlements", "payments", "purchases", "readings", "matrices") if t in have]
+for table in order:
     count = db.execute(f"select count(*) from {table} where user_id in ({holes})", ids).fetchone()[0]
     print(f"  {table}: {count}")
 
@@ -34,7 +37,7 @@ if not apply:
     raise SystemExit(0)
 
 db.execute("pragma foreign_keys = on")
-for table in ("report_jobs", "entitlements", "payments", "matrices"):
+for table in order:
     db.execute(f"delete from {table} where user_id in ({holes})", ids)
 db.execute(f"delete from users where id in ({holes})", ids)
 db.commit()

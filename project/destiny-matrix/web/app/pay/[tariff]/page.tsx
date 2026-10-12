@@ -7,7 +7,7 @@ import { requestLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
-import { getBilling } from "@/lib/tariffs.server";
+import { billingFor } from "@/lib/tariffs.server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PayScreen from "../PayScreen";
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
   if (ALL_FREE) return NOT_FOUND_META;
   const slug = (await params).tariff;
-  const billing = await getBilling();
+  const billing = await billingFor(slug);
   // Недоступный справочник не доказывает, что тариф удалён.
   if (billing.providers === null) return pageMeta({
     title: D.pay.pageTitle[L],
@@ -56,10 +56,11 @@ export default async function PayPage({ params }: { params: Promise<Params> }) {
   const { byId } = forLocale(L, await requestSite());
 
   if (ALL_FREE) notFound();
-  const { items: tariffs, providers, test } = await getBilling();
   const slug = (await params).tariff;
+  const { items: tariffs, providers, test, product } = await billingFor(slug);
   const t = byId(tariffs, slug);
   if (!t && providers !== null) notFound();
 
-  return <PayScreen locale={L} tariffs={tariffs} initial={t?.id ?? slug} test={test} providers={providers} />;
+  // выбор из трёх сделан на /pay: здесь форма только выбранного предложения
+  return <PayScreen locale={L} tariffs={t ? [t] : tariffs} initial={t?.id ?? slug} test={test} providers={providers} product={product} />;
 }

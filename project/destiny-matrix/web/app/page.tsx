@@ -3,6 +3,7 @@ import CalcHero from "@/components/matrix/CalcHero";
 import CalculationProvider from "@/components/matrix/CalculationProvider";
 import MatrixForm from "@/components/matrix/MatrixForm";
 import MatrixReport from "@/components/matrix/MatrixReport";
+import { OfferText } from "@/components/pay/Price";
 import TariffsProvider from "@/components/pay/TariffsProvider";
 import HashScroll from "@/components/ui/HashScroll";
 import { ALL_FREE } from "@/lib/access";
@@ -16,7 +17,6 @@ import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedTariffs, type Tariff } from "@/lib/tariffs";
 import { getTariffs, getBilling } from "@/lib/tariffs.server";
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { pickMatrix, readAccess, readSavedMatrices } from "./_lib/access";
 import { SavedReport } from "./_lib/report";
@@ -31,7 +31,7 @@ const forLocale = localized((L: Locale, site) => {
   const { LANDING_SLIDES } = localizedHeroSlides(L);
   const { freePositionArticles, freePositionTexts } = localizedSections(L);
   const { SITE, pageMeta } = localizedSite(L, site);
-  const { lead, periodLabel, priceLabel } = localizedTariffs(L);
+  const { lead, priceLabel } = localizedTariffs(L);
 
   function productJsonLd(tariffs: Tariff[]) {
     return {
@@ -50,7 +50,7 @@ const forLocale = localized((L: Locale, site) => {
       })),
     };
   }
-  return { LANDING_SLIDES, freePositionArticles, freePositionTexts, SITE, pageMeta, lead, periodLabel, priceLabel, productJsonLd };
+  return { LANDING_SLIDES, freePositionArticles, freePositionTexts, SITE, pageMeta, lead, priceLabel, productJsonLd };
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,12 +74,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage({ searchParams }: { searchParams: Search }) {
   const L = await requestLocale();
-  const { LANDING_SLIDES, freePositionArticles, freePositionTexts, lead, periodLabel, priceLabel, productJsonLd } = forLocale(L, await requestSite());
+  const { LANDING_SLIDES, freePositionArticles, freePositionTexts, productJsonLd } = forLocale(L, await requestSite());
 
   const wanted = (await searchParams).m;
   const { items: tariffs, providers } = await getBilling();
-  // пустой список — API молчит: цену не называем, но страница открывается и считает карту
-  const main = tariffs.length ? lead(tariffs) : null;
   let paidResult: ReactNode = null;
 
   // В URL только внутренний id, не дата рождения. Сам id ничего не открывает: список содержит
@@ -119,7 +117,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
       <main id="content">
         {/* цена уже прочитана на сервере: без этого клиентские кнопки шли за ней второй раз и
           при недоступном BFF писали «уточняется» рядом с напечатанным числом */}
-        <TariffsProvider locale={L} server={tariffs} providers={providers}>
+        <TariffsProvider product="personal" locale={L} server={tariffs} providers={providers}>
           <CalculationProvider locale={L}>
             <CalcHero locale={L}
               slides={LANDING_SLIDES}
@@ -131,43 +129,15 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
             </CalcHero>
           </CalculationProvider>
 
-          {/* Цена и состав отчёта ушли из первого экрана под карусель: слева теперь композиция из
-          колоды, и длинный список чипов её перегружал. */}
           <section className="wrap offerbar">
-            <div className="pricelead">
-              {ALL_FREE ? (
-                <>
-                  <b>{D.common.free[L][0].toUpperCase() + D.common.free[L].slice(1)}</b>
-                  <span className="what">{D.home.freeAllSections[L]}</span>
-                </>
-              ) : main ? (
-                <>
-                  <b>{priceLabel(main)}</b>
-                  <span className="what">{D.home.priceWhat[L](periodLabel(main))}</span>
-                </>
-              ) : (
-                <span className="what">{D.home.priceUnknown[L]}</span>
-              )}
-              <span className="free">
-                {ALL_FREE ? D.home.freeNoteAll[L] : D.home.freeNote[L]}
-              </span>
-            </div>
             <div className="chips">
               <span className="chip">✦ {D.home.chipSections[L]}</span>
               <span className="chip">✦ {D.home.chipChakras[L]}</span>
               <span className="chip">✦ {D.home.chipDecades[L]}</span>
               <span className="chip">
-                ✦ {ALL_FREE ? D.home.chipNoPayment[L] : D.home.chipOnePayment[L]}
+                ✦ <OfferText free={D.home.chipNoPayment[L]} subscription={D.home.subscribedLead[L]}>{D.home.chipOnePayment[L]}</OfferText>
               </span>
             </div>
-            <p className="small">
-              {!ALL_FREE && tariffs.length
-                ? D.home.tariffsLine[L](tariffs.map((t) => `${t.name} — ${priceLabel(t)}`).join(" · "))
-                : ""}
-              {/* Без кассы блока тарифов на странице нет, и якорь «#plans» никуда не ведёт:
-              на витрине без оплаты ссылка отправляет к самому разбору. */}
-              <Link href={ALL_FREE ? "#result" : "#plans"}>{D.home.plansLink[L]}</Link>
-            </p>
           </section>
 
           <section className="edit">

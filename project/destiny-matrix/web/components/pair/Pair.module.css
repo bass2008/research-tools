@@ -1,0 +1,196 @@
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 8px 48px; }
+.dim { color: var(--dim); font-size: 13.5px; }
+.mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); padding: 22px; min-width: 0; }
+.card h2 { font-size: 26px; }
+
+.head { display: grid; gap: 6px; }
+.head h1, .head h2 { font-size: clamp(28px, 3.4vw, 38px); margin: 0; }
+.rsub { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.rsub > p { margin: 0; flex: 1 1 auto; min-width: 0; }
+.pdfslot { flex: none; margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+.badge { flex: none; font: 700 11px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); background: #faf3df; border-radius: 999px; padding: 4px 10px; }
+
+/* блок партнёра — поля формы главной: имя строкой, под ним число, месяц и год */
+.who + .who { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--line2); }
+.whoT { margin: 0 0 10px; font: 700 12px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+.whoName { margin-bottom: 10px; }
+.opt { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.addNames { display: inline-block; margin-top: 14px; font: 600 13.5px var(--sans); color: var(--gold2); text-underline-offset: 3px; }
+.submit { margin-top: 16px; }
+.btn { display: inline-block; text-align: center; border: 0; border-radius: 12px; padding: 14px 20px; background: var(--gold); color: #fff; font: 700 15px var(--sans); cursor: pointer; text-decoration: none; }
+.btn:hover { background: var(--gold2); color: #fff; }
+.btnGold { background: var(--accent); }
+.btnGold:hover { background: var(--accent2); }
+
+.keys h2 { font-size: 22px; margin: 0 0 12px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.tile { display: grid; gap: 2px; padding: 12px; border-radius: 12px; background: var(--bg2); border: 1px solid var(--line); }
+.tileL { font: 700 11px var(--sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--dim2); }
+.tileV { font: 600 30px/1.1 var(--ser); color: var(--gold2); }
+.tileS { font-size: 13px; color: var(--dim); }
+.tile { align-content: start; gap: 8px; }
+.tileRow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-height: 44px; }
+.tileRow .tileV { white-space: nowrap; }
+.tileCards { display: flex; flex: none; }
+.tileCards :global(.arccard), .tileStep :global(.arccard) { display: block; width: 34px; max-width: none; height: auto; aspect-ratio: 4/5; margin: 0; object-fit: cover; object-position: center 42%; border: 1px solid #d0d7cc; border-radius: 4px; box-shadow: 0 4px 8px -5px #16283c60; }
+.tilePair :global(.arccard):first-child { transform: rotate(-4deg); }
+.tilePair :global(.arccard) + :global(.arccard) { margin-left: -12px; transform: rotate(6deg); }
+.tileChain { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.tileLink { display: flex; align-items: center; gap: 4px; }
+.tileLink i { font-style: normal; font-size: 13px; color: var(--dim2); }
+.tileStep { display: grid; justify-items: center; gap: 2px; }
+.tileStep :global(.arccard) { width: 26px; }
+.tileStep b { font: 600 17px/1 var(--ser); color: var(--gold2); }
+
+.block { display: grid; gap: 16px; }
+.blockHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.blockHead h2, .blockHead p { margin: 0; }
+.headMain { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* перенос с центрированием, а не сетка: в неполном ряду последняя карта стояла одна слева */
+.mainCards { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.mc { flex: 0 0 calc((100% - 4 * 14px) / 5); margin: 0; display: grid; gap: 8px; align-content: start; text-align: center; min-width: 0; }
+/* подпись в две строки сдвигала свою карту ниже соседней: место под две строки, подпись прижата к карте */
+.mcL { font: 700 11px/1.3 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim2); min-height: 2.6em; display: flex; align-items: flex-end; justify-content: center; }
+
+.mc figcaption { display: grid; gap: 4px; justify-items: center; }
+.mcN { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 8px; max-width: 100%; color: inherit; text-decoration: none; }
+.mcN b { font: 600 19px var(--ser); }
+.mcCap { font: 600 15px/1.35 var(--ser); color: var(--text); }
+
+/* уравнение «партнёр + партнёр = пара»: матрица пары крупнее слагаемых, таблица сложения под ним */
+.merge { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.mergeMaps { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.55fr); align-items: center; gap: 10px; }
+.mergeSum figcaption { font-size: 22px; }
+.mergeMaps figure { margin: 0; display: grid; gap: 4px; text-align: center; min-width: 0; }
+.mergeMaps figcaption { font: 600 18px var(--ser); display: grid; }
+.mergeMaps figcaption span { font: 400 12px var(--sans); color: var(--dim); }
+.op { font: 600 28px var(--ser); color: var(--accent); }
+.eq { width: 100%; border-collapse: collapse; font-size: 14px; }
+.eq th, .eq td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+.eq th { font: 700 11px var(--sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--dim2); }
+.eq td:last-child { text-align: right; }
+
+/* сетка на details растягивала скрытый слот содержимого под ширину таблицы, и на 390 px вбок
+   уезжала вся страница; в обычной раскладке слот равен ширине карточки */
+.all { display: block; }
+
+/* совместимость в работе — продолжение расшифровки, со своей шапкой */
+.biz { display: grid; gap: 12px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+.all[open] .tableWrap { margin-top: 16px; }
+.all summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.all summary::-webkit-details-marker { display: none; }
+.all summary h2 { margin: 0; }
+.all summary h2::before { content: "▸ "; color: var(--gold); }
+.all[open] summary h2::before { content: "▾ "; }
+/* широкая только таблица: обёртка в сетке карточки растягивалась под неё, и на 390 px вбок
+   уезжала вся страница */
+.tableWrap { overflow-x: auto; min-width: 0; max-width: 100%; }
+.allT { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+.allT th, .allT td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.allT th { font: 700 11px var(--sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--dim2); }
+.allT td:first-child { color: var(--gold2); font-weight: 600; white-space: nowrap; }
+.allT td:nth-child(2) { white-space: nowrap; }
+.allT td:nth-child(3) { font-size: 14.5px; }
+
+.reading { display: grid; gap: 12px; }
+.readingHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.readingHead h2 { font-size: 32px; margin: 0 auto 0 0; }
+.sections { display: grid; gap: 12px; }
+.sec { background: var(--card); border: 1.5px solid var(--gold); border-radius: var(--r); padding: 18px 22px 22px; box-shadow: var(--sh); }
+.sec summary { cursor: pointer; font: 700 16px var(--sans); list-style: none; display: flex; align-items: center; gap: 10px; }
+.sec summary::-webkit-details-marker { display: none; }
+.secN { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #e6f2f1; color: var(--gold2); font: 700 12px var(--sans); flex: none; }
+.secNums { margin-left: auto; color: var(--dim2); font-size: 13px; }
+.lead { color: var(--dim); margin: 8px 0 16px; }
+.secTitle { font: 600 28px/1.2 var(--ser); margin: 2px 0 16px; color: var(--text); }
+.read { display: grid; gap: 18px 26px; }
+.read1 { grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); align-items: start; }
+.acs { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.read1 .acs { justify-content: start; }
+.ac { margin: 0; display: grid; gap: 8px; justify-items: center; align-content: start; width: 180px; min-width: 0; }
+.read1 .ac { width: 100%; }
+.acRole { font: 700 11px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim2); text-align: center; min-height: 2.6em; display: flex; align-items: end; }
+.read1 .acRole { min-height: 0; }
+.acLink { display: block; width: 100%; }
+.ac .acLink :global(.arccard), .mc .acLink :global(.arccard) { width: 100%; height: auto; border-radius: 10px; aspect-ratio: 520 / 700; object-fit: cover; object-position: top; box-shadow: var(--sh); transition: transform 140ms ease; }
+.acLink:hover :global(.arccard) { transform: translateY(-2px); }
+.acName { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 8px; color: inherit; text-decoration: none; }
+.acName:hover, .mcN:hover, .sumA:hover { color: var(--gold2); }
+.keyCard { display: block; line-height: 0; }
+.bubLink { text-decoration: none; }
+.ac figcaption { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 8px; font: 600 21px var(--ser); text-align: center; }
+.acCap { font: 600 15px/1.3 var(--ser); color: var(--gold2); text-align: center; max-width: 100%; }
+.txt { display: grid; gap: 12px; min-width: 0; }
+.txt p { margin: 0; font-size: 15.5px; line-height: 1.65; overflow-wrap: anywhere; hyphens: auto; }
+.txt strong { font-weight: 700; color: var(--gold2); }
+.stub { color: var(--dim); font-style: italic; }
+.amp { margin: 4px 0 0; padding: 8px 12px; border-radius: 10px; background: #fbf6e8; color: #7a5d17; font-size: 14px; font-weight: 600; }
+.blocks { display: grid; gap: 22px; }
+.ublock { display: grid; grid-template-columns: minmax(130px, 170px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.ublock .ac { width: 100%; }
+.ublock .acRole { min-height: 0; }
+.prefix { font: 600 17px/1.4 var(--ser); color: var(--gold2); margin: 0 0 4px; }
+
+.locks { display: grid; gap: 8px; }
+.sum svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-color: var(--accent); margin-top: 4px; }
+.cta h3 { font: 600 24px var(--ser); margin: 0; }
+.cta p { margin: 4px 0 0; }
+
+.summary h2 { font-size: 26px; margin: 0 0 12px; }
+.sum { list-style: none; margin: 0; padding: 0; display: grid; }
+/* подпись — строкой над обеими колонками, арканы и текст — на одной линии под ней: по строке
+   маленькой подписи большой текст стоял выше кружков с арканами */
+.sum li { display: grid; grid-template-columns: 290px minmax(0, 1fr); column-gap: 16px; row-gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.sum li:first-child { border-top: 0; }
+.sumH { display: contents; }
+.sumL { grid-column: 1 / -1; font: 700 11px var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim2); }
+.sumAs { grid-column: 1; padding-top: 2px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.sumA { display: inline-flex; align-items: center; gap: 6px; font: 600 15px var(--ser); color: var(--text); text-decoration: none; }
+.sumA .bub { min-width: 24px; height: 24px; font-size: 11.5px; padding: 0 4px; }
+.sumT { grid-column: 2; font: 600 21px/1.35 var(--ser); color: var(--text); }
+.locked .sumT { font: 600 13.5px var(--sans); display: inline-flex; gap: 6px; align-items: center; color: var(--dim); }
+
+.bub { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; border-radius: 50%; border: 1.5px solid var(--gold); background: #e6f2f1; font: 700 13.5px ui-monospace, monospace; color: var(--gold2); }
+
+.merge [data-muted] { opacity: 0.45; }
+
+@media (max-width: 1000px) {
+  .mc { flex-basis: calc((100% - 2 * 14px) / 3); }
+}
+@media (max-width: 760px) {
+  .mergeMaps { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); row-gap: 4px; }
+  .opEq { grid-column: 1 / -1; justify-self: center; line-height: 1; }
+  .mergeSum { grid-column: 1 / -1; justify-self: center; width: min(100%, 420px); }
+}
+@media (max-width: 640px) {
+  .card { padding: 16px; }
+  .sec { padding: 14px 16px 18px; }
+  .pdfslot { flex: 1 1 100%; min-width: 0; align-items: stretch; margin-left: 0; }
+  .mc { flex-basis: calc((100% - 14px) / 2); }
+  .read1 { grid-template-columns: minmax(0, 1fr); }
+  .read1 .acs { justify-content: center; }
+  .read1 .ac { width: 180px; }
+  .ac { width: calc(50% - 8px); }
+  .read3 .ac { width: calc(33.3% - 11px); }
+  .acRole { font-size: 10px; line-height: 1.4; min-height: 4.2em; }
+  .read2 .ac figcaption, .read3 .ac figcaption, .read2 .acName, .read3 .acName { flex-direction: column; gap: 2px; }
+  .ac figcaption { font-size: 16px; }
+  .acCap { font-size: 13.5px; }
+  .txt p { font-size: 15px; }
+  .secTitle { font-size: 23px; }
+  .tiles { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .tileV { font-size: 26px; }
+  .tileRow { gap: 8px; }
+  .tileRow .tileV { font-size: 22px; }
+  .sum li { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
+  .sumAs, .sumT { grid-column: 1; }
+  .sumT { font-size: 19px; }
+  .ublock { grid-template-columns: 110px minmax(0, 1fr); gap: 14px; }
+  .prefix { font-size: 16px; }
+}
+@media (max-width: 360px) {
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+}

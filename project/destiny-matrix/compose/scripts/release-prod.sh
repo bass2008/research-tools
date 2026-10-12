@@ -75,27 +75,19 @@ scripts/backup.sh
 
 echo "== запуск на $IP"
 # На машину едет только база: без override там нет ни сборки, ни dev-секретов.
-ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cp /srv/arcana/docker-compose.yml /srv/arcana/docker-compose.previous.yml"
 scp -q -o StrictHostKeyChecking=accept-new docker-compose.yml "$SSH_USER@$IP:/srv/arcana/docker-compose.yml"
 scp -q -o StrictHostKeyChecking=accept-new ../infra/prune-images.sh "$SSH_USER@$IP:/usr/local/bin/arcana-prune-images"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "chmod 755 /usr/local/bin/arcana-prune-images"
 ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
-  && (grep -E '^(REGISTRY|TAG|BUILD_COMMIT|SITE_URL)=' .env > .env.rollback.candidate 2>/dev/null || true) \
   && sed -i '/^TAG=/d;/^REGISTRY=/d;/^BUILD_COMMIT=/d;/^SITE_LANG=/d;/^ALL_FREE_WITHOUT_PAYMENT=/d;/^SITE_URL=/d' .env \
   && printf 'REGISTRY=%s\nTAG=%s\nBUILD_COMMIT=%s\nSITE_LANG=ru\nALL_FREE_WITHOUT_PAYMENT=0\nSITE_URL=https://arcana-sense.com\n' '$REGISTRY' '$TAG' '$TAG' >> .env \
-  && /usr/local/bin/arcana-prune-images remember arcana \
-  && /usr/local/bin/arcana-prune-images remember arcana-prod-en \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && docker compose pull -q \
   && docker ps -q --filter label=com.docker.compose.project=arcana-prod-en | xargs -r docker stop >/dev/null \
   && docker compose up -d --wait --remove-orphans \
-  && mv -f .env.rollback.candidate .env.previous.tag \
   && /usr/local/bin/arcana-prune-images prune"
 ../infra/apply-cron.sh "$IP"
-# Тег для отката переносится только после удачного перезапуска. Пока он писался сразу, упавшая
-# попытка релиза затирала им же настоящую работавшую версию: после двух заходов в файле лежал
-# тег сегодняшней сборки, и откат по нему вернул бы тот же код.
 # Диск машины 20 ГБ, каждый релиз добавляет ~2,7 ГБ образов: без чистки он заполнился на 100 %
 # и следующий релиз упал на «no space left on device». Чистим после перезапуска, чтобы удалялись
 # только образы, которые уже никем не заняты.

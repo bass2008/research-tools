@@ -60,7 +60,7 @@ export const forLocale = localized((L: Locale, site) => {
       // телефон печатается только на «Контактах» — там его требует эквайрер; пусто = строки нет
       phone: "",
       rknNotice: "",
-      updated: "20 сентября 2026",
+      updated: "11 октября 2026",
       bank: "Т-Банк",
       // имена обработчиков не раскрываем: закон требует факт передачи и цель, а не поимённый список.
       // Названы только те, кого покупатель видит сам, — платёжный провайдер и Метрика.
@@ -78,7 +78,7 @@ export const forLocale = localized((L: Locale, site) => {
       site: "arcana-sense.com",
       phone: "",
       rknNotice: "",
-      updated: "20 September 2026",
+      updated: "11 October 2026",
       // Касса не подключена: называть платёжного провайдера нечем, и данные к нему не уходят.
       bank: "",
       hosting: "a cloud infrastructure provider",
@@ -88,7 +88,7 @@ export const forLocale = localized((L: Locale, site) => {
 
   const LEGAL: Legal = {
     ...LEGAL_BY_LANG[site.legalLocale],
-    updated: formats(L).dateLabel("2026-09-20"),
+    updated: formats(L).dateLabel("2026-10-11"),
     hosting: L === "ru"
       ? `провайдер облачной инфраструктуры${site.legalLocale === "ru" ? " (Россия)" : ""}`
       : `a cloud infrastructure provider${site.legalLocale === "ru" ? " (Russia)" : ""}`,

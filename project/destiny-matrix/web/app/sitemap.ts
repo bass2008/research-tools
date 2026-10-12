@@ -4,5 +4,6 @@ import { sitemapForSite } from "@/lib/sitemapEntries";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap() {
-  return sitemapForSite(await requestSite());
+  const site = await requestSite();
+  return sitemapForSite(site);
 }

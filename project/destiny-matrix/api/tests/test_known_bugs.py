@@ -35,7 +35,7 @@ def paid(client, email="bug@example.ru", birth="1990-01-01"):
     body = client.post("/api/payments/start",
                        json={"tariff": "single", "email": email, "birth": birth}).json()
     note = signed({"TerminalKey": "1234DEMO", "OrderId": body["order_id"], "Success": True,
-                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 25_000})
+                   "Status": "CONFIRMED", "PaymentId": body["payment_id"], "Amount": 39_000})
     client.post("/api/payments/notify", json=note)
     return body
 

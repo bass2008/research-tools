@@ -15,13 +15,14 @@ describe("заголовок страницы возврата из оплаты
     ["paid", "stagePaid"],
     ["failed", "stageFailed"],
     ["pending", "stagePending"],
+    ["sign-in", "stageSignIn"],
     ["error", "stageUnknown"],
   ] as const)("%s берёт заголовок из %s", (stage, key) => {
     expect(resultTitle(stage)).toBe(D.payResult[key][L]);
   });
 
   it("у каждой стадии свой заголовок", () => {
-    const stages = ["checking", "paid", "refunded", "failed", "pending", "error"] as const;
+    const stages = ["checking", "paid", "refunded", "failed", "pending", "error", "sign-in"] as const;
     const titles = stages.map(resultTitle);
     expect(new Set(titles).size, titles.join(" / ")).toBe(stages.length);
     for (const title of titles) expect(title.trim().length).toBeGreaterThan(0);

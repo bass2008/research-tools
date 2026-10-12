@@ -2,11 +2,13 @@ import SessionBadge from "@/components/account/SessionBadge";
 import BuyButton from "@/components/ui/BuyButton";
 import Logo from "@/components/ui/Logo";
 import SiteLink from "@/components/ui/SiteLink";
-import { ALL_FREE } from "@/lib/access";
 import { D } from "@/lib/i18n";
+import { DP } from "@/lib/i18n/dict/pair";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 
-export default function Header({ locale: requestedLocale, ...localeProps }: ({ plain?: boolean }) & { locale?: Locale }) {
+export default function Header({ locale: requestedLocale, ...localeProps }: ({
+  plain?: boolean;
+}) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
   const { plain } = localeProps;
 
@@ -22,6 +24,7 @@ export default function Header({ locale: requestedLocale, ...localeProps }: ({ p
         </SiteLink>
         <nav className="hnav">
           <SiteLink plain={plain} href="/report">{D.nav.myReading[L]}</SiteLink>
+          <SiteLink plain={plain} href="/compatibility">{DP.navTitle[L]}</SiteLink>
           <SiteLink plain={plain} href="/encyclopedia">{D.nav.encyclopedia[L]}</SiteLink>
         </nav>
         <span className="hspacer">
@@ -33,7 +36,7 @@ export default function Header({ locale: requestedLocale, ...localeProps }: ({ p
           {D.nav.account[L]}
         </SiteLink>
         {/* Цену в кнопку не пишем: тарифов два, и цена выбирается на странице оплаты. */}
-        {ALL_FREE ? null : <BuyButton locale={L} plain={plain} />}
+        <BuyButton locale={L} plain={plain} />
       </div>
     </header>
   );

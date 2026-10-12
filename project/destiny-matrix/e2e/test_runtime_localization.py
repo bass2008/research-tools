@@ -103,7 +103,7 @@ def test_registration_and_both_domains_share_one_account(page, browser, mail):
         second.wait_for_url("**/account")
         me = second.request.get(other + "/api/auth/me").json()
         assert me["user"]["id"] == before["user"]["id"]
-        rows = second.request.get(other + "/api/matrices").json()["items"]
+        rows = second.request.get(other + "/api/readings?product=personal").json()["items"]
         assert rows[0]["id"] == created.json()["id"]
         expect(second.locator("main")).to_contain_text("31 марта 1993")
         expect(second.get_by_test_id("language-en")).to_have_count(1)

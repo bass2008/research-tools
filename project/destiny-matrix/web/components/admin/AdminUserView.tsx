@@ -1,10 +1,12 @@
 "use client";
 
+import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import UserActions from "@/components/admin/UserActions";
 import { ApiError, type AdminUserCard } from "@/lib/api";
 
 
@@ -16,15 +18,18 @@ const ACCESS: Record<string, string> = {
 };
 
 export default function AdminUserView({ id }: { id: number }) {
-  const { t, api, when, money, paymentTargetLabel, counted, birthLabel } = useAdminLocale();
+  const { L, t, api, when, money, paymentTargetLabel, counted, birthLabel } = useAdminLocale();
+  const { holdingLines } = localizedHoldings(L);
   const [card, setCard] = useState<AdminUserCard | null>(null);
   const [error, setError] = useAdminMessage();
 
+  const load = () => api.admin
+    .user(id)
+    .then(setCard)
+    .catch((err) => setError(err instanceof ApiError ? err : "Не удалось открыть."));
+
   useEffect(() => {
-    void api.admin
-      .user(id)
-      .then(setCard)
-      .catch((err) => setError(err instanceof ApiError ? err : "Не удалось открыть."));
+    void load();
   }, [id, api]);
 
   if (error) {
@@ -46,6 +51,11 @@ export default function AdminUserView({ id }: { id: number }) {
         <Link href="/admin">{t("Админка")}</Link> <span>/</span> <span>{u.email}</span>
       </p>
       <h1>{u.email}</h1>
+      {/* выдать дату, пару или подписку можно прямо из карточки, а не только из списка */}
+      <div className="panel" data-testid="admin-user-actions">
+        <h3>{t("Действия")}</h3>
+        <UserActions user={u} onGranted={() => void load()} />
+      </div>
 
       <div className="panel">
         <h3>{t("Профиль")}</h3>
@@ -54,10 +64,12 @@ export default function AdminUserView({ id }: { id: number }) {
           <dd>{when(u.created_at)}</dd>
           <dt>{t("Последнее появление")}</dt>
           <dd>{when(u.last_seen_at)}</dd>
-          <dt>{t("Куплено навсегда")}</dt>
-          <dd>{u.owned}</dd>
-          <dt>{t("Подписка")}</dt>
-          <dd>{u.scopes.includes("all") ? (u.until ? t("до {0}", when(u.until)) : t("активна")) : t("нет")}</dd>
+          <dt>{t("Доступ")}</dt>
+          <dd data-testid="admin-user-access">
+            {u.holdings?.length
+              ? holdingLines(u.holdings).map((line) => <div key={line.text}>{line.text}</div>)
+              : t("нет прав")}
+          </dd>
           <dt>{t("Уплачено")}</dt>
           <dd>
             {money(u.spent)} {t(" ₽ за ")}{counted(u.payments, "платёж", "платежа", "платежей")}
@@ -95,6 +107,7 @@ export default function AdminUserView({ id }: { id: number }) {
                     <td>
                       {t(ACCESS[m.access] ?? m.access)}
                       {m.access_until ? t(" · до {0}", when(m.access_until)) : ""}
+                      {m.access === "subscription" && m.access_granted ? t(" · выдана") : ""}
                     </td>
                     <td className="small">{when(m.created_at)}</td>
                   </tr>
@@ -104,6 +117,26 @@ export default function AdminUserView({ id }: { id: number }) {
           </table>
         </div>
       </div>
+
+      {(card.readings ?? []).some((r) => r.product === "pair") ? (
+        <div className="panel section-gap">
+          <h3>{t("Пары (")}{(card.readings ?? []).filter((r) => r.product === "pair").length})</h3>
+          <div className="tablewrap">
+            <table className="admtable" data-testid="admin-user-pairs">
+              <thead><tr><th>{t("Имя")}</th><th>{t("Доступ")}</th><th>{t("Сохранена")}</th></tr></thead>
+              <tbody>
+                {(card.readings ?? []).filter((r) => r.product === "pair").map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.title}</td>
+                    <td>{t(ACCESS[r.access] ?? r.access)}{r.access_until ? t(" · до {0}", when(r.access_until)) : ""}{r.access === "subscription" && r.access_granted ? t(" · выдана") : ""}</td>
+                    <td className="small">{when(r.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
 
       <div className="panel section-gap">
         {/* Заголовок называет все записи, включая возвращённые и незавершённые: в сводке

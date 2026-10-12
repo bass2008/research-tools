@@ -9,9 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from engine.matrix import calculate
-
-from .. import access, audit, monitor, printing
+from .. import access, audit, monitor, offers, printing, products, readings
 from .. import reports as report_store
 from .. import payments as gateway
 from ..routers.payments import apply as apply_payment
@@ -20,9 +18,9 @@ from ..db import get_db
 from ..deps import current_user
 from ..i18n import using_locale, say, validation_message
 from ..http_errors import LocalizedHTTPException
-from ..models import (Entitlement, Payment, PaymentSweep, ReportJob, SavedMatrix, SecurityAudit,
-                      User, default_title, iso)
-from ..schemas import BirthIn
+from ..models import (Payment, PaymentSweep, Purchase, Reading, ReportJob, SecurityAudit,
+                      User, MetrikaClient, iso)
+from ..schemas import BirthIn, ReadingIn
 from ..security import create_token
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -39,9 +37,9 @@ def admin_user(user: User = Depends(current_user)) -> User:
 def _row(db: Session, user: User) -> dict:
     rights = access.active_rights(db, user)
     paid = db.execute(
-        select(func.count(Payment.id), func.coalesce(func.sum(Payment.amount), 0))
-        .where(Payment.user_id == user.id, Payment.paid_at.is_not(None),
-               Payment.refunded_at.is_(None))
+        select(func.count(Purchase.id), func.coalesce(func.sum(Purchase.amount), 0))
+        .where(Purchase.user_id == user.id, Purchase.paid_at.is_not(None),
+               Purchase.refunded_at.is_(None))
     ).one()
     summary = access.summary(db, user)
     return {
@@ -58,6 +56,8 @@ def _row(db: Session, user: User) -> dict:
         "granted": summary["granted"],
         "until": summary["until"],
         "rights": len(rights),
+        "products": summary["products"],
+        "holdings": summary["holdings"],
     }
 
 
@@ -68,7 +68,8 @@ USER_COLUMNS = {"id": User.id, "email": User.email,
                 "created_at": User.created_at}
 # Counted per row, so these sort the computed rows rather than SQL.
 USER_COMPUTED = {"matrices": lambda r: r["matrices"], "payments": lambda r: r["payments"],
-                 "spent": lambda r: r["spent"], "access": lambda r: (r["rights"], r["owned"] + r["granted"])}
+                 "spent": lambda r: r["spent"],
+                 "access": lambda r: (r["rights"], len(r["holdings"]))}
 
 
 @router.get("/users")
@@ -102,10 +103,20 @@ def payments(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> di
         select(Payment, User.email).join(User, User.id == Payment.user_id)
         .order_by(Payment.id.desc())
     ).all()
-    dates = {m.id: m.item() for m in db.scalars(select(SavedMatrix)).all()}
+    found = {r.id: r.item() for r in db.scalars(select(Reading)).all()}
     return {"items": [{**payment.item(), "user_id": payment.user_id, "email": email,
-                       "matrix": dates.get(payment.matrix_id)}
+                       "reading": found.get(payment.reading_id),
+                       "matrix": found.get(payment.reading_id)}
                       for payment, email in rows]}
+
+
+@router.get("/payments/{payment_id}/refund-preview")
+def refund_preview(payment_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Что станет с доступом после возврата — текст для окна подтверждения."""
+    payment = db.get(Payment, payment_id)
+    if payment is None or payment.purchase is None:
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
+    return {"outcome": access.refund_outcome(db, payment.purchase)}
 
 
 @router.post("/payments/{payment_id}/refund")
@@ -179,22 +190,24 @@ def sweeps(_: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict
 
 @router.get("/users/{user_id}")
 def one(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
-    """Карточка пользователя: его матрицы и его платежи."""
+    """Карточка пользователя: его разборы и его платежи."""
     user = db.get(User, user_id)
     if user is None:
         raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_user"))
     rights = access.active_rights(db, user)
-    matrices = db.scalars(
-        select(SavedMatrix).where(SavedMatrix.user_id == user.id).order_by(SavedMatrix.id.desc())
+    rows = db.scalars(
+        select(Reading).where(Reading.user_id == user.id).order_by(Reading.id.desc())
     ).all()
     payment_rows = db.scalars(
         select(Payment).where(Payment.user_id == user.id).order_by(Payment.id.desc())
     ).all()
+    items = {r.id: {**r.item(), **access.reading_state(rights, r)} for r in rows}
     return {
         "user": _row(db, user),
-        "matrices": [{**m.item(), **access.matrix_state(rights, m.id)} for m in matrices],
-        "payments": [{**p.item(),
-                      "matrix": next((m.item() for m in matrices if m.id == p.matrix_id), None)}
+        "readings": list(items.values()),
+        # прежний список личных дат
+        "matrices": [item for item in items.values() if item["product"] == products.PERSONAL],
+        "payments": [{**p.item(), "reading": items.get(p.reading_id), "matrix": items.get(p.reading_id)}
                      for p in payment_rows],
         "rights": [r.item() for r in rights],
         "reports": [job.item() for job in db.scalars(
@@ -224,40 +237,65 @@ def impersonate(user_id: int, request: Request, admin: User = Depends(admin_user
             "user": target.public()}
 
 
-@router.post("/users/{user_id}/matrices")
-def add_matrix(user_id: int, payload: BirthIn, _: User = Depends(admin_user),
-               db: Session = Depends(get_db)) -> dict:
-    """Выдать пользователю матрицу без оплаты: разбор открыт, но правом без платежа.
+def _grant(db: Session, user: User, product: products.Product, raw: dict) -> dict:
+    """Выдать разбор без оплаты: открыт, но правом без заказа.
 
-    Право бессрочное и без `payment_id` — по этому признаку кабинет показывает её открытой, но не
-    купленной (`access.matrix_state`). Повторная выдача той же даты ничего не ломает: матрица
-    находится по дате и полу, а право не задваивается.
+    Право бессрочное и без `purchase_id` — по этому признаку кабинет показывает разбор открытым, но
+    не купленным (`access.reading_state`). Повторная выдача того же ввода ничего не ломает: разбор
+    находится по вводу, а право не задваивается.
     """
+    row = readings.create(db, user, product, raw, limited=False)
+    db.commit()
+    body = {"products": [product.code], "per_reading": True}
+    fresh = not access.covering(access.granted(access.active_rights(db, user)), body, row, forever=True)
+    if fresh:
+        access.grant(db, user, body, reading_id=row.id, note="выдана админом")
+        db.commit()
+        printing.warm(user.id, row.id)
+    return {**row.item(), **access.reading_state(access.active_rights(db, user), row), "granted_now": fresh}
+
+
+def _user_or_404(db: Session, user_id: int) -> User:
     user = db.get(User, user_id)
     if user is None:
         raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_user"))
-    try:
-        calculate(payload.birth, payload.sex)
-    except ValueError as exc:
-        raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
-                                     detail=lambda: validation_message(exc)) from exc
+    return user
 
-    row = db.scalar(select(SavedMatrix).where(SavedMatrix.user_id == user.id,
-                                              SavedMatrix.birth == payload.birth,
-                                              SavedMatrix.sex == payload.sex))
-    if row is None:
-        row = SavedMatrix(user_id=user.id, birth=payload.birth, sex=payload.sex,
-                          title=None)
-        db.add(row)
+
+@router.post("/users/{user_id}/matrices")
+def add_matrix(user_id: int, payload: BirthIn, _: User = Depends(admin_user),
+               db: Session = Depends(get_db)) -> dict:
+    """Выдать личный разбор без оплаты — прежний адрес."""
+    return _grant(db, _user_or_404(db, user_id), products.PRODUCTS[products.PERSONAL],
+                  {"birth": payload.birth, "sex": payload.sex})
+
+
+@router.post("/users/{user_id}/readings")
+def add_reading(user_id: int, payload: ReadingIn, _: User = Depends(admin_user),
+                db: Session = Depends(get_db)) -> dict:
+    """Выдать разбор любого включённого продукта без оплаты: так принимают продукт на тестовом
+    контуре, где мок-оплаты нет."""
+    return _grant(db, _user_or_404(db, user_id), readings.product_or_404(payload.product),
+                  payload.inputs)
+
+
+@router.post("/users/{user_id}/subscription")
+def add_subscription(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    """Выдать подписку без оплаты: те же продукты, хранение и срок, что у предложения `month`.
+    Пока действует такая же выданная подписка, вторая не выдаётся — повторное нажатие ничего не
+    меняет. Оплаченная не в счёт: выданная переживает её возврат."""
+    user = _user_or_404(db, user_id)
+    offer = offers.get(db, offers.MONTH_ID)
+    if offer is None:
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.no_tariff"))
+    body = offer.body()
+    current = access.covering(access.granted(access.active_rights(db, user)), body)
+    if not current:
+        access.grant(db, user, body, note="выдана админом")
         db.commit()
-        db.refresh(row)
-    if not access.unlocked_matrix(db, user, row.id):
-        db.add(Entitlement(user_id=user.id, matrix_id=row.id, scope=json.dumps([access.SINGLE]),
-                           note="выдана админом"))
-        db.commit()
-        printing.warm(user.id, row.id)
-    rights = access.active_rights(db, user)
-    return {**row.item(), **access.matrix_state(rights, row.id)}
+    summary = access.summary(db, user)
+    return {"ok": True, "already": bool(current), "until": summary["until"],
+            "products": summary["products"]}
 
 
 @router.get("/reports/{job_id}/link")
@@ -271,9 +309,10 @@ def report_link(job_id: int, _: User = Depends(admin_user), db: Session = Depend
         raise LocalizedHTTPException(status.HTTP_410_GONE, detail=lambda: say("admin.file_expired"))
     if job.status != "done" or not job.object_key:
         raise LocalizedHTTPException(status.HTTP_409_CONFLICT, detail=lambda: say("admin.no_file"))
-    matrix = db.get(SavedMatrix, job.matrix_id)
+    row = db.get(Reading, job.reading_id)
     with using_locale(job.locale):
-        name = f"{default_title(matrix.birth)}.pdf".replace("/", "-") if matrix else None
+        name = (f"{products.PRODUCTS[row.product].default_title(row.data())}.pdf".replace("/", "-")
+                if row else None)
     return {"url": report_store.link(job.object_key, name)}
 
 
@@ -286,8 +325,8 @@ def report_rebuild(job_id: int, _: User = Depends(admin_user), db: Session = Dep
     if job is None:
         raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.no_job"))
     try:
-        with using_locale(job.locale), printing.exclusive(job.user_id, job.matrix_id):
-            fresh = printing.run(db, job.user_id, job.matrix_id)
+        with using_locale(job.locale), printing.exclusive(job.user_id, job.reading_id):
+            fresh = printing.run(db, job.user_id, job.reading_id)
     except printing.Busy as exc:
         raise LocalizedHTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=lambda: say("admin.print_busy")) from exc
     except Exception as exc:                       # noqa: BLE001
@@ -349,3 +388,12 @@ def clear_security_audit(_: User = Depends(admin_user), db: Session = Depends(ge
     removed = db.query(SecurityAudit).delete()
     db.commit()
     return {"removed": int(removed)}
+
+
+@router.get("/users/{user_id}/visits")
+def user_visits(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    if db.get(User, user_id) is None:
+        raise LocalizedHTTPException(404, detail=lambda: say("admin.not_found"))
+    rows = db.scalars(select(MetrikaClient).where(MetrikaClient.user_id == user_id)
+                      .order_by(MetrikaClient.last_seen_at.desc(), MetrikaClient.client_id)).all()
+    return {"items": [row.item() for row in rows]}

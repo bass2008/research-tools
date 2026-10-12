@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 
 from app import mail, payments, sites, store, sweep
 from app.config import settings
-from app.models import Entitlement, Payment, SavedMatrix, User
+from app.models import Entitlement, Payment, Reading, User
 
 RU = "https://test.arcana-sense.ru"
 COM = "https://test.arcana-sense.com"
@@ -48,7 +48,7 @@ def begin(client, **kwargs):
 
 def signed(body, **changes):
     fields = {"TerminalKey": settings.tbank_terminal_key, "PaymentId": body["payment_id"],
-              "OrderId": body["order_id"], "Success": True, "Amount": 25000,
+              "OrderId": body["order_id"], "Success": True, "Amount": 39000,
               "Status": "CONFIRMED", **changes}
     return {**fields, "Token": payments.PROVIDERS["tbank"].token(fields)}
 
@@ -56,7 +56,7 @@ def signed(body, **changes):
 @pytest.mark.parametrize("locale", ["en", "ru"])
 @pytest.mark.parametrize("path,provider", [("start", None), ("start", "tbank"), ("start", "mock"), ("mock", None)])
 def test_com_blocks_every_payment_before_writing(client, db, regional, locale, path, provider):
-    before = {model: db.scalar(select(func.count()).select_from(model)) for model in (User, SavedMatrix, Payment)}
+    before = {model: db.scalar(select(func.count()).select_from(model)) for model in (User, Reading, Payment)}
     response = client.post(f"/api/payments/{path}", headers=header(COM, locale), json={**BUY, "provider": provider})
     assert response.status_code == 403
     assert response.json()["messages"]["ru"] == "На данный момент нет доступной оплаты для вашего региона"
@@ -187,12 +187,12 @@ def test_existing_russian_payment_keeps_callback_and_rights_without_rewriting(cl
     for field in ("site_origin", "connection_id", "locale"):
         snapshot.pop(field, None)
     original = json.dumps(snapshot, ensure_ascii=False)
-    payment.tariff_body = original
+    payment.purchase.offer_body = original
     db.commit()
     assert client.post("/api/payments/notify", json=signed(body)).status_code == 200
     assert client.post("/api/payments/notify", json=signed(body)).status_code == 200
     db.refresh(payment)
-    assert payment.tariff_body == original
+    assert payment.purchase.offer_body == original
     assert db.scalar(select(func.count()).select_from(Entitlement)) == 1
 
 

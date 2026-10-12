@@ -26,7 +26,9 @@ import sqlite3, sys
 db = sqlite3.connect(sys.argv[1])
 assert db.execute("pragma integrity_check").fetchone()[0] == "ok", "битая копия"
 tables = {r[0] for r in db.execute("select name from sqlite_master where type='table'")}
-need = {"users", "payments", "matrices", "entitlements", "report_jobs", "tariffs"}
+# копия бывает и до миграции 001 (matrices, tariffs), и после неё (readings, offers, purchases)
+common = {"users", "payments", "entitlements", "report_jobs"}
+need = common | ({"readings", "offers", "purchases"} if "readings" in tables else {"matrices", "tariffs"})
 missing = need - tables
 assert not missing, f"в копии нет таблиц: {missing}"
 counts = {t: db.execute(f"select count(*) from {t}").fetchone()[0] for t in sorted(need)}

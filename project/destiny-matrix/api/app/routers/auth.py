@@ -12,9 +12,9 @@ from .. import access, audit
 from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
-from ..deps import current_user
-from ..models import SavedMatrix, User
-from ..schemas import Credentials, ResetApply, ResetRequest
+from ..deps import current_user, ghost_session
+from ..models import Reading, User, MetrikaClient, utcnow
+from ..schemas import Credentials, ResetApply, ResetRequest, MetrikaClientIn
 from .. import mail
 from ..security import (create_reset_token, create_token, hash_password,
                         password_fingerprint, read_reset_token, verify_password)
@@ -60,7 +60,8 @@ def login(payload: Credentials, request: Request, db: Session = Depends(get_db))
 def me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
     """Что открыто — решают права, а не поле в users: у разового тарифа право привязано к
     матрице, у месячного распространяется на все."""
-    used = db.scalar(select(func.count(SavedMatrix.id)).where(SavedMatrix.user_id == user.id)) or 0
+    used = db.scalar(select(func.count(Reading.id)).where(Reading.user_id == user.id,
+                                                          Reading.product == "personal")) or 0
     rights = access.summary(db, user)
     return {
         "user": user.public(),
@@ -108,3 +109,23 @@ def reset_apply(payload: ResetApply, db: Session = Depends(get_db)) -> dict:
     user.password_hash = hash_password(payload.password)
     db.commit()
     return {"token": create_token(user.id, user.password_hash), "user": user.public()}
+
+
+@router.post("/metrika-client")
+def metrika_client(payload: MetrikaClientIn, user: User = Depends(current_user),
+                   ghost: bool = Depends(ghost_session), db: Session = Depends(get_db)) -> dict:
+    """Связь браузера с текущим аккаунтом. Вход админа под пользователем не учитывается."""
+    if ghost:
+        return {"ok": True}
+    from sqlalchemy.dialects.sqlite import insert
+    stamp = utcnow()
+    row = insert(MetrikaClient).values(
+        user_id=user.id, counter_id=payload.counter_id, client_id=payload.client_id,
+        site_origin=sites.current().origin, first_seen_at=stamp, last_seen_at=stamp,
+    )
+    db.execute(row.on_conflict_do_update(
+        index_elements=["user_id", "counter_id", "client_id"],
+        set_={"last_seen_at": func.max(MetrikaClient.last_seen_at, row.excluded.last_seen_at)},
+    ))
+    db.commit()
+    return {"ok": True}

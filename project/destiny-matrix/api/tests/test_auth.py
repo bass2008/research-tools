@@ -99,4 +99,4 @@ def test_reset_link_is_not_a_session(client, db, monkeypatch):
     token = next(b for b in links if "token=" in b).split("token=")[1].split()[0]
 
     assert client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 401
-    assert client.get("/api/matrices", headers={"Authorization": f"Bearer {token}"}).status_code == 401
+    assert client.get("/api/readings?product=personal", headers={"Authorization": f"Bearer {token}"}).status_code == 401
