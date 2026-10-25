@@ -74,7 +74,7 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
             return;
           }
           if (res.paid) {
-            trackPurchase(res.payment_id);
+            trackPurchase(res.payment_id, { tariff: res.tariff });
             setReading(res.matrix_id ? { id: res.matrix_id, product: res.product } : null);
             await refreshSession();
             setStage("paid");

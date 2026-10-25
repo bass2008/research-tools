@@ -1,4 +1,5 @@
 import LockIcon from "@/components/ui/LockIcon";
+import BuyLink from "@/components/pay/BuyLink";
 import RichText from "@/components/ui/RichText";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { DP } from "@/lib/i18n/dict/pair";
@@ -122,7 +123,7 @@ export default function PairReport(props: PairReportProps) {
   const lockedBlock = (id: string, name: string, lead: ReactNode, body: ReactNode) => (
     <div className="acc lock" key={id} data-testid={`pair-lock-${id}`} data-locked="true">
       {buying ? (
-        <Link className="head" href={props.buyHref!}>{name}<span className="unlock"><LockIcon /> {DP.unlock[L]}</span></Link>
+        <BuyLink className="head" href={props.buyHref!} analytics={{ tariff: "pair", place: "pair-section", section: id }}>{name}<span className="unlock"><LockIcon /> {DP.unlock[L]}</span></BuyLink>
       ) : (
         // замок виден всегда: у примера и у подписчика купить нечего, и без значка закрытые сферы
         // выглядели бы обычными
@@ -130,9 +131,9 @@ export default function PairReport(props: PairReportProps) {
       )}
       {printing ? null : (
         <LockedBody testId={`pair-preview-${id}`} lead={lead} cta={buying ? (
-          <Link className="btn gold" href={props.buyHref!} data-testid={`pair-buy-${id}`}>
+          <BuyLink className="btn gold" href={props.buyHref!} data-testid={`pair-buy-${id}`} analytics={{ tariff: "pair", place: "pair-section", section: id }}>
             <span>{props.price ? `${D.report.unlockSection[L]}${props.price}` : DP.unlock[L]}</span>
-          </Link>
+          </BuyLink>
         ) : null}>
           {body}
         </LockedBody>
@@ -358,7 +359,7 @@ export default function PairReport(props: PairReportProps) {
 
       <PairChakras locale={L} dates={dates} printing={printing} locked={mode !== "full"} reading={chakraReading}
         cta={props.open ?? (props.buyHref
-          ? <Link className={`${styles.btn} ${styles.btnGold}`} href={props.buyHref}>{props.price ? DP.buy[L](props.price) : DP.buyNoPrice[L]}</Link>
+          ? <BuyLink className={`${styles.btn} ${styles.btnGold}`} href={props.buyHref} analytics={{ tariff: "pair", place: "pair-main" }}>{props.price ? DP.buy[L](props.price) : DP.buyNoPrice[L]}</BuyLink>
           : <span className={styles.dim}>{DP.inFull[L]}</span>)} />
 
       <section className={`${styles.card} ${styles.keys}`}>
@@ -477,7 +478,7 @@ export default function PairReport(props: PairReportProps) {
                   <LockedCards locale={L} cards={sphereCards(s)} />))}
                 {lockedBlock("chakras", DP.chakras.title[L], DP.chakras.lockedLead[L],
                   <ChakraReadingView reading={lockedPairChakraReading(L, dates)} locale={L} printing={printing} linkHref={href}
-                    unlock={buying ? (className, label) => <Link className={className} href={props.buyHref!}>{label}</Link> : undefined} />)}
+                    unlock={buying ? (className, label) => <BuyLink className={className} href={props.buyHref!} analytics={{ tariff: "pair", place: "pair-chakra", section: "chakras" }}>{label}</BuyLink> : undefined} />)}
               </div>
               {bizSection}
               {props.open ? (

@@ -424,6 +424,7 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
             "reading_id": payment.reading_id, "matrix_id": payment.reading_id,
             "product": reading.product if reading else None,
             "payment_id": payment.external_id,
+            "tariff": purchase.offer_id,
             # подписка без разбора: чек говорит про подписку, а не «разбор сохранён в кабинете»
             "subscription": not purchase.body().get("per_reading", True),
             "until": access.summary(db, user)["until"]}

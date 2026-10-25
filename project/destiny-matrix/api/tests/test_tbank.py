@@ -303,6 +303,25 @@ def test_sync_asks_the_bank(client, db, bank):
     assert ("GetState", {"PaymentId": body["payment_id"]}) in bank
 
 
+@pytest.mark.parametrize("tariff,target", [
+    ("single", {"birth": "1990-01-01"}),
+    ("pair", {"inputs": {"a": {"birth": "1990-01-01"}, "b": {"birth": "1991-02-02"}}}),
+    ("month", {}),
+])
+def test_bank_sync_returns_the_purchased_tariff(client, db, bank, tariff, target):
+    started = client.post("/api/payments/start", json={
+        "tariff": tariff, "email": "metrics@example.ru", **target,
+    })
+    assert started.status_code == 200, started.text
+    body = started.json()
+    headers = {"Authorization": f"Bearer {body['token']}"}
+    # Only the persisted order identifies the tariff; the caller cannot replace it.
+    response = client.post("/api/payments/sync", json={"order_id": body["order_id"]}, headers=headers)
+    assert response.status_code == 200, response.text
+    assert response.json()["paid"] is True
+    assert response.json()["tariff"] == tariff
+
+
 def test_start_needs_credentials(client, monkeypatch):
     monkeypatch.setattr(payments.tbank.settings, "tbank_terminal_key", "")
     monkeypatch.setattr(payments.PROVIDERS["mock"], "enabled", lambda: False)

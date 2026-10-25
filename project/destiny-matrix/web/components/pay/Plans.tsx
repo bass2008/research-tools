@@ -82,7 +82,10 @@ export default function Plans({ locale: requestedLocale, ...localeProps }: ({ pl
               className="btn wide"
               data-testid={`plan-${t.id}`}
               href={`/pay/${t.id}${aimOf(t, carry)}`}
-              onClick={() => track("buy_click", { tariff: t.id, place })}
+              onClick={() => {
+                track("buy_click", { tariff: t.id, place });
+                track("tariff_select", { tariff: t.id, place });
+              }}
             >
               {D.pay.buyFor[L](priceLabel(t))}
             </Link>

@@ -611,7 +611,8 @@ export const forLocale = localized((L: Locale) => {
         /** после возврата: что стало с доступом — текст сервера; открыт ли ещё разбор */
         outcome?: string;
         still_open?: boolean;
-        payment_id: string
+        payment_id: string;
+        tariff: string;
       }>("/payments/sync", {
         method: "POST",
         body: JSON.stringify({ order_id: orderId }),
