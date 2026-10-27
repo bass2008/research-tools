@@ -344,6 +344,8 @@ def check(item: dict, category: str, lang: str) -> tuple[list[str], list[str]]:
     if category == "karmic-tails":
         allowed = {t["triple"] for t in json.loads(METHOD.read_text())["reachable_karmic_tails"]}
         build.check_tail(item, where, allowed, problems)
+    if category == "compatibility-karmic-tails":
+        build.check_pair_tail(item, where, build.pair_tail_keys(), problems)
     build.hygiene(item, where, "", warnings, lang)
     return problems, warnings
 

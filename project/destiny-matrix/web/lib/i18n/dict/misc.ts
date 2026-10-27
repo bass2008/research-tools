@@ -119,6 +119,10 @@ export const encSections = {
     title: { ru: "Арканы в совместимости", en: "Arcana in compatibility" } satisfies Phrase,
     hint: { ru: "что значит аркан в матрице пары", en: "what an arcanum means in a couple's matrix" } satisfies Phrase,
   },
+  ptl: {
+    title: { ru: "Кармические хвосты пары", en: "Couple karmic tails" } satisfies Phrase,
+    hint: { ru: "тройки хвоста в матрице двоих", en: "the tail triples of a couple's matrix" } satisfies Phrase,
+  },
   cmb: {
     title: { ru: "Сочетания арканов", en: "Combinations of arcana" } satisfies Phrase,
     hint: { ru: "пары арканов рядом", en: "pairs of arcana side by side" } satisfies Phrase,

@@ -35,7 +35,7 @@ TITLE_LIMIT = 70
 
 # Минимумы повторяют загрузчик сайта (web/lib/content.ts): что не проходит здесь, не попадёт на
 # страницу и там — только там об этом узнают после сборки.
-ARTICLE = ("karmic-tails", "year-arcana", "category-hubs", "hubs", "compatibility-arcana")
+ARTICLE = ("karmic-tails", "compatibility-karmic-tails", "year-arcana", "category-hubs", "hubs", "compatibility-arcana")
 ENRICH = {"arcana": ("arcana.json", "n"), "positions": ("positions.json", "key"),
           "chakras": ("chakras.json", "key")}
 CHAKRA_ARTICLE = ("title", "short", "seo", "intro", "sections", "faq")
@@ -273,6 +273,53 @@ def check_tail(item: dict, where: str, allowed: set[str], problems: list[str]) -
         fail(problems, where, "noindex-хвост не должен публиковать SEO queries")
 
 
+def pair_tail_keys() -> set[str]:
+    units = json.loads((DST_ROOT / DEFAULT_LANG / "pair-units.json").read_text())["items"]
+    return {u["unit"].split(":", 1)[1] for u in units if u["sphere"] == "tasks"}
+
+
+UNIT_LIMITS = {"title": 32, "caption": 60, "meaning": 125}
+
+
+def check_pair_tail(item: dict, where: str, allowed: set[str], problems: list[str]) -> None:
+    key = str(item.get("key") or "")
+    if key not in allowed:
+        fail(problems, where, f"{key!r} не входит в хвосты пары движка")
+    expected = [int(part) for part in key.split("-")] if re.fullmatch(r"\d+-\d+-\d+", key) else []
+    if item.get("arcana") != expected:
+        fail(problems, where, f"arcana {item.get('arcana')!r} не совпадает с порядком ключа {expected}")
+    if item.get("entity_type") != "pair_karmic_tail":
+        fail(problems, where, "entity_type должен быть pair_karmic_tail")
+    report = item.get("report")
+    if not isinstance(report, list) or not report:
+        fail(problems, where, "нет report — короткой версии для разбора пары")
+    else:
+        check_paragraphs(report, where, "report", problems)
+        if any(isinstance(p, dict) and next(iter(p)) not in ("h3", "ul", "ol") for p in report):
+            fail(problems, where, "report: только абзацы, h3 и списки")
+    unit = item.get("unit")
+    captions = unit.get("captions") if isinstance(unit, dict) else None
+    if not isinstance(unit, dict) or not isinstance(captions, dict) or set(captions) != {"M", "N", "D"}:
+        fail(problems, where, "unit: нужны title, captions M/N/D и meaning")
+    else:
+        for field, limit in (("title", UNIT_LIMITS["title"]), ("meaning", UNIT_LIMITS["meaning"])):
+            value = str(unit.get(field) or "").strip()
+            if not value or len(value) > limit:
+                fail(problems, where, f"unit.{field}: от 1 до {limit} знаков, сейчас {len(value)}")
+        for point, value in captions.items():
+            if not str(value).strip() or len(str(value)) > UNIT_LIMITS["caption"]:
+                fail(problems, where, f"unit.captions.{point}: от 1 до {UNIT_LIMITS['caption']} знаков")
+    publication = item.get("publication")
+    if not isinstance(publication, dict) or not isinstance(publication.get("index"), bool):
+        fail(problems, where, "нет явного publication.index")
+    elif publication["index"]:
+        query = str(publication.get("primary_query") or "").strip().lower()
+        if not query:
+            fail(problems, where, "индексируемой странице нужен primary_query")
+        elif query not in {str(q).strip().lower() for q in item.get("seo", {}).get("queries", [])}:
+            fail(problems, where, "primary_query отсутствует в seo.queries")
+
+
 def check_enrichment(item: dict, where: str, base_keys: set, key: str, problems: list[str]) -> None:
     if key not in base_keys:
         fail(problems, where, f"ключа {key!r} нет в корпусе — обогащать нечего")
@@ -387,6 +434,7 @@ def main() -> int:
     written: list[str] = []
     method = json.loads(METHOD.read_text())
     allowed_tails = {item["triple"] for item in method["reachable_karmic_tails"]}
+    allowed_pair_tails = pair_tail_keys()
     tail_primary: dict[str, str] = {}
 
     for category in ARTICLE:
@@ -411,8 +459,11 @@ def main() -> int:
             if path.stem != key and category != "karmic-tails":
                 print(f"  ~ {where}: имя файла не совпадает с ключом {key!r}")
             check_article(item, where, problems)
-            if category == "karmic-tails":
-                check_tail(item, where, allowed_tails, problems)
+            if category == "compatibility-karmic-tails":
+                check_pair_tail(item, where, allowed_pair_tails, problems)
+            if category in ("karmic-tails", "compatibility-karmic-tails"):
+                if category == "karmic-tails":
+                    check_tail(item, where, allowed_tails, problems)
                 publication = item.get("publication") or {}
                 primary = str(publication.get("primary_query") or "").strip().lower()
                 if primary:

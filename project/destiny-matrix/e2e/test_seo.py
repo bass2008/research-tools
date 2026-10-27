@@ -377,6 +377,7 @@ SECTION_HUBS = (
     ("/encyclopedia/combination", "Сочетания арканов"),
     ("/encyclopedia/karmic-tail", "Кармические хвосты"),
     ("/year", "Матрица судьбы на год"),
+    ("/encyclopedia/compatibility/tails", "Кармические хвосты пары"),
 )
 
 # Лист → шапка, которую он обязан объявить родителем.
@@ -425,7 +426,8 @@ def test_encyclopedia_is_a_table_of_contents_not_a_flat_list():
     body = re.sub(r"(?is)<script.*?</script>", "", html)
     hrefs = {m.group(1).split("#")[0].rstrip("/") or "/" for m in re.finditer(r'<a\b[^>]*href="(/[^"?]*)"', body)}
     assert len(hrefs) < 40, f"страница снова раздаёт {len(hrefs)} ссылок"
-    leaves = [h for h in hrefs if re.match(r"^/(encyclopedia/[a-z_-]+/.+|year/.+)$", h)]
+    hubs = {hub for hub, _ in SECTION_HUBS}
+    leaves = [h for h in hrefs if re.match(r"^/(encyclopedia/[a-z_-]+/.+|year/.+)$", h) and h not in hubs]
     assert leaves == [], f"на оглавлении снова листья: {leaves[:5]}"
     for hub, _ in SECTION_HUBS:
         assert hub in hrefs, f"оглавление не ведёт к шапке {hub}"

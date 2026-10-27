@@ -31,10 +31,10 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
   if (!site.indexable) return [];
   const L = site.defaultLocale;
   const { ARCANA } = localizedArcana(L);
-  const { categoryHub, compatibilityKeys, hubKeys, indexedKarmicTailKeys, yearKeys } = localizedContent(L);
+  const { categoryHub, compatibilityKeys, hubKeys, indexedKarmicTailKeys, indexedPairTailKeys, yearKeys } = localizedContent(L);
   const { indexedRegistryItems, positionArcanumHref } = localizedPositionArcanum(L);
   const { SERVICE_PAGES, servicePages } = localizedServicePages(L);
-  const { ARCANUM_HUB, CHAKRA_HUB, COMPATIBILITY_HUB, KARMIC_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, compatibilityHref, hasHubRoute, hubHref, karmicTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
+  const { ARCANUM_HUB, CHAKRA_HUB, COMPATIBILITY_HUB, KARMIC_TAIL_HUB, PAIR_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, compatibilityHref, hasHubRoute, hubHref, karmicTailHref, pairTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
 
   const abs = (path: string) => new URL(path, site.origin).toString();
   // Один адрес — одна запись. Источников у карты несколько (хабы, реестр служебных страниц,
@@ -76,6 +76,8 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
     ...yearKeys().map((key) => ({ url: abs(yearHref(key)), priority: 0.7 })),
     ...(categoryHub("compatibility") ? [{ url: abs(COMPATIBILITY_HUB), priority: 0.8 }] : []),
     ...compatibilityKeys().map((n) => ({ url: abs(compatibilityHref(n)), priority: 0.7 })),
+    ...(indexedPairTailKeys().length ? [{ url: abs(PAIR_TAIL_HUB), priority: 0.8 }] : []),
+    ...indexedPairTailKeys().map((key) => ({ url: abs(pairTailHref(key)), priority: 0.7 })),
     ...hubKeys()
       .filter(hasHubRoute)
       .map((key) => ({ url: abs(hubHref(key)), priority: 0.8 })),

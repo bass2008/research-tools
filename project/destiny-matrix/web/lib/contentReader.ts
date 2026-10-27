@@ -31,7 +31,7 @@ export interface ChakraReadingItem {
 // Places where a page inserts its own component inside the article.
 export const SLOTS = ["calc", "pair"] as const;
 // hub articles about a couple: they promote the pair calculator instead of the personal one
-export const COMPATIBILITY_HUBS: readonly string[] = ["business-compatibility", "karmic-compatibility", "compatibility-center"];
+export const COMPATIBILITY_HUBS: readonly string[] = ["business-compatibility", "compatibility-center"];
 export type Slot = (typeof SLOTS)[number];
 
 // Body text allows only `**bold**`; headings and table heads stay plain.
@@ -462,6 +462,9 @@ export function createContent(L: Locale, source: ContentSource) {
 
   const KARMIC_TAILS = articles("karmic-tails.json");
 
+  // хвосты пары: свой корпус, адрес под «Совместимостью»; корпус растёт до 97 по мере написания
+  const PAIR_TAILS = articles("compatibility-karmic-tails.json");
+
   // шапки категорий («что такое кармический хвост», «что такое матрица на год») лежат отдельно
   // от корневых хабов: у них свой адрес внутри категории, а не слаг первого уровня
   const CATEGORY_HUBS = articles("category-hubs.json");
@@ -481,7 +484,7 @@ export function createContent(L: Locale, source: ContentSource) {
     ["karmic-tails.json", KARMIC_TAILS.size, 26],
     ["year-arcana.json", YEAR_ARCANA.size, 23],
     // раздел «Арканы в совместимости» язык получает целиком: шапка и все 21 страница, либо ничего
-    ["category-hubs.json", CATEGORY_HUBS.size, CATEGORY_HUBS.has("compatibility") ? 8 : 7],
+    ["category-hubs.json", CATEGORY_HUBS.size, (CATEGORY_HUBS.has("compatibility") ? 8 : 7) + (CATEGORY_HUBS.has("compatibility-tails") ? 1 : 0)],
     ["compatibility-arcana.json", COMPATIBILITY_ARCANA.size, CATEGORY_HUBS.has("compatibility") ? 21 : 0],
     ["hubs.json", HUBS.size, 10 + COMPATIBILITY_HUBS.filter((key) => HUBS.has(key)).length],
   ] as const) {
@@ -502,6 +505,18 @@ export function createContent(L: Locale, source: ContentSource) {
 
   function karmicTails(): ArticleContent[] {
     return [...KARMIC_TAILS.values()];
+  }
+
+  function pairTail(key: string): ArticleContent | null {
+    return PAIR_TAILS.get(key) ?? null;
+  }
+
+  function pairTailKeys(): string[] {
+    return [...PAIR_TAILS.keys()];
+  }
+
+  function indexedPairTailKeys(): string[] {
+    return [...PAIR_TAILS.values()].filter((item) => item.publication.index).map((item) => item.key);
   }
 
   // В одном файле лежат и «N на год» (ключ 1…22), и год-штамп «на 2026» (ключ 2026): у них общий
@@ -893,5 +908,5 @@ export function createContent(L: Locale, source: ContentSource) {
       hubs: HUBS.size,
     };
   }
-  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats };
+  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, pairTail, pairTailKeys, indexedPairTailKeys, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats };
 }

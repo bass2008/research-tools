@@ -18,7 +18,7 @@ describe("единый реестр навигации энциклопедии"
   const keys = ENCYCLOPEDIA_SECTIONS.map((section) => section.key);
 
   it("содержит восемь уникальных разделов", () => {
-    expect(keys).toEqual(["arc", "sec", "pts", "chk", "tls", "yer", "cmp", "cmb", "art"]);
+    expect(keys).toEqual(["arc", "sec", "pts", "chk", "tls", "yer", "cmp", "ptl", "cmb", "art"]);
     expect(new Set(keys).size).toBe(keys.length);
   });
 
@@ -35,6 +35,7 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionHub("cmb")).toBe("/encyclopedia/combination");
     expect(encyclopediaSectionHub("tls")).toBe("/encyclopedia/karmic-tail");
     expect(encyclopediaSectionHub("yer")).toBe("/year");
+    expect(encyclopediaSectionHub("ptl")).toBe("/encyclopedia/compatibility/tails");
   });
 
   // «Разделы отчёта» и «Позиции карты» — один роут `position/[key]`, поэтому и одна шапка.
@@ -92,6 +93,9 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionFromPath("/encyclopedia/profession/3-10-7", positions, articles)).toBe("sec");
     expect(encyclopediaSectionFromPath("/encyclopedia/position/day", positions, articles)).toBe("pts");
     expect(encyclopediaSectionFromPath("/encyclopedia/karmic-tail/15-8-11", positions, articles)).toBe("tls");
+    expect(encyclopediaSectionFromPath("/encyclopedia/compatibility/tails", positions, articles)).toBe("ptl");
+    expect(encyclopediaSectionFromPath("/encyclopedia/compatibility/tails/9-21-12", positions, articles)).toBe("ptl");
+    expect(encyclopediaSectionFromPath("/encyclopedia/compatibility/7", positions, articles)).toBe("cmp");
     // Шапка раздела — голова своей ветки, а не статья: иначе меню утверждает «Статьи», пока
     // рядом стоит неподсвеченным пункт собственного раздела.
     expect(encyclopediaSectionFromPath("/encyclopedia/karmic-tail", positions, articles)).toBe("tls");

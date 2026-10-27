@@ -15,12 +15,13 @@ describe("личные хвосты в разборе пары", () => {
       expect([...PERSONAL_TAILS].sort()).toEqual(keys);
     });
 
-    it(`${L}: у каждого хвоста есть собственный разбор совместимости`, () => {
+    it(`${L}: у каждого хвоста короткая подводка к статье о хвосте пары`, () => {
       const articles = read(L, "karmic-tails.json").items as Array<{ key: string; sections: Section[] }>;
       const readings = articles.map((article) => {
         const sections = article.sections.filter((section) => section.h2 === D.encTail.inCompatibilityTitle[L]);
         expect(sections, article.key).toHaveLength(1);
-        expect(sections[0].paragraphs.length, article.key).toBeGreaterThanOrEqual(3);
+        expect(sections[0].paragraphs, article.key).toHaveLength(1);
+        expect(String(sections[0].paragraphs[0]).split(/[.!?](?:\s|$)/).filter(Boolean).length, article.key).toBeLessThanOrEqual(2);
         return JSON.stringify(sections[0].paragraphs);
       });
       expect(new Set(readings).size).toBe(articles.length);

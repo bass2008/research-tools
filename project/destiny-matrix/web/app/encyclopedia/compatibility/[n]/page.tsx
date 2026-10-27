@@ -98,7 +98,7 @@ export default async function CompatibilityArcanumPage({ params }: { params: Pro
         </p>
       </div>
 
-      <Related locale={L} path={compatibilityHref(n)} refs={[...item.related, ...COMPATIBILITY_HUBS]} />
+      <Related locale={L} path={compatibilityHref(n)} refs={[...item.related, ...COMPATIBILITY_HUBS, "compatibility-tails"]} />
 
       {siblings.length ? (
         <div className="panel section-gap">

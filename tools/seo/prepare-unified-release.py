@@ -34,6 +34,7 @@ AUDIT = ROOT / "tools" / "seo" / "audit"
 TODAY = "2026-08-30"
 NUMBER = re.compile(r"(?<!\d)(?:[1-9]|1\d|2[0-2])(?!\d)")
 WORD = re.compile(r"[а-яёa-z0-9]+", re.IGNORECASE)
+PAIR_WORDS = re.compile(r"совместим|\bпар(?:а|ы|е|у|ой)\b|партн[её]р|\bобоих\b")
 
 POSITION_WORDS: tuple[tuple[str, str], ...] = (
     ("комфорт", "comfort"), ("центр", "center"), ("ден", "money"),
@@ -156,7 +157,7 @@ def tail_sources(reachable: list[dict], stats: dict[str, dict[str, int]]) -> lis
     return tails
 
 
-def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
+def classify(row: dict, valid: set[str], indexed: set[str], pair: set[str]) -> dict:
     query = row["phrase"]
     low = query.lower()
     triple = numbers(query)
@@ -167,9 +168,13 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
     entity = None
     evidence: list[str] = []
 
-    if "совместим" in low:
+    if PAIR_WORDS.search(low):
         intent = "compatibility"
-        evidence.append("явный маркер совместимости")
+        evidence.append("явный маркер совместимости или пары")
+        if key in pair:
+            entity = f"pair_tail:{key}"
+            landing = f"/encyclopedia/compatibility/tails/{key}"
+            evidence.append("точный порядок совпал с хвостом пары")
     elif re.search(r"\b(?:19|20)\d{2}\b", low) or " на год" in low:
         intent = "year"
         landing = "/year"
@@ -181,6 +186,10 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
             entity = f"tail:{key}"
             landing = f"/encyclopedia/karmic-tail/{key}" if key in indexed else None
             evidence.append("ordered-последовательность есть в контракте метода")
+        elif key in pair:
+            entity = f"pair_tail:{key}"
+            landing = f"/encyclopedia/compatibility/tails/{key}"
+            evidence.append("в личной матрице тройки нет, это хвост пары")
         else:
             evidence.append("последовательности нет в реестре 26; чужую формулу не публикуем")
     elif "программ" in low:
@@ -193,6 +202,11 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
             entity = f"tail:{key}"
             landing = f"/encyclopedia/karmic-tail/{key}" if key in indexed else None
             evidence.append("полная программа совпала с ordered-хвостом; иной контекст не указан")
+        elif key in pair and not other_position:
+            context = "pair_tail"
+            entity = f"pair_tail:{key}"
+            landing = f"/encyclopedia/compatibility/tails/{key}"
+            evidence.append("полная программа совпала с хвостом пары; в личной матрице такой тройки нет")
         else:
             context = "loops"
             landing = "/programs"
@@ -220,6 +234,10 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
                 entity = f"tail:{key}"
                 landing = f"/encyclopedia/karmic-tail/{key}" if key in indexed else None
                 evidence.append("точный порядок совпал с продуктовым хвостом")
+            elif key in pair:
+                entity = f"pair_tail:{key}"
+                landing = f"/encyclopedia/compatibility/tails/{key}"
+                evidence.append("в личной матрице тройки нет, это хвост пары")
 
     return {
         "query": query,
@@ -231,15 +249,15 @@ def classify(row: dict, valid: set[str], indexed: set[str]) -> dict:
         "method_entity": entity,
         "landing_url": landing,
         "primary_or_supporting": "primary" if landing else "reject",
-        "confidence": "product_verified" if entity and entity.startswith("tail:") else "automatic",
+        "confidence": "product_verified" if entity and entity.startswith(("tail:", "pair_tail:")) else "automatic",
         "evidence": "; ".join(evidence),
         "reviewed_at": TODAY,
     }
 
 
-def semantic_artifacts(nodes: list[dict], valid: set[str], indexed: set[str]) -> tuple[str, str, str]:
+def semantic_artifacts(nodes: list[dict], valid: set[str], indexed: set[str], pair: set[str]) -> tuple[str, str, str]:
     source = [row for row in nodes if len(numbers(row["phrase"])) == 3]
-    rows = [classify(row, valid, indexed) for row in source]
+    rows = [classify(row, valid, indexed, pair) for row in source]
     rows.sort(key=lambda item: (-item["frequency"], item["query"]))
     fields = list(rows[0])
     output = io.StringIO()
@@ -291,7 +309,7 @@ def url_registry(tails: list[dict]) -> list[dict]:
             "old_url": url, "entity_type": entity, "index_now": index,
             "impressions": None, "clicks": None, "backlinks": None,
             "decision": decision, "new_url": canonical if decision == "redirect" else None,
-            "status_code": 200 if decision in ("keep", "noindex") else 404,
+            "status_code": 200 if decision in ("keep", "noindex") else 301 if decision == "redirect" else 404,
             "canonical": canonical or (url if decision in ("keep", "noindex") else None),
             "sitemap": decision == "keep" and index,
             "reason": reason, "owner": "seo+product", "release": "unified",
@@ -341,6 +359,15 @@ def url_registry(tails: list[dict]) -> list[dict]:
     for item in item_list("compatibility-arcana.json"):
         add(f"/encyclopedia/compatibility/{item['n']}", "compatibility_arcanum", "keep", True,
             "аркан в матрице пары")
+    pair_tails = item_list("compatibility-karmic-tails.json")
+    if any(item["publication"]["index"] for item in pair_tails):
+        add("/encyclopedia/compatibility/tails", "pair_karmic_tail_hub", "keep", True, "шапка раздела хвостов пары: статья и список хвостов")
+        add("/karmic-compatibility", "redirect", "redirect", False, "обзор хвоста пары стал шапкой раздела хвостов пары",
+            canonical="/encyclopedia/compatibility/tails")
+    for item in pair_tails:
+        indexed = bool(item["publication"]["index"])
+        add(f"/encyclopedia/compatibility/tails/{item['key']}", "pair_karmic_tail",
+            "keep" if indexed else "noindex", indexed, "кармический хвост матрицы пары")
     for item in item_list("matrices.json"):
         add(f"/matrix/{item['slug']}", "calculated_matrix", "noindex", False,
             "производный продуктовый результат, не SEO landing")
@@ -445,7 +472,8 @@ def expected_outputs() -> dict[Path, str]:
             "unknown_program_requires_position": True,
         },
     }
-    semantic_json, semantic_csv, semantic_summary = semantic_artifacts(raw["nodes"], valid, indexed)
+    pair = {item["key"] for item in item_list("compatibility-karmic-tails.json") if item["publication"]["index"]}
+    semantic_json, semantic_csv, semantic_summary = semantic_artifacts(raw["nodes"], valid, indexed, pair)
     urls = url_registry(tails)
     cards = review_cards(tails, urls)
     outputs: dict[Path, str] = {

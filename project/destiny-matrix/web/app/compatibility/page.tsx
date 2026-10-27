@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 // Пример до первого расчёта печатается сервером, как карта-пример на главной: иначе в HTML
 // для поиска была одна форма.
-const EXAMPLE = { a: "1993-03-31", b: "1994-12-28" };
+const EXAMPLE = { a: "2000-01-01", b: "2000-06-01" };
 
 const forLocale = localized((L: Locale, site) => {
   const { pageMeta } = localizedSite(L, site);
@@ -41,10 +41,12 @@ export default async function CompatibilityPage() {
   const L = await requestLocale();
   const { faqLd } = localizedSchema(L, await requestSite());
   const faq = DP.seo.faq.map((item) => ({ q: item.q[L], a: item.a[L] }));
-  const { hub } = localizedContent(L);
-  const articles = ["compatibility-center", "karmic-compatibility", "business-compatibility"]
-    .map((key) => hub(key))
-    .filter((x): x is NonNullable<typeof x> => Boolean(x));
+  const { hub, categoryHub } = localizedContent(L);
+  const articles = [
+    { href: "/compatibility-center", item: hub("compatibility-center") },
+    { href: "/encyclopedia/compatibility/tails", item: categoryHub("compatibility-tails") },
+    { href: "/business-compatibility", item: hub("business-compatibility") },
+  ].flatMap(({ href, item }) => item ? [{ href, label: item.crumb ?? item.title }] : []);
   const example = { ...EXAMPLE, units: pairUnits(L, computePair(EXAMPLE.a, EXAMPLE.b, L), EXAMPLE, false) };
   // без способа оплаты в регионе кнопок покупки нет — как у личного разбора
   const { items: pairOffers, providers } = await getBilling("pair");
@@ -88,7 +90,7 @@ export default async function CompatibilityPage() {
             <p data-testid="compatibility-articles">
               {DP.seo.articlesLine[L]}{" "}
               {articles.map((x, i) => (
-                <span key={x.key}>{i ? ", " : ""}<Link href={`/${x.key}`}>{x.crumb ?? x.title}</Link></span>
+                <span key={x.href}>{i ? ", " : ""}<Link href={x.href}>{x.label}</Link></span>
               ))}.
             </p>
           ) : null}

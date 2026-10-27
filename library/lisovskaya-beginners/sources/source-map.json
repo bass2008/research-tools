@@ -1,0 +1,1373 @@
+{
+ "archive": "matritsa-sudby-dlya-nachinayushchih.epub",
+ "sha256": "ff49db1c91adee8854bf5fdc8d27d7c44364f29e606d2597c7d8d47d5499ca36",
+ "bytes": 8380052,
+ "metadata": {
+  "title": "Матрица Судьбы для начинающих",
+  "creator": "Юлиана Лисовская",
+  "publisher": "Издательские решения",
+  "language": "ru-RU"
+ },
+ "origin": "Local EPUB supplied by user (Лисовская Юлиана. Матрица Судьбы для начинающих.epub); copied without modification.",
+ "created": "2026-10-26",
+ "sections": {
+  "intro": {
+   "chapter": 0,
+   "heading": "Введение в метод; направление в Матрице",
+   "members": [
+    "OEBPS/part-002.xhtml"
+   ]
+  },
+  "base": {
+   "chapter": 1,
+   "heading": "Базовая матрица: правила чтения, построение, основное колесо",
+   "members": [
+    "OEBPS/part-004.xhtml",
+    "OEBPS/part-005.xhtml"
+   ]
+  },
+  "points": {
+   "chapter": 1,
+   "heading": "Значение базовых точек в матрице",
+   "members": [
+    "OEBPS/part-006.xhtml"
+   ]
+  },
+  "lines": {
+   "chapter": 1,
+   "heading": "Значение базовых линий в матрице",
+   "members": [
+    "OEBPS/part-007.xhtml"
+   ]
+  },
+  "links": {
+   "chapter": 1,
+   "heading": "Взаимосвязь и влияние точек и линий",
+   "members": [
+    "OEBPS/part-008.xhtml"
+   ]
+  },
+  "calculation": {
+   "chapter": 1,
+   "heading": "Расчёт базовых точек и линий",
+   "members": [
+    "OEBPS/part-009.xhtml"
+   ]
+  },
+  "energies": {
+   "chapter": 2,
+   "heading": "22 энергии: редкие и популярные, запрещённые точки",
+   "members": [
+    "OEBPS/part-013.xhtml",
+    "OEBPS/part-014.xhtml"
+   ]
+  },
+  "01": {
+   "chapter": 2,
+   "heading": "1 энергия",
+   "members": [
+    "OEBPS/part-016.xhtml"
+   ]
+  },
+  "02": {
+   "chapter": 2,
+   "heading": "2 энергия",
+   "members": [
+    "OEBPS/part-017.xhtml"
+   ]
+  },
+  "03": {
+   "chapter": 2,
+   "heading": "3 энергия",
+   "members": [
+    "OEBPS/part-018.xhtml"
+   ]
+  },
+  "04": {
+   "chapter": 2,
+   "heading": "4 энергия",
+   "members": [
+    "OEBPS/part-019.xhtml"
+   ]
+  },
+  "05": {
+   "chapter": 2,
+   "heading": "5 энергия",
+   "members": [
+    "OEBPS/part-020.xhtml"
+   ]
+  },
+  "06": {
+   "chapter": 2,
+   "heading": "6 энергия",
+   "members": [
+    "OEBPS/part-021.xhtml"
+   ]
+  },
+  "07": {
+   "chapter": 2,
+   "heading": "7 энергия",
+   "members": [
+    "OEBPS/part-022.xhtml"
+   ]
+  },
+  "08": {
+   "chapter": 2,
+   "heading": "8 энергия",
+   "members": [
+    "OEBPS/part-023.xhtml"
+   ]
+  },
+  "09": {
+   "chapter": 2,
+   "heading": "9 энергия",
+   "members": [
+    "OEBPS/part-024.xhtml"
+   ]
+  },
+  "10": {
+   "chapter": 2,
+   "heading": "10 энергия",
+   "members": [
+    "OEBPS/part-025.xhtml"
+   ]
+  },
+  "11": {
+   "chapter": 2,
+   "heading": "11 энергия",
+   "members": [
+    "OEBPS/part-026.xhtml"
+   ]
+  },
+  "12": {
+   "chapter": 2,
+   "heading": "12 энергия",
+   "members": [
+    "OEBPS/part-027.xhtml"
+   ]
+  },
+  "13": {
+   "chapter": 2,
+   "heading": "13 энергия",
+   "members": [
+    "OEBPS/part-028.xhtml"
+   ]
+  },
+  "14": {
+   "chapter": 2,
+   "heading": "14 энергия",
+   "members": [
+    "OEBPS/part-029.xhtml"
+   ]
+  },
+  "15": {
+   "chapter": 2,
+   "heading": "15 энергия",
+   "members": [
+    "OEBPS/part-030.xhtml"
+   ]
+  },
+  "16": {
+   "chapter": 2,
+   "heading": "16 энергия",
+   "members": [
+    "OEBPS/part-031.xhtml"
+   ]
+  },
+  "17": {
+   "chapter": 2,
+   "heading": "17 энергия",
+   "members": [
+    "OEBPS/part-032.xhtml"
+   ]
+  },
+  "18": {
+   "chapter": 2,
+   "heading": "18 энергия",
+   "members": [
+    "OEBPS/part-033.xhtml"
+   ]
+  },
+  "19": {
+   "chapter": 2,
+   "heading": "19 энергия",
+   "members": [
+    "OEBPS/part-034.xhtml"
+   ]
+  },
+  "20": {
+   "chapter": 2,
+   "heading": "20 энергия",
+   "members": [
+    "OEBPS/part-035.xhtml"
+   ]
+  },
+  "21": {
+   "chapter": 2,
+   "heading": "21 энергия",
+   "members": [
+    "OEBPS/part-036.xhtml"
+   ]
+  },
+  "22": {
+   "chapter": 2,
+   "heading": "22 энергия",
+   "members": [
+    "OEBPS/part-037.xhtml"
+   ]
+  },
+  "rod": {
+   "chapter": 3,
+   "heading": "Родовой квадрат: расчёт, сила рода, родовые сценарии",
+   "members": [
+    "OEBPS/part-041.xhtml",
+    "OEBPS/part-042.xhtml",
+    "OEBPS/part-043.xhtml"
+   ]
+  },
+  "purpose": {
+   "chapter": 4,
+   "heading": "Предназначения: периоды, расчёт, кризисы",
+   "members": [
+    "OEBPS/part-047.xhtml",
+    "OEBPS/part-048.xhtml"
+   ]
+  },
+  "karma": {
+   "chapter": 5,
+   "heading": "Карма: кармический хвостик и материальная карма — точки и интеграция",
+   "members": [
+    "OEBPS/part-052.xhtml",
+    "OEBPS/part-053.xhtml"
+   ]
+  },
+  "tails": {
+   "chapter": 5,
+   "heading": "Сочетания кармических хвостиков и их значение",
+   "members": [
+    "OEBPS/part-054.xhtml",
+    "OEBPS/part-055.xhtml"
+   ]
+  },
+  "finance": {
+   "chapter": 6,
+   "heading": "Линия финансов; влияние материальной кармы",
+   "members": [
+    "OEBPS/part-059.xhtml",
+    "OEBPS/part-060.xhtml"
+   ]
+  },
+  "realisation": {
+   "chapter": 7,
+   "heading": "Самореализация",
+   "members": [
+    "OEBPS/part-064.xhtml",
+    "OEBPS/part-065.xhtml"
+   ]
+  },
+  "relations": {
+   "chapter": 8,
+   "heading": "Линия отношений; влияние кармического хвостика",
+   "members": [
+    "OEBPS/part-069.xhtml",
+    "OEBPS/part-070.xhtml"
+   ]
+  },
+  "integration": {
+   "chapter": 9,
+   "heading": "Интеграция линий и точек: ДРК, таланты, материальная карма, хвостик, родовые линии, предназначения",
+   "members": [
+    "OEBPS/part-074.xhtml",
+    "OEBPS/part-075.xhtml"
+   ]
+  },
+  "types": {
+   "chapter": 10,
+   "heading": "Виды матрицы; программы в Матрице",
+   "members": [
+    "OEBPS/part-079.xhtml",
+    "OEBPS/part-080.xhtml"
+   ]
+  },
+  "algorithm": {
+   "chapter": 11,
+   "heading": "Алгоритм работы, ошибки чтения, зелёные точки, практики",
+   "members": [
+    "OEBPS/part-084.xhtml",
+    "OEBPS/part-085.xhtml"
+   ]
+  },
+  "clients": {
+   "chapter": 12,
+   "heading": "Работа с клиентами",
+   "members": [
+    "OEBPS/part-087.xhtml",
+    "OEBPS/part-088.xhtml"
+   ]
+  },
+  "terms": {
+   "chapter": 0,
+   "heading": "Термины в помощь новичку",
+   "members": [
+    "OEBPS/part-096.xhtml"
+   ]
+  }
+ },
+ "toc": [
+  {
+   "order": 1,
+   "label": "Матрица Судьбы для начинающих",
+   "src": "OEBPS/title-page.xhtml#title-page"
+  },
+  {
+   "order": 2,
+   "label": "Об авторе",
+   "src": "OEBPS/part-001.xhtml#tocForcedId0"
+  },
+  {
+   "order": 3,
+   "label": "Введение в метод",
+   "src": "OEBPS/part-002.xhtml#tocForcedId1"
+  },
+  {
+   "order": 4,
+   "label": "Чем может помочь и что рассказать",
+   "src": "OEBPS/part-002.xhtml#tocForcedId2"
+  },
+  {
+   "order": 5,
+   "label": "Направление в Матрице",
+   "src": "OEBPS/part-002.xhtml#tocForcedId3"
+  },
+  {
+   "order": 6,
+   "label": "ГЛАВА 1",
+   "src": "OEBPS/part-003.xhtml#tocForcedId4"
+  },
+  {
+   "order": 7,
+   "label": "БАЗОВАЯ МАТРИЦА",
+   "src": "OEBPS/part-004.xhtml#tocForcedId5"
+  },
+  {
+   "order": 8,
+   "label": "Что такое базовая матрица?",
+   "src": "OEBPS/part-005.xhtml#tocForcedId6"
+  },
+  {
+   "order": 9,
+   "label": "Правила чтения матрицы",
+   "src": "OEBPS/part-005.xhtml#tocForcedId7"
+  },
+  {
+   "order": 10,
+   "label": "Построение и структурирование матрицы",
+   "src": "OEBPS/part-005.xhtml#tocForcedId8"
+  },
+  {
+   "order": 11,
+   "label": "Что такое основное колесо Матрицы?",
+   "src": "OEBPS/part-005.xhtml#tocForcedId9"
+  },
+  {
+   "order": 12,
+   "label": "Значение базовых точек в матрице",
+   "src": "OEBPS/part-006.xhtml#tocForcedId10"
+  },
+  {
+   "order": 13,
+   "label": "Значение базовых линий в матрице",
+   "src": "OEBPS/part-007.xhtml#tocForcedId11"
+  },
+  {
+   "order": 14,
+   "label": "Взаимосвязь и влияние точек и линий в Матрице",
+   "src": "OEBPS/part-008.xhtml#tocForcedId12"
+  },
+  {
+   "order": 15,
+   "label": "Расчёт базовых точек и линий",
+   "src": "OEBPS/part-009.xhtml#tocForcedId13"
+  },
+  {
+   "order": 16,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-010.xhtml#tocForcedId14"
+  },
+  {
+   "order": 17,
+   "label": "ГЛАВА 2",
+   "src": "OEBPS/part-012.xhtml#tocForcedId15"
+  },
+  {
+   "order": 18,
+   "label": "22 ЭНЕРГИИ МАТРИЦЫ",
+   "src": "OEBPS/part-013.xhtml#tocForcedId16"
+  },
+  {
+   "order": 19,
+   "label": "Редкие и популярные энергии в матрице",
+   "src": "OEBPS/part-014.xhtml#tocForcedId17"
+  },
+  {
+   "order": 20,
+   "label": "Энергии не могут стоять на определённых точках",
+   "src": "OEBPS/part-014.xhtml#tocForcedId18"
+  },
+  {
+   "order": 21,
+   "label": "Почему можно не узнать себя по энергии или Матрице",
+   "src": "OEBPS/part-014.xhtml#tocForcedId19"
+  },
+  {
+   "order": 22,
+   "label": "22 ЭНЕРГИИ",
+   "src": "OEBPS/part-015.xhtml#tocForcedId20"
+  },
+  {
+   "order": 23,
+   "label": "1 ЭНЕРГИЯ",
+   "src": "OEBPS/part-016.xhtml#tocForcedId21"
+  },
+  {
+   "order": 24,
+   "label": "2 ЭНЕРГИЯ",
+   "src": "OEBPS/part-017.xhtml#tocForcedId22"
+  },
+  {
+   "order": 25,
+   "label": "3 ЭНЕРГИЯ",
+   "src": "OEBPS/part-018.xhtml#tocForcedId23"
+  },
+  {
+   "order": 26,
+   "label": "4 ЭНЕРГИЯ",
+   "src": "OEBPS/part-019.xhtml#tocForcedId24"
+  },
+  {
+   "order": 27,
+   "label": "5 ЭНЕРГИЯ",
+   "src": "OEBPS/part-020.xhtml#tocForcedId25"
+  },
+  {
+   "order": 28,
+   "label": "6 ЭНЕРГИЯ",
+   "src": "OEBPS/part-021.xhtml#tocForcedId26"
+  },
+  {
+   "order": 29,
+   "label": "7 ЭНЕРГИЯ",
+   "src": "OEBPS/part-022.xhtml#tocForcedId27"
+  },
+  {
+   "order": 30,
+   "label": "8 ЭНЕРГИЯ",
+   "src": "OEBPS/part-023.xhtml#tocForcedId28"
+  },
+  {
+   "order": 31,
+   "label": "9 ЭНЕРГИЯ",
+   "src": "OEBPS/part-024.xhtml#tocForcedId29"
+  },
+  {
+   "order": 32,
+   "label": "10 ЭНЕРГИЯ",
+   "src": "OEBPS/part-025.xhtml#tocForcedId30"
+  },
+  {
+   "order": 33,
+   "label": "11 ЭНЕРГИЯ",
+   "src": "OEBPS/part-026.xhtml#tocForcedId31"
+  },
+  {
+   "order": 34,
+   "label": "12 ЭНЕРГИЯ",
+   "src": "OEBPS/part-027.xhtml#tocForcedId32"
+  },
+  {
+   "order": 35,
+   "label": "13 ЭНЕРГИЯ",
+   "src": "OEBPS/part-028.xhtml#tocForcedId33"
+  },
+  {
+   "order": 36,
+   "label": "14 ЭНЕРГИЯ",
+   "src": "OEBPS/part-029.xhtml#tocForcedId34"
+  },
+  {
+   "order": 37,
+   "label": "15 ЭНЕРГИЯ",
+   "src": "OEBPS/part-030.xhtml#tocForcedId35"
+  },
+  {
+   "order": 38,
+   "label": "16 ЭНЕРГИЯ",
+   "src": "OEBPS/part-031.xhtml#tocForcedId36"
+  },
+  {
+   "order": 39,
+   "label": "17 ЭНЕРГИЯ",
+   "src": "OEBPS/part-032.xhtml#tocForcedId37"
+  },
+  {
+   "order": 40,
+   "label": "18 ЭНЕРГИЯ",
+   "src": "OEBPS/part-033.xhtml#tocForcedId38"
+  },
+  {
+   "order": 41,
+   "label": "19 ЭНЕРГИЯ",
+   "src": "OEBPS/part-034.xhtml#tocForcedId39"
+  },
+  {
+   "order": 42,
+   "label": "20 ЭНЕРГИЯ",
+   "src": "OEBPS/part-035.xhtml#tocForcedId40"
+  },
+  {
+   "order": 43,
+   "label": "21 ЭНЕРГИЯ",
+   "src": "OEBPS/part-036.xhtml#tocForcedId41"
+  },
+  {
+   "order": 44,
+   "label": "22 ЭНЕРГИЯ",
+   "src": "OEBPS/part-037.xhtml#tocForcedId42"
+  },
+  {
+   "order": 45,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-038.xhtml#tocForcedId43"
+  },
+  {
+   "order": 46,
+   "label": "ГЛАВА 3",
+   "src": "OEBPS/part-040.xhtml#tocForcedId44"
+  },
+  {
+   "order": 47,
+   "label": "РОДОВОЙ КВАДРАТ",
+   "src": "OEBPS/part-041.xhtml#tocForcedId45"
+  },
+  {
+   "order": 48,
+   "label": "Что такое род, предки и родовая система",
+   "src": "OEBPS/part-042.xhtml#tocForcedId46"
+  },
+  {
+   "order": 49,
+   "label": "Расчёт родовых линий",
+   "src": "OEBPS/part-043.xhtml#tocForcedId47"
+  },
+  {
+   "order": 50,
+   "label": "Значение и интеграция точек на родовых линий",
+   "src": "OEBPS/part-043.xhtml#tocForcedId48"
+  },
+  {
+   "order": 51,
+   "label": "Сила рода",
+   "src": "OEBPS/part-043.xhtml#tocForcedId49"
+  },
+  {
+   "order": 52,
+   "label": "Таланты, задачи и карма от предков",
+   "src": "OEBPS/part-043.xhtml#tocForcedId50"
+  },
+  {
+   "order": 53,
+   "label": "Родовые сценарии",
+   "src": "OEBPS/part-043.xhtml#tocForcedId51"
+  },
+  {
+   "order": 54,
+   "label": "Практика для проработки сценариев",
+   "src": "OEBPS/part-043.xhtml#tocForcedId52"
+  },
+  {
+   "order": 55,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-044.xhtml#tocForcedId53"
+  },
+  {
+   "order": 56,
+   "label": "ГЛАВА 4",
+   "src": "OEBPS/part-046.xhtml#tocForcedId54"
+  },
+  {
+   "order": 57,
+   "label": "ПРЕДНАЗНАЧЕНИЯ",
+   "src": "OEBPS/part-047.xhtml#tocForcedId55"
+  },
+  {
+   "order": 58,
+   "label": "Что такое предназначение",
+   "src": "OEBPS/part-048.xhtml#tocForcedId56"
+  },
+  {
+   "order": 59,
+   "label": "Периоды предназначений",
+   "src": "OEBPS/part-048.xhtml#tocForcedId57"
+  },
+  {
+   "order": 60,
+   "label": "Личное предназначение (период) — до 40 лет",
+   "src": "OEBPS/part-048.xhtml#tocForcedId58"
+  },
+  {
+   "order": 61,
+   "label": "Социальное предназначение (после 40 и до 60)",
+   "src": "OEBPS/part-048.xhtml#tocForcedId59"
+  },
+  {
+   "order": 62,
+   "label": "Духовное предназначение (после 60)",
+   "src": "OEBPS/part-048.xhtml#tocForcedId60"
+  },
+  {
+   "order": 63,
+   "label": "Расчёт предназначений",
+   "src": "OEBPS/part-048.xhtml#tocForcedId61"
+  },
+  {
+   "order": 64,
+   "label": "Примеры проживания духовного предназначения + и —",
+   "src": "OEBPS/part-048.xhtml#tocForcedId62"
+  },
+  {
+   "order": 65,
+   "label": "Жизненные кризисы",
+   "src": "OEBPS/part-048.xhtml#tocForcedId63"
+  },
+  {
+   "order": 66,
+   "label": "Как наш путь влияет на характер",
+   "src": "OEBPS/part-048.xhtml#tocForcedId64"
+  },
+  {
+   "order": 67,
+   "label": "Что влияет на наше предназначение",
+   "src": "OEBPS/part-048.xhtml#tocForcedId65"
+  },
+  {
+   "order": 68,
+   "label": "Как понять, что мы идём не по своему пути",
+   "src": "OEBPS/part-048.xhtml#tocForcedId66"
+  },
+  {
+   "order": 69,
+   "label": "Что такое судьба",
+   "src": "OEBPS/part-048.xhtml#tocForcedId67"
+  },
+  {
+   "order": 70,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-049.xhtml#tocForcedId68"
+  },
+  {
+   "order": 71,
+   "label": "ГЛАВА 5",
+   "src": "OEBPS/part-051.xhtml#tocForcedId69"
+  },
+  {
+   "order": 72,
+   "label": "КАРМА",
+   "src": "OEBPS/part-052.xhtml#tocForcedId70"
+  },
+  {
+   "order": 73,
+   "label": "Что такое карма",
+   "src": "OEBPS/part-053.xhtml#tocForcedId71"
+  },
+  {
+   "order": 74,
+   "label": "Прошлые воплощения",
+   "src": "OEBPS/part-053.xhtml#tocForcedId72"
+  },
+  {
+   "order": 75,
+   "label": "Личная карма",
+   "src": "OEBPS/part-053.xhtml#tocForcedId73"
+  },
+  {
+   "order": 76,
+   "label": "Родовая карма",
+   "src": "OEBPS/part-053.xhtml#tocForcedId74"
+  },
+  {
+   "order": 77,
+   "label": "Законы Вселенной",
+   "src": "OEBPS/part-053.xhtml#tocForcedId75"
+  },
+  {
+   "order": 78,
+   "label": "Кармические задачи по методу Матрицы Судьбы",
+   "src": "OEBPS/part-053.xhtml#tocForcedId76"
+  },
+  {
+   "order": 79,
+   "label": "Точки на кармическом хвостике и их интеграция",
+   "src": "OEBPS/part-053.xhtml#tocForcedId77"
+  },
+  {
+   "order": 80,
+   "label": "Что такое материальная карма и интеграция точек",
+   "src": "OEBPS/part-053.xhtml#tocForcedId78"
+  },
+  {
+   "order": 81,
+   "label": "Сочетания кармических хвостиков и их значение",
+   "src": "OEBPS/part-054.xhtml#tocForcedId79"
+  },
+  {
+   "order": 82,
+   "label": "8-5-15 и 15-5-8",
+   "src": "OEBPS/part-055.xhtml#tocForcedId80"
+  },
+  {
+   "order": 83,
+   "label": "21-3-9 и 9-3-21",
+   "src": "OEBPS/part-055.xhtml#tocForcedId81"
+  },
+  {
+   "order": 84,
+   "label": "7-19-12 и 12-19-7",
+   "src": "OEBPS/part-055.xhtml#tocForcedId82"
+  },
+  {
+   "order": 85,
+   "label": "12-3-18",
+   "src": "OEBPS/part-055.xhtml#tocForcedId83"
+  },
+  {
+   "order": 86,
+   "label": "22-7-3 и 3-7-22",
+   "src": "OEBPS/part-055.xhtml#tocForcedId84"
+  },
+  {
+   "order": 87,
+   "label": "6-20-14",
+   "src": "OEBPS/part-055.xhtml#tocForcedId85"
+  },
+  {
+   "order": 88,
+   "label": "21-4-10",
+   "src": "OEBPS/part-055.xhtml#tocForcedId86"
+  },
+  {
+   "order": 89,
+   "label": "9-18-9",
+   "src": "OEBPS/part-055.xhtml#tocForcedId87"
+  },
+  {
+   "order": 90,
+   "label": "21-10-7",
+   "src": "OEBPS/part-055.xhtml#tocForcedId88"
+  },
+  {
+   "order": 91,
+   "label": "15-8-11",
+   "src": "OEBPS/part-055.xhtml#tocForcedId89"
+  },
+  {
+   "order": 92,
+   "label": "17-5-6",
+   "src": "OEBPS/part-055.xhtml#tocForcedId90"
+  },
+  {
+   "order": 93,
+   "label": "3-22-19",
+   "src": "OEBPS/part-055.xhtml#tocForcedId91"
+  },
+  {
+   "order": 94,
+   "label": "6-8-20 и 20-8-6",
+   "src": "OEBPS/part-055.xhtml#tocForcedId92"
+  },
+  {
+   "order": 95,
+   "label": "12-3-18",
+   "src": "OEBPS/part-055.xhtml#tocForcedId93"
+  },
+  {
+   "order": 96,
+   "label": "3-12-9 и 9-12-3",
+   "src": "OEBPS/part-055.xhtml#tocForcedId94"
+  },
+  {
+   "order": 97,
+   "label": "6-15-9 и 9-15-6",
+   "src": "OEBPS/part-055.xhtml#tocForcedId95"
+  },
+  {
+   "order": 98,
+   "label": "21-7-13 и 13-7-21",
+   "src": "OEBPS/part-055.xhtml#tocForcedId96"
+  },
+  {
+   "order": 99,
+   "label": "18-6-15",
+   "src": "OEBPS/part-055.xhtml#tocForcedId97"
+  },
+  {
+   "order": 100,
+   "label": "5-20-15",
+   "src": "OEBPS/part-055.xhtml#tocForcedId98"
+  },
+  {
+   "order": 101,
+   "label": "3-13-10",
+   "src": "OEBPS/part-055.xhtml#tocForcedId99"
+  },
+  {
+   "order": 102,
+   "label": "6-14-8 и 8-14-6",
+   "src": "OEBPS/part-055.xhtml#tocForcedId100"
+  },
+  {
+   "order": 103,
+   "label": "21-10-16",
+   "src": "OEBPS/part-055.xhtml#tocForcedId101"
+  },
+  {
+   "order": 104,
+   "label": "12-16-4",
+   "src": "OEBPS/part-055.xhtml#tocForcedId102"
+  },
+  {
+   "order": 105,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-056.xhtml#tocForcedId103"
+  },
+  {
+   "order": 106,
+   "label": "ГЛАВА 6",
+   "src": "OEBPS/part-058.xhtml#tocForcedId104"
+  },
+  {
+   "order": 107,
+   "label": "ЛИНИЯ ФИНАНСОВ",
+   "src": "OEBPS/part-059.xhtml#tocForcedId105"
+  },
+  {
+   "order": 108,
+   "label": "Значение линии финансов",
+   "src": "OEBPS/part-060.xhtml#tocForcedId106"
+  },
+  {
+   "order": 109,
+   "label": "Интеграция точек",
+   "src": "OEBPS/part-060.xhtml#tocForcedId107"
+  },
+  {
+   "order": 110,
+   "label": "Влияние материальной кармы",
+   "src": "OEBPS/part-060.xhtml#tocForcedId108"
+  },
+  {
+   "order": 111,
+   "label": "На каких точках в матрице можно ещё посмотреть финансы",
+   "src": "OEBPS/part-060.xhtml#tocForcedId109"
+  },
+  {
+   "order": 112,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-061.xhtml#tocForcedId110"
+  },
+  {
+   "order": 113,
+   "label": "ГЛАВА 7",
+   "src": "OEBPS/part-063.xhtml#tocForcedId111"
+  },
+  {
+   "order": 114,
+   "label": "САМОРЕАЛИЗАЦИЯ",
+   "src": "OEBPS/part-064.xhtml#tocForcedId112"
+  },
+  {
+   "order": 115,
+   "label": "Что такое самореализация",
+   "src": "OEBPS/part-065.xhtml#tocForcedId113"
+  },
+  {
+   "order": 116,
+   "label": "Самореализация в Матрице",
+   "src": "OEBPS/part-065.xhtml#tocForcedId114"
+  },
+  {
+   "order": 117,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-066.xhtml#tocForcedId115"
+  },
+  {
+   "order": 118,
+   "label": "ГЛАВА 8",
+   "src": "OEBPS/part-068.xhtml#tocForcedId116"
+  },
+  {
+   "order": 119,
+   "label": "ЛИНИЯ ОТНОШЕНИЙ",
+   "src": "OEBPS/part-069.xhtml#tocForcedId117"
+  },
+  {
+   "order": 120,
+   "label": "Значение линии отношений",
+   "src": "OEBPS/part-070.xhtml#tocForcedId118"
+  },
+  {
+   "order": 121,
+   "label": "Интеграция точек",
+   "src": "OEBPS/part-070.xhtml#tocForcedId119"
+  },
+  {
+   "order": 122,
+   "label": "Как быть, если вашей энергии нет ни на одной точке у другого человека в Матрице?",
+   "src": "OEBPS/part-070.xhtml#tocForcedId120"
+  },
+  {
+   "order": 123,
+   "label": "Влияние кармического хвостика",
+   "src": "OEBPS/part-070.xhtml#tocForcedId121"
+  },
+  {
+   "order": 124,
+   "label": "Связующая точка отношений и финансов",
+   "src": "OEBPS/part-070.xhtml#tocForcedId122"
+  },
+  {
+   "order": 125,
+   "label": "Где в Матрице еще можно посмотреть отношения",
+   "src": "OEBPS/part-070.xhtml#tocForcedId123"
+  },
+  {
+   "order": 126,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-071.xhtml#tocForcedId124"
+  },
+  {
+   "order": 127,
+   "label": "ГЛАВА 9",
+   "src": "OEBPS/part-073.xhtml#tocForcedId125"
+  },
+  {
+   "order": 128,
+   "label": "ИНТЕГРАЦИЯ ЛИНИЙ И ТОЧЕК",
+   "src": "OEBPS/part-074.xhtml#tocForcedId126"
+  },
+  {
+   "order": 129,
+   "label": "Детско-родительская карма (ДРК)",
+   "src": "OEBPS/part-075.xhtml#tocForcedId127"
+  },
+  {
+   "order": 130,
+   "label": "Таланты",
+   "src": "OEBPS/part-075.xhtml#tocForcedId128"
+  },
+  {
+   "order": 131,
+   "label": "Материальная карма",
+   "src": "OEBPS/part-075.xhtml#tocForcedId129"
+  },
+  {
+   "order": 132,
+   "label": "Кармический хвостик",
+   "src": "OEBPS/part-075.xhtml#tocForcedId130"
+  },
+  {
+   "order": 133,
+   "label": "Родовые линии по м и ж",
+   "src": "OEBPS/part-075.xhtml#tocForcedId131"
+  },
+  {
+   "order": 134,
+   "label": "Предназначения",
+   "src": "OEBPS/part-075.xhtml#tocForcedId132"
+  },
+  {
+   "order": 135,
+   "label": "Как соединять линии между собой",
+   "src": "OEBPS/part-075.xhtml#tocForcedId133"
+  },
+  {
+   "order": 136,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-076.xhtml#tocForcedId134"
+  },
+  {
+   "order": 137,
+   "label": "ГЛАВА 10",
+   "src": "OEBPS/part-078.xhtml#tocForcedId135"
+  },
+  {
+   "order": 138,
+   "label": "О ВИДАХ МАТРИЦЫ",
+   "src": "OEBPS/part-079.xhtml#tocForcedId136"
+  },
+  {
+   "order": 139,
+   "label": "Зеркальная матрица",
+   "src": "OEBPS/part-080.xhtml#tocForcedId137"
+  },
+  {
+   "order": 140,
+   "label": "Частичная зеркальность",
+   "src": "OEBPS/part-080.xhtml#tocForcedId138"
+  },
+  {
+   "order": 141,
+   "label": "Закрытая матрица",
+   "src": "OEBPS/part-080.xhtml#tocForcedId139"
+  },
+  {
+   "order": 142,
+   "label": "Частичная закрытость",
+   "src": "OEBPS/part-080.xhtml#tocForcedId140"
+  },
+  {
+   "order": 143,
+   "label": "Матрица кратна 3-м",
+   "src": "OEBPS/part-080.xhtml#tocForcedId141"
+  },
+  {
+   "order": 144,
+   "label": "Теневая матрица",
+   "src": "OEBPS/part-080.xhtml#tocForcedId142"
+  },
+  {
+   "order": 145,
+   "label": "Светлая матрица",
+   "src": "OEBPS/part-080.xhtml#tocForcedId143"
+  },
+  {
+   "order": 146,
+   "label": "Немного об энергиях",
+   "src": "OEBPS/part-080.xhtml#tocForcedId144"
+  },
+  {
+   "order": 147,
+   "label": "Много одинаковых энергий по всей матрице",
+   "src": "OEBPS/part-080.xhtml#tocForcedId145"
+  },
+  {
+   "order": 148,
+   "label": "Разнообразная Матрица",
+   "src": "OEBPS/part-080.xhtml#tocForcedId146"
+  },
+  {
+   "order": 149,
+   "label": "Программы в Матрице",
+   "src": "OEBPS/part-080.xhtml#tocForcedId147"
+  },
+  {
+   "order": 150,
+   "label": "18-5-5",
+   "src": "OEBPS/part-080.xhtml#tocForcedId148"
+  },
+  {
+   "order": 151,
+   "label": "18-6-6",
+   "src": "OEBPS/part-080.xhtml#tocForcedId149"
+  },
+  {
+   "order": 152,
+   "label": "18-7-7",
+   "src": "OEBPS/part-080.xhtml#tocForcedId150"
+  },
+  {
+   "order": 153,
+   "label": "18-8-8",
+   "src": "OEBPS/part-080.xhtml#tocForcedId151"
+  },
+  {
+   "order": 154,
+   "label": "18-9-9",
+   "src": "OEBPS/part-080.xhtml#tocForcedId152"
+  },
+  {
+   "order": 155,
+   "label": "9-9-18",
+   "src": "OEBPS/part-080.xhtml#tocForcedId153"
+  },
+  {
+   "order": 156,
+   "label": "18-10-10",
+   "src": "OEBPS/part-080.xhtml#tocForcedId154"
+  },
+  {
+   "order": 157,
+   "label": "18-11-11",
+   "src": "OEBPS/part-080.xhtml#tocForcedId155"
+  },
+  {
+   "order": 158,
+   "label": "5-19-14",
+   "src": "OEBPS/part-080.xhtml#tocForcedId156"
+  },
+  {
+   "order": 159,
+   "label": "6-9-3",
+   "src": "OEBPS/part-080.xhtml#tocForcedId157"
+  },
+  {
+   "order": 160,
+   "label": "6-16-10",
+   "src": "OEBPS/part-080.xhtml#tocForcedId158"
+  },
+  {
+   "order": 161,
+   "label": "5-15-10",
+   "src": "OEBPS/part-080.xhtml#tocForcedId159"
+  },
+  {
+   "order": 162,
+   "label": "17-7-8",
+   "src": "OEBPS/part-080.xhtml#tocForcedId160"
+  },
+  {
+   "order": 163,
+   "label": "9-10-19",
+   "src": "OEBPS/part-080.xhtml#tocForcedId161"
+  },
+  {
+   "order": 164,
+   "label": "8-10-20",
+   "src": "OEBPS/part-080.xhtml#tocForcedId162"
+  },
+  {
+   "order": 165,
+   "label": "6-12-6",
+   "src": "OEBPS/part-080.xhtml#tocForcedId163"
+  },
+  {
+   "order": 166,
+   "label": "3-13-10",
+   "src": "OEBPS/part-080.xhtml#tocForcedId164"
+  },
+  {
+   "order": 167,
+   "label": "7-20-13",
+   "src": "OEBPS/part-080.xhtml#tocForcedId165"
+  },
+  {
+   "order": 168,
+   "label": "10-11-19",
+   "src": "OEBPS/part-080.xhtml#tocForcedId166"
+  },
+  {
+   "order": 169,
+   "label": "7-17-10",
+   "src": "OEBPS/part-080.xhtml#tocForcedId167"
+  },
+  {
+   "order": 170,
+   "label": "Домашнее задание",
+   "src": "OEBPS/part-081.xhtml#tocForcedId168"
+  },
+  {
+   "order": 171,
+   "label": "Глава 11",
+   "src": "OEBPS/part-083.xhtml#tocForcedId169"
+  },
+  {
+   "order": 172,
+   "label": "Алгоритм работы с Матрицей",
+   "src": "OEBPS/part-084.xhtml#tocForcedId170"
+  },
+  {
+   "order": 173,
+   "label": "Ошибки при чтении матрицы",
+   "src": "OEBPS/part-085.xhtml#tocForcedId171"
+  },
+  {
+   "order": 174,
+   "label": "Зеленые точки в матрице",
+   "src": "OEBPS/part-085.xhtml#tocForcedId172"
+  },
+  {
+   "order": 175,
+   "label": "Как влияет смена дата рождения на матрицу и судьбу",
+   "src": "OEBPS/part-085.xhtml#tocForcedId173"
+  },
+  {
+   "order": 176,
+   "label": "Одинаковая дата рождения или одинаковые линии у людей",
+   "src": "OEBPS/part-085.xhtml#tocForcedId174"
+  },
+  {
+   "order": 177,
+   "label": "С чего начинать и как правильно читать матрицу",
+   "src": "OEBPS/part-085.xhtml#tocForcedId175"
+  },
+  {
+   "order": 178,
+   "label": "Суммирование одинаковых энергий",
+   "src": "OEBPS/part-085.xhtml#tocForcedId176"
+  },
+  {
+   "order": 179,
+   "label": "Что входит в базу, а что в расширенную консультацию",
+   "src": "OEBPS/part-085.xhtml#tocForcedId177"
+  },
+  {
+   "order": 180,
+   "label": "Как вывести энергии в +",
+   "src": "OEBPS/part-085.xhtml#tocForcedId178"
+  },
+  {
+   "order": 181,
+   "label": "Как понять, что ты в минусе",
+   "src": "OEBPS/part-085.xhtml#tocForcedId179"
+  },
+  {
+   "order": 182,
+   "label": "Проработка матрицы и практики",
+   "src": "OEBPS/part-085.xhtml#tocForcedId180"
+  },
+  {
+   "order": 183,
+   "label": "Медитации",
+   "src": "OEBPS/part-085.xhtml#tocForcedId181"
+  },
+  {
+   "order": 184,
+   "label": "Изучение своей темной стороны (тени)",
+   "src": "OEBPS/part-085.xhtml#tocForcedId182"
+  },
+  {
+   "order": 185,
+   "label": "Практика письма",
+   "src": "OEBPS/part-085.xhtml#tocForcedId183"
+  },
+  {
+   "order": 186,
+   "label": "Практика Благодарности",
+   "src": "OEBPS/part-085.xhtml#tocForcedId184"
+  },
+  {
+   "order": 187,
+   "label": "Практика Самопрограмирования",
+   "src": "OEBPS/part-085.xhtml#tocForcedId185"
+  },
+  {
+   "order": 188,
+   "label": "Практика «5 писем маме/папе»",
+   "src": "OEBPS/part-085.xhtml#tocForcedId186"
+  },
+  {
+   "order": 189,
+   "label": "Претензионное письмо",
+   "src": "OEBPS/part-085.xhtml#tocForcedId187"
+  },
+  {
+   "order": 190,
+   "label": "Письмо Прощение",
+   "src": "OEBPS/part-085.xhtml#tocForcedId188"
+  },
+  {
+   "order": 191,
+   "label": "Письмо Извинения",
+   "src": "OEBPS/part-085.xhtml#tocForcedId189"
+  },
+  {
+   "order": 192,
+   "label": "Письмо Признания",
+   "src": "OEBPS/part-085.xhtml#tocForcedId190"
+  },
+  {
+   "order": 193,
+   "label": "Письмо Благодарности",
+   "src": "OEBPS/part-085.xhtml#tocForcedId191"
+  },
+  {
+   "order": 194,
+   "label": "Практика «Самоценность»",
+   "src": "OEBPS/part-085.xhtml#tocForcedId192"
+  },
+  {
+   "order": 195,
+   "label": "Если энергий нет в Матрице",
+   "src": "OEBPS/part-085.xhtml#tocForcedId193"
+  },
+  {
+   "order": 196,
+   "label": "Глава 12",
+   "src": "OEBPS/part-086.xhtml#tocForcedId194"
+  },
+  {
+   "order": 197,
+   "label": "Работа с клиентами",
+   "src": "OEBPS/part-087.xhtml#tocForcedId195"
+  },
+  {
+   "order": 198,
+   "label": "Где клиенты?",
+   "src": "OEBPS/part-088.xhtml#tocForcedId196"
+  },
+  {
+   "order": 199,
+   "label": "Алгоритм построения работы",
+   "src": "OEBPS/part-088.xhtml#tocForcedId197"
+  },
+  {
+   "order": 200,
+   "label": "Как вести социальные сети специалисту",
+   "src": "OEBPS/part-088.xhtml#tocForcedId198"
+  },
+  {
+   "order": 201,
+   "label": "Какие рекомендации может давать специалист по матрице",
+   "src": "OEBPS/part-088.xhtml#tocForcedId199"
+  },
+  {
+   "order": 202,
+   "label": "Ответственность специалиста",
+   "src": "OEBPS/part-088.xhtml#tocForcedId200"
+  },
+  {
+   "order": 203,
+   "label": "Ценообразование",
+   "src": "OEBPS/part-088.xhtml#tocForcedId201"
+  },
+  {
+   "order": 204,
+   "label": "Синдром самозванца",
+   "src": "OEBPS/part-088.xhtml#tocForcedId202"
+  },
+  {
+   "order": 205,
+   "label": "ИТОГОВОЙ ЭКЗАМЕН",
+   "src": "OEBPS/part-089.xhtml#tocForcedId203"
+  },
+  {
+   "order": 206,
+   "label": "Задание №1",
+   "src": "OEBPS/part-091.xhtml#tocForcedId204"
+  },
+  {
+   "order": 207,
+   "label": "Задание №2",
+   "src": "OEBPS/part-092.xhtml#tocForcedId205"
+  },
+  {
+   "order": 208,
+   "label": "Задание №3",
+   "src": "OEBPS/part-093.xhtml#tocForcedId206"
+  },
+  {
+   "order": 209,
+   "label": "Заключение",
+   "src": "OEBPS/part-094.xhtml#tocForcedId207"
+  },
+  {
+   "order": 210,
+   "label": "Термины в помощь новичку",
+   "src": "OEBPS/part-096.xhtml#tocForcedId208"
+  },
+  {
+   "order": 211,
+   "label": "Для заметок",
+   "src": "OEBPS/part-097.xhtml#tocForcedId209"
+  }
+ ]
+}

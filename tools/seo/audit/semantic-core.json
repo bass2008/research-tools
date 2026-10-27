@@ -169,11 +169,11 @@
         18,
         18
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "явное слово хвост/кармический; последовательности нет в реестре 26; чужую формулу не публикуем",
+      "method_entity": "pair_tail:18-9-18",
+      "landing_url": "/encyclopedia/compatibility/tails/18-9-18",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "явное слово хвост/кармический; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -631,11 +631,11 @@
         9,
         15
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:9-6-15",
+      "landing_url": "/encyclopedia/compatibility/tails/9-6-15",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -741,11 +741,11 @@
         12,
         12
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:9-12-12",
+      "landing_url": "/encyclopedia/compatibility/tails/9-12-12",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -2798,7 +2798,7 @@
       "query": "9 15 15 программа матрица судьбы",
       "frequency": 523,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         9,
         15,
@@ -2809,11 +2809,11 @@
         15,
         15
       ],
-      "method_entity": "occurrence:loops:9-15-15",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:9-15-15",
+      "landing_url": "/encyclopedia/compatibility/tails/9-15-15",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -5845,11 +5845,11 @@
         12,
         21
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:9-21-12",
+      "landing_url": "/encyclopedia/compatibility/tails/9-21-12",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -6021,11 +6021,11 @@
         18,
         21
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:18-12-21",
+      "landing_url": "/encyclopedia/compatibility/tails/18-12-21",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -6879,11 +6879,11 @@
         7,
         10
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:3-10-7",
+      "landing_url": "/encyclopedia/compatibility/tails/3-10-7",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -7187,11 +7187,11 @@
         13,
         16
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:3-16-13",
+      "landing_url": "/encyclopedia/compatibility/tails/3-16-13",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -7539,11 +7539,11 @@
         18,
         21
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:18-21-3",
+      "landing_url": "/encyclopedia/compatibility/tails/18-21-3",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -7781,11 +7781,11 @@
         7,
         21
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:21-7-4",
+      "landing_url": "/encyclopedia/compatibility/tails/21-7-4",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -8133,11 +8133,11 @@
         12,
         21
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:9-21-12",
+      "landing_url": "/encyclopedia/compatibility/tails/9-21-12",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -8837,11 +8837,11 @@
         15,
         20
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:15-8-20",
+      "landing_url": "/encyclopedia/compatibility/tails/15-8-20",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -9079,11 +9079,11 @@
         12,
         22
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:12-22-10",
+      "landing_url": "/encyclopedia/compatibility/tails/12-22-10",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -9255,11 +9255,11 @@
         12,
         16
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:12-10-16",
+      "landing_url": "/encyclopedia/compatibility/tails/12-10-16",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -9497,11 +9497,11 @@
         9,
         18
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "явный маркер совместимости",
+      "method_entity": "pair_tail:18-9-9",
+      "landing_url": "/encyclopedia/compatibility/tails/18-9-9",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "явный маркер совместимости или пары; точный порядок совпал с хвостом пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -9849,11 +9849,11 @@
         7,
         10
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:3-10-7",
+      "landing_url": "/encyclopedia/compatibility/tails/3-10-7",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -9871,11 +9871,11 @@
         13,
         16
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:3-16-13",
+      "landing_url": "/encyclopedia/compatibility/tails/3-16-13",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -10509,11 +10509,11 @@
         12,
         22
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:12-7-22",
+      "landing_url": "/encyclopedia/compatibility/tails/12-7-22",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -10663,11 +10663,11 @@
         7,
         21
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:21-7-4",
+      "landing_url": "/encyclopedia/compatibility/tails/21-7-4",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -10784,7 +10784,7 @@
       "query": "18 12 21 программа в матрице судьбы",
       "frequency": 82,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         18,
         12,
@@ -10795,11 +10795,11 @@
         18,
         21
       ],
-      "method_entity": "occurrence:loops:18-12-21",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:18-12-21",
+      "landing_url": "/encyclopedia/compatibility/tails/18-12-21",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -10905,11 +10905,11 @@
         6,
         9
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "явный маркер совместимости",
+      "method_entity": "pair_tail:9-6-6",
+      "landing_url": "/encyclopedia/compatibility/tails/9-6-6",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "явный маркер совместимости или пары; точный порядок совпал с хвостом пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -11026,7 +11026,7 @@
       "query": "6 11 5 программа в матрице судьбы",
       "frequency": 79,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         6,
         11,
@@ -11037,11 +11037,11 @@
         6,
         11
       ],
-      "method_entity": "occurrence:loops:6-11-5",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:6-11-5",
+      "landing_url": "/encyclopedia/compatibility/tails/6-11-5",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -11521,11 +11521,11 @@
         16,
         19
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:3-19-16",
+      "landing_url": "/encyclopedia/compatibility/tails/3-19-16",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -11840,7 +11840,7 @@
       "query": "9 21 12 программа в матрице судьбы",
       "frequency": 66,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         9,
         21,
@@ -11851,11 +11851,11 @@
         12,
         21
       ],
-      "method_entity": "occurrence:loops:9-21-12",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:9-21-12",
+      "landing_url": "/encyclopedia/compatibility/tails/9-21-12",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -11873,11 +11873,11 @@
         8,
         11
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:6-8-11",
+      "landing_url": "/encyclopedia/compatibility/tails/6-8-11",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12005,11 +12005,11 @@
         9,
         15
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:9-6-15",
+      "landing_url": "/encyclopedia/compatibility/tails/9-6-15",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12060,7 +12060,7 @@
       "query": "3 10 7 программа в матрице судьбы",
       "frequency": 62,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         3,
         10,
@@ -12071,11 +12071,11 @@
         7,
         10
       ],
-      "method_entity": "occurrence:loops:3-10-7",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:3-10-7",
+      "landing_url": "/encyclopedia/compatibility/tails/3-10-7",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12181,11 +12181,11 @@
         6,
         8
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:6-5-8",
+      "landing_url": "/encyclopedia/compatibility/tails/6-5-8",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12291,11 +12291,11 @@
         12,
         19
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "числовой запрос без предметного маркера",
+      "method_entity": "pair_tail:12-4-19",
+      "landing_url": "/encyclopedia/compatibility/tails/12-4-19",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "числовой запрос без предметного маркера; в личной матрице тройки нет, это хвост пары",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12764,7 +12764,7 @@
       "query": "12 7 22 программа в матрице судьбы",
       "frequency": 54,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         12,
         7,
@@ -12775,11 +12775,11 @@
         12,
         22
       ],
-      "method_entity": "occurrence:loops:12-7-22",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:12-7-22",
+      "landing_url": "/encyclopedia/compatibility/tails/12-7-22",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12852,7 +12852,7 @@
       "query": "15 8 20 программа в матрице судьбы",
       "frequency": 53,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         15,
         8,
@@ -12863,11 +12863,11 @@
         15,
         20
       ],
-      "method_entity": "occurrence:loops:15-8-20",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:15-8-20",
+      "landing_url": "/encyclopedia/compatibility/tails/15-8-20",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -12962,7 +12962,7 @@
       "query": "21 7 4 программа в матрице судьбы",
       "frequency": 52,
       "intent": "program",
-      "context": "loops",
+      "context": "pair_tail",
       "ordered_numbers": [
         21,
         7,
@@ -12973,11 +12973,11 @@
         7,
         21
       ],
-      "method_entity": "occurrence:loops:21-7-4",
-      "landing_url": "/programs",
+      "method_entity": "pair_tail:21-7-4",
+      "landing_url": "/encyclopedia/compatibility/tails/21-7-4",
       "primary_or_supporting": "primary",
-      "confidence": "automatic",
-      "evidence": "явное слово программа; это не делает тройку хвостом",
+      "confidence": "product_verified",
+      "evidence": "полная программа совпала с хвостом пары; в личной матрице такой тройки нет",
       "reviewed_at": "2026-08-30"
     },
     {
@@ -13061,11 +13061,11 @@
         8,
         20
       ],
-      "method_entity": null,
-      "landing_url": null,
-      "primary_or_supporting": "reject",
-      "confidence": "automatic",
-      "evidence": "явный маркер совместимости",
+      "method_entity": "pair_tail:6-8-20",
+      "landing_url": "/encyclopedia/compatibility/tails/6-8-20",
+      "primary_or_supporting": "primary",
+      "confidence": "product_verified",
+      "evidence": "явный маркер совместимости или пары; точный порядок совпал с хвостом пары",
       "reviewed_at": "2026-08-30"
     },
     {

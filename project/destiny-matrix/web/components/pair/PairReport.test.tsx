@@ -65,6 +65,31 @@ describe.each(["ru", "en"] as const)("три позиции хвоста пар�
   }
 });
 
+describe.each(["ru", "en"] as const)("хвост пары со статьёй в энциклопедии (%s)", (locale) => {
+  const dates = { a: "1975-08-14", b: "1975-04-14" }; // 9–21–12
+  const result = computePair(dates.a, dates.b, locale);
+  const units = pairUnits(locale, result, dates, true);
+
+  it("короткая версия статьи, ссылка на полную и ни одной ссылки на арканы", () => {
+    const unit = units["tasks:9-21-12"];
+    expect(unit?.report?.length).toBeGreaterThan(0);
+    const html = renderToStaticMarkup(<PairReport locale={locale} result={result} title="Пара" names={{ a: "А", b: "Б" }}
+      dates={dates} units={units} mode="full" printing={false} />);
+    const tail = html.match(/<details[^>]*data-sec="tasks"[^>]*>([\s\S]*?)<\/details>/)![1];
+    expect(tail).toContain('href="/encyclopedia/compatibility/tails/9-21-12"');
+    expect(tail.replace(/<figure\b[\s\S]*?<\/figure>/g, "")).not.toMatch(/href="\/encyclopedia\/(compatibility|arcanum)\/\d+"/);
+    expect(text(tail)).toContain(text(renderToStaticMarkup(<>{DP.moreTail[locale]("9-21-12")}</>)).trim());
+    const first = unit!.report!.find((x): x is string => typeof x === "string")!;
+    expect(text(tail)).toContain(text(renderToStaticMarkup(<>{first.slice(0, 40)}</>)).trim());
+  });
+
+  it("бесплатная статья открыта и без покупки: ссылка в «Главных числах»", () => {
+    const html = renderToStaticMarkup(<PairReport locale={locale} result={result} title="Пара" names={{ a: "А", b: "Б" }}
+      dates={dates} units={pairUnits(locale, result, dates, false)} mode="free" printing={false} />);
+    expect(html).toMatch(/data-testid="pair-key-tail-link"[^>]*href="\/encyclopedia\/compatibility\/tails\/9-21-12"|href="\/encyclopedia\/compatibility\/tails\/9-21-12"[^>]*data-testid="pair-key-tail-link"/);
+  });
+});
+
 describe.each(["ru", "en"] as const)("закрытая часть разбора пары (%s)", (locale) => {
   const result = computePair(dates.a, dates.b, locale);
   const { a, b, p } = result;

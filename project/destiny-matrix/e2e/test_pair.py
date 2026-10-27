@@ -17,6 +17,7 @@ CORPUS = json.loads((pathlib.Path(__file__).resolve().parents[1] / "web" / "cont
 PAID_TEXTS = [u["text"][0][:50] for u in CORPUS
               if u.get("text") and not u["unit"].startswith(("meet:", "atmosphere:", "business:base:", "business:plus:"))]
 FREE_MEANING = next(u["meaning"] for u in CORPUS if u["unit"] == "atmosphere:13")
+EXAMPLE_MEANING = next(u["meaning"] for u in CORPUS if u["unit"] == "atmosphere:8")
 CHAKRAS = [json.loads(p.read_text()) for p in sorted(
     (pathlib.Path(__file__).resolve().parents[1] / "web" / "content" / "pair-chakras" / "ru").rglob("*.json"))]
 PAID_TEXTS += [u["text"][0][:50] for u in CHAKRAS]
@@ -64,14 +65,14 @@ def test_free_part_shows_two_spheres_and_keeps_dates_in_the_browser(page: Page):
 def test_example_before_any_dates(page: Page):
     """До ввода дат в форме даты примера, как на главной, а рядом пример «Партнёр 1 и Партнёр 2»:
     замки есть, покупки нет, тексты открытых сфер стоят в HTML сервера."""
-    assert FREE_MEANING in page.request.get(f"{BASE}/compatibility").text()
+    assert EXAMPLE_MEANING in page.request.get(f"{BASE}/compatibility").text()
     page.goto(f"{BASE}/compatibility", wait_until="domcontentloaded")
-    expect(page.get_by_test_id("pair-a-d")).to_have_value("31")
-    expect(page.get_by_test_id("pair-b-y")).to_have_value("1994")
+    expect(page.get_by_test_id("pair-a-d")).to_have_value("1")
+    expect(page.get_by_test_id("pair-b-y")).to_have_value("2000")
     report = page.get_by_test_id("pair-report")
     expect(report).to_have_attribute("data-mode", "free")
     expect(report).to_contain_text("Партнёр 1")
-    expect(page.get_by_test_id("pair-locks").locator("> div")).to_have_count(11)
+    expect(page.get_by_test_id("pair-locks").locator("> div")).to_have_count(10)
     expect(page.get_by_test_id("plan-pair")).to_have_count(0)
     expect(page.get_by_test_id("pair-example-cta")).to_be_visible()
 
@@ -195,22 +196,23 @@ def test_pair_is_open_in_english(browser):
 def test_compatibility_articles_are_linked_and_lead_to_the_pair_calculator(page: Page):
     page.goto(f"{BASE}/compatibility", wait_until="domcontentloaded")
     articles = page.get_by_test_id("compatibility-articles")
-    for key in ("compatibility-center", "karmic-compatibility", "business-compatibility"):
-        expect(articles.locator(f"a[href='/{key}']")).to_have_count(1)
+    for href in ("/compatibility-center", "/encyclopedia/compatibility/tails", "/business-compatibility"):
+        expect(articles.locator(f"a[href='{href}']")).to_have_count(1)
     expect(page.locator("#sec-atmosphere").get_by_test_id("pair-article-atmosphere")).to_have_attribute(
         "href", "/compatibility-center")
     expect(page.get_by_test_id("pair-article-business")).to_have_attribute("href", "/business-compatibility")
 
-    for key in ("compatibility-center", "karmic-compatibility", "business-compatibility"):
+    for key in ("compatibility-center", "business-compatibility"):
         page.goto(f"{BASE}/{key}", wait_until="domcontentloaded")
         expect(page.get_by_test_id("hub-pair-calc").locator("a[href='/compatibility']")).to_have_count(1)
         expect(page.get_by_test_id("calc-promo")).to_have_count(0)
 
     page.goto(f"{BASE}/encyclopedia/compatibility/16", wait_until="domcontentloaded")
-    for key in ("compatibility-center", "karmic-compatibility"):
-        expect(page.locator(f"main a[href='/{key}']").first).to_be_visible()
+    for href in ("/compatibility-center", "/encyclopedia/compatibility/tails"):
+        expect(page.locator(f"main a[href='{href}']").first).to_be_visible()
     page.goto(f"{BASE}/encyclopedia/karmic-tail/18-9-9", wait_until="domcontentloaded")
-    expect(page.get_by_test_id("tail-compatibility").locator("a[href='/karmic-compatibility']")).to_have_count(1)
+    expect(page.get_by_test_id("tail-compatibility").locator("a[href='/encyclopedia/compatibility/tails']")).to_have_count(1)
+    assert page.request.get(f"{BASE}/karmic-compatibility", max_redirects=0).status == 301
 
 
 def test_pair_form_starts_from_the_couple_not_an_example(page: Page, mail: str):

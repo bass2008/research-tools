@@ -30,6 +30,8 @@
 .tileL { font: 700 11px var(--sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--dim2); }
 .tileV { font: 600 30px/1.1 var(--ser); color: var(--gold2); }
 .tileS { font-size: 13px; color: var(--dim); }
+.tileA { font-size: 13px; font-weight: 600; color: var(--gold); }
+.tileA:hover { text-decoration: underline; }
 .tile { align-content: start; gap: 8px; }
 .tileRow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-height: 44px; }
 .tileRow .tileV { white-space: nowrap; }
@@ -125,6 +127,7 @@
 .txt { display: grid; gap: 12px; min-width: 0; }
 .txt p { margin: 0; font-size: 15.5px; line-height: 1.65; overflow-wrap: anywhere; hyphens: auto; }
 .txt strong { font-weight: 700; color: var(--gold2); }
+.article :global(.prose) { max-width: none; }
 .stub { color: var(--dim); font-style: italic; }
 .amp { margin: 4px 0 0; padding: 8px 12px; border-radius: 10px; background: #fbf6e8; color: #7a5d17; font-size: 14px; font-weight: 600; }
 .blocks { display: grid; gap: 22px; }

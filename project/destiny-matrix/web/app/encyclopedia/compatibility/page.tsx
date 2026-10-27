@@ -24,13 +24,13 @@ const KEY = "compatibility";
 
 const forLocale = localized((L: Locale, site) => {
   const { arcanumTitle } = localizedArcana(L);
-  const { categoryHub, compatibilityKeys } = localizedContent(L);
-  const { COMPATIBILITY_HUB, compatibilityHref } = localizedEncyclopedia(L);
+  const { categoryHub, compatibilityKeys, indexedPairTailKeys } = localizedContent(L);
+  const { COMPATIBILITY_HUB, PAIR_TAIL_HUB, compatibilityHref } = localizedEncyclopedia(L);
   const { articleLd, itemListLd } = localizedSchema(L, site);
   const { NOT_FOUND_META } = localizedSeo(L, site);
   const { pageMeta } = localizedSite(L, site);
   const { encyclopediaSection } = localizedEncyclopediaNavigation(L);
-  return { arcanumTitle, categoryHub, compatibilityKeys, COMPATIBILITY_HUB, compatibilityHref, articleLd, itemListLd, NOT_FOUND_META, pageMeta, encyclopediaSection };
+  return { arcanumTitle, categoryHub, compatibilityKeys, indexedPairTailKeys, COMPATIBILITY_HUB, PAIR_TAIL_HUB, compatibilityHref, articleLd, itemListLd, NOT_FOUND_META, pageMeta, encyclopediaSection };
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CompatibilityHubPage() {
   const L = await requestLocale();
-  const { arcanumTitle, categoryHub, compatibilityKeys, COMPATIBILITY_HUB, compatibilityHref, articleLd, itemListLd, encyclopediaSection } = forLocale(L, await requestSite());
+  const { arcanumTitle, categoryHub, compatibilityKeys, indexedPairTailKeys, COMPATIBILITY_HUB, PAIR_TAIL_HUB, compatibilityHref, articleLd, itemListLd, encyclopediaSection } = forLocale(L, await requestSite());
 
   const hub = categoryHub(KEY);
   if (!hub) notFound();
@@ -68,6 +68,14 @@ export default async function CompatibilityHubPage() {
         <div className="cap">{DP.encCompat.deckHint[L]} · {items.length}</div>
         <ArcanaDeck locale={L} numbers={items.map(({ n }) => n)} href={compatibilityHref} />
       </div>
+
+      {indexedPairTailKeys().length ? (
+        <div className="panel section-gap" data-testid="compatibility-tails">
+          <h2>{DP.encPairTail.crumb[L]}</h2>
+          <p>{DP.encPairTail.short[L]}</p>
+          <p className="encref"><Link href={PAIR_TAIL_HUB}>{DP.encPairTail.all[L]} →</Link></p>
+        </div>
+      ) : null}
 
       <Sections items={hub.sections} locale={L} />
 

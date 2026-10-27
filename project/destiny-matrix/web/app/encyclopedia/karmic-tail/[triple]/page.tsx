@@ -13,6 +13,7 @@ import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
+import { DP } from "@/lib/i18n/dict/pair";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
@@ -33,14 +34,14 @@ export const dynamicParams = false;
 const forLocale = localized((L: Locale, site) => {
   const { positionHref } = localizedPublicSpec(L);
   const { arcanumTitle } = localizedArcana(L);
-  const { karmicTail, karmicTailKeys } = localizedContent(L);
-  const { KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, tailByFormula } = localizedEncyclopedia(L);
+  const { karmicTail, karmicTailKeys, pairTail } = localizedContent(L);
+  const { KARMIC_TAIL_HUB, PAIR_TAIL_HUB, arcanumHref, karmicTailHref, pairTailHref, parseTail, tailByFormula } = localizedEncyclopedia(L);
   const { articleLd } = localizedSchema(L, site);
   const { NOT_FOUND_META } = localizedSeo(L, site);
   const { pageMeta } = localizedSite(L, site);
   const { encyclopediaSectionCrumb } = localizedEncyclopediaNavigation(L);
 
-  return { positionHref, arcanumTitle, karmicTail, karmicTailKeys, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, tailByFormula, articleLd, NOT_FOUND_META, pageMeta, encyclopediaSectionCrumb };
+  return { positionHref, arcanumTitle, karmicTail, karmicTailKeys, pairTail, KARMIC_TAIL_HUB, PAIR_TAIL_HUB, arcanumHref, karmicTailHref, pairTailHref, parseTail, tailByFormula, articleLd, NOT_FOUND_META, pageMeta, encyclopediaSectionCrumb };
 });
 
 export function generateStaticParams(): Params[] {
@@ -70,17 +71,17 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function KarmicTailPage({ params }: { params: Promise<Params> }) {
   const L = await requestLocale();
-  const { positionHref, arcanumTitle, karmicTail, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, tailByFormula, articleLd, encyclopediaSectionCrumb } = forLocale(L, await requestSite());
+  const { positionHref, arcanumTitle, karmicTail, pairTail, KARMIC_TAIL_HUB, PAIR_TAIL_HUB, arcanumHref, karmicTailHref, pairTailHref, parseTail, tailByFormula, articleLd, encyclopediaSectionCrumb } = forLocale(L, await requestSite());
 
   const triple = (await params).triple;
   const item = karmicTail(triple);
   if (!item) notFound();
 
   const formula = tailByFormula(parseTail(item.key) ?? []);
-  const karmicHub = localizedContent(L).hub("karmic-compatibility");
   const displayArcana = formula?.triple ?? parseTail(item.key) ?? item.arcana;
   const compatibility = item.sections.find((section) => section.h2 === D.encTail.inCompatibilityTitle[L]);
   const personalSections = item.sections.filter((section) => section !== compatibility);
+  const pairTwin = pairTail(item.key);
 
   return (
     <>
@@ -127,11 +128,16 @@ export default async function KarmicTailPage({ params }: { params: Promise<Param
         <div className="panel section-gap" data-testid="tail-compatibility">
           <TocHeading id="compatibility">{D.encTail.inCompatibilityTitle[L]}</TocHeading>
           <Paragraphs items={compatibility.paragraphs} locale={L} />
+          {pairTwin ? (
+            <p className="encref" data-testid="tail-pair-article">
+              <Link href={pairTailHref(item.key)}>{DP.encPairTail.pairTwin[L](item.key)} →</Link>
+            </p>
+          ) : null}
           <p className="encref">
             <Link href="/compatibility">{D.encTail.inCompatibilityCalc[L]}</Link>
             {" · "}
             <Link href="/encyclopedia/compatibility">{D.encTail.inCompatibilityHub[L]}</Link>
-            {karmicHub ? <>{" · "}<Link href="/karmic-compatibility">{karmicHub.crumb ?? karmicHub.title}</Link></> : null}
+            {" · "}<Link href={PAIR_TAIL_HUB}>{DP.encPairTail.crumb[L]}</Link>
           </p>
         </div>
       ) : null}

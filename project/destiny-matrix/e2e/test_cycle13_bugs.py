@@ -128,6 +128,6 @@ def test_not_found_page_uses_site_fonts(page: Page) -> None:
     """404 набиралась запасными шрифтами: свой документ не получал переменных next/font."""
     page.goto(f"{BASE}/nosuchpage", wait_until="networkidle")
     classes = page.evaluate("document.documentElement.className")
-    assert "__variable" in classes, f"на 404 нет шрифтовых переменных: «{classes}»"
+    assert re.search(r"\w_variable\b", classes), f"на 404 нет шрифтовых переменных: «{classes}»"
     loaded = page.evaluate("document.fonts.size")
     assert loaded > 0, "ни одного шрифта сайта не загружено"

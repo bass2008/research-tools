@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 export const forLocale = localized((L: Locale) => {
   const { ARCANA } = localizedArcana(L);
   const { CHAKRA_PAGES, KARMIC_TAIL_HUB, POSITIONS, YEAR_HUB, allCombinationSlugs, hubCrumb, hubHref } = localizedEncyclopedia(L);
-  const { categoryHub, compatibilityKeys, hub, hubKeys, karmicTails, yearKeys } = localizedContent(L);
+  const { categoryHub, compatibilityKeys, hub, hubKeys, karmicTails, pairTailKeys, yearKeys } = localizedContent(L);
   const { ENCYCLOPEDIA_SLIDES } = localizedHeroSlides(L);
   const { ENCYCLOPEDIA_SECTIONS } = localizedEncyclopediaNavigation(L);
 
@@ -30,6 +30,7 @@ export const forLocale = localized((L: Locale) => {
       tls: karmicTails().length,
       yer: yearKeys().length,
       cmp: compatibilityKeys().length,
+      ptl: pairTailKeys().length,
       cmb: allCombinationSlugs().length,
       art: articlePaths().length,
     };

@@ -68,6 +68,12 @@ export const enc = {
       + "and open their pair in the table.",
   } satisfies Phrase,
   tailsAnalysed: { ru: "Разобранные тройки", en: "Triples with a reading" } satisfies Phrase,
+  tailSearchLabel: { ru: "Найти хвост по трём числам", en: "Find a tail by its three numbers" } satisfies Phrase,
+  tailSearchPlaceholder: { ru: "например, 18-9-9", en: "for example, 18-9-9" } satisfies Phrase,
+  tailSearchMissing: {
+    ru: (key: string) => `Хвоста ${key} в личной матрице нет. Порядок чисел важен: первым идёт начало хвоста M, последним — конец D.`,
+    en: (key: string) => `There is no tail ${key} in a personal matrix. The order matters: the entry M comes first and the end D last.`,
+  } satisfies PhraseFn<[string]>,
   tailsOne: { ru: "Пока одна тройка", en: "One triple so far" } satisfies Phrase,
   tailsMany: {
     ru: (n: number) => `${n} троек с разбором`,

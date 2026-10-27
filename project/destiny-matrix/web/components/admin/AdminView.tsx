@@ -289,7 +289,6 @@ function accessLine(u: AdminUser): string {
               <tr>
                 {userHead("id", "ID")}
                 {userHead("email", t("Почта"))}
-                {userHead("matrices", t("Разборов"))}
                 {userHead("payments", t("Платежей"))}
                 {userHead("spent", t("Уплачено"))}
                 {userHead("access", t("Доступ"))}
@@ -301,7 +300,7 @@ function accessLine(u: AdminUser): string {
             <tbody>
               {users === null ? (
                 <tr>
-                  <td colSpan={9} className="skeleton">
+                  <td colSpan={8} className="skeleton">
                     {t("Загружаем…")}</td>
                 </tr>
               ) : (
@@ -312,7 +311,6 @@ function accessLine(u: AdminUser): string {
                       <Link href={`/admin/users/${u.id}`}>{u.email}</Link>
                       {u.is_admin ? <span className="badge sub">{t("админ")}</span> : null}
                     </td>
-                    <td>{u.matrices}</td>
                     <td>{u.payments}</td>
                     <td className="num">{money(u.spent)} ₽</td>
                     <td className="acc">{accessLine(u)}</td>

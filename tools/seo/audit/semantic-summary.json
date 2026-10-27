@@ -2,7 +2,7 @@
   "generated_at": "2026-08-30",
   "raw_source": "logs/needs-lab/матрица-судьбы-dd5dcc98/params.json",
   "raw_sha256": "7c2a1e147e377fd95af26a69e0bd756afe40d82bb99104d67ee3776f4e558e8d",
-  "classifier_sha256": "2df3243a00956d1adae825f7ecec90dbfba74031e5d8397e4e771bc2fd2b298e",
+  "classifier_sha256": "6469229ddc7f4284d433449c7f6b446dbe69db08e5e67cdf94c028be33423a33",
   "raw_rows": 603,
   "raw_frequency": 199240,
   "unique_unordered_shapes": 257,
@@ -14,8 +14,8 @@
     "program": 150,
     "tail": 49
   },
-  "accepted_frequency": 85212,
-  "rejected_frequency": 114028,
+  "accepted_frequency": 91355,
+  "rejected_frequency": 107885,
   "frequency_checksum": 199240,
   "serp_policy": "Неоднозначный запрос без продуктовой сущности не создаёт landing. Внешний SERP не может переопределить формулу; будущая индексация требует отдельного датированного review."
 }

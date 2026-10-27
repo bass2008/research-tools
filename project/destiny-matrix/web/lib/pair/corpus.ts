@@ -10,6 +10,29 @@ import type { PairResult, Points } from "./engine";
 import { FREE, MAIN, sphereOf, unitKeys, visible, type PairUnit } from "./spheres";
 
 const cache = new Map<Locale, Map<string, PairUnit>>();
+const tailCache = new Map<Locale, Map<string, PairUnit>>();
+
+export const PAIR_TAIL_HUB = "/encyclopedia/compatibility/tails";
+
+// Хвост пары со статьёй читается из корпуса статей: короткая версия и подписи написаны по
+// полной статье, чтобы разбор и энциклопедия не расходились. Без статьи остаётся юнит.
+function tails(locale: Locale): Map<string, PairUnit> {
+  const hit = tailCache.get(locale);
+  if (hit) return hit;
+  const file = path.join(process.cwd(), "content", locale, "compatibility-karmic-tails.json");
+  type Raw = { key: string; report?: PairUnit["report"]; unit?: { title: string; captions: Record<string, string>; meaning: string } };
+  const items: Raw[] = fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as { items: Raw[] }).items : [];
+  const map = new Map<string, PairUnit>();
+  for (const item of items) {
+    if (!item.report?.length || !item.unit) continue;
+    map.set(`tasks:${item.key}`, {
+      unit: `tasks:${item.key}`, title: item.unit.title, captions: item.unit.captions, meaning: item.unit.meaning,
+      text: null, report: item.report, article: `${PAIR_TAIL_HUB}/${item.key}`,
+    });
+  }
+  tailCache.set(locale, map);
+  return map;
+}
 const chakraCache = new Map<string, PairUnit>();
 
 function load(locale: Locale): Map<string, PairUnit> {
@@ -36,6 +59,10 @@ export function unit(locale: Locale, key: string): PairUnit | null {
     chakraCache.set(cacheKey, body);
     return body;
   }
+  if (key.startsWith("tasks:")) {
+    const article = tails(locale).get(key);
+    if (article) return article;
+  }
   return load(locale).get(key) ?? null;
 }
 
@@ -56,8 +83,9 @@ export function previewUnits(locale: Locale, p: Points): Record<string, PairUnit
   for (const main of MAIN) {
     const key = sphereOf(main.sphere).key!(p);
     if (key in out) continue;
-    const caption = unit(locale, key)?.captions?.[main.key];
-    out[key] = caption ? { unit: key, captions: { [main.key]: caption } } : null;
+    const full = unit(locale, key);
+    const caption = full?.captions?.[main.key];
+    out[key] = caption ? { unit: key, captions: { [main.key]: caption }, ...(full?.article ? { article: full.article } : {}) } : null;
   }
   return out;
 }

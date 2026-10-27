@@ -1,6 +1,7 @@
 import { requestSite } from "@/lib/siteProfile.server";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
+import TailSearch from "@/components/enc/TailSearch";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import { PriceOrFree } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
@@ -17,7 +18,6 @@ import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSite } from "@/lib/site";
-import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -26,7 +26,6 @@ const forLocale = localized((L: Locale, site) => {
   const { categoryHub, karmicTails } = localizedContent(L);
   const { KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail } = localizedEncyclopedia(L);
   const { articleLd, itemListLd } = localizedSchema(L, site);
-  const { clip } = localizedText(L);
   const { pageMeta } = localizedSite(L, site);
   const { encyclopediaSection } = localizedEncyclopediaNavigation(L);
 
@@ -50,12 +49,12 @@ const forLocale = localized((L: Locale, site) => {
     for (let i = 0; i < 3; i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0);
     return 0;
   }
-  return { arcanumTitle, categoryHub, karmicTails, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, articleLd, itemListLd, clip, pageMeta, encyclopediaSection, KEY, HUB, metadata, byTriple };
+  return { arcanumTitle, categoryHub, karmicTails, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, articleLd, itemListLd, pageMeta, encyclopediaSection, KEY, HUB, metadata, byTriple };
 });
 
 export default async function KarmicTailHubPage() {
   const L = await requestLocale();
-  const { arcanumTitle, karmicTails, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, articleLd, itemListLd, clip, encyclopediaSection, HUB, byTriple } = forLocale(L, await requestSite());
+  const { arcanumTitle, karmicTails, KARMIC_TAIL_HUB, arcanumHref, karmicTailHref, parseTail, articleLd, itemListLd, encyclopediaSection, HUB, byTriple } = forLocale(L, await requestSite());
 
   const hub = HUB!;
   const items = karmicTails().filter((item) => item.publication.index).sort((a, b) => byTriple(a.key, b.key));
@@ -91,27 +90,22 @@ export default async function KarmicTailHubPage() {
       <h1>{hub.title}</h1>
       <p className="dim prose">{hub.short}</p>
 
-      {items.length ? (
-        <div className="panel section-gap">
-          <h2>{D.enc.tailsAnalysed[L]}</h2>
-          <div className="cap">
-            {items.length === 1 ? D.enc.tailsOne[L] : D.enc.tailsMany[L](items.length)}
-          </div>
-          <div className="cardgrid">
-            {items.map((t) => (
-              <Link className="ecard" key={t.key} href={karmicTailHref(t.key)} prefetch={false}>
-                <div className="num">{t.key}</div>
-                {/* имена берём из ключа: в данных arcana лежит отсортированным, и подпись
-                      расходилась с номерами — «10-15-5» против «Иерофант · Колесо · Дьявол» */}
-                <div className="nm">
-                  {(parseTail(t.key) ?? t.arcana).map((n) => arcanumTitle(n)).join(" · ")}
-                </div>
-                <div className="ds">{clip(t.short, 120)}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <div className="panel section-gap">
+        <TailSearch locale={L} tails={items.map((t) => ({ key: t.key, href: karmicTailHref(t.key),
+          names: (parseTail(t.key) ?? t.arcana).map((n) => arcanumTitle(n)).join(" · ") }))} />
+      </div>
+
+      <Sections items={hub.sections.slice(1)} locale={L} start={1} />
+
+      <div className="section-gap">
+        <CalcPromo locale={L}
+          title={D.enc.promoTailTitle[L]}
+          lead={D.enc.promoTailLead[L]}
+          place="karmic-tail-hub"
+        />
+      </div>
+
+      <Faq locale={L} items={hub.faq} />
 
       <div className="panel section-gap">
         <Sections items={hub.sections.slice(0, 1)} locale={L} />
@@ -128,18 +122,6 @@ export default async function KarmicTailHubPage() {
           </div>
         ))}
       </div>
-
-      <Sections items={hub.sections.slice(1)} locale={L} start={1} />
-
-      <div className="section-gap">
-        <CalcPromo locale={L}
-          title={D.enc.promoTailTitle[L]}
-          lead={D.enc.promoTailLead[L]}
-          place="karmic-tail-hub"
-        />
-      </div>
-
-      <Faq locale={L} items={hub.faq} />
 
       <Related locale={L} path={KARMIC_TAIL_HUB} refs={hub.related} />
 

@@ -26,7 +26,7 @@ interface Source {
 /** A locale-bound view; safe to use alongside other languages. */
 export const forLocale = localized((L: Locale) => {
   const { arcanumTitle } = localizedArcana(L);
-  const { KARMIC_TAIL_HUB, ROOT_HUBS, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, arcanumHref, chakraByKey, chakraHref, combinationHref, karmicTailHref, positionByKey, positionHref, yearHref } = localizedEncyclopedia(L);
+  const { KARMIC_TAIL_HUB, PAIR_TAIL_HUB, ROOT_HUBS, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, arcanumHref, chakraByKey, chakraHref, combinationHref, karmicTailHref, positionByKey, positionHref, yearHref } = localizedEncyclopedia(L);
   const { categoryHub, hub, karmicTail, karmicTails, yearArcanum, yearKeys } = localizedContent(L);
   const { positionArcanumHref, positionArcanumLabel, registryItem } = localizedPositionArcanum(L);
 
@@ -48,6 +48,7 @@ export const forLocale = localized((L: Locale) => {
     chakra: CHAKRA_HUB,
     combination: COMBINATION_HUB,
     position: POSITION_HUB,
+    "compatibility-tails": PAIR_TAIL_HUB,
   };
 
   /** Указатель → ссылка. null, если цели нет: ссылаться в никуда хуже, чем не ссылаться. */

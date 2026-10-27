@@ -22,6 +22,7 @@ const SOURCES: Record<string, string> = {
   "compatibility-arcana.json": "n",
   "category-hubs.json": "key",
   "hubs.json": "key",
+  "compatibility-karmic-tails.json": "key",
 };
 
 interface Row {

@@ -23,6 +23,7 @@ const KEYS: Record<string, (item: Record<string, unknown>) => string> = {
   "sections.json": (x) => String(x.key),
   "year-arcana.json": (x) => String(x.n),
   "compatibility-arcana.json": (x) => String(x.n),
+  "compatibility-karmic-tails.json": (x) => String(x.key),
 };
 
 const keysOf = (L: string, file: string) =>

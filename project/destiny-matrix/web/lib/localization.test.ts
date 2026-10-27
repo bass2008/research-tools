@@ -25,7 +25,7 @@ describe("runtime localization", () => {
     const matrix = matrixForLocale("ru").calculate("1993-03-31", "f");
     const files = ["arcana.json", "positions.json", "chakras.json", "combinations.json",
       "position-arcanum.json", "karmic-tails.json", "category-hubs.json", "year-arcana.json", "hubs.json",
-      "chakra-personal.json", "compatibility-arcana.json"];
+      "chakra-personal.json", "compatibility-arcana.json", "compatibility-karmic-tails.json"];
     const memory = Object.fromEntries(["ru", "en"].map((locale) => [locale,
       Object.fromEntries(files.map((file) => [file, JSON.parse(readFileSync(`content/${locale}/${file}`, "utf8"))])),
     ]));

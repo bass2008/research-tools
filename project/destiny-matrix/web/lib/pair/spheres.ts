@@ -1,5 +1,6 @@
 // Сферы разбора пары: какие точки читаются вместе, ключ текста и что открыто без покупки.
 // Тексты лежат в корпусе по ключу юнита; один юнит показывается каждой паре с этими числами.
+import type { Paragraph } from "../contentReader";
 import type { Points, PointKey } from "./engine";
 
 export type SphereId =
@@ -17,6 +18,9 @@ export interface PairUnit {
   captions?: Record<string, string>;
   meaning?: string | null;
   text?: string[] | string | null;
+  // хвост пары, у которого есть статья: короткая версия вместо текста и адрес полной статьи
+  report?: Paragraph[] | null;
+  article?: string | null;
 }
 
 export interface Sphere {

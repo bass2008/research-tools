@@ -3,6 +3,7 @@
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
+import { DP } from "@/lib/i18n/dict/pair";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import Link from "next/link";
@@ -76,6 +77,9 @@ export default function EncCrumbs({ locale: requestedLocale, ...localeProps }: (
         trail.push({ name: slug.replace("-", ` ${D.encArcanum.and[L]} `) });
       } else if (parts[1] === "chakra") {
         trail.push({ name: chakras[slug] ?? slug });
+      } else if (parts[1] === "compatibility" && slug === "tails") {
+        trail.push({ name: DP.encPairTail.crumb[L], href: "/encyclopedia/compatibility/tails" });
+        if (parts[3]) trail.push({ name: parts[3] });
       } else {
         trail.push({ name: slug });
       }

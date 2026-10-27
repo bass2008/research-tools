@@ -443,6 +443,23 @@
       "independent_editor": "pending human sign-off"
     },
     {
+      "entity": "category_hub:compatibility-tails",
+      "source": "web/content/ru/category-hubs.json",
+      "primary_query": "матрица судьбы кармическая совместимость",
+      "search_intent": "category_hub",
+      "formula_verified": false,
+      "position_context_verified": false,
+      "claims_reviewed": "automated contract/safety audit",
+      "unique_value": "content validator + category invariants",
+      "paid_report_overlap": "n/a",
+      "internal_links": "automated",
+      "metadata": "automated",
+      "decision": "keep",
+      "reviewer": "Codex engineering/content audit",
+      "reviewed_at": "2026-08-30",
+      "independent_editor": "pending human sign-off"
+    },
+    {
       "entity": "category_hub:energy-field",
       "source": "web/content/ru/category-hubs.json",
       "primary_query": "энергополе в матрице судьбы",
@@ -4693,23 +4710,6 @@
       "independent_editor": "pending human sign-off"
     },
     {
-      "entity": "hub:karmic-compatibility",
-      "source": "web/content/ru/hubs.json",
-      "primary_query": "матрица судьбы кармическая совместимость",
-      "search_intent": "hub",
-      "formula_verified": false,
-      "position_context_verified": false,
-      "claims_reviewed": "automated contract/safety audit",
-      "unique_value": "content validator + category invariants",
-      "paid_report_overlap": "n/a",
-      "internal_links": "automated",
-      "metadata": "automated",
-      "decision": "keep",
-      "reviewer": "Codex engineering/content audit",
-      "reviewed_at": "2026-08-30",
-      "independent_editor": "pending human sign-off"
-    },
-    {
       "entity": "hub:karmic-matrix",
       "source": "web/content/ru/hubs.json",
       "primary_query": "кармическая матрица судьбы",
@@ -5374,23 +5374,6 @@
     },
     {
       "entity": "page:/how-to-read",
-      "source": "web/app",
-      "primary_query": null,
-      "search_intent": "concept",
-      "formula_verified": false,
-      "position_context_verified": true,
-      "claims_reviewed": "automated route/claims audit",
-      "unique_value": "route-level review",
-      "paid_report_overlap": "checked",
-      "internal_links": "crawler",
-      "metadata": "crawler",
-      "decision": "keep",
-      "reviewer": "Codex engineering/content audit",
-      "reviewed_at": "2026-08-30",
-      "independent_editor": "pending human sign-off"
-    },
-    {
-      "entity": "page:/karmic-compatibility",
       "source": "web/app",
       "primary_query": null,
       "search_intent": "concept",

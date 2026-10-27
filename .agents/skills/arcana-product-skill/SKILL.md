@@ -32,14 +32,31 @@ description: "Продукт Arcana Sense (матрица судьбы) и то,
 
 ## Что внутри
 
+Поиск SEO-возможностей и недостающих функций продукта —
+[`seo-product-coverage-audit.md`](references/seo-product-coverage-audit.md).
+Этот аудит всегда только исследует; все решения обсуждаются с владельцем.
+
+Для SEO-рекомендации сначала проверить поисковую частотность конкретных запросов.
+Визиты Метрики подтверждают обращения к сайту, но не заменяют Вордстат и не определяют
+список статей или примеров. Если выбираем из конечного набора комбинаций, сравнить весь
+набор, а не несколько сочетаний из визитов. `FLOOR=50` в semcore — граница рекурсии:
+меньшие частоты не отбрасывать, отсутствие записи не считать нулём. Подробные требования
+к замерам, порядку чисел, прогнозу и окончательному списку — в инструкции аудита выше.
+
 | Файл | Когда читать |
 |---|---|
 | [references/product.md](references/product.md) | всегда: схема и подписи точек, типы страниц, где что бывает |
 | [references/search-map.md](references/search-map.md) | когда текст или запрос касается слов из поиска: «сердце», «под долларом», «программа N»… |
+| [references/seo-research.md](references/seo-research.md) | перед исследованием спроса: Вордстат, кэш, подсказки, числовые фразы, ограничения и исторические ошибки |
+| [references/page-audit.md](references/page-audit.md) | при оценке существующих страниц: спрос, показы, позиции, индексирование и сопоставимость периодов |
+| [references/energy-chacras-result.md](references/energy-chacras-result.md) | перед подготовкой SEO-статьи: кейс энергополя как образец прямого ответа, проверяемой конкретики и связи с продуктом; результаты и границы доказательств |
 | [references/mistakes.md](references/mistakes.md) | перед написанием и перед проверкой: ошибки, которые уже делали |
 | [references/deck-images.md](references/deck-images.md) | когда текст касается рисунка карты |
 | [references/content-format.md](references/content-format.md) | когда сдаёшь текст на сайт: формат JSON, title и description, адреса, разметка, индексация |
 | [prompts/arcanum-article-prompt.md](prompts/arcanum-article-prompt.md) | писатель статьи об аркане: один агент на статью |
+| [prompts/pair-karmic-tail-prompt.md](prompts/pair-karmic-tail-prompt.md) | писатель статьи о хвосте пары: полная статья, короткая версия, подписи и переводы; даты и порядок чисел задаёт заказчик |
+| [prompts/short-karmic-tale-prompt.md](prompts/short-karmic-tale-prompt.md) | редактор короткой версии статьи о хвосте для платного отчёта; для пары подстановки из промпта выше |
+| [prompts/short-karmic-tale-translate-prompt.md](prompts/short-karmic-tale-translate-prompt.md) | переводчик короткой версии хвоста на английский с опорой на полную английскую статью |
 | [prompts/seo-check-prompt.md](prompts/seo-check-prompt.md) | проверяющий, режим «отчёт»: один агент на весь набор, ничего не правит |
 | [prompts/seo-fix-prompt.md](prompts/seo-fix-prompt.md) | проверяющий, режим «исправить»: тот же разбор, правки вносит сам |
 | [prompts/pair-unit-prompt.md](prompts/pair-unit-prompt.md) | писатель юнитов разбора пары: ключи, точки, формат, объём; проверка — `web/scripts/check-pair-units.ts` |
@@ -89,6 +106,6 @@ description: "Продукт Arcana Sense (матрица судьбы) и то,
 - Строка в `mistakes.md` — только об ошибке, найденной на живом тексте или данных.
 - Пополняет проверяющий агент: в режиме «отчёт» предлагает строки, в режиме «исправить» вносит сам;
   редактор смотрит их в `git diff`.
-- Подробности не копировать, а ссылаться: спрос и грабли базы —
-  `project/destiny-matrix/docs/semcore.md`; «так задумано» —
+- Подробности не копировать, а ссылаться: методика спроса — [seo-research.md](references/seo-research.md),
+  устройство базы и команды — `project/destiny-matrix/docs/semcore.md`; «так задумано» —
   `project/destiny-matrix/docs/decisions.md`.

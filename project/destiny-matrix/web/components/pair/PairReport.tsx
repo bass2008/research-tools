@@ -15,6 +15,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraReadingView from "@/components/matrix/ChakraReadingView";
+import { Paragraphs } from "@/components/enc/Sections";
 import { LockedBody, LockedCards, type LockedCard } from "@/components/matrix/LockedSection";
 import { D } from "@/lib/i18n";
 import { lockedPairChakraReading, pairChakraMap, pairChakraReading } from "@/lib/pair/chakraReading";
@@ -23,7 +24,7 @@ import PairChakras from "./PairChakras";
 import PairOctagram from "./PairOctagram";
 import styles from "./Pair.module.css";
 
-const SPHERE_ARTICLE = { tasks: "/karmic-compatibility", atmosphere: "/compatibility-center", characters: "/encyclopedia/compatibility" } as const;
+const SPHERE_ARTICLE = { tasks: "/encyclopedia/compatibility/tails", atmosphere: "/compatibility-center", characters: "/encyclopedia/compatibility" } as const;
 const hasArticle = (id: SphereId): id is keyof typeof SPHERE_ARTICLE => id in SPHERE_ARTICLE;
 
 export interface PairReportProps {
@@ -147,6 +148,7 @@ export default function PairReport(props: PairReportProps) {
     : blocks(s, a, b, p).map((x) => ({ n: x.card, who: role(x.role), href: arcanumPage(x.card) }));
 
   const body = (unit: PairUnit | null | undefined) => {
+    if (unit?.report?.length) return <Paragraphs items={unit.report} locale={L} />;
     const text = paragraphs(unit);
     if (!text.length) return <p className={styles.stub}>{DP.stub[L]}</p>;
     return text.map((t, i) => <p key={i}><RichText text={t} /></p>);
@@ -160,6 +162,7 @@ export default function PairReport(props: PairReportProps) {
     </p>
   );
   const tail = `${p.M}-${p.N}-${p.D}`;
+  const tailArticle = units[`tasks:${tail}`]?.article ?? null;
 
   const prefix = (x: Block) => {
     if (!x.lead) return null;
@@ -175,18 +178,22 @@ export default function PairReport(props: PairReportProps) {
       const unit = units[s.key!(p)] ?? null;
       const shown = sectionCards(s);
       const width = s.cards!.length === 1 ? 1 : shown.length;
+      const amp = amplified(s, p).map((n) => <p className={styles.amp} key={n}>{DP.amplified[L](arcanumTitle(n),
+        (["H", "I"] as const).filter((point) => p[point] === n)
+          .map((point) => DP.amplifierPoint[point][L]).join("; "))}</p>);
+      const article = unit?.report?.length ? unit.report : null;
       inner = (
         <>
           {unit?.title ? <h3 className={styles.secTitle}>{unit.title}</h3> : null}
           <div className={`${styles.read} ${styles[`read${width}`] ?? ""}`}>
             <div className={styles.acs}>{shown.map(([k, r]) => card(p[k], r, unit?.captions?.[k]))}</div>
-            <div className={styles.txt}>
-              {body(unit)}
-              {amplified(s, p).map((n) => <p className={styles.amp} key={n}>{DP.amplified[L](arcanumTitle(n),
-                (["H", "I"] as const).filter((point) => p[point] === n)
-                  .map((point) => DP.amplifierPoint[point][L]).join("; "))}</p>)}
-            </div>
+            {article ? (amp.length ? <div className={styles.txt}>{amp}</div> : null) : <div className={styles.txt}>{body(unit)}{amp}</div>}
           </div>
+          {article ? (
+            <article className={`section-gap report-article ${styles.article}`} data-testid="pair-tail-reading">
+              <Paragraphs items={article} locale={L} />
+            </article>
+          ) : null}
         </>
       );
     } else {
@@ -213,15 +220,32 @@ export default function PairReport(props: PairReportProps) {
         </summary>
         <p className={styles.lead}>{DP.sphere[s.id].lead[L]}</p>
         {inner}
-        {encLinks(cardsOf(s))}
-        {s.id === "tasks" && PERSONAL_TAILS.has(tail) ? (
-          <p className="encref"><Link href={href(`/encyclopedia/karmic-tail/${tail}`)} data-testid="pair-tail-personal">
-            {DP.tailPersonal[L](tail)}</Link></p>
-        ) : null}
-        {hasArticle(s.id) ? (
-          <p className="encref"><Link href={href(SPHERE_ARTICLE[s.id])} data-testid={`pair-article-${s.id}`}>
-            {DP.article[s.id][L]}</Link></p>
-        ) : null}
+        {s.id === "tasks" && tailArticle ? (
+          // Как раздел хвоста в личном отчёте: полная статья по своей паре и статья о методе.
+          <div className="encref character-encrefs" data-testid="pair-tail-links">
+            <div className="character-encref-group">
+              <span className="character-encref-label">{DP.byYourPair[L]}</span>
+              <Link href={href(tailArticle)} data-testid="pair-tail-full-link">{DP.moreTail[L](tail)}</Link>
+            </div>
+            <span className="character-encref-separator" aria-hidden="true" />
+            <div className="character-encref-group">
+              <span className="character-encref-label">{D.sheet.aboutMethod[L]}</span>
+              <Link href={href(SPHERE_ARTICLE.tasks)} data-testid="pair-article-tasks">{DP.article.tasks[L]}</Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {encLinks(cardsOf(s))}
+            {s.id === "tasks" && PERSONAL_TAILS.has(tail) ? (
+              <p className="encref"><Link href={href(`/encyclopedia/karmic-tail/${tail}`)} data-testid="pair-tail-personal">
+                {DP.tailPersonal[L](tail)}</Link></p>
+            ) : null}
+            {hasArticle(s.id) ? (
+              <p className="encref"><Link href={href(SPHERE_ARTICLE[s.id])} data-testid={`pair-article-${s.id}`}>
+                {DP.article[s.id][L]}</Link></p>
+            ) : null}
+          </>
+        )}
       </details>
     );
   };
@@ -381,6 +405,7 @@ export default function PairReport(props: PairReportProps) {
               {[p.M, p.N, p.D].map((n, i) => <span key={i} className={styles.tileLink}>{i ? <i aria-hidden="true">→</i> : null}<span className={styles.tileStep}>{keyCard(n)}<b>{n}</b></span></span>)}
             </span>
             <span className={styles.tileS}>{[p.M, p.N, p.D].map(arcanumTitle).join(", ")}</span>
+            {tailArticle ? <Link href={href(tailArticle)} className={styles.tileA} data-testid="pair-key-tail-link">{DP.tailArticle[L]} →</Link> : null}
           </div>
           <div className={styles.tile}>
             <span className={styles.tileL}>{DP.role.values[L]}</span>

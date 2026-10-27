@@ -69,6 +69,35 @@ export const DP = {
     listTitle: { ru: "Арканы в матрице пары", en: "Arcana in a couple's matrix" } satisfies Phrase,
     pageCrumb: { ru: (n: number, title: string) => `${n} · ${title}`, en: (n: number, title: string) => `${n} · ${title}` } satisfies PhraseFn<[number, string]>,
   },
+  encPairTail: {
+    crumb: { ru: "Кармические хвосты пары", en: "Couple karmic tails" } satisfies Phrase,
+    short: {
+      ru: "У пары свой кармический хвост: каждую его точку складывают из одноимённых точек двух личных матриц. Сочетаний 97, и у каждого своя статья — найдите тройку из вашего расчёта.",
+      en: "A couple has its own karmic tail: each point is the sum of the same points of the two personal matrices. There are 97 combinations, each with its own article — find the three numbers from your reading.",
+    } satisfies Phrase,
+    listTitle: { ru: "Хвосты пары по главной задаче", en: "Couple tails by the main task" } satisfies Phrase,
+    listHint: {
+      ru: (count: number) => `Тройка читается в порядке «вход в задачу — середина — главная задача». Статей: ${count}.`,
+      en: (count: number) => `Read the three numbers as “entry to the task — middle — main task”. Articles: ${count}.`,
+    } satisfies PhraseFn<[number]>,
+    groupTitle: { ru: (n: number, title: string) => `Главная задача — ${n} · ${title}`, en: (n: number, title: string) => `Main task — ${n} · ${title}` } satisfies PhraseFn<[number, string]>,
+    searchLabel: { ru: "Найти хвост пары по трём числам", en: "Find a couple tail by its three numbers" } satisfies Phrase,
+    searchPlaceholder: { ru: "например, 9-21-12", en: "for example, 9-21-12" } satisfies Phrase,
+    missing: {
+      ru: (key: string) => `Хвоста пары ${key} в методе нет. Порядок чисел важен: проверьте, что первым идёт вход в задачу, а последним — главная задача.`,
+      en: (key: string) => `There is no couple tail ${key} in the method. The order matters: the entry to the task comes first and the main task last.`,
+    } satisfies PhraseFn<[string]>,
+    calcTitle: { ru: "Найдите хвост своей пары", en: "Find your couple's tail" } satisfies Phrase,
+    calcLead: {
+      ru: "Две даты рождения — и вы увидите кармический хвост вашей пары вместе с центром, чакрами и остальными точками матрицы. Расчёт бесплатный.",
+      en: "Two birth dates show your couple's karmic tail together with the centre, chakras and the other points of the matrix. The calculation is free.",
+    } satisfies Phrase,
+    whereNext: { ru: "Куда дальше", en: "Where next" } satisfies Phrase,
+    sibling: { ru: (key: string) => `Хвост пары ${key} — те же числа в другом порядке`, en: (key: string) => `Couple tail ${key}: the same numbers in another order` } satisfies PhraseFn<[string]>,
+    personal: { ru: (key: string) => `Личный кармический хвост ${key}`, en: (key: string) => `Personal karmic tail ${key}` } satisfies PhraseFn<[string]>,
+    pairTwin: { ru: (key: string) => `Кармический хвост ${key} в совместимости`, en: (key: string) => `Karmic tail ${key} in compatibility` } satisfies PhraseFn<[string]>,
+    all: { ru: "Все хвосты пары", en: "All couple tails" } satisfies Phrase,
+  },
   // Пять надписей карусели — по одной на композицию CalcHero; ссылки ведут к разделам разбора ниже.
   slides: [
     {
@@ -317,6 +346,12 @@ export const DP = {
     business: { ru: "Как считается совместимость в работе →", en: "How business compatibility is calculated →" } satisfies Phrase,
     characters: { ru: "Как устроена совместимость характеров →", en: "How compatibility of characters works →" } satisfies Phrase,
   },
+  byYourPair: { ru: "По вашей паре", en: "From your couple" } satisfies Phrase,
+  tailArticle: { ru: "Что значит хвост вашей пары", en: "What your couple's tail means" } satisfies Phrase,
+  moreTail: {
+    ru: (key: string) => `Читать полную статью про кармический хвост пары ${key} в энциклопедии →`,
+    en: (key: string) => `Read the full article on the couple's karmic tail ${key} in the encyclopedia →`,
+  } satisfies PhraseFn<[string]>,
   tailPersonal: {
     ru: (key: string) => `Хвост ${key.replaceAll("-", " ")} в личной матрице судьбы →`,
     en: (key: string) => `The ${key.replaceAll("-", " ")} tail in a personal destiny matrix →`,

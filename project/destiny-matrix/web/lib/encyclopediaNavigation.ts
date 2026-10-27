@@ -29,6 +29,7 @@ export const forLocale = localized((L: Locale) => {
     { key: "tls", title: D.encSections.tls.title[L], hint: D.encSections.tls.hint[L], segment: "karmic-tail", hub: "/encyclopedia/karmic-tail" },
     { key: "yer", title: D.encSections.yer.title[L], hint: D.encSections.yer.hint[L], externalRoot: "year", hub: "/year" },
     { key: "cmp", title: D.encSections.cmp.title[L], hint: D.encSections.cmp.hint[L], segment: "compatibility", hub: "/encyclopedia/compatibility" },
+    { key: "ptl", title: D.encSections.ptl.title[L], hint: D.encSections.ptl.hint[L], hub: "/encyclopedia/compatibility/tails" },
     { key: "cmb", title: D.encSections.cmb.title[L], hint: D.encSections.cmb.hint[L], segment: "combination", hub: "/encyclopedia/combination" },
     { key: "art", title: D.encSections.art.title[L], hint: D.encSections.art.hint[L], anchor: "stati" },
   ] as const;
@@ -111,6 +112,7 @@ export const forLocale = localized((L: Locale) => {
       return parts.length === 2 ? "pts" : positionKinds[parts[2] ?? ""] ?? "sec";
     }
     if (["character", "comfort", "profession"].includes(parts[1])) return "sec";
+    if (parts[1] === "compatibility" && parts[2] === "tails") return "ptl";
     return encyclopediaSectionFromSegment(parts[1]);
   }
   return { ENCYCLOPEDIA_SECTIONS, encyclopediaSection, encyclopediaSectionHub, encyclopediaSectionHref, encyclopediaSectionCrumb, encyclopediaSectionFromSegment, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromPath };

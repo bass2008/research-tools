@@ -11,7 +11,10 @@ ROOT = HERE.parents[2]
 SRC = Path("/home/sergey/Personal")
 NAME = {"ru": "example-{key}-opus.md", "en": "example-{key}-opus-en.md"}
 SHORT = {"ru": "example-{key}-short.md", "en": "example-{key}-short-en.md"}
+UNIT = {"ru": "example-{key}-unit.json", "en": "example-{key}-unit-en.json"}
 OUT = ROOT / "tools/seo/content/{lang}/karmic-tails/{key}.json"
+PAIR_OUT = ROOT / "tools/seo/content/{lang}/compatibility-karmic-tails/{key}.json"
+PAIR_REGISTRY = HERE / "pair-tails.json"
 METHOD = ROOT / "project/destiny-matrix/spec/method.json"
 
 POINT_HEAD = {"ru": ["Точка", "Аркан", "Как получается"], "en": ["Point", "Arcanum", "How it is derived"]}
@@ -20,6 +23,17 @@ FIXES = {
     "ru": {"18-9-9": {"\nСложите три числа.\n": "\nТеперь сложите три числа.\n"}},
     "en": {},
 }
+
+
+def pair_base(key: str, lang: str) -> dict:
+    tail = json.loads(PAIR_REGISTRY.read_text())["tails"][key]
+    primary = tail["primary_query"] if lang == "ru" else tail["en_primary_query"]
+    queries = [primary] + ([p for p, _ in tail["phrases"]] if lang == "ru" else [])
+    publication = {"index": True, "follow": True, "primary_query": primary}
+    if lang == "ru" and tail.get("frequency_30d"):
+        publication["exact_frequency"] = tail["frequency_30d"]
+    return {"key": key, "entity_type": "pair_karmic_tail", "publication": publication,
+            "arcana": [int(n) for n in key.split("-")], "seo": {"queries": queries}, "related": []}
 
 
 def load_converter():
@@ -114,29 +128,44 @@ def main() -> int:
     parser.add_argument("keys", nargs="*")
     parser.add_argument("--lang", default="ru", choices=sorted(NAME))
     parser.add_argument("--check", action="store_true", help="только проверить, ничего не записывать")
+    parser.add_argument("--pair", action="store_true", help="хвост пары: example-pair-*, compatibility-karmic-tails")
     args = parser.parse_args()
 
     m2c = load_converter()
-    keys = args.keys or [t["triple"] for t in json.loads(METHOD.read_text())["reachable_karmic_tails"]]
+    if args.pair:
+        keys = args.keys or list(json.loads(PAIR_REGISTRY.read_text())["tails"])
+    else:
+        keys = args.keys or [t["triple"] for t in json.loads(METHOD.read_text())["reachable_karmic_tails"]]
     failed = 0
     for key in keys:
-        source = SRC / NAME[args.lang].format(key=key)
-        out = Path(str(OUT).format(lang=args.lang, key=key))
+        stem = f"pair-{key}" if args.pair else key
+        source = SRC / NAME[args.lang].format(key=stem)
+        out = Path(str(PAIR_OUT if args.pair else OUT).format(lang=args.lang, key=key))
         if not source.exists():
             print(f"✗ {key}: нет {source}")
             failed += 1
             continue
-        base = json.loads(out.read_text(encoding="utf-8"))
+        if out.exists():
+            base = json.loads(out.read_text(encoding="utf-8"))
+        elif args.pair:
+            base = pair_base(key, args.lang)
+        else:
+            print(f"✗ {key}: нет {out}")
+            failed += 1
+            continue
         text, notes = prepare(source.read_text(encoding="utf-8"), key, args.lang, m2c.FAQ_TITLES)
         rep = m2c.Report()
         item = m2c.convert(text, base, rep, keep_intro=True)
         if not item["intro"]:
             del item["intro"]
-        short = SRC / SHORT[args.lang].format(key=key)
+        short = SRC / SHORT[args.lang].format(key=stem)
         if short.exists():
             item["report"] = [m2c.block(kind, value, rep) for kind, value in
                               m2c.tokens(short.read_text(encoding="utf-8").splitlines(), rep)]
-        problems, warnings = m2c.check(item, "karmic-tails", args.lang)
+        unit = SRC / UNIT[args.lang].format(key=stem)
+        if args.pair and unit.exists():
+            item["unit"] = json.loads(unit.read_text(encoding="utf-8"))
+        problems, warnings = m2c.check(item, "compatibility-karmic-tails" if args.pair else "karmic-tails", args.lang)
         blocks = [p for s in item["sections"] for p in s["paragraphs"] if not isinstance(p, str)]
         tables = sum(1 for p in blocks if "table" in p)
         print(f"{'✗' if problems else '✓'} {key}: глав {len(item['sections'])}, таблиц {tables}, "
@@ -149,6 +178,7 @@ def main() -> int:
             failed += 1
             continue
         if not args.check:
+            out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"{len(keys) - failed} из {len(keys)} {'проверены' if args.check else 'записаны'}")
     return 1 if failed else 0
