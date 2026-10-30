@@ -1,0 +1,239 @@
+{
+  "periods": {
+    "current": [
+      "2026-10-02",
+      "2026-10-29"
+    ],
+    "previous": [
+      "2026-09-04",
+      "2026-10-01"
+    ]
+  },
+  "timezone": "Europe/Moscow",
+  "attribution": "API returned query preserved in raw reports",
+  "sampling": false,
+  "sites": {
+    "ru": {
+      "goal_names": {
+        "600790540": "Автоцель: отправка формы",
+        "600924565": "Автоцель: возврат из платежной системы",
+        "603551068": "Автоцель: заполнил контактные данные",
+        "603551069": "Автоцель: отправил контактные данные",
+        "603811452": "Расчёт матрицы",
+        "603811454": "Клик «Купить»",
+        "603811455": "Открытие оплаты",
+        "603811459": "Выбор тарифа",
+        "603811462": "Отправка заявки",
+        "603811464": "Успешная покупка",
+        "603811465": "Скачивание PDF",
+        "664228513": "Автоцель: переход в мессенджер",
+        "664270106": "Автоцель: клик по email",
+        "673091959": "CRM: Заказ создан",
+        "673091960": "CRM: Заказ оплачен",
+        "673091961": "CRM: Спам заказ",
+        "673091962": "CRM: Заказ отменен",
+        "674442398": "Расчёт совместимости"
+      },
+      "periods": {
+        "current": {
+          "all": {
+            "metrics": {
+              "ym:s:visits": 1648.0,
+              "ym:s:users": 1436.0,
+              "ym:s:goal603811452reaches": 640.0,
+              "ym:s:goal603811452visits": 386.0,
+              "ym:s:goal603811455reaches": 83.0,
+              "ym:s:goal603811455visits": 71.0,
+              "ym:s:goal603811464reaches": 1.0,
+              "ym:s:goal603811464visits": 1.0,
+              "ym:s:goal674442398reaches": 30.0,
+              "ym:s:goal674442398visits": 12.0
+            },
+            "filters": "",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "organic": {
+            "metrics": {
+              "ym:s:visits": 1259.0,
+              "ym:s:users": 1163.0,
+              "ym:s:goal603811452reaches": 496.0,
+              "ym:s:goal603811452visits": 317.0,
+              "ym:s:goal603811455reaches": 66.0,
+              "ym:s:goal603811455visits": 61.0,
+              "ym:s:goal603811464reaches": 0.0,
+              "ym:s:goal603811464visits": 0.0,
+              "ym:s:goal674442398reaches": 6.0,
+              "ym:s:goal674442398visits": 1.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "yandex": {
+            "metrics": {
+              "ym:s:visits": 1254.0,
+              "ym:s:users": 1158.0,
+              "ym:s:goal603811452reaches": 492.0,
+              "ym:s:goal603811452visits": 315.0,
+              "ym:s:goal603811455reaches": 66.0,
+              "ym:s:goal603811455visits": 61.0,
+              "ym:s:goal603811464reaches": 0.0,
+              "ym:s:goal603811464visits": 0.0,
+              "ym:s:goal674442398reaches": 6.0,
+              "ym:s:goal674442398visits": 1.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic' AND ym:s:lastSearchEngineRoot=='yandex'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          }
+        },
+        "previous": {
+          "all": {
+            "metrics": {
+              "ym:s:visits": 692.0,
+              "ym:s:users": 610.0,
+              "ym:s:goal603811452reaches": 156.0,
+              "ym:s:goal603811452visits": 114.0,
+              "ym:s:goal603811455reaches": 35.0,
+              "ym:s:goal603811455visits": 32.0,
+              "ym:s:goal603811464reaches": 0.0,
+              "ym:s:goal603811464visits": 0.0,
+              "ym:s:goal674442398reaches": 0.0,
+              "ym:s:goal674442398visits": 0.0
+            },
+            "filters": "",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "organic": {
+            "metrics": {
+              "ym:s:visits": 441.0,
+              "ym:s:users": 417.0,
+              "ym:s:goal603811452reaches": 113.0,
+              "ym:s:goal603811452visits": 84.0,
+              "ym:s:goal603811455reaches": 28.0,
+              "ym:s:goal603811455visits": 27.0,
+              "ym:s:goal603811464reaches": 0.0,
+              "ym:s:goal603811464visits": 0.0,
+              "ym:s:goal674442398reaches": 0.0,
+              "ym:s:goal674442398visits": 0.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "yandex": {
+            "metrics": {
+              "ym:s:visits": 422.0,
+              "ym:s:users": 404.0,
+              "ym:s:goal603811452reaches": 102.0,
+              "ym:s:goal603811452visits": 74.0,
+              "ym:s:goal603811455reaches": 23.0,
+              "ym:s:goal603811455visits": 23.0,
+              "ym:s:goal603811464reaches": 0.0,
+              "ym:s:goal603811464visits": 0.0,
+              "ym:s:goal674442398reaches": 0.0,
+              "ym:s:goal674442398visits": 0.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic' AND ym:s:lastSearchEngineRoot=='yandex'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          }
+        }
+      }
+    },
+    "com": {
+      "goal_names": {
+        "653018940": "Chart calculated",
+        "653018957": "PDF downloaded",
+        "653785386": "Автоцель: отправка формы",
+        "674442440": "Compatibility calculated"
+      },
+      "periods": {
+        "current": {
+          "all": {
+            "metrics": {
+              "ym:s:visits": 56.0,
+              "ym:s:users": 51.0,
+              "ym:s:goal653018940reaches": 11.0,
+              "ym:s:goal653018940visits": 9.0,
+              "ym:s:goal674442440reaches": 11.0,
+              "ym:s:goal674442440visits": 4.0
+            },
+            "filters": "",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "organic": {
+            "metrics": {
+              "ym:s:visits": 0.0,
+              "ym:s:users": 0.0,
+              "ym:s:goal653018940reaches": 0.0,
+              "ym:s:goal653018940visits": 0.0,
+              "ym:s:goal674442440reaches": 0.0,
+              "ym:s:goal674442440visits": 0.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "yandex": {
+            "metrics": {
+              "ym:s:visits": 0.0,
+              "ym:s:users": 0.0,
+              "ym:s:goal653018940reaches": 0.0,
+              "ym:s:goal653018940visits": 0.0,
+              "ym:s:goal674442440reaches": 0.0,
+              "ym:s:goal674442440visits": 0.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic' AND ym:s:lastSearchEngineRoot=='yandex'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          }
+        },
+        "previous": {
+          "all": {
+            "metrics": {
+              "ym:s:visits": 43.0,
+              "ym:s:users": 35.0,
+              "ym:s:goal653018940reaches": 5.0,
+              "ym:s:goal653018940visits": 3.0,
+              "ym:s:goal674442440reaches": 0.0,
+              "ym:s:goal674442440visits": 0.0
+            },
+            "filters": "",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "organic": {
+            "metrics": {
+              "ym:s:visits": 4.0,
+              "ym:s:users": 4.0,
+              "ym:s:goal653018940reaches": 1.0,
+              "ym:s:goal653018940visits": 1.0,
+              "ym:s:goal674442440reaches": 0.0,
+              "ym:s:goal674442440visits": 0.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          },
+          "yandex": {
+            "metrics": {
+              "ym:s:visits": 0.0,
+              "ym:s:users": 0.0,
+              "ym:s:goal653018940reaches": 0.0,
+              "ym:s:goal653018940visits": 0.0,
+              "ym:s:goal674442440reaches": 0.0,
+              "ym:s:goal674442440visits": 0.0
+            },
+            "filters": "ym:s:lastTrafficSource=='organic' AND ym:s:lastSearchEngineRoot=='yandex'",
+            "data_lag": 0,
+            "attribution": "CROSS_DEVICE_LAST_SIGNIFICANT"
+          }
+        }
+      }
+    }
+  }
+}
