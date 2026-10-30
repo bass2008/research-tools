@@ -1,5 +1,8 @@
 "use client";
 
+import { navigationHref } from "@/lib/publicRouting";
+import { useSite } from "@/components/ui/LocaleProvider";
+
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { track } from "@/lib/analytics";
 import { useHydrated } from "@/lib/hydrated";
@@ -61,6 +64,8 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
   const testId = (what: string) => (promo ? `promo-${what}` : what);
 
   const router = useRouter();
+  const navigationSite = useSite();
+  const navigationLocale = useLocale();
   // Дата-пример корпуса, а не часы браузера: страница статическая, и «сегодня» в её HTML не
   // совпадает с датой у посетителя — в Москве после полуночи число расходилось, React считал это
   // расхождением текста и перерисовывал форму.
@@ -129,7 +134,7 @@ export default function MatrixForm({ locale: requestedLocale, ...localeProps }: 
       track("calc", { place });
       if (finish.kind === "go") {
         // карту печатает другая страница: она прочитает дату из браузера, хеш просит прокрутку
-        router.push(finish.href);
+        router.push(navigationHref(finish.href, navigationSite, navigationLocale));
         return;
       }
       requestAnimationFrame(() => {

@@ -1,3 +1,4 @@
+import { publicPath } from "./publicRouting";
 import { describe, expect, it } from "vitest";
 import { configuredSites, printLinkSite, siteForHost } from "./siteProfile";
 import { forLocale as siteView } from "./site";
@@ -24,7 +25,7 @@ describe("one frontend, domain profiles", () => {
       }))));
       const international = configured.find((profile) => profile.origin === origins[1])!;
       expect(siteView("ru", printLinkSite(international, "ru", configured))
-        .publicHref("/encyclopedia/arcanum/8")).toBe(`${origins[0]}/encyclopedia/arcanum/8`);
+        .publicHref("/encyclopedia/arcanum/8")).toBe(`${origins[0]}/ru/encyclopedia/arcanum/8`);
       expect(printLinkSite(international, "en", configured)).toBe(international);
     }
   });
@@ -70,10 +71,10 @@ describe("one frontend, domain profiles", () => {
     }
   });
 
-  it("uses an explicit choice for interactive refreshes and private pages", () => {
+  it("keeps public refreshes stable and uses explicit choice only for private pages", () => {
     const headers = new Headers({ cookie: "arcana_locale=ru", "accept-language": "en" });
     headers.set(INTERACTIVE_HEADER, "1");
-    expect(renderLocale(headers, com)).toBe("ru");
+    expect(renderLocale(headers, com)).toBe("en");
     headers.set(INTERACTIVE_HEADER, "0");
     headers.set(PATH_HEADER, "/account");
     expect(renderLocale(headers, com)).toBe("ru");
@@ -108,10 +109,10 @@ describe("one frontend, domain profiles", () => {
     // Interleaving the same language on two hosts must not contaminate cached factories.
     for (const site of [ru, com, com, ru]) {
       const opts = { title: "Article", description: "Description", path: "/encyclopedia/arcanum/4" };
-      expect(siteView("ru", site).pageMeta(opts).alternates?.canonical).toBe(site.origin + opts.path);
+      expect(siteView("ru", site).pageMeta(opts).alternates?.canonical).toBe("https://arcana-sense.ru/ru" + opts.path);
       const article = schemaView(site.defaultLocale, site).articleLd({ ...opts, headline: "Article" });
       expect(article.inLanguage).toBe(site.defaultLocale);
-      expect(article.mainEntityOfPage["@id"]).toBe(site.origin + opts.path);
+      expect(article.mainEntityOfPage["@id"]).toBe(site.origin + publicPath(opts.path, site.defaultLocale));
       expect(article.publisher.url).toBe(site.origin);
     }
   });

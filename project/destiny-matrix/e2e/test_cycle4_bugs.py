@@ -57,13 +57,13 @@ def test_other_year_arcana_block_lists_all_of_them_in_order():
     """Список «Другие арканы года» строился по строковым ключам и обрезался на двенадцати:
     после «19» шла «2», а арканы 3–8 не попадали в блок вовсе."""
     html = _html("/year/7")
-    links = re.findall(r'href="/year/(\d+)"', html)
+    links = re.findall(r'href="/ru/year/(\d+)"', html)
     numbers = [int(n) for n in links]
     missing = [n for n in range(1, 23) if n != 7 and n not in numbers]
     assert not missing, f"в блоке нет арканов {missing}"
     block = re.search(r"Другие арканы года.*?</div>\s*</div>", html, re.S)
     assert block, "блок «Другие арканы года» не найден"
-    order = [int(n) for n in re.findall(r'href="/year/(\d+)"', block.group(0))]
+    order = [int(n) for n in re.findall(r'href="/ru/year/(\d+)"', block.group(0))]
     assert order == sorted(order), f"порядок не по возрастанию: {order[:8]}"
 
 
@@ -110,7 +110,7 @@ def test_hub_breadcrumb_is_a_short_name_not_the_whole_headline():
 def test_arcanum_links_to_its_year_page_once():
     """Ссылка на «N на год» стояла дважды подряд: отдельным блоком и в связях."""
     html = _html("/encyclopedia/arcanum/7")
-    assert html.count('href="/year/7"') == 1, f"ссылок на /year/7: {html.count('href=\"/year/7\"')}"
+    assert html.count('href="/ru/year/7"') == 1, f"ссылок на /year/7: {html.count('href=\"/ru/year/7\"')}"
 
 
 def test_tail_page_does_not_repeat_the_same_arcanum_link():
@@ -134,7 +134,7 @@ def test_encyclopedia_leads_to_the_category_hubs(page: Page, expected):
     hrefs = page.eval_on_selector_all(
         "main a", "els => els.map(e => e.getAttribute('href'))"
     )
-    assert expected in hrefs, f"на справочнике нет ссылки на {expected}"
+    assert "/ru" + expected in hrefs, f"на справочнике нет ссылки на {expected}"
 
 
 def test_error_about_days_in_month_disappears_when_the_date_is_fixed(page: Page):
@@ -243,7 +243,7 @@ def test_arcanum_page_points_to_the_year_article_without_retelling_it():
     вместо самой статьи. Ссылка осталась — без неё годовая статья теряет входящий вес.
     """
     html = _html("/encyclopedia/arcanum/7")
-    assert html.count('href="/year/7"') == 1, "ссылки на годовую статью нет или она печатается дважды"
+    assert html.count('href="/ru/year/7"') == 1, "ссылки на годовую статью нет или она печатается дважды"
     assert "Год под седьмым арканом" not in html, "вводный абзац годовой статьи снова на странице аркана"
     assert "Тот же аркан в рамке персонального года" not in html, "подводка вкладки осталась"
     tabs = re.findall(r'role="tab"[^>]*>([^<]+)<', html)

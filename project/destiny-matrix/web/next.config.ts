@@ -15,6 +15,8 @@ const config: NextConfig = {
   // Keep the RSC marker available to middleware: public documents and explicit
   // application refreshes have different locale policies, but share the same URL.
   skipProxyUrlNormalize: true,
+  // Language homes retain /en/; public routing normalizes article URLs itself.
+  skipTrailingSlashRedirect: true,
   allowedDevOrigins: ["127.0.0.1", "ru.localhost", "com.localhost"],
   // Идентификатор сборки — от состава маршрутов, а не случайный. Случайный вшивается в разметку
   // каждой страницы, из-за чего встроенный `ETag` сбрасывался на каждом релизе и поиск качал
@@ -46,10 +48,10 @@ const config: NextConfig = {
       "family_gifts", "soul_tasks", "purpose", "money", "money40", "relations",
       "parents_children", "ancestry", "body_resource", "chakras", "rest", "loops", "years",
     ];
-    return personal.map((section) => ({
-      source: `/encyclopedia/${section}/:slug`,
+    return personal.flatMap((section) => ["", "/ru", "/en"].map((prefix) => ({
+      source: `${prefix}/encyclopedia/${section}/:slug`,
       headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
-    }));
+    })));
   },
   async redirects() {
     // Переезды адресов энциклопедии, по одному правилу на адрес: список и правило — в lib/redirects.ts.

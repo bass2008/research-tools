@@ -1,3 +1,4 @@
+import LocalizedAnchor from "@/components/ui/LocalizedAnchor";
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 import { cardColumns } from "@/lib/cardColumns";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
@@ -34,9 +35,9 @@ function Bub({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: (
 
   const href = absolute ? publicHref(`/encyclopedia/arcanum/${v}`) : `/encyclopedia/arcanum/${v}`;
   return (
-    <a className={gold ? "bub g" : "bub"} href={href} title={arcanumTitle(v)}>
+    <LocalizedAnchor className={gold ? "bub g" : "bub"} href={href} title={arcanumTitle(v)}>
       {v}
-    </a>
+    </LocalizedAnchor>
   );
 }
 
@@ -137,7 +138,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
         <div className="cap">{D.report.mainPointsHint[L]}</div>
         <div className="mp" style={cardColumns(main.length)}>
           {main.map(([who, v, hint]) => (
-            <a
+            <LocalizedAnchor
               className="mpc"
               key={who}
               href={link(`/encyclopedia/arcanum/${v}`)}
@@ -152,7 +153,7 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
                 </span>
                 <span className="ds">{hint}</span>
               </span>
-            </a>
+            </LocalizedAnchor>
           ))}
         </div>
       </div>
@@ -175,13 +176,13 @@ export default function MatrixResult({ site = DEFAULT_SITE, locale: requestedLoc
                 return (
                   <tr key={key}>
                     <td className="pn">
-                      <a href={link(positionHref(key))}>{POINT_LABELS[key]}</a>
+                      <LocalizedAnchor href={link(positionHref(key))}>{POINT_LABELS[key]}</LocalizedAnchor>
                     </td>
                     <td>
                       <span className="ar">
-                        <a href={link(`/encyclopedia/arcanum/${v}`)}>
+                        <LocalizedAnchor href={link(`/encyclopedia/arcanum/${v}`)}>
                           {v} · <b>{arcanumTitle(v)}</b>
-                        </a>
+                        </LocalizedAnchor>
                       </span>
                     </td>
                     <td className="vl">{arcanum(v).short}</td>

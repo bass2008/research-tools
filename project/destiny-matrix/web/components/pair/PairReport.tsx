@@ -11,7 +11,7 @@ import {
   amplified, blocks, distinctCards, FREE, MAIN, SUMMARY, sphereOf, unitKeys, visible,
   type Block, type PairUnit, type RoleId, type Sphere, type SphereId,
 } from "@/lib/pair/spheres";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import type { ReactNode } from "react";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import ChakraReadingView from "@/components/matrix/ChakraReadingView";

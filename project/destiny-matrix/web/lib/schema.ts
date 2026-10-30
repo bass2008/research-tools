@@ -3,6 +3,7 @@ import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { plainText } from "./richText";
 import { forLocale as localizedSite } from "./site";
+import { publicUrl } from "./publicRouting";
 
 // Дата публикации живёт в `lib/corpusDates` и отсюда переизлучается: её импортируют как часть
 // разметки. Article без author/datePublished/publisher Google отбраковывает целиком, поэтому она
@@ -18,7 +19,7 @@ export interface Crumb {
 export const forLocale = localized((L: Locale, site) => {
   const { LEGAL, SITE } = localizedSite(L, site);
 
-  const abs = (path: string) => new URL(path, SITE.url).toString();
+  const abs = (path: string) => publicUrl(path, site, L);
 
   const AUTHOR = { "@type": "Organization", name: SITE.name, url: SITE.url };
 

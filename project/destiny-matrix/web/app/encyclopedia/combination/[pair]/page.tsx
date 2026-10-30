@@ -17,7 +17,7 @@ import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedText } from "@/lib/text";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound } from "next/navigation";
 
 type Params = { pair: string };

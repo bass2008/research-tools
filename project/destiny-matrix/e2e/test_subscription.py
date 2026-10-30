@@ -26,7 +26,7 @@ def test_subscriber_is_offered_nothing_and_sees_everything(page: Page, mail: str
 
     for path in PAGES:
         page.goto(BASE + path, wait_until="networkidle")
-        expect(page.locator("a[href^='/pay']"), path).to_have_count(0)
+        expect(page.locator("a[href^='/ru/pay']"), path).to_have_count(0)
         expect(page.get_by_role("button", name=re.compile("Купить"))).to_have_count(0)
         expect(page.locator("main, #content").first, path).not_to_contain_text("₽")
 

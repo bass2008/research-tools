@@ -12,6 +12,9 @@ const PORT = Number(process.env.CHECK_PORT ?? 3131);
 // Витрина без оплаты: кассы нет, страницы оплаты отвечают 404 — забирать и проверять нечего.
 const ALL_FREE = process.env.NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT === "1";
 const LOCALE = process.env.CHECK_LOCALE ?? process.env.NEXT_PUBLIC_SITE_LANG ?? "ru";
+const logicalPath = (route) => route.replace(/^\/(ru|en)(?=\/|$)/, "") || "/";
+const localizedPath = (route) => route === "/" ? (LOCALE === "ru" ? "/" : "/en/") : `/${LOCALE}${route}`;
+const routeKey = (route) => route.replace(/\/$/, "") || "/";
 const HOST = LOCALE === "en" ? "arcana-sense.com" : "arcana-sense.ru";
 const requestHeaders = { Host: HOST, "Accept-Language": LOCALE, "User-Agent": "ArcanaBuildCheckBot" };
 let sitemapXml = "";
@@ -20,7 +23,7 @@ let sitemapXml = "";
 // sending the actual domain to the one shared frontend.
 function fetchPage(route) {
   return new Promise((resolve, reject) => {
-    const req = http.get({ hostname: "127.0.0.1", port: PORT, path: route, headers: requestHeaders }, (res) => {
+    const req = http.get({ hostname: "127.0.0.1", port: PORT, path: route === `/${LOCALE}` ? `/${LOCALE}/` : route, headers: requestHeaders }, (res) => {
       const chunks = [];
       res.on("data", (chunk) => chunks.push(chunk));
       res.on("error", reject);
@@ -43,7 +46,7 @@ const publicRoutes = Object.entries(appRoutes)
 const ON_DEMAND = [...new Set([...publicRoutes,
   "/matrix/1-1-2", "/encyclopedia/arcanum/4", "/encyclopedia/karmic-tail/18-9-9",
   ...(ALL_FREE ? [] : ["/pay/single"]),
-])];
+].map(localizedPath))];
 
 const diskFiles = [];
 (function walk(dir) {
@@ -61,7 +64,7 @@ const route = (f) => {
 
 const pages = new Map(diskFiles.map((f) => [route(f), fs.readFileSync(f, "utf8")]));
 
-const known = new Set([...pages.keys(), ...ON_DEMAND]);
+const known = new Set([...pages.keys(), ...ON_DEMAND.map(routeKey)]);
 const dynamicOk = [/^\/report$/, /^\/account$/, /^\/login$/, /^\/register$/,
   /^\/forgot$/, /^\/reset$/,
   /^\/matrices(\/\d+)?$/, /^\/admin(\/users\/\d+)?$/,
@@ -94,7 +97,7 @@ async function serve() {
   for (let i = 0; i < 120; i++) {
     if (proc.exitCode !== null) throw new Error(`next start упал: ${stderr.slice(0, 400)}`);
     try {
-      const res = await fetchPage("/");
+      const res = await fetchPage(localizedPath("/"));
       if (res.ok) return proc;
     } catch {
       /* сервер ещё поднимается */
@@ -134,6 +137,13 @@ async function loadOnDemand() {
   const proc = await serve();
   let price = null;
   try {
+    // Check the old URLs as redirects, not as final pages or silently followed requests.
+    for (const old of ["/encyclopedia", "/encyclopedia/arcanum/4"]) {
+      const response = await fetchPage(old);
+      if (response.status !== 301 || response.headers.get("location") !== `https://${HOST}${localizedPath(old)}`) {
+        fail(`${old}: expected 301 to the localized page`);
+      }
+    }
     const sitemap = await fetchPage("/sitemap.xml");
     if (!sitemap.ok) fail(`sitemap.xml: сервер ответил ${sitemap.status}`);
     sitemapXml = await sitemap.text();
@@ -148,7 +158,7 @@ async function loadOnDemand() {
         fail(`${r}: сервер ответил ${res.status} — страница по запросу не открывается`);
         continue;
       }
-      pages.set(r, await res.text());
+      pages.set(routeKey(r), await res.text());
     }
     const missing = await fetchPage("/__localization-check-missing__");
     if (missing.status !== 404) fail(`404: сервер ответил ${missing.status}`);
@@ -160,7 +170,7 @@ async function loadOnDemand() {
       for (const m of html.matchAll(/href="(\/[^"#?]*)"/g)) {
         const target = m[1].replace(/\/$/, "") || "/";
         if (!known.has(target) && !target.startsWith("/_next")
-          && !/\.[a-z0-9]{2,5}$/.test(target) && !dynamicOk.some((re) => re.test(target))) linked.add(target);
+          && !/\.[a-z0-9]{2,5}$/.test(target) && !dynamicOk.some((re) => re.test(logicalPath(target)))) linked.add(target);
       }
     }
     for (const target of linked) {
@@ -224,7 +234,7 @@ for (const [r, html] of pages) {
   for (const rule of TEXT_RULES) {
     // Политика конфиденциальности обязана назвать специальные категории ПДн. Это юридическое
     // перечисление, а не рекламное обещание или толкование матрицы.
-    if (r === "/privacy" && rule.category === "medical") continue;
+    if (logicalPath(r) === "/privacy" && rule.category === "medical") continue;
     if (rule.pattern.test(html)) warn(`${r}: слово из text-policy (${rule.category}) «${rule.rule}»`);
   }
 
@@ -246,7 +256,7 @@ for (const [r, html] of pages) {
     if (!hasAsset(src)) fail(`${r}: картинка ${src} — файла нет ни в public, ни в app`);
   }
   // страницы, где карта аркана — часть содержания, а не украшение
-  if (NEEDS_CARD.some((re) => re.test(r)) && !imgs.some((s) => s.startsWith("/img/arcana/"))) {
+  if (NEEDS_CARD.some((re) => re.test(logicalPath(r))) && !imgs.some((s) => s.startsWith("/img/arcana/"))) {
     fail(`${r}: нет карты аркана — колода в public есть, а на странице её не видно`);
   }
 
@@ -262,7 +272,7 @@ for (const [r, html] of pages) {
       if (!hasAsset(target)) fail(`${r}: ссылка на файл ${target} — его нет ни в public, ни в app`);
       continue;
     }
-    if (known.has(target) || dynamicOk.some((re) => re.test(target))) continue;
+    if (known.has(target) || dynamicOk.some((re) => re.test(logicalPath(target)))) continue;
     fail(`${r}: битая внутренняя ссылка ${target}`);
   }
 }
@@ -312,7 +322,7 @@ function checkSitemap() {
 
 // прайс
 function checkPrice(prices) {
-const home = norm(pages.get("/") ?? "");
+const home = norm(pages.get(routeKey(localizedPath("/"))) ?? "");
 if (!home) {
   fail("главная не получена — прайс проверять нечем");
   return;
@@ -339,7 +349,7 @@ const firstScreen = home.slice(headEnd, headEnd + 12000);
 if (!firstScreen.includes(label)) fail("главная: цена не попала в первый экран");
 
 // дата рождения не должна попадать в разметку ссылок оплаты
-for (const m of home.matchAll(/href="\/pay\/[^"]*"/g)) {
+for (const m of home.matchAll(/href="\/(?:ru|en)\/pay\/[^"]*"/g)) {
   if (/\d{4}-\d{2}-\d{2}|birth|date=/.test(m[0])) fail(`главная: дата в ссылке оплаты ${m[0]}`);
 }
 
@@ -349,7 +359,7 @@ if (!prices.providers.length) {
     ? "There are currently no payment methods available for your region"
     : "На данный момент нет доступной оплаты для вашего региона";
   for (const route of ["/pay", "/pay/single"]) {
-    const html = norm(pages.get(route) ?? "");
+    const html = norm(pages.get(routeKey(localizedPath(route))) ?? "");
     if (!html.includes(message)) fail(`${route}: нет сообщения о недоступной оплате региона`);
     if (html.includes('data-testid="pay-modal"')) fail(`${route}: касса открыта без провайдера`);
   }
@@ -357,11 +367,11 @@ if (!prices.providers.length) {
 }
 
 // страница оплаты обязана показывать ту же цену, что спишет касса
-const pay = norm(pages.get("/pay/single") ?? "");
+const pay = norm(pages.get(localizedPath("/pay/single")) ?? "");
 if (pay && !pay.includes(label)) fail(`/pay/single: цена не совпадает с прайсом (${label})`);
 
 // выбор тарифа на /pay должен быть настоящим: видны все цены прайса, а не только ведущая
-const choice = norm(pages.get("/pay") ?? "");
+const choice = norm(pages.get(localizedPath("/pay")) ?? "");
 for (const p of prices.all) {
   const one = `${money(p)} ₽`;
   if (choice && !choice.includes(one)) fail(`/pay: в выборе тарифа нет цены ${one}`);
@@ -402,7 +412,7 @@ const legalState = {};
 
 function checkLegal() {
 for (const legal of ["/terms", "/privacy", "/refund"]) {
-  const html = pages.get(legal) ?? "";
+  const html = pages.get(localizedPath(legal)) ?? "";
   if (!html) {
     fail(`${legal}: страница не получена — реквизиты проверять нечем`);
     continue;
@@ -603,12 +613,13 @@ const VOLATILE = ["CONTENT_MODIFIED", "NEXT_PUBLIC_BUILD_COMMIT", "NEXT_PUBLIC_B
                   "NEXT_PUBLIC_BUILD_TIME", "NEXT_PUBLIC_BUILD_BRANCH"];
 
 function checkCorpusChunks() {
-  const file = path.join(ROOT, "sitemap.xml.body");
-  if (!fs.existsSync(file)) return;                 // собрано не на боевом адресе: сверять нечего
+  // The sitemap is now generated per Host, so there is no static sitemap.xml.body.
+  const sitemapRoutes = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map((match) => new URL(match[1]).pathname);
   const routes = sitemapRoutes.length ? sitemapRoutes : ON_DEMAND;
   const referenced = new Set();
   for (const route of routes) {
-    const html = pages.get(route);
+    const html = pages.get(routeKey(route));
     if (!html) continue;
     for (const m of html.matchAll(/\/_next\/static\/chunks\/([A-Za-z0-9_.-]+\.js)/g)) referenced.add(m[1]);
   }

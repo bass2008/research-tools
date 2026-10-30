@@ -23,5 +23,5 @@ def test_tariffs_keep_product_on_language_switch(page, path, ids):
         plans = page.locator('#plans')
         expect(plans.locator('a[data-testid^="plan-"]')).to_have_count(len(ids))
         for id in ids:
-            expect(plans.get_by_test_id('plan-' + id)).to_have_attribute('href', '/pay/' + id)
+            expect(plans.get_by_test_id('plan-' + id)).to_have_attribute('href', f'/{lang}/pay/' + id)
         expect(plans.locator('.plan-value')).to_have_text(' · better value' if lang == 'en' else ' · выгоднее')

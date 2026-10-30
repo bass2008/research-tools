@@ -1,7 +1,7 @@
 import { forLocale as adminLocale } from "@/lib/adminLocale";
 import { requestLocale } from "@/lib/i18n/request";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 import AdminView from "@/components/admin/AdminView";
 import { forLocale } from "@/lib/site";

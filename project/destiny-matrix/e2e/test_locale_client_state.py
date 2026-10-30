@@ -69,7 +69,7 @@ def test_validation_message_switches_without_resubmitting(page, form, request):
         page.get_by_test_id("pay-email").fill("user@example.ru")
         page.get_by_test_id("pay-submit").click()
     elif form == "calc":
-        page.goto(BASE + "/")
+        page.goto(BASE + "/ru/")
         expect(page.locator("html")).to_have_attribute("lang", "ru")
         page.locator("#d").select_option("31")
         page.locator("#m").select_option("2")

@@ -1,3 +1,4 @@
+import { publicPath } from "@/lib/publicRouting";
 import { requestSite } from "@/lib/siteProfile.server";
 import SavePdfButton from "@/components/matrix/SavePdfButton";
 import PairReport from "@/components/pair/PairReport";
@@ -12,7 +13,7 @@ import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { getBilling } from "@/lib/tariffs.server";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound, redirect } from "next/navigation";
 import { buyHref } from "@/lib/readingLinks";
 import Plans from "@/components/pay/Plans";
@@ -62,7 +63,7 @@ export default async function ReadingPage({ params }: { params: Promise<{ id: st
   const reading = await readReading(Number(id));
   if (!reading) notFound();
   // у личного разбора своя страница, со всей её навигацией по датам
-  if (reading.product === "personal") redirect(`/matrices/${reading.id}`);
+  if (reading.product === "personal") redirect(publicPath(`/matrices/${reading.id}`, L));
   if (reading.product !== "pair") notFound();
   const view = pairView(reading.inputs, L);
   if (!view) notFound();

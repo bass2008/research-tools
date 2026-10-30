@@ -12,6 +12,14 @@ base="${BASE:-https://arcana-sense.ru}"
 base="${base%/}"
 domain="${base#*://}"
 scheme="${base%%://*}"
+case "${domain}" in
+  arcana-sense.com|test.arcana-sense.com|127.0.0.1:3000|com.localhost:3000) locale=en ;;
+  *) locale=ru ;;
+esac
+locale="${CHECK_LOCALE:-$locale}"
+[[ "$locale" == ru || "$locale" == en ]] || { echo 'CHECK_LOCALE must be ru or en' >&2; exit 1; }
+home="/"
+[[ "$locale" == en ]] && home="/en/"
 
 failures=0
 skipped=0
@@ -60,14 +68,21 @@ else
 fi
 
 printf 'Страницы:\n'
-for path in / /encyclopedia /encyclopedia/arcanum/14; do
+for path in "$home" "/$locale/encyclopedia" "/$locale/encyclopedia/arcanum/14"; do
   c="$(code "${base}${path}")"
   printf '  GET %s -> %s\n' "${path}" "${c}"
   [[ "${c}" == "200" ]] || fail "GET ${path} вернул ${c}"
 done
 
+# Old indexable URLs must permanently redirect to the exact language URL.
+for path in /encyclopedia /encyclopedia/arcanum/14; do
+  c="$(code "${base}${path}")"
+  destination="$(header "${base}${path}" location)"
+  [[ "$c" == 301 && "$destination" == "${base}/${locale}${path}" ]] || fail "${path}: expected 301 to ${base}/${locale}${path}, got ${c} ${destination}"
+done
+
 # Контракт, п. 2: node отдаёт и /path, и /path/ — trailingSlash больше не нужен.
-slash="$(code "${base}/encyclopedia/arcanum/14/")"
+slash="$(code "${base}/${locale}/encyclopedia/arcanum/14/")"
 printf '  GET /encyclopedia/arcanum/14/ -> %s\n' "${slash}"
 [[ "${slash}" == "200" || "${slash}" == 30* ]] || fail "адрес со слешем вернул ${slash}"
 
@@ -85,7 +100,7 @@ printf '  /api/auth/me без куки -> %s\n' "${me}"
 [[ "${me}" == '{"user":null}' ]] || fail "/api/auth/me без куки вернул ${me}, ожидался гость {\"user\":null}"
 
 printf 'Токен недоступен из JS:\n'
-html="$(curl -s --max-time 20 "${base}/")"
+html="$(curl -s --max-time 20 "${base}${home}")"
 if grep -qi 'destiny_session' <<<"${html}"; then
   fail 'имя сессионной куки встречается в HTML: сессия обязана жить только в httpOnly-куке'
 else
@@ -93,7 +108,7 @@ else
 fi
 
 printf 'Платные разделы не в предрендере:\n'
-report_cc="$(header "${base}/report" cache-control)"
+report_cc="$(header "${base}/${locale}/report" cache-control)"
 printf '  Cache-Control /report: %s\n' "${report_cc:-<none>}"
 if [[ "${report_cc}" == *"no-store"* || "${report_cc}" == *"private"* ]]; then
   printf '  страница отчёта динамическая\n'

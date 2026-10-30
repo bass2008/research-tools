@@ -87,7 +87,7 @@ def test_context_and_return_urls_are_not_chosen_by_language(client, db, regional
     for key in ("SuccessURL", "FailURL"):
         url = urlsplit(payload[key])
         assert url.netloc == "test.arcana-sense.ru"
-        assert parse_qs(url.query) == {"order": [payment.order_id], "lang": ["ru"]}
+        assert parse_qs(url.query) == {"order": [payment.order_id]}
 
 
 def test_missing_or_unknown_site_is_rejected_before_registration(client, db, regional):
@@ -143,8 +143,8 @@ def test_sweep_restores_payment_origin_and_language(client, db, regional, monkey
         assert sweep.run(db).changed == 1
     assert len(letters) == 1
     rendered = str(letters[0])
-    assert RU + "/report?" in rendered and "lang=ru" in rendered
-    assert COM + "/report?" not in rendered
+    assert RU + "/ru/report" in rendered
+    assert COM + "/ru/report?" not in rendered
 
 
 @pytest.mark.parametrize("origin,locale", [(RU, "ru"), (COM, "en"), (COM, "ru")])
@@ -154,9 +154,9 @@ def test_account_mail_and_pdf_use_request_origin(client, regional, monkeypatch, 
     headers = header(origin, locale)
     response = client.post("/api/auth/register", headers=headers, json={"email": BUY["email"], "password": "123"})
     assert response.status_code == 200
-    assert origin + f"/account?lang={locale}" in str(letters[-1])
+    assert origin + f"/{locale}/account" in str(letters[-1])
     assert client.post("/api/auth/reset/request", headers=headers, json={"email": BUY["email"]}).status_code == 200
-    assert origin + f"/reset?lang={locale}" in str(letters[-1])
+    assert origin + f"/{locale}/reset?token=" in str(letters[-1])
     with sites.using_site(sites.find(origin)):
         assert store.LocalStore().link("sample.pdf").startswith(origin + "/api/reports/file?")
 
@@ -226,10 +226,11 @@ def test_shared_connection_keeps_com_return_and_mail_context(client, db, regiona
     monkeypatch.setattr(payments.PROVIDERS["mock"], "start", capture)
     monkeypatch.setattr(mail, "send", lambda *args: letters.append(args))
     begin(client, headers=header(COM, "ru"))
-    assert captured[0].success.startswith(COM + "/pay/done?")
-    assert "lang=ru" in captured[0].success
+    assert captured[0].success.startswith(COM + "/ru/pay/done?")
+    assert "order=" in captured[0].success
+    assert captured[0].fail.startswith(COM + "/ru/pay/fail?")
     assert captured[0].notification == RU + "/api/payments/notify/shared-mock"
-    assert COM + "/report?" in str(letters[0])
+    assert COM + "/ru/report?" in str(letters[0])
     assert calls == []
 
 

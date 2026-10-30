@@ -12,6 +12,7 @@ export interface SiteProfile {
   verification?: { google?: string; yandex?: string };
   metrikaId?: number;
   errorsDsn?: string;
+  languageOrigins?: Partial<Record<Lang, string>>;
 }
 
 // Compatibility for pure helpers and build-time route enumeration. HTTP requests use
@@ -93,7 +94,14 @@ export function configuredSites(raw?: string): readonly HostedSite[] {
     if (seen.has(host)) throw new Error(`Duplicate site host: ${host}`);
     seen.add(host);
   }
-  return [...profiles.values()];
+  const result = [...profiles.values()];
+  for (const site of result) {
+    const production = Object.values(SITE_HOSTS).includes(site.origin);
+    site.languageOrigins = Object.fromEntries(result
+      .filter((other) => Object.values(SITE_HOSTS).includes(other.origin) === production)
+      .map((other) => [other.defaultLocale, other.origin]));
+  }
+  return result;
 }
 
 export function siteForHost(host: string | null, sites: readonly HostedSite[]): HostedSite | null {

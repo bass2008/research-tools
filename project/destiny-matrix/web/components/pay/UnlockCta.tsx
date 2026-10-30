@@ -8,7 +8,7 @@ import { buyHref } from "@/lib/readingLinks";
 import { alignBirth, type StoredBirth } from "@/lib/storage";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 /**
  * Кнопка покупки. Отдельным клиентским компонентом, чтобы вокруг неё жила серверная разметка:

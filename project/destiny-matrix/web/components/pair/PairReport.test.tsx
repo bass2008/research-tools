@@ -1,3 +1,4 @@
+import { DEFAULT_SITE } from "@/lib/siteProfile";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { D } from "@/lib/i18n";
@@ -76,8 +77,8 @@ describe.each(["ru", "en"] as const)("хвост пары со статьёй в
     const html = renderToStaticMarkup(<PairReport locale={locale} result={result} title="Пара" names={{ a: "А", b: "Б" }}
       dates={dates} units={units} mode="full" printing={false} />);
     const tail = html.match(/<details[^>]*data-sec="tasks"[^>]*>([\s\S]*?)<\/details>/)![1];
-    expect(tail).toContain('href="/encyclopedia/compatibility/tails/9-21-12"');
-    expect(tail.replace(/<figure\b[\s\S]*?<\/figure>/g, "")).not.toMatch(/href="\/encyclopedia\/(compatibility|arcanum)\/\d+"/);
+    expect(tail).toContain(`href="/${DEFAULT_SITE.defaultLocale}/encyclopedia/compatibility/tails/9-21-12"`);
+    expect(tail.replace(/<figure\b[\s\S]*?<\/figure>/g, "")).not.toMatch(/href="\/(?:ru|en)\/encyclopedia\/(compatibility|arcanum)\/\d+"/);
     expect(text(tail)).toContain(text(renderToStaticMarkup(<>{DP.moreTail[locale]("9-21-12")}</>)).trim());
     const first = unit!.report!.find((x): x is string => typeof x === "string")!;
     expect(text(tail)).toContain(text(renderToStaticMarkup(<>{first.slice(0, 40)}</>)).trim());
@@ -86,7 +87,7 @@ describe.each(["ru", "en"] as const)("хвост пары со статьёй в
   it("бесплатная статья открыта и без покупки: ссылка в «Главных числах»", () => {
     const html = renderToStaticMarkup(<PairReport locale={locale} result={result} title="Пара" names={{ a: "А", b: "Б" }}
       dates={dates} units={pairUnits(locale, result, dates, false)} mode="free" printing={false} />);
-    expect(html).toMatch(/data-testid="pair-key-tail-link"[^>]*href="\/encyclopedia\/compatibility\/tails\/9-21-12"|href="\/encyclopedia\/compatibility\/tails\/9-21-12"[^>]*data-testid="pair-key-tail-link"/);
+    expect(html).toMatch(/data-testid="pair-key-tail-link"[^>]*href="\/(?:ru|en)\/encyclopedia\/compatibility\/tails\/9-21-12"|href="\/(?:ru|en)\/encyclopedia\/compatibility\/tails\/9-21-12"[^>]*data-testid="pair-key-tail-link"/);
   });
 });
 
@@ -104,10 +105,10 @@ describe.each(["ru", "en"] as const)("закрытая часть разбора
     expect(html.match(/data-testid="pair-lock-(?!business)/g)).toHaveLength(locked.length + 1);
     expect(html.match(/data-testid="pair-lock-business-/g)).toHaveLength(bizLocked);
     expect(html.match(/data-testid="pair-buy-/g)).toHaveLength(locked.length + 1 + bizLocked);
-    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/pay\?for=pair"/g)).toHaveLength(8);
+    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/(?:ru|en)\/pay\?for=pair"/g)).toHaveLength(8);
     expect(text(html)).toContain(DP.chakras.lockedRow[locale]);
     expect(text(html)).toContain(`${D.report.unlockSection[locale]}250 ₽`);
-    expect(html).toContain('href="/pay?for=pair"');
+    expect(html).toContain(`href="/${DEFAULT_SITE.defaultLocale}/pay?for=pair"`);
   });
 
   it("платные тексты сфер и чакр в разметку не попадают", () => {

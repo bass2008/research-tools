@@ -97,7 +97,7 @@ until curl -sf -o /dev/null "$SITE/"; do sleep 3; done
 curl -fsS "$SITE/version/current.txt"
 curl -fsS https://arcana-sense.com/version/current.txt
 curl -fsS "$SITE/" | grep '<html lang="ru"' >/dev/null
-curl -fsS https://arcana-sense.com/ | grep '<html lang="en"' >/dev/null
+curl -fsS https://arcana-sense.com/en/ | grep '<html lang="en"' >/dev/null
 
 echo "== прогрев печати"
 # Chromium поднимается на первой печати после перезапуска: без прогрева эти секунды ждёт покупатель.

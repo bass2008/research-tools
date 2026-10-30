@@ -112,7 +112,7 @@ def test_locked_sections_show_cards_but_not_paid_text(page, browser, mail):
     expect(guest.locator("[data-locked=true] .mp")).to_have_count(17)
     expect(guest.locator("[data-testid^=section-buy-]")).to_have_count(18)
     for link in guest.locator("[data-testid^=section-buy-]").all():
-        assert link.get_attribute("href") == "/pay?for=personal"
+        assert link.get_attribute("href") == "/ru/pay?for=personal"
 
     chakras = next(s for s in paid["ru"] if s["key"] == "chakras")["longform"]
     expect(guest.locator("[data-testid^=chakra-lock-]")).to_have_count(8)
@@ -152,6 +152,6 @@ def test_saved_locked_matrix_shows_the_same_preview(page, browser, mail):
     expect(page.locator("[data-locked=true]")).to_have_count(18)
     expect(page.locator("[data-locked=true] .mp")).to_have_count(17)
     expect(page.locator("[data-testid^=chakra-lock-]")).to_have_count(8)
-    assert page.get_by_test_id("section-buy-profession").get_attribute("href") == f"/pay?for=personal&m={saved['id']}"
+    assert page.get_by_test_id("section-buy-profession").get_attribute("href") == f"/ru/pay?for=personal&m={saved['id']}"
     assert leaks(html + rsc, secret) == []
     assert leaks(html + rsc, chakra_pieces()) == []

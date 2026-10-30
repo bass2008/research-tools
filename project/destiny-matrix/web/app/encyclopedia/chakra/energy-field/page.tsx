@@ -20,7 +20,7 @@ import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
 import { exampleDay } from "@/lib/today";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound } from "next/navigation";
 
 const KEY = "energy-field";

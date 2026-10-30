@@ -2,7 +2,7 @@ import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedRelated } from "@/lib/related";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale) => {
   const { relatedBoth } = localizedRelated(L);

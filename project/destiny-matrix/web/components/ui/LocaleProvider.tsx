@@ -3,7 +3,8 @@
 import { SITE_LANG, type Lang } from "@/lib/i18n/lang";
 import { LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n/selection";
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { isUserPath, splitPublicPath } from "@/lib/publicRouting";
 import { createContext, useCallback, useContext, useEffect, useState, startTransition, type ReactNode } from "react";
 
 const LocaleContext = createContext<Lang>(SITE_LANG);
@@ -30,17 +31,28 @@ export default function LocaleProvider({ locale: serverLocale, site, children, c
   clientLocalized?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const publicPage = isUserPath(splitPublicPath(pathname ?? "/").path);
   const [clientLocale, setClientLocale] = useState(serverLocale);
   const locale = clientLocalized ? clientLocale : serverLocale;
   const refreshLocale = useCallback((selected: Lang) => {
     if (clientLocalized) setClientLocale(selected);
     else router.refresh();
   }, [clientLocalized, router]);
+  // Back/forward may restore an old page under the layout from the other language.
+  // Refresh that layout from the URL without remounting forms or changing history.
+  useEffect(() => {
+    if (clientLocalized || !publicPage) return;
+    const route = splitPublicPath(window.location.pathname);
+    const expected = route.locale ?? site.defaultLocale;
+    if (expected !== serverLocale) startTransition(() => router.refresh());
+  }, [pathname, serverLocale, site.defaultLocale, clientLocalized, publicPage, router]);
   const allowed = site.locales.join(",");
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
   useEffect(() => {
+    if (publicPage || clientLocalized) return;
     function applySavedLocale(raw: string | null | undefined) {
       const saved = normalizeLocale(raw);
       const selected = saved && allowed.split(",").includes(saved) ? saved : site.defaultLocale;
@@ -57,8 +69,8 @@ export default function LocaleProvider({ locale: serverLocale, site, children, c
       // Use the announced preference to decide whether the page needs updating.
       applySavedLocale(event.newValue);
     }
-    // Public HTML starts in the domain language. Restore only an explicit user choice,
-    // never navigator.language. Keep other open tabs' server trees in the same language.
+    // Private screens restore explicit preferences, never navigator.language.
+    // Public pages keep their URL language, including across tabs and RSC refreshes.
     restore();
     window.addEventListener("storage", storage);
     window.addEventListener("focus", restore);
@@ -68,7 +80,7 @@ export default function LocaleProvider({ locale: serverLocale, site, children, c
       window.removeEventListener("focus", restore);
       window.removeEventListener("pageshow", restore);
     };
-  }, [serverLocale, clientLocalized, site.defaultLocale, allowed, refreshLocale]);
+  }, [serverLocale, clientLocalized, site.defaultLocale, allowed, refreshLocale, publicPage]);
   return <SiteContext.Provider value={site}>
     <RefreshLocaleContext.Provider value={refreshLocale}>
       <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>

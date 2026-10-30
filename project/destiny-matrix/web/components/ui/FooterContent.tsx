@@ -54,7 +54,7 @@ export default function FooterContent({ locale: requestedLocale, site, ...locale
         </div>
         <div>
           <Links locale={L} group="legal" plain={plain} />
-          <p><LanguageLink /></p>
+          <p><LanguageLink plain={plain} /></p>
           <p style={{ marginTop: 8 }}>© 2026</p>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import LocalizedAnchor from "@/components/ui/LocalizedAnchor";
 import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 
@@ -15,9 +16,9 @@ export default function NotFoundBody({ locale: requestedLocale, ...localeProps }
       <h1>{D.nav.notFoundTitle[L]}</h1>
       <p>{D.nav.notFoundText[L]}</p>
       <div className="taglist">
-        <a href="/">{D.nav.notFoundHome[L]}</a>
-        <a href="/encyclopedia">{D.nav.encyclopedia[L]}</a>
-        <a href="/report">{D.nav.myReading[L]}</a>
+        <LocalizedAnchor href="/">{D.nav.notFoundHome[L]}</LocalizedAnchor>
+        <LocalizedAnchor href="/encyclopedia">{D.nav.encyclopedia[L]}</LocalizedAnchor>
+        <LocalizedAnchor href="/report">{D.nav.myReading[L]}</LocalizedAnchor>
       </div>
     </div>
   );

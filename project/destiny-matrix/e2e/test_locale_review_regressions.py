@@ -10,7 +10,7 @@ from test_runtime_localization import switch
 
 @pytest.mark.parametrize("initial", ["en", "ru"])
 @pytest.mark.parametrize("width", [1360, 390])
-def test_global_404_switches_without_navigation(page, initial, width):
+def test_global_404_switches_url_without_navigation_loop(page, initial, width):
     page.set_viewport_size({"width": width, "height": 900})
     page.context.add_cookies([{"name": "arcana_locale", "value": initial, "url": BASE}])
     documents, errors, flights = [], [], []
@@ -19,32 +19,33 @@ def test_global_404_switches_without_navigation(page, initial, width):
             if request.is_navigation_request() and request.frame == page.main_frame else None)
     page.on("request", lambda request: flights.append(request.url)
             if request.headers.get("rsc") == "1" else None)
-    response = page.goto(BASE + "/missing-localization-regression")
+    response = page.goto(BASE + f"/{initial}/missing-localization-regression")
     assert response.status == 404
     expect(page.locator("html")).to_have_attribute("lang", initial)
     page.evaluate("window.localeDocumentMarker = 'same-document'")
-    for locale in (["ru", "en", "ru"] if initial == "en" else ["en", "ru"]):
+    choices = ["ru", "en", "ru"] if initial == "en" else ["en", "ru"]
+    for locale in choices:
         switch(page, locale)
         expect(page.locator("h1")).to_have_text("Такой страницы нет" if locale == "ru" else "This page does not exist")
         expect(page.get_by_test_id("nav-account")).to_have_text("Кабинет" if locale == "ru" else "Account")
         assert bool(re.search("[А-Яа-я]", page.title())) == (locale == "ru")
-        assert page.evaluate("window.localeDocumentMarker") == "same-document"
+        assert page.url == BASE + f"/{locale}/missing-localization-regression"
     page.wait_for_timeout(1500)  # The old bug produced dozens of navigations in this interval.
-    assert len(documents) == 1, documents
+    assert len(documents) == 1 + len(choices), documents
     assert flights == []
     assert errors == []
     assert page.reload().status == 404
     expect(page.locator("html")).to_have_attribute("lang", "ru")
     page.wait_for_timeout(500)
-    assert len(documents) == 2, documents
+    assert len(documents) == 2 + len(choices), documents
     assert flights == []
-    page.locator("main a[href='/']").click()
+    page.locator("main a[href='/ru/']").click()
     expect(page.locator("#d")).to_be_visible()
     expect(page.locator("html")).to_have_attribute("lang", "ru")
 
 
-def test_global_404_follows_another_tabs_choice(page):
-    page.goto(BASE + "/missing-localization-regression")
+def test_global_404_keeps_url_language_when_another_tab_switches(page):
+    page.goto(BASE + "/en/missing-localization-regression")
     expect(page.locator("html")).to_have_attribute("lang", "en")
     page.evaluate("window.localeDocumentMarker = 'same-document'")
     other = page.context.new_page()
@@ -52,8 +53,8 @@ def test_global_404_follows_another_tabs_choice(page):
         other.goto(BASE + "/login")
         for locale in ["ru", "en"] * 3:
             switch(other, locale)
-            expect(page.locator("html")).to_have_attribute("lang", locale)
-            expect(page.locator("h1")).to_have_text("Такой страницы нет" if locale == "ru" else "This page does not exist")
+            expect(page.locator("html")).to_have_attribute("lang", "en")
+            expect(page.locator("h1")).to_have_text("This page does not exist")
             assert page.evaluate("window.localeDocumentMarker") == "same-document"
     finally:
         other.close()
@@ -88,7 +89,7 @@ def test_article_role_names_switch_in_place(page, section, slug):
     login = page.request.post(BASE + "/api/auth/login", data={"email": ADMIN[0], "password": ADMIN[1]})
     assert login.ok, login.text()
     page.context.add_cookies([{"name": "arcana_locale", "value": "ru", "url": BASE}])
-    page.goto(BASE + f"/encyclopedia/{section}/{slug}")
+    page.goto(BASE + f"/ru/encyclopedia/{section}/{slug}")
     expect(page.locator("html")).to_have_attribute("lang", "ru")
     reading = page.locator(".character-reading")
     expect(reading).to_be_visible()

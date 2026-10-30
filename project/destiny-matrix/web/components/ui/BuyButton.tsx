@@ -7,6 +7,7 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { buyHref } from "@/lib/readingLinks";
 import { useBirth } from "@/lib/useBirth";
+import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 
 /** Кнопка «Купить» в шапке. Что предложить, решает страница, а не браузер: там может лежать и
@@ -29,7 +30,7 @@ export default function BuyButton({ locale: requestedLocale, ...localeProps }: (
   const L = requestedLocale ?? activeLocale;
   const { plain } = localeProps;
 
-  const path = usePathname();
+  const path = splitPublicPath(usePathname()).path;
   const birth = useBirth();
   const mode = useOfferMode();
   if (mode !== "sell") return null;

@@ -5,7 +5,7 @@ import Plans, { type PlanCarry } from "@/components/pay/Plans";
 import { useOfferMode } from "@/components/pay/useOfferMode";
 import { D, forLocale as localizedI18n } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 /** Подписка уже открывает продукт: покупать нечего, есть путь к разборам. */
 export function Subscribed({ locale: L, pair = false }: { locale: Locale; pair?: boolean }) {

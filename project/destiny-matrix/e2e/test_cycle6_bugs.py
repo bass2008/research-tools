@@ -50,7 +50,7 @@ def test_chakra_page_does_not_link_to_itself_among_other_levels(page: Page):
         }"""
     )
     assert hrefs is not None, "на странице чакры нет блока «Остальные уровни»"
-    assert "/encyclopedia/chakra/anahata" not in hrefs, (
+    assert "/ru/encyclopedia/chakra/anahata" not in hrefs, (
         f"страница чакры ссылается сама на себя: {hrefs}"
     )
     assert len(hrefs) == 6, f"«остальных» уровней {len(hrefs)}, а их шесть: {hrefs}"
@@ -67,7 +67,7 @@ def test_carousel_button_never_points_at_the_page_it_stands_on(page: Page, path)
     hrefs = page.locator(".slide .btn.ghost").evaluate_all(
         "els => els.map(e => e.getAttribute('href'))"
     )
-    dead = [h for h in hrefs if (h or "").rstrip("/") == path.rstrip("/")]
+    dead = [h for h in hrefs if (h or "").rstrip("/") == ("/ru" + path).rstrip("/")]
     assert not dead, f"на {path} кнопка карусели ведёт на эту же страницу: {dead}"
 
 

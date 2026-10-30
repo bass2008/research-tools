@@ -7,6 +7,7 @@
  * отдельный. Иначе пять открытых страниц выглядели в админке как пять разных людей. HttpOnly-куку
  * при наличии добавляет BFF: JavaScript по-прежнему не видит ни токен, ни user_id.
  */
+import { splitPublicPath } from "@/lib/publicRouting";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
@@ -62,7 +63,7 @@ export default function PulseBeacon() {
 
   useEffect(() => {
     // страницу печати открывает наш же Chromium: это не посетитель, считать его нельзя
-    if (path.startsWith("/print")) return;
+    if (splitPublicPath(path).path.startsWith("/print")) return;
     const visitor = visitorId();
     const tab = tabId();
     const beat = () => {

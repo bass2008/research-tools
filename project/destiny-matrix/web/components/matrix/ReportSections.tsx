@@ -1,3 +1,4 @@
+import LocalizedAnchor from "@/components/ui/LocalizedAnchor";
 import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 // Разметка разделов. Без "use client" и без своих данных намеренно: этот же компонент
 // печатает серверная страница /report для оплатившего (тексты платных разделов приходят
@@ -22,7 +23,7 @@ import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang
 import { localized } from "@/lib/i18n/localized";
 import type { SectionOut } from "@/lib/publicSpec";
 import { forLocale as localizedSite } from "@/lib/site";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale, site) => {
   const { arcanumTitle } = localizedArcana(L);
@@ -105,7 +106,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                       data-position={p.label}
                       data-arcanum={p.arcanum}
                     >
-                      <a className="poscard" href={printing ? publicHref(p.href) : p.href}>
+                      <LocalizedAnchor className="poscard" href={printing ? publicHref(p.href) : p.href}>
                         <span className="who">{p.label}</span>
                         <ArcanumCard locale={L} n={p.arcanum} size="grid" decorative half={printing} />
                         <span className="lb">
@@ -113,7 +114,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                             <span className="rn">{p.arcanum}</span> {arcanumTitle(p.arcanum)}
                           </span>
                         </span>
-                      </a>
+                      </LocalizedAnchor>
                       {readingRole ? (
                         <CharacterRoleParts locale={L} role={readingRole} />
                       ) : p.text && !s.tailReading ? (

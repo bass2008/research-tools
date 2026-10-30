@@ -10,7 +10,7 @@ import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useMessage } from "@/lib/i18n/useMessage";
 import { forLocale as localizedSite } from "@/lib/site";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useState } from "react";
 
 export const forLocale = localized((L: Locale, site) => {

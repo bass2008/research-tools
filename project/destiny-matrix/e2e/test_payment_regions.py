@@ -78,5 +78,6 @@ def test_terms_distinguish_free_calculator_from_account_readings(page):
     expect(page.locator("main")).to_contain_text("An account is required to save charts and access purchased readings")
     expect(page.locator("main")).not_to_contain_text("An account is optional")
     switch(page, "ru")
+    page.wait_for_url(COM + "/ru/terms")
     expect(page.locator("main")).to_contain_text("Для сохранения карт и доступа к приобретённым разборам нужен аккаунт")
     expect(page.locator("main")).not_to_contain_text("Аккаунт необязателен")

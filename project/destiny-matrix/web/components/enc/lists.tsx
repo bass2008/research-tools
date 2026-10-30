@@ -8,7 +8,7 @@ import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedText } from "@/lib/text";
 import { ENERGY_FIELD_HREF } from "@/lib/readingTypes";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export type PositionKind = (typeof POSITIONS)[number]["kind"];
 

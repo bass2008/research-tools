@@ -316,9 +316,9 @@ def _open(db: Session, payload: PaymentIn, connection: sites.Connection) -> dict
     db.flush()
 
     order = payments.order_id(payment.id)
-    query = urlencode({"order": order, "lang": current_locale()})
-    urls = PaymentUrls(success=f"{site.origin}/pay/done?{query}",
-                       fail=f"{site.origin}/pay/fail?{query}",
+    query = urlencode({"order": order})
+    urls = PaymentUrls(success=f"{site.origin}/{current_locale()}/pay/done?{query}",
+                       fail=f"{site.origin}/{current_locale()}/pay/fail?{query}",
                        notification=connection.notification_url)
     try:
         started = provider.start(order, purchase.amount, purchase.body()["name"], user.email, urls=urls)

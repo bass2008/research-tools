@@ -10,5 +10,5 @@ export async function requestLocale(request?: Request): Promise<Lang> {
 }
 
 export async function publicLocale(): Promise<Lang> {
-  return (await requestSite()).defaultLocale;
+  return requestLocale();
 }

@@ -18,7 +18,8 @@ import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { useBirth } from "@/lib/useBirth";
 import { buyHref } from "@/lib/readingLinks";
-import Link, { useLinkStatus } from "next/link";
+import { useLinkStatus } from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useCallback, useEffect, useState } from "react";
 
 function OpenReadingLabel({ locale }: { locale: Locale }) {

@@ -13,9 +13,17 @@ from playwright.sync_api import expect
 from conftest import BASE
 
 
+def public_path(path, locale):
+    if path == "/":
+        return "/" if locale == "ru" else "/en/"
+    return f"/{locale}{path}"
+
+
 def read(path, host, **headers):
     # Connect only to the local acceptance server; Host simulates the production domain.
     assert BASE.startswith(("http://127.0.0.1:", "http://localhost:"))
+    if path == "/" or path.startswith(("/encyclopedia", "/meaning", "/contacts")):
+        path = public_path(path, "ru" if host in ("arcana-sense.ru", "localhost:3000") else "en")
     request = urllib.request.Request(BASE + path, headers={"Host": host, **headers})
     with urllib.request.urlopen(request, timeout=45) as response:
         return response.read().decode(), response.headers
@@ -32,7 +40,7 @@ def test_public_html_and_metadata_depend_only_on_domain(path, host, locale):
         })
         assert re.search(fr'<html[^>]*lang="{locale}"', html)
         canonical = re.search(r'<link rel="canonical" href="([^"]+)"', html).group(1)
-        assert canonical.rstrip("/") == f"https://{host}{path}".rstrip("/")
+        assert canonical.rstrip("/") == f"https://{host}{public_path(path, locale)}".rstrip("/")
         title = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S).group(1)
         assert bool(re.search("[А-Яа-я]", title)) == (locale == "ru"), title
         assert "no-store" in headers.get("Cache-Control", "")
@@ -41,7 +49,7 @@ def test_public_html_and_metadata_depend_only_on_domain(path, host, locale):
             article = next(item for item in objects if item.get("@type") == "Article")
             assert article["inLanguage"] == locale
             assert article["publisher"]["url"] == f"https://{host}"
-            assert article["mainEntityOfPage"]["@id"] == f"https://{host}{path}"
+            assert article["mainEntityOfPage"]["@id"] == f"https://{host}{public_path(path, locale)}"
 
 
 def test_interleaved_hosts_do_not_share_rendered_language_or_canonical():
@@ -49,7 +57,7 @@ def test_interleaved_hosts_do_not_share_rendered_language_or_canonical():
         host, locale = ("arcana-sense.ru", "ru") if i % 2 else ("arcana-sense.com", "en")
         html, _ = read("/encyclopedia/arcanum/4", host)
         assert f'<html lang="{locale}"' in html
-        assert f'<link rel="canonical" href="https://{host}/encyclopedia/arcanum/4"' in html
+        assert f'<link rel="canonical" href="https://{host}/{locale}/encyclopedia/arcanum/4"' in html
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(check, range(12)))
 
@@ -72,27 +80,28 @@ def test_rendered_page_without_explicit_choice_uses_domain_default(browser, agen
         expect(page.locator("html")).to_have_attribute("lang", "en")
         expect(page.locator("h1")).to_contain_text("4 in the destiny matrix: The Emperor")
         assert "lang=" not in page.url
-        assert not any(cookie["name"] == "arcana_locale" for cookie in context.cookies())
+        # Prefetching private navigation can persist the URL locale; the query/browser
+        # preference must never persist Russian while the English URL is displayed.
+        assert all(cookie["value"] == "en" for cookie in context.cookies()
+                   if cookie["name"] == "arcana_locale")
         # A real interaction confirms hydration; automatic browser language never wins.
         page.get_by_test_id("language-ru").click()
         expect(page.locator("html")).to_have_attribute("lang", "ru")
         expect(page.locator("h1")).to_contain_text("Император")
 
 
-def test_choice_survives_navigation_reload_and_another_tab(page):
-    page.goto(BASE + "/encyclopedia/arcanum/4")
+def test_public_language_is_in_url_and_does_not_change_other_tabs(page):
+    page.goto(BASE + "/en/encyclopedia/arcanum/4")
     page.get_by_test_id("language-ru").click()
-    expect(page.locator("html")).to_have_attribute("lang", "ru")
-    page.locator('header a[href="/encyclopedia"]').click()
+    page.wait_for_url(BASE + "/ru/encyclopedia/arcanum/4")
+    page.locator('header a[href="/ru/encyclopedia"]').click()
     expect(page.locator("h1")).to_contain_text("Энциклопедия")
     page.reload()
     expect(page.locator("html")).to_have_attribute("lang", "ru")
     other = page.context.new_page()
-    other.goto(BASE + "/encyclopedia/arcanum/4")
-    expect(other.locator("html")).to_have_attribute("lang", "ru")
-    other.get_by_test_id("language-en").click()
-    expect(page.locator("html")).to_have_attribute("lang", "en")
-    expect(page.locator("h1")).to_have_text("Destiny matrix encyclopedia")
+    other.goto(BASE + "/en/encyclopedia/arcanum/4")
+    expect(other.locator("html")).to_have_attribute("lang", "en")
+    expect(page.locator("html")).to_have_attribute("lang", "ru")
 
 
 def test_russian_domain_serves_russian_html_and_switches_to_english(browser):
@@ -111,3 +120,13 @@ def test_unknown_host_is_rejected():
     with pytest.raises(urllib.error.HTTPError) as error:
         read("/", "unknown.example", **{"X-Forwarded-Host": "arcana-sense.com"})
     assert error.value.code == 421
+
+
+@pytest.mark.parametrize("host,locale", [("arcana-sense.ru", "ru"), ("arcana-sense.com", "en")])
+def test_encyclopedia_navigation_has_no_legacy_links(host, locale):
+    """Includes the plain-anchor sidebar, not just Next Link cards."""
+    html, _ = read("/encyclopedia", host)
+    links = re.findall(r'<a\b[^>]*href="([^"]+)"', html)
+    assert links
+    assert f"/{locale}/encyclopedia/arcanum" in links
+    assert not any(href.startswith("/encyclopedia") for href in links)

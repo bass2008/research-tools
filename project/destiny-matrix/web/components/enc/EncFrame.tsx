@@ -11,7 +11,9 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useUrlParam } from "@/lib/useUrlParam";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
+import LocalizedAnchor from "@/components/ui/LocalizedAnchor";
+import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 
@@ -51,7 +53,7 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
   } = localeProps;
   const { encyclopediaSectionFromPath, encyclopediaSectionHref } = forLocale(L);
 
-  const path = usePathname();
+  const path = splitPublicPath(usePathname()).path;
   const fromPath = useMemo(
     () => encyclopediaSectionFromPath(path, positionKinds, articlePaths),
     [path, positionKinds, articlePaths],
@@ -192,7 +194,7 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
         <i>{s.count}</i>
       </Link>
     ) : (
-      <a
+      <LocalizedAnchor
         key={s.key}
         className={s.key === active ? "enc-navi on" : "enc-navi"}
         aria-current={s.key === active}
@@ -200,7 +202,7 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
       >
         {s.title}
         <i>{s.count}</i>
-      </a>
+      </LocalizedAnchor>
     ),
   );
 

@@ -1,5 +1,8 @@
 "use client";
 
+import { navigationHref } from "@/lib/publicRouting";
+import { useSite } from "@/components/ui/LocaleProvider";
+
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { forLocale as localizedApi, type MatrixListItem } from "@/lib/api";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -46,6 +49,8 @@ export default function CalculationProvider({ locale: requestedLocale, ...locale
   const L = requestedLocale ?? activeLocale;
   const { children } = localeProps;
   const router = useRouter();
+  const navigationSite = useSite();
+  const navigationLocale = useLocale();
   const { dates: ownDates, ready: datesReady } = useSavedDates();
   const [requested, setRequested] = useState<StoredBirth | null>(null);
   const birth = useBirth();
@@ -91,13 +96,14 @@ export default function CalculationProvider({ locale: requestedLocale, ...locale
       if (opened.align) alignBirth(opened.align);
       const target = `/?m=${paid.id}#result`;
       const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-      if (current !== target) router.push(target);
+      const destination = navigationHref(target, navigationSite, navigationLocale);
+      if (current !== destination) router.push(destination);
     } else if (new URLSearchParams(window.location.search).has("m")) {
       // На главной открыт прежний купленный отчёт, но человек запросил другую дату.
-      router.push("/#result");
+      router.push(navigationHref("/#result", navigationSite, navigationLocale));
     }
     setRequested(null);
-  }, [datesReady, ownDates, requested, router]);
+  }, [datesReady, ownDates, requested, router, navigationLocale, navigationSite]);
 
   return <OwnDates.Provider value={ownDates}>{children}</OwnDates.Provider>;
 }

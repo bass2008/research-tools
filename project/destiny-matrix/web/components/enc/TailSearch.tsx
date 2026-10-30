@@ -3,7 +3,7 @@
 import { D } from "@/lib/i18n";
 import { DP } from "@/lib/i18n/dict/pair";
 import type { Lang as Locale } from "@/lib/i18n/lang";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useState } from "react";
 
 export interface TailLink {

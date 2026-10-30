@@ -1,3 +1,4 @@
+import LocalizedAnchor from "@/components/ui/LocalizedAnchor";
 import type { CSSProperties, ReactNode } from "react";
 import styles from "./ChakraMapHover.module.css";
 
@@ -61,5 +62,5 @@ export function OctagramPoint({ angle, radius, size, font, value, color, title, 
       <text className={small ? "n sm" : "n"} x={fmt(x)} y={fmt(y)} fontSize={font}>{value}</text>
     </>
   );
-  return href ? <a href={href} aria-label={title} {...props}>{body}</a> : <g aria-label={title} {...props}>{body}</g>;
+  return href ? <LocalizedAnchor href={href} aria-label={title} {...props}>{body}</LocalizedAnchor> : <g aria-label={title} {...props}>{body}</g>;
 }

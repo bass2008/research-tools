@@ -159,7 +159,7 @@ def test_every_card_and_point_leads_to_its_arcanum(page: Page):
     assert loose == 0, f"карт без ссылки: {loose}"
     points = page.locator("#pair-merge svg.oct [data-map-point]")
     assert points.count() == page.locator("#pair-merge svg.oct a[data-map-point]").count() > 0
-    first = page.locator("#sec-meet a[href^='/encyclopedia/compatibility/']").first
+    first = page.locator("#sec-meet a[href^='/ru/encyclopedia/compatibility/']").first
     target = first.get_attribute("href")
     first.click(force=True)
     page.wait_for_url(f"**{target}")
@@ -167,7 +167,7 @@ def test_every_card_and_point_leads_to_its_arcanum(page: Page):
 
 def test_pair_page_is_in_the_header(page: Page):
     page.goto(BASE, wait_until="domcontentloaded")
-    link = page.locator("header .hnav a[href='/compatibility']")
+    link = page.locator("header .hnav a[href='/ru/compatibility']")
     expect(link).to_have_text("Совместимость")
 
 
@@ -187,7 +187,7 @@ def test_pair_is_open_in_english(browser):
     context = browser.new_context(locale="en-US")
     page = context.new_page()
     page.goto(en, wait_until="domcontentloaded")
-    expect(page.locator("header .hnav a[href='/compatibility']")).to_have_count(1)
+    expect(page.locator("header .hnav a[href='/en/compatibility']")).to_have_count(1)
     assert page.goto(f"{en}/compatibility").status == 200
     expect(page.get_by_test_id("pair-report")).to_be_visible()
     context.close()
@@ -197,21 +197,21 @@ def test_compatibility_articles_are_linked_and_lead_to_the_pair_calculator(page:
     page.goto(f"{BASE}/compatibility", wait_until="domcontentloaded")
     articles = page.get_by_test_id("compatibility-articles")
     for href in ("/compatibility-center", "/encyclopedia/compatibility/tails", "/business-compatibility"):
-        expect(articles.locator(f"a[href='{href}']")).to_have_count(1)
+        expect(articles.locator(f"a[href='/ru{href}']")).to_have_count(1)
     expect(page.locator("#sec-atmosphere").get_by_test_id("pair-article-atmosphere")).to_have_attribute(
-        "href", "/compatibility-center")
-    expect(page.get_by_test_id("pair-article-business")).to_have_attribute("href", "/business-compatibility")
+        "href", "/ru/compatibility-center")
+    expect(page.get_by_test_id("pair-article-business")).to_have_attribute("href", "/ru/business-compatibility")
 
     for key in ("compatibility-center", "business-compatibility"):
         page.goto(f"{BASE}/{key}", wait_until="domcontentloaded")
-        expect(page.get_by_test_id("hub-pair-calc").locator("a[href='/compatibility']")).to_have_count(1)
+        expect(page.get_by_test_id("hub-pair-calc").locator("a[href='/ru/compatibility']")).to_have_count(1)
         expect(page.get_by_test_id("calc-promo")).to_have_count(0)
 
     page.goto(f"{BASE}/encyclopedia/compatibility/16", wait_until="domcontentloaded")
     for href in ("/compatibility-center", "/encyclopedia/compatibility/tails"):
-        expect(page.locator(f"main a[href='{href}']").first).to_be_visible()
+        expect(page.locator(f"main a[href='/ru{href}']").first).to_be_visible()
     page.goto(f"{BASE}/encyclopedia/karmic-tail/18-9-9", wait_until="domcontentloaded")
-    expect(page.get_by_test_id("tail-compatibility").locator("a[href='/encyclopedia/compatibility/tails']")).to_have_count(1)
+    expect(page.get_by_test_id("tail-compatibility").locator("a[href='/ru/encyclopedia/compatibility/tails']")).to_have_count(1)
     assert page.request.get(f"{BASE}/karmic-compatibility", max_redirects=0).status == 301
 
 

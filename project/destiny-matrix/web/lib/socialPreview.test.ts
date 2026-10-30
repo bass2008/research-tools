@@ -8,7 +8,7 @@ import { configuredSites, siteForHost } from "./siteProfile";
 describe("social previews use the public language of the domain", () => {
   it.each([
     ["arcana-sense.com", "en", "/og-en.png"],
-    ["arcana-sense.com", "ru", "/og-en.png"],
+    ["arcana-sense.com", "ru", "/og.png"],
     ["arcana-sense.ru", "ru", "/og.png"],
   ] as const)("%s with %s interface", (host, locale, asset) => {
     const site = siteForHost(host, configuredSites())!;

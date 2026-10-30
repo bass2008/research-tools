@@ -3,7 +3,7 @@ import JsonLd from "@/components/ui/JsonLd";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedSchema, type Crumb } from "@/lib/schema";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { Fragment } from "react";
 
 export const forLocale = localized((L: Locale, site) => {

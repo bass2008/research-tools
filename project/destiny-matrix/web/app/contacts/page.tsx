@@ -7,7 +7,7 @@ import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 const forLocale = localized((L: Locale, site) => {
   const { LEGAL, pageMeta } = localizedSite(L, site);

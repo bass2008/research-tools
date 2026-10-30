@@ -1,4 +1,8 @@
-import Link from "next/link";
+"use client";
+
+import Link from "@/components/ui/LocalizedLink";
+import { useLocale, useSite } from "./LocaleProvider";
+import { navigationHref } from "@/lib/publicRouting";
 
 /** Ссылка шапки и подвала.
  *
@@ -12,6 +16,7 @@ export default function SiteLink({
   children,
   ...rest
 }: React.ComponentProps<"a"> & { plain?: boolean; href: string }) {
+  href = navigationHref(href, useSite(), useLocale());
   if (plain) return <a href={href} {...rest}>{children}</a>;
   return <Link href={href} {...rest}>{children}</Link>;
 }

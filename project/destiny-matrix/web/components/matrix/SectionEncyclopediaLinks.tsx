@@ -8,7 +8,7 @@ import {
 } from "@/lib/publicSpec";
 import { CHAKRA_HUB_HREF } from "@/lib/readingTypes";
 import { forLocale as localizedSite } from "@/lib/site";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale, site) => {
   const { positionHref, sectionEntityLink } = localizedPublicSpec(L);

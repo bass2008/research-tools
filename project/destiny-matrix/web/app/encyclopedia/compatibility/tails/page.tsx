@@ -17,7 +17,7 @@ import { requestLocale, publicLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound } from "next/navigation";
 
 const forLocale = localized((L: Locale, site) => {

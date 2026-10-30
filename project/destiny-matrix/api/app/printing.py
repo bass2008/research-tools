@@ -143,8 +143,8 @@ def running(db: Session, user_id: int, reading_id: int) -> ReportJob | None:
 def print_url(reading: Reading, token: str) -> str:
     """Адрес страницы печати: у каждого продукта своя, номер разбора — в её параметре."""
     product = products.PRODUCTS[reading.product]
-    return (f"{settings.web_internal_url.rstrip('/')}{product.print_path}"
-            f"?{product.print_param}={reading.id}&t={token}&lang={current_locale()}")
+    return (f"{settings.web_internal_url.rstrip('/')}/{current_locale()}{product.print_path}"
+            f"?{product.print_param}={reading.id}&t={token}")
 
 
 def run(db: Session, user_id: int, reading_id: int) -> ReportJob:

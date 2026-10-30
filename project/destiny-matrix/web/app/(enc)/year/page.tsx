@@ -20,7 +20,7 @@ import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedText } from "@/lib/text";
 import { forLocale as localizedYearExample } from "@/lib/yearExample";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 const forLocale = localized((L: Locale, site) => {
   const { positionHref } = localizedPublicSpec(L);

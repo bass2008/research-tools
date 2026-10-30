@@ -12,17 +12,17 @@ def test_open_shows_pending_until_reading_arrives(page, mail, product, inputs, c
     assert page.request.post(f"{BASE}/api/auth/register", data={"email": mail, "password": "1234"}).ok
     reading = page.request.post(f"{BASE}/api/readings", data={"product": product, "inputs": inputs})
     assert reading.ok
-    target = f"{BASE}/{path}/{reading.json()['id']}"
+    target = f"{BASE}/ru/{path}/{reading.json()['id']}"
     held = []
     page.route(f"{target}*", lambda route: held.append(route))
     page.goto(f"{BASE}/account", wait_until="domcontentloaded")
-    link = page.get_by_test_id(card_id).locator(f'a[href="/{path}/{reading.json()["id"]}"]')
+    link = page.get_by_test_id(card_id).locator(f'a[href="/ru/{path}/{reading.json()["id"]}"]')
     expect(link).to_have_text("Открыть")
     link.click()
     try:
         expect(link).to_have_text("Открываем…", timeout=1500)
         expect(link.locator('[aria-busy="true"]')).to_be_visible()
-        assert page.url == f"{BASE}/account"
+        assert page.url == f"{BASE}/ru/account"
     finally:
         for route in held:
             route.continue_()

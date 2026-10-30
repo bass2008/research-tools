@@ -6,7 +6,7 @@ import { useLocale } from "@/components/ui/LocaleProvider";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import type { PaymentProvider, Tariff } from "@/lib/tariffs";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 // Экран оплаты один на два маршрута: `/pay` (выбор с нуля) и `/pay/<тариф>` (тариф выбран
 // ссылкой из карточки). Отличаются только тем, что отмечено при открытии.

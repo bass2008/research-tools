@@ -4,8 +4,9 @@ import { useState } from "react";
 
 // Кто вошёл — видно из ответа сервера, а не из localStorage: признак доступа один на весь сайт.
 import { useSession } from "@/components/account/useSession";
-import { useLocale } from "@/components/ui/LocaleProvider";
+import { useLocale, useSite } from "@/components/ui/LocaleProvider";
 import SiteLink from "@/components/ui/SiteLink";
+import { navigationHref } from "@/lib/publicRouting";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
@@ -35,6 +36,7 @@ export const forLocale = localized((L: Locale) => {
 });
 
 export default function SessionBadge({ locale: requestedLocale, ...localeProps }: ({ plain?: boolean }) & { locale?: Locale }) {
+  const site = useSite();
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
   const { plain } = localeProps;
@@ -88,7 +90,7 @@ export default function SessionBadge({ locale: requestedLocale, ...localeProps }
           // Полная перезагрузка, а не router.push: клиентский кеш роутера держит уже
           // напечатанные страницы, и после выхода прошлый разбор с датой рождения оставался
           // виден по той же ссылке.
-          window.location.assign("/");
+          window.location.assign(navigationHref("/", site, L));
         }}
       >
         {failed ? D.auth.signOutAgain[L] : D.auth.signOut[L]}

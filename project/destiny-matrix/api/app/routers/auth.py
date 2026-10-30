@@ -87,7 +87,7 @@ def reset_request(payload: ResetRequest, request: Request, db: Session = Depends
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is not None:
         token = create_reset_token(user.id, user.password_hash)
-        mail.reset(user.email, f"{sites.current().origin}/reset?lang={current_locale()}&token={token}", settings.reset_ttl_hours)
+        mail.reset(user.email, f"{sites.current().origin}/{current_locale()}/reset?token={token}", settings.reset_ttl_hours)
     # исход журналируется внутренне; наружу ответ по-прежнему одинаков (без утечки перечисления)
     audit.record("reset", "success" if user is not None else "failed", email=payload.email,
                  ip=audit.client_ip(request))

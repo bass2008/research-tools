@@ -8,6 +8,7 @@ import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
 import { buildSettings } from "./settings/build";
 import { ENERGY_FIELD_HREF } from "./readingTypes";
+import { publicUrl } from "./publicRouting";
 
 // По решению владельца от 27.09.2026 все адреса снова получают общую дату релиза, как до
 // 6abed77 (30.08). Тогда карта была статической и new Date() фиксировалась при сборке.
@@ -36,7 +37,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
   const { SERVICE_PAGES, servicePages } = localizedServicePages(L);
   const { ARCANUM_HUB, CHAKRA_HUB, COMPATIBILITY_HUB, KARMIC_TAIL_HUB, PAIR_TAIL_HUB, POSITION_HUB, YEAR_HUB, CHAKRA_PAGES, POSITIONS, arcanumHref, chakraHref, compatibilityHref, hasHubRoute, hubHref, karmicTailHref, pairTailHref, positionHref, yearHref, } = localizedEncyclopedia(L);
 
-  const abs = (path: string) => new URL(path, site.origin).toString();
+  const abs = (path: string) => publicUrl(path, site);
   // Один адрес — одна запись. Источников у карты несколько (хабы, реестр служебных страниц,
   // разделы), и «О методе» попал в неё дважды: он одновременно хаб и служебная страница.
   // Дубль в карте — сигнал поиску, что сайт сам не знает своих адресов.

@@ -120,11 +120,11 @@ def test_hard_refresh_is_stable_on_every_page_type(page: Page) -> None:
     # Реальные id зависят от содержимого БД, поэтому берём доступные ссылки, но сохраняем
     # статические запасные адреса выше: тест остаётся полным и на только что очищенной БД.
     page.goto(f"{BASE}/account", wait_until="domcontentloaded")
-    saved = page.locator('a[href^="/matrices/"]').evaluate_all(
+    saved = page.locator('a[href^="/ru/matrices/"]').evaluate_all(
         "links => links.map(link => link.getAttribute('href')).filter(Boolean)",
     )
     page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
-    users = page.locator('a[href^="/admin/users/"]').evaluate_all(
+    users = page.locator('a[href^="/ru/admin/users/"]').evaluate_all(
         "links => links.map(link => link.getAttribute('href')).filter(Boolean)",
     )
     routes = list(dict.fromkeys([*REFRESH_ROUTES, *saved, *users]))
@@ -156,7 +156,7 @@ def test_back_after_article_contents_link_shows_previous_page(page):
     page.goto(f"{BASE}/encyclopedia/karmic-tail/18-9-9", wait_until="networkidle")
     page.locator(".enc-tabs [role=tab]").nth(1).click()
     page.locator(".enc-toc a").nth(4).click()
-    page.locator(".enc-panes a[href='/encyclopedia/arcanum/9']").first.click()
-    page.wait_for_url("**/encyclopedia/arcanum/9")
+    page.locator(".enc-panes a[href='/ru/encyclopedia/arcanum/9']").first.click()
+    page.wait_for_url("**/ru/encyclopedia/arcanum/9")
     page.go_back()
     expect(page.locator(".enc-panes h1")).to_contain_text("18-9-9")

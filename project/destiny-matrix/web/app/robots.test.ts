@@ -1,3 +1,4 @@
+import { splitPublicPath } from "@/lib/publicRouting";
 import { describe, expect, it, vi } from "vitest";
 
 import { robotsForSite as robots } from "@/lib/robotsPolicy";
@@ -9,7 +10,10 @@ import { verification } from "@/lib/seo";
 
 describe("robots.txt", () => {
   const rules = [robots().rules].flat();
-  const groupFor = (agent: string) => rules.find((r) => r.userAgent === agent);
+  const groupFor = (agent: string) => {
+    const rule = rules.find((r) => r.userAgent === agent);
+    return rule ? { ...rule, disallow: [rule.disallow].flat().map((path) => path ? splitPublicPath(path).path : path) } : undefined;
+  };
   const closed = (agent: string) => [groupFor(agent)?.disallow].flat().includes("/");
 
   it.each(["GPTBot", "ClaudeBot", "CCBot", "AhrefsBot"])("закрывает %s целиком", (agent) => {

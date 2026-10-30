@@ -19,7 +19,7 @@ import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale, site) => {
   const { hubCrumb, hubHref } = localizedEncyclopedia(L);

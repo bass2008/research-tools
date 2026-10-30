@@ -9,7 +9,8 @@ import { forLocale as localizedHeroSlides, type HeroSlide } from "@/lib/heroSlid
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
+import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
@@ -208,7 +209,7 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
     top,
   } = localeProps;
 
-  const path = usePathname();
+  const path = splitPublicPath(usePathname()).path;
   const mode = useOfferMode();
   const total = slides.length;
   const [i, setI] = useState(0);

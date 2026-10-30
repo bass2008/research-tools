@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { LOCALE_COOKIE, normalizeLocale } from "./lib/i18n/selection";
-import { INTERACTIVE_HEADER, PATH_HEADER, privateLocalePath } from "./lib/i18n/requestPolicy";
+import { INTERACTIVE_HEADER, PATH_HEADER, LOCALE_HEADER, selectedLocale } from "./lib/i18n/requestPolicy";
 import { resolveSite } from "./lib/siteProfile.config";
 import { missingContentRoute } from "./lib/contentRoute";
+import { isPublicPath, isUserPath, publicPath, splitPublicPath } from "./lib/publicRouting";
 
 // Кроме выбора языка из ссылки, приводим Next к RFC 9110 в двух местах. Условными запросами
 // занимается сам Next: `ETag` он считает от отданного тела, соврать такой отпечаток не может.
@@ -23,40 +24,57 @@ export function middleware(request: NextRequest) {
   if (!site) return new NextResponse("Unknown site host", {
     status: 421, headers: { "X-Robots-Tag": "noindex", "Cache-Control": "no-store" },
   });
-  const path = request.nextUrl.pathname;
-  // Public ?lang= links cannot create an alternate indexed/rendered language.
-  if (request.nextUrl.searchParams.has("lang") && !privateLocalePath(path)) {
-    const target = new URL(path + request.nextUrl.search, site.origin);
+  const incoming = request.nextUrl.pathname;
+  const parsed = splitPublicPath(incoming);
+  const path = parsed.path;
+  const userPage = isUserPath(path);
+  const publicPage = isPublicPath(path);
+  const chosen = normalizeLocale(request.nextUrl.searchParams.get("lang"));
+  // A prefixed URL wins over cookies and legacy ?lang= links.
+  const locale = parsed.locale ?? (publicPage ? site.defaultLocale
+    : chosen && site.locales.includes(chosen) ? chosen : selectedLocale(request.headers, site));
+  const invalidPrefix = Boolean(parsed.locale && (!userPage || !site.locales.includes(parsed.locale)));
+  const missing = invalidPrefix || missingContentRoute(path, locale);
+  if (!missing && userPage) {
+    const target = new URL(publicPath(path, locale, site) + request.nextUrl.search, site.origin);
     target.searchParams.delete("lang");
-    return NextResponse.redirect(target, 308);
+    if (incoming !== target.pathname || request.nextUrl.search !== target.search) {
+      // Private legacy addresses may choose their language from a preference: never cache
+      // that choice permanently. Keep POST bodies (e.g. a server action) on normalization.
+      const code = request.method !== "GET" && request.method !== "HEAD" ? 307
+        : path === "/" || !publicPage ? 302 : 301;
+      return NextResponse.redirect(target, code);
+    }
   }
   // Пустое значение — это отсутствие условия, а не «ни один отпечаток не подошёл».
   const sent = request.headers.get("if-none-match")?.trim();
-  const chosen = normalizeLocale(request.nextUrl.searchParams.get("lang"));
-  const locale = chosen && site.locales.includes(chosen) ? chosen : null;
   const forward = new Headers(request.headers);
   forward.set(PATH_HEADER, path);
+  forward.delete(LOCALE_HEADER);
+  // A missing translated page still renders its 404 document in the URL language.
+  if ((userPage || parsed.locale) && site.locales.includes(locale)) forward.set(LOCALE_HEADER, locale);
   const interactive = request.headers.get("rsc") === "1";
   forward.set(INTERACTIVE_HEADER, interactive ? "1" : "0");
   if (sent) forward.delete("if-modified-since");
   if (sent === "*") forward.delete("if-none-match");
-  if (locale) {
+  if (userPage && !missing) {
     const kept = (forward.get("cookie") ?? "").split(";").map((item) => item.trim())
       .filter((item) => item && !item.startsWith(`${LOCALE_COOKIE}=`));
     forward.set("cookie", [...kept, `${LOCALE_COOKIE}=${locale}`].join("; "));
   }
   // A thrown notFound() inside a dynamic page yields Next's empty SSR error shell.
   // Route absent content through the existing standalone 404 document instead.
-  const missing = missingContentRoute(path, site.defaultLocale);
   const response = missing
     ? NextResponse.rewrite(new URL("/_missing-content", request.url), {
       status: 404, request: { headers: forward },
     })
-    : NextResponse.next({ request: { headers: forward } });
-  if (!site.indexable || interactive) response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    : parsed.locale
+      ? NextResponse.rewrite(new URL(path + request.nextUrl.search, request.url), { request: { headers: forward } })
+      : NextResponse.next({ request: { headers: forward } });
+  if (!site.indexable || interactive || (userPage && !publicPage)) response.headers.set("X-Robots-Tag", "noindex, nofollow");
   // Next renders these routes dynamically. Never share a personalized RSC response.
   response.headers.set("Cache-Control", "private, no-store");
-  if (locale) response.cookies.set(LOCALE_COOKIE, locale, {
+  if (userPage && !publicPage && !missing) response.cookies.set(LOCALE_COOKIE, locale, {
     path: "/", maxAge: 31536000, sameSite: "lax", secure: request.nextUrl.protocol === "https:",
   });
   return response;

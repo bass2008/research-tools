@@ -10,7 +10,7 @@ import { localized } from "@/lib/i18n/localized";
 import type { Block, Chunk, LegalDoc } from "@/lib/legal/types";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Tariff } from "@/lib/tariffs";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { Fragment } from "react";
 
 export const forLocale = localized((L: Locale, site) => {

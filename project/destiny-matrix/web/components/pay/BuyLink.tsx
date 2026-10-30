@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import type { ComponentProps } from "react";
 import { track, type GoalParams } from "@/lib/analytics";
 

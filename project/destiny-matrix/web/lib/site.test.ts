@@ -1,3 +1,5 @@
+import { publicPath } from "./publicRouting";
+import { DEFAULT_SITE } from "./siteProfile";
 import type { Metadata } from "next";
 import { describe, expect, it } from "vitest";
 
@@ -15,7 +17,7 @@ describe("метаданные страницы", () => {
 
   it("делает canonical абсолютным и указывающим на саму страницу", () => {
     const meta = pageMeta(base);
-    expect(meta.alternates?.canonical).toBe(new URL(base.path, SITE.url).toString());
+    expect(meta.alternates?.canonical).toBe(new URL(publicPath(base.path, DEFAULT_SITE.defaultLocale), SITE.url).toString());
     expect(String(meta.alternates?.canonical)).toContain(base.path);
   });
 
@@ -64,7 +66,7 @@ describe("метаданные страницы", () => {
         titles.add(typeof meta.title === "string" ? meta.title : (meta.title as { absolute: string }).absolute);
         canonicals.add(String(meta.alternates?.canonical));
         expect(meta.robots, path).toEqual({ index: false, follow: true });
-        expect(String(meta.alternates?.canonical), path).toBe(new URL(path, SITE.url).toString());
+        expect(String(meta.alternates?.canonical), path).toBe(new URL(publicPath(path, DEFAULT_SITE.defaultLocale), SITE.url).toString());
       }
     }
     expect(canonicals.size, "canonical повторяется между разборами").toBe(total);

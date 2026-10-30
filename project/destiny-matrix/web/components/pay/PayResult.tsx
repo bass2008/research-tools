@@ -11,7 +11,7 @@ import { useMessage } from "@/lib/i18n/useMessage";
 import type { PayStage as Stage } from "@/lib/payresult";
 import { forLocale as localizedPayresult } from "@/lib/payresult";
 import { payHref, readingHref, type ReadingRef } from "@/lib/readingLinks";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useEffect, useState } from "react";
 
 export const forLocale = localized((L: Locale) => {

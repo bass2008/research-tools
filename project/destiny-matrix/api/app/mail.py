@@ -79,13 +79,13 @@ def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = 
     from . import products
     product = products.get(reading.product) if reading is not None else None
     page = product.page(reading.id) if product else "/report"
-    report = f"{sites.current().origin}{page}{'&' if '?' in page else '?'}lang={current_locale()}"
+    report = f"{sites.current().origin}/{current_locale()}{page}"
     lines = [
         say("mail.purchase.ready", tariff=tariff_name),
         say("mail.purchase.payment", id=payment_id),
         "",
         say("mail.purchase.open", url=report),
-        say("mail.account", url=f"{sites.current().origin}/account?lang={current_locale()}"),
+        say("mail.account", url=f"{sites.current().origin}/{current_locale()}/account"),
     ]
     if password:
         lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
@@ -95,7 +95,7 @@ def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = 
 
 def _subscription(to: str, tariff_name: str, payment_id: str, password: str | None) -> bool:
     # У подписки нет одного разбора: «ваш разбор готов» и ссылка на личный уводили на главную.
-    account = f"{sites.current().origin}/account?lang={current_locale()}"
+    account = f"{sites.current().origin}/{current_locale()}/account"
     lines = [say("mail.subscription.ready", tariff=tariff_name), say("mail.purchase.payment", id=payment_id),
              "", say("mail.subscription.open", url=account)]
     if password:
@@ -111,7 +111,7 @@ def welcome(to: str) -> bool:
     body = "\n".join([
         say("mail.welcome.created", email=to),
         "",
-        say("mail.account", url=f"{sites.current().origin}/account?lang={current_locale()}"),
+        say("mail.account", url=f"{sites.current().origin}/{current_locale()}/account"),
         say(access_line),
         "",
         say("mail.welcome.help"),

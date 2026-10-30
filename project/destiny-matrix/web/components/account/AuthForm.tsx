@@ -1,5 +1,7 @@
 "use client";
 
+import { publicPath } from "@/lib/publicRouting";
+
 import { forLocale as localizedUseSession } from "@/components/account/useSession";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
@@ -10,7 +12,7 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useMessage } from "@/lib/i18n/useMessage";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -75,7 +77,7 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
       await refreshSession();
       // После регистрации пустая форма больше не должна оставаться в истории: «Назад» на неё
       // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
-      router.replace("/account");
+      router.replace(publicPath("/account", L));
     } catch (err) {
       setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
       // Ошибка остаётся объявленной через role=alert, но набор продолжается в поле, которое

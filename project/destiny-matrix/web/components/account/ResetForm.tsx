@@ -1,5 +1,7 @@
 "use client";
 
+import { publicPath } from "@/lib/publicRouting";
+
 import { forLocale as localizedUseSession } from "@/components/account/useSession";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
@@ -9,7 +11,7 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useMessage } from "@/lib/i18n/useMessage";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -43,7 +45,7 @@ export default function ResetForm({ locale: requestedLocale, ...localeProps }: (
     try {
       await api.resetApply(token, password);
       await refreshSession();
-      router.push("/account");
+      router.push(publicPath("/account", L));
     } catch (err) {
       setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
     } finally {

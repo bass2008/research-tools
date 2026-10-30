@@ -54,17 +54,17 @@ def test_admin_open_form_and_error_switch_without_reposting(page):
     page.route("**/api/admin/matrices", reject)
     page.get_by_test_id("grant-submit").click()
     expect(page.get_by_test_id("grant-dialog")).to_contain_text("User not found")
-    # Another tab can change the language while the dialog is open.
+    # Another tab changes its own language; this form keeps the explicit /en/ URL.
     second = page.context.new_page()
     second.goto(BASE + "/login")
     switch(second, "ru")
     page.bring_to_front()
     page.evaluate("window.dispatchEvent(new Event('focus'))")
-    expect(page.locator("html")).to_have_attribute("lang", "ru")
-    expect(page.get_by_test_id("grant-dialog")).to_contain_text("Пользователь не найден")
+    expect(page.locator("html")).to_have_attribute("lang", "en")
+    expect(page.get_by_test_id("grant-dialog")).to_contain_text("User not found")
     expect(page.get_by_test_id("grant-day")).to_have_value("17")
     expect(page.get_by_test_id("grant-month")).to_have_value("3")
-    expect(page.locator("#grant-m option:checked")).to_have_text("Март")
+    expect(page.locator("#grant-m option:checked")).to_have_text("March")
     assert len(calls) == 1
     second.close()
 
@@ -141,7 +141,7 @@ def test_legal_public_html_uses_domain_language(path, host, locale):
     from test_domain_localization import read
     foreign = "ru" if locale == "en" else "en"
     for agent in ("Mozilla/5.0", "Googlebot", "YandexBot"):
-        html, _ = read(path, host, **{"User-Agent": agent, "Accept-Language": foreign,
+        html, _ = read(f"/{locale}{path}", host, **{"User-Agent": agent, "Accept-Language": foreign,
                                      "Cookie": f"arcana_locale={foreign}"})
         assert re.search(fr'<html[^>]*lang="{locale}"', html)
         main = re.search(r"<main[^>]*>(.*?)</main>", html, re.S).group(1)
@@ -152,4 +152,4 @@ def test_legal_public_html_uses_domain_language(path, host, locale):
         else:
             assert "11 октября 2026" in main
             assert "ИП Бородаенко" in main
-        assert f'href="https://{host}{path}"' in html
+        assert f'href="https://{host}/{locale}{path}"' in html

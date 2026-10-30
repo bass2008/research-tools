@@ -52,7 +52,7 @@ def test_reachable_tail_permutation_is_a_distinct_address(page: Page):
     """9-9-18 и 18-9-9 — два достижимых ordered-хвоста, а не SEO-дубли."""
     for triple, sample in (("9-9-18", "07.01.1900"), ("18-9-9", "16.01.1900")):
         res = page.request.get(
-            f"{BASE}/encyclopedia/karmic-tail/{triple}?utm_source=test",
+            f"{BASE}/ru/encyclopedia/karmic-tail/{triple}?utm_source=test",
             max_redirects=0,
         )
         assert res.status == 200, f"{triple}: код {res.status}"

@@ -1,5 +1,7 @@
 "use client";
 
+import { publicPath } from "@/lib/publicRouting";
+import { useLocale } from "@/components/ui/LocaleProvider";
 import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
 
 import { useEffect, useState } from "react";
@@ -32,6 +34,7 @@ export default function UserActions({ user, onGranted, notices }: {
   notices?: HTMLElement | null;
 }) {
   const { t, api, MONTHS_ACC, daysInMonth, toIso, day: dayLabel, birthLabel } = useAdminLocale();
+  const locale = useLocale();
   const [visits, setVisits] = useState(false);
   const [granting, setGranting] = useState(false);
   const [pairing, setPairing] = useState(false);
@@ -80,7 +83,7 @@ export default function UserActions({ user, onGranted, notices }: {
       await api.admin.impersonate(user.id);
       // Полная перезагрузка, а не router.push: кука сменилась, и всё, что уже отрисовано в
       // админке, принадлежит другому человеку.
-      window.location.href = "/account";
+      window.location.href = publicPath("/account", locale);
     } catch (err) {
       setBusy(false);
       setError(err instanceof ApiError ? err : "Войти не удалось.");

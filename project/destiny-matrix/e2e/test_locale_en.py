@@ -82,12 +82,16 @@ def test_html_lang_and_locale(path):
 
 
 def test_other_language_version_is_linked():
-    """hreflang связывает домены, а не языки внутри одного адреса."""
+    """hreflang links the canonical language origins, including local stand profiles."""
     # Next печатает атрибут как `hrefLang`; в HTML регистр имени атрибута значения не имеет.
     html = _html("/").lower()
-    assert 'hreflang="ru"' in html and "arcana-sense.ru" in html
-    assert 'hreflang="en"' in html and "arcana-sense.com" in html
-    assert 'hreflang="x-default"' in html
+    links = dict(re.findall(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"', html))
+    local = BASE.startswith("http://127.0.0.1:")
+    ru_origin = BASE.replace("127.0.0.1", "localhost") if local else "https://arcana-sense.ru"
+    en_origin = BASE if local else "https://arcana-sense.com"
+    assert links["ru"].rstrip("/") == ru_origin.rstrip("/")
+    assert links["en"] == en_origin.rstrip("/") + "/en/"
+    assert links["x-default"] == links["en"]
 
 
 def test_payment_pages_follow_the_shared_access_policy():
@@ -105,10 +109,10 @@ def test_reading_keeps_paid_access_after_switching_language(page: Page):
     page.goto(f"{BASE}/matrix/1-1-2")
     page.wait_for_selector("h1")
     from playwright.sync_api import expect
-    expect(page.locator('a[href^="/pay"]').first).to_be_visible()
+    expect(page.locator('a[href^="/en/pay"]').first).to_be_visible()
     page.get_by_test_id("language-ru").click()
     expect(page.locator("html")).to_have_attribute("lang", "ru")
-    expect(page.locator('a[href^="/pay"]').first).to_be_visible()
+    expect(page.locator('a[href^="/ru/pay"]').first).to_be_visible()
 
 
 def test_legal_pages_name_the_owner_without_russian_requisites():

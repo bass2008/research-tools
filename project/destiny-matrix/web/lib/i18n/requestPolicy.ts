@@ -1,6 +1,7 @@
 import type { SiteProfile } from "../siteProfile";
 import { LOCALE_COOKIE, negotiateLocale, normalizeLocale } from "./selection";
 
+export const LOCALE_HEADER = "x-arcana-locale";
 export const PATH_HEADER = "x-arcana-path";
 export const INTERACTIVE_HEADER = "x-arcana-interactive";
 
@@ -21,9 +22,10 @@ export function selectedLocale(headers: Headers, site: SiteProfile, api = false)
 
 export function renderLocale(headers: Headers, site: SiteProfile) {
   const path = headers.get(PATH_HEADER) ?? "/";
-  // HTML of public URLs is stable. Interactive RSC updates may use an explicit choice;
-  // no browser-language negotiation and no bot-specific rendering.
-  if (headers.get(INTERACTIVE_HEADER) === "1" || privateLocalePath(path)) {
+  const fromPath = normalizeLocale(headers.get(LOCALE_HEADER));
+  if (fromPath && site.locales.includes(fromPath)) return fromPath;
+  // API/internal requests without a user-facing URL retain explicit language negotiation.
+  if (privateLocalePath(path)) {
     return selectedLocale(headers, site, path.startsWith("/api/"));
   }
   return site.defaultLocale;

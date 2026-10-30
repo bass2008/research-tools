@@ -5,10 +5,10 @@ import { forLocale as localizedContent } from "@/lib/content";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
-import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { requestLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { forLocale as localizedMatrices } from "./matrices";
 
 const forLocale = localized((L: Locale, site) => {
@@ -129,5 +129,5 @@ export default async function MatrixIndexPage() {
   );
 }
 export async function generateMetadata() {
-  return forLocale(await publicLocale(), await requestSite()).metadata;
+  return forLocale(await requestLocale(), await requestSite()).metadata;
 }

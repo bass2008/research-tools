@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { PERSONAL_SECTION_KEYS } from "@/lib/sectionReadingShared";
 import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
+import { publicPath } from "./publicRouting";
 
 // Отдаёт node-сервер по /robots.txt. Закрыты личные адреса: разбор и кабинет печатаются на
 // запрос и содержат дату рождения, а /pay — страница оплаты, ей в выдаче делать нечего.
@@ -15,7 +16,7 @@ import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
 const UNWANTED = ["GPTBot", "ClaudeBot", "CCBot", "AhrefsBot"];
 
 // Приватные адреса: содержат чужую дату рождения либо оплату.
-const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/readings", "/pay", "/login", "/register", "/api/"];
+const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/readings", "/pay", "/login", "/register", "/forgot", "/reset", "/print", "/api/"];
 
 // Результаты расчёта. Их 5 544 (`/matrix/`) плюс 446 персональных разборов разделов, и все они
 // помечены `noindex`: это почти-дубли одной формы, в выдаче им делать нечего. Но `noindex`
@@ -35,6 +36,13 @@ const CLOSED = ["/encyclopedia/combination"];
 
 export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.Robots {
   if (!site.indexable) return { rules: [{ userAgent: "*", disallow: "/" }] };
+  // Old indexable pages remain crawlable; previously blocked calculations stay blocked.
+  const scoped = (paths: string[]) => site.locales.flatMap((locale) => paths.map((path) => {
+    const mapped = publicPath(path, locale);
+    return path.endsWith("/") && !mapped.endsWith("/") ? `${mapped}/` : mapped;
+  }));
+  const privatePaths = [...PRIVATE, ...["ru", "en"].flatMap((lang) =>
+    [...PRIVATE.filter((path) => path !== "/api/"), "/matrix/"].map((path) => `/${lang}${path}`))];
   return {
     rules: [
       // Без `Allow: /`: по стандарту всё не запрещённое разрешено, а Next печатает `Allow`
@@ -43,7 +51,7 @@ export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.R
       // строку как «всё открыто» и считали результаты расчёта разрешёнными.
       {
         userAgent: "*",
-        disallow: [...PRIVATE, ...COMPUTED, ...CLOSED],
+        disallow: [...new Set([...privatePaths, ...COMPUTED, ...CLOSED, ...scoped(COMPUTED), ...scoped(CLOSED)])],
         // Директива Яндекса: адреса с этими параметрами робот не скачивает вовсе. `canonical`
         // на них стоит верно, но он читается только после загрузки страницы — а норма обхода
         // у молодого домена тратится на каждой. `?tab=` — вкладки страницы аркана,
@@ -51,7 +59,7 @@ export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.R
         other: { "Clean-param": "tab&sec&lang" },
       },
       // Своя группа отменяет для Googlebot группу `*` целиком, поэтому запреты повторены.
-      { userAgent: "Googlebot", disallow: [...PRIVATE, ...COMPUTED] },
+      { userAgent: "Googlebot", disallow: [...new Set([...privatePaths, ...COMPUTED, ...scoped(COMPUTED)])] },
       ...UNWANTED.map((userAgent) => ({ userAgent, disallow: "/" })),
     ],
     sitemap: `${site.origin}/sitemap.xml`,

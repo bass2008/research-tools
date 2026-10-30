@@ -102,13 +102,14 @@ def test_pdf_cache_is_separate_for_each_language(client, auth, monkeypatch):
     assert ru["job_id"] != en["job_id"]
     assert again["job_id"] == ru["job_id"] and again["cached"]
     assert len(calls) == 2
-    assert calls[0].endswith("lang=ru") and calls[1].endswith("lang=en")
+    assert "/ru/print/report?" in calls[0] and "/en/print/report?" in calls[1]
+    assert "lang=" not in calls[0] and "lang=" not in calls[1]
     # A Russian-speaking admin must rebuild the same English document.
     admin = auth(settings.admins[0])
     rebuilt = client.post(f"/api/admin/reports/{en['job_id']}/rebuild",
                           headers={**admin, "Accept-Language": "ru"})
     assert rebuilt.status_code == 200, rebuilt.text
-    assert calls[-1].endswith("lang=en")
+    assert "/en/print/report?" in calls[-1] and "lang=" not in calls[-1]
 
 
 def test_validation_uses_request_language(client, auth):

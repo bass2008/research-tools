@@ -5,7 +5,7 @@ import { localized } from "@/lib/i18n/localized";
 import { requestLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound } from "next/navigation";
 import { pickMatrix, readAccess, readSavedMatrices } from "../../_lib/access";
 import { SavedReport, Sheet } from "../../_lib/report";

@@ -6,7 +6,8 @@ import { D } from "@/lib/i18n";
 import { DP } from "@/lib/i18n/dict/pair";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
+import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 
 export const forLocale = localized((L: Locale) => {
@@ -34,7 +35,7 @@ export default function EncCrumbs({ locale: requestedLocale, ...localeProps }: (
   } = localeProps;
   const { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref } = forLocale(L);
 
-  const path = usePathname();
+  const path = splitPublicPath(usePathname()).path;
   const parts = path.split("/").filter(Boolean);
   const trail: { name: string; href?: string }[] = [
     { name: D.nav.home[L], href: "/" },

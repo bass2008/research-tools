@@ -92,7 +92,7 @@ describe("октаграмма", () => {
   });
 
   it("делает каждую точку ссылкой на свой аркан", () => {
-    const links = [...html.matchAll(/<a href="\/encyclopedia\/arcanum\/(\d+)"/g)];
+    const links = [...html.matchAll(/<a[^>]*href="\/(?:ru|en)\/encyclopedia\/arcanum\/(\d+)"/g)];
     expect(links.length).toBe(MAP_POINTS.length);
     for (const link of links) {
       expect(Number(link[1])).toBeGreaterThanOrEqual(1);

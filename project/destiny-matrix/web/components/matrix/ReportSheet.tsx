@@ -14,7 +14,7 @@ import { localized } from "@/lib/i18n/localized";
 import type { Matrix } from "@/lib/matrix";
 import type { SectionOut } from "@/lib/publicSpec";
 import { forLocale as localizedSite } from "@/lib/site";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export interface SavedMatrix {
   id: number;

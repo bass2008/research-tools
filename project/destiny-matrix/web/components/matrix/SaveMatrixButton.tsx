@@ -1,5 +1,7 @@
 "use client";
 
+import { publicPath } from "@/lib/publicRouting";
+
 import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
@@ -59,7 +61,7 @@ export default function SaveMatrixButton({ locale: requestedLocale, ...localePro
       const saved = await api.saveMatrix(birth, sex);
       setState("done");
       await onSaved?.(saved.id);
-      if (openReport) router.push(`/report?m=${saved.id}`);
+      if (openReport) router.push(publicPath(`/report?m=${saved.id}`, L));
       router.refresh();
     } catch (err) {
       setState("idle");

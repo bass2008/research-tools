@@ -45,7 +45,7 @@ def matrix_slugs(page: Page, limit: int = 60) -> list[str]:
     """Номера матриц — со страницы списка. Из карты сайта их брать нельзя: она публикуется только
     на боевом адресе, а на закрытом контуре пуста намеренно."""
     page.goto(f"{BASE}/matrix", wait_until="domcontentloaded")
-    hrefs = page.locator('a[href^="/matrix/"]').evaluate_all(
+    hrefs = page.locator('a[href^="/ru/matrix/"]').evaluate_all(
         "list => list.map(a => a.getAttribute('href'))")
     slugs = [h.rsplit("/", 1)[-1] for h in hrefs if h and re.fullmatch(r"[0-9-]+", h.rsplit("/", 1)[-1])]
     return list(dict.fromkeys(slugs))[:limit]
@@ -109,7 +109,7 @@ def register(page: Page, email: str, password: str = "1234") -> None:
     page.get_by_test_id("auth-password").fill(password)
     page.locator(".consent input[type=checkbox]").check()
     page.get_by_test_id("auth-submit").click()
-    page.wait_for_url(f"{BASE}/account", timeout=15_000)
+    page.wait_for_url(f"{BASE}/ru/account", timeout=15_000)
     page.wait_for_timeout(500)
 
 
@@ -118,7 +118,7 @@ def login(page: Page, email: str, password: str = "1234") -> None:
     page.get_by_test_id("auth-email").fill(email)
     page.get_by_test_id("auth-password").fill(password)
     page.get_by_test_id("auth-submit").click()
-    page.wait_for_url(f"{BASE}/account", timeout=15_000)
+    page.wait_for_url(f"{BASE}/ru/account", timeout=15_000)
     page.wait_for_timeout(500)
 
 

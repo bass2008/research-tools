@@ -5,7 +5,7 @@ import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
 
 // Админка: только чтение. Права проверяет апстрим по списку почт в своём конфиге, поэтому
 // «спрятать ссылку» здесь — вопрос удобства, а не безопасности: без админской куки BFF отдаст 404.
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useEffect, useState } from "react";
 
 import { ApiError, type AdminPayment, type AdminReportJob, type AdminUser,

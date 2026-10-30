@@ -11,7 +11,7 @@ from test_pair import calc_pair
     ('[data-testid="pair-lock-characters"] > a.head', "pair-section", "characters"),
     ('[data-testid="pair-buy-chakras"]', "pair-section", "chakras"),
     ('[data-testid^="chakra-lock-"] > a', "pair-chakra", "chakras"),
-    ('[data-testid="chakra-dialog"] a[href^="/pay"]', "pair-main", None),
+    ('[data-testid="chakra-dialog"] a[href^="/ru/pay"]', "pair-main", None),
 ])
 def test_pair_purchase_links_emit_one_goal(page, selector, place, section):
     calc_pair(page)
@@ -21,7 +21,7 @@ def test_pair_purchase_links_emit_one_goal(page, selector, place, section):
     # Keep the document to inspect its event; Next's click handler must still run.
     page.get_by_test_id("pair-report").evaluate("el => el.addEventListener('click', e => e.preventDefault(), true)")
     link = page.locator(selector).first
-    expect(link).to_have_attribute("href", "/pay?for=pair")
+    expect(link).to_have_attribute("href", "/ru/pay?for=pair")
     link.click()
     events = page.evaluate("window.dataLayer.filter(e => e.event === 'buy_click')")
     expected = {"event": "buy_click", "tariff": "pair", "place": place}

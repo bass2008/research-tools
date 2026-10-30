@@ -37,7 +37,7 @@ def test_admin_enters_as_the_user_and_sees_his_account(page, mail):
     page.once("dialog", lambda d: (asked.append(d.message), d.accept()))
     page.get_by_test_id("action-impersonate").click()
 
-    page.wait_for_url(f"{BASE}/account", timeout=30_000)
+    page.wait_for_url(f"{BASE}/ru/account", timeout=30_000)
     page.wait_for_timeout(800)
     assert asked and mail in asked[0], f"вход под чужим аккаунтом не спросил подтверждения: {asked}"
     assert mail in page.inner_text("body"), "кабинет открылся не под тем пользователем"
@@ -55,7 +55,7 @@ def test_impersonation_lands_in_the_security_log(page, mail):
     row = open_actions(page, mail)
     page.once("dialog", lambda d: d.accept())
     page.get_by_test_id("action-impersonate").click()
-    page.wait_for_url(f"{BASE}/account", timeout=30_000)
+    page.wait_for_url(f"{BASE}/ru/account", timeout=30_000)
 
     flows.logout(page)
     flows.login(page, *ADMIN)

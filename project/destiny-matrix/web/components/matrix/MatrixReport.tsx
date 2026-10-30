@@ -31,7 +31,7 @@ import { useBirth } from "@/lib/useBirth";
 import { useChakraAccess } from "@/lib/useChakraAccess";
 import { useFullSections } from "@/lib/useFullSections";
 import { useLockedPreview, withPreview } from "@/lib/useLockedPreview";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useMemo } from "react";
 
 export const forLocale = localized((L: Locale) => {

@@ -32,7 +32,7 @@ def test_declined_payment_retry_keeps_older_matrix(page, mail):
     }))
     page.goto(BASE + "/pay/fail?order=decline-regression")
     retry = page.locator('.paybox a.btn').first
-    expect(retry).to_have_attribute("href", f"/pay/single?m={ids[0]}")
+    expect(retry).to_have_attribute("href", f"/ru/pay/single?m={ids[0]}")
     retry.click()
     expect(page.get_by_test_id("pay-target")).to_have_attribute("data-value", str(ids[0]))
     expect(page.get_by_test_id("pay-submit")).to_contain_text("31 марта 1993")
@@ -51,8 +51,8 @@ payload['exp'] = int(time.time()) - 5
 token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 root = settings.web_internal_url.rstrip('/')
 results = []
-for name, url in [('expired', root + '/print/report?m=1&t=' + token + '&lang=ru'),
-                  ('not-report', root + '/')]:
+for name, url in [('expired', root + '/ru/print/report?m=1&t=' + token),
+                  ('not-report', root + '/en/')]:
     try:
         reports.render(url)
     except Exception as exc:

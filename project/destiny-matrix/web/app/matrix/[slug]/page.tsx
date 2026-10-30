@@ -15,7 +15,7 @@ import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
-import { requestLocale, publicLocale } from "@/lib/i18n/request";
+import { requestLocale } from "@/lib/i18n/request";
 import type { Matrix } from "@/lib/matrix";
 import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
 import { forLocale as localizedSchema } from "@/lib/schema";
@@ -23,7 +23,7 @@ import { forLocale as localizedSections } from "@/lib/sections";
 import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound } from "next/navigation";
 import { forLocale as localizedMatrices } from "../matrices";
 
@@ -97,7 +97,7 @@ export function generateStaticParams(): Params[] {
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const L = await publicLocale();
+  const L = await requestLocale();
   const { pageMeta, NOT_FOUND_META, matrixHref, seo } = forLocale(L, await requestSite());
 
   const data = seo((await params).slug);

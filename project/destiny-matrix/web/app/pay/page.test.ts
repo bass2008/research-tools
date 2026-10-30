@@ -58,6 +58,6 @@ it("a broken record number is not carried into the form", async () => {
 });
 
 it("old links with a saved reading go straight to its form", async () => {
-  await expect(page({ m: "12" })).rejects.toThrow("REDIRECT /pay/single?m=12");
-  await expect(page({ r: "7" })).rejects.toThrow("REDIRECT /pay/pair?r=7");
+  await expect(page({ m: "12" })).rejects.toThrow("REDIRECT /ru/pay/single?m=12");
+  await expect(page({ r: "7" })).rejects.toThrow("REDIRECT /ru/pay/pair?r=7");
 });

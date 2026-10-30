@@ -67,7 +67,7 @@ describe("runtime localization", () => {
   });
 
   it("does not change the storefront or legal entity with the language", () => {
-    expect(siteForLocale("ru").SITE).toEqual(siteForLocale("en").SITE);
+    expect(siteForLocale("ru").SITE).toEqual({ ...siteForLocale("en").SITE, ogImage: "/og.png" });
     const ru = siteForLocale("ru").LEGAL, en = siteForLocale("en").LEGAL;
     for (const key of ["entity", "inn", "ogrnip", "email", "phone", "site", "bank", "rknNotice"] as const) {
       expect(ru[key], key).toBe(en[key]);

@@ -129,7 +129,7 @@ def test_arcanum_links_back_to_its_karmic_tails():
 def test_related_works_both_ways(page_path, expected):
     """B7: перелинковка в обе стороны. Взаимность держит код — иначе каждая новая статья
     требовала бы правки уже сданных."""
-    assert f'href="{expected}"' in _html(page_path), f"{page_path}: нет ссылки на {expected}"
+    assert f'href="/ru{expected}"' in _html(page_path), f"{page_path}: нет ссылки на {expected}"
 
 
 def test_related_never_points_at_a_missing_page():
@@ -144,7 +144,7 @@ def test_related_never_points_at_a_missing_page():
     html = _html("/encyclopedia/karmic-tail/18-9-9")
     for triple in ("1-2-3", "2-3-5", "1-1-2"):
         assert triple not in written, f"{triple} появилась в корпусе — тест нужно обновить"
-        assert f'href="/encyclopedia/karmic-tail/{triple}"' not in html, triple
+        assert f'href="/ru/encyclopedia/karmic-tail/{triple}"' not in html, triple
 
 
 def test_concept_hub_gets_an_incoming_link_when_written():
@@ -155,7 +155,7 @@ def test_concept_hub_gets_an_incoming_link_when_written():
         pytest.skip("статей-хабов ещё нет")
     html = _html("/encyclopedia")
     for item in hubs:
-        assert f'href="/{item["key"]}"' in html, f"на хаб /{item['key']} не ведёт ни одна ссылка"
+        assert f'href="/ru/{item["key"]}"' in html, f"на хаб /{item['key']} не ведёт ни одна ссылка"
 
 
 @pytest.mark.parametrize("path", INFO_PAGES)
@@ -214,7 +214,7 @@ def test_one_tail_is_one_address():
     """Два порядка одной формы имеют собственные self-canonical, если оба достижимы."""
     for triple in ("9-9-18", "18-9-9"):
         r = requests.get(
-            f"{BASE}/encyclopedia/karmic-tail/{triple}", timeout=30, allow_redirects=False
+            f"{BASE}/ru/encyclopedia/karmic-tail/{triple}", timeout=30, allow_redirects=False
         )
         assert r.status_code == 200, (triple, r.status_code)
         canonical = re.search(r'<link rel="canonical" href="([^"]+)"', r.text)
@@ -274,7 +274,7 @@ def test_hub_serves_a_page_or_leads_somewhere_useful(path, target):
     посадочную и не 404, а временный редирект на ближайшую страницу того же смысла (постоянный
     склеил бы адреса, и появление статьи потребовало бы расклейки)."""
     written = {item["key"] for item in _hubs()}
-    r = requests.get(f"{BASE}{path}", timeout=30, allow_redirects=False)
+    r = requests.get(f"{BASE}/ru{path}", timeout=30, allow_redirects=False)
     if path.lstrip("/") in written:
         assert r.status_code == 200, f"{path}: статья есть, но страница отдаёт {r.status_code}"
         assert 'class="crumbs' in r.text and "BreadcrumbList" in r.text
@@ -426,11 +426,11 @@ def test_encyclopedia_is_a_table_of_contents_not_a_flat_list():
     body = re.sub(r"(?is)<script.*?</script>", "", html)
     hrefs = {m.group(1).split("#")[0].rstrip("/") or "/" for m in re.finditer(r'<a\b[^>]*href="(/[^"?]*)"', body)}
     assert len(hrefs) < 40, f"страница снова раздаёт {len(hrefs)} ссылок"
-    hubs = {hub for hub, _ in SECTION_HUBS}
-    leaves = [h for h in hrefs if re.match(r"^/(encyclopedia/[a-z_-]+/.+|year/.+)$", h) and h not in hubs]
+    hubs = {"/ru" + hub for hub, _ in SECTION_HUBS}
+    leaves = [h for h in hrefs if re.match(r"^/ru/(encyclopedia/[a-z_-]+/.+|year/.+)$", h) and h not in hubs]
     assert leaves == [], f"на оглавлении снова листья: {leaves[:5]}"
     for hub, _ in SECTION_HUBS:
-        assert hub in hrefs, f"оглавление не ведёт к шапке {hub}"
+        assert "/ru" + hub in hrefs, f"оглавление не ведёт к шапке {hub}"
 
 
 def test_section_address_comes_only_from_the_registry():
@@ -441,7 +441,7 @@ def test_section_address_comes_only_from_the_registry():
     открываться: по нему приходят из выдачи и из закладок."""
     for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/method"):
         body = re.sub(r"(?is)<script.*?</script>", "", _html(path))
-        found = set(re.findall(r'href="(/encyclopedia\?sec=[a-z]+)"', body))
+        found = set(re.findall(r'href="(/ru/encyclopedia\?sec=[a-z]+)"', body))
         assert found == set(), (path, found)
 
 
@@ -449,7 +449,7 @@ def test_articles_section_leads_to_the_anchor_of_the_index():
     """«Статьи» — единственный раздел без своей шапки, и ведёт он на свой блок в оглавлении.
     Якорь нового адреса поиску не создаёт, в отличие от параметра."""
     body = re.sub(r"(?is)<script.*?</script>", "", _html("/method"))
-    assert 'href="/encyclopedia#stati"' in body, "ссылка на блок статей пропала"
+    assert 'href="/ru/encyclopedia#stati"' in body, "ссылка на блок статей пропала"
     assert 'id="stati"' in _html("/encyclopedia"), "на оглавлении нет якоря блока статей"
 
 
@@ -518,8 +518,8 @@ def test_crossings_are_reachable_without_the_sitemap():
         f"/encyclopedia/arcanum/{item['arcanum']}" for item in CROSSINGS
     }:
         body = re.sub(r"(?is)<script.*?</script>", "", _html(source))
-        linked |= set(re.findall(r'href="(/encyclopedia/position/[a-z_]+/\d+)"', body))
-    wanted = {f"/encyclopedia/position/{i['position']}/{i['arcanum']}" for i in CROSSINGS}
+        linked |= set(re.findall(r'href="(/ru/encyclopedia/position/[a-z_]+/\d+)"', body))
+    wanted = {f"/ru/encyclopedia/position/{i['position']}/{i['arcanum']}" for i in CROSSINGS}
     assert wanted - linked == set(), sorted(wanted - linked)[:5]
 
 
@@ -554,8 +554,8 @@ def test_decoding_hub_leads_to_its_variants():
     """Хаб и варианты связаны: иначе пять страниц конкурируют между собой вместо того, чтобы
     делить кластер."""
     body = re.sub(r"(?is)<script.*?</script>", "", _html("/decoding"))
-    linked = set(re.findall(r'href="(/[a-z-]+)"', body))
-    missing = [p for p in DECODING_PAGES if p != "/decoding" and p not in linked]
+    linked = set(re.findall(r'href="(/ru/[a-z-]+)"', body))
+    missing = [p for p in DECODING_PAGES if p != "/decoding" and "/ru" + p not in linked]
     assert missing == [], missing
 
 
@@ -563,7 +563,7 @@ def test_decoding_pages_are_reachable_and_indexable():
     """В карте сайта и со ссылками из справочника — иначе поиск о них не узнает."""
     xml = requests.get(f"{BASE}/sitemap.xml", timeout=30).text
     body = re.sub(r"(?is)<script.*?</script>", "", _html("/encyclopedia"))
-    linked = set(re.findall(r'href="(/[a-z-]+)"', body))
+    linked = set(re.findall(r'href="(/ru/[a-z-]+)"', body))
     for path in DECODING_PAGES:
         assert requests.get(f"{BASE}{path}", timeout=30).status_code == 200, path
-        assert path in linked, f"{path}: нет ссылки с оглавления справочника"
+        assert "/ru" + path in linked, f"{path}: нет ссылки с оглавления справочника"

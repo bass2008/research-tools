@@ -65,11 +65,16 @@ def _credentials() -> dict | None:
 
 
 @pytest.fixture(scope="session")
-def browser():
+def playwright_engine():
     with sync_playwright() as pw:
-        instance = pw.chromium.launch(args=["--no-sandbox", f"--host-resolver-rules={COUNTERS}"])
-        yield instance
-        instance.close()
+        yield pw
+
+
+@pytest.fixture(scope="session")
+def browser(playwright_engine):
+    instance = playwright_engine.chromium.launch(args=["--no-sandbox", f"--host-resolver-rules={COUNTERS}"])
+    yield instance
+    instance.close()
 
 
 @pytest.fixture

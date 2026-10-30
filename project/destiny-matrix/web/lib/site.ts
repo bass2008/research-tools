@@ -1,10 +1,11 @@
 import { forLocale as formats } from "./i18n/format";
 import type { Metadata } from "next";
-import { D, LANGS, SITE_HOSTS } from "./i18n";
+import { D, LANGS } from "./i18n";
 import type { Lang } from "./i18n/lang";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { forLocale as localizedServicePages } from "./servicePages";
+import { publicUrl } from "./publicRouting";
 
 // Реквизиты приходят от владельца перед запуском; до этого — заглушки в угловых скобках.
 // Их видно и в футере, и в юридических страницах: так проверка «на странице нет заглушек»
@@ -42,7 +43,7 @@ export const forLocale = localized((L: Locale, site) => {
     url: site.origin,
     // Search and link previews follow the public language of the host, even after
     // a visitor switches the interactive interface to another language.
-    ogImage: site.defaultLocale === "en" ? "/og-en.png" : "/og.png",
+    ogImage: L === "en" ? "/og-en.png" : "/og.png",
     ogWidth: 1200,
     ogHeight: 630,
   };
@@ -109,16 +110,16 @@ export const forLocale = localized((L: Locale, site) => {
     return title.length + SUFFIX.length > TITLE_LIMIT ? { absolute: title } : title;
   }
 
-  /** Адреса той же страницы на других языках: хост меняется, путь остаётся. */
+  /** Release 1: языковые пары находятся на своих доменах и путях /ru/, /en/. */
   function alternates(path: string): Record<string, string> {
     // Служебная страница живёт не на всех языках: заявить её версию там, где маршрут отвечает
     // 404, значит послать поиск в никуда. Для остальных адресов набор языков общий.
     const langs = langsOfPath(path) ?? LANGS;
-    const pairs = langs.map((lang) => [lang, new URL(path, SITE_HOSTS[lang]).toString()] as const);
-    const fallback = langs.includes("en") ? SITE_HOSTS.en : SITE_HOSTS[langs[0]];
+    const pairs = langs.map((lang) => [lang, publicUrl(path, site, lang)] as const);
+    const fallback = langs.includes("en") ? "en" : langs[0];
     return {
       ...Object.fromEntries(pairs),
-      "x-default": new URL(path, fallback).toString(),
+      "x-default": publicUrl(path, site, fallback),
     };
   }
 
@@ -133,7 +134,7 @@ export const forLocale = localized((L: Locale, site) => {
     /** Оставить обход ссылок при noindex: страница уходит из индекса, но перелинковка живёт. */
     follow?: boolean;
   }): Metadata {
-    const url = new URL(opts.path, SITE.url).toString();
+    const url = publicUrl(opts.path, site, L);
     return {
       title: titleOf(opts.title),
       description: opts.description,
@@ -165,7 +166,7 @@ export const forLocale = localized((L: Locale, site) => {
   /** Адрес для печати: PDF открывается по внутреннему http://web:3000, и относительная ссылка
    *  внутри файла у покупателя никуда не ведёт. */
   function publicHref(path: string): string {
-    return new URL(path, SITE.url).toString();
+    return publicUrl(path, site, L);
   }
   return { SUPPORT_BOT, SITE, LEGAL, DISCLAIMER, pageMeta, publicHref };
 });

@@ -1,5 +1,8 @@
 "use client";
 
+import { navigationHref } from "@/lib/publicRouting";
+import { useSite } from "@/components/ui/LocaleProvider";
+
 import type { SavedMatrix } from "@/app/_lib/access";
 import { useSession } from "@/components/account/useSession";
 import { useOfferMode } from "@/components/pay/useOfferMode";
@@ -22,7 +25,7 @@ import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { useBirth } from "@/lib/useBirth";
 import { useFullSections } from "@/lib/useFullSections";
 import { useLockedPreview, withPreview } from "@/lib/useLockedPreview";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
@@ -79,9 +82,11 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
   const full = useFullSections(matrix, open);
   const preview = useLockedPreview(matrix, !open);
   const router = useRouter();
+  const navigationSite = useSite();
+  const navigationLocale = useLocale();
   // Даты нет — разбирать нечего: человек попадает на главную, к расчёту, а не на экран-объяснение.
   useEffect(() => {
-    if (hydrated && !matrix) router.replace("/");
+    if (hydrated && !matrix) router.replace(navigationHref("/", navigationSite, navigationLocale));
   }, [hydrated, matrix, router]);
 
   if (!hydrated || !matrix) {

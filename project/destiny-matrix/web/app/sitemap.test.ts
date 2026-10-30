@@ -1,3 +1,4 @@
+import { splitPublicPath } from "@/lib/publicRouting";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sitemapForSite as sitemap } from "@/lib/sitemapEntries";
@@ -18,7 +19,7 @@ const SERVICE_PATHS = servicePages().map((key) => SERVICE_PAGES[key].path);
 const STATIC_PATHS = ["/", "/encyclopedia", "/year", "/compatibility", ...SERVICE_PATHS];
 
 describe("карта сайта", () => {
-  const paths = sitemap().map((entry) => new URL(entry.url).pathname);
+  const paths = sitemap().map((entry) => splitPublicPath(new URL(entry.url).pathname).path);
 
   it.each(["/", "/encyclopedia", ...SERVICE_PATHS])("содержит %s", (path) => {
     expect(paths).toContain(path);
@@ -57,7 +58,7 @@ describe("карта сайта", () => {
   // Приоритет шапки выше листа: иначе карта заявляет, что лист важнее страницы, с которой
   // он раздаётся.
   it("ставит шапкам приоритет выше листьев", () => {
-    const by = new Map(sitemap().map((e) => [new URL(e.url).pathname, e.priority ?? 0]));
+    const by = new Map(sitemap().map((e) => [splitPublicPath(new URL(e.url).pathname).path, e.priority ?? 0]));
     for (const [hub, leaf] of [
       ["/encyclopedia/arcanum", "/encyclopedia/arcanum/4"],
       ["/encyclopedia/chakra", "/encyclopedia/chakra/anahata"],

@@ -1,3 +1,4 @@
+import { publicPath } from "@/lib/publicRouting";
 import { requestSite } from "@/lib/siteProfile.server";
 import { PayChoice } from "@/components/pay/Subscribed";
 import TariffsProvider from "@/components/pay/TariffsProvider";
@@ -10,7 +11,7 @@ import { forLocale as localizedSite } from "@/lib/site";
 import { type BuyFor } from "@/lib/readingLinks";
 import { allOffers, getBilling } from "@/lib/tariffs.server";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { notFound, redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -41,8 +42,8 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
   const one = (key: string) => String((Array.isArray(params[key]) ? params[key]![0] : params[key]) ?? "");
   const asked = one("for");
   const flow: BuyFor | null = asked === "personal" || asked === "pair" ? asked : null;
-  if (!flow && one("m")) redirect(`/pay/single?m=${encodeURIComponent(one("m"))}`);
-  if (!flow && one("r")) redirect(`/pay/pair?r=${encodeURIComponent(one("r"))}`);
+  if (!flow && one("m")) redirect(publicPath(`/pay/single?m=${encodeURIComponent(one("m"))}`, L));
+  if (!flow && one("r")) redirect(publicPath(`/pay/pair?r=${encodeURIComponent(one("r"))}`, L));
   const id = (key: string) => (/^\d+$/.test(one(key)) ? one(key) : undefined);
   const carry = flow === "pair" ? { r: id("r") } : flow === "personal" ? { m: id("m") } : {};
   const [{ providers }, all] = await Promise.all([getBilling(), allOffers()]);

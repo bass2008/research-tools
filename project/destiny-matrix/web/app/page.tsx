@@ -1,3 +1,4 @@
+import { publicUrl } from "@/lib/publicRouting";
 import { requestSite } from "@/lib/siteProfile.server";
 import CalcHero from "@/components/matrix/CalcHero";
 import CalculationProvider from "@/components/matrix/CalculationProvider";
@@ -46,7 +47,7 @@ const forLocale = localized((L: Locale, site) => {
         price: (t.price / 100).toFixed(2),
         priceCurrency: "RUB",
         availability: "https://schema.org/InStock",
-        url: `${SITE.url}/pay/${t.id}`,
+        url: publicUrl(`/pay/${t.id}`, site, L),
       })),
     };
   }

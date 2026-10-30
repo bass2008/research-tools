@@ -156,7 +156,7 @@ def test_pair_mail_leads_to_the_pair(client, monkeypatch):
     sent = []
     monkeypatch.setattr(mail, "send", lambda to, subject, body: sent.append(body) or True)
     body, _ = buy_pair(client, "mail@example.ru")
-    assert f"/readings/{body['reading_id']}?lang=ru" in sent[-1]
+    assert f"/ru/readings/{body['reading_id']}" in sent[-1]
 
 
 def test_pair_pdf_prints_the_pair_page(client, monkeypatch):

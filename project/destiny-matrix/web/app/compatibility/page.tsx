@@ -14,7 +14,7 @@ import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { readAccess, readReadings } from "../_lib/access";
 import { getBilling } from "@/lib/tariffs.server";
 import TariffsProvider from "@/components/pay/TariffsProvider";

@@ -3,7 +3,7 @@
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 /**
  * Платёж по адресу есть, а сервер о нём молчит.

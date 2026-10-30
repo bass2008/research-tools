@@ -54,13 +54,13 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
     assert _position_values(page, "relations")[:3] == [15, 20, 5]
     assert page.locator("[data-locked=true]").count() == 0
     tail_link = page.get_by_test_id("past_lives-full-link")
-    expect(tail_link).to_have_attribute("href", "/encyclopedia/karmic-tail/15-8-11")
+    expect(tail_link).to_have_attribute("href", "/ru/encyclopedia/karmic-tail/15-8-11")
     expect(tail_link).to_have_attribute("data-entity-type", "karmic_tail")
     comfort_link = page.get_by_test_id("comfort-full-link")
-    expect(comfort_link).to_have_attribute("href", "/encyclopedia/comfort/4-15-7")
+    expect(comfort_link).to_have_attribute("href", "/ru/encyclopedia/comfort/4-15-7")
     expect(comfort_link).to_have_attribute("data-entity-type", "comfort")
     profession_link = page.get_by_test_id("profession-full-link")
-    expect(profession_link).to_have_attribute("href", "/encyclopedia/profession/3-10-7")
+    expect(profession_link).to_have_attribute("href", "/ru/encyclopedia/profession/3-10-7")
     expect(profession_link).to_have_attribute("data-entity-type", "profession")
     profession = page.get_by_test_id("section-profession")
     expect(profession.locator('[data-position="Средняя точка таланта"]')).to_contain_text("Действие.")

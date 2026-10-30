@@ -56,6 +56,7 @@ def test_password_reset_lets_you_in(page, mail, api_log):
     page.wait_for_timeout(600)
 
     page.goto(f"{BASE}/forgot", wait_until="domcontentloaded")
+    assert page.url == BASE + "/ru/forgot"
     page.get_by_test_id("forgot-email").fill(mail)
     page.get_by_test_id("forgot-submit").click()
     expect(page.get_by_test_id("forgot-sent")).to_be_visible()
@@ -64,6 +65,7 @@ def test_password_reset_lets_you_in(page, mail, api_log):
     assert token, "ссылки на сброс нет в логе api"
 
     page.goto(f"{BASE}/reset?token={token}", wait_until="domcontentloaded")
+    assert page.url == BASE + f"/ru/reset?token={token}"
     page.get_by_test_id("reset-password").fill("newpass")
     page.get_by_test_id("reset-submit").click()
     page.wait_for_timeout(1200)

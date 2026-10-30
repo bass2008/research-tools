@@ -6,7 +6,7 @@ import { config, middleware } from "./middleware";
 const forwarded = (response: ReturnType<typeof middleware>) =>
   response.headers.get("x-middleware-override-headers");
 
-function call(headers: Record<string, string>, pathname = "/o-metode") {
+function call(headers: Record<string, string>, pathname = "/ru/method") {
   const request = {
     url: new URL(pathname, "https://arcana-sense.ru").toString(),
     method: "GET",
@@ -97,25 +97,25 @@ describe("domain and public locale isolation", () => {
   });
 
   it("overwrites visitor-supplied render context", () => {
-    const response = call({ host: "arcana-sense.com", "x-arcana-path": "/account", "x-arcana-interactive": "1" }, "/encyclopedia");
+    const response = call({ host: "arcana-sense.com", "x-arcana-path": "/account", "x-arcana-interactive": "1" }, "/en/encyclopedia");
     expect(response.headers.get("x-middleware-request-x-arcana-path")).toBe("/encyclopedia");
     expect(response.headers.get("x-middleware-request-x-arcana-interactive")).toBe("0");
   });
 
   it("removes public lang links without setting a language cookie", () => {
-    const response = call({ host: "arcana-sense.com" }, "/encyclopedia/arcanum/4?lang=ru&tab=meaning");
-    expect(response.status).toBe(308);
-    expect(response.headers.get("location")).toBe("https://arcana-sense.com/encyclopedia/arcanum/4?tab=meaning");
+    const response = call({ host: "arcana-sense.com" }, "/en/encyclopedia/arcanum/4?lang=ru&tab=meaning");
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe("https://arcana-sense.com/en/encyclopedia/arcanum/4?tab=meaning");
     expect(response.headers.has("set-cookie")).toBe(false);
   });
 
   it("allows language links for private reports on both domains", () => {
-    expect(call({ host: "arcana-sense.com" }, "/report?lang=ru").headers.get("set-cookie")).toContain("arcana_locale=ru");
-    expect(call({ host: "arcana-sense.ru" }, "/report?lang=en").headers.get("set-cookie")).toContain("arcana_locale=en");
+    expect(call({ host: "arcana-sense.com" }, "/report?lang=ru").headers.get("location")).toBe("https://arcana-sense.com/ru/report");
+    expect(call({ host: "arcana-sense.ru" }, "/report?lang=en").headers.get("location")).toBe("https://arcana-sense.ru/en/report");
   });
 
   it("marks interactive RSC responses as private and non-indexable", () => {
-    const response = call({ host: "arcana-sense.com", rsc: "1", cookie: "arcana_locale=ru" }, "/encyclopedia");
+    const response = call({ host: "arcana-sense.com", rsc: "1", cookie: "arcana_locale=ru" }, "/en/encyclopedia");
     expect(response.headers.get("x-middleware-request-x-arcana-interactive")).toBe("1");
     expect(response.headers.get("x-robots-tag")).toContain("noindex");
     expect(response.headers.get("cache-control")).toContain("no-store");

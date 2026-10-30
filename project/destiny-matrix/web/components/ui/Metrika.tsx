@@ -1,5 +1,6 @@
 "use client";
 
+import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
@@ -25,7 +26,7 @@ export default function Metrika() {
   // Срабатывает и для старой сессии, и после входа/регистрации без перезагрузки.
   // onReady гарантирует, что очередь ym уже создана, даже если внешний tag.js ещё грузится.
   useEffect(() => {
-    if (!id || !ready || session.status !== "user" || path.startsWith("/print")) return;
+    if (!id || !ready || session.status !== "user" || splitPublicPath(path).path.startsWith("/print")) return;
     return linkMetrikaClient(id);
   }, [id, ready, session.status, session.email, path]);
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { publicPath } from "@/lib/publicRouting";
+
 import { useSession } from "@/components/account/useSession";
 import CalcHero from "@/components/matrix/CalcHero";
 import { useOfferMode } from "@/components/pay/useOfferMode";
@@ -284,7 +286,7 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
     setError(null);
     try {
       const row = await localizedApi(L).api.saveReading("pair", pair);
-      router.push(`/readings/${row.id}`);
+      router.push(publicPath(`/readings/${row.id}`, L));
     } catch {
       setOpening(false);
       setError(DP.openFailed);

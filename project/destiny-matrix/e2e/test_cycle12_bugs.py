@@ -59,7 +59,7 @@ def test_section_article_links_to_its_exact_points_instead_of_generic_arcana_car
 
     expect(page.get_by_role("heading", name="Позиции этого раздела")).to_be_visible()
     for key in ("day", "month", "year"):
-        expect(page.locator(f'a[href="/encyclopedia/position/{key}"]')).to_be_visible()
+        expect(page.locator(f'a[href="/ru/encyclopedia/position/{key}"]')).to_be_visible()
     expect(page.get_by_role("heading", name="Все 22 аркана в этой позиции")).to_have_count(0)
 
     page.goto(f"{BASE}/encyclopedia/position/day", wait_until="domcontentloaded")

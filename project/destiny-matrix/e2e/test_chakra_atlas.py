@@ -53,7 +53,7 @@ def test_locked_widget_and_payment_link(page):
     expect(dialog).to_be_visible()
     expect(dialog.get_by_test_id('chakra-locked')).to_be_visible()
     expect(dialog.get_by_test_id('chakra-copy')).to_have_count(0)
-    link = dialog.locator('a[href="/pay?for=personal"]')
+    link = dialog.locator('a[href="/ru/pay?for=personal"]')
     expect(link).to_be_visible()
     link.click()
     expect(page).to_have_url(re.compile(r'/pay\?for=personal'))
@@ -151,7 +151,7 @@ def test_matrix_catalog_keeps_public_chakra_links(page):
     expect(widget).to_have_attribute('data-access', 'reference')
     expect(widget.locator('a[data-chakra]')).to_have_count(7)
     widget.locator('a[data-chakra=muladhara]').click()
-    expect(page).to_have_url(BASE + '/encyclopedia/chakra/muladhara')
+    expect(page).to_have_url(BASE + '/ru/encyclopedia/chakra/muladhara')
 
 
 @pytest.mark.parametrize('catalog', [False, True])

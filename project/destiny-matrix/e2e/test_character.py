@@ -38,14 +38,14 @@ def test_calculator_opens_full_character_reading(page: Page) -> None:
     expect(links.locator(".character-encref-separator")).to_be_visible()
     expect(
         links.get_by_role("link", name="Как читать раздел «Характер и личные качества» →")
-    ).to_have_attribute("href", "/encyclopedia/position/character")
+    ).to_have_attribute("href", "/ru/encyclopedia/position/character")
     link = section.get_by_test_id("character-full-link")
-    expect(link).to_have_attribute("href", "/encyclopedia/character/7-3-19")
+    expect(link).to_have_attribute("href", "/ru/encyclopedia/character/7-3-19")
     assert "btn" not in (link.get_attribute("class") or "").split()
     expect(link).to_have_text("Подробнее про характер 7-3-19 в энциклопедии →")
     link.click()
 
-    page.wait_for_url(f"{BASE}/encyclopedia/character/7-3-19")
+    page.wait_for_url(f"{BASE}/ru/encyclopedia/character/7-3-19")
     expect(page.get_by_role("heading", name="Характер 7-3-19", exact=False)).to_be_visible()
     reading = page.get_by_test_id("character-reading")
     expect(reading.locator('[data-role="A"]')).to_contain_text("Колесница")
@@ -55,7 +55,7 @@ def test_calculator_opens_full_character_reading(page: Page) -> None:
     expect(reading).to_contain_text("Практический шаг")
     expect(
         reading.get_by_role("link", name="Подробнее про сочетание 3 и 7 аркана в энциклопедии →")
-    ).to_have_attribute("href", "/encyclopedia/combination/3-7")
+    ).to_have_attribute("href", "/ru/encyclopedia/combination/3-7")
     expect(page.locator('meta[name="robots"]')).to_have_attribute("content", "noindex, follow")
     expect(page.locator(".enc-crumbs")).to_contain_text("Энциклопедия")
     expect(page.locator(".enc-crumbs")).to_contain_text("Разделы отчёта")
@@ -74,13 +74,13 @@ def test_calculator_opens_full_character_reading(page: Page) -> None:
 def test_matrix_and_encyclopedia_link_to_personal_example(page: Page) -> None:
     page.goto(f"{BASE}/matrix/4-3-22", wait_until="domcontentloaded")
     expect(page.get_by_test_id("character-full-link")).to_have_attribute(
-        "href", "/encyclopedia/character/4-3-22"
+        "href", "/ru/encyclopedia/character/4-3-22"
     )
 
-    page.goto(f"{BASE}/encyclopedia/position/character", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/ru/encyclopedia/position/character", wait_until="domcontentloaded")
     expect(page.get_by_role("heading", name="Точка A: портрет личности и визитка")).to_be_visible()
     expect(page.get_by_role("link", name="Посмотреть разбор 4–3–22 в энциклопедии →")).to_have_attribute(
-        "href", "/encyclopedia/character/4-3-22"
+        "href", "/ru/encyclopedia/character/4-3-22"
     )
 
     response = page.goto(f"{BASE}/matrix/4-3-22/character", wait_until="domcontentloaded")
@@ -88,7 +88,7 @@ def test_matrix_and_encyclopedia_link_to_personal_example(page: Page) -> None:
 
 
 def test_day_position_is_full_vizitka_article(page: Page) -> None:
-    page.goto(f"{BASE}/encyclopedia/position/day", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/ru/encyclopedia/position/day", wait_until="domcontentloaded")
 
     expect(page).to_have_title("Визитка в матрице судьбы — аркан дня рождения — Arcana Sense")
     expect(page.get_by_role("heading", name="Что такое визитка в матрице судьбы")).to_be_visible()
@@ -97,14 +97,14 @@ def test_day_position_is_full_vizitka_article(page: Page) -> None:
     expect(page.get_by_text("Как найти точку визитки на схеме?", exact=True)).to_be_visible()
     expect(
         page.get_by_role("link", name="Подробнее о полном разделе «Характер и личные качества» →")
-    ).to_have_attribute("href", "/encyclopedia/position/character")
+    ).to_have_attribute("href", "/ru/encyclopedia/position/character")
 
 
 def test_combination_page_contains_all_section_contexts(page: Page) -> None:
     # Пара 3 и 11 выбрана не случайно: это одна из семи пар, у которых достижимы все девять
     # контекстов. На 3 и 4 тест ждал связей E↔M и B↔P, которых у этой пары не бывает ни в одной
     # из 5 544 матриц, — страница была права, а тест красный.
-    page.goto(f"{BASE}/encyclopedia/combination/3-11", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/ru/encyclopedia/combination/3-11", wait_until="domcontentloaded")
     for group in (
         "Как пара работает в характере: 3 и 11",
         "Как пара работает в центре и внутренних точках: 3 и 11",

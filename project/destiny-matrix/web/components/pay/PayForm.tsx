@@ -21,7 +21,7 @@ import { forLocale as localizedTargets } from "@/lib/paytarget";
 import { pairTitle } from "@/lib/pair/title";
 import { saveBirth, savePair, type StoredBirth, type StoredPair } from "@/lib/storage";
 import { BirthPicker, PairPicker, isoOf, type PickedDate } from "./BirthPicker";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import PayReceipt from "./PayReceipt";

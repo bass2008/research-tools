@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import ArcanumCard from "./ArcanumCard";
 import LockIcon from "@/components/ui/LockIcon";
 import { forLocale as localizedArcana } from "@/lib/arcana";

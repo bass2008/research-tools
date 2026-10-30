@@ -201,15 +201,15 @@ def test_second_click_returns_the_same_file(page, mail):
     ссылки ведут на один файл, и задача печати на матрицу остаётся одна.
     """
     answers: list[dict] = []
-    page.on("response", lambda r: answers.append(r.json())
-            if r.url.endswith("/api/reports/pdf") and r.status == 200 else None)
 
     flows.buy(page, mail, 12, 11, 1993)
     page.get_by_role("link", name="Открыть полный разбор").click()
     page.wait_for_timeout(1200)
     button = page.get_by_test_id("save-pdf")
     expect(button).to_be_enabled(timeout=20_000)
-    button.click()
+    with page.expect_response(lambda r: r.url.endswith("/api/reports/pdf") and r.status == 200, timeout=180_000) as first:
+        button.click()
+    answers.append(first.value.json())
     page.wait_for_function(
         "() => document.querySelector('[data-testid=save-pdf]').innerText.includes('Открыть')",
         timeout=180_000)
@@ -218,7 +218,9 @@ def test_second_click_returns_the_same_file(page, mail):
     page.wait_for_timeout(1500)
     again = page.get_by_test_id("save-pdf")
     expect(again).to_be_enabled(timeout=20_000)
-    again.click()
+    with page.expect_response(lambda r: r.url.endswith("/api/reports/pdf") and r.status == 200, timeout=180_000) as second:
+        again.click()
+    answers.append(second.value.json())
     page.wait_for_function(
         "() => document.querySelector('[data-testid=save-pdf]').innerText.includes('Открыть')",
         timeout=60_000)

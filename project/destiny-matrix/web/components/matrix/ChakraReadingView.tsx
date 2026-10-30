@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { D } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n/lang";

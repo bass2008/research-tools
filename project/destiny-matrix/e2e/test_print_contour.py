@@ -31,11 +31,12 @@ from conftest import BASE, _credentials
 def _register(page: Page) -> str:
     mail = f"print-{uuid.uuid4().hex[:8]}@example.com"
     page.goto(f"{BASE}/register", wait_until="domcontentloaded")
+    locale = page.locator("html").get_attribute("lang")
     page.get_by_test_id("auth-email").fill(mail)
     page.get_by_test_id("auth-password").fill("1234")
     flows.agree(page)
     page.get_by_test_id("auth-submit").click()
-    page.wait_for_url(f"{BASE}/account", timeout=20_000)
+    page.wait_for_url(f"{BASE}/{locale}/account", timeout=20_000)
     return mail
 
 

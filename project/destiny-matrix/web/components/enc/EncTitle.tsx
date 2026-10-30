@@ -3,6 +3,7 @@
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
+import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 
 // Надпись справочника видна на всех страницах каркаса, но заголовком первого уровня она
@@ -11,7 +12,7 @@ export default function EncTitle({ locale: requestedLocale, ...localeProps }: ({
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
 
-  const path = usePathname();
+  const path = splitPublicPath(usePathname()).path;
   const text = D.octagram.encTitle[L];
   if (path === "/encyclopedia") return <h1 className="enc-title">{text}</h1>;
   return (

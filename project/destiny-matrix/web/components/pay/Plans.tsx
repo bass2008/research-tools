@@ -8,7 +8,7 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedTariffs, type Tariff } from "@/lib/tariffs";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale) => {
   const { capLabel, periodLabel, priceLabel } = localizedTariffs(L);

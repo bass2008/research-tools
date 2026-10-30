@@ -4,7 +4,7 @@ import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
 import type { LongformReading } from "@/lib/readingTypes";
 import type { PersonalSectionKey } from "@/lib/sectionReadings";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import CharacterReadingView from "./CharacterReadingView";
 
 export const forLocale = localized((L: Locale) => {

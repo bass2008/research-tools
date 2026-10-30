@@ -108,7 +108,7 @@ def test_hero_buttons_open_what_they_promise(page: Page, label, hub):
         label,
     )
     assert href, f"кнопки «{label}» нет на слайдах"
-    assert href.split("#")[0] == hub, f"«{label}» ведёт на {href}"
+    assert href.split("#")[0] == "/ru" + hub, f"«{label}» ведёт на {href}"
     page.goto(BASE + href, wait_until="domcontentloaded")
     _wait_active(page, label, f"«{label}» открыла раздел «{_active_section(page)}»")
 
@@ -133,7 +133,7 @@ def test_positions_link_opens_positions(page: Page):
           return link ? link.getAttribute('href') : null;
         }"""
     )
-    assert href and href.split("#")[0] == "/encyclopedia/position", f"ссылка ведёт на {href}"
+    assert href and href.split("#")[0] == "/ru/encyclopedia/position", f"ссылка ведёт на {href}"
     page.goto(BASE + href, wait_until="domcontentloaded")
     assert page.locator("#tochki").count(), "на шапке позиций нет половины с точками карты"
 

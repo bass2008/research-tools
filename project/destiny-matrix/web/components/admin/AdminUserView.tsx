@@ -3,7 +3,7 @@
 import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { useAdminLocale, useAdminMessage } from "./useAdminLocale";
 
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import { useEffect, useState } from "react";
 
 import UserActions from "@/components/admin/UserActions";

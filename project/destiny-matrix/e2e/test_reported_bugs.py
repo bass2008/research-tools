@@ -35,7 +35,7 @@ def test_registration_replaces_the_form_in_browser_history(page: Page):
     page.get_by_test_id("auth-password").fill("1234")
     flows.agree(page)
     page.get_by_test_id("auth-submit").click()
-    page.wait_for_url(f"{BASE}/account")
+    page.wait_for_url(f"{BASE}/ru/account")
 
     page.go_back(wait_until="domcontentloaded")
     assert not page.url.rstrip("/").endswith("/register"), page.url
@@ -82,7 +82,7 @@ def test_account_report_works_without_browser_birth_and_uses_free_wording(page: 
     report = page.get_by_test_id("account-report")
     expect(report).to_be_visible()
     href = report.get_attribute("href") or ""
-    assert re.fullmatch(r"/matrices/\d+", href), href
+    assert re.fullmatch(r"/ru/matrices/\d+", href), href
     report.click()
     page.wait_for_url(re.compile(r"/matrices/\d+$"))
 
@@ -118,11 +118,11 @@ def test_refunded_date_keeps_the_exact_payment_target(page: Page):
     expect(buy).to_be_visible()
     # Пока не приехал прайс, кнопка живёт как `button` без адреса: чтение атрибута сразу после
     # появления давало плавающее падение под нагрузкой полного прогона.
-    expect(buy).to_have_attribute("href", f"/pay?for=personal&m={bought_id}", timeout=15_000)
+    expect(buy).to_have_attribute("href", f"/ru/pay?for=personal&m={bought_id}", timeout=15_000)
 
     buy.click()
     page.get_by_test_id("plan-single").click()
-    page.wait_for_url(re.compile(rf"/pay/single\?m={bought_id}$"))
+    page.wait_for_url(re.compile(rf"/ru/pay/single\?m={bought_id}$"))
     expect(page.get_by_test_id("pay-target")).to_have_attribute("data-value", str(bought_id))
 
     flows.agree(page)

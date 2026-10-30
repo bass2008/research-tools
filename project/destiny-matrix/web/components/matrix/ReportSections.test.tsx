@@ -32,7 +32,7 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
     const gist = arcanumShort(cards[0].arcanum);
     expect(html).toContain(gist.charAt(0).toLocaleUpperCase(locale) + gist.slice(1));
     expect(html.match(/data-testid="section-buy-/g)).toHaveLength(18);
-    expect(html.match(/href="\/pay\?for=personal&amp;m=7"/g)).toHaveLength(36 + 8);
+    expect(html.match(/href="\/(?:ru|en)\/pay\?for=personal&amp;m=7"/g)).toHaveLength(36 + 8);
     expect(html).toContain(D.report.unlockSection[locale]);
 
     const chakras = sections.find((s) => s.key === "chakras")!.longform!;
@@ -40,7 +40,7 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
     for (const row of [...chakras.chakraRows!, chakras.energyField!]) {
       expect(html).toContain(D.report.lockedWords[locale](row.lockedWords!));
     }
-    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/pay\?for=personal&amp;m=7"/g)).toHaveLength(8);
+    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/(?:ru|en)\/pay\?for=personal&amp;m=7"/g)).toHaveLength(8);
     expect(html).not.toContain("chakras-reading");
     if (locale === "en") expect(text(html)).not.toMatch(/[А-Яа-яЁё]/);
   });

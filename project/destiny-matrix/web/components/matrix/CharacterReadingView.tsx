@@ -7,7 +7,7 @@ import { forLocale as localizedPublicSpec } from "@/lib/publicSpec";
 import type { LongformReading } from "@/lib/readingTypes";
 import { readingRoleReference, readingRoleSymbol } from "@/lib/readingRoleLabel";
 import { forLocale as localizedSite } from "@/lib/site";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 import ArcanumCard from "./ArcanumCard";
 import CharacterConclusionView from "./CharacterConclusionView";
 import ChakraReadingView from "./ChakraReadingView";

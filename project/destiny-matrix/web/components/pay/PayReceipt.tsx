@@ -5,7 +5,7 @@ import { localized } from "@/lib/i18n/localized";
 import { forLocale as localizedMatrix } from "@/lib/matrix";
 import type { Stage } from "@/lib/payStage";
 import { readingHref } from "@/lib/readingLinks";
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale) => {
   const { birthLabel } = localizedMatrixResult(L);

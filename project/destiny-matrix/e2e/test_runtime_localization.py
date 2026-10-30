@@ -23,54 +23,51 @@ def switch(page, locale):
 
 
 @pytest.mark.parametrize("width", [1360, 390])
-def test_switch_preserves_form_and_document(page, width):
+def test_public_switch_navigates_to_language_home(page, width):
     page.set_viewport_size({"width": width, "height": 844})
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(BASE + "/")
+    expect(page.locator("html")).to_have_attribute("lang", "en")
+    assert page.url == BASE + "/en/"
+    switch(page, "ru")
+    page.wait_for_url(BASE + "/ru/")
     page.locator("#d").select_option("31")
     page.locator("#m").select_option("3")
     page.locator("#y").select_option("1993")
-    page.evaluate("window.localeDocumentMarker = 'same-document'")
-    switch(page, "en")
-    expect(page.locator("#d")).to_have_value("31")
-    expect(page.locator("#m")).to_have_value("3")
-    expect(page.locator("#y")).to_have_value("1993")
-    expect(page.locator("#m option:checked")).to_have_text("March")
-    assert page.evaluate("window.localeDocumentMarker") == "same-document"
-    assert page.url == BASE + "/"
-    switch(page, "ru")
     expect(page.locator("#m option:checked")).to_have_text("Март")
+    switch(page, "en")
+    page.wait_for_url(BASE + "/en/")
     page.reload()
-    expect(page.locator("html")).to_have_attribute("lang", "ru")
+    expect(page.locator("html")).to_have_attribute("lang", "en")
     assert errors == []
 
 
 def test_private_language_link_overrides_cookie_and_survives_switch(page):
     page.goto(BASE + "/login?lang=en#content")
     expect(page.locator("html")).to_have_attribute("lang", "en")
+    assert page.url == BASE + "/en/login#content"
     page.evaluate("window.localeDocumentMarker = 'same-document'")
     switch(page, "ru")
-    assert "lang=ru" in page.url and page.url.endswith("#content")
+    assert page.url == BASE + "/ru/login#content"
     assert page.evaluate("window.localeDocumentMarker") == "same-document"
     page.reload()
     expect(page.locator("html")).to_have_attribute("lang", "ru")
 
 
-def test_article_switches_on_its_current_url(page):
-    page.goto(BASE + "/encyclopedia/arcanum/4")
-    expect(page.locator("html")).to_have_attribute("lang", "ru")
+def test_article_switches_to_corresponding_public_url(page):
+    page.goto(BASE + "/en/encyclopedia/arcanum/4")
+    expect(page.locator("html")).to_have_attribute("lang", "en")
+    en = page.locator("h1").inner_text()
+    switch(page, "ru")
+    page.wait_for_url(BASE + "/ru/encyclopedia/arcanum/4")
     ru = page.locator("h1").inner_text()
     assert re.search("[А-Яа-я]", ru)
-    switch(page, "en")
-    en = page.locator("h1").inner_text()
-    assert en != ru and not re.search("[А-Яа-я]", en)
-    assert page.url == BASE + "/encyclopedia/arcanum/4"
     page.reload()
-    expect(page.locator("html")).to_have_attribute("lang", "en")
-    expect(page.locator("h1")).to_have_text(en)
-    switch(page, "ru")
     expect(page.locator("h1")).to_have_text(ru)
+    switch(page, "en")
+    page.wait_for_url(BASE + "/en/encyclopedia/arcanum/4")
+    expect(page.locator("h1")).to_have_text(en)
 
 
 def test_registration_and_both_domains_share_one_account(page, browser, mail):
@@ -119,7 +116,8 @@ def test_paid_pdf_is_rendered_and_cached_per_locale(page, mail, tmp_path):
     })
     assert paid.ok, paid.text()
     matrix_id = paid.json()["matrix_id"]
-    page.goto(BASE + f"/report?m={matrix_id}")
+    page.goto(BASE + f"/ru/report?m={matrix_id}")
+    expect(page.locator("html")).to_have_attribute("lang", "ru")
     switch(page, "en")
     en = page.request.post(BASE + "/api/reports/pdf", data={"matrix_id": matrix_id},
                            headers={"Accept-Language": "en"}, timeout=180_000)
