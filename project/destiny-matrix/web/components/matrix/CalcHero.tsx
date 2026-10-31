@@ -232,13 +232,16 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
 
   // Кнопка не должна вести туда, где человек уже стоит. Сравнивается только путь: параметр и
   // якорь снимаются, потому что «/encyclopedia/position#tochki» — та же страница, что и
-  // «/encyclopedia/position», а раньше разделы жили параметрами и три слайда подряд предлагали
-  // один и тот же «Каталог матриц».
+  // «/encyclopedia/position».
   function secondLink(s: HeroSlide) {
     const href = s.link.href.split(/[?#]/)[0] ?? s.link.href;
     const here = href.replace(/\/$/, "") === path.replace(/\/$/, "");
-    if (!here) return s.link;
-    return { label: D.nav.matrixCatalog[L], href: "/matrix" };
+    if (here) return null;
+    return (
+      <Link className="btn ghost" href={s.link.href}>
+        {s.link.label}
+      </Link>
+    );
   }
 
   function primaryAction() {
@@ -279,9 +282,7 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
         {heading}
         <div className="btnrow">
           {primaryAction()}
-          <Link className="btn ghost" href={secondLink(s).href}>
-            {secondLink(s).label}
-          </Link>
+          {secondLink(s)}
         </div>
       </>
     );
@@ -367,9 +368,7 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
             {lead ? <p className="lede">{lead}</p> : null}
             <div className="btnrow">
               {primaryAction()}
-              <Link className="btn ghost" href={secondLink(s).href}>
-                {secondLink(s).label}
-              </Link>
+              {secondLink(s)}
             </div>
           </div>
         );

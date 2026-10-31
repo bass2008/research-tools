@@ -303,6 +303,34 @@ def test_sync_asks_the_bank(client, db, bank):
     assert ("GetState", {"PaymentId": body["payment_id"]}) in bank
 
 
+def test_receipt_answers_without_session(client, db, bank):
+    body = start(client, "app-return@example.ru")
+    answer = client.post("/api/payments/receipt", json={"order_id": body["order_id"]})
+    assert answer.status_code == 200, answer.text
+    data = answer.json()
+    assert data["paid"] is True and data["state"] == "paid" and data["tariff"] == "single"
+    assert data["payment_id"] == body["payment_id"] and data["subscription"] is False
+    assert ("GetState", {"PaymentId": body["payment_id"]}) in bank
+    assert "app-return@example.ru" not in answer.text
+    assert not {"user", "email", "reading_id", "matrix_id", "token"} & data.keys()
+
+
+def test_receipt_tells_subscription_end(client, db, bank):
+    started = client.post("/api/payments/start", json={"tariff": "month", "email": "sub-return@example.ru"})
+    assert started.status_code == 200, started.text
+    data = client.post("/api/payments/receipt", json={"order_id": started.json()["order_id"]}).json()
+    right = db.scalars(select(Entitlement)).one()
+    assert data["subscription"] is True and data["until"] is not None
+    assert data["until"].startswith(right.expires_at.date().isoformat())
+
+
+@pytest.mark.parametrize("order", ["arcana-1", "arcana-1-00000000", "arcana-1-abc", "other-1-12345678"])
+def test_receipt_needs_the_exact_order(client, db, bank, order):
+    start(client, "guess@example.ru")
+    response = client.post("/api/payments/receipt", json={"order_id": order})
+    assert response.status_code == 404
+
+
 @pytest.mark.parametrize("tariff,target", [
     ("single", {"birth": "1990-01-01"}),
     ("pair", {"inputs": {"a": {"birth": "1990-01-01"}, "b": {"birth": "1991-02-02"}}}),

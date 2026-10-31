@@ -618,6 +618,23 @@ export const forLocale = localized((L: Locale) => {
         body: JSON.stringify({ order_id: orderId }),
       }),
 
+    payReceipt: (orderId: string) =>
+      request<{
+        ok: true; status: string;
+        state: "new" | "paid" | "refunded" | "failed" | "abandoned";
+        paid: boolean;
+        /** чек без входа: разборы и кабинет не раскрывает */
+        matrix_id?: null; product?: null;
+        subscription: boolean;
+        until: string | null;
+        outcome?: string;
+        payment_id: string;
+        tariff: string;
+      }>("/payments/receipt", {
+        method: "POST",
+        body: JSON.stringify({ order_id: orderId }),
+      }),
+
     reportJobs: () =>
       request<{
         items: Array<{

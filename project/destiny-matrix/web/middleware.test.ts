@@ -20,14 +20,14 @@ describe("missing content keeps its localized HTML before streaming", () => {
   it.each(["arcana-sense.ru", "arcana-sense.com"])("returns the standalone 404 for %s", (host) => {
     for (const path of ["/encyclopedia/arcanum/99", "/encyclopedia/chakra/nope",
       "/encyclopedia/position/not-real/7", "/encyclopedia/position/center/99",
-      "/matrix/9-9-9999", "/year/99", "/encyclopedia/combination/1-99",
+      "/year/99", "/encyclopedia/combination/1-99",
       "/encyclopedia/karmic-tail/1-2-3"]) {
       const response = call({ host }, path);
       expect(response.status, path).toBe(404);
       expect(response.headers.get("x-middleware-rewrite"), path).toContain("/_missing-content");
     }
     for (const path of ["/encyclopedia/arcanum/7", "/encyclopedia/chakra/anahata",
-      "/matrix/1-1-2", "/year/7", "/encyclopedia/combination/7-18", "/api/matrices"]) {
+      "/year/7", "/encyclopedia/combination/7-18", "/api/matrices"]) {
       expect(call({ host }, path).headers.get("x-middleware-rewrite"), path).toBeNull();
     }
   });
@@ -76,7 +76,7 @@ describe("список адресов", () => {
   const covers = (path: string) =>
     config.matcher.some((pattern) => new RegExp(`^${pattern}$`).test(path));
 
-  it.each(["/", "/o-metode", "/encyclopedia/arcanum/7", "/matrix/1-1-1990", "/report", "/sitemap.xml", "/health-other", "/health/nested"])(
+  it.each(["/", "/o-metode", "/encyclopedia/arcanum/7", "/report", "/sitemap.xml", "/health-other", "/health/nested"])(
     "покрывает %s", (path) => expect(covers(path)).toBe(true),
   );
 

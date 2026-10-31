@@ -24,7 +24,7 @@ export function isPublicPath(path: string): boolean {
 
 /** Application pages keep their session/payment host while their language lives in the URL. */
 export function isUserPath(path: string): boolean {
-  return isPublicPath(path) || /^\/(account|admin|report|matrices|readings|pay|login|register|forgot|reset|print|matrix)(\/|$)/.test(path);
+  return isPublicPath(path) || /^\/(account|admin|report|matrices|readings|pay|login|register|forgot|reset|print)(\/|$)/.test(path);
 }
 
 /** Idempotent mapping of user-facing paths; API, assets and external URLs are untouched. */

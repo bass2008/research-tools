@@ -55,10 +55,8 @@ STATIC_INDEXED = {
     "/encyclopedia/karmic-tail": "tail_hub", "/year": "year_hub",
     "/contacts": "legal", "/terms": "legal", "/privacy": "legal", "/refund": "legal",
 }
-# Публичная страница вне индекса — не то же, что личная. Каталог матриц остаётся путём человека
-# к конкретной карте, но спроса на список всех матриц нет (ноль показов за первые дни индексации
-# при наличии в карте сайта), а его содержимое — ссылки на 5 544 адреса, закрытых от обхода.
-STATIC_PUBLIC_NOINDEX = {"/matrix": "matrix_catalog", "/encyclopedia/combination": "combination_hub"}
+# Публичная страница вне индекса — не то же, что личная.
+STATIC_PUBLIC_NOINDEX = {"/encyclopedia/combination": "combination_hub"}
 STATIC_NOINDEX = {
     "/account", "/admin", "/forgot", "/login", "/register", "/reset", "/report",
     "/matrices", "/pay", "/pay/done", "/pay/fail", "/print/report",
@@ -294,9 +292,7 @@ def semantic_artifacts(nodes: list[dict], valid: set[str], indexed: set[str], pa
 
 
 def item_list(name: str) -> list[dict]:
-    # Предрасчёт матриц один на все языки и лежит уровнем выше языкового каталога.
-    root = WEB_CONTENT.parent if name == "matrices.json" else WEB_CONTENT
-    payload = read_json(root / name)
+    payload = read_json(WEB_CONTENT / name)
     return payload.get("items", payload)
 
 
@@ -368,9 +364,6 @@ def url_registry(tails: list[dict]) -> list[dict]:
         indexed = bool(item["publication"]["index"])
         add(f"/encyclopedia/compatibility/tails/{item['key']}", "pair_karmic_tail",
             "keep" if indexed else "noindex", indexed, "кармический хвост матрицы пары")
-    for item in item_list("matrices.json"):
-        add(f"/matrix/{item['slug']}", "calculated_matrix", "noindex", False,
-            "производный продуктовый результат, не SEO landing")
     return sorted(rows, key=lambda row: row["old_url"])
 
 
@@ -426,7 +419,7 @@ def review_cards(tails: list[dict], urls: list[dict]) -> list[dict]:
             "independent_editor": "pending human sign-off",
         })
     for row in urls:
-        if row["entity_type"] in {"calculate", "matrix_catalog", "method", "concept", "author", "legal"}:
+        if row["entity_type"] in {"calculate", "method", "concept", "author", "legal"}:
             cards.append({
                 "entity": f"page:{row['old_url']}", "source": "web/app",
                 "primary_query": None, "search_intent": row["entity_type"],

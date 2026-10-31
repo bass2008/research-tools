@@ -1,5 +1,4 @@
 import { pickMatrix, readAccess, readMatrixUnlocked, readSavedMatrices } from "@/app/_lib/access";
-import { parseSlug } from "@/app/matrix/matrices";
 import { ALL_FREE } from "@/lib/access";
 import { forLocale as contentForLocale } from "@/lib/content";
 import { requestLocale } from "@/lib/i18n/request";
@@ -32,7 +31,7 @@ export async function GET(request: Request) {
   const id = params.get("m");
   if (params.get("preview") === "locked") {
     const slug = params.get("slug") ?? "";
-    const item = parseSlug(slug) && matrixItem(slug);
+    const item = matrixItem(slug);
     if (!item) return new NextResponse("Not found", { status: 404 });
     return NextResponse.json(
       { sections: withLockedPreview(item.matrix, build(item.matrix, false)).filter((s) => s.locked) },
@@ -54,7 +53,7 @@ export async function GET(request: Request) {
   }
   if (!ALL_FREE && !(await readAccess()).unlimited) return new NextResponse("Not found", { status: 404 });
   const slug = params.get("slug") ?? "";
-  const item = parseSlug(slug) && matrixItem(slug);
+  const item = matrixItem(slug);
   if (!item) return new NextResponse("Not found", { status: 404 });
   const matrix = item.matrix;
   return NextResponse.json(

@@ -3,6 +3,7 @@ import json
 import logging
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -34,7 +35,7 @@ logging.config.dictConfig(LOGGING_CONFIG)
 with notification_log('tbank', {'Token': 'secret-value', 'Email': 'buyer@gmail.com',
                                 'Details': 'line one\\nline two'}) as event:
     event['result'] = 'applied'
-"""], capture_output=True, text=True, check=True)
+"""], capture_output=True, text=True, check=True, cwd=Path(__file__).resolve().parents[1])
     lines = result.stderr.splitlines()
     assert len(lines) == 2
     events = [json.loads(line[line.index("{"):]) for line in lines]

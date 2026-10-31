@@ -145,21 +145,8 @@ def test_paid_other_date_reads_its_own_combinations(page, mail):
         expect(page.get_by_test_id('chakra-dialog')).not_to_be_visible()
 
 
-def test_matrix_catalog_keeps_public_chakra_links(page):
-    page.goto(BASE + '/matrix/4-3-22', wait_until='networkidle')
-    widget = page.get_by_test_id('chakra-atlas')
-    expect(widget).to_have_attribute('data-access', 'reference')
-    expect(widget.locator('a[data-chakra]')).to_have_count(7)
-    widget.locator('a[data-chakra=muladhara]').click()
-    expect(page).to_have_url(BASE + '/ru/encyclopedia/chakra/muladhara')
-
-
-@pytest.mark.parametrize('catalog', [False, True])
-def test_chakra_hover_highlights_exact_points_and_resets(page, catalog):
-    if catalog:
-        page.goto(BASE + '/matrix/4-3-22', wait_until='networkidle')
-    else:
-        flows.calculate(page, 31, 3, 1993)
+def test_chakra_hover_highlights_exact_points_and_resets(page):
+    flows.calculate(page, 31, 3, 1993)
     points = page.locator('svg.oct [data-map-point]')
     page.mouse.move(0, 0)
     # После прокрутки к результату курсор мог оказаться над строкой: ждём конца перехода.

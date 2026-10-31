@@ -5407,23 +5407,6 @@
       "independent_editor": "pending human sign-off"
     },
     {
-      "entity": "page:/matrix",
-      "source": "web/app",
-      "primary_query": null,
-      "search_intent": "matrix_catalog",
-      "formula_verified": false,
-      "position_context_verified": true,
-      "claims_reviewed": "automated route/claims audit",
-      "unique_value": "route-level review",
-      "paid_report_overlap": "checked",
-      "internal_links": "crawler",
-      "metadata": "crawler",
-      "decision": "noindex",
-      "reviewer": "Codex engineering/content audit",
-      "reviewed_at": "2026-08-30",
-      "independent_editor": "pending human sign-off"
-    },
-    {
       "entity": "page:/meaning",
       "source": "web/app",
       "primary_query": null,

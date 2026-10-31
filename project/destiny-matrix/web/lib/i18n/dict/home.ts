@@ -125,7 +125,7 @@ export const slides = {
       eyebrow: { ru: "20 разделов отчёта", en: "20 sections of the reading" } satisfies Phrase,
       heading: { ru: "Деньги, отношения, род и предназначение — в одном разборе",
                  en: "Money, relationships, family and purpose — in one reading" } satisfies Phrase,
-      link: { ru: "Каталог матриц", en: "Matrix catalogue" } satisfies Phrase,
+      link: { ru: "Разделы отчёта", en: "Sections of the reading" } satisfies Phrase,
     },
   ],
   encyclopedia: [

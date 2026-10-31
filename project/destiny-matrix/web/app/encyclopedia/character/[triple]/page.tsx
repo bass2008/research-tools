@@ -20,8 +20,7 @@ import { notFound } from "next/navigation";
 
 type Params = { triple: string };
 
-// 5 544 персональных статей собираются на запрос и закрыты от индексации. Они живут в
-// энциклопедии как толкования, а не в /matrix, который оставлен результату калькулятора.
+// 5 544 персональных статей собираются на запрос и закрыты от индексации.
 export const dynamic = "force-dynamic";
 
 const forLocale = localized((L: Locale, site) => {
@@ -97,9 +96,6 @@ export default async function CharacterPage({ params }: { params: Promise<Params
         <div className="btnrow center">
           <Link className="btn" href={positionHref("character")}>
             {D.sheet.openSectionArticle[L]}
-          </Link>
-          <Link className="btn ghost" href={`/matrix/${item.slug}`}>
-            {D.encCharacter.backToMatrix[L]}
           </Link>
           <Link className="btn ghost" href="/#calc">
             {D.sheet.otherDate[L]}

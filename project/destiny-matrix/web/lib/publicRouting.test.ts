@@ -68,7 +68,6 @@ describe("Release 1 public URL migration", () => {
     const common = [robotsForSite(site).rules].flat().find((r) => r.userAgent === "*")!;
     expect(common.disallow).toContain(`/${site.defaultLocale}/encyclopedia/character/`);
     expect(common.disallow).toContain("/encyclopedia/character/");
-    expect(common.disallow).toContain("/matrix/");
     expect(common.disallow).toContain("/encyclopedia/combination");
     expect(common.disallow).not.toContain("/encyclopedia/arcanum/");
     const google = [robotsForSite(site).rules].flat().find((r) => r.userAgent === "Googlebot")!;
@@ -91,7 +90,7 @@ describe("all user pages have URL languages", () => {
   const pages = ["/account", "/admin", "/admin/users/7", "/report?m=12", "/matrices/12",
     "/readings/7", "/pay", "/pay/pair?r=7", "/pay/done?order=abc", "/pay/fail?order=abc",
     "/login", "/register", "/forgot", "/reset?token=secret", "/print/report?m=12&t=signature",
-    "/print/pair?r=7&t=signature", "/matrix", "/matrix/1-1-2"];
+    "/print/pair?r=7&t=signature"];
   it.each(["arcana-sense.ru", "arcana-sense.com"])("keeps both private languages and parameters on %s", (host) => {
     for (const locale of ["ru", "en"] as const) for (const path of pages) {
       const target = `https://${host}/${locale}${path}`;
@@ -120,7 +119,7 @@ describe("all user pages have URL languages", () => {
     expect(siteView("en", site).pageMeta({path: "/account", title: "Account", description: "Account", noindex: true})
       .alternates?.canonical).toBe("https://arcana-sense.ru/en/account");
     for (const group of [robotsForSite(site).rules].flat().filter((r) => ["*", "Googlebot"].includes(String(r.userAgent)))) {
-      for (const locale of ["ru", "en"]) for (const path of ["/account", "/reset", "/print", "/matrix/"]) {
+      for (const locale of ["ru", "en"]) for (const path of ["/account", "/reset", "/print"]) {
         expect(group.disallow).toContain(`/${locale}${path}`);
       }
     }

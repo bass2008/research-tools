@@ -9,5 +9,4 @@ it("«Купить» в шапке предлагает то, что челов�
   expect(buyFor("/matrices/12", false)).toBe("/pay?for=personal&m=12");
   expect(buyFor("/compatibility", true)).toBe("/pay?for=pair");
   expect(buyFor("/readings/7", false)).toBe("/pay?for=pair&r=7");
-  expect(buyFor("/matrix/7-5-1971", true)).toBe("/pay");
 });

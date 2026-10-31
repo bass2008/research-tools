@@ -71,20 +71,12 @@ def test_calculator_opens_full_character_reading(page: Page) -> None:
     assert max(tops) - min(tops) < 1, f"карточки ролей не выровнены: {tops}"
 
 
-def test_matrix_and_encyclopedia_link_to_personal_example(page: Page) -> None:
-    page.goto(f"{BASE}/matrix/4-3-22", wait_until="domcontentloaded")
-    expect(page.get_by_test_id("character-full-link")).to_have_attribute(
-        "href", "/ru/encyclopedia/character/4-3-22"
-    )
-
+def test_encyclopedia_links_to_personal_example(page: Page) -> None:
     page.goto(f"{BASE}/ru/encyclopedia/position/character", wait_until="domcontentloaded")
     expect(page.get_by_role("heading", name="Точка A: портрет личности и визитка")).to_be_visible()
     expect(page.get_by_role("link", name="Посмотреть разбор 4–3–22 в энциклопедии →")).to_have_attribute(
         "href", "/ru/encyclopedia/character/4-3-22"
     )
-
-    response = page.goto(f"{BASE}/matrix/4-3-22/character", wait_until="domcontentloaded")
-    assert response is not None and response.status == 404
 
 
 def test_day_position_is_full_vizitka_article(page: Page) -> None:

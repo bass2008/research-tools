@@ -904,11 +904,6 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .ecard.withcard > div { min-width: 0; }
 .cardgrid.deck { grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr)); }
 
-.matrixcards { display: flex; gap: 18px; flex-wrap: wrap; margin: 14px 0 6px; }
-.matrixcards .cardlink { display: block; color: var(--dim); font-size: 13px; text-align: center; }
-.matrixcards .cardlink:hover { text-decoration: none; color: var(--text); }
-.matrixcards .cardlink span { display: block; margin-top: 6px; }
-
 @media (max-width: 560px) {
   .arccard.big { width: 190px; }
   .arccard.grid { width: 104px; }

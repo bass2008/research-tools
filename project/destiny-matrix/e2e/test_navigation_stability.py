@@ -35,8 +35,6 @@ REFRESH_ROUTES = [
     "/forgot",
     "/login",
     "/matrices/999999",
-    "/matrix",
-    "/matrix/1-1-2",
     "/terms",
     "/pay",
     "/pay/single",

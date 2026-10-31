@@ -10,7 +10,7 @@ import { publicPath } from "./publicRouting";
 
 // Закрыты те, кто забирает текст и ничего не возвращает: GPTBot и ClaudeBot собирают данные для
 // обучения моделей (вместе больше гигабайта отданного трафика), CCBot складывает страницы в
-// открытый архив, из которого учатся все остальные, AhrefsBot перебирает страницы матриц для
+// открытый архив, из которого учатся все остальные, AhrefsBot перебирает сайт для
 // платной базы ссылок. Поисковые боты тех же сервисов — OAI-SearchBot, ChatGPT-User,
 // PerplexityBot — открыты намеренно: они приводят людей и дают ссылку на источник.
 const UNWANTED = ["GPTBot", "ClaudeBot", "CCBot", "AhrefsBot"];
@@ -18,16 +18,10 @@ const UNWANTED = ["GPTBot", "ClaudeBot", "CCBot", "AhrefsBot"];
 // Приватные адреса: содержат чужую дату рождения либо оплату.
 const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/readings", "/pay", "/login", "/register", "/forgot", "/reset", "/print", "/api/"];
 
-// Результаты расчёта. Их 5 544 (`/matrix/`) плюс 446 персональных разборов разделов, и все они
-// помечены `noindex`: это почти-дубли одной формы, в выдаче им делать нечего. Но `noindex`
-// обход не запрещает — робот обязан скачать страницу целиком, чтобы прочитать мету, и идёт по
-// её ссылкам дальше. На 356 индексируемых адресов приходилось 6 000 таких скачиваний, то есть
-// 17 из 18 запросов молодого сайта уходили в никуда. Норму обхода экономит только `Disallow`.
-// Хаб `/matrix` открыт: префикс со слешем на него не распространяется.
-const COMPUTED = [
-  "/matrix/",
-  ...[...PERSONAL_SECTION_KEYS, "character"].map((section) => `/encyclopedia/${section}/`),
-];
+// Персональные разборы разделов помечены `noindex`: это почти-дубли одной формы, в выдаче им
+// делать нечего. Но `noindex` обход не запрещает — робот обязан скачать страницу целиком, чтобы
+// прочитать мету, и идёт по её ссылкам дальше. Норму обхода экономит только `Disallow`.
+const COMPUTED = [...PERSONAL_SECTION_KEYS, "character"].map((section) => `/encyclopedia/${section}/`);
 
 // Сочетания закрыты 05.10.2026: трафика нет, а пара двух арканов в одной карте не отвечает
 // на то, что ищут под этим запросом. Страницы остаются для людей. Яндекс выводит закрытое
@@ -42,7 +36,7 @@ export function robotsForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.R
     return path.endsWith("/") && !mapped.endsWith("/") ? `${mapped}/` : mapped;
   }));
   const privatePaths = [...PRIVATE, ...["ru", "en"].flatMap((lang) =>
-    [...PRIVATE.filter((path) => path !== "/api/"), "/matrix/"].map((path) => `/${lang}${path}`))];
+    PRIVATE.filter((path) => path !== "/api/").map((path) => `/${lang}${path}`))];
   return {
     rules: [
       // Без `Allow: /`: по стандарту всё не запрещённое разрешено, а Next печатает `Allow`

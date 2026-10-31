@@ -23,14 +23,6 @@ export const enc = {
     ru: (n: number) => `Разборы понятий целиком · ${n}`,
     en: (n: number) => `Whole concepts explained · ${n}`,
   } satisfies PhraseFn<[number]>,
-  matrixCatalog: { ru: "Каталог матриц", en: "Matrix catalogue" } satisfies Phrase,
-  matrixCatalogText: {
-    ru: "Все карты по свёрнутым числам даты: день, месяц и год после свёртки дают три аркана, и "
-      + "вариантов таких троек ровно 5 544.",
-    en: "Every chart by the reduced numbers of a date: the day, month and year reduce to three "
-      + "arcana, and there are exactly 5,544 such triples.",
-  } satisfies Phrase,
-  openCatalog: { ru: "Открыть каталог", en: "Open the catalogue" } satisfies Phrase,
   allArcana: { ru: "Все 22 аркана", en: "All 22 arcana" } satisfies Phrase,
   promoArcanaTitle: { ru: "Узнать свои арканы", en: "Find your own arcana" } satisfies Phrase,
   promoArcanaLead: {

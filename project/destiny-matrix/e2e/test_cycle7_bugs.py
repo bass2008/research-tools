@@ -203,7 +203,7 @@ def test_pay_link_to_an_open_matrix_does_not_swap_the_date(page: Page):
 
 @pytest.mark.parametrize(
     "path",
-    ("/nope", "/encyclopedia/arcanum/99", "/encyclopedia/chakra/nope", "/matrix/9-9-9999"),
+    ("/nope", "/encyclopedia/arcanum/99", "/encyclopedia/chakra/nope"),
 )
 def test_not_found_page_comes_with_the_html(page: Page, path):
     """404 отдавался пустой оболочкой: заголовок и текст приходили только RSC-пейлоадом, а в

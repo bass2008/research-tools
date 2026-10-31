@@ -11,8 +11,6 @@ export const nav = {
   otherLanguage: { ru: "Русская версия", en: "English version" } satisfies Phrase,
   buy: { ru: "Купить", en: "Buy" } satisfies Phrase,
   newCalculation: { ru: "Новый расчёт", en: "New calculation" } satisfies Phrase,
-  allMatrices: { ru: "Все матрицы", en: "All matrices" } satisfies Phrase,
-  matrixCatalog: { ru: "Каталог матриц", en: "Matrix catalogue" } satisfies Phrase,
   // подвал
   about: { ru: "О методе", en: "About the method" } satisfies Phrase,
   author: { ru: "Об авторе", en: "About the author" } satisfies Phrase,

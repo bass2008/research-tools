@@ -5,7 +5,7 @@ import type { Lang } from "./i18n/lang";
  * per request, so reject missing records before Next starts streaming the layout.
  * Use the same content reader as pages, never a second list of allowed URLs. */
 export function missingContentRoute(path: string, locale: Lang): boolean {
-  const match = /^\/(?:encyclopedia\/(arcanum|chakra|position|combination|karmic-tail)|(matrix|year))\/([^/]+)(?:\/([^/]+))?$/.exec(path);
+  const match = /^\/(?:encyclopedia\/(arcanum|chakra|position|combination|karmic-tail)|(year))\/([^/]+)(?:\/([^/]+))?$/.exec(path);
   if (!match) return false;
   const [, section, root, key, child] = match;
   const content = forLocale(locale);
@@ -20,7 +20,6 @@ export function missingContentRoute(path: string, locale: Lang): boolean {
     case "position": return !content.positionContent(key);
     case "combination": return !content.combinationContent(key);
     case "karmic-tail": return !content.karmicTail(key);
-    case "matrix": return !content.matrixItem(key);
     case "year": return !content.yearArcanum(key);
     default: return false;
   }

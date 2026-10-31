@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 import uuid
 
 from fastapi import APIRouter, Depends, status
@@ -15,7 +16,7 @@ from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
-from ..models import Entitlement, Offer, Payment, Purchase, Reading, User, as_utc, utcnow
+from ..models import Entitlement, Offer, Payment, Purchase, Reading, User, as_utc, iso, utcnow
 from ..schemas import PaymentIn, PaymentRef
 from ..payments.base import PaymentUrls
 from ..payments.notification_log import notification_log
@@ -406,17 +407,7 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
     payment = _find(db, None, payload.order_id)
     if payment is None or payment.user_id != user.id:
         raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
-    provider = payments.for_payment(payment)
-    if (provider is not None and provider.enabled()
-            and sites.payment_connection(payment) in sites.current().payments):
-        try:
-            apply(db, payment, provider.state(payment.external_id))
-        except payments.PaymentError as exc:
-            raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
-        except AlreadyGranted:
-            # Доступ у человека есть, спрашивал он именно про него: это не ошибка, а ответ.
-            db.rollback()
-            db.refresh(payment)
+    _refresh(db, payment)
     purchase = payment.purchase
     reading = purchase.reading
     body = {"ok": True, "status": payment.status, "state": payment.state(),
@@ -434,6 +425,45 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
         body["outcome"] = access.refund_outcome(db, purchase, done=True)
         body["still_open"] = key not in access.CLOSED_AFTER_REFUND
     return body
+
+
+# SberPay и T-Pay возвращают покупателя окном приложения банка, где сессии нет. Номер со случайным
+# хвостом знают только он и банк, поэтому по нему — только исход, без почты и разборов.
+@router.post("/receipt")
+def receipt(payload: PaymentRef, db: Session = Depends(get_db)) -> dict:
+    order = str(payload.order_id)
+    payment = _find(db, None, order) if _ORDER_WITH_TAIL.fullmatch(order) else None
+    if payment is None:
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
+    _refresh(db, payment)
+    purchase = payment.purchase
+    subscription = not purchase.body().get("per_reading", True)
+    right = db.scalar(select(Entitlement).where(Entitlement.purchase_id == purchase.id))
+    body = {"ok": True, "status": payment.status, "state": payment.state(),
+            "paid": payment.paid_at is not None,
+            "payment_id": payment.external_id, "tariff": purchase.offer_id,
+            "subscription": subscription,
+            "until": iso(right.expires_at) if subscription and right else None}
+    if payment.state() == "refunded":
+        body["outcome"] = access.refund_outcome(db, purchase, done=True)
+    return body
+
+
+_ORDER_WITH_TAIL = re.compile(rf"{re.escape(payments.ORDER_PREFIX)}\d+-[0-9a-f]{{8}}")
+
+
+def _refresh(db: Session, payment: Payment) -> None:
+    provider = payments.for_payment(payment)
+    if (provider is not None and provider.enabled()
+            and sites.payment_connection(payment) in sites.current().payments):
+        try:
+            apply(db, payment, provider.state(payment.external_id))
+        except payments.PaymentError as exc:
+            raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
+        except AlreadyGranted:
+            # Доступ у человека есть, спрашивал он именно про него: это не ошибка, а ответ.
+            db.rollback()
+            db.refresh(payment)
 
 
 def _find(db: Session, external_id: str | None, order_id: str | None) -> Payment | None:

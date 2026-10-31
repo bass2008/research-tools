@@ -24,6 +24,8 @@ export const forLocale = localized((L: Locale) => {
   return { api, emailError, normalizeEmail, refreshSession };
 });
 
+const ORDER = /^arcana-\d+-[0-9a-f]{8}$/;
+
 export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({ mode: "login" | "register" }) & { locale?: Locale }) {
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
@@ -77,7 +79,9 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
       await refreshSession();
       // После регистрации пустая форма больше не должна оставаться в истории: «Назад» на неё
       // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
-      router.replace(publicPath("/account", L));
+      // Вход с чека оплаты возвращает к этому заказу, а не в общий кабинет.
+      const order = new URLSearchParams(window.location.search).get("order") ?? "";
+      router.replace(publicPath(ORDER.test(order) ? `/pay/done?order=${order}` : "/account", L));
     } catch (err) {
       setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
       // Ошибка остаётся объявленной через role=alert, но набор продолжается в поле, которое

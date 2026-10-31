@@ -31,8 +31,6 @@ PAGES = (
     "/encyclopedia/karmic-tail/18-9-9",
     "/year",
     "/year/7",
-    "/matrix",
-    "/matrix/1-1-2",
     "/login",
     "/account",
 )
@@ -74,7 +72,7 @@ def test_page_has_no_russian_left(path):
     assert not found, f"{path}: на странице осталась кириллица ({''.join(found)[:40]})"
 
 
-@pytest.mark.parametrize("path", ("/", "/encyclopedia", "/matrix/1-1-2"))
+@pytest.mark.parametrize("path", ("/", "/encyclopedia"))
 def test_html_lang_and_locale(path):
     html = _html(path)
     assert '<html lang="en"' in html, f"{path}: язык страницы не английский"
@@ -106,7 +104,7 @@ def test_payment_pages_follow_the_shared_access_policy():
 
 def test_reading_keeps_paid_access_after_switching_language(page: Page):
     """Choosing English does not unlock paid content or change account rights."""
-    page.goto(f"{BASE}/matrix/1-1-2")
+    page.goto(f"{BASE}/encyclopedia/position/money")
     page.wait_for_selector("h1")
     from playwright.sync_api import expect
     expect(page.locator('a[href^="/en/pay"]').first).to_be_visible()

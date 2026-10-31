@@ -891,10 +891,6 @@ export function createContent(L: Locale, source: ContentSource) {
     return matrices().get(slug) ?? null;
   }
 
-  function matrixCount(): number {
-    return matrices().size;
-  }
-
   /** Сколько записей реально подхватилось — для отчёта сборки и тестов. */
   function contentStats() {
     return {
@@ -908,5 +904,5 @@ export function createContent(L: Locale, source: ContentSource) {
       hubs: HUBS.size,
     };
   }
-  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, pairTail, pairTailKeys, indexedPairTailKeys, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, matrixCount, contentStats };
+  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, pairTail, pairTailKeys, indexedPairTailKeys, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, contentStats };
 }

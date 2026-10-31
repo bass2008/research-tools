@@ -10,7 +10,7 @@ from playwright.sync_api import Page, expect
 from test_admin_actions import open_actions
 from test_pair import PAID_TEXTS, calc_pair
 
-PAGES = ["/", "/report", "/matrix", "/matrix/14-6-7", "/encyclopedia/chakra/energy-field",
+PAGES = ["/", "/report", "/encyclopedia/chakra/energy-field",
          "/encyclopedia/arcanum/1", "/encyclopedia/karmic-tail", "/compatibility"]
 
 

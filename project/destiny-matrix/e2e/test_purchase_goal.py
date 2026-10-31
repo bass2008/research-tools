@@ -58,13 +58,33 @@ def test_bank_return_does_not_track_unsuccessful_purchase(page, state, paid, tit
     assert _purchases(page) == []
 
 
-def test_bank_return_does_not_track_without_server_confirmation(page):
+def _app_window_receipt(page, *, state="paid", paid=True, tariff="month"):
+    # окно приложения банка: куки сайта нет, исход приходит по номеру заказа
+    page.add_init_script("window.__ym = []; window.ym = (...args) => window.__ym.push(args);")
     page.route("**/api/payments/sync", lambda route: route.fulfill(
         status=401, json={"detail": "Войдите в аккаунт"}))
+    page.route("**/api/payments/receipt", lambda route: route.fulfill(json={
+        "ok": True, "status": "CONFIRMED" if paid else "NEW", "state": state, "paid": paid,
+        "payment_id": "bank-app-1", "tariff": tariff, "subscription": tariff == "month",
+        "until": "2027-01-28T12:29:10+00:00" if tariff == "month" else None,
+    }))
+
+
+def test_bank_app_window_shows_paid_order_without_session(page):
+    _app_window_receipt(page)
     page.goto(f"{BASE}/pay/done?order=bank-order-123&lang=ru")
-    expect(page.locator("main h1")).to_have_text("Войдите, чтобы проверить оплату и открыть разбор")
-    expect(page).to_have_title("Войдите для проверки оплаты — Arcana Sense")
-    expect(page.locator("main")).not_to_contain_text("Платёж ещё обрабатывается")
+    expect(page.locator("main h1")).to_have_text("Доступ открыт")
+    expect(page).to_have_title("Оплата прошла — Arcana Sense")
+    expect(page.locator("main")).to_contain_text("подписка действует до")
+    expect(page.get_by_role("link", name="Войти и открыть")).to_have_attribute(
+        "href", "/ru/login?order=bank-order-123")
+    assert _purchases(page) == [{"event": "purchase", "tariff": "month"}]
+
+
+def test_bank_app_window_does_not_track_unconfirmed_order(page):
+    _app_window_receipt(page, state="new", paid=False)
+    page.goto(f"{BASE}/pay/done?order=bank-order-123&lang=ru")
+    expect(page.locator("main h1")).to_have_text("Платёж ещё обрабатывается", timeout=20_000)
     assert _purchases(page) == []
 
 

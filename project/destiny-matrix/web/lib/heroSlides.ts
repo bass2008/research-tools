@@ -15,15 +15,7 @@ export const forLocale = localized((L: Locale) => {
   const { encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
 
   // Тексты слайдов живут в словаре языка, адреса — здесь: путь у всех языков один.
-  const LANDING_HREFS = [
-    "/#plans",
-    encyclopediaSectionHref("pts"),
-    encyclopediaSectionHref("arc"),
-    "/year",
-    "/matrix",
-  ];
-
-  const ENCYCLOPEDIA_HREFS = [
+  const HREFS = [
     "/#plans",
     encyclopediaSectionHref("pts"),
     encyclopediaSectionHref("arc"),
@@ -31,18 +23,18 @@ export const forLocale = localized((L: Locale) => {
     encyclopediaSectionHref("sec"),
   ];
 
-  function slides(rows: typeof D.slides.landing, hrefs: string[]): HeroSlide[] {
+  function slides(rows: typeof D.slides.landing): HeroSlide[] {
     return rows.map((row, index) => ({
       eyebrow: row.eyebrow[L],
       heading: row.heading[L],
-      link: { label: row.link[L], href: hrefs[index] },
+      link: { label: row.link[L], href: HREFS[index] },
     }));
   }
 
   // Порядок совпадает с порядком композиций в CalcHero: веер, кольцо, триптих, лента, мозаика.
-  const LANDING_SLIDES: HeroSlide[] = slides(D.slides.landing, LANDING_HREFS);
+  const LANDING_SLIDES: HeroSlide[] = slides(D.slides.landing);
 
-  const ENCYCLOPEDIA_SLIDES: HeroSlide[] = slides(D.slides.encyclopedia, ENCYCLOPEDIA_HREFS);
+  const ENCYCLOPEDIA_SLIDES: HeroSlide[] = slides(D.slides.encyclopedia);
   return { LANDING_SLIDES, ENCYCLOPEDIA_SLIDES };
 });
 

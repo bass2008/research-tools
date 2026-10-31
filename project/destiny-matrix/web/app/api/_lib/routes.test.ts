@@ -14,6 +14,7 @@ vi.mock("next/headers", () => ({
 }));
 
 import { credentials, payment } from "./routes";
+import { POST as receipt } from "../payments/receipt/route";
 
 interface Corpus {
   valid: string[];
@@ -147,4 +148,32 @@ describe("BFF: платёж", () => {
       messages: D.emailErrors["local-dot-end"],
     });
   });
+});
+
+describe("BFF: чек без входа", () => {
+  function ask(order: string): Request {
+    return new Request(`${SITE_HOSTS[L]}/api/payments/receipt`, {
+      method: "POST",
+      body: JSON.stringify({ order_id: order }),
+      headers: { "Content-Type": "application/json", "Accept-Language": L },
+    });
+  }
+
+  it("спрашивает апстрим по номеру с хвостом и без токена", async () => {
+    cookieGet.mockReturnValue({ value: "session-token" });
+    const res = await receipt(ask("arcana-16-6787f5b8"));
+    expect(res.status).toBe(200);
+    const [url, init] = upstream.mock.calls[0];
+    expect(String(url)).toMatch(/\/api\/payments\/receipt$/);
+    expect(sentBody()).toEqual({ order_id: "arcana-16-6787f5b8" });
+    expect((init as RequestInit).headers).not.toHaveProperty("Authorization");
+  });
+
+  for (const order of ["arcana-16", "arcana-16-678", "arcana-16-6787F5B8", "arcana-16-6787f5b8x", ""]) {
+    it(`не пускает в апстрим ${JSON.stringify(order)}`, async () => {
+      const res = await receipt(ask(order));
+      expect(res.status).toBe(400);
+      expect(upstream).not.toHaveBeenCalled();
+    });
+  }
 });

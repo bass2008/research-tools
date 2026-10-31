@@ -35,6 +35,7 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
   // что сервер сказал о покупке: подписка без разбора и исход возврата
   const [facts, setFacts] = useState<{ subscription: boolean; until: string | null; outcome?: string }>(
     { subscription: false, until: null });
+  const [guest, setGuest] = useState(false);
 
   // Заголовок вкладки следует за состоянием: статический «Оплата прошла» обещал исход ещё до
   // ответа банка, а при отказе по карте говорил то же самое.
@@ -50,12 +51,27 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
       return;
     }
     let stop = false;
+    let anonymous = false;
+    // SberPay и T-Pay возвращают покупателя окном приложения банка, где нашей куки нет: исход
+    // тогда спрашиваем по номеру заказа, а войти предлагаем уже после него.
+    const check = async () => {
+      if (!anonymous) {
+        try {
+          return await api.paySync(order);
+        } catch (err) {
+          if (!(err instanceof ApiError) || err.status !== 401) throw err;
+          anonymous = true;
+          setGuest(true);
+        }
+      }
+      return await api.payReceipt(order);
+    };
     (async () => {
       for (const pause of WAIT_STEPS) {
         if (stop) return;
         if (pause) await new Promise((r) => setTimeout(r, pause));
         try {
-          const res = await api.paySync(order);
+          const res = await check();
           if (stop) return;
           setFacts({ subscription: res.subscription === true, until: res.until ?? null, outcome: res.outcome });
           // Возврат проверяем раньше оплаты: у возвращённого платежа отметка об оплате остаётся,
@@ -75,6 +91,10 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
           }
           if (res.paid) {
             trackPurchase(res.payment_id, { tariff: res.tariff });
+            if (anonymous) {
+              setStage("paid");
+              return;
+            }
             setReading(res.matrix_id ? { id: res.matrix_id, product: res.product } : null);
             await refreshSession();
             setStage("paid");
@@ -86,11 +106,6 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
             return;
           }
         } catch (err) {
-          if (err instanceof ApiError && err.status === 401) {
-            setStage("sign-in");
-            setNote((locale) => D.payResult.ownerOnly[locale]);
-            return;
-          }
           setStage("error");
           setNote((locale) => err instanceof ApiError ? err.messageFor(locale) : D.payResult.noServer[locale]);
           return;
@@ -102,6 +117,23 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
       stop = true;
     };
   }, [order, outcome]);
+
+  if (stage === "paid" && guest) {
+    return (
+      <div className="panel paybox">
+        <h1>{D.payResult.accessOpen[L]}</h1>
+        <p className="dim">
+          {facts.subscription
+            ? D.payResult.subscriptionPaid[L](facts.until ? localizedI18n(L).dateLabel(facts.until.slice(0, 10), L) : "")
+            : D.payResult.paidSaved[L]}
+        </p>
+        <Link className="btn wide" href={`/login?order=${encodeURIComponent(order)}`}>
+          {D.payResult.signInToOpen[L]}
+        </Link>
+        <p className="hint">{D.payResult.guestHint[L]}</p>
+      </div>
+    );
+  }
 
   if (stage === "paid" && facts.subscription && !reading) {
     return (
@@ -178,8 +210,7 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
 
   return (
     <div className="panel paybox">
-      <h1>{stage === "sign-in" ? D.payResult.signInTitle[L]
-        : stage === "error" ? D.payResult.unknownTitle[L] : D.payResult.pendingTitle[L]}</h1>
+      <h1>{stage === "error" ? D.payResult.unknownTitle[L] : D.payResult.pendingTitle[L]}</h1>
       <p className="dim">
         {note ??
           D.payResult.pendingText[L]}

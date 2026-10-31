@@ -44,7 +44,7 @@ const publicRoutes = Object.entries(appRoutes)
     && !(ALL_FREE && route.startsWith("/pay")))
   .map(([, route]) => route);
 const ON_DEMAND = [...new Set([...publicRoutes,
-  "/matrix/1-1-2", "/encyclopedia/arcanum/4", "/encyclopedia/karmic-tail/18-9-9",
+  "/encyclopedia/arcanum/4", "/encyclopedia/karmic-tail/18-9-9",
   ...(ALL_FREE ? [] : ["/pay/single"]),
 ].map(localizedPath))];
 
@@ -213,13 +213,12 @@ function hasAsset(url) {
   return fs.existsSync(path.join("public", rel)) || fs.existsSync(path.join("app", rel));
 }
 
-// Колода — часть содержания этих страниц: 22 аркана, сочетания, матрицы и вход в энциклопедию.
+// Колода — часть содержания этих страниц: 22 аркана, сочетания, характер и вход в энциклопедию.
 // Без этой проверки картинки могут пропасть из разметки, и приёмка останется зелёной.
 const NEEDS_CARD = [
   /^\/encyclopedia$/,
   /^\/encyclopedia\/arcanum\/\d+$/,
   /^\/encyclopedia\/combination\/\d+-\d+$/,
-  /^\/matrix\/\d+-\d+-\d+$/,
   /^\/encyclopedia\/character\/\d+-\d+-\d+$/,
 ];
 function checkPages() {

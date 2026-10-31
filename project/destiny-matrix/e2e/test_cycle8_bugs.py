@@ -105,26 +105,6 @@ def test_rename_by_enter_sends_one_request(page: Page):
     assert len(patches) == 1, f"ушло {len(patches)} запросов переименования вместо одного"
 
 
-def test_catalogue_does_not_prefetch_every_card(page: Page):
-    """264 карточки каталога тянули RSC-пейлоад каждой страницы: просмотр сетки ссылок стоил
-    мегабайты трафика."""
-    seen: list[str] = []
-    page.on("response", lambda r: seen.append(r.url) if "_rsc=" in r.url else None)
-    page.goto(f"{BASE}/matrix", wait_until="domcontentloaded")
-    for _ in range(8):
-        page.mouse.wheel(0, 900)
-        page.wait_for_timeout(400)
-    page.wait_for_timeout(3000)
-    # Считаем именно карточки, а не все запросы: общий предел был заложником стратегии Next.
-    # В 16 навигация запрашивает каждый адрес шапки и подвала дважды (17 адресов → 37 запросов),
-    # и порог 30 краснел, хотя ни одна из 264 карточек пейлоад не тянула.
-    cards = [u for u in seen if u.startswith(f"{BASE}/matrix/")]
-    assert not cards, f"каталог тянет пейлоады карточек: {len(cards)}, например {cards[:2]}"
-    assert len({u.split("?")[0] for u in seen}) <= 25, (
-        f"каталог запросил пейлоады {len({u.split('?')[0] for u in seen})} разных адресов"
-    )
-
-
 def test_restored_receipt_keeps_the_paid_date(page: Page):
     """Чек, восстановленный по адресу, терял оплаченную дату, и «Открыть полный разбор» вёл на
     чужой, неоплаченный разбор."""

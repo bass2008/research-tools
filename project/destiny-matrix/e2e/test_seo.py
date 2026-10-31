@@ -20,7 +20,6 @@ pytestmark = pytest.mark.seo
 # проверял только энциклопедию, и поэтому не заметил, что BreadcrumbList на них не появился.
 CRUMB_PAGES = (
     "/encyclopedia",
-    "/matrix",
     "/contacts",
     "/terms",
     "/privacy",
@@ -66,17 +65,6 @@ def _types(html: str) -> set[str]:
 def _hubs() -> list[dict]:
     path = pathlib.Path(__file__).resolve().parents[1] / "web/content/ru/hubs.json"
     return json.loads(path.read_text())["items"]
-
-
-def test_matrix_catalog_uses_top_level_h2_sections():
-    """Самостоятельные блоки каталога не должны выглядеть подразделами друг друга."""
-    assert _headings(_html("/matrix")) == [
-        (1, "Все матрицы судьбы"),
-        (2, "Как устроен адрес"),
-        (2, "Вход по аркану дня"),
-        (2, "Куда дальше"),
-        (2, "Найти свою матрицу"),
-    ]
 
 
 @pytest.mark.parametrize(
@@ -195,21 +183,6 @@ def test_arcanum_title_and_h1_match_the_query():
     assert "7" in h1 and "в матрице судьбы" in re.sub(r"<[^>]+>|<!--.*?-->", "", h1)
 
 
-def test_matrix_pages_leave_the_index_but_keep_their_links():
-    """5544 почти-дубля тянули домен вниз. Страница остаётся, но не индексируется; nofollow
-    здесь обрывал бы перелинковку каталога на арканы и позиции."""
-    html = _html("/matrix/1-1-10")
-    robots = re.search(r'<meta name="robots" content="([^"]+)"', html).group(1)
-    assert "noindex" in robots and "nofollow" not in robots, robots
-
-
-def test_matrices_are_out_of_the_sitemap():
-    """Состав карты проверяет app/sitemap.test.ts: вне боевого контура она пустая намеренно,
-    чтобы тест не сдавал поиску свои адреса. Здесь — только что матрицы в неё не вернулись."""
-    xml = requests.get(f"{BASE}/sitemap.xml", timeout=30).text
-    assert "/matrix/1-1-" not in xml, "страницы матриц вернулись в карту сайта"
-
-
 def test_one_tail_is_one_address():
     """Два порядка одной формы имеют собственные self-canonical, если оба достижимы."""
     for triple in ("9-9-18", "18-9-9"):
@@ -294,7 +267,6 @@ CONDITIONAL_PAGES = (
     "/encyclopedia/position/comfort",
     "/encyclopedia/karmic-tail/18-9-9",
     "/year/13",
-    "/matrix",
 )
 
 
@@ -353,7 +325,7 @@ def test_calculation_results_get_their_own_validator():
     Печатаемых на запрос это не касается: `ETag` — хеш тела, а тело такой страницы собирается
     на лету и целиком серверу неизвестно."""
     tags = {}
-    for path in ("/matrix/1-1-10", "/matrix/5-5-8", "/encyclopedia/comfort/4-6-13"):
+    for path in ("/encyclopedia/character/1-1-10", "/encyclopedia/character/5-5-8", "/encyclopedia/comfort/4-6-13"):
         r = requests.get(f"{BASE}{path}", timeout=30)
         assert r.status_code == 200, (path, r.status_code)
         tag = r.headers.get("ETag")

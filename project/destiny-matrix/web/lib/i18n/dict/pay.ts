@@ -272,10 +272,13 @@ export const payResult = {
     ru: "Счёт больше не действует — оплату можно начать заново.",
     en: "The invoice is no longer valid — the payment can be started again.",
   } satisfies Phrase,
-  ownerOnly: {
-    ru: "Войдите в аккаунт, на который оформляли платёж, — состояние платежа видно только владельцу.",
-    en: "Sign in to the account the payment was made from — only the owner can see its state.",
+  guestHint: {
+    ru: "Чтобы открыть покупку в этом окне, войдите в аккаунт, на который её оформляли. "
+      + "В окне браузера, где вы оформляли заказ, вход уже выполнен.",
+    en: "To open the purchase in this window, sign in to the account you paid from. "
+      + "In the browser window where you placed the order, you are already signed in.",
   } satisfies Phrase,
+  signInToOpen: { ru: "Войти и открыть", en: "Sign in and open" } satisfies Phrase,
   noServer: { ru: "Сервер не ответил.", en: "The server did not answer." } satisfies Phrase,
   accessOpen: { ru: "Доступ открыт", en: "Access is open" } satisfies Phrase,
   paidSaved: {
@@ -314,10 +317,6 @@ export const payResult = {
   } satisfies Phrase,
   unknownTitle: { ru: "Не удалось проверить платёж", en: "The payment could not be checked" } satisfies Phrase,
   pendingTitle: { ru: "Платёж ещё обрабатывается", en: "The payment is still being processed" } satisfies Phrase,
-  signInTitle: {
-    ru: "Войдите, чтобы проверить оплату и открыть разбор",
-    en: "Sign in to check your payment and open the reading",
-  } satisfies Phrase,
   pendingText: {
     ru: "Банк пока не подтвердил оплату. Как только подтвердит, доступ откроется сам — "
       + "обновите кабинет через минуту.",
@@ -330,7 +329,6 @@ export const payResult = {
   stageRefunded: { ru: "Платёж возвращён", en: "Payment refunded" } satisfies Phrase,
   stageFailed: { ru: "Платёж не прошёл", en: "Payment failed" } satisfies Phrase,
   stagePending: { ru: "Платёж ещё в обработке", en: "Payment still processing" } satisfies Phrase,
-  stageSignIn: { ru: "Войдите для проверки оплаты", en: "Sign in to check your payment" } satisfies Phrase,
   stageUnknown: { ru: "Не удалось проверить платёж", en: "Payment could not be checked" } satisfies Phrase,
   stageChecking: { ru: "Проверяем платёж", en: "Checking the payment" } satisfies Phrase,
   // чек

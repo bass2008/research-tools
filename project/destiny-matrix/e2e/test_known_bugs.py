@@ -278,9 +278,6 @@ def test_sitemap_is_published_only_on_the_live_site(page):
 
     if BASE.rstrip("/") == "https://arcana-sense.ru":
         assert "/contacts" in body, "в карте сайта нет /contacts"
-        # страницы матриц из карты убраны намеренно (noindex, follow): 5544 почти-дубля тянули
-        # домен вниз. Раньше здесь стояло обратное требование — оно и было бы красным на проде.
-        assert "/matrix/1-1-" not in body, "страницы матриц вернулись в карту сайта"
     else:
         assert "<loc>" not in body, f"закрытый контур публикует свои адреса: {body[:200]}"
 

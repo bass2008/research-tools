@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import pathlib
 import re
 
 import pytest
@@ -118,54 +117,6 @@ def test_d6_month_names_fit_in_the_encyclopedia_calculator(page, width):
         f"на {width}px не влезают: {room['tight']} при доступных {room['available']}px")
 
 
-def test_d7_matrix_pages_agree_the_number_of_dates(page):
-    """D7. На страницах матриц «1 дат», «2 дат», «3 дат» вместо «1 дата», «2 даты»."""
-    slugs = flows.matrix_slugs(page)
-    assert slugs, "на странице списка нет ссылок на матрицы"
-
-    bad = []
-    for slug in slugs:
-        page.goto(f"{BASE}/matrix/{slug}", wait_until="domcontentloaded")
-        page.wait_for_timeout(120)
-        text = page.inner_text("body")
-        for found in re.finditer(r"\b(\d+) дат\b", text):
-            number = int(found.group(1))
-            tail, hundred = number % 10, number % 100
-            if not (11 <= hundred <= 14) and (tail == 1 or 2 <= tail <= 4):
-                bad.append(f"/matrix/{slug}: «{number} дат»")
-    assert not bad, "число дат не согласовано: " + "; ".join(bad[:6])
-
-
-def test_d8_matrix_pages_do_not_name_dates_that_do_not_exist(page):
-    """D8. Пояснение под списком дат называет «30 февраля» и другие несуществующие числа."""
-    days = {"января": 31, "февраля": 28, "марта": 31, "апреля": 30, "мая": 31, "июня": 30,
-            "июля": 31, "августа": 31, "сентября": 30, "октября": 31, "ноября": 30, "декабря": 31}
-    # все номера — из данных сайта: карта сайта публикуется только на боевом адресе, а нужны
-    # именно редкие карты, которых на первой странице списка нет
-    data = json.loads((pathlib.Path(__file__).resolve().parents[1] / "web" / "content"
-                       / "matrices.json").read_text(encoding="utf-8"))
-    all_slugs = [row["slug"] for row in data["items"]]
-    # берём именно те карты, где «день + 22» вылезает за конец месяца: 30 февраля, 31 апреля и т.п.
-    short = {2: 28, 4: 30, 6: 30, 9: 30, 11: 30}
-    slugs = [s for s in all_slugs
-             if (lambda p: len(p) == 3 and p[1] in short and p[0] + 22 > short[p[1]]
-                 and p[0] + 22 <= 31)(list(map(int, s.split("-"))))][:40]
-    assert slugs, "не нашлось карт, где пояснение обещает несуществующее число"
-
-    bad = []
-    for slug in slugs:
-        page.goto(f"{BASE}/matrix/{slug}", wait_until="domcontentloaded")
-        page.wait_for_timeout(120)
-        text = page.inner_text("body")
-        for found in re.finditer(r"поэтому (\d+) и (\d+) (\w+) дают", text):
-            first, second, month = int(found.group(1)), int(found.group(2)), found.group(3)
-            limit = days.get(month, 31)
-            for day in (first, second):
-                if day > limit:
-                    bad.append(f"/matrix/{slug}: «{day} {month}»")
-    assert not bad, "страница называет несуществующую дату: " + "; ".join(sorted(set(bad))[:6])
-
-
 def test_p2_calculator_button_does_not_swallow_the_first_click(page):
     """P2. Клик по «Рассчитать» в первую секунду после загрузки терялся: обработчик ещё не подключён,
     и человек на медленном телефоне решал, что сайт сломан."""
@@ -206,7 +157,7 @@ def test_q2_not_found_pages_do_not_canonicalize_to_the_home_page(page):
     ответа, `noindex` и отсутствие чужого canonical.
     """
     bad = []
-    for path in ("/net-takoy-stranicy", "/matrix/net-takogo-slaga", "/encyclopedia/arcanum/999"):
+    for path in ("/net-takoy-stranicy", "/encyclopedia/arcanum/999"):
         answer = page.request.get(f"{BASE}{path}")
         html = answer.text()
         if answer.status != 404:

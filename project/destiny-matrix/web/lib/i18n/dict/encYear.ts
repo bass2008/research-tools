@@ -89,7 +89,6 @@ export const encCharacter = {
     en: (slug: string) => `The general article explains how the section is read; this page applies `
       + `that to your triple ${slug}.`,
   } satisfies PhraseFn<[string]>,
-  backToMatrix: { ru: "Вернуться к матрице", en: "Back to the matrix" } satisfies Phrase,
   personalDescription: {
     ru: (title: string, subject: string) => `${title}: персональный связный разбор ${subject}, `
       + "ролей, переходов и практического шага.",

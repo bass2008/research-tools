@@ -20,7 +20,7 @@ PHONE_WIDTHS = (320, 360, 390, 414)
 
 PUBLIC_PAGES = ("/", "/pay", "/account", "/report", "/matrices", "/privacy", "/terms", "/refund",
                 "/contacts", "/login", "/register", "/forgot", "/encyclopedia",
-                "/encyclopedia/arcanum/7", "/matrix")
+                "/encyclopedia/arcanum/7")
 
 # После этих слов существительное стоит в родительном падеже, и правило согласования другое:
 # «Разборы всех 5544 карт» — верно.
@@ -95,7 +95,7 @@ def test_c1_admin_agrees_number_with_noun(page, mail):
 def test_c2_public_pages_agree_number_with_noun(page):
     """C2. «22 арканов, 37 позиций карты, 7 чакр и 231 сочетаний» на публичных страницах."""
     bad: list[str] = []
-    for path in ("/encyclopedia", "/matrix", "/"):
+    for path in ("/encyclopedia", "/"):
         page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
         page.wait_for_timeout(800)
         bad += [f"{path}: {x}" for x in mismatched(page.inner_text("body"))]
@@ -257,10 +257,9 @@ def test_c9_account_stays_inside_the_window_while_renaming(page, mail, width):
         f"с открытым полем переименования кабинет шире окна: {scroll} > {inner}"
 
 
-@pytest.mark.parametrize("path", ("/net-takoy-stranicy", "/matrix/net-takogo-slaga",
-                                  "/encyclopedia/arcanum/999"))
+@pytest.mark.parametrize("path", ("/net-takoy-stranicy", "/encyclopedia/arcanum/999"))
 def test_c10_every_404_keeps_its_own_tab_title(page, path):
-    """C10. На 404 верхнего уровня и на неверном слаге матрицы стоит заголовок главной."""
+    """C10. На 404 стоит заголовок главной."""
     page.goto(f"{BASE}{path}", wait_until="domcontentloaded")
     page.wait_for_timeout(1500)
     title = page.title().lower()

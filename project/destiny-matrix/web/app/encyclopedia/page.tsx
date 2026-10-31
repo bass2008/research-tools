@@ -74,14 +74,6 @@ export default async function EncyclopediaIndexPage() {
           ))}
         </div>
       </div>
-
-      <div className="panel section-gap">
-        <h3>{D.enc.matrixCatalog[L]}</h3>
-        <p className="dim prose">
-          {D.enc.matrixCatalogText[L]}
-        </p>
-        <Link href="/matrix">{D.enc.openCatalog[L]}</Link>
-      </div>
     </>
   );
 }

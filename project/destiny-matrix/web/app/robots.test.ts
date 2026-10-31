@@ -38,10 +38,9 @@ describe("robots.txt", () => {
   });
 
   // `noindex` обход не запрещает: робот качает страницу целиком, чтобы прочитать мету. Норму
-  // обхода экономит только `Disallow`, поэтому 5 990 результатов расчёта закрыты префиксами.
+  // обхода экономит только `Disallow`, поэтому персональные разборы закрыты префиксами.
   it("закрывает от обхода результаты расчёта", () => {
     const disallow = [groupFor("*")?.disallow].flat();
-    expect(disallow).toContain("/matrix/");
     const missing = [...PERSONAL_SECTION_KEYS, "character"].filter(
       (section) => !disallow.includes(`/encyclopedia/${section}/`),
     );
@@ -55,8 +54,6 @@ describe("robots.txt", () => {
     expect(groupFor("*")?.other?.["Clean-param"]).toBe("tab&sec&lang");
   });
 
-  // Хаб `/matrix` — обычная страница корпуса и стоит в карте сайта: закрыть его префиксом
-  // без слеша значило бы выкинуть из поиска и его.
   it("закрывает от обхода сочетания", () => {
     expect([groupFor("*")?.disallow].flat()).toContain("/encyclopedia/combination");
   });
@@ -66,10 +63,6 @@ describe("robots.txt", () => {
   it("открывает Googlebot только сочетания", () => {
     const common = [groupFor("*")?.disallow].flat().filter((path) => path !== "/encyclopedia/combination");
     expect([groupFor("Googlebot")?.disallow].flat()).toEqual(common);
-  });
-
-  it("не закрывает хаб матриц", () => {
-    expect([groupFor("*")?.disallow].flat()).not.toContain("/matrix");
   });
 
   it("на тестовом контуре закрывает сайт целиком", async () => {

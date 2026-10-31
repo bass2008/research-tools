@@ -14,8 +14,7 @@ from conftest import BASE
 @pytest.mark.parametrize("locale", ["ru", "en"])
 def test_private_html_redirects_and_parameters(page, host, locale):
     paths = ["/login", "/register", "/forgot", "/reset?token=old-token", "/account", "/admin",
-             "/report", "/pay", "/pay/single", "/pay/done?order=old-order", "/pay/fail?order=old-order",
-             "/matrix", "/matrix/1-1-2"]
+             "/report", "/pay", "/pay/single", "/pay/done?order=old-order", "/pay/fail?order=old-order"]
     headers = {"Host": host, "User-Agent": "YandexBot", "Cookie": f"arcana_locale={'en' if locale == 'ru' else 'ru'}"}
     for path in paths:
         old = page.request.get(BASE + path + ("&" if "?" in path else "?") + f"lang={locale}",
