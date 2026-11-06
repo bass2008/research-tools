@@ -243,12 +243,12 @@ export const individualLanding = {
     ru: {
       personal: (who: string) => `Характер, дело, деньги, отношения, род, хвост, тело, время и план — по ${who}.`,
       pair: () => "Ключ пары, деньги, задачи, ссоры и как их чинить, план для двоих — по двум датам.",
-      year: (y: string) => `Матрица ${y} года, три периода и двенадцать глав-месяцев: когда начинать, когда закрывать.`,
+      year: () => "Матрица любого года, три периода и двенадцать глав-месяцев: когда начинать, когда закрывать.",
     },
     en: {
       personal: (who: string) => `Character, work, money, relationships, lineage, tail, body, time and a plan — for ${who}.`,
       pair: () => "The key of the couple, money, tasks, quarrels and how to mend them, a plan for two — for two dates.",
-      year: (y: string) => `The matrix of ${y}, three periods and twelve month chapters: when to start, when to close.`,
+      year: () => "The matrix of any year, three periods and twelve month chapters: when to start, when to close.",
     },
   } satisfies Pair<Record<"personal" | "pair" | "year", (x: string) => string>>,
   yourDate: { ru: "вашей дате", en: "your date" } satisfies Phrase,
@@ -277,8 +277,8 @@ export const individualLanding = {
   builderKicker: { ru: "✦ Конструктор", en: "✦ Builder" } satisfies Phrase,
   builderTitle: { ru: "Набросайте, сколько нужно, — цена посчитается сама", en: "Add as many as you need — the price works itself out" } satisfies Phrase,
   stepHint: {
-    ru: { personal: "для себя или близкого", pair: "две даты, совместимость", year: "двенадцать месяцев" },
-    en: { personal: "for yourself or someone close", pair: "two dates, compatibility", year: "twelve months" },
+    ru: { personal: "для себя или близкого", pair: "две даты, совместимость", year: "любой · двенадцать месяцев" },
+    en: { personal: "for yourself or someone close", pair: "two dates, compatibility", year: "any year · twelve months" },
   } satisfies Pair<Record<"personal" | "pair" | "year", string>>,
   each: { ru: (sum: string) => `${sum} за каждый`, en: (sum: string) => `${sum} each` } satisfies PhraseFn<[string]>,
   noSub: {
@@ -330,7 +330,8 @@ export const individualLanding = {
       ["What my year holds", "What should I expect from the year — when to start new things and when to close old ones?", "selfYear", ""],
     ],
   } satisfies Pair<[string, string, string, string][]>,
-  topicNote: { ru: (name: string) => `Под этот вопрос подходит «${name}» — выбрали, можно поменять выше.`, en: (name: string) => `“${name}” fits this question — we chose it; you can change it above.` } satisfies PhraseFn<[string]>,
+  topicNote: { ru: (name: string) => `Под этот вопрос подходит «${name}»`, en: (name: string) => `“${name}” fits this question` } satisfies PhraseFn<[string]>,
+  topicChoose: { ru: "Выбрать", en: "Choose" } satisfies Phrase,
   questionPlaceholder: { ru: "Например: деньги приходят рывками — почему и что с этим делать?", en: "For example: money comes in bursts — why, and what can I do about it?" } satisfies Phrase,
   emailPlaceholder: { ru: "you@example.ru", en: "you@example.com" } satisfies Phrase,
   passwordPlaceholder: { ru: "Не меньше 3 символов", en: "At least 3 characters" } satisfies Phrase,

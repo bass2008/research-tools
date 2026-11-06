@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSession } from "@/components/account/useSession";
 import { BirthPicker, isoOf, type PickedDate } from "@/components/pay/BirthPicker";
-import { YearInput, forgetIndividualTerms } from "@/components/pay/IndividualOffer";
+import { YearInput, forgetIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
 import RichText from "@/components/ui/RichText";
@@ -48,6 +48,7 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [lostPassword, setLostPassword] = useState(false);
   const [done, setDone] = useState<[string, string] | null>(null);
   const signedIn = session.status === "user";
   const mail = signedIn && session.email ? session.email : email.trim().toLowerCase();
@@ -98,6 +99,7 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLostPassword(false);
     if (!readings.length) return setError(T.errEmpty[L]);
     if (owners.some((o) => !people[o] || !validDate(people[o].date))) return setError(T.errDate[L]);
     const problem = problemOf(readings);
@@ -126,7 +128,10 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
       const today = browserDay();
       setDone([dateLabel(workdaysFrom(today, 1), L), dateLabel(workdaysFrom(today, 3), L)]);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) setError(D.payForm.errors.wrongPassword[L]);
+      if (err instanceof ApiError && err.status === 401) {
+        setError(D.payForm.errors.wrongPassword[L]);
+        setLostPassword(true);
+      }
       else if (err instanceof ApiError) setError(err.messageFor(L).replace(/[.!…]?$/, ".") + (err.status ? D.payForm.errors.notCharged[L] : ""));
       else setError(D.payForm.errors.generic[L]);
     } finally {
@@ -203,7 +208,8 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
         <p className="lp-mini-sum"><RichText text={summary} /></p>
         {owners.length > 0 && <p className="lp-mini-sum" data-testid="iorder-dates">{T.forDates[L]}: <b>{owners.map(dateOf).join(", ")}</b></p>}
         {!payable && <p className="lp-form-err lp-on" data-testid="iorder-region">{D.pay.regionUnavailable[L]}</p>}
-        {error && <p className="lp-form-err lp-on" role="alert" data-testid="iorder-error">{error}</p>}
+        {error && <p className="lp-form-err lp-on" role="alert" data-testid="iorder-error">{error}
+          {lostPassword && <> <Link href="/forgot" target="_blank" rel="noopener" data-testid="iorder-forgot">{D.payForm.restorePassword[L]}</Link></>}</p>}
         <button className="lp-btn lp-gold" type="submit" disabled={busy || !readings.length || !payable} data-testid="iorder-submit">
           {busy ? T.sending[L] : T.payFor[L](total)}
         </button>

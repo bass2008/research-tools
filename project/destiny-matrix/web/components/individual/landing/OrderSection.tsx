@@ -22,7 +22,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
   const L = useLocale();
   const T = D.individualSale;
   const TL = D.individualLanding;
-  const { terms, prices, PW, r, priceOf, plans, kindName } = useSets(year);
+  const { terms, prices, PW, r, priceOf, plans, kindName } = useSets();
   const [question, setQuestion] = useState("");
   const [topic, setTopic] = useState<number | null>(null);
   const [orderDates, setOrderDates] = useState<string[]>([]);
@@ -36,6 +36,9 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
   const total = r(priceOf(cart));
   const byDates = orderDates.length ? TL.byDate[L](orderDates.join(", ")) : "";
   const topics = TL.topics[L];
+  // a question only suggests its set: the order changes on an explicit choice, so the form does not jump under the finger
+  const suggested = topic === null ? null : { s: topics[topic][2] as SetKey, k: (topics[topic][3] || undefined) as Kind | undefined };
+  const fits = suggested && (suggested.s !== set || (suggested.k && suggested.k !== formKind)) ? suggested : null;
   const sectionRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = sectionRef.current;
@@ -72,7 +75,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
           </div>}
           {set === "custom" && <div className="lp-fl">
             <span>{TL.buildSet[L]}</span>
-            <Steppers cart={custom} setCart={setCustom} year={year} p="lp" />
+            <Steppers cart={custom} setCart={setCustom} p="lp" />
             <Ladder count={quote(custom, 0, prices).count} bought={terms.bought} prices={prices} p="lp" />
           </div>}
           <OrderForm cart={cart} baseYear={year} total={total} providers={providers} payable={terms.payable} initialBirth={initialBirth}
@@ -80,16 +83,21 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
             summary={`**${setTitle}**${byDates ? ` · ${byDates}` : ""} · ${TL.summaryWhen[L](latest)}`}
             topics={<>
               <div className="lp-topics">{topics.map(([label, text, s, k], i) => (
-                <button key={label} type="button" className={topic === i ? "lp-on" : undefined} onClick={() => {
-                  if (!question.trim() || (topic !== null && question === topics[topic][1])) setQuestion(text);
+                <button key={label} type="button" className={topic === i ? "lp-on" : undefined} aria-pressed={topic === i} onClick={() => {
+                  const ours = !question.trim() || (topic !== null && question === topics[topic][1]);
+                  if (topic === i) {
+                    if (question === text) setQuestion("");
+                    setTopic(null);
+                    return;
+                  }
+                  if (ours) setQuestion(text);
                   setTopic(i);
-                  setSet(s as SetKey);
-                  if (k) setFormKind(k as Kind);
                 }}>{label}</button>
               ))}</div>
-              {topic !== null && <p className="lp-topic-note">{TL.topicNote[L](topics[topic][2] === "one"
-                ? `${T.setOne[L]}${topics[topic][3] ? ` · ${kindName[topics[topic][3] as Kind].toLowerCase()}` : ""}`
-                : topics[topic][2] === "selfYear" ? T.setSelfYear[L](year) : T.setCouple[L])}</p>}
+              {fits && <p className="lp-topic-note">{TL.topicNote[L](fits.s === "one"
+                ? `${T.setOne[L]}${fits.k ? ` · ${kindName[fits.k].toLowerCase()}` : ""}`
+                : fits.s === "selfYear" ? T.setSelfYear[L](year) : T.setCouple[L])}{" "}
+                <button type="button" onClick={() => { setSet(fits.s); if (fits.k) setFormKind(fits.k); }}>{TL.topicChoose[L]}</button></p>}
             </>} />
         </div>
         <aside className="lp-summary-card">

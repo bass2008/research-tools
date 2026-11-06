@@ -135,8 +135,9 @@ def test_admin_sees_what_happens_right_now(page, browser, mail):
         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                    "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36")
     guest = human.new_page()
-    guest.goto(BASE, wait_until="domcontentloaded")
-    guest.wait_for_timeout(2000)                   # пульс уходит сразу при открытии страницы
+    guest.goto(BASE, wait_until="networkidle")
+    guest.mouse.move(150, 150)                     # a crawler never moves; a person does
+    guest.wait_for_timeout(2000)
 
     flows.login(page, *ADMIN)
     page.goto(f"{BASE}/admin", wait_until="domcontentloaded")

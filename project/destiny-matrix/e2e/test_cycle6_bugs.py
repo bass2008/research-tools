@@ -56,9 +56,10 @@ def test_chakra_page_does_not_link_to_itself_among_other_levels(page: Page):
     assert len(hrefs) == 6, f"«остальных» уровней {len(hrefs)}, а их шесть: {hrefs}"
 
 
+# The year pages show the individual year reading offer instead of the carousel.
 @pytest.mark.parametrize(
     "path",
-    ("/year", "/encyclopedia/karmic-tail", "/programs", "/energies"),
+    ("/encyclopedia/karmic-tail", "/programs", "/energies"),
 )
 def test_carousel_button_never_points_at_the_page_it_stands_on(page: Page, path):
     """Кнопка слайда вела на тот же адрес: видимый клик, после которого ничего не происходит."""

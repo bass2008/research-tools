@@ -13,7 +13,21 @@ import { usePathname } from "next/navigation";
 
 const VISITOR_KEY = "destiny.visitor";
 const TAB_KEY = "destiny.tab";
+const ACTIVE_KEY = "destiny.active";
 const EVERY = 45_000;
+// Headless crawlers render the page and run this script, but never move, scroll or type.
+const ACTIONS = ["pointermove", "pointerdown", "keydown", "scroll", "wheel", "touchstart"] as const;
+
+let active = false;
+function wasActive(): boolean {
+  if (active) return true;
+  try {
+    active = sessionStorage.getItem(ACTIVE_KEY) === "1";
+  } catch {
+    /* without storage the flag lives until the next full load */
+  }
+  return active;
+}
 
 function newId(): string {
   // randomUUID есть только в защищённом контексте: по http (а так печать открывает страницу
@@ -68,7 +82,7 @@ export default function PulseBeacon() {
     const tab = tabId();
     const beat = () => {
       // A background tab woken by the browser is not a visitor.
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible" || !wasActive()) return;
       void fetch("/api/pulse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,12 +95,25 @@ export default function PulseBeacon() {
           /* счётчик присутствия — не повод показывать человеку ошибку */
         });
     };
+    const wake = () => {
+      ACTIONS.forEach((name) => window.removeEventListener(name, wake));
+      if (wasActive()) return;
+      active = true;
+      try {
+        sessionStorage.setItem(ACTIVE_KEY, "1");
+      } catch {
+        /* see wasActive */
+      }
+      beat();
+    };
+    if (!wasActive()) ACTIONS.forEach((name) => window.addEventListener(name, wake, { passive: true }));
     beat();
     const timer = setInterval(beat, EVERY);
     document.addEventListener("visibilitychange", beat);
     return () => {
       clearInterval(timer);
       document.removeEventListener("visibilitychange", beat);
+      ACTIONS.forEach((name) => window.removeEventListener(name, wake));
     };
   }, [path]);
 

@@ -65,6 +65,13 @@ export function cartQuery(cart: Cart, year?: number): string {
   return parts.join("&");
 }
 
+// A set in the address (`personal=2&pair=1&y=2027`): the landing and /pay open it in the order form.
+export function cartFromQuery(one: (key: string) => string): { cart: Cart | null; year?: number } {
+  const cart: Cart = { ...EMPTY_CART };
+  for (const k of CART_KINDS) cart[k] = Math.max(0, Math.min(MAX_PER_KIND, Math.trunc(Number(one(k))) || 0));
+  return { cart: CART_KINDS.some((k) => cart[k]) ? cart : null, year: /^\d{4}$/.test(one("y")) ? Number(one("y")) : undefined };
+}
+
 export interface IndividualTerms { bought: number; default_year: number; prices: Prices; typical_days: number; max_days: number; payable: boolean }
 
 export interface OrderPerson { birth: string; sex: "f" | "m" }

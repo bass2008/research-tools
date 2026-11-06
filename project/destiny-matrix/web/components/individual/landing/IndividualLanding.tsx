@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { arcanumImage } from "@/components/matrix/ArcanumCard";
-import { useIndividualTerms } from "@/components/pay/IndividualOffer";
+import { useIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
 import RichText from "@/components/ui/RichText";
@@ -18,6 +18,7 @@ import { useBirth } from "@/lib/useBirth";
 import { FindingSheet, SummarySheet, TocSheet, ToggleSheet, useMobile } from "./ExampleSheets";
 import LinksMap from "./LinksMap";
 import OrderSection from "./OrderSection";
+import { setOf } from "./useSets";
 import PricesSection from "./PricesSection";
 import { pad, showDate, type Kind, type SetKey, type UserDate, type UserInfo } from "./types";
 
@@ -38,9 +39,10 @@ export default function IndividualLanding({ data, providers, serverYear, initial
   const stored = useBirth();
 
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [oneKind, setOneKind] = useState<Kind>("personal");
-  const [set, setSet] = useState<SetKey>(initialCart ? "custom" : "one");
-  const [formKind, setFormKind] = useState<Kind>("personal");
+  const asked = initialCart ? setOf(initialCart) : null;
+  const [oneKind, setOneKind] = useState<Kind>(asked?.kind ?? "personal");
+  const [set, setSet] = useState<SetKey>(asked?.set ?? "one");
+  const [formKind, setFormKind] = useState<Kind>(asked?.kind ?? "personal");
   const [custom, setCustom] = useState<Cart>(initialCart ?? { ...EMPTY_CART, personal: 2 });
   const [dates, setDates] = useState<[string, string]>(["", ""]);
   useEffect(() => {

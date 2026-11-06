@@ -30,7 +30,8 @@ def test_five_tabs_send_one_visitor_and_five_tab_ids(browser: Browser) -> None:
     for path in ["/", "/", "/", "/account", "/admin"]:
         tab = context.new_page()
         pages.append(tab)
-        tab.goto(f"{BASE}{path}", wait_until="domcontentloaded")
+        tab.goto(f"{BASE}{path}", wait_until="networkidle")
+        tab.mouse.move(120, 160)
 
     for _ in range(30):
         if len(beats) >= 5:
@@ -81,3 +82,21 @@ def test_admin_names_people_and_tabs_separately(page: Page) -> None:
     expect(online).to_have_text("1 человек · 5 вкладок сейчас")
     panel = page.get_by_test_id("admin-pulse")
     expect(panel).to_contain_text("Смотрят: / (1 человек · 3 вкладки)")
+
+
+def test_a_tab_without_any_action_is_not_counted(browser: Browser) -> None:
+    """Headless crawlers open pages and run scripts but never move, scroll or type."""
+    context = browser.new_context(locale="ru-RU", http_credentials=_credentials(), user_agent=HUMAN_AGENT)
+    beats: list[str] = []
+    context.on("request", lambda r: beats.append(r.url) if r.url.split("?", 1)[0] == f"{BASE}/api/pulse" else None)
+    tab = context.new_page()
+    tab.goto(f"{BASE}/", wait_until="networkidle")
+    tab.wait_for_timeout(1500)
+    assert beats == [], f"вкладка без действий посчитана: {beats}"
+    tab.mouse.move(200, 200)
+    for _ in range(30):
+        if beats:
+            break
+        tab.wait_for_timeout(100)
+    context.close()
+    assert beats, "после движения мыши пульс не ушёл"

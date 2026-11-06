@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "@/components/account/useSession";
+import OrderSection from "@/components/individual/landing/OrderSection";
+import type { Kind, SetKey } from "@/components/individual/landing/types";
+import { setOf } from "@/components/individual/landing/useSets";
+import { useIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
 import { track } from "@/lib/analytics";
-import { forLocale as localizedApi } from "@/lib/api";
-import { D } from "@/lib/i18n";
+import { D, forLocale as localizedI18n } from "@/lib/i18n";
 import { Ladder, Steppers } from "@/components/pay/IndividualBuilder";
 import RichText from "@/components/ui/RichText";
 import { arcanumImage } from "@/components/matrix/ArcanumCard";
 import { forLocale as arcanaForLocale } from "@/lib/arcana";
 import {
-  COUPLE_CARDS, DEFAULT_PRICES, EMPTY_CART, KIND_CARDS, SELF_YEAR_CARDS, SETS, cartQuery, defaultYearFor, quote,
-  type Cart, type IndividualTerms, type Prices,
+  COUPLE_CARDS, EMPTY_CART, KIND_CARDS, SELF_YEAR_CARDS, SETS, quote, workdaysFrom, type Cart,
 } from "@/lib/individualPricing";
 import { SAMPLE_BIRTH } from "@/lib/individualSample";
 import { useBirth } from "@/lib/useBirth";
@@ -21,47 +22,16 @@ import { yearMatrix } from "@/lib/yearMatrix";
 import { priceWords, rub } from "@/lib/individualMoney";
 import { browserDay } from "@/lib/today";
 import type { Lang } from "@/lib/i18n/hosts";
-
-export interface Terms { bought: number; prices: Prices; defaultYear: number; payable: boolean }
-
-// One request per language and account for every block on the page; an order changes the count.
-const asked = new Map<string, Promise<IndividualTerms>>();
-export function forgetIndividualTerms() { asked.clear(); }
-
-/** Prices from the database and how many readings the buyer has paid for: from three on, any
- *  reading costs `after_three`. Until the answer comes, the seeded prices and the browser's year. */
-export function useIndividualTerms(): Terms {
-  const L = useLocale();
-  const { status, email } = useSession();
-  const [terms, setTerms] = useState<Terms>({ bought: 0, prices: DEFAULT_PRICES, defaultYear: 0, payable: true });
-  useEffect(() => {
-    let live = true;
-    setTerms((t) => ({ ...t, defaultYear: t.defaultYear || defaultYearFor(browserDay()) }));
-    if (status === "loading") return;
-    const key = `${L}|${status === "user" ? email : ""}`;
-    if (!asked.has(key)) asked.set(key, localizedApi(L).api.individualTerms());
-    asked.get(key)!
-      .then((t) => { if (live) setTerms({ bought: t.bought, prices: t.prices, defaultYear: t.default_year, payable: t.payable !== false }); })
-      .catch(() => asked.delete(key));
-    return () => { live = false; };
-  }, [status, email, L]);
-  return terms;
-}
-
-/** Any year can be chosen; the input only keeps it a plausible one. */
-export function YearInput({ value, onChange, label }: { value: number; onChange: (y: number) => void; label: string }) {
-  return <input className="iyear" type="number" inputMode="numeric" min={1900} max={2200} value={value || ""} aria-label={label}
-    onChange={(e) => { const y = Math.trunc(Number(e.target.value)); if (y) onChange(y); }} />;
-}
-
-type Kind = "personal" | "pair" | "year";
+import type { PaymentProvider } from "@/lib/tariffs";
 
 const Cards = ({ ns }: { ns: number[] }) => <div className="pw-cardrow">{ns.map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div>;
-const order = (cart: Cart, year: number) => `/individual?${cartQuery(cart, year)}#order`;
 
 /** Gold section of /pay: ready sets, the builder and the perk for those who bought three (reports/individual-sales, paywall.html). */
-export default function IndividualOffer() {
+export default function IndividualOffer({ providers, initialCart, initialYear }: {
+  providers: PaymentProvider[]; initialCart?: Cart | null; initialYear?: number;
+}) {
   const L = useLocale();
+  const { dateLabel } = localizedI18n(L);
   const T = D.individualSale;
   const TL = D.individualLanding;
   const r = (n: number) => rub(n, L as Lang);
@@ -69,14 +39,29 @@ export default function IndividualOffer() {
   const P = priceWords(terms.prices, L);
   const { arcanumTitle } = arcanaForLocale(L);
   const stored = useBirth();
-  const year = terms.defaultYear;
-  const [oneKind, setOneKind] = useState<Kind>("personal");
-  const [custom, setCustom] = useState<Cart>({ ...EMPTY_CART, personal: 2 });
+  const year = initialYear || terms.defaultYear;
+  const asked = initialCart ? setOf(initialCart) : null;
+  const [oneKind, setOneKind] = useState<Kind>(asked?.kind ?? "personal");
+  const [custom, setCustom] = useState<Cart>(initialCart ?? { ...EMPTY_CART, personal: 2 });
+  // the order form of the landing, opened here by the chosen set (docs/individual-reading.md)
+  const [open, setOpen] = useState(Boolean(asked));
+  const [set, setSet] = useState<SetKey>(asked?.set ?? "one");
+  const [formKind, setFormKind] = useState<Kind>(asked?.kind ?? "personal");
+  const [latest, setLatest] = useState("");
+  useEffect(() => { setLatest(dateLabel(workdaysFrom(browserDay(), 3), L)); }, [L, dateLabel]);
+  const choose = (s: SetKey, place: string, kind?: Kind) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    track("individual_set", { place });
+    setSet(s);
+    if (kind) setFormKind(kind);
+    setOpen(true);
+    requestAnimationFrame(() => document.getElementById("order")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
   const after = terms.bought >= 3;
   const price = (c: Cart) => quote(c, terms.bought, terms.prices).total;
   const oneCart = { ...EMPTY_CART, [oneKind]: 1 };
   const self = SETS.selfYear("personal"), couple = SETS.couple("personal");
-  const kindName: Record<Kind, string> = { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindYear[L](year) };
+  const kindName: Record<Kind, string> = { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindAnyYear[L] };
   const birth = stored?.birth ?? SAMPLE_BIRTH;
   const [by, bm, bd] = birth.split("-").map(Number);
   const y = year ? yearMatrix({ y: by, m: bm, d: bd }, year) : null;
@@ -99,7 +84,7 @@ export default function IndividualOffer() {
               <p className="pw-desc">{TL.kindDesc[L][oneKind](oneKind === "personal" ? TL.yourDate[L] : String(year))}</p>
               <p className="pw-iprice">{r(price(oneCart))}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : T.setOneSub[L]}</p>
-              <Link className="pw-ibtn pw-ghost" href={order(oneCart, year)} onClick={() => track("individual_set", { place: `one-${oneKind}` })}>{T.choose[L]}</Link>
+              <a className="pw-ibtn pw-ghost" href="#order" onClick={choose("one", `one-${oneKind}`, oneKind)}>{T.choose[L]}</a>
               <Link className="pw-ex-link" href={`/matrix/individual-example/${oneKind}`}>{TL.exLabel[L][oneKind]}</Link>
             </article>
             <article className="pw-iplan pw-rec" data-testid="iset-selfYear">
@@ -110,7 +95,7 @@ export default function IndividualOffer() {
                 `${y.centre} ${arcanumTitle(y.centre)}`, y.periods.map((n) => arcanumTitle(n)) as [string, string, string])} /></p>}
               <p className="pw-iprice">{r(price(self))}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : T.separately[L](r(terms.prices.first * 2))}</p>
-              <Link className="pw-ibtn pw-gold" href={order(self, year)} onClick={() => track("individual_set", { place: "self-year" })}>{T.choose[L]}</Link>
+              <a className="pw-ibtn pw-gold" href="#order" onClick={choose("selfYear", "self-year")}>{T.choose[L]}</a>
               <Link className="pw-ex-link" href="/matrix/individual-example/year">{TL.exLabel[L].year}</Link>
             </article>
             <article className="pw-iplan" data-testid="iset-couple">
@@ -118,7 +103,7 @@ export default function IndividualOffer() {
               <p className="pw-desc">{TL.coupleDesc[L]}</p>
               <p className="pw-iprice">{r(price(couple))}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : `${T.separately[L](r(terms.prices.first * 3))} · ${T.coupleExtra[L](P)}`}</p>
-              <Link className="pw-ibtn pw-ghost" href={order(couple, year)} onClick={() => track("individual_set", { place: "couple" })}>{T.choose[L]}</Link>
+              <a className="pw-ibtn pw-ghost" href="#order" onClick={choose("couple", "couple")}>{T.choose[L]}</a>
               <Link className="pw-ex-link" href="/matrix/individual-example/pair">{TL.exLabel[L].pair}</Link>
             </article>
           </div>
@@ -129,11 +114,11 @@ export default function IndividualOffer() {
               <p>{T.builderText[L](P)}</p>
             </div>
             <div className="pw-b-box">
-              <Steppers cart={custom} setCart={setCustom} year={year} p="pw" />
+              <Steppers cart={custom} setCart={setCustom} p="pw" />
               <Ladder count={quote(custom, 0, terms.prices).count} bought={terms.bought} prices={terms.prices} p="pw" />
               <div className="pw-b-total">
                 <p data-testid="ib-total"><b>{r(q.total)}</b> · {T.readings[L](q.count)}{q.perReading ? <> · {TL.each[L](r(q.perReading))}</> : null}{q.separately ? <s>{r(q.separately)}</s> : null}</p>
-                <Link className="pw-ibtn pw-gold" href={order(custom, year)} onClick={() => track("individual_set", { place: "builder" })}>{T.checkout[L]}</Link>
+                <a className="pw-ibtn pw-gold" href="#order" onClick={choose("custom", "builder")}>{T.checkout[L]}</a>
               </div>
             </div>
           </div>
@@ -141,6 +126,10 @@ export default function IndividualOffer() {
           {!terms.payable && <p className="isale-region" data-testid="isale-region">{D.pay.regionUnavailable[L]}</p>}
         </div>
       </div>
+      {open && <div className="ilp isale-order">
+        <OrderSection set={set} setSet={setSet} formKind={formKind} setFormKind={setFormKind} custom={custom} setCustom={setCustom}
+          year={year} providers={providers} initialBirth={stored} latest={latest} />
+      </div>}
     </section>
   );
 }

@@ -22,7 +22,7 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
   const T = D.individualSale;
   const TL = D.individualLanding;
   const { arcanumTitle } = arcanaForLocale(L);
-  const { terms, prices, PW, r, priceOf, plans, kindName } = useSets(year);
+  const { terms, prices, PW, r, priceOf, plans, kindName } = useSets();
   const after = terms.bought >= 3;
   const oneCart = { ...EMPTY_CART, [oneKind]: 1 };
   const sampleYear = useMemo(() => {
@@ -77,7 +77,7 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
           <p>{T.builderText[L](PW)}</p>
         </div>
         <div className="lp-b-box">
-          <Steppers cart={custom} setCart={setCustom} year={year} p="lp" />
+          <Steppers cart={custom} setCart={setCustom} p="lp" />
           <Ladder count={quote(custom, 0, prices).count} bought={terms.bought} prices={prices} p="lp" />
           <div className="lp-b-total">
             <p data-testid="ib-total"><b>{r(q.total)}</b> · {T.readings[L](q.count)}{q.perReading ? <> · {TL.each[L](r(q.perReading))}</> : null}{q.separately ? <s>{r(q.separately)}</s> : null}</p>

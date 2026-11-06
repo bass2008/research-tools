@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/components/ui/LocaleProvider";
 import RichText from "@/components/ui/RichText";
-import { useIndividualTerms } from "@/components/pay/IndividualOffer";
+import { useIndividualTerms } from "@/components/pay/individualTerms";
 import { D } from "@/lib/i18n";
 import { priceWords } from "@/lib/individualMoney";
 

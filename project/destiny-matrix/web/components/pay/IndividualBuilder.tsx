@@ -6,10 +6,10 @@ import { rub } from "@/lib/individualMoney";
 import { MAX_PER_KIND as MAX, type Cart, type IndividualKindKey, type Prices } from "@/lib/individualPricing";
 
 /** The builder of a set: how many readings of each kind; `p` is the class prefix of the page it stands on. */
-export function Steppers({ cart, setCart, year, p }: { cart: Cart; setCart: (c: Cart) => void; year: number; p: string }) {
+export function Steppers({ cart, setCart, p }: { cart: Cart; setCart: (c: Cart) => void; p: string }) {
   const L = useLocale();
   const T = D.individualSale;
-  const title: Record<IndividualKindKey, string> = { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindYear[L](year) };
+  const title: Record<IndividualKindKey, string> = { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindAnyYear[L] };
   const change = (k: IndividualKindKey, d: number) => {
     const next = { ...cart, [k]: Math.max(0, Math.min(MAX, cart[k] + d)) };
     if (!next.personal && !next.pair && !next.year) next[k] = 1;

@@ -12,6 +12,8 @@ import { requestLocale } from "@/lib/i18n/request";
 import { forLocale as localizedSite } from "@/lib/site";
 import { type BuyFor } from "@/lib/readingLinks";
 import { allOffers, getBilling } from "@/lib/tariffs.server";
+import { cartFromQuery } from "@/lib/individualPricing";
+import "../individual/landing.css";
 import type { Metadata } from "next";
 import Link from "@/components/ui/LocalizedLink";
 import { notFound, redirect } from "next/navigation";
@@ -35,6 +37,7 @@ const forLocale = localized((L: Locale, site) => {
 // One page wherever "Buy" was pressed: all three automatic offers, then the gold section of
 // individual readings. `for=personal|pair` only carries the saved record (`m`/`r`) into the form
 // of its own offer. Old links with a number but without a product go straight to that form.
+// A set in the address (`year=1&y=2027#order`, from the year widget) opens the order form of the gold section.
 export default async function PayChoicePage({ searchParams }: { searchParams: Search }) {
   const L = await requestLocale();
 
@@ -48,6 +51,7 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
   if (!flow && one("r")) redirect(publicPath(`/pay/pair?r=${encodeURIComponent(one("r"))}`, L));
   const id = (key: string) => (/^\d+$/.test(one(key)) ? one(key) : undefined);
   const carry = flow === "pair" ? { r: id("r") } : flow === "personal" ? { m: id("m") } : {};
+  const ordered = cartFromQuery(one);
   const [{ providers }, all] = await Promise.all([getBilling(), allOffers()]);
   // разовые покупки слева, подписка последней
   const offers = [...all].sort((a, b) => Number(a.per_reading === false) - Number(b.per_reading === false));
@@ -68,7 +72,7 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
             <p className="dim">{D.encLinks.priceUnknownText[L]}</p>
           </div>
         )}
-        <IndividualOffer />
+        <IndividualOffer providers={providers ?? []} initialCart={ordered.cart} initialYear={ordered.year} />
         <IndividualCompare />
       </div>
     </main>

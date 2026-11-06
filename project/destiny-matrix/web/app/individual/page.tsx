@@ -6,7 +6,7 @@ import { D } from "@/lib/i18n";
 import { publicLocale, requestLocale } from "@/lib/i18n/request";
 import { landingData } from "@/lib/individualLanding";
 import { rub } from "@/lib/individualMoney";
-import { CART_KINDS, EMPTY_CART, MAX_PER_KIND, defaultYearFor, type Cart } from "@/lib/individualPricing";
+import { cartFromQuery, defaultYearFor } from "@/lib/individualPricing";
 import { publicUrl } from "@/lib/publicRouting";
 import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSite } from "@/lib/site";
@@ -37,10 +37,7 @@ export default async function IndividualPage({ searchParams }: { searchParams: S
   const { providers } = await getBilling();
   const params = await searchParams;
   const one = (key: string) => String((Array.isArray(params[key]) ? params[key]![0] : params[key]) ?? "");
-  const asked: Cart = { ...EMPTY_CART };
-  for (const k of CART_KINDS) asked[k] = Math.max(0, Math.min(MAX_PER_KIND, Math.trunc(Number(one(k))) || 0));
-  const initialCart = CART_KINDS.some((k) => asked[k]) ? asked : null;
-  const initialYear = /^\d{4}$/.test(one("y")) ? Number(one("y")) : undefined;
+  const { cart: initialCart, year: initialYear } = cartFromQuery(one);
   const now = new Date();
   const { faqLd } = localizedSchema(L, site);
   // the service and its starting price; the FAQ markup stands next to the visible answers

@@ -2,7 +2,7 @@
 // код тарифа, раздел и год-десятилетие — ничего, по чему восстанавливается дата.
 export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "purchase"
   | "pdf_click" | "pair_calc" | "individual_click" | "individual_example" | "individual_date"
-  | "individual_order_view" | "individual_set" | "individual_order_submit";
+  | "individual_order_view" | "individual_set" | "individual_order_submit" | "individual_year_date" | "individual_year_order";
 
 export interface GoalParams {
   tariff?: string;

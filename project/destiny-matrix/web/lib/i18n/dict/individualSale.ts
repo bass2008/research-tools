@@ -41,6 +41,7 @@ export const individualSale = {
   kindPersonal: { ru: "Личный", en: "Personal" } satisfies Phrase,
   kindPair: { ru: "Пара", en: "Couple" } satisfies Phrase,
   kindYear: { ru: (y: number) => `Год ${y}`, en: (y: number) => `Year ${y}` } satisfies PhraseFn<[number]>,
+  kindAnyYear: { ru: "На год", en: "Year" } satisfies Phrase,
   builderText: {
     ru: (P: PriceWords) => `Для себя, близких, пары и на любой год — в одном заказе. Чем больше разборов, тем дешевле каждый: третий стоит ${P.thirdStep}, с четвёртого — по ${P.next}. Купили три — дальше любой разбор для вас стоит ${P.after}, и в следующих заказах.`,
     en: (P: PriceWords) => `For yourself, your family, a couple and any year — in one order. The more readings, the cheaper each one: the third costs ${P.thirdStep}, from the fourth on ${P.next} each. Once you have bought three, any further reading costs you ${P.after}, in later orders too.`,
@@ -62,6 +63,26 @@ export const individualSale = {
     en: "**Usually ready in 1 working day**, at the longest in 3 working days. The automatic reading of the same dates opens instantly. The subscription does not include it: an individual reading is written separately for each person.",
   } satisfies Phrase,
   yourYear: { ru: (y: number) => `Ваш ${y}`, en: (y: number) => `Your ${y}` } satisfies PhraseFn<[number]>,
+  yearBannerKicker: { ru: "✦ Индивидуальный разбор года", en: "✦ Individual year reading" } satisfies Phrase,
+  yearBannerTitle: {
+    ru: (name: string) => name ? `${name} — тема года. А что будет у вас по месяцам?` : "Аркан года — общий для всех. А что будет у вас по месяцам?",
+    en: (name: string) => name ? `${name} is the theme of the year. What will your months bring?` : "The arcanum of the year is shared by many. What will your months bring?",
+  } satisfies PhraseFn<[string]>,
+  yearBannerText: {
+    ru: "Аркан года — общий для всех, у кого он выпал. Индивидуальный разбор считает матрицу **именно вашего** года по «Прогностике» Лисовской — центр, три периода и двенадцать месяцев — и читает её вместе с вашей матрицей. Около 15 тысяч слов, каждый вывод проверяет человек.",
+    en: "The arcanum of the year is shared by everyone who has it. The individual reading builds the matrix of **your own** year by Lisovskaya's “Prognostics” — the centre, three periods and twelve months — and reads it together with your matrix. About 15,000 words; a person checks every conclusion.",
+  } satisfies Phrase,
+  yearBannerDate: { ru: "Дата рождения", en: "Date of birth" } satisfies Phrase,
+  yearBannerYear: { ru: "Год разбора", en: "Reading year" } satisfies Phrase,
+  yearBannerShow: { ru: (y: number) => `Показать мой ${y}`, en: (y: number) => `Show my ${y}` } satisfies PhraseFn<[number]>,
+  yearBannerDateError: { ru: "Введите дату в виде 12.08.1992", en: "Enter the date as 12.08.1992" } satisfies Phrase,
+  yearBannerHint: {
+    ru: "Что это значит месяц за месяцем и что делать в каждом — в индивидуальном разборе.",
+    en: "What it means month by month and what to do in each one is in the individual reading.",
+  } satisfies Phrase,
+  yearBannerOrder: { ru: (y: number, price: string) => `Заказать разбор ${y} · ${price}`, en: (y: number, price: string) => `Order the ${y} reading · ${price}` } satisfies PhraseFn<[number, string]>,
+  yearBannerExample: { ru: "Посмотреть пример разбора года", en: "See a sample year reading" } satisfies Phrase,
+  yearBannerFine: { ru: "Обычно готов за 1 рабочий день · в подписку не входит", en: "Usually ready in 1 working day · not part of the subscription" } satisfies Phrase,
   yearOfDate: { ru: (y: number, date: string) => `${y} для даты ${date}`, en: (y: number, date: string) => `${y} for ${date}` } satisfies PhraseFn<[number, string]>,
   yearFor: {
     ru: (label: string, centre: string, p: [string, string, string]) => `**${label}:** центр года — ${centre}. Январь–апрель — ${p[0]}, май–август — ${p[1]}, сентябрь–декабрь — ${p[2]}.`,

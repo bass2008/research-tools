@@ -3,6 +3,7 @@ import EncFrame from "@/components/enc/EncFrame";
 import EncTitle from "@/components/enc/EncTitle";
 import CalcHero from "@/components/matrix/CalcHero";
 import MatrixForm from "@/components/matrix/MatrixForm";
+import YearHeroSwitch from "@/components/year/YearHeroSwitch";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { forLocale as localizedContent } from "@/lib/content";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
@@ -10,6 +11,8 @@ import { forLocale as localizedEncyclopediaNavigation, type EncyclopediaSectionK
 import { forLocale as localizedHeroSlides } from "@/lib/heroSlides";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
+import { defaultYearFor } from "@/lib/individualPricing";
+import { individualPrices } from "@/lib/tariffs.server";
 import type { ReactNode } from "react";
 
 export const forLocale = localized((L: Locale) => {
@@ -72,9 +75,12 @@ export const forLocale = localized((L: Locale) => {
 
 export const { encSections, articleList, articlePaths } = forLocale(defaultLocale);
 
-export default function EncShell({ locale: requestedLocale, ...localeProps }: ({ children: ReactNode; hero?: boolean }) & { locale?: Locale }) {
+export default async function EncShell({ locale: requestedLocale, ...localeProps }: ({ children: ReactNode; hero?: boolean }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
   const { children, hero = true } = localeProps;
+  // Year articles offer the individual year reading instead of the calculator (Russian site only: no payment on .com).
+  const now = new Date();
+  const readingYear = defaultYearFor({ month: now.getMonth() + 1, year: now.getFullYear() });
   const { ARCANA, CHAKRA_PAGES, POSITIONS, ENCYCLOPEDIA_SLIDES, categoryHub, encSections, articleList } = forLocale(L);
   const energyField = categoryHub("energy-field");
 
@@ -88,11 +94,13 @@ export default function EncShell({ locale: requestedLocale, ...localeProps }: ({
 
   return (
     <main id="content" className="page">
-      {hero && <CalcHero locale={L} slides={ENCYCLOPEDIA_SLIDES} h1={false} place="encyclopedia">
+      {hero && <YearHeroSwitch year={readingYear} years={[now.getFullYear(), now.getFullYear() + 1]} price={(await individualPrices()).first}>
+        <CalcHero locale={L} slides={ENCYCLOPEDIA_SLIDES} h1={false} place="encyclopedia">
         {/* В справочнике отчёта нет: после расчёта сразу открываем карту на главной. Раньше
             оставляли человека в статье с малозаметной второй ссылкой, и кнопка казалась сломанной. */}
         <MatrixForm locale={L} finish={{ kind: "go", href: "/#result" }} place="encyclopedia" />
-      </CalcHero>}
+        </CalcHero>
+      </YearHeroSwitch>}
 
       <div className="wrap">
         <EncCrumbs locale={L}
