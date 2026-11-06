@@ -40,17 +40,17 @@ it("«Купить» without a product offers all three purchases", async () => 
   expect(ids(await page())).toEqual(["single", "pair", "month"]);
 });
 
-it("a personal reading offers its date or the subscription and carries the saved matrix", async () => {
+// One page wherever "Buy" was pressed (docs/individual-reading.md): the product only carries its record.
+it("a personal reading still shows all three offers and carries the saved matrix", async () => {
   const node = await page({ for: "personal", m: "12" });
-  expect(ids(node)).toEqual(["single", "month"]);
+  expect(ids(node)).toEqual(["single", "pair", "month"]);
   expect(find(node as Node, "carry")).toEqual({ m: "12" });
 });
 
-it("a couple offers the pair or the subscription and carries the saved reading", async () => {
+it("a couple still shows all three offers and carries the saved reading", async () => {
   const node = await page({ for: "pair", r: "7" });
-  expect(ids(node)).toEqual(["pair", "month"]);
+  expect(ids(node)).toEqual(["single", "pair", "month"]);
   expect(find(node as Node, "carry")).toEqual({ r: "7" });
-  expect(find(node as Node, "pair")).toBe(true);
 });
 
 it("a broken record number is not carried into the form", async () => {

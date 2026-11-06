@@ -68,7 +68,6 @@
 | `docs/search-bot-base-strategy.md` | обход роботами: как устроен условный ответ (`ETag`, прибитый `buildId`, middleware) |
 | `docs/search-bot-google.md` | Googlebot: на чём он экономит обход и куда его тратит |
 | `docs/search-bot-yandex.md` | Яндекс: **живой рабочий файл** — что проверено, что выпилено, что делать с охватом |
-| `docs/decisions-review.md` | кандидаты в решения, рабочий список |
 
 SEO-часть живёт вне проекта, в `tools/seo/`:
 

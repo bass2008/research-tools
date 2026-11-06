@@ -1,13 +1,16 @@
 // Цели внешней Метрики. Дата рождения в параметры не попадает никогда: разрешены только
 // код тарифа, раздел и год-десятилетие — ничего, по чему восстанавливается дата.
 export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "purchase"
-  | "pdf_click" | "pair_calc";
+  | "pdf_click" | "pair_calc" | "individual_click" | "individual_example" | "individual_date"
+  | "individual_order_view" | "individual_set" | "individual_order_submit";
 
 export interface GoalParams {
   tariff?: string;
   section?: string;
   place?: string;
   decade?: number;
+  example?: string;
+  count?: number;
 }
 
 declare global {

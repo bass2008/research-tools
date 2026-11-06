@@ -90,12 +90,12 @@ def test_admin_grants_a_matrix_and_it_is_open_but_not_bought(page, mail):
     page.wait_for_timeout(800)
     body = page.inner_text("main")
     assert "17 марта 1984" in body, f"выданной даты нет в кабинете: {body[:200]}"
-    granted = page.locator(".matrow", has_text="17 марта 1984").first
+    granted = page.locator(".cabinet-reading", has_text="17 марта 1984").first
     assert "выдана" in granted.inner_text().lower(), granted.inner_text()
     assert "куплена" not in granted.inner_text().lower(), \
         f"подарок выглядит купленным: {granted.inner_text()}"
     # у купленной метка остаётся прежней — две строки в списке не должны слиться в одну
-    bought = page.locator(".matrow", has_text="9 сентября 1999").first
+    bought = page.locator(".cabinet-reading", has_text="9 сентября 1999").first
     assert "куплена" in bought.inner_text().lower(), bought.inner_text()
 
 

@@ -6,6 +6,7 @@ export const nav = {
   homeAria: { ru: "Arcana Sense — на главную", en: "Arcana Sense — home" } satisfies Phrase,
   myReading: { ru: "Мой разбор", en: "My reading" } satisfies Phrase,
   encyclopedia: { ru: "Энциклопедия", en: "Encyclopedia" } satisfies Phrase,
+  individual: { ru: "Индивидуальный", en: "Individual" } satisfies Phrase,
   account: { ru: "Кабинет", en: "Account" } satisfies Phrase,
   /** Подпись переключателя: читается на языке той версии, куда ведёт. */
   otherLanguage: { ru: "Русская версия", en: "English version" } satisfies Phrase,

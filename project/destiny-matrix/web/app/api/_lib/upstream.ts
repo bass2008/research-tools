@@ -133,6 +133,7 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
 
   // апстрим может ответить не-JSON (HTML 404 прокси, 502 балансировщика) — наверх всё равно
   // уходит JSON, иначе клиент не отличит отказ сервера от своей ошибки
+  if (res.status === 204) return new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store, private" } });
   const text = await res.text();
   let data: unknown = null;
   if (text) {

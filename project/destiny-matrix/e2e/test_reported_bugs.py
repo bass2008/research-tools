@@ -79,7 +79,7 @@ def test_account_report_works_without_browser_birth_and_uses_free_wording(page: 
 
     page.evaluate("sessionStorage.clear()")
     page.goto(f"{BASE}/account", wait_until="domcontentloaded")
-    report = page.get_by_test_id("account-report")
+    report = flows.matrix_cards(page).first.get_by_role("link", name=re.compile(r"^Открыть"))
     expect(report).to_be_visible()
     href = report.get_attribute("href") or ""
     assert re.fullmatch(r"/ru/matrices/\d+", href), href

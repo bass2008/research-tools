@@ -65,6 +65,9 @@ description: "Продукт Arcana Sense (матрица судьбы) и то,
 | [prompts/pair-unit-translate-review-prompt.md](prompts/pair-unit-translate-review-prompt.md) | проверяющий английских юнитов пары: смысл как в русском, без кальки и шаблонов, «не хуже» |
 | [prompts/pair-unit-review-prompt.md](prompts/pair-unit-review-prompt.md) | проверяющий юнитов пары: сверка с Лисовской, шаблоны, правило «не хуже» |
 | [prompts/pair-chakras-prompt.md](prompts/pair-chakras-prompt.md) | задача очереди «Добавить интерпретацию чакры»: толкования чакр пары RU+EN по ключам из `arcana-tasks`, сдача через `submit_result` |
+| [prompts/individual-reading-prompt.md](prompts/individual-reading-prompt.md) | автор индивидуального разбора за 1990 ₽: бриф, исследование, статья, сдача через `scripts/individual_reading.py` |
+| [prompts/individual-reading-review-prompt.md](prompts/individual-reading-review-prompt.md) | независимый проверяющий индивидуального разбора: впечатление читателя, пересказ калькулятора, открытия, правда; ничего не правит |
+| [references/individual-sources.md](references/individual-sources.md) | литература индивидуального разбора с проверенными публичными ссылками |
 | [prompts/article-translate-prompt.md](prompts/article-translate-prompt.md) | переводчик статьи на английский: один агент на статью; проверка — `tools/seo/check-translation.py <категория> <ключ>` |
 
 ## Набор статей

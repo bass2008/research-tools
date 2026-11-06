@@ -1,3 +1,4 @@
+import type { IndividualReading } from "@/lib/individualReading";
 import { D } from "@/lib/i18n";
 import type { ReadingItem } from "@/lib/api";
 import { SITE_LANG, type Lang } from "@/lib/i18n/lang";
@@ -235,10 +236,26 @@ export async function readReading(id: number): Promise<ReadingRow | null> {
   return res.ok ? readingRow(res.body) : null;
 }
 
+/** Read-only administrative preview; owner routes keep their normal access rules. */
+export async function readAdminReading(id: number): Promise<(ReadingRow & { owner: { id: number; email: string } }) | null> {
+  const token = await sessionToken();
+  if (!token) return null;
+  const res = await upstream(`/admin/readings/${id}`, token);
+  const row = res.ok ? readingRow(res.body) : null;
+  if (!row) return null;
+  const { owner } = res.body as { owner: { id: number; email: string } };
+  return { ...row, owner };
+}
+
 /** Страница печати разбора любого продукта: пропуск на один разбор, живущий минуту. */
 export async function readPrintReading(id: number, token: string, L: Lang = SITE_LANG): Promise<ReadingRow | null> {
   const res = await upstream(`/reports/page/${id}?t=${encodeURIComponent(token)}`, "", L);
   return res.ok ? readingRow(res.body) : null;
+}
+
+export async function readPrintIndividual(id: number, token: string, L: Lang = SITE_LANG): Promise<IndividualReading | null> {
+  const res = await upstream(`/individual-readings/${id}/print?t=${encodeURIComponent(token)}`, "", L);
+  return res.ok && res.body && typeof res.body === "object" ? res.body as IndividualReading : null;
 }
 
 /** Разборы продукта в кабинете — для страниц, которые открывают «свою» запись, как /report. */

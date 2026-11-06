@@ -19,7 +19,7 @@ from sqlalchemy.schema import CreateIndex, CreateTable
 from .config import settings
 from .db import Base, SessionLocal, engine
 from . import models  # noqa: F401  — модели должны быть импортированы до create_all
-from . import errors, offers
+from . import errors, offers, prices
 from .models import User
 from .security import hash_password
 
@@ -313,24 +313,44 @@ def static_pair_chakras(cur: sqlite3.Cursor) -> dict:
     return {"старые задачи чакр удалены": removed}
 
 
-def work_task_identity(cur: sqlite3.Cursor) -> dict:
-    """009. Удаление задачи не освобождает её номер для следующей задачи."""
-    if "work_tasks" not in _tables(cur):
-        return {"таблица появится при создании схемы": True}
-    ddl = cur.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='work_tasks'").fetchone()[0]
-    if "AUTOINCREMENT" in ddl.upper():
-        return {"повторное использование ID уже отключено": True}
-    before = _count(cur, "work_tasks")
-    columns = ", ".join(column.name for column in Base.metadata.tables["work_tasks"].columns)
-    cur.execute(_table_ddl("work_tasks", "new_work_tasks"))
-    cur.execute(f"INSERT INTO new_work_tasks ({columns}) SELECT {columns} FROM work_tasks")
-    cur.execute("DROP TABLE work_tasks")
-    cur.execute("ALTER TABLE new_work_tasks RENAME TO work_tasks")
-    for ddl in _index_ddl("work_tasks"):
-        cur.execute(ddl)
-    if _count(cur, "work_tasks") != before:
-        raise RuntimeError("миграция 009 потеряла задачи")
-    return {"задачи сохранены": before}
+def account_notifications(cur: sqlite3.Cursor) -> dict:
+    for table, columns in {
+        "users": {"email_verified_at": "DATETIME", "auth_version": "INTEGER NOT NULL DEFAULT 0"},
+        "readings": {"saved_via": "VARCHAR(24)", "removed_at": "DATETIME"},
+    }.items():
+        existing = {r[1] for r in cur.execute(f"PRAGMA table_info({table})")}
+        for column, ddl in columns.items():
+            if column not in existing:
+                cur.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
+    for table in ("account_operations", "notifications", "notification_deliveries"):
+        cur.execute(_table_ddl(table).replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ", 1))
+        for ddl in _index_ddl(table):
+            cur.execute(ddl.replace("CREATE UNIQUE INDEX ", "CREATE UNIQUE INDEX IF NOT EXISTS ", 1).replace("CREATE INDEX ", "CREATE INDEX IF NOT EXISTS ", 1))
+    # Историческое происхождение выводим только там, где есть доказательство права.
+    cur.execute("""UPDATE readings SET saved_via='subscription' WHERE saved_via IS NULL
+        AND EXISTS (SELECT 1 FROM entitlements e WHERE e.user_id=readings.user_id
+          AND e.per_reading=0 AND e.starts_at<=readings.created_at
+          AND (e.expires_at IS NULL OR e.expires_at>readings.created_at)
+          AND (e.revoked_at IS NULL OR e.revoked_at>readings.created_at)
+          AND (e.products LIKE '%"*"%' OR e.products LIKE '%"' || readings.product || '"%'))""")
+    return {"notifications": "created", "account_operations": "created"}
+
+
+def remove_task_queue(cur: sqlite3.Cursor) -> dict:
+    """Индивидуальные разборы заменили очередь MCP; старые задачи больше не нужны."""
+    cur.execute("DROP TABLE IF EXISTS work_tasks")
+    return {"task_queue": "removed"}
+
+
+def individual_orders(cur: sqlite3.Cursor) -> dict:
+    """013. A paid order creates individual reading requests: each remembers its order."""
+    if "individual_readings" not in _tables(cur):
+        return {}
+    existing = {r[1] for r in cur.execute("PRAGMA table_info(individual_readings)")}
+    if "purchase_id" not in existing:
+        cur.execute("ALTER TABLE individual_readings ADD COLUMN purchase_id INTEGER REFERENCES purchases(id) ON DELETE SET NULL")
+    cur.execute("CREATE INDEX IF NOT EXISTS ix_individual_readings_purchase_id ON individual_readings(purchase_id)")
+    return {"individual_readings.purchase_id": "есть"}
 
 
 MIGRATIONS: list[tuple[str, Callable[[sqlite3.Cursor], dict]]] = [
@@ -342,7 +362,9 @@ MIGRATIONS: list[tuple[str, Callable[[sqlite3.Cursor], dict]]] = [
     ("006_prices_390_590", prices_390_590),
     ("007_unique_purchase_right", unique_purchase_right),
     ("008_static_pair_chakras", static_pair_chakras),
-    ("009_work_task_identity", work_task_identity),
+    ("010_account_notifications", account_notifications),
+    ("012_remove_task_queue", remove_task_queue),
+    ("013_individual_orders", individual_orders),
 ]
 
 
@@ -412,6 +434,7 @@ def ensure() -> None:
     Base.metadata.create_all(engine)
     with SessionLocal() as db:
         rows = offers.seed(db)
+        prices.seed(db)
     admin = seed_admin()
     if admin:
         print(f"админ: {admin}")

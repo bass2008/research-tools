@@ -11,7 +11,7 @@ from . import access, offers, products
 from .config import settings
 from .http_errors import LocalizedHTTPException
 from .i18n import say, say_for, validation_message
-from .models import Reading, User
+from .models import Reading, User, Purchase, Entitlement
 
 
 def product_or_404(code: str | None) -> products.Product:
@@ -61,7 +61,7 @@ def create(db: Session, user: User, product: products.Product, raw: dict,
     """
     inputs = normalized(product, raw)
     row = find(db, user, product, inputs)
-    if row is not None:
+    if row is not None and row.removed_at is None:
         return row
     used = access.saved_count(db, user)
     if used >= settings.matrices_hard_cap:
@@ -69,7 +69,14 @@ def create(db: Session, user: User, product: products.Product, raw: dict,
                                      detail=lambda: say("matrix.hard_cap", cap=settings.matrices_hard_cap))
     if limited and not access.can_save_more(db, user, product.code):
         raise _no_room(db, product, access.saved_count(db, user, product.code))
-    row = Reading(user_id=user.id, product=product.code,
+    via = "subscription" if limited and any(not r.per_reading and r.covers(product.code)
+        for r in access.active_rights(db, user)) else None
+    if row is not None:
+        row.removed_at = None
+        row.saved_via = row.saved_via or via
+        db.flush()
+        return row
+    row = Reading(user_id=user.id, saved_via=via, product=product.code,
                   inputs=json.dumps(inputs, ensure_ascii=False),
                   subject_key=product.subject_key(inputs), title=(title or None))
     db.add(row)
@@ -89,6 +96,19 @@ def own(db: Session, user: User, reading_id: int, product: str | None = None) ->
 def card(db: Session, user: User, row: Reading) -> dict:
     """Карточка разбора: ввод, подпись и права. Толкований здесь нет — разбор считает фронт."""
     rights = access.active_rights(db, user)
-    return {**row.item(), **access.reading_state(rights, row),
+    return {**row.item(), "can_delete": can_delete(db, row), **access.reading_state(rights, row),
             "unlocked": access.can_open(db, user, row, rights=rights),
             "plan": access.plan_label(db, rights, row)}
+
+
+def can_delete(db: Session, row: Reading) -> bool:
+    # A refunded individual purchase still belongs in the payment history and cannot be removed.
+    purchases = db.scalars(select(Purchase).where(Purchase.reading_id == row.id,
+        Purchase.paid_at.is_not(None)))
+    # Legacy subscriptions can also reference the reading used at checkout.
+    if any(purchase.body().get("per_reading", True) for purchase in purchases):
+        return False
+    if row.saved_via in {"admin", "subscription"}:
+        return True
+    return db.scalar(select(Entitlement.id).where(Entitlement.reading_id == row.id,
+        Entitlement.per_reading.is_(True), Entitlement.purchase_id.is_(None)).limit(1)) is not None

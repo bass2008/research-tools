@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Запуск без докера: uvicorn и next dev со значком Next.js и обновлением при правках.
+# Запуск без докера: uvicorn и next dev, оба подхватывают правки без перезапуска.
 # Аргументы ru/en сохранены как алиасы общего приложения, язык выбирается по Host.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -10,10 +10,13 @@ esac
 export SITE_LANG=ru NEXT_PUBLIC_SITE_LANG=ru NEXT_PUBLIC_SUPPORTED_LOCALES=ru,en
 export ALL_FREE_WITHOUT_PAYMENT="${ALL_FREE_WITHOUT_PAYMENT:-0}"
 export WEB_PORT="${WEB_PORT:-3000}" API_PORT="${API_PORT:-8010}"
-export MOCK_PAYMENTS="${MOCK_PAYMENTS:-1}" MAIL_TO_LOG=1 SESSION_COOKIE_SECURE=0
+export MOCK_PAYMENTS="${MOCK_PAYMENTS:-1}" SESSION_COOKIE_SECURE=0
 export NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT="$ALL_FREE_WITHOUT_PAYMENT"
 # как в compose: PDF стенда лежат в локальном каталоге, а не в бакете S3
 export REPORTS_STORE="${REPORTS_STORE:-local}"
+# как в compose: без постоянного ключа API подписывает токены случайным при каждом старте —
+# сессии слетают после перезапуска, а токен агента индивидуальных разборов не принимается
+export JWT_SECRET="${JWT_SECRET:-local-development-secret-not-for-prod-000}"
 
 PY="${PY:-/home/sergey/miniconda3/envs/research3.12/bin/python}"
 LOGS=/tmp/arcana; mkdir -p "$LOGS"
@@ -22,6 +25,10 @@ LOGS=/tmp/arcana; mkdir -p "$LOGS"
 for env in ~/.config/arcana/smtp.env ~/.config/arcana/reports.env; do
   if [ -f "$env" ]; then set -a; . "$env"; set +a; fi
 done
+
+# Локальная разработка никогда не отправляет настоящие письма, включая smtp.env.
+export MAIL_TO_LOG=1
+export MAIL_SITE_ORIGIN="http://localhost:$WEB_PORT"
 
 # Один и тот же allowlist передаём BFF и API, включая Host внутреннего браузера.
 export SITE_PROFILES="$("$PY" - <<'CONFIG'
@@ -72,10 +79,13 @@ echo "== api"
 # ждёт его завершения — скрипт не выходил, пока работает api, и это выглядело как зависание.
 (cd api && PYTHONPATH=.. "$PY" -m app.schema ensure >>"$LOGS/api.log" 2>&1 \
   && PYTHONPATH=.. setsid --fork "$PY" -m uvicorn app.main:app --host 127.0.0.1 --port "$API_PORT" \
+       --reload --reload-dir app --reload-dir ../engine \
        </dev/null >>"$LOGS/api.log" 2>&1 &)
 
 echo "== фронт: режим разработки Next.js"
 cd web
+# После перезапуска кеш Turbopack в .next/dev ломается: страницы перезагружаются по кругу.
+rm -rf .next/dev
 export NEXT_PUBLIC_BUILD_COMMIT="$(git rev-parse --short HEAD)$(git diff --quiet HEAD -- .. || echo +)"
 export NEXT_PUBLIC_BUILD_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export NEXT_PUBLIC_BUILD_TIME="$(TZ=Europe/Moscow date '+%Y-%m-%d %H:%M МСК')"

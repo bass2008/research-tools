@@ -1,0 +1,2347 @@
+{
+ "product": "personal",
+ "kind": "personal",
+ "year": null,
+ "inputs": {
+  "birth": "1992-08-12",
+  "sex": "f"
+ },
+ "locale": "en",
+ "title": "The virtue missing from the deck",
+ "article": {
+  "version": 2,
+  "title": "The virtue missing from the deck",
+  "lead": "The Tarot deck has Justice, Strength and Temperance, but not the fourth of the old virtues — Prudence. In your matrix Justice appears three times. Strength sits in the point where you are easiest to pressure, in the strength of your family line and in the total of your chakras. Temperance is not on the scheme: it appears only when your two Chariots are added together. And the Hanged Man, whom people once tried to declare the card of prudence, is your mask and your spiritual purpose. Hence the main knot: a precise sense of measure that needs not one more proof of being right, but a well-chosen moment. How to find that moment is what this report is about. This is a symbolic reading for self-knowledge, not a forecast and not a psychological diagnosis.",
+  "summary": [
+   "**Your main gift is a precise sense of measure.** You see an imbalance and an unfair deal before others do. The basis: Justice in the main talent, in the middle of the talent line and in the amplifier.",
+   "**On the outside you wait; inside you live by turns.** The basis: the mask is the Hanged Man, the centre is the Wheel. The Hanged Man also stands in your spiritual purpose, so a pause is your landmark for life. The cost, according to the book: self-sacrifice and difficulty saying “no”.",
+   "**Endurance is both your support and your weak spot.** Strength stands in the trigger point, in the strength of the family line and in the total of the chakras, and your thirties are its decade. The cost: not knowing how to rest.",
+   "**Your income grows where you explain and show yourself.** The Hierophant in the point of earnings coincides with your karmic task, and the Sun at the end of the money line asks to be seen.",
+   "**In closeness you need strong feeling, and it is easier to make peace with you through action.** The basis: the Devil at the entry to relationships, the Chariot in the point of reconciliation, the Sun in the dual point.",
+   "**Your family line leads a thread into every main area.** The nearest points of all four family lines coincide with your entry to money, your parents’ point, your dual and your centre — this happens for about one date in 860.",
+   "**Before forty your two main energies come one after another.** At 35 the age point is the Hierophant, at 37.5 it is Justice, and around 37–43 your personal purpose gives way to your social one."
+  ],
+  "chapters": [
+   {
+    "kind": "key",
+    "h2": "Scales, a pause and a sense of timing",
+    "conclusion": "Your main gift is a precise sense of measure: you see an imbalance before others do. On the outside you look like someone who waits; inside you live by turns. What connects the two is the Wheel in the centre: it tells you when what you say will be heard, and then the pause becomes preparation for the right word.",
+    "cards": [
+     {
+      "arcanum": 8,
+      "label": "Main talent",
+      "caption": "Justice in the large circle at the top is a gift that shows from birth: seeing measure and a broken balance.",
+      "points": [
+       "B"
+      ]
+     },
+     {
+      "arcanum": 12,
+      "label": "Mask",
+      "caption": "The Hanged Man in the large circle on the left is how people see you: calm, restraint, the ability to wait.",
+      "points": [
+       "A"
+      ]
+     }
+    ],
+    "blocks": [
+     "If you read your matrix as a text, one word in it repeats more often than the others — **measure**. Justice appears on the scheme three times: in the point of the main talent (the large circle at the top), in the middle of the talent line and in the lower right corner. That corner is called the amplifier: it reinforces an energy that is present somewhere else in the matrix. In your case it reinforces the talent itself. Everything else is built around this axis.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 8,
+         "label": "Main talent",
+         "points": [
+          "B"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Additional talent",
+         "points": [
+          "P"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Amplifier",
+         "points": [
+          "H"
+         ]
+        }
+       ],
+       "caption": "**8 = 8 = 8.** One card in three roles. Your sense of justice is a working tool: it switches on by itself, and you use it every day, even when you say nothing."
+      }
+     },
+     "In life it looks like this. At a shared table you are the first to notice that one person always pays while another “forgets their wallet” every time. At work you see that a task was estimated at two days when it holds five. In an argument between two friends you hear where each of them is half right. You don’t necessarily say it out loud, but you see it almost always and almost at once. The eight is the energy of people who understand how one event pulls another after it and who can dig down to the root of a problem.",
+     "On the outside this person looks different. In the point of the mask — the large circle on the left where the scheme begins — stands the Hanged Man. It is an image of a pause: a person who is in no hurry, who can wait and who looks at a situation from an unusual angle. People see calm and restraint in you, sometimes compliance. Meanwhile the scales are at work inside.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 12,
+         "label": "Mask",
+         "points": [
+          "A"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 12,
+         "label": "Spiritual purpose",
+         "points": []
+        }
+       ],
+       "caption": "**12 = 12.** The Hanged Man stands both in the mask and in the spiritual purpose — for about one date in twenty. Lisovskaya writes that the spiritual purpose works together with the mask, the centre and the main talent and serves as a landmark all your life, long before sixty. For you a pause is a lifelong lesson."
+      }
+     },
+     "The main argument of the matrix is between this pause and the centre. The centre holds the Wheel: a sense of timing, a love of movement, the ability to notice a turn before others do. The Chariot — speed and a goal — appears on the scheme twice, in the middle of the relationship line and in the children’s point, and once more in the calculated point of attitude to the material. Inside lives a person of movement. On the outside the Hanged Man teaches waiting. The energy of the centre does not always open up at full strength, especially when the mask holds a bigger energy (more on this in the findings), and in your case twelve is bigger than ten. So people around you see your pause more often than your inner pace, and you yourself sometimes take someone else’s “be patient” for your own decision.",
+     {
+      "h3": "What the Wheel adds"
+     },
+     "The pair “I see unfairness — I keep quiet for a long time” is common. You have a third element added to it — the Wheel in the centre, a sense of timing — and it changes the advice. Speaking up sooner is only half the job. Your word sounds strongest at a turning point, when the situation changes by itself and a review looks natural. You notice such points before others do:",
+     {
+      "ul": [
+       "**After a result.** A delivered project, a good week, a closed deal — the best day to talk about money and workload.",
+       "**At any change.** A new manager, a move, a change of season, a budget review — a moment when everyone revisits agreements, and your review will surprise no one.",
+       "**At the start of a cycle.** The first day of the month, the launch of a project, coming back from holiday — this is where a new rule is easiest to bring in.",
+       "**When the other person is calm,** and you have already cooled down."
+      ]
+     },
+     "The Hanged Man is responsible for weighing things up. The Wheel answers the question “when”. Use it as a tool: you noticed an imbalance — you wrote it down, weighed it and wait for the nearest turn. If there is no turn for more than a month, create one yourself: set a conversation for a specific date.",
+     {
+      "h3": "The fourth virtue"
+     },
+     "This argument has an old name. Ancient philosophers, and medieval theologians after them, named four cardinal virtues: Justice, Fortitude, Temperance and Prudence. Arthur Edward Waite, co-author of the best-known Tarot deck, noted that it has the first three, but — “owing to a curious omission” — it does not offer us any type of Prudence. People tried to find it. The eighteenth-century French scholar Court de Gébelin decided it was the Hanged Man; Waite replied that in this “he deceived himself”, and elsewhere listed what else the card had been wrongly called: “a card of martyrdom, a card of prudence, a card of the Great Work, a card of duty”. He himself saw a hint of the way of prudence in the Hermit, who walks alone by the light of his own lamp.",
+     "No deck has Prudence. What your date has is a set of cards from which it can be assembled. Justice — three times. Strength — in the trigger point, in the strength of the family line and in the total of the chakras. The Hanged Man — in the mask and in the purpose. The Hermit — in the total of the chakras and in the middles of both material family lines. The Wheel — in the centre. Prudence in the old sense is practical wisdom: knowing what to do and when. The Hanged Man’s pause gives you time to weigh things up; the Wheel finds the turn. A pause becomes martyrdom and duty only when it drags on with no end date.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 7,
+         "label": "Point of reconciliation",
+         "points": [
+          "R1"
+         ]
+        },
+        "+",
+        {
+         "arcanum": 7,
+         "label": "Children’s point",
+         "points": [
+          "O"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 14,
+         "label": "Temperance",
+         "points": []
+        }
+       ],
+       "caption": "**7 + 7 = 14.** Temperance is not on the scheme. Lisovskaya advises adding up repeated energies, and your two Chariots together give exactly that. Speed taken twice needs measure — in your case it is a skill that is built up."
+      }
+     },
+     "This closes the last question of the image. The three virtues of the deck are present in you in different ways: Justice is given generously, Strength in excess and at a price, and Temperance is hidden in a sum of speeds. You don’t get it for free; you add it yourself — a pause before a dash, a budget before spending, the word “stop” at full speed.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 8,
+         "label": "Talent",
+         "points": [
+          "B"
+         ]
+        },
+        "+",
+        {
+         "arcanum": 8,
+         "label": "Middle",
+         "points": [
+          "P"
+         ]
+        },
+        "+",
+        {
+         "arcanum": 8,
+         "label": "Amplifier",
+         "points": [
+          "H"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 6,
+         "label": "Earth",
+         "points": []
+        }
+       ],
+       "caption": "**8 + 8 + 8 = 6.** The main talent, the middle of the talent line and the amplifier add up to 24, that is 6 — the Lovers, the energy of choice. The six is also your total of the earth, the material side of life before forty. In its plus it is confidence in your choice; in its minus it is hanging in the air without clear answers."
+      }
+     },
+     "This sum explains why you need scales. Weighing for the sake of weighing turns into an endless “on the one hand, on the other hand”. The scales are there to choose: to say yes or no, to stay or to leave, to take or to refuse. When the choice is made, Justice is calm. When it hangs, she starts to judge — yourself, the people close to you, the past.",
+     {
+      "h3": "Strength — the card of your thirties"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 11,
+         "label": "Trigger",
+         "points": [
+          "G"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 11,
+         "label": "Strength of the family line",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 11,
+         "label": "Total energy of the chakras",
+         "points": []
+        }
+       ],
+       "caption": "**11 = 11 = 11.** Strength stands in the upper right corner, in the calculated strength of the family line and in the total energy of all seven chakras. All three coincidences at once occur for about one date in 260."
+      }
+     },
+     "For any date the decade 30–40 stands on the upper right corner. Yours holds Strength, so your thirties pass under the same card as your family support and your overall reserve of energy. By the Golden Dawn correspondences Strength is also the card of your sign, Leo. There is one conclusion for these years: endurance is both your main resource and your main expense. How people catch you on it and how to protect yourself — in the findings.",
+     {
+      "h3": "Your formula of prudence"
+     },
+     {
+      "ol": [
+       "**Weigh.** Name the imbalance to yourself in words: who, what, how much, since when.",
+       "**Step back.** Look through the other person’s eyes: what do they see, what might you not know? This takes an hour or a day; a month is too long.",
+       "**Find the turn.** The nearest result, change or start of a cycle. No turn — set the date yourself.",
+       "**Say it.** Out loud, briefly, with facts and a suggestion of what to do next. No verdict and no lecture.",
+       "**Close it.** If you agreed, the question is out of your head. If you didn’t, decide what you do next and stop going back to the conversation."
+      ]
+     },
+     "Almost every area of life converges on this knot. In money, earnings stand where you explain the rules, and the entry to money is held by the Emperor, who needs a clear frame. In relationships the first thing you want is strong feeling, and it is easier to make peace with you through action. Each of the four family lines arrives at one of your main points. In 2026 and 2027 the year matrix puts Justice in the point of dealing with people. The next chapters show how the knot works in each area."
+    ],
+    "actions": [
+     "Keep a “scales” note for a month: every time you see an imbalance, write one line — what, who, how much. After a month you will see what you keep quiet about most often.",
+     "Pick one imbalance from the note, find the nearest turning point — the end of a project, the start of a month, a change in the team — and set the conversation for it.",
+     "Before you say “never mind, I’ll wait”, ask yourself: am I choosing this pause, or was it chosen for me?"
+    ]
+   },
+   {
+    "kind": "findings",
+    "h2": "What the automatic reading does not show",
+    "conclusion": "Eight links that cannot be seen point by point. The main ones: your gift of measure is also a task of trust; rules taken to excess turn in you into control or protest; income grows where you explain without lecturing and stop hiding. Your endurance is both a support from your family line and the place where you get pressured, and the family line itself leads a thread into money, home, partnership and into you.",
+    "cards": [],
+    "blocks": [
+     "Below is what can be seen only by adding up distant points, comparing their roles or calculating points that are not on the scheme. Where a coincidence is rare, it says how often it occurs: the frequencies are counted over all dates since 1900 with the same calculation that builds your scheme.",
+     {
+      "finding": {
+       "title": "Your gift for seeing dishonesty is your theme of trust",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 8,
+          "label": "Main talent",
+          "points": [
+           "B"
+          ]
+         },
+         "→",
+         {
+          "arcanum": 8,
+          "label": "Middle of the talent line",
+          "points": [
+           "P"
+          ]
+         },
+         "→",
+         {
+          "arcanum": 18,
+          "label": "Inner point of talent",
+          "points": [
+           "K"
+          ]
+         }
+        ],
+        "caption": "**8 → 8 → 18.** The talent line repeats the 18-8-8 program (in the book the numbers are written from the other end)."
+       },
+       "text": [
+        "You notice dishonesty before others do, and that is exactly why it hurts so much when you yourself are deceived: “how could I not see it?”. These two things are linked. Your talent line runs Justice → Justice → the Moon, and Yuliana Lisovskaya singles out this triple as a separate program — a scenario that repeats for many people. She describes it as a task of trust, honesty and understanding how one event pulls another after it. In her example the triple stands on the line of material karma; in yours, on the line of talent: the theme of trust is built into the gift itself.",
+        "The Moon at the end of the line adds sensitivity and imagination. You pick up on a trick from a tone of voice, but sometimes you fill in what was not there. Hence two imbalances: trusting too quickly those who speak beautifully about honesty, or checking everyone so hard that the people close to you feel they are being interrogated.",
+        "The book’s text on this program is harsh: deception and betrayal are described in it as lessons. For you it raises a question of choice. Your talent is more reliable when you yourself are transparent: you don’t promise too much and you name what your conclusion is based on. And when you tell two signals apart — “I find this unpleasant” and “this is unfair”. The first comes from the Moon, the second from Justice. The first is worth checking before you present it as the second."
+       ],
+       "action": "All next week, before every promise ask yourself: “will I really do this?” — and drop at least one you are not sure about."
+      }
+     },
+     {
+      "finding": {
+       "title": "A calm mask dims a fast centre",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 12,
+          "label": "Mask",
+          "points": [
+           "A"
+          ]
+         },
+         {
+          "arcanum": 10,
+          "label": "Centre",
+          "points": [
+           "E"
+          ]
+         }
+        ],
+        "caption": "**12 and 10.** The energy of the mask is bigger than the energy of the centre."
+       },
+       "text": [
+        "You often feel “it’s time” and still wait. Lisovskaya has an observation that explains this: “The energy in the centre does not always open up at full power, especially if the point of outer expression or of talent holds an energy bigger than it.” Your mask holds 12, your centre 10. She also writes that the mask leads a person away from their essence: through it they try to appear to others.",
+        "The Wheel in the centre is a person who feels good in motion and senses when it’s time. The Hanged Man in the mask is a person who waits. Your natural “now!” passes through the filter “I’ll wait, it’s awkward, not the right time”. On the horizontal between the mask and the centre stand two more cards: the Chariot in the children’s point and the Fool in the parents’ point — speed and lightness. Our reading: if home had a lot of freedom and little clear rhythm, you had to learn the pause yourself, as a way not to be swept up by someone else’s element. Check this against your own story.",
+        "The imbalance is easy to recognise: the moment has come, and you are waiting for permission, for a convenient occasion, for the other person to speak first. Then the moment passes and annoyance remains. When the centre is open, the pause is short: you stop to look and move on."
+       ],
+       "action": "Next time you feel “it’s time”, give yourself a day instead of a week: stop, look from the other side — and take the first step."
+      }
+     },
+     {
+      "finding": {
+       "title": "Three Hierophants add up to the Devil",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 5,
+          "label": "Task",
+          "points": [
+           "D"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 5,
+          "label": "Love",
+          "points": [
+           "S"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 5,
+          "label": "Income",
+          "points": [
+           "R2"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 15,
+          "label": "Entry of the tail",
+          "points": [
+           "M"
+          ]
+         }
+        ],
+        "caption": "**5 + 5 + 5 = 15.** The Hierophant in the karmic task, in the physics of Anahata and in the point of earnings; the sum is the Devil, and it stands in the point where the karmic tail begins."
+       },
+       "text": [
+        "When there are too many rules, in you they turn into control or into a wish to do the opposite. The sum shows this. The Hierophant — rules, tradition, knowledge that is passed on — stands in your matrix three times: in the karmic task, in how you show love (the physics of Anahata) and in the middle of the money line, where earnings come from. Three fives add up to fifteen — the Devil, and the Devil stands in the point where the karmic tail and the relationship line begin.",
+        "The text on the karmic tail below tells in detail about the mirror kinship of the Hierophant and the Devil. Here something else matters more: in your case this kinship is not only in the tail but in the arithmetic of the whole scheme. A person who loves order and can explain how things should be done one day notices that they are behaving like a warden. Or that they are breaking with all their might a rule that was once imposed on them.",
+        "A scene: at home or at work you introduced a sensible rule — about the budget, about who does what, about deadlines. It was broken. The first reaction is to explain again, in more detail. The second is to check. The third is to stop following it yourself out of spite. The way out is to keep fewer rules than you would like, and to choose each one together with the people it concerns. A rule invented together needs neither guarding nor breaking."
+       ],
+       "action": "Count how many rules you keep in one important area — at home, at work or in your relationship. Cancel one you can live without and see what changes over a month."
+      }
+     },
+     {
+      "finding": {
+       "title": "Earnings stand where the karmic task does — and the mask gets in their way",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 5,
+          "label": "Profit and earnings",
+          "points": [
+           "R2"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 5,
+          "label": "Karmic task",
+          "points": [
+           "D"
+          ]
+         }
+        ],
+        "caption": "**5 = 5.** The point of profit and the point where the karmic tail ends are one Hierophant. This coincidence happens for about one date in twenty."
+       },
+       "text": [
+        "Money comes to you through what you stumble on, and its main obstacle is your own mask. Lisovskaya advises checking, when reading money, whether the energy of the money line repeats on the karmic tail: such a repeat links money and the life task directly. In your matrix the point of the biggest earnings and the karmic task are one card.",
+        "The Hierophant in the role of the task pulls you to hold on to the one right way. In the role of earnings it pays for what you can explain. Between these roles you have two more cards. The Hanged Man in the mask tells the market “I’ll wait”: the conversation about price is postponed until you feel entitled, and the mask grants that entitlement late. The Sun at the end of the money line demands the opposite — visibility: income grows when people know you by name, by result, by a talk you gave.",
+        "Hence an order of actions made for your scheme. First show a result — an analysis, a work sample, a talk, a client’s review. Then name the price. The Sun does for you what the mask cannot: it announces that you exist. A price after a visible result sounds like its continuation, and there is no longer any need to wait for permission. And the karmic task is passed along the way: the more willingly you show how you arrived at your method, the less “one right way” there is in it."
+       ],
+       "action": "Show someone one of your analyses or results — publicly or in person — and within a week after that name a price for similar work."
+      }
+     },
+     {
+      "finding": {
+       "title": "The strength of your family line stands where you are pressured",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 17,
+          "label": "Corner 70",
+          "points": [
+           "I"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 20,
+          "label": "Corner 10",
+          "points": [
+           "F"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 8,
+          "label": "Corner 50",
+          "points": [
+           "H"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 11,
+          "label": "Corner 30",
+          "points": [
+           "G"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 11,
+          "label": "Strength of the family line",
+          "points": []
+         }
+        ],
+        "caption": "**17 + 20 + 8 + 11 = 11.** The four corners of the scheme (their age marks are 70, 10, 50 and 30) give the strength of the family line — Strength. The same Strength stands in the upper right corner, on the trigger point. The coincidence occurs for about one date in seventeen."
+       },
+       "text": [
+        "The firmest support your family line gives you and your most vulnerable spot are one and the same card. The strength of the family line is not on the scheme: Lisovskaya calculates it as the sum of the four corners and calls it what the family line gives a person at full strength, “our direct talent”. In your case it is Strength: endurance, inner power, the ability to hold out when others give up.",
+        "The upper right corner, where the same Strength stands, is the trigger point: the energy through which a person is easiest to influence, and so the place where knowing how to protect yourself matters most. The hook phrase sounds like this: “You’re strong, you’ll manage.” You manage. And take on more.",
+        "In the minus of this energy is the habit of creating difficulties for yourself so as to overcome them bravely, and not knowing how to rest. Waite explains the Strength card without any “self-confidence”: in his picture a woman holds a lion with a chain of flowers, and that chain is, in his words, the light burden of a law once it has been taken into the heart. Strength is in its plus when you yourself decide what to carry and don’t take on other people’s loads to prove your endurance."
+       ],
+       "action": "Think up and write down in advance a phrase to say no with, for when you are asked to take on one more thing because you’ll manage. Say it at least once this month."
+      }
+     },
+     {
+      "finding": {
+       "title": "It is easier to meet “your” person when you shine yourself",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 19,
+          "label": "Dual",
+          "points": [
+           "R"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 19,
+          "label": "Personal purpose",
+          "points": []
+         }
+        ],
+        "caption": "**19 = 19.** The Sun stands in the dual point and in the personal purpose — for about one date in fourteen."
+       },
+       "text": [
+        "The point where the lines of money and relationships meet describes a person who suits you energetically — in love, friendship, work. The personal purpose is what matters to live for yourself before forty. In both places you have the Sun. A repeat of the purpose’s energy on the scheme shows where it is lived out — in your case, in partnership and in money.",
+        "This turns the usual order upside down: “I’ll find my person, and things will get bright.” The Sun in the purpose is a task to become a source of warmth and clarity yourself: to make the complex understandable, to rejoice openly, not to wait to be noticed. A sunny person next to you is a reflection of that work. While your own sun is switched off, you are drawn to those who shine brightly but shine only for themselves, and next to them you are once again the one who waits.",
+        "The dual point also stands on the money line: a partner in the plus opens the flow, a partner in the minus blocks it — especially if a person dissolves in the couple and stops doing their own thing. For you the conclusion is practical: your own work and your own visibility are a condition both for money and for good relationships."
+       ],
+       "action": "Find one thing where you can shine yourself — speak, show a result, share what you know — and do it before the end of the month without waiting for an invitation."
+      }
+     },
+     {
+      "finding": {
+       "title": "Speed is the common language of your money, your reconciliations and your attitude to children",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 7,
+          "label": "Attitude to the material",
+          "points": []
+         },
+         "=",
+         {
+          "arcanum": 7,
+          "label": "Point of reconciliation",
+          "points": [
+           "R1"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 7,
+          "label": "Children’s point",
+          "points": [
+           "O"
+          ]
+         }
+        ],
+        "caption": "**7 = 7 = 7.** The calculated point of attitude to the material (the material task 21 plus the entry to money 4: 25 → 7), the middle of the relationship line and the children’s point are one Chariot."
+       },
+       "text": [
+        "In money you want to achieve things quickly, in a quarrel to make peace sooner through action, with younger people to lead them forward. This is one card in three places. The line of material karma runs from the material task to the centre: the World, then the calculated point of attitude to the material, then the entry to money. The middle point, which is not on the scheme, describes your mood about money. Yours holds the Chariot — speed, a goal, a dash. You will find it in the middle of the relationship line too, which shows through what you can make peace with a person, and in the children’s point.",
+        "In money it is the wish to set a goal and dash for it; in the minus of the seven it is the habit of sacrificing your interests and wishes for the sake of the material. In reconciliation it is easier to come to terms with you through action than through talk: to go somewhere together, to do something, to rearrange things. In your attitude to children — your own, other people’s or children in general — it is the wish to develop them and move them forward.",
+        "The risk is substituting one thing for another: making peace with a purchase, curing a quarrel with a trip you cannot afford, hurrying a child or yourself towards a result because standing still is unbearable. The strength is the same speed directed at a clear goal and shared with another person."
+       ],
+       "action": "Try to end your next quarrel with an hour of doing something together — a walk, cooking, tidying up — and only after it go back to the conversation."
+      }
+     },
+     {
+      "finding": {
+       "title": "Each family line leads into one of your main points",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 17,
+          "label": "Lower left corner",
+          "points": [
+           "I"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 11,
+          "label": "Strength of the family line",
+          "points": []
+         },
+         "=",
+         {
+          "arcanum": 10,
+          "label": "Centre",
+          "points": [
+           "E"
+          ]
+         }
+        ],
+        "caption": "**17 + 11 = 10.** The point of the female material line nearest to the strength of the family line is the Wheel, your centre. Three more lines are built the same way."
+       },
+       "text": [
+        "Your family line does not stand apart from your personal life: each of the four family lines ends in one of your main points. From each corner of the scheme to the strength of the family line a line of three points is calculated; the one nearest to the strength of the family line is the place where the line of the family connects with you.",
+        "Here are the four connections. The spiritual male line (upper left corner) comes to the Emperor — your entry to money. The spiritual female line (upper right) comes to the Fool, your parents’ point. The material male line (lower right) comes to the Sun, your dual. The material female line (lower left) comes to the Wheel, your centre.",
+        "A coincidence with the dual occurs for half of all dates — that is how the calculation works. Each of the other three occurs for about one date in twenty. All four at once — for 54 dates out of 46 thousand since 1900, about one in 860.",
+        "Our reading: your family line passes a thread into every main area. The male line of values arrives in money — your attitude to responsibility and order in money probably comes from there. The female line of values arrives in the atmosphere of home, in lightness or the lack of it. The male line of deeds arrives in your choice of partner: which person feels like your own. The female line of deeds arrives in your very essence, in your sense of timing. So whatever you change in money, home, partnership or yourself, you also change the continuation of one of your family lines."
+       ],
+       "action": "Pick one of the four areas and ask your elders how the family treated exactly that — money, home, choosing a partner, change. Write down one rule you want to continue and one you will end with yourself."
+      }
+     }
+    ],
+    "actions": []
+   },
+   {
+    "kind": "character",
+    "h2": "A pause outside, a turn inside",
+    "conclusion": "You are seen as a calm and patient person who is in no hurry to draw conclusions. Inside you sense change quickly and know exactly where things are unfair. The strength of this make-up is that you are rarely wrong about people or about the moment; the cost is work nobody sees and a strictness with yourself that you would never allow anyone else.",
+    "cards": [
+     {
+      "arcanum": 12,
+      "label": "Mask",
+      "caption": "The Hanged Man is what people read first: restraint, absorption, a look from an unusual angle.",
+      "points": [
+       "A"
+      ]
+     },
+     {
+      "arcanum": 10,
+      "label": "Centre",
+      "caption": "The Wheel in the centre is your essence: a sense of timing, movement, the ability to catch a turn.",
+      "points": [
+       "E"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "How you are seen"
+     },
+     "People see in you a calm person who listens more than talks and is in no hurry to agree. This is the mask — the Hanged Man in the large circle on the left: what is read about you first and what you yourself look at the world through. Waite stressed three details in his drawing of this card: the tree is living wood, with leaves; the face expresses deep entrancement, not suffering; it is life in suspension, but life. That is often how you are seen: a person within themselves, calm, a little detached.",
+     "A scene at work. A new plan is being discussed. Everyone has spoken in five minutes; you are silent: you need to see the whole picture, to look at how it works for the department, for the client, for whoever will do it. Colleagues decide you have no opinion or you agree. An hour later you say two sentences after which the plan is rewritten. It surprises people every time, though there is nothing to be surprised about: you waited until the whole picture came together.",
+     "This mask has a side that people don’t usually expect from someone “patient”: the ability to say “no”, to know your worth, to sense time and arrive on time. The reverse side is self-sacrifice, difficulty refusing, impostor feelings, a habit of being late. A pause after which you say “no” works for you. A pause after which you agree against your will works against you.",
+     {
+      "h3": "Who you are inside"
+     },
+     "Inside you are a person of flow: quick to get going, with good intuition, you sense an opportunity and don’t miss it. This is the centre — the Wheel, your essence and where you draw energy from. In an even week with no news you get bored; when something shifts — a new offer, a move, an unexpected conversation — energy appears. You understand before others that a situation is turning, and inwardly you are already ready.",
+     "The minus of this energy is anxiety, suggestibility and living in cycles, when the same mistakes repeat round and round. For you it is linked to the mask: if the pause becomes a habit, the Wheel spins idle — you sense the turn but don’t take it, and the next turn brings the same annoyance.",
+     {
+      "h3": "Two modes around the centre"
+     },
+     "In a calm state you have two modes and switch between them. This can be seen from the four inner points around the centre. On the left is the Fool, the parents’ point. At the top is the Moon, the additional talent. On the right is the Emperor, the entry to money. At the bottom is the Devil, what you want from relationships. The left and top points are fluid: freedom, lightness, starting from a blank page, sensitivity, living by feel. The right and bottom points hold: order, rules, control, strong desire, grip.",
+     "Our reading of such a square: when tired, you either let everything go — “to hell with it, I’ll start over” — or clamp down — new rules, control, a schedule. The Wheel in the centre is the switching mechanism itself. Prudence here means noticing which mode the moment needs. A quarrel with someone close asks you to let go. Chaos in money asks you to take hold. It is easy to mix them up: to clamp down on the relationship and let go of the budget.",
+     {
+      "h3": "Why it is easy to load you up"
+     },
+     "The Hanged Man’s mask tells the world: this person can wait. Strength on the trigger point answers pressure with endurance. Together they create the image of a person who is convenient to rely on and convenient to load up: from the outside it seems you will both endure and wait. So you get more than others of other people’s unfinished work, postponed promises and requests to be patient a little longer. Protection takes a skill, and strength won’t help here: talk about your limits before you are asked about them. “I’m not taking new tasks this week” sounds calm, and that is exactly why it works.",
+     {
+      "h3": "Strength and cost"
+     },
+     "The strong side of this make-up is precision. You are rarely wrong about people: the calm mask gives you time to look at a person closely, the Moon in the talent hears the tone, Justice weighs the actions. In a crisis you don’t panic out loud. People trust you because you don’t throw words around, and when you say “this is unfair”, they listen.",
+     "The cost is strictness with yourself. The Justice you apply so precisely to others you apply to yourself with no discounts, and the Hanged Man’s mask adds the doubt “do I have the right”. A scene: at work you made a small mistake — mixed up a date in an email. A colleague forgot about it in an hour, your manager didn’t notice. You come back to that mistake for a week, double-check every next email and in the end don’t take a task you were interested in — “what if it happens again”. A simple check helps: would you say the same thing to a friend in the same situation? If not, you are judging yourself by a different law, and that law is worth revising."
+    ],
+    "actions": [
+     "In three conversations this week say what you think in the first ten minutes, even briefly: “this is my view for now, I may change my mind”.",
+     "Next time you start picking apart your own mistake, ask: “what would I tell a friend?” — and tell it to yourself.",
+     "In the evening note one situation from the day: did you let it go or clamp down — and which mode was really needed?"
+    ]
+   },
+   {
+    "kind": "talents",
+    "h2": "Talents and work: untangling disputes and explaining decisions",
+    "conclusion": "You are strongest where a disputed situation between people has to be untangled and a decision explained so that people can use it. Work with clear criteria and the right to your own conclusion suits you. You fade where rules are changed silently and you have to wait with no end date.",
+    "cards": [
+     {
+      "arcanum": 8,
+      "label": "Main talent",
+      "caption": "Justice at the top is a gift that switches on by itself: seeing measure and naming an imbalance.",
+      "points": [
+       "B"
+      ]
+     },
+     {
+      "arcanum": 18,
+      "label": "Inner point of talent",
+      "caption": "The Moon at the end of the line is sensitivity, imagination, the ability to hear what is left unsaid.",
+      "points": [
+       "K"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "The talent line as a whole"
+     },
+     "You have seen measure since childhood, and it can also be learned as a craft. The talent line runs from the top to the centre: Justice, Justice again, the Moon. The first point is a talent that shows by itself. The other two are additional: on their own they rarely open up, but they develop easily if you give them attention. The result is a rare combination: the same Justice is both innate and worth training. You already see an imbalance, and with training you will be able to do it professionally — with a method, criteria and arguments.",
+     "The Moon at the end of the line changes the character of this precision. Your precision begins with people: first you hear where a person is hurting or awkward, and only then do you lay the situation out piece by piece. The eighteenth energy is a rich inner world, a good memory, an ability to understand people and to write. Its minus is fears and pictures a person fills in by themselves. So at work it is especially important for you to tell an impression from a conclusion: you get the impression in a minute, the conclusion after talking to both sides.",
+     {
+      "h3": "What you do best"
+     },
+     {
+      "ul": [
+       "Untangle disputed situations: who is right, about what and how far — so that both sides accept the analysis as fair.",
+       "Find the weak spot in a contract, plan, estimate or text — where what was declared differs from what was done.",
+       "Hear what a person is not saying and ask in a way that makes it easier for them to say it.",
+       "Turn chaos into a clear order — an instruction, a sequence of steps, a checklist. Here the Hierophant in your point of earnings and the Emperor at the entry to money are at work.",
+       "Explain a complex rule through the living example of a particular person: the Moon finds the example, the Hierophant makes a rule of it."
+      ]
+     },
+     {
+      "h3": "Fields where this is needed"
+     },
+     {
+      "table": {
+       "head": [
+        "Field",
+        "What in it is yours"
+       ],
+       "rows": [
+        [
+         "Mediation, handling conflicts and complaints",
+         "weighing both sides’ arguments, hearing what is unsaid and explaining the decision"
+        ],
+        [
+         "Advising on rules: labour, family, consumer",
+         "translating a law or regulation into the language of a specific situation"
+        ],
+        [
+         "Methodology and training within your profession",
+         "gathering experience into a rule that others will start to use"
+        ],
+        [
+         "People management: evaluation, complaint handling, fair procedures",
+         "making sure the rules are the same for everyone and explaining decisions"
+        ],
+        [
+         "Audit, quality control, compliance checks",
+         "seeing where figures or processes differ from what was declared"
+        ],
+        [
+         "Editing, fact-checking, investigative journalism",
+         "hearing where a text is wrong and proving it with a source"
+        ],
+        [
+         "Psychology, research, interviewing people",
+         "depth, patience and a nose for motive"
+        ]
+       ]
+      }
+     },
+     {
+      "h3": "Which field to choose"
+     },
+     "The fields in the table rely on different cards of yours, and that decides how fully you will open up in them. The first four hold on to the whole bundle at once: Justice weighs, the Moon hears people, the Hierophant in the point of earnings explains the decision and turns it into a rule. If you are choosing your main work, choose from here — especially where living people argue and where the decision then has to be explained. Audit, control and checking figures rely mainly on Justice: you will be precise there, but without people and without explaining you will quickly get bored. Psychology and research rest more on the Moon and are good as a second role: your main work needs a conclusion that can be defended.",
+     {
+      "h3": "Format and environment"
+     },
+     "Your best format is deep work alone, then a finished conclusion on the table. The Hanged Man gives time to look at a task from all sides, Justice to formulate a result that can be defended. Projects with a clear finish work well: the Wheel in the centre and the Chariot in two points love movement, and endless processes dim them. Roles that suit you are those of someone who checks, makes the decision, consults in sessions, writes the conclusion.",
+     "You are stronger in an environment where criteria are named in advance, where you can say “this isn’t ready yet” or “I disagree” without being punished, where quality is valued above haste and where the manager explains their decisions. A new direction, a change of tasks, a project move charge you up rather than scare you.",
+     "You fade where rules are changed silently; where loyalty is valued above truth; where “we’ll discuss it later” drags on for months; where work is judged by mood; where you carry someone else’s area because you’ll manage. Each of these places hits one of your main points: Justice, the Hierophant, the pause-mask, Strength on the trigger.",
+     {
+      "h3": "How to check a job or a project"
+     },
+     "Before agreeing to a new position, client or big project, go through six questions. The more “yes” answers, the more room this work has for your talent.",
+     {
+      "ol": [
+       "Is there a moment here when things have to be weighed and a clear conclusion given?",
+       "Are the criteria by which the result will be judged named before the work starts?",
+       "Can I say “I disagree” and be heard?",
+       "Will there be movement: stages, a finish, new tasks?",
+       "Is it clear who is responsible for what and who pays for a mistake?",
+       "Can I explain and teach others here — and be paid for it separately?"
+      ]
+     },
+     {
+      "h3": "Where inspiration comes from"
+     },
+     "You are inspired by summing up: closing a big stage and seeing what came of it; gathering scattered pieces into one picture; sorting through an archive, a family history, accumulated data; hearing “we need you specifically”. This is the upper left corner — the point of inspiration, and yours holds Judgement: the energy of summing up, of a large volume of information and of memory. The same point shows what takes your strength away: labels and judgements from others and stages left hanging unfinished."
+    ],
+    "actions": [
+     "Write out three tasks from the past year after which you felt “this is mine”. Find what they have in common: almost certainly it involved untangling a dispute or explaining a rule.",
+     "Take one task where you can give a written conclusion with arguments — an analysis, an expert opinion, a review — and do it as an expert assessment: criteria, facts, conclusion, what to do next.",
+     "Once every three months hold a “summing up” for yourself: what is finished, what is weighed, what I am letting go. For you this is a source of strength."
+    ]
+   },
+   {
+    "kind": "money",
+    "h2": "Money: order, visibility and the courage of scale",
+    "conclusion": "Money comes to you through responsibility for order and through explanation that helps people. It is held back by control for the sake of control, by waiting for your worth to be noticed on its own, and by the fear of moving to a bigger scale. After forty your main resource is passing on experience beyond one circle of people.",
+    "cards": [
+     {
+      "arcanum": 4,
+      "label": "Entry to money",
+      "caption": "The Emperor is both the entry and the block: money opens through responsibility and order and closes through rigidity.",
+      "points": [
+       "L"
+      ]
+     },
+     {
+      "arcanum": 5,
+      "label": "Profit and earnings",
+      "caption": "The Hierophant in the middle of the money line: you are paid for what you can explain and turn into a rule.",
+      "points": [
+       "R2"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "Where money comes from and what holds it"
+     },
+     "Money comes to you when you take on the structure: you are responsible for an area, set up a process, keep deadlines for others. This is the entry to money — the Emperor in the inner circle to the right of the centre. Lisovskaya describes this point as an entry and a block at the same time: the energy on it “is in the minus, but at the same time opens the financial flow”, so a person’s money can swing up and down. The Emperor’s block is rigidity, excessive control, the wish to hold everything yourself. An Emperor who holds everything alone gets tired and stops taking on anything new.",
+     "The biggest earnings come through explanation: the middle of your money line is the Hierophant. A five in this point means education, public speaking, work with documents, finance and rules. As the findings say, the same card is your karmic task, and what hinders it most is the mask that waits for permission to name a price.",
+     "At the end of the money line, where it meets relationships, stands the Sun. In the money sense this point shows the beliefs that get in the way of earning. The Sun’s minus as a belief is self-reproach, workaholism and the habit of treating any failure as a disaster. Together the Emperor and the Sun make a clear knot: you want to control the result and to be visible, but not before everything is flawless. While it isn’t flawless, you work a lot and quietly.",
+     {
+      "h3": "Material karma: the theme of scale"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 21,
+         "label": "Material task",
+         "points": [
+          "C"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 7,
+         "label": "Attitude to the material",
+         "points": []
+        },
+        "→",
+        {
+         "arcanum": 4,
+         "label": "Entry to money",
+         "points": [
+          "L"
+         ]
+        }
+       ],
+       "caption": "**21 → 7 → 4.** The line of material karma: the World sets the theme, the calculated Chariot (21 + 4 = 25 → 7) shows your mood about money, the Emperor is the entry."
+      }
+     },
+     "In material matters you can do more than you allow yourself. The main point of the line is the World: scale, freedom from borders, other cities and countries, languages, big projects. In its minus — closedness, categorical thinking and a fear of expanding. This line is lived from birth mostly in the minus, and the task is to notice how its energies work in you and to bring them into the plus.",
+     "What this can look like: you are able to run your work a level higher than you do now, but you choose a familiar circle of clients, your own city, one source of income. The Chariot in the attitude to the material adds impatience: you want a result fast, and if it hasn’t come in a month, it seems it never will. The Emperor at the entry squeezes all of this into a frame. The plus of the same line is a person who can set a big goal, move towards it fast and build the order on which the result rests.",
+     {
+      "h3": "Money scenarios — check which one is yours"
+     },
+     "These are hypotheses drawn from combinations of cards. If you recognise yourself, there is something to work with.",
+     {
+      "ul": [
+       "**“A fair share.”** You count who put in how much, and to keep things fair you take on more: you pay for shared things, finish other people’s work, don’t send an invoice for small things. In total your share turns out smaller than anyone’s. The basis: Justice three times and Strength on the trigger.",
+       "**“I’ll wait until they offer.”** You know you work better than others, but you don’t ask for a raise and don’t raise your price — you wait to be noticed. The Hanged Man’s mask tells the world “I don’t mind waiting”, and the world agrees. Among the advice for the twelfth energy there is a direct one: learn to take money for your work.",
+       "**“Dash and brake.”** First a decisive purchase or investment for a big goal — a course, a move, equipment. Then hard saving and guilt. Then another dash. The basis: the Chariot in the attitude to the material, the Emperor at the entry and the Wheel in the centre, which in its minus lives in cycles.",
+       "**“Money through the partner.”** Your finances change noticeably along with the person close to you: next to one they open up, next to another they shrink. The dual point stands on the money line and affects earnings both ways."
+      ]
+     },
+     {
+      "h3": "Where money leaks"
+     },
+     {
+      "ul": [
+       "**Free work “out of conscience”.** Finishing for someone else, staying an extra hour, advising “as a friend”. Each small thing is fair; together they add up to unsold work.",
+       "**A dash with no road.** A purchase or investment for a big goal that has no plan and no deadline. The Chariot spends fast, and then the Emperor punishes with saving.",
+       "**Money instead of a conversation.** Buying a present after a quarrel, paying for a trip to ease the tension. Peace through action works; peace through a purchase lasts until next time.",
+       "**Long disputes about fairness.** Time and energy spent proving you are right on a matter worth less than the dispute itself. Before any showdown it helps to ask: what is winning worth, and what is the time it takes?"
+      ]
+     },
+     {
+      "h3": "What changes after forty"
+     },
+     "Your decade 40–50 runs under the World — the same card that stands in your material task. The theme of scale, which before forty sounded like the question “will I dare”, becomes the theme of the period itself. At the same time your personal purpose gives way to your social one, and this period is the time to pass accumulated experience on to others. Your social purpose is Judgement: gather what was done and pass it on. Inside the decade the age points run like this: at 42.5 — the Hierophant again, at 45 — Strength, at 47.5 — the Sun.",
+     "For money this means: knowledge gathered before forty is worth more after forty if it goes beyond one circle — another audience, another country, a format that doesn’t need your presence every minute. You can prepare for this in advance: write down how you do what you do well, collect examples, try small steps beyond the usual borders. The transition is gradual, over several years before and after forty.",
+     {
+      "h3": "Rules for your wallet"
+     },
+     {
+      "ul": [
+       "**Your own share comes first.** Before dividing “by conscience”, write down what your contribution is worth at market rates.",
+       "**Visible result first, price second.** The Sun at the end of the line opens what the mask keeps closed.",
+       "**Money and relationships are separate conversations.** A money question is not settled in the middle of making up, and making up is not bought.",
+       "**Review your price at a turning point.** After a good result, at the start of a year or a new project, the Wheel helps you, and a review looks natural.",
+       "**One big goal a year — with a budget and a deadline.** The Chariot’s dash is useful when it has a road."
+      ]
+     }
+    ],
+    "actions": [
+     "Count how much work you did for free over the past month because it felt fairer. Name the amount the market would have put on it.",
+     "Show one of your results to people who might find it useful, and after that offer them similar work at a named price.",
+     "Choose one step beyond your usual borders for the next three months — a new audience, an online format, another city — and write it down with a date."
+    ]
+   },
+   {
+    "kind": "relations",
+    "h2": "Relationships: strong feeling and peace through action",
+    "conclusion": "In closeness you want strength and authenticity: a feeling that sweeps you up and a person you are never bored with. It is easier to make peace with you through doing something together than through a long analysis. “Your” person is warm, generous and bright in their own right. The main risk is a silent tally of grievances; the way out is to name an imbalance within a day and to invent rules together.",
+    "cards": [
+     {
+      "arcanum": 15,
+      "label": "What you want from relationships",
+      "caption": "The Devil in the inner circle below the centre — passion, intensity, grip; the karmic tail also begins here.",
+      "points": [
+       "M"
+      ]
+     },
+     {
+      "arcanum": 19,
+      "label": "Dual",
+      "caption": "The Sun on the lower right diagonal — the energy of the person who suits you best.",
+      "points": [
+       "R"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "How you get close"
+     },
+     "Your way of being with people is the same in love, friendship and work: first a strong wish for real contact, then getting closer through a shared task, and finally warmth. These are the three points of the relationship line: the Devil, the Chariot, the Sun.",
+     "**You want the real thing.** The first point of the line is what you look for in people and how you look at them. Yours holds the Devil: passion, brightness, quality, the ability to captivate. You don’t need warm but limp relationships — you want them to be real, with tension and strength. The same point starts the karmic tail, so its minus switches on easily: dependence, obsession, the wish to get your way at any price. The advice of this energy is to lower your demands on yourself and others and not to slip into idealisation. The risk for you is confusing intensity with tests: “if they love me, they’ll take it”.",
+     "**You get close in motion.** The second point is how you show yourself to others and through what people can make peace with you. Yours holds the Chariot. This point is worth reading together with the mask, and in your case they argue. The Hanged Man’s mask keeps a distance: you look closely and don’t open up at once. The Chariot gets close through doing: a shared project, a trip, sport, a move, a renovation. So people become close to you when you do something together, and long talks “about us” are more likely to push you apart.",
+     "**A sunny person suits you.** The third point is the dual, the energy of a person who understands you almost without words. Yours holds the Sun, which is also your personal purpose — more on this in the findings.",
+     {
+      "h3": "What you bring to a relationship"
+     },
+     "Before talking about difficulties, it is worth naming what the person next to you gets. Honesty: with you there is no need to guess where the truth is, if you have said it. Depth: the Moon in the talent hears what is going on with the other person before they understand it themselves. Faithfulness to your word and to rituals: the Hierophant in the physics of Anahata makes love reliable. Movement: with you a relationship doesn’t stagnate, there is always a shared task, a trip, a plan. And a strength of feeling that cannot be mistaken for polite interest.",
+     {
+      "h3": "A portrait of “your” person"
+     },
+     {
+      "ul": [
+       "Warm and generous: shares attention, time and money without counting — and next to them your Justice has nothing to recount.",
+       "Bright in their own right: they have their own work, their own interests and their own light, and don’t need to live your life.",
+       "With a good sense of humour and no habit of despair: for them a failure is an episode.",
+       "Caring, loves children and people, comes to help without being asked.",
+       "The minus of the same energy is domineering, categorical behaviour, pressure and self-reproach. The Sun that warms and the Sun that burns are one card; watch how a person behaves when they are tired."
+      ]
+     },
+     "How to check this in practice. Lisovskaya advises looking for your dual energy in the other person’s matrix: in the centre, the mask, the main talent, the spiritual purpose, or in the first and last points of their relationship line. If the Sun stands there, understanding will be almost intuitive. If the person has it on the trigger, in material karma or in the karmic tail, the energy is shared but painful for them, and there will be misunderstandings. With a person who has the Devil in the same places you have a lot in common and a few topics where you speak different languages. A relationship can be built with any energies; this is a landmark, and the decision stays with you.",
+     {
+      "h3": "The main risk: a silent tally"
+     },
+     "A scene. Someone close promised to deal with a shared matter — call about the renovation, renew the joint insurance, sort out the documents. They didn’t. You made a mental note and said nothing: it felt awkward to remind them. The second time — another note. The third time you did everything yourself and felt you were right. The tally grows. The wish for strength and authenticity that stands at the entry to your relationships quietly turns into control: you check, notice, compare. The person next to you feels the cold but doesn’t understand where it comes from.",
+     "Then the turn comes. The Wheel in the centre makes it sharp: one day you announce a decision — “I can’t go on like this” — which for you is the result of months of weighing and for the other person a bolt from the blue. On your side everything was fair. On theirs there was never a single conversation.",
+     "Hence a rule worth remembering: **the truth said within a day is a conversation. The truth said six months later is already a verdict, even if the words are the same.**",
+     {
+      "h3": "The way out"
+     },
+     {
+      "ul": [
+       "**A short check-in once a week.** Fifteen minutes, two questions: what felt unfair this week and what was good. Justice gets an outlet while the tally is small.",
+       "**Rules made together.** Who is responsible for what, how you split money, what you do when one of you can’t keep up. A rule you invented alone, the other person will take as an order.",
+       "**A pause with a deadline.** When you need to think, say: “I need time until this evening.” The Hanged Man needs a pause; the other person needs to know when it will end.",
+       "**Make peace through action.** After a quarrel there is no need to analyse everything at once. First do something together, then talk — that is how your point of reconciliation works.",
+       "**The right to be imperfect.** Don’t test love with trials. Strength of feeling rests on freedom."
+      ]
+     },
+     "If you are not in a couple right now, the same line suggests where to meet people: where people do something together — hikes, volunteering, courses, shared projects. The Chariot recognises its own in motion, and the mask has time to look closely while the hands are busy."
+    ],
+    "actions": [
+     "Agree with someone close on a weekly fifteen-minute check-in and hold the first one this week.",
+     "Recall your latest “tally” against someone and say it out loud in one sentence with a concrete suggestion of what to change.",
+     "Start your next reconciliation with a shared task and only then move on to talking."
+    ]
+   },
+   {
+    "kind": "family",
+    "h2": "Family: freedom from home, endurance from the family line",
+    "conclusion": "From home you may have brought lightness and freedom — or a habit of setting your own rhythm. Your family line gives you endurance but teaches you to cope alone, and that part of the inheritance is worth revising. The main task is to learn to ask for help and to create your own family rules consciously.",
+    "cards": [
+     {
+      "arcanum": 22,
+      "label": "Parents’ point",
+      "caption": "The Fool in the inner circle to the left of the centre — the atmosphere you grew up in: freedom, lightness, starting from a blank page.",
+      "points": [
+       "J"
+      ]
+     },
+     {
+      "arcanum": 7,
+      "label": "Children’s point",
+      "caption": "The Chariot between the large and the inner circle on the left — how you relate to children and younger people: to lead, develop, move forward.",
+      "points": [
+       "O"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "What you brought from home"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 12,
+         "label": "Mask",
+         "points": [
+          "A"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 7,
+         "label": "Children’s point",
+         "points": [
+          "O"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 22,
+         "label": "Parents’ point",
+         "points": [
+          "J"
+         ]
+        }
+       ],
+       "caption": "**12 → 7 → 22.** The line of child–parent relationships: mask, children, parents. The atmosphere of the parental home affects both the attitude to children and how a person comes out into the world."
+      }
+     },
+     "Most likely your home had a lot of freedom — or, on the contrary, freedom was the main question. The parents’ point describes the atmosphere a person grew up in and how the relationship between father and mother affected them, even if the parents were not around. Yours holds the Fool. In the plus it is a home where you could try, make mistakes and start again, where people knew how to forgive and did not hold on to the past. In the minus this energy has two opposites: irresponsible adults — or control over the people close to you and limits on their freedom.",
+     "Which version is yours, only you know. But both versions explain the Hanged Man’s mask. In a very free home a child sometimes learns to wait until one of the adults finally takes the situation in hand. In a home where freedom was limited, to wait until permitted. In both cases the pause becomes a way of living next to someone else’s element. You can check this hypothesis with one question: what did I get used to waiting for as a child — order or permission?",
+     "With younger people you are probably different: active and leading forward. The children’s point is the Chariot, the energy of movement and development: trips, sport, clubs, goals, a shared adventure. If you have children or will have them, their strength next to you is in doing things together. If you have no children, the same point speaks of junior colleagues, students, nieces and nephews. The minus of the seven is pressure and a race for results. The Fool in the parents’ point is a good antidote here: give the younger one the freedom to make mistakes that you may have had plenty of — or lacked.",
+     {
+      "h3": "What the family line passes on"
+     },
+     "Your family line passes on endurance and at the same time a habit of coping alone. The strength of your family line is Strength (in detail — in the findings). Besides it, a line of three points runs from each corner of the scheme to the strength of the family line: the upper corners are the values of the family, its attitude to love, words, learning, laws; the lower ones are the deeds of the family, money, property, the body. Each line can be read both as a talent of the family and as its unfinished task.",
+     "There is a pattern in your lines. Both lines of values pass through the Lovers: in the family’s thoughts the main question is choice and love, and their plus and minus are confidence in your own choice and dependence on other people’s opinion. Both lines of deeds pass through the Hermit: in deeds the family relied on itself. The nine in its plus is self-sufficiency, wisdom and good personal boundaries; in its minus, withdrawal and mistrust. The result is a family formula: “the strong ones who cope alone”. The Hermit and Strength also stand in your total of all the chakras — in the physics and in the energy of the whole field.",
+     "Line by line it looks like this. From the male line of values — responsibility and the ability to sum things up; still to finish — choosing with your heart when the family expects the “right” decision. From the female line of values — endurance and lightness; still to finish — not measuring love by how much a person has put up with. From the male line of deeds — honesty and independence; still to finish — allowing yourself to be visible and not carrying everything alone. From the female line of deeds — faith in the future and the ability to get back up; still to finish — showing your talents. Where each of these lines arrives in your own scheme is told in the last finding: in money, in home, in partnership and in your centre.",
+     "The triples of both your female lines are analysed in one of the book’s examples, though on a different branch and in different areas. From her analysis only the general meaning of the energies applies here; the ready conclusion does not carry over to you.",
+     {
+      "h3": "A tail about family"
+     },
+     "In Lisovskaya’s book on tails, your karmic tail is placed among the tasks to do with family and kin: traditions, family rules, the link between generations. Her advice to people with such a tail is surprisingly simple: learn to ask your relatives for help, starting with small requests, invent new traditions and holidays, gather people around one table. For a person whose family strength stands on the point of pressure, this is hard advice: to ask means admitting you can’t manage alone. That is exactly why it is yours.",
+     "If there is no connection with your family, or it is a heavy one, the same advice works with other people. You can gather your own family from the people you have chosen, and you can start your own traditions from scratch."
+    ],
+    "actions": [
+     "Ask one of your relatives for a small favour — advice, a recipe, a story from the past — and notice what you feel as you do.",
+     "Ask your elders how the family got through hard times: who was “the strong one”, who coped alone. Write down one phrase you want to keep for yourself and one you don’t want to pass on.",
+     "Invent one tradition of your own — a yearly dinner, a trip, a shared album — and give it a date."
+    ]
+   },
+   {
+    "kind": "karma",
+    "h2": "Karmic tail: where it sounds in your life",
+    "conclusion": "The cards of your karmic tail stand in three more important places: in your earnings, in how you love and in what inspires you. So the tail’s old scenario is heard above all in money, in partnership and in the choice of work. At 35 the age point becomes the very card the tail ends with.",
+    "cards": [
+     {
+      "arcanum": 5,
+      "label": "Main point of the tail",
+      "caption": "The Hierophant in the large circle at the bottom is the karmic task; the whole tail is read from it.",
+      "points": [
+       "D"
+      ]
+     },
+     {
+      "arcanum": 20,
+      "label": "Middle of the tail",
+      "caption": "Judgement between the inner and the large circle at the bottom is a hint of what the task passes through.",
+      "points": [
+       "N"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "insert": "karmic_tail"
+     },
+     {
+      "h3": "Where the tail sounds in your matrix"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 15,
+         "label": "Entry of the tail",
+         "points": [
+          "M"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 20,
+         "label": "Middle of the tail",
+         "points": [
+          "N"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 5,
+         "label": "Karmic task",
+         "points": [
+          "D"
+         ]
+        }
+       ],
+       "caption": "**15 → 20 → 5.** The tail runs from the inner circle below the centre to the large circle at the bottom. Its main point is the last one, the Hierophant: it sets the theme, and the other two hint at what the theme passes through."
+      }
+     },
+     "The text above tells how such a tail works for everyone who has it. What is particular to you is where else its cards stand. Each of the three appears in another important role in your matrix, and that is where the tail sounds loudest.",
+     {
+      "ul": [
+       "**The Hierophant — in money and in love.** It also stands in the middle of the money line, where earnings come from, in the physics of Anahata, that is, in how you show love, and in the planetary purpose. For you rules and traditions are at once a source of income and a way of loving: through faithfulness to your word and to rituals. So the question “how it should be done” comes up for you above all in money and in partnership.",
+       "**Judgement — in inspiration and in the second half of life.** It also stands in the upper left corner, the point of inspiration, and in the social purpose, which begins after forty. What lights you up — summing up, big transitions, recognition of what has been done — and where the tail hooks you — evaluation, your own or someone else’s — are one energy.",
+       "**The Devil — in understanding and in closeness.** The feelings of two chakras, Ajna and Anahata, are also the Devil in your matrix. When you are trying to understand something and when you love, the emotional charge is the same — the one the tail begins with. A strong “I want to know” and a strong “I want to be close” easily turn into a grip in you."
+      ]
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 20,
+         "label": "Middle of the tail",
+         "points": [
+          "N"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 20,
+         "label": "Inspiration",
+         "points": [
+          "F"
+         ]
+        }
+       ],
+       "caption": "**20 = 20.** Judgement in the middle of the tail and in the upper left corner. The point of inspiration shows both what fills you and what drains you: in your case it is one energy — the evaluation of a result."
+      }
+     },
+     {
+      "h3": "Two programs together"
+     },
+     "In this school the karmic tail itself is called a program — a combination of cards that carries a recurring task. In your case its links are also connected by a sum: three Hierophants, as the findings say, add up to the Devil, with which the tail begins. Our reading: that is why you can enter the old scenario from any side — through too many rules in money, through rituals in partnership, through a thirst for evaluation at work. And you can leave it from any side too.",
+     "The second program is trust on the talent line. Together with the tail it gives the main question of your maturity: whom and what to trust. Both answer in a similar way: trust what stands the test of action within a reasonable time.",
+     {
+      "h3": "What to do about it in three areas"
+     },
+     {
+      "ul": [
+       "**In money.** Before naming a price, ask yourself whose figure it is: yours — or the one it is “decent” to charge in your family and circle. The Hierophant in the point of earnings often brings someone else’s yardstick with it.",
+       "**In partnership.** Replace one inherited tradition — how you celebrate holidays, who does what at home, how you handle money — with one invented together. A rule you created yourselves does not switch the tail on.",
+       "**At work.** Note what inspired you this week: your own finished result or someone’s praise. The more of the first, the less power the second has."
+      ]
+     },
+     {
+      "h3": "The tail and age"
+     },
+     "From thirty-two and a half to thirty-five the age point of your scale is the Tower, the energy of tearing down the old and building the new. These are the years when you want to take apart outdated structures — agreements, roles, habits. The risk is taking apart what irritates you and keeping what has truly outlived itself.",
+     "At thirty-five the age point becomes the Hierophant — the card the tail ends with. The question “whose rules am I living by” stops being background and becomes the theme of several years. From thirty-seven and a half the point is Justice, your main talent. The order is a lucky one: first clear the ground, then choose your own rules, then check them for fairness."
+    ],
+    "actions": [
+     "Before your next conversation about money, write down the figure you want to name and, next to it, where it came from: your own estimate or “that’s how it’s done”.",
+     "Pick one household tradition that was handed down to you and weighs on you, and suggest to the people close to you a version invented together.",
+     "Choose one thing you have long wanted to drop or take apart. Before taking it on, write down what will appear in its place."
+    ]
+   },
+   {
+    "kind": "body",
+    "h2": "Body and rest: movement, people and silence on schedule",
+    "conclusion": "You are filled up by movement, a change of scene, the warmth of people and finished stages. You are drained by the role of the strong one who can take anything, and by rest that turns into one more duty. The best format is active rest together with others plus short periods of silence that you set for yourself.",
+    "cards": [
+     {
+      "arcanum": 11,
+      "label": "Trigger",
+      "caption": "Strength in the upper right corner — endurance that easily turns into a habit of not resting.",
+      "points": [
+       "G"
+      ]
+     },
+     {
+      "arcanum": 19,
+      "label": "Dual",
+      "caption": "The Sun — warmth, light, joy you want to share.",
+      "points": [
+       "R"
+      ]
+     }
+    ],
+    "blocks": [
+     "You recover in motion and spend yourself on endurance. The matrix does not speak about health and makes no diagnoses; it suggests a rhythm that suits your character. If tiredness doesn’t go away even after rest, that is a reason to see a doctor.",
+     {
+      "h3": "What fills you up"
+     },
+     "**Movement.** The Chariot appears in your matrix three times, counting the calculated point, and the seven is charged with energy precisely in motion: a walk with a route, cycling, swimming, dancing, a weekend hike. This restores you faster than the sofa.",
+     "**A change of scene.** The Wheel in the centre loves a turn. The same weekends in the same place stop being restful after a month. Something small is enough: another park, a new route, a day trip to a nearby town.",
+     "**The warmth of people.** The Sun in the dual point and in the personal purpose asks for light: company, laughter, a shared celebration.",
+     "**A finished stage.** Judgement in the point of inspiration makes marking what you have done a form of rest too. A small ritual at the end of a project or a hard week — a dinner, a trip, simply a note of “what worked” — restores your strength better than jumping straight into the next task.",
+     {
+      "h3": "What drains you"
+     },
+     "The main expense is Strength on the trigger point. In the minus of this energy is wearing yourself out and not knowing how to relax. It is easy for you to say “I can still go on”, and it is true — until the day you can’t. The second leak is the Hanged Man’s mask: in the minus of the twelfth energy are apathy and tiredness, and among its advice is to live for yourself too, not only for others. The third is the Hierophant, which stands in three of your points: rest by the rules (“at weekends one is supposed to…”) tires you even if it is formally correct.",
+     {
+      "h3": "A contradiction worth taking into account"
+     },
+     "The Sun wants people and celebration. But the physics of the total of all your chakras is the Hermit, and it also stands in the middles of both material family lines: the body needs time alone. Rest where you are around people all the time wears you out by evening. Long solitude without people also soon stops being a joy. The solution is to combine them: a trip with friends where every day you have two hours for yourself; a party followed by a quiet evening already booked. Silence is better planned in advance, like a meeting, or someone else’s request will take it.",
+     {
+      "h3": "Your format of rest"
+     },
+     {
+      "ul": [
+       "Short active rest every week: two or three hours of movement outdoors with a clear route.",
+       "A change of scene every one or two months, at least for a weekend.",
+       "One treat for yourself a week — something just for pleasure, with no occasion and no use.",
+       "Rest in the calendar in advance, before you get tired. Strength doesn’t notice when it is time to stop, so the schedule makes the decision.",
+       "A small ritual after each finished stage."
+      ]
+     },
+     {
+      "h3": "Signs that it is time to stop"
+     },
+     "A week has passed without a single walk. Rest has been cancelled for someone else’s business twice in a row. Any change of plans irritates you, though you usually love change — the Wheel is stuck. You want to drop everything and leave. Each of these signs is a reason to take a pause set by you, without waiting for tiredness to set it."
+    ],
+    "actions": [
+     "Put four slots of active rest and two slots of silence for the coming month in your calendar — as meetings that cannot be moved.",
+     "Invent a ritual for the end of a stage and hold it after the next thing you finish.",
+     "Notice one of the signs of overload this week and on the same day take a pause, even for an hour."
+    ]
+   },
+   {
+    "kind": "chakras",
+    "h2": "Chakras: where they repeat the main points of the matrix",
+    "conclusion": "The most interesting thing about your chakras is the places where they repeat the main points of the matrix: calm in speech rests on the same card as the entry to money, the feeling after a job done on the card of inspiration, and love on the centre and the karmic task. The overall energy reserve of all the chakras is Strength, the same as in the strength of the family line and in the trigger point.",
+    "cards": [],
+    "blocks": [
+     "Seven chakras are seven floors of one life, from the body to meaning. First come the texts on each of them, then the links that can be seen only by comparing the chakras with other points of your scheme.",
+     {
+      "insert": "chakras"
+     },
+     {
+      "h3": "A clear word and the entry to money are one card"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 4,
+         "label": "Vishuddha, emotions",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 4,
+         "label": "Entry to money",
+         "points": [
+          "L"
+         ]
+        }
+       ],
+       "caption": "**4 = 4.** The feeling in the chakra of speech and the entry of the money line are the Emperor."
+      }
+     },
+     "Your money starts to move the moment the conversation about it takes shape. The feeling in Vishuddha, the chakra of speech, is the Emperor, and it also stands at the entry to money. In practice this means: until the amount, the deadline and the terms are said out loud, there is neither inner calm nor movement of money. Many people expect money to come first and calm to follow. For you it is the other way round: calm comes from something clearly said, and money follows it. So your shortest path to income runs through one uncomfortable sentence — naming the figure.",
+     {
+      "h3": "The feeling after a job done is the card of inspiration"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 20,
+         "label": "Manipura, emotions",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 20,
+         "label": "Inspiration",
+         "points": [
+          "F"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 20,
+         "label": "Social purpose",
+         "points": []
+        }
+       ],
+       "caption": "**20 = 20 = 20.** What you feel after an action, the point of inspiration and the purpose of the second half of life are Judgement."
+      }
+     },
+     "What you feel after a job done is what inspires you. Manipura is will and action, and the feeling in it is Judgement for you. The same card stands in the upper left corner, the point of inspiration, and in the social purpose, which opens up after forty. The result is a chain: you act, you sum up, the result lights you up for the next step. And after forty the ability to sum things up becomes your role for others — gathering experience and passing it on.",
+     "A simple planning rule follows from this. Your tasks need visible finish points: stages, deliveries, interim results. Work with no finish leaves Manipura without fuel, and then your strength goes faster than the amount of work would suggest. The risk of the same link is judging yourself after every step. A result is needed to light you up; a verdict on yourself puts the fire out.",
+     {
+      "h3": "Love stands on the centre and on the karmic task"
+     },
+     "In love two cards meet in your matrix that meet like this nowhere else among the chakras. The energy of Anahata is the Wheel, the same card as in your centre. And how love shows itself is the Hierophant, your karmic task and point of earnings. To love, for you, means staying yourself in motion while keeping agreements. Hence a practical conclusion: rules in a couple are the same growth zone for you as in money. Overdo the rules and you will meet in love the same control and protest the finding about the three Hierophants talks about. Keep the measure and you will get a reliability many people lack.",
+     {
+      "h3": "The overall reserve is Strength"
+     },
+     "The energy in the total of all seven chakras is Strength; a coincidence with the strength of the family line occurs for about one date in thirteen, and in your case the trigger point adds to them. Your whole energy reserve rests on endurance, and it matters to spend that reserve on your own things, not on putting up with things. The physics of the total is the Hermit: the body needs its own time alone — more on this in the chapter on rest."
+    ],
+    "actions": [
+     "In your next money conversation name the amount and the deadline in the very first sentence and notice what happens to your calm.",
+     "Break your longest task into stages with a visible finish and mark the first of them.",
+     "Pick one rule in your relationship that holds only because you insist on it, and discuss it afresh."
+    ]
+   },
+   {
+    "kind": "zodiac",
+    "h2": "Your sign in the Tarot: the lion, the sun and fire",
+    "conclusion": "By the Golden Dawn correspondences your sign, Leo, is the Strength card, its ruler the Sun is the Sun card, and its element, fire, is the Judgement card. All three stand in prominent places in your matrix. This is a different system, not the matrix method, but it highlights the same theme: endurance that matters not to turn into endless patience.",
+    "cards": [
+     {
+      "arcanum": 11,
+      "label": "Card of the sign",
+      "caption": "Strength is Leo’s card by the Golden Dawn correspondences; in your matrix it stands in the upper right corner, on the trigger point.",
+      "points": [
+       "G"
+      ]
+     }
+    ],
+    "blocks": [
+     "By a neighbouring system, the three cards of your sign stand exactly where the main theme of your matrix runs. The link between Tarot cards and zodiac signs was not invented in the Destiny Matrix: it is the system of the English Hermetic Order of the Golden Dawn of the late nineteenth century, described, for example, by Benebell Wen in her book “Holistic Tarot”. The matrix is calculated from the date differently and does not use signs, so everything below is a view from a neighbouring tradition.",
+     "**Sign — Leo, card — Strength.** You were born on 12 August, and Wen writes that the Strength card can refer to the sign of Leo and the period from 23 July to 22 August. In your matrix Strength stands in the upper right corner — on the trigger point, where you are easiest to pressure — and in the strength of the family line. So the card of your sign in one system is your support and your vulnerable spot in another. In Waite’s picture on this card a woman holds a lion with a chain of flowers; for Wen, Strength upright is the victory of gentleness and compassion. Leo’s fire works better in you when it is held gently.",
+     "**Ruler — the Sun, card — the Sun.** In your matrix the Sun stands at the crossing of the lines of money and relationships and in the personal purpose. Wen writes of the Sun card as success that gets noticed, and also as release from previous exhausting toil. For a person with Strength on the trigger this is a precise landmark: shine rather than haul.",
+     "**Element — fire, card — Judgement.** In the Golden Dawn system fire corresponds to Judgement. In your matrix Judgement stands in the upper left corner, the point of inspiration, in the middle of the karmic tail and in the social purpose. To be honest: Wen mentions two schools — one assigns Judgement to fire, the other to water — and she herself chooses water. We take the classic Golden Dawn correspondence.",
+     "If you put the three cards together, you get a picture familiar from the chapters above. The fire of your sign holds you and tests your strength in one place, warms others and you yourself in another, and lights you up and judges in a third. The main lesson of this picture: Leo’s fire is there to shine and inspire. If it goes into silent endurance, it goes out fastest."
+    ],
+    "actions": [
+     "Remember the last time you “shone” — spoke in public, shared, rejoiced openly. Plan something similar for the coming month.",
+     "Next time you are asked to take on more, remember the chain of flowers in Waite’s picture: holding gently is strength too."
+    ]
+   },
+   {
+    "kind": "close",
+    "h2": "For the people close to you: a short guide",
+    "conclusion": "This chapter can be shown to a partner, a friend or family. In short: she sees unfairness at once but doesn’t speak about it at once; she is inspired by honesty, movement and recognition; it is better to make peace with her through action, and to agree on things in advance and out loud; in closeness she wants strength of feeling and freedom.",
+    "cards": [],
+    "blocks": [
+     "This chapter is written for those around her. If you are reading it about someone close to you, here is the main thing about how she is made and what makes things easier with her.",
+     {
+      "h3": "What inspires her"
+     },
+     {
+      "ul": [
+       "Honesty. Say it straight, even if it is unpleasant: she respects the truth more than convenience.",
+       "Movement. Suggest going somewhere, starting, doing something together — a new project or route charges her up more than a present.",
+       "Recognition of her conclusion. When she has untangled and explained something, tell her it helped. Her talent is precision, and it matters to her that the precision was noticed.",
+       "Summing up. Mark a finished stage together: a move, a project, a hard year. For her it is a celebration."
+      ]
+     },
+     {
+      "h3": "What easily hooks her"
+     },
+     {
+      "ul": [
+       "“You’re strong, you’ll manage.” This is her vulnerable spot: she will manage, but she will remember that her strength was used.",
+       "Double standards. A rule that applies to her and not to you hurts more than a rude word.",
+       "Lecturing. If you explain to her “how it’s done” without her asking, she will either shut down or do the opposite.",
+       "Promises not kept. She notes each one — even if out loud she says “never mind”."
+      ]
+     },
+     {
+      "h3": "How to agree on things"
+     },
+     {
+      "ul": [
+       "In advance and concretely: who does what, how much it costs, by what date. A clear frame calms her.",
+       "Out loud. She hears hints, but she will weigh them rather than act on them.",
+       "By explaining why. A rule with an explanation she will accept; a rule “because that’s how it has to be”, hardly.",
+       "By leaving her the right to her own conclusion. Give her time to think — but ask when she will be ready to answer."
+      ]
+     },
+     {
+      "h3": "How to make peace"
+     },
+     {
+      "ul": [
+       "First a shared task, then talk. A walk together, cooking, a trip ease the tension faster than a long analysis.",
+       "Name what you were wrong about, concretely: what, when, what you will do differently. A vague “sorry if anything” won’t convince her.",
+       "Don’t rush her. If she said “I need to think until this evening”, that is an honest deadline.",
+       "If she has withdrawn into herself, don’t bombard her with questions. Suggest doing something together — a walk, a drive, cooking dinner. In motion she will tell you sooner than sitting across the table."
+      ]
+     },
+     {
+      "h3": "If you work together"
+     },
+     {
+      "ul": [
+       "Give her the part of the work where things need to be checked, compared and concluded: there she is stronger than most.",
+       "Name the criteria in advance. The task “do it well” torments her; the task “here are three signs it’s ready” pleases her.",
+       "Don’t change the rules silently. If something has changed, explain why — otherwise she will consider it unfair, even if she says nothing.",
+       "Give her pause a deadline: “Think it over until Thursday.” Without a deadline she will weigh things for a long time; with one she will come back with a ready and precise answer.",
+       "Don’t load her with someone else’s area just because she won’t refuse. She won’t refuse, but her trust in you will shrink."
+      ]
+     },
+     {
+      "h3": "What to expect in closeness"
+     },
+     "She loves seriously and strongly: warm but limp relationships bore her. She needs intensity of feeling and at the same time her own freedom — checking up on her and jealousy put her out faster than distance. On the outside she looks calm, so her opinion is easy to miss in a general conversation: ask her directly what she thinks — the answer usually turns out to be the most precise of the evening. Her outward calm doesn’t mean she doesn’t care; usually it means she is still weighing things up.",
+     "People who shine themselves do well next to her: those who have their own work, humour and warmth and are not afraid of being seen as imperfect. She is at ease with people who don’t turn every failure into a disaster. And one more thing: she rarely asks for help first. If you see that she is once again carrying everything herself, offer something concrete — “I’ll take care of dinners this week” — instead of a general “just say if you need anything”. A general offer she will politely decline; a concrete one she is more likely to accept."
+    ],
+    "actions": [
+     "Show this chapter to someone close and ask what they recognise in it and what is news to them.",
+     "Agree on a signal phrase she will use to say she needs time to think — so you know the conversation is simply postponed until the evening."
+    ]
+   },
+   {
+    "kind": "time",
+    "h2": "Time: the decade of Strength and two main energies in a row",
+    "conclusion": "Your thirties are the decade of Strength, and from 32.5 to 35 comes the mark of the Tower, a time to take apart what has outlived itself. Before forty your two main energies come in a row: at 35 the Hierophant, at 37.5 Justice. Around 37–43 your personal purpose gradually gives way to your social one, from the Sun to Judgement.",
+    "cards": [],
+    "blocks": [
+     "Each of your decades is coloured by one card, and between them an intermediate one appears every two and a half years. This describes the mood and the task of a period; it does not predict events. The energies change gradually, with a transition of a year or two either way.",
+     {
+      "timeline": [
+       {
+        "age": "0–10",
+        "arcanum": 12,
+        "title": "An observer’s childhood",
+        "text": "A decade of pause and looking from the side. If you recall that time, much of it most likely happened inside: you watched, waited, remembered. The habit of looking first and acting second may come from here.",
+        "now": false
+       },
+       {
+        "age": "10–20",
+        "arcanum": 20,
+        "title": "First results and first choices",
+        "text": "The time when the question “who to be” first sounds and the first results are summed up. The theme of Judgement — hearing your own call and not confusing it with someone else’s voice — has been linked with inspiration for you ever since.",
+        "now": false
+       },
+       {
+        "age": "20–30",
+        "arcanum": 8,
+        "title": "Agreements and responsibility",
+        "text": "The decade of the main talent: learning to weigh, to agree, to answer for consequences. Check it against what you have lived: where did you learn to say “this is unfair” back then — and where did you keep quiet?",
+        "now": false
+       },
+       {
+        "age": "30",
+        "arcanum": 11,
+        "title": "The start of the decade of Strength",
+        "text": "Strength is the energy of endurance and inner power; in your matrix it also stands on the trigger point, in the strength of the family line and in the total of the chakras. The decade tests what you carry by choice and what you carry because you are “the strong one”.",
+        "now": false
+       },
+       {
+        "age": "32.5–35",
+        "arcanum": 16,
+        "title": "Taking apart what has outlived itself",
+        "text": "A mark of rebuilding: tear down what holds on by inertia — agreements, roles, habits — and make room. The risk of this point for you is breaking things in protest. The plus is clearing the ground consciously and knowing what you will build.",
+        "now": true
+       },
+       {
+        "age": "35",
+        "arcanum": 5,
+        "title": "Your own rules",
+        "text": "The mark of the root of the karmic tail. The main question of several years: what rules do I live by, and which of them did I choose myself?",
+        "now": false
+       },
+       {
+        "age": "37.5",
+        "arcanum": 8,
+        "title": "A test of fairness",
+        "text": "Your main talent is once again in the role of the age point. A time to settle old accounts and agreements, so as to enter your forties without debts either way.",
+        "now": false
+       },
+       {
+        "age": "37–43",
+        "arcanum": 20,
+        "title": "A change of purposes: from the Sun to Judgement",
+        "text": "The personal purpose (the Sun) gradually gives way to the social one (Judgement). Before forty experience is gathered for yourself; after forty it is passed on to others. The support in this transition is the centre of the matrix, the point of inspiration and the spiritual purpose: in your case the Wheel, Judgement and the Hanged Man.",
+        "now": false
+       },
+       {
+        "age": "40–50",
+        "arcanum": 21,
+        "title": "Scale",
+        "text": "A decade of the same card that stands in the material task. The theme is going beyond the usual borders: other cities and audiences, big projects, long journeys.",
+        "now": false
+       },
+       {
+        "age": "42.5",
+        "arcanum": 5,
+        "title": "Teaching",
+        "text": "The second meeting with the Hierophant — now in the social period. Knowledge gathered earlier asks to go out to people: courses, mentoring, a method.",
+        "now": false
+       },
+       {
+        "age": "45",
+        "arcanum": 11,
+        "title": "Endurance again",
+        "text": "The middle of the decade brings back the theme of Strength. A test of whether you have learned to carry only your own load.",
+        "now": false
+       },
+       {
+        "age": "47.5",
+        "arcanum": 19,
+        "title": "Visibility",
+        "text": "The mark of your dual and of your former personal purpose. A time when it is easy to shine and be noticed.",
+        "now": false
+       },
+       {
+        "age": "50–60",
+        "arcanum": 8,
+        "title": "Selecting what matters",
+        "text": "The main talent becomes the theme of a whole decade: what of everything you have done really works, and what can be taught to others.",
+        "now": false
+       },
+       {
+        "age": "60–70",
+        "arcanum": 5,
+        "title": "The Hierophant and the spiritual purpose",
+        "text": "The decade of the Hierophant; after sixty the spiritual purpose opens up — in your case the Hanged Man. The pause you have been learning all your life becomes wisdom to share.",
+        "now": false
+       },
+       {
+        "age": "70–80",
+        "arcanum": 17,
+        "title": "Plans",
+        "text": "A decade of hope and of new plans brought to a visible result.",
+        "now": false
+       }
+      ]
+     },
+     {
+      "h3": "Why 35–40 are special years"
+     },
+     "Look at the order of the marks. Your two most frequent cards are the Hierophant and Justice; both appear on the scheme three times. And it is exactly they that come in a row at the end of your thirties: at thirty-five the Hierophant, at thirty-seven and a half Justice. Right after them, around forty, comes the change of purposes. So before the transition into the second half of life the matrix leads you through both main themes in turn: first decide what rules to live by, then check them for fairness. If these five years are lived attentively, the transition to the social period will be gentle: those who consciously looked for their path in advance hardly feel the crisis.",
+     {
+      "h3": "2026 and 2027 by the year matrix"
+     },
+     "A separate matrix is built for each year from the date of birth and the date of the year. Its centre is the main background of the year, the top point and the upper left corner are what supports you, the right and bottom points are where to be more careful, and the left point is how to behave with people.",
+     "**2026 is a year of the Empress.** The background is the fruit and growth of what was planted earlier. You are supported by the Empress and Strength; Strength is the card of your trigger, and here it works as a support. Money (Death: the theme of endings) and choice (the Lovers) ask for caution. The weak spot in front of others is the Tower: don’t break things in the heat of the moment.",
+     "**2027 is a year of the Chariot:** movement, projects, partnership. You are supported by the Emperor, your card of the entry to money, and the Hanged Man, your mask: the year is on the side of those who pause before a dash. Justice stands in it twice — in the point of dealing with people and among the trials of the year — so agreements and honesty will be the main test. The weak spot is the Moon: don’t believe rumours or your own fears. The overall energy of the year is the Wheel, the card of your centre.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 8,
+         "label": "How to behave with people in 2026 and 2027",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Main talent",
+         "points": [
+          "B"
+         ]
+        }
+       ],
+       "caption": "**8 = 8.** For both years in a row the point “how to behave with people” holds Justice — your main talent. For two years the world expects from you what you do best: a clear assessment and an honest word."
+      }
+     },
+     "If you have come across the short formula “the arcanum of the year”, by it 2026 is the Empress and 2027 the Emperor. That is one arcanum for the whole year, whereas the year matrix has nine points with different roles. In 2026 the short arcanum coincides with the centre of the year; in 2027 only with the top point, and the background of the year is set by the Chariot."
+    ],
+    "actions": [
+     "Write out what in your life holds on by inertia and asks to be taken apart before thirty-five. Choose one thing and take it apart consciously, with a plan for what will stand in its place.",
+     "Start a “notebook of rules”: which rules you want to take into the second half of life, and why. Come back to it every six months.",
+     "Before thirty-five, put your agreements in order: what is signed, what was promised in words, what it is time to formalise."
+    ]
+   },
+   {
+    "kind": "selfcheck",
+    "h2": "Self-check: where you are now",
+    "conclusion": "The eight main energies of your matrix and the signs that show how each of them works right now. This is not an assessment or a diagnosis: mark which phrases sound more like you, and start with the energy where “in the minus” resonated most strongly.",
+    "cards": [],
+    "blocks": [
+     "Read both columns and honestly mark what has been true of you over the past month. The same energy can be in the plus in one area and in the minus in another — that is normal. Come back to this page in three months and compare.",
+     {
+      "selfcheck": [
+       {
+        "arcanum": 8,
+        "label": "Main talent, additional talent and amplifier",
+        "points": [
+         "B",
+         "P",
+         "H"
+        ],
+        "plus": [
+         "I say “this is unfair” on the same day I notice it.",
+         "My assessments are accepted because I explain what they are based on.",
+         "I tell “I find this unpleasant” from “this is unfair” and don’t pass one off as the other.",
+         "I close an argument and don’t go back to it before bed."
+        ],
+        "minus": [
+         "I agree out loud and disagree inside.",
+         "I judge people by a single act and don’t revise the conclusion.",
+         "I pay for everyone just to keep it “fair”, and I’m angry with myself.",
+         "I replay other people’s unfairness for months."
+        ]
+       },
+       {
+        "arcanum": 12,
+        "label": "Mask",
+        "points": [
+         "A"
+        ],
+        "plus": [
+         "I take a pause to look from the other side, and I know when it will end.",
+         "I can say “no” without justifying myself.",
+         "I know what my work is worth and I name it.",
+         "I arrive on time and manage my time myself."
+        ],
+        "minus": [
+         "I wait for everything to sort itself out.",
+         "I agree and then regret it.",
+         "I feel undervalued but keep quiet.",
+         "I am late and put important things off “for later”."
+        ]
+       },
+       {
+        "arcanum": 10,
+        "label": "Centre",
+        "points": [
+         "E"
+        ],
+        "plus": [
+         "I notice that a situation is turning, and I take the turn.",
+         "Change gives me energy.",
+         "I trust my sense of timing.",
+         "I see a task through to the end, even when the novelty has worn off."
+        ],
+        "minus": [
+         "I feel “it’s time” and still wait.",
+         "The same stories repeat round and round.",
+         "Without change I feel dreary, and change scares me.",
+         "I give up at the first dip."
+        ]
+       },
+       {
+        "arcanum": 11,
+        "label": "Trigger and the strength of the family line",
+        "points": [
+         "G"
+        ],
+        "plus": [
+         "I choose myself what to carry.",
+         "I turn down what is too much without guilt.",
+         "I rest before my strength runs out.",
+         "My endurance works for me too, not only for those around me."
+        ],
+        "minus": [
+         "It is easy to talk me into taking on too much if you say I’ll manage.",
+         "I take on other people’s tasks to prove I can manage.",
+         "I can’t relax even on holiday.",
+         "I create difficulties for myself so as to overcome them."
+        ]
+       },
+       {
+        "arcanum": 5,
+        "label": "Karmic task, love and earnings",
+        "points": [
+         "D",
+         "S",
+         "R2"
+        ],
+        "plus": [
+         "I am paid for what I explain.",
+         "I can explain my rules, and they are accepted without pressure.",
+         "I respect other people’s methods and other people’s teachers.",
+         "I have my own rules, and I can explain each of them."
+        ],
+        "minus": [
+         "I give advice nobody asked for.",
+         "I hold on to the one right way.",
+         "I put off the conversation about price until I am asked to name it.",
+         "I demand that people follow rules I invented myself."
+        ]
+       },
+       {
+        "arcanum": 20,
+        "label": "Inspiration and the middle of the tail",
+        "points": [
+         "F",
+         "N"
+        ],
+        "plus": [
+         "I am inspired by finishing a big stage and summing it up.",
+         "I hear what I really want and follow it.",
+         "I let go of the past when it has outlived itself.",
+         "I work easily with a large volume of information."
+        ],
+        "minus": [
+         "I devalue what I have done if nobody has noticed it.",
+         "I make sharp turns to prove something.",
+         "Other people’s assessment means more to me than my own.",
+         "Unfinished stages hang over me and take my strength."
+        ]
+       },
+       {
+        "arcanum": 15,
+        "label": "Entry to relationships and to the tail",
+        "points": [
+         "M"
+        ],
+        "plus": [
+         "In relationships I am alive, passionate, real.",
+         "I can want something and go after it.",
+         "I accept my own imperfection and that of others.",
+         "I give the people close to me freedom."
+        ],
+        "minus": [
+         "I test love with trials.",
+         "I cling to people, things or questions and can’t let go.",
+         "I want to do things out of spite.",
+         "I expect perfection from myself and others."
+        ]
+       },
+       {
+        "arcanum": 7,
+        "label": "Reconciliation and the children’s point",
+        "points": [
+         "R1",
+         "O"
+        ],
+        "plus": [
+         "I make peace through action: I suggest doing something together.",
+         "I have a clear goal and I move towards it.",
+         "Movement and the road restore my strength.",
+         "I lead younger people forward and give them my pace."
+        ],
+        "minus": [
+         "I drive myself and others towards results.",
+         "I forget about myself for the sake of the material.",
+         "I make peace with purchases instead of talking.",
+         "Without movement I sink into apathy."
+        ]
+       }
+      ]
+     }
+    ],
+    "actions": [
+     "In each energy mark the phrases that are about you, and count where there is more “in the minus”. Start your plan with that energy.",
+     "Set a reminder for three months from now — to take the self-check again and compare."
+    ]
+   },
+   {
+    "kind": "plan",
+    "h2": "Plan: where to start",
+    "conclusion": "Start with one skill — saying your truth on time, at a turning point. In the first thirty days, the habit of naming an imbalance within a day and turning down what is too much. By ninety days, your own rules, a visible result with a price, and one step beyond your usual borders.",
+    "cards": [],
+    "blocks": [
+     {
+      "h3": "Where to start and why"
+     },
+     "It is worth starting with conversations about fairness — at home, with the people close to you, at work: this is where most threads of your matrix converge. Three Justices, the pause-mask and Strength on the trigger meet precisely in such conversations. When you start talking about an imbalance on time, a lot changes at once: relationships get warmer, less energy goes into replaying things, it becomes easier to name a price. The second area is money through explanation and visibility: your earnings and karmic task are one card, so every step here works both for income and for character. The third is rest on schedule, otherwise Strength will use up the reserve before you notice.",
+     {
+      "h3": "The first step — tomorrow"
+     },
+     "Tomorrow say out loud one thing you noticed and would usually keep quiet about. One sentence, no lecture and no verdict: “I think the workload is uneven right now. Let’s split it differently.” It doesn’t matter to whom — a colleague, someone close, a friend. What matters is that less than a day passes between “I noticed” and “I said”.",
+     {
+      "h3": "Thirty days"
+     },
+     {
+      "ul": [
+       "**A “scales” note.** Each imbalance is one line: what, who, how much. Once a week pick one and take it through the five steps of the formula of prudence from the key of the matrix.",
+       "**A weekly check-in with someone close.** Fifteen minutes: what was unfair, what was good.",
+       "**A phrase for saying no.** Prepare it and say it at least once when you are asked to take on too much.",
+       "**Rest in the calendar.** Four slots of movement and two slots of silence, set in advance.",
+       "**A ritual for the end of a stage** after every finished task.",
+       "**A small request to your relatives** — advice, a story, help with something small."
+      ]
+     },
+     {
+      "h3": "Ninety days"
+     },
+     {
+      "ul": [
+       "**A visible result and a price after it.** One analysis or work sample shown to people, and an offer of similar work for a named amount.",
+       "**A notebook of rules.** Which rules you are taking into the second half of your thirties, and why. Each one with an explanation.",
+       "**Three old accounts closed.** By a conversation, a letter, paperwork or a decision never to go back to them.",
+       "**A step beyond the usual borders.** A new audience, an online format, another city — one action with a date.",
+       "**A tradition of your own** with a set date.",
+       "**A second self-check** — compare it with the first."
+      ]
+     },
+     {
+      "h3": "How to tell that it is working"
+     },
+     "Signs that you are on the right track will appear before money and big changes. Less time passes between “I noticed” and “I said”. Conversations that never happened replay less often in the evening. At least once a week you say “no” without a long explanation. People come to you for an assessment and advice more often — and you start charging for it. The people close to you say you have become easier to be with: it is clear what you think. If not a single sign has appeared in a month, go back to the self-check and start with a different energy: perhaps Strength or the Hierophant sounds louder in you right now.",
+     {
+      "h3": "The spiritual and the material together"
+     },
+     "Your matrix needs both sides: the inner work with your tally against people and the outer one — price, agreements, budget. One doesn’t hold without the other: you can forgive and go on silently overpaying, or you can neatly agree on money and still carry the old grievance.",
+     "For the inner side, Lisovskaya’s “five letters” practice suits you. The letters are not sent: a complaint, forgiveness, an apology for your own part, an acknowledgement of what the person gave you, gratitude. For your Justice it is a way to close the case by all the rules without passing a verdict, and for the Hanged Man it is a pause that has an end. If the practice brings no relief, it is worth turning to a specialist.",
+     "For the material side, one page of “my prices and boundaries”: your rate, what work you take and what you don’t, how much time a week you are ready to give for free. The Emperor at the entry to money is calm when the frame is written down; Justice, when it can be shown."
+    ],
+    "actions": [
+     "Tomorrow: one sentence about an imbalance — out loud, within a day of noticing it.",
+     "By the end of the week: start the “scales” note, set the first check-in with someone close and put a month of rest in your calendar.",
+     "By the end of the month: write the first of the five letters and one page of “my prices and boundaries”."
+    ]
+   }
+  ],
+  "faq": [
+   {
+    "q": "What does “the virtue missing from the deck” mean for me, and what should I do with it?",
+    "a": [
+     "It is prudence in the old sense of the word — the ability to know what to do and when. Your matrix has everything it is assembled from: Justice sees the imbalance, the Hanged Man gives a pause to look from the other side, the Wheel in the centre finds the moment. Only one thing is missing — linking them into a sequence and bringing them to a word. Without that link you get two imbalances. The first is “the pause”: you see, but wait with no end date. The second is “the judge”: what has piled up comes out all at once, and the other person doesn’t understand where it came from.",
+     "What it looks like in practice:",
+     {
+      "ul": [
+       "**Work.** For a year you have been doing more than a colleague on the same salary. The pause version is waiting to be noticed. The judge version is one day putting your resignation on the desk. The prudent version is gathering the facts for the quarter, choosing a day after a good result and asking for a conversation about your salary with a specific figure.",
+       "**Home.** You have long been splitting the chores unequally. The pause is silently doing more. The judge is exploding over an unwashed cup. Prudence is suggesting a list of chores on a calm evening and splitting it together.",
+       "**Friendship.** A friend has failed to pay you back on time for the second time. The pause is keeping quiet and no longer inviting her out. The judge is writing a sharp message in the group chat. Prudence is saying it in person within a week: “It’s awkward for me, but let’s agree on a date.”",
+       "**Closeness.** Your partner has again forgotten what you agreed on. The pause is making a mental note. The judge is announcing a month later that you are tired. Prudence is naming one case at the weekly check-in and deciding together how to do it differently.",
+       "**You yourself.** You are again taking on too much because you’ll manage. Prudence is checking your calendar first and only then agreeing."
+      ]
+     },
+     "A short check you can do every day is the same five steps: I weighed it — looked through the other person’s eyes — found the turn — said it — closed it. If a step is skipped, that is exactly the one to work on."
+    ]
+   },
+   {
+    "q": "I don’t recognise myself as “patient”: I’m more abrupt. So this isn’t about me?",
+    "a": [
+     "Not necessarily. The mask is what is read about you and what you look at the world through; it is not yet your whole essence. Every energy has frequent, bright expressions and rare, almost opposite ones. The Hanged Man in the minus is a person who endures for a long time. But the same energy in the plus is the ability to say “no” and know your worth. If you are abrupt, perhaps your mask has long worked in that direction.",
+     "Something else is even more likely: you live through your centre and talents. The Wheel in the centre reacts quickly to change, and Justice three times calls things by their names. Then the Hanged Man’s pause shows itself differently in you: in a habit of holding a decision in your head for a long time before acting, or in a long silence after a sharp word. Check in the “Self-check” chapter which phrases resonate. If nothing resonates, that is an answer too: this energy rarely shows in you for now, and it is worth noticing in small things."
+    ]
+   },
+   {
+    "q": "Justice three times — am I doomed to conflicts and the role of eternal judge?",
+    "a": [
+     "No. Justice is the ability to see measure; you are not obliged to fight for it. The book’s advice to the eight is exactly the opposite: step back from the fight for justice, keep to the golden mean, keep your emotional balance. In Waite’s divinatory meanings, upright Justice is equity, rightness, probity, and reversed it is bigotry, bias and “excessive severity”. It is one card; the difference is in how you use it.",
+     "You become a judge when you assess a whole person by one episode. A mediator — when you assess the episode and suggest what to do about it. The second path is as open to you as the first and costs far less. People with your set of cards often become the ones others go to for settling a dispute: both sides trust them. And the Wheel in the centre tells you when a dispute is ripe for a conversation — which spares you unnecessary battles."
+    ]
+   },
+   {
+    "q": "Why is it so hard for me to charge for what I explain well?",
+    "a": [
+     "Because three cards meet here. The Hierophant in the point of earnings says: you are paid for explaining. The same Hierophant in the karmic task adds a doubt: do I have the right to teach, do I know enough? The Hanged Man’s mask tells the world “I’ll wait”, and the world gladly waits along with you. The Sun at the end of the money line suggests the way out: income grows where you are seen.",
+     "What helps you specifically:",
+     {
+      "ul": [
+       "**Show first, then name the price.** An analysis, a work sample, a review — something that announces you without your permission. A price after a visible result sounds natural.",
+       "**Name the price at a turning point:** after a successful job, at the start of a new project or year. The Wheel in the centre makes such moments your allies.",
+       "**Describe what will change for the person:** “in two sessions you’ll understand how your budget works.” That is how the Sun speaks, and that is how you are easier to hear.",
+       "**Write your rate down on paper** and don’t lower it in the conversation the first time the other person goes quiet."
+      ]
+     }
+    ]
+   },
+   {
+    "q": "How can I tell that a person is “mine”?",
+    "a": [
+     "The energy that suits you best is the Sun — it stands in your dual point. You can recognise such a person by their behaviour: they are warm and generous, they have their own work and their own light, they can rejoice and don’t make a tragedy out of failures, and they care about people without counting. Next to them your Justice has nothing to recount.",
+     "If you want to check by the matrix, look at where the person has the Sun: in the centre, the mask, the main talent, the spiritual purpose or at the ends of their relationship line — that is a coincidence in your favour. If it is on their trigger, in material karma or in the karmic tail, the energy is shared but painful for them, and there will be misunderstandings. With the Devil in the same places — a lot in common and a few topics where you speak different languages.",
+     "And most importantly: you also have the Sun in your personal purpose. “Your” person comes more easily when you shine yourself. Good relationships can be built with any energies — the matrix shows where it will be easy and where you will have to negotiate."
+    ]
+   },
+   {
+    "q": "What will happen around forty — a crisis?",
+    "a": [
+     "The matrix does not predict events. It shows that around 37–43 the personal purpose — the Sun — gradually gives way to the social one — Judgement: before forty experience is gathered for yourself, after forty it is passed on to others. Lisovskaya notes that many women come to her at 38–42 looking for themselves, and immediately adds: those who consciously looked for their path in advance hardly feel the transition.",
+     "In your case two main energies come in a row before this transition: at 35 the Hierophant, at 37.5 Justice. This is convenient preparation. From thirty-five — work out what rules you want to live by. From thirty-seven and a half — close old accounts and agreements. Then you will reach forty with a clear answer to the question of what to pass on, and your fortieth birthday will open the decade of the World — a time of scale."
+    ]
+   },
+   {
+    "q": "A tail about family and kin — but what if things with my family are complicated, or there is no connection?",
+    "a": [
+     "Your tail is linked to family and kin, and the advice for it is to learn to ask relatives for help, starting with small things, and to create new traditions. But it does not require you to go back to where things were hard or dangerous.",
+     "The task can be solved differently too. If the connection with the family cannot be restored, a person can start their own branch: their own rules, their own holidays, their own memory. Family also means the people you have chosen. Asking a friend for help, gathering the people close to you at your own table, inventing a tradition that wasn’t there in your childhood — it is the same work. For you it is especially useful: asking for help trains exactly what people with Strength on the point of pressure lack."
+    ]
+   },
+   {
+    "q": "How do I combine a thirst for change with a love of order?",
+    "a": [
+     "This is one of the main inner contradictions of your matrix. Your centre is the Wheel, next to it two Chariots: you are drawn to turns, new stages, speed. And support comes from the cards of order: the Hierophant in the karmic task and in earnings, the Emperor at the entry to money, Justice three times. Some cards ask for change, others for everything to be in its place.",
+     "A simple rule helps combine them: change and order live in different areas and at different times.",
+     {
+      "ul": [
+       "**Different areas.** Let work, projects, studies and travel live by change. And let home, money and close relationships rest on clear rules.",
+       "**Different rhythms.** Once a quarter — a big turn or a new project. All the rest of the time — an even routine.",
+       "**A turn by the rules.** Changes you plan yourself, with a date and a budget, the Emperor accepts calmly. What scares him are changes that happen by themselves or under pressure."
+      ]
+     },
+     "If you ignore this contradiction, you will keep breaking order for the sake of change and smothering change for the sake of order. If you take it into account, the Wheel will have room to spin and the Emperor something to lean on."
+    ]
+   },
+   {
+    "q": "Why do I get so tired, even though I never show it?",
+    "a": [
+     "Because you are used to coping alone, and the habit is older than you. Strength stands on your trigger point and in the strength of your family line, and both material family lines pass through the Hermit — the family formula “the strong ones who cope alone”. It is easy for you to say “I’ll manage” and take on more, and asking for help seems like weakness.",
+     "The second reason is movement. The Chariot appears in your matrix three times, and it is an energy that recovers in motion. If a week has passed between work and the sofa, your strength doesn’t come back, however much you rest lying down.",
+     "What to do: schedule rest before tiredness sets in, move for at least a couple of hours a week, once a week tell one person how you are really doing, and learn to ask for small things. If the tiredness doesn’t pass even after that, it is a reason to see a doctor: the matrix does not speak about health."
+    ]
+   },
+   {
+    "q": "What does the Tower at 32.5–35 mean — is everything falling apart for me?",
+    "a": [
+     "The Tower on the age scale is a time of rebuilding; it does not promise a disaster. These are the years when holding on to what has outlived itself becomes more expensive than taking it apart: agreements that have long stopped working, roles you have outgrown, habits held by inertia. In your matrix this mark has a special feature: right after it, at 35, comes the Hierophant — a time to build your own rules. The Tower clears the space for them.",
+     "How to get through it usefully:",
+     {
+      "ul": [
+       "**Choose what to take apart.** Break what has outlived itself, and keep what merely irritates you on a bad day.",
+       "**Take things apart at a turning point.** The Wheel in the centre will tell you the moment when a change will fall into place naturally, without battles.",
+       "**Know what you will build.** Before ending something, write down what will appear in its place. Your Strength usually fills emptiness with other people’s tasks.",
+       "**Keep a support.** While one area is changing, let another stay as it was: if work is being rebuilt, home keeps its order, and vice versa."
+      ]
+     }
+    ]
+   }
+  ],
+  "sources": [
+   {
+    "title": "Yuliana Lisovskaya — “Destiny Matrix for Beginners” (in Russian)",
+    "url": "https://litres.com/book/uliana-lisovskaya/matrica-sudby-dlya-nachinauschih-70224676/",
+    "note": "The roles of the points of a personal matrix (mask, centre, main and additional talents, inspiration, trigger, amplifiers, parents’ and children’s points, entry to finances, profit, dual, point of reconciliation) and the observation about a centre that does not always open up at full strength; lines and how to read them; characteristics of the energies; the 18-8-8 program and adding up repeats (ch. 10–11); material karma and the point of attitude to the material (ch. 1, 5, 6); the strength of the family line and the family lines (ch. 3), an example with triples of family lines (ch. 9); purposes and crises (ch. 4); dual and half-dual (ch. 8); the “five letters” practice (ch. 11). The links between areas, the frequencies of coincidences and the through-running knot are the work of the report’s author."
+   },
+   {
+    "title": "Yuliana Lisovskaya — “The Karmic Tail in the Destiny Matrix” (in Russian)",
+    "url": "https://books.yandex.ru/books/pSMcQ8UV",
+    "note": "Analysis of the 15-20-5 tail (written by the author as 5-20-15): tasks with family and kin, the advice to ask relatives for help and create new traditions; the rule of the tail’s main point; how a karmic program differs from a simple one. Where elements of the tail repeat on the scheme and how it sounds at 32–37 are the report author’s interpretation."
+   },
+   {
+    "title": "Yuliana Lisovskaya — “Destiny Matrix: Forecast. Prognostics in the Destiny Matrix” (in Russian)",
+    "url": "https://ridero.ru/books/matrica_sudby_prognoz_prognostika_po_matrice_sudby/",
+    "note": "Decades and intermediate age points, the matrices of 2026 and 2027 and the meanings of their points (the “Time” chapter). The book’s lists of events are not carried into the report: age points are described as the mood of a period."
+   },
+   {
+    "title": "Arthur Edward Waite — “The Pictorial Key to the Tarot” (1910)",
+    "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot",
+    "note": "Part I, on Justice: the Tarot has Justice, Temperance and Fortitude but no Prudence; Court de Gébelin’s attempt to see it in the Hanged Man; a hint of the way of prudence in the Hermit. Part II: the Hanged Man (living wood, entrancement instead of suffering, “called falsely a card of martyrdom, a card of prudence… a card of duty”), Strength (the chain of flowers). Part III: the divinatory meanings of Justice and the Hanged Man. Quotations are given in Waite’s original wording; the image of the “fourth virtue” as the key to the matrix is the report author’s interpretation."
+   },
+   {
+    "title": "Benebell Wen — “Holistic Tarot” (2015)",
+    "url": "https://www.penguin.com.au/books/holistic-tarot-9781583948354",
+    "note": "The “Your sign in the Tarot” chapter: the correspondence of the Strength card to the sign of Leo (23 July — 22 August), the meanings of the Strength and Sun cards, two schools of element for the Judgement card. The Golden Dawn system of correspondences is a separate tradition, not the matrix method; matching it to the points of the scheme is the report author’s interpretation."
+   }
+  ]
+ },
+ "matrix": {
+  "birth": "1992-08-12",
+  "sex": "f",
+  "day": 12,
+  "month": 8,
+  "year": 21,
+  "mission": 5,
+  "center": 10,
+  "father_line": 20,
+  "mother_line": 11,
+  "descendants": 8,
+  "inheritance": 17,
+  "comfort_west": 22,
+  "comfort_north": 18,
+  "comfort_east": 4,
+  "comfort_south": 15,
+  "sky": [
+   8,
+   5,
+   13
+  ],
+  "ground": [
+   12,
+   21,
+   6
+  ],
+  "social_male": [
+   20,
+   8,
+   10
+  ],
+  "social_female": [
+   11,
+   17,
+   10
+  ],
+  "purpose_personal": 19,
+  "purpose_social": 20,
+  "harmony": 12,
+  "planetary": 5,
+  "money": [
+   4,
+   5,
+   19
+  ],
+  "love": [
+   15,
+   7,
+   19
+  ],
+  "talent": [
+   8,
+   8,
+   18
+  ],
+  "karmic_tail": [
+   15,
+   20,
+   5
+  ],
+  "chakras": [
+   {
+    "key": "sahasrara",
+    "title": "Sahasrara",
+    "hint": "connection to a larger plan",
+    "physics": 12,
+    "energy": 8,
+    "emotions": 20
+   },
+   {
+    "key": "ajna",
+    "title": "Ajna",
+    "hint": "vision and intuition",
+    "physics": 7,
+    "energy": 8,
+    "emotions": 15
+   },
+   {
+    "key": "vishuddha",
+    "title": "Vishuddha",
+    "hint": "word, honesty, destiny",
+    "physics": 22,
+    "energy": 18,
+    "emotions": 4
+   },
+   {
+    "key": "anahata",
+    "title": "Anahata",
+    "hint": "love and relationships",
+    "physics": 5,
+    "energy": 10,
+    "emotions": 15
+   },
+   {
+    "key": "manipura",
+    "title": "Manipura",
+    "hint": "status, will, money",
+    "physics": 10,
+    "energy": 10,
+    "emotions": 20
+   },
+   {
+    "key": "svadhisthana",
+    "title": "Svadhisthana",
+    "hint": "joy, children, creativity",
+    "physics": 4,
+    "energy": 15,
+    "emotions": 19
+   },
+   {
+    "key": "muladhara",
+    "title": "Muladhara",
+    "hint": "body, support, matter",
+    "physics": 21,
+    "energy": 5,
+    "emotions": 8
+   }
+  ],
+  "chakra_totals": {
+   "physics": 9,
+   "energy": 11,
+   "emotions": 2
+  },
+  "age_scale": [
+   {
+    "from": 0,
+    "to": 10,
+    "arcanum": 12
+   },
+   {
+    "from": 10,
+    "to": 20,
+    "arcanum": 20
+   },
+   {
+    "from": 20,
+    "to": 30,
+    "arcanum": 8
+   },
+   {
+    "from": 30,
+    "to": 40,
+    "arcanum": 11
+   },
+   {
+    "from": 40,
+    "to": 50,
+    "arcanum": 21
+   },
+   {
+    "from": 50,
+    "to": 60,
+    "arcanum": 8
+   },
+   {
+    "from": 60,
+    "to": 70,
+    "arcanum": 5
+   },
+   {
+    "from": 70,
+    "to": 80,
+    "arcanum": 17
+   }
+  ]
+ },
+ "inserts": {
+  "chakras": {
+   "slug": "12-8-20-7-8-15-22-18-4-5-10-15-10-10-20-4-15-19-21-5-8-9-11-2",
+   "title": "Chakras: the energy map, reading the seven levels for matrix 12–8–21",
+   "lead": "It begins with what gives you a sense of home. Then come desire, action, relationships, words and understanding. Last comes meaning — the reason you want to keep going. This is a symbolic portrait drawn from your matrix: seven chakras, each showing a different side of one life.",
+   "testId": "chakras-reading",
+   "layout": "chakras",
+   "rolesTitle": "",
+   "rolesLead": "",
+   "interactionsTitle": "",
+   "interactionsLead": "",
+   "roles": [],
+   "interactions": [],
+   "summary": "",
+   "strength": "",
+   "tension": "",
+   "practice": "",
+   "chakraRows": [
+    {
+     "key": "muladhara",
+     "title": "Muladhara",
+     "topic": "Everyday support",
+     "heading": "Where custom keeps everything even",
+     "paragraphs": [
+      "Your daily life strives to be complete: the World in Muladhara is a home where everything has found its place and come together as one whole. The Hierophant helps you keep that fullness by leaning on what is established: family traditions, tried and tested rules, “this is how we do things”. When something is disrupted, you return to what has stood the test of time. And you feel settled inside when Justice is at work: everyone’s portion is measured fairly, and no one carries more than the rest.",
+      "Take a family cottage shared for many years. Everyone has their own vegetable beds and their own weekends, the costs of the fence and the water are split by an old rule, and in August everyone gathers to make jam — because it has always been so. No one argues over who owes what: the order answers for itself. **Your footing is a way of life where everything has long been in its place and everyone has their fair share.** In a home like that you can relax: the rules are known, and nobody will be left out.",
+      "It becomes vulnerable when someone new enters this finished world. A new member of the family with habits of their own — and a suggestion to change something sounds like a threat to the balance. “That’s how we do things here” becomes the main argument, and the newcomer’s request is weighed on the old scales, which have no room for it. It is hard for a newcomer to belong where everything has already been allotted, and hard for you to notice that the wholeness rests on closed doors."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 21,
+       "caption": "Home as a complete world"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 5,
+       "caption": "Keeping to custom"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 8,
+       "caption": "A sense of fair shares"
+      }
+     ]
+    },
+    {
+     "key": "svadhisthana",
+     "title": "Svadhisthana",
+     "topic": "Desire and pleasure",
+     "heading": "Steering desire, rejoicing openly",
+     "paragraphs": [
+      "The strength of your desire shows at once. The Devil feeds a pull towards whatever feels good — tasty food, the thrill of the game, bodily pleasures, anything that takes hold of you completely and will not wait. The Emperor governs how this plays out in life: you set the limits yourself, choose where, when and how much, and keep the promises you make to yourself. And the Sun colours what remains afterwards — a simple, bright joy without a shadow, like that of a child with nothing to apologise for.",
+      "**In your hands, strong desire becomes a celebration, not a disaster.** You can treat yourself to a real feast, a long game, a trip just for one favourite cuisine — and carry it off so that there is nothing to regret in the morning. Order does not put out passion; it gives it shape. That is why your pleasure comes out bright: you want to share it, it is easy to talk about, and there is nothing in it that needs hiding.",
+      "The danger is that the limits slowly come to matter more than the pleasure itself. It feels good to have power over your own cravings, and the rules multiply: how much is allowed, when it has been earned, what counts as excess. The desire does not go anywhere; it simply answers now to the routine rather than to you. Every unplanned joy feels like a defeat, and sunny simplicity gives way to the dry satisfaction of having held back once again."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 4,
+       "caption": "Setting limits for pleasure"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 15,
+       "caption": "A powerful pull to enjoyment"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 19,
+       "caption": "Clear, open joy"
+      }
+     ]
+    },
+    {
+     "key": "manipura",
+     "title": "Manipura",
+     "topic": "Will and independence",
+     "heading": "Hearing that it is time for the next turn",
+     "paragraphs": [
+      "You act best when you sense movement. In your work the Wheel of Fortune gives you a knack for handling its turns: noticing that circumstances have shifted, rearranging the plan and making use of the right moment. As motivation, the same Wheel brings the thrill of change — your energy rises when things get moving and a new opportunity opens up. Outcomes are felt through Judgement. Success or failure sounds to you like the angel’s trumpet on the card: the moment it becomes clear that this stage is over and it is time to rise to the next.",
+      "**Any turn can become a beginning for you if you hear what it means.** A project falls through — and you see what it taught you and where to go next. Luck comes your way — and you do not just celebrate; you understand what new role it opens up. Here will does not fight the course of events but answers it in good time.",
+      "You are most vulnerable in a lull. When the wheel barely turns, the work seems to have lost its point, and you want to wait for a new sign: an offer, a change, that very call. You try every small event on for size: is this it? Meanwhile the work, which needs ordinary, regular steps, stands still. Acting on your own initiative quietly turns into waiting for a signal, and circumstances start deciding for you."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 10,
+       "caption": "Acting in rhythm with change"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 10,
+       "caption": "Seizing your moment"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 20,
+       "caption": "Answering a turning point"
+      }
+     ]
+    },
+    {
+     "key": "anahata",
+     "title": "Anahata",
+     "topic": "Closeness and mutual care",
+     "heading": "Holding together through the turns",
+     "paragraphs": [
+      "For you, love proves itself through what repeats: the call you agreed on, the shared dinner, the promise no one needs reminding of. This is how the Hierophant shows up in closeness — through settled routine and keeping your word. What holds you in a relationship is the Wheel of Fortune: an interest in where it is going, in new stages and turns that cannot be mapped out in advance. The Devil makes your experience of connection strong and tenacious: when you attach, you do so in earnest, and the very thought of loss cuts deep.",
+      "**Your bond can survive change because it has something to stand on.** Say your job changes, or your city, or the familiar rhythm of your days. The Wheel keeps the relationship from standing still, while your customs remind you that you are still together. A ritual may change its form — dinner becomes an evening phone call — but its meaning stays. Strong feeling works in the bond’s favour: you care, and you look for ways to stay close in new circumstances.",
+      "As long as the turn is shared, it inspires you. But if only your loved one changes — perhaps they have taken up something new or started keeping evenings of their own — attachment whispers that this is how you lose someone. Then a custom turns into a test: “we always used to…”, “if you love me, stay the way you were”. The rule that protected the bond starts holding the person in place. They may stay by your side out of duty rather than desire — and that is exactly what strong attachment fears most."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 5,
+       "caption": "Keeping shared customs"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 10,
+       "caption": "Curious about new stages"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 15,
+       "caption": "Strong attachment"
+      }
+     ]
+    },
+    {
+     "key": "vishuddha",
+     "title": "Vishuddha",
+     "topic": "Speech and influence",
+     "heading": "Asking outright what hangs in the air",
+     "paragraphs": [
+      "A change in someone’s tone is hard for you to let pass unnoticed. The Moon in your Vishuddha explains what draws you into such conversations: a sensitivity to tone, to pauses, to what sounds between the words. And you speak like the Fool — simply and directly, without meaningful hints: “Is it just me, or did something upset you?” Calm comes with the Emperor, when what was unclear gets a clear answer and it’s obvious how to go on.",
+      "Say a colleague on a shared project suddenly starts giving one-word replies and stops joking in the chat. You message them privately: “Listen, I get the feeling something about the plan is bothering you. Just tell me straight.” It turns out they were landed with someone else’s task and felt awkward objecting. Half an hour later the tasks have been reshuffled. **After your question, a vague tension can become a clear agreement.** And you feel at ease: everything has been said, and it’s clear who is doing what.",
+      "Asked too often, “Are you OK?” can lose its weight. You hear every pause distinctly, and asking costs nothing: “Are you sure everything’s fine? You’re not upset?” Your calm returns only after a clear “Yes, really”, and so the questions keep coming. Someone close to you answers in detail at first, then on autopilot. And one day something real is hiding behind the usual “I’m fine”, and by now it’s hard to pick out: the stock reply has become the easiest way to end the conversation."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 22,
+       "caption": "A plain, direct question"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 18,
+       "caption": "An ear for pauses"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 4,
+       "caption": "The calm of a clear answer"
+      }
+     ]
+    },
+    {
+     "key": "ajna",
+     "title": "Ajna",
+     "topic": "Perception and understanding",
+     "heading": "Getting to the truth without getting stuck",
+     "paragraphs": [
+      "For you, an unclear situation is like an open case. The Chariot sets your way of thinking: an inquiry is a journey to a destination, step by step, past every obstacle. Justice is the fuel — the wish to find out what really happened, to separate facts from rumours and to give each party what their actions deserve. And the feeling belongs to the Devil: an unanswered question hooks you hard, and until there is an answer, your mind keeps going back to it.",
+      "A company has charged you twice and keeps replying with stock phrases. Someone else would shrug it off, but you gather receipts, emails and the contract, find the right clause and write a letter that can’t be answered with a template. **You carry an inquiry through to a fair outcome long after everyone else has grown tired.** A week later the money is back, and you are left with a neat folder and the satisfaction of someone who refused to be confused.",
+      "Yet not every case deserves a grip that tight. Unresolved unfairness holds you like a chain: in the evening you reread the emails in your head, hunt for better wording, imagine what the other side will say. The cost of the inquiry keeps rising, but stopping is hard — backing down feels like losing rather than choosing. At some point you are no longer driving the Chariot; it is driving you. The truth has long been clear, yet the question still won’t let go."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 7,
+       "caption": "Driving the inquiry home"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 8,
+       "caption": "Thirst for a fair answer"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 15,
+       "caption": "A question that grips"
+      }
+     ]
+    },
+    {
+     "key": "sahasrara",
+     "title": "Sahasrara",
+     "topic": "Meaning and direction",
+     "heading": "A pause that changes course",
+     "paragraphs": [
+      "Sometimes meaning becomes clear not on the run but when you stop. In your actions this is the Hanged Man: you can step out of the usual flow of things and look at your life from an unfamiliar angle. That look is not idle — Justice guides it, a set of inner scales on which you honestly weigh what you put in and what you get back. And the outcome feels like Judgement: a call you cannot leave unanswered, a clear “it’s time”, after which your old life no longer seems the only one possible.",
+      "Picture a quiet week between two projects. You don’t rush; you calmly sort through what your current work gives you, what it costs and what you are really serving. The sums don’t add up — and that brings relief rather than bitterness. **Your turning points come not from resentment or exhaustion but from an honest look from the outside.** That is why a decision made after such a pause holds firm: you know exactly why you are doing what you do.",
+      "It gets harder when the review turns into a trial of the past. The scales keep working: how many years went the wrong way, where you should have made up your mind sooner, who is to blame. The pause drags on, and instead of a new step there is an inquiry. The call that started it all grows fainter while you weigh not the choice any more but yourself. The past was the road to your present clarity, but in this kind of reckoning it looks like one long debt."
+     ],
+     "cells": [
+      {
+       "column": "physics",
+       "title": "Physics",
+       "arcanum": 12,
+       "caption": "Stopping to see differently"
+      },
+      {
+       "column": "energy",
+       "title": "Energy",
+       "arcanum": 8,
+       "caption": "Leaning on honest scales"
+      },
+      {
+       "column": "emotions",
+       "title": "Emotions",
+       "arcanum": 20,
+       "caption": "Answering an inner call"
+      }
+     ]
+    }
+   ],
+   "energyField": {
+    "key": "energy_field",
+    "title": "Overall energy field",
+    "topic": "The shared tone of all seven levels",
+    "heading": "A quiet strength with no witnesses",
+    "paragraphs": [
+     "Most of your work happens with no audience. In what you do, you are like the Hermit: you take on a task yourself, go at your own pace and don’t call for help until you have worked it out. Your energy comes from Strength — inner steadiness, the ability to come to terms gently with your own fear and steer it where it won’t get in the way. And your feelings are kept by the High Priestess: you understand and feel many things deeply, but keep them to yourself, behind the veil.",
+     "**Your strength works quietly: calm on the outside, and inside a great deal of work that no one sees.** Suppose a hard stretch arrives: a difficult exam, uncertainty at work, a move to another city. You don’t complain or panic. Each evening you simply sit down, work out the next step and persuade your anxiety to wait. People around you are amazed at how easily it all came to you. They didn’t see the nights when you were holding your lion.",
+     "That is exactly the difficulty: since no one sees, no one offers help. The High Priestess keeps her knowledge to herself, the Hermit walks alone, and Strength won’t let you show how frightening it sometimes is. Those close to you get used to the idea that you will cope, and stop asking. So when one day your strength runs short, it will not be easy to say so: for too long you have looked like someone who needs no support. A solitude that began as your own way of doing things becomes a habit for everyone around you."
+    ],
+    "cells": [
+     {
+      "column": "physics",
+      "title": "Physics",
+      "arcanum": 9,
+      "caption": "Coping on your own"
+     },
+     {
+      "column": "energy",
+      "title": "Energy",
+      "arcanum": 11,
+      "caption": "Gently taming fear"
+     },
+     {
+      "column": "emotions",
+      "title": "Emotions",
+      "arcanum": 2,
+      "caption": "Knowing and not saying"
+     }
+    ]
+   },
+   "chakraNote": "An author’s symbolic reading. You can compare the possibilities and difficulties described here with your own experience; they do not describe your physical condition or whether your chakras are ‘open’."
+  },
+  "karmic_tail": {
+   "title": "Karmic tail",
+   "paragraphs": [
+    "“I’ll let my ears freeze off to spite Mum”: this Russian saying fits the 15-20-5 tail better than the legend behind its name, the “Rebel”. The legend says that in a past life the soul, born into a family with strict rules, rebelled: chose passion over duty, then left or was cast out. None of this can be checked. As metaphor, though, the legend is precise, and the cards themselves back it.",
+    "For Waite, the Devil is “the Dweller on the Threshold without the Mystical Garden when those are driven forth therefrom who have eaten the forbidden fruit”. Breaking a commandment and landing outside the gates: that is the Rebel’s plot. His raised right hand, Waite says, is “the reverse of that benediction which is given by the Hierophant in the fifth card” — and the Hierophant is this tail’s root. The Waite–Smith cards share one layout: a raised figure with a lifted hand above two figures, kneeling ministers on the Hierophant, a chained pair on the Devil.",
+    "The gesture is not an absence of blessing but its reverse: the same raised hand, turned the other way. A protest mirrors the rule it fights. Hence the saying: whoever acts out of spite still lets Mum decide what they do, only with the sign reversed. The Rebel of 15-20-5 is not a person without rules. **It is a person whose life is built around someone else’s rule with a minus sign.**",
+    {
+     "h3": "Chained not to the fruit but to the ban"
+    },
+    "Here the Devil’s pull is lit by a ban. A cigarette behind the garages at fourteen. A partner the family will never accept: the union rests on “us against the world”, and once the parents come round, the passion somehow fades. Forbidden fruit has become just fruit.",
+    "Waite’s card shows why. The chain loops round the neck, the hands are free, and it runs not to the fruit, not to each other, but to a ring on the altar of the figure towering above. Our reading: **a person with this tail is tied not to the forbidden thing but to the ban.** Without the ban, many desires quietly vanish.",
+    {
+     "h3": "No judge on the Judgement card"
+    },
+    "On Waite’s twentieth card an angel sounds the trumpet and the dead rise — not punishment but transformation “in answer to the summons of the Supernal — which summons is heard and answered from within”. Waite asks: “What is that within us which does sound a trumpet and all that is lower in our nature rises in response — almost in a moment, almost in the twinkling of an eye?” That lower nature is exactly what the Devil card depicts.",
+    "In 15-20-5 the trumpet sounds from outside: “time to grow up” from Mum, “that’s not how we do things here” from the boss. Everything lower rises in the twinkling of an eye — hurt, stubbornness, the urge to prove a point — and a sharp turn follows: slam the door, quit, start from zero. It feels like resurrection, but another voice set the new life’s direction.",
+    "The card’s Russian name, Sud, also means “court of law” — and hints at another trap: judgement as a tribunal. For years an argument runs in the head with a father, a teacher, an ex, all long out of the picture. Yet Waite’s card has no scales and no sword; those belong to Justice, the eighth card. The angel hands down no verdict; he calls, and the judgement, Wen stresses, is the person’s own. **The circle runs on a double substitution: a verdict replaces the call, and someone else’s judgement replaces one’s own.**",
+    "The centre of the chart holds the circle tightest: everyone with this tail has 10 there, the Wheel of Fortune, the comfort zone. A break feels less like a problem than “a new chapter”. But for Waite the wheel’s essential idea is “stability amidst movement”, and a wheel without an axle can only spin. Each new order hardens into a new altar with a new ring: yesterday’s rebel starts a business “so that nobody tells me what to do”, and within a few years its rules are stricter than the old boss’s.",
+    {
+     "h3": "Two sons chained to the same altar"
+    },
+    "The parable of the prodigal son reads like this circle. The parallel is ours, not Waite’s or the method’s. The younger son “wasted his substance with riotous living” — the Devil. “When he came to himself”, he went home, and his father would say he “was dead, and is alive again” — Judgement. The father has a ring put on his hand — the Hierophant and his blessing.",
+    "The elder son never left. Hearing of the feast, he “was angry, and would not go in”: “Lo, these many years do I serve thee, neither transgressed I at any time thy commandment.” He carried the chain as a duty. His father answers: “Son, thou art ever with me, and all that I have is thine.” These are the two faces of 15-20-5: the open rebel who argues and leaves, and the quiet one who does everything properly and nurses grievances for years. **Both are chained to the same altar: one through “against”, the other through “must”.** The parable never says whether the elder son went in. Nobody else can take that step.",
+    {
+     "h3": "The way out is written into the Devil’s own description"
+    },
+    "The figure towering over the chained pair, Waite writes, is himself a bondsman, “blind to the liberty of service”. The ministers on Waite’s fifth card kneel without chains. The Hierophant’s divinatory list opens with “marriage, alliance” and goes on to “captivity, servitude”. One bond can be a vow or a captivity; the only difference is whether it was chosen.",
+    "The root’s task is neither a return to obedience nor a hunt for the “right church”, but taking the Hierophant’s place oneself: choosing what to serve and being able to explain one’s rules.",
+    {
+     "ul": [
+      "Before a big decision, check whether the wish would survive a “yes” from Mum, the boss or an ex. A wish that vanishes with the ban is a reversed blessing.",
+      "Sort one’s rules into “for” and “against”. In “I will never be like my father”, the father is still in charge.",
+      "Find one thing to keep from the family line, faith or former surroundings, and say so out loud to the person it came from."
+     ]
+    },
+    "If there was violence or danger in the family, safety matters more than any scheme, this one included.",
+    {
+     "h3": "The one who left and became a place to come back to"
+    },
+    "In the worked-through version, the Devil gives the courage to go where it is “not allowed” and an inside knowledge of the forbidden. Judgement gives the skill to change a life once it has truly run its course, not merely when hurt. The Hierophant gives a form that can be passed on: rules with reasons. Such people get called in when the old order has broken down and no new one exists yet. They will not hold anyone on the chain of “that’s how it’s done”: they know its weight.",
+    "Of the figure towering over the chained pair, Waite writes that he is “not to be their master for ever”. The Hierophant of this tail is not someone who never left. **It is someone who left, understood why they left, and became a place others can come back to.**"
+   ]
+  }
+ },
+ "id": 0,
+ "status": "done",
+ "created_at": "2026-11-03T19:07:16.091683+00:00",
+ "approved_at": "2026-11-03T19:07:16.091683+00:00",
+ "href": "/matrix/individual-example/personal",
+ "can_pdf": false
+}

@@ -297,6 +297,27 @@ def reprint_stale() -> int:
     return len(groups)
 
 
+def background(key: tuple, job, *args) -> bool:
+    """Чужая печать в том же фоновом потоке, по одной на ключ; видна в `pending`."""
+    if not settings.print_warmup or not settings.pdf_enabled:
+        return False
+    with _lock:
+        if key in _started:
+            return False
+        _started.add(key)
+
+    def run_once() -> None:
+        try:
+            job(*args)
+        except Exception as exc:                   # noqa: BLE001
+            log.warning("фоновая печать %s не удалась: %s", key, exc)
+        finally:
+            with _lock:
+                _started.discard(key)
+    _pool.submit(run_once)
+    return True
+
+
 def warm(user_id: int, reading_id: int | None) -> bool:
     """Поставить печать в фон сразу после оплаты. Возвращает, взялись ли за работу."""
     if reading_id is None or not settings.print_warmup or not settings.pdf_enabled:

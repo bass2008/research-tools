@@ -1,4 +1,6 @@
 """Медленный переход в разбор подтверждает первый клик видимым состоянием ожидания."""
+import re
+
 import pytest
 from playwright.sync_api import expect
 from conftest import BASE
@@ -17,10 +19,10 @@ def test_open_shows_pending_until_reading_arrives(page, mail, product, inputs, c
     page.route(f"{target}*", lambda route: held.append(route))
     page.goto(f"{BASE}/account", wait_until="domcontentloaded")
     link = page.get_by_test_id(card_id).locator(f'a[href="/ru/{path}/{reading.json()["id"]}"]')
-    expect(link).to_have_text("Открыть")
+    expect(link).to_have_text(re.compile(r"^Открыть(\s|$)"))
     link.click()
     try:
-        expect(link).to_have_text("Открываем…", timeout=1500)
+        expect(link).to_contain_text("Открываем…", timeout=1500)
         expect(link.locator('[aria-busy="true"]')).to_be_visible()
         assert page.url == f"{BASE}/ru/account"
     finally:
@@ -30,4 +32,4 @@ def test_open_shows_pending_until_reading_arrives(page, mail, product, inputs, c
     page.wait_for_url(target)
     expect(page.locator("h1")).to_be_visible()
     page.go_back()
-    expect(page.get_by_test_id(card_id).get_by_role("link", name="Открыть", exact=True)).to_be_visible()
+    expect(page.get_by_test_id(card_id).get_by_role("link", name=re.compile(r"^Открыть(\s|$)"))).to_be_visible()

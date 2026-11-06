@@ -15,6 +15,9 @@ from .products import ANY, PAIR, PERSONAL
 SINGLE_ID = "single"
 MONTH_ID = "month"
 PAIR_ID = "pair"
+# Individual readings: hidden from the storefront and sold only through /individual-orders,
+# where the price is counted from the order.
+INDIVIDUAL_ID = "individual"
 
 SITE = "site"
 
@@ -29,6 +32,9 @@ SEED = [
     {"id": MONTH_ID, "name": "Подписка на 3 месяца", "price": 59_000,
      "products": [ANY], "per_reading": False, "store_unlimited": True,
      "period_days": 90, "public": True, "sort": 30},
+    {"id": INDIVIDUAL_ID, "name": "Индивидуальный разбор", "price": 199_000,
+     "products": [], "per_reading": False, "store_unlimited": False,
+     "period_days": None, "public": False, "sort": 40},
 ]
 
 
@@ -77,6 +83,7 @@ def display_name(offer_id: str, stored_name: str) -> str:
         SINGLE_ID: {"ru": "Полный разбор одной даты", "en": "Full reading for one date"},
         MONTH_ID: {"ru": "Подписка на 3 месяца", "en": "3-month subscription"},
         PAIR_ID: {"ru": "Совместимость пары", "en": "Couple compatibility"},
+        INDIVIDUAL_ID: {"ru": "Индивидуальный разбор", "en": "Individual reading"},
     }
     translated = labels.get(offer_id, {})
     return translated.get(current_locale(), stored_name) if stored_name in translated.values() else stored_name

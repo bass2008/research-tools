@@ -1,9 +1,11 @@
 "use client";
 
 import { publicPath } from "@/lib/publicRouting";
+import { useSession } from "@/components/account/useSession";
 
 import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
 import { useLocale } from "@/components/ui/LocaleProvider";
+import styles from "@/components/ui/ReadingButton.module.css";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -49,6 +51,7 @@ export default function SaveMatrixButton({ locale: requestedLocale, ...localePro
   const { api, birthLabel } = forLocale(L);
 
   const router = useRouter();
+  const session = useSession();
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
   const [limit, setLimit] = useMessage(L);
   const [error, setError] = useMessage(L);
@@ -58,10 +61,10 @@ export default function SaveMatrixButton({ locale: requestedLocale, ...localePro
     setLimit(null);
     setError(null);
     try {
-      const saved = await api.saveMatrix(birth, sex);
+      const saved = await api.saveReading("personal", { birth, sex });
       setState("done");
       await onSaved?.(saved.id);
-      if (openReport) router.push(publicPath(`/report?m=${saved.id}`, L));
+      if (openReport) router.push(publicPath(`/matrices/${saved.id}`, L));
       router.refresh();
     } catch (err) {
       setState("idle");
@@ -80,10 +83,12 @@ export default function SaveMatrixButton({ locale: requestedLocale, ...localePro
     }
   };
 
+  if (session.status !== "user") return null;
+
   return (
-    <div>
+    <div className={styles.container}>
       <button
-        className="btn sm"
+        className={`${styles.button} ${styles.gold}`}
         data-testid="save-matrix"
         onClick={save}
         disabled={state !== "idle"}

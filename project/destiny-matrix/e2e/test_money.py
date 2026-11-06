@@ -70,8 +70,11 @@ def test_double_click_makes_one_payment(page, mail):
     page.wait_for_function(
         "() => document.querySelector('[data-testid=paid-matrix]') || document.querySelector('.err')",
         timeout=60_000)
-    flows.account(page)
-    rows = page.get_by_test_id("payment-row")
+    flows.logout(page)
+    flows.login(page, *ADMIN)
+    page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
+    rows = page.locator("[data-testid=admin-payment-row]", has_text=mail)
+    expect(rows.first).to_be_visible(timeout=20_000)
     assert rows.count() == 1, f"платежей {rows.count()}"
 
 
@@ -117,10 +120,10 @@ def test_storage_limit_is_explained(page, mail):
     flows.calculate(page, 19, 7, 1995)
     flows.save_current(page)
     flows.calculate(page, 20, 8, 1996)
-    flows.account(page)
-    page.get_by_test_id("save-matrix").click()
+    page.locator(".save-reading-summary").get_by_test_id("save-matrix").click()
     page.wait_for_timeout(1500)
     expect(page.get_by_test_id("limit-message")).to_be_visible()
+    flows.account(page)
     assert flows.matrix_cards(page).count() == 1
 
 

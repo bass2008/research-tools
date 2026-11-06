@@ -32,8 +32,9 @@ export default function BuyButton({ locale: requestedLocale, ...localeProps }: (
 
   const path = splitPublicPath(usePathname()).path;
   const birth = useBirth();
-  const mode = useOfferMode();
-  if (mode !== "sell") return null;
+  // Individual readings can be bought any number of times, so a subscriber sees "Buy" too: /pay shows
+  // them their subscription line and the gold section. Only the showcase without payments has no till.
+  if (useOfferMode() === "free") return null;
   const href = buyFor(path ?? "", birth !== null);
   return (
     <SiteLink plain={plain} className="btn sm" data-testid="buy-top" href={href}>

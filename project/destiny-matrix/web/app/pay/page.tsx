@@ -1,5 +1,7 @@
 import { publicPath } from "@/lib/publicRouting";
 import { requestSite } from "@/lib/siteProfile.server";
+import IndividualCompare from "@/components/pay/IndividualCompare";
+import IndividualOffer from "@/components/pay/IndividualOffer";
 import { PayChoice } from "@/components/pay/Subscribed";
 import TariffsProvider from "@/components/pay/TariffsProvider";
 import { ALL_FREE } from "@/lib/access";
@@ -30,9 +32,9 @@ const forLocale = localized((L: Locale, site) => {
   return { pageMeta, metadata };
 });
 
-// Выбор перед формой. Без продукта — все предложения сайта; `for=personal|pair` — разовая покупка
-// этого продукта или подписка, номер записи (`m`/`r`) уходит в форму. Старые ссылки с номером, но
-// без продукта, ведут сразу в форму этой записи.
+// One page wherever "Buy" was pressed: all three automatic offers, then the gold section of
+// individual readings. `for=personal|pair` only carries the saved record (`m`/`r`) into the form
+// of its own offer. Old links with a number but without a product go straight to that form.
 export default async function PayChoicePage({ searchParams }: { searchParams: Search }) {
   const L = await requestLocale();
 
@@ -48,9 +50,7 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
   const carry = flow === "pair" ? { r: id("r") } : flow === "personal" ? { m: id("m") } : {};
   const [{ providers }, all] = await Promise.all([getBilling(), allOffers()]);
   // разовые покупки слева, подписка последней
-  const offers = all
-    .filter((t) => !flow || (t.products ?? ["personal"]).some((p) => p === flow || p === "*"))
-    .sort((a, b) => Number(a.per_reading === false) - Number(b.per_reading === false));
+  const offers = [...all].sort((a, b) => Number(a.per_reading === false) - Number(b.per_reading === false));
   return (
     <main id="content" className="page">
       <div className="wrap">
@@ -59,8 +59,8 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
         </p>
         <h1>{D.pay.chooseTitle[L]}</h1>
         {offers.length ? (
-          <TariffsProvider product={flow ?? "all"} locale={L} server={offers} providers={providers}>
-            <PayChoice locale={L} pair={flow === "pair"} carry={carry} />
+          <TariffsProvider product="all" locale={L} server={offers} providers={providers}>
+            <PayChoice locale={L} carry={carry} />
           </TariffsProvider>
         ) : (
           <div className="panel paybox">
@@ -68,6 +68,8 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
             <p className="dim">{D.encLinks.priceUnknownText[L]}</p>
           </div>
         )}
+        <IndividualOffer />
+        <IndividualCompare />
       </div>
     </main>
   );

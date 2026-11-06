@@ -7,13 +7,12 @@
 """
 from __future__ import annotations
 
-from . import sites
-
 import logging
 import smtplib
 from email.message import EmailMessage
 
 import boto3
+from botocore.config import Config
 
 from .i18n import say, current_locale
 from .config import settings
@@ -31,6 +30,7 @@ def enabled() -> bool:
 def _by_api(msg: EmailMessage) -> None:
     ses = boto3.client("sesv2", endpoint_url=settings.postbox_endpoint,
                        region_name=settings.postbox_region,
+                       config=Config(connect_timeout=5, read_timeout=10, retries={"max_attempts": 0}),
                        aws_access_key_id=settings.postbox_key_id,
                        aws_secret_access_key=settings.postbox_secret)
     # Raw, а не Simple: только так до получателя доходит Reply-To.
@@ -70,36 +70,44 @@ def send(to: str, subject: str, body: str) -> bool:
 
 
 def purchase(to: str, tariff_name: str, payment_id: str, password: str | None = None,
-             reading=None, subscription: bool = False) -> bool:
+             reading=None, subscription: bool = False, verify_email: bool = False,
+             origin: str | None = None) -> bool:
     # Без номера разбора ссылка вела на «последний сохранённый», а купить могли не его:
     # человек шёл по письму и попадал в чужой по смыслу разбор. Подписка разбора не имеет —
     # она ведёт на личный разбор, как и раньше.
     if subscription:
-        return _subscription(to, tariff_name, payment_id, password)
+        return _subscription(to, tariff_name, payment_id, password, verify_email, origin)
     from . import products
     product = products.get(reading.product) if reading is not None else None
     page = product.page(reading.id) if product else "/report"
-    report = f"{sites.current().origin}/{current_locale()}{page}"
+    site = link_origin(origin)
+    report = f"{site}/{current_locale()}{page}"
     lines = [
         say("mail.purchase.ready", tariff=tariff_name),
         say("mail.purchase.payment", id=payment_id),
         "",
         say("mail.purchase.open", url=report),
-        say("mail.account", url=f"{sites.current().origin}/{current_locale()}/account"),
+        say("mail.account", url=f"{site}/{current_locale()}/account"),
     ]
     if password:
         lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
+    if verify_email:
+        lines += ["", _verify_hint(site)]
     lines += ["", say("mail.purchase.help")]
     return send(to, say("mail.purchase.subject"), "\n".join(lines))
 
 
-def _subscription(to: str, tariff_name: str, payment_id: str, password: str | None) -> bool:
+def _subscription(to: str, tariff_name: str, payment_id: str, password: str | None, verify_email: bool = False,
+                  origin: str | None = None) -> bool:
     # У подписки нет одного разбора: «ваш разбор готов» и ссылка на личный уводили на главную.
-    account = f"{sites.current().origin}/{current_locale()}/account"
+    site = link_origin(origin)
+    account = f"{site}/{current_locale()}/account"
     lines = [say("mail.subscription.ready", tariff=tariff_name), say("mail.purchase.payment", id=payment_id),
              "", say("mail.subscription.open", url=account)]
     if password:
         lines += ["", say("mail.purchase.login", email=to), say("mail.purchase.password", password=password)]
+    if verify_email:
+        lines += ["", _verify_hint(site)]
     lines += ["", say("mail.subscription.help")]
     return send(to, say("mail.subscription.subject"), "\n".join(lines))
 
@@ -111,7 +119,7 @@ def welcome(to: str) -> bool:
     body = "\n".join([
         say("mail.welcome.created", email=to),
         "",
-        say("mail.account", url=f"{sites.current().origin}/{current_locale()}/account"),
+        say("mail.account", url=f"{link_origin()}/{current_locale()}/account"),
         say(access_line),
         "",
         say("mail.welcome.help"),
@@ -143,3 +151,23 @@ def reset(to: str, link: str, hours: int) -> bool:
         say("mail.reset.expires", hours=hours),
     ])
     return send(to, say("mail.reset.subject"), body)
+
+
+def _verify_hint(site: str) -> str:
+    label = "Confirm your email in your profile: " if current_locale() == "en" else "Подтвердить почту в профиле: "
+    return label + f"{site}/{current_locale()}/account?tab=profile"
+
+
+def link_origin(origin: str | None = None) -> str:
+    # Stored origin of the operation, else the request domain; a retired domain falls back.
+    from urllib.parse import urlsplit
+    from . import sites
+    request = sites.optional_current()
+    for candidate in (origin, request.origin if request else None):
+        if candidate and sites.find(candidate):
+            return candidate
+    value = settings.mail_site_origin.rstrip("/")
+    url = urlsplit(value)
+    if url.scheme not in ("http", "https") or not url.netloc or url.username or url.password or url.path or url.query or url.fragment:
+        raise ValueError("MAIL_SITE_ORIGIN must be an HTTP(S) origin")
+    return value

@@ -44,6 +44,8 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
   printing?: boolean;
   /** Отчёт стоит внутри главной, где h1 и навигационная цепочка уже есть. */
   embedded?: boolean;
+  /** Administrative preview does not use the owner's PDF download endpoint. */
+  showPdf?: boolean;
 }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
   const site = await requestSite();
@@ -56,6 +58,7 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
     currentId,
     printing = false,
     embedded = false,
+    showPdf = true,
   } = localeProps;
   const linkSite = printing ? resolvePrintLinkSite(site, L) : site;
   const { DISCLAIMER, birthLabel, printedBy } = forLocale(L, site);
@@ -83,7 +86,7 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
           {printing ? null : <> · {!ALL_FREE && unlocked ? planName : D.sheet.freeAccess[L]}</>} —{" "}
           {D.sheet.openOf[L](open, sections.length)}
         </p>
-        {printing || locked.length ? null : (
+        {printing || locked.length || !showPdf ? null : (
           /* кнопка и её сообщение живут в одной ячейке: иначе текст ошибки становился третьим
              элементом строки и сдвигал кнопку от правого края.
              На закрытом разборе кнопки нет вовсе: она была активной и всегда отвечала

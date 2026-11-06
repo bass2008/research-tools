@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from pathlib import Path
 
-from sqlalchemy import create_engine, make_url
+from sqlalchemy import create_engine, make_url, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from .config import settings
@@ -33,3 +33,10 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 def get_db() -> Iterator[Session]:
     with SessionLocal() as session:
         yield session
+
+
+def begin_write(db: Session) -> None:
+    """Завершить чтение зависимостей и сериализовать sensitive read/modify/write в SQLite."""
+    db.rollback()
+    if db.get_bind().dialect.name == "sqlite":
+        db.execute(text("BEGIN IMMEDIATE"))

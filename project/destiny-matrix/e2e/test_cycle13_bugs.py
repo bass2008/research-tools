@@ -49,16 +49,19 @@ def test_sex_switch_keeps_the_paid_report_open(page: Page, mail: str) -> None:
 
 
 def test_account_report_link_opens_the_paid_matrix(page: Page, mail: str) -> None:
-    """«Мой разбор» в кабинете ведёт на купленную дату, а не на последнюю сохранённую."""
+    """Карточка купленной даты в кабинете ведёт на неё, а не на последнюю сохранённую."""
     flows.buy(page, mail, 19, 9, 1979, sex="f")
     flows.calculate(page, 5, 5, 2015, "f")
     flows.save_current(page)
     flows.account(page)
-    href = page.get_by_test_id("account-report").get_attribute("href")
-    page.get_by_test_id("account-report").click()
+    card = flows.matrix_cards(page).filter(has_text="19 сентября 1979")
+    expect(card).to_have_count(1)
+    href = card.get_by_role("link", name=re.compile(r"^Открыть")).get_attribute("href")
+    card.get_by_role("link", name=re.compile(r"^Открыть")).click()
+    page.wait_for_url(re.compile(r"/matrices/\d+$"))
     page.wait_for_timeout(1200)
     locked = flows.locked_sections(page)
-    assert locked == 0, f"«Мой разбор» ведёт на закрытую дату ({href}), под замком {locked} разделов"
+    assert locked == 0, f"карточка купленной даты ведёт на закрытую дату ({href}), под замком {locked} разделов"
 
 
 def test_printed_report_has_no_container_host_links(page: Page, mail: str, tmp_path) -> None:

@@ -40,23 +40,27 @@ export function OctagramFrame({ label, under, children }: { label: string; under
 
 /** Точка схемы: кружок с числом; со ссылкой — переход к аркану, как у всех карт сайта. */
 export function OctagramPoint({ angle, radius, size, font, value, color, title, href, small = false, muted = false,
-  pointKey, chakras }: {
+  focused = false, pointKey, chakras }: {
   angle: number; radius: number; size: number; font: number; value: number; color: string; title: string;
-  href?: string; small?: boolean; muted?: boolean; pointKey: string;
+  href?: string; small?: boolean; muted?: boolean; focused?: boolean; pointKey: string;
   /** чакры, строки которых подсвечивают точку при наведении на атлас */
   chakras?: string;
 }) {
   const [x, y] = pt(angle, radius);
+  // On a thumbnail map the discussed point must stay readable while the rest fades out.
+  if (focused) { size = Math.max(size * 1.3, 26); font = Math.max(font * 1.3, 23); small = false; }
   const props = {
     className: styles.node,
     style: { "--point-color": color } as CSSProperties,
     "data-map-point": pointKey,
     "data-map-chakras": chakras || undefined,
     "data-muted": muted || undefined,
+    "data-focus": focused || undefined,
   };
   const body = (
     <>
       <title>{title}</title>
+      {focused ? <circle className="focus-ring" cx={fmt(x)} cy={fmt(y)} r={size + 7} aria-hidden="true" /> : null}
       {chakras ? <circle className={styles.halo} data-chakra-halo="true" cx={fmt(x)} cy={fmt(y)} r={size + 7} aria-hidden="true" /> : null}
       <circle cx={fmt(x)} cy={fmt(y)} r={size} fill={color} />
       <text className={small ? "n sm" : "n"} x={fmt(x)} y={fmt(y)} fontSize={font}>{value}</text>

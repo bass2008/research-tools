@@ -21,6 +21,7 @@ def header(origin=RU, locale="ru"):
 
 @pytest.fixture
 def regional(monkeypatch, client):
+    monkeypatch.setattr(settings, "mail_site_origin", RU)
     connection = {"id": "tbank", "provider": "tbank", "notificationUrl": RU + "/api/payments/notify/tbank"}
     profiles = [{"origin": RU, "defaultLocale": "ru", "locales": ["ru"], "payments": [connection]},
                 {"origin": COM, "defaultLocale": "en", "locales": ["en", "ru"], "payments": []}]
@@ -148,15 +149,21 @@ def test_sweep_restores_payment_origin_and_language(client, db, regional, monkey
 
 
 @pytest.mark.parametrize("origin,locale", [(RU, "ru"), (COM, "en"), (COM, "ru")])
-def test_account_mail_and_pdf_use_request_origin(client, regional, monkeypatch, origin, locale):
+def test_account_mail_stays_on_request_domain_and_pdf_request_origin(client, regional, monkeypatch, origin, locale):
     letters = []
-    monkeypatch.setattr(mail, "send", lambda *args: letters.append(args))
+    monkeypatch.setattr(mail, "send", lambda *args: letters.append(args) or True)
     headers = header(origin, locale)
     response = client.post("/api/auth/register", headers=headers, json={"email": BUY["email"], "password": "123"})
     assert response.status_code == 200
     assert origin + f"/{locale}/account" in str(letters[-1])
+    token = response.json()["token"]
+    verify = client.post("/api/auth/email/verification/request", headers={**headers, "Authorization": f"Bearer {token}"})
+    assert verify.status_code == 200, verify.text
+    assert origin + f"/{locale}/account/confirm#token=" in str(letters[-1])
     assert client.post("/api/auth/reset/request", headers=headers, json={"email": BUY["email"]}).status_code == 200
     assert origin + f"/{locale}/reset?token=" in str(letters[-1])
+    other = COM if origin == RU else RU
+    assert other not in "".join(str(letter) for letter in letters)
     with sites.using_site(sites.find(origin)):
         assert store.LocalStore().link("sample.pdf").startswith(origin + "/api/reports/file?")
 
@@ -208,7 +215,7 @@ def test_admin_on_com_refunds_using_the_payment_connection(client, db, regional,
     assert payment.refunded_at is not None
 
 
-def test_shared_connection_keeps_com_return_and_mail_context(client, db, regional, monkeypatch):
+def test_shared_connection_keeps_com_return_and_mail_on_purchase_domain(client, db, regional, monkeypatch):
     # Проверка расширяемости на игрушечном провайдере, без подключения Т-Банка к COM.
     profiles, calls = regional
     mock = {"id": "shared-mock", "provider": "mock", "notificationUrl": RU + "/api/payments/notify/shared-mock"}
@@ -231,6 +238,7 @@ def test_shared_connection_keeps_com_return_and_mail_context(client, db, regiona
     assert captured[0].fail.startswith(COM + "/ru/pay/fail?")
     assert captured[0].notification == RU + "/api/payments/notify/shared-mock"
     assert COM + "/ru/report?" in str(letters[0])
+    assert RU + "/ru/" not in str(letters[0])
     assert calls == []
 
 

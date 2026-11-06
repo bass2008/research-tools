@@ -17,7 +17,7 @@ export const forLocale = localized((L: Locale) => {
   // список возможностей разошёлся бы с правами, которые реально выдаёт оплата.
   function features(t: Tariff): string[] {
     if (t.products?.length === 1 && t.products[0] === "pair") {
-      return [D.pay.pairSections[L], D.pay.pairDates[L], D.pay.noSubscription[L], D.pay.pairOpens[L], D.pay.downloadsAsPdf[L]];
+      return [D.pay.pairSections[L], D.pay.pairDates[L], D.pay.noSubscription[L], D.pay.opensAtOnce[L], D.pay.downloadsAsPdf[L]];
     }
     const unlimited = t.scope.includes("all");
     const everything = t.products?.includes("*") ?? false;
@@ -27,10 +27,15 @@ export const forLocale = localized((L: Locale) => {
       ...(t.scope.includes("matrix") ? [D.pay.storedInAccount[L]] : []),
       ...(t.period_days === null
         ? [D.pay.noSubscription[L], D.pay.opensAtOnce[L], D.pay.downloadsAsPdf[L]]
-        : [D.pay.openedFor[L](periodLabel(t)), D.pay.manualRenewal[L]]),
+        : [D.pay.openedFor[L](periodLabel(t)), D.pay.noAutomaticCharges[L], D.pay.opensAtOnce[L]]),
     ];
   }
-  return { capLabel, periodLabel, priceLabel, features };
+  // Short titles that fit one line; "automatic" is said in the card cap.
+  function title(t: Tariff): string {
+    if (t.period_days !== null) return t.name;
+    return t.products?.length === 1 && t.products[0] === "pair" ? D.pay.pairTitle[L] : t.scope.includes("all") ? t.name : D.pay.singleTitle[L];
+  }
+  return { capLabel, periodLabel, priceLabel, features, title };
 });
 
 /** Номер сохранённой записи, которую откроет разовая покупка своего продукта. */
@@ -47,7 +52,7 @@ export default function Plans({ locale: requestedLocale, ...localeProps }: ({ pl
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
   const { place = "plans", carry } = localeProps;
-  const { capLabel, periodLabel, priceLabel, features } = forLocale(L);
+  const { capLabel, periodLabel, priceLabel, features, title } = forLocale(L);
 
   const tariffs = useTariffs();
   const providers = usePaymentProviders();
@@ -69,7 +74,7 @@ export default function Plans({ locale: requestedLocale, ...localeProps }: ({ pl
         <div className={compare && t.id === premium?.id ? "plan premium" : "plan"} key={t.id}>
           {compare ? <div className="pcap">{capLabel(t)}{t.id === premium?.id ? <span className="plan-value"> · {D.pay.betterValue[L]}</span> : null}</div> : null}
           <div className="in">
-            <h3>{t.name}</h3>
+            <h3>{title(t)}</h3>
             <div className="price">
               {priceLabel(t)} <s>{periodLabel(t)}</s>
             </div>

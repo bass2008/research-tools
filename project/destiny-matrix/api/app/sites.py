@@ -90,6 +90,10 @@ def find(origin: str) -> Site | None:
 _site: ContextVar[Site | None] = ContextVar("site", default=None)
 
 
+def optional_current() -> Site | None:
+    return _site.get()
+
+
 def current() -> Site:
     site = _site.get()
     if site is None:

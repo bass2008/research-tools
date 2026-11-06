@@ -11,6 +11,8 @@ import { useMessage } from "@/lib/i18n/useMessage";
 import type { PayStage as Stage } from "@/lib/payresult";
 import { forLocale as localizedPayresult } from "@/lib/payresult";
 import { payHref, readingHref, type ReadingRef } from "@/lib/readingLinks";
+import { workdaysFrom } from "@/lib/individualPricing";
+import { browserDay } from "@/lib/today";
 import Link from "@/components/ui/LocalizedLink";
 import { useEffect, useState } from "react";
 
@@ -33,7 +35,7 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
   const [note, setNote] = useMessage(L);
   const [reading, setReading] = useState<ReadingRef | null>(null);
   // что сервер сказал о покупке: подписка без разбора и исход возврата
-  const [facts, setFacts] = useState<{ subscription: boolean; until: string | null; outcome?: string }>(
+  const [facts, setFacts] = useState<{ subscription: boolean; individual?: boolean; until: string | null; outcome?: string }>(
     { subscription: false, until: null });
   const [guest, setGuest] = useState(false);
 
@@ -73,7 +75,7 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
         try {
           const res = await check();
           if (stop) return;
-          setFacts({ subscription: res.subscription === true, until: res.until ?? null, outcome: res.outcome });
+          setFacts({ subscription: res.subscription === true, individual: res.individual === true, until: res.until ?? null, outcome: res.outcome });
           // Возврат проверяем раньше оплаты: у возвращённого платежа отметка об оплате остаётся,
           // и страница поздравляла с покупкой при каждой перезагрузке, хотя деньги уже вернулись.
           if (res.state === "abandoned") {
@@ -117,6 +119,19 @@ export default function PayResult({ locale: requestedLocale, ...localeProps }: (
       stop = true;
     };
   }, [order, outcome]);
+
+  if (stage === "paid" && facts.individual) {
+    const day = (n: number) => localizedI18n(L).dateLabel(workdaysFrom(browserDay(), n), L);
+    return (
+      <div className="panel paybox" data-testid="pay-individual-done">
+        <h1>{D.individualSale.doneTitle[L]}</h1>
+        <p className="dim">{D.individualSale.doneText[L](day(1), day(3))}</p>
+        <Link className="btn gold wide" href={guest ? `/login?order=${encodeURIComponent(order)}` : "/account?filter=individual"}>
+          {guest ? D.payResult.signInToOpen[L] : D.individualSale.toGolden[L]}
+        </Link>
+      </div>
+    );
+  }
 
   if (stage === "paid" && guest) {
     return (

@@ -190,3 +190,9 @@
 /encyclopedia/arcanum/20
 /encyclopedia/arcanum/21
 /encyclopedia/arcanum/22
+
+# --- индивидуальный разбор: лендинг и три примера (после выкладки лендинга; до неё адреса отдают 404)
+/ru/individual
+/ru/matrix/individual-example/personal
+/ru/matrix/individual-example/pair
+/ru/matrix/individual-example/year

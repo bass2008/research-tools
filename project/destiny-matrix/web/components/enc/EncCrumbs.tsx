@@ -42,7 +42,9 @@ export default function EncCrumbs({ locale: requestedLocale, ...localeProps }: (
     { name: D.nav.encyclopedia[L], href: "/encyclopedia" },
   ];
 
-  if (articles[path]) {
+  if (parts[1] === "individual") {
+    trail.push({ name: L === "en" ? "Individual reading" : "Индивидуальный разбор" });
+  } else if (articles[path]) {
     const section = encyclopediaSection("art");
     trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     trail.push({ name: articles[path] });

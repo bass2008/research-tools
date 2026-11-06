@@ -8,6 +8,7 @@ import { useSession } from "@/components/account/useSession";
 import { useOfferMode } from "@/components/pay/useOfferMode";
 import MatrixResult, { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
 import ReportSections from "@/components/matrix/ReportSections";
+import SaveReadingSummary from "./SaveReadingSummary";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import Plans from "@/components/pay/Plans";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
@@ -103,6 +104,8 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
         <Link href="/">{D.nav.home[L]}</Link> <span>/</span> <span>{D.nav.myReading[L]}</span>
       </p>
       <h1>{D.unlockBox.readingTitle[L]}</h1>
+      <SaveReadingSummary birth={matrix.birth} sex={matrix.sex}
+        opened={sections.filter(s => !s.locked).length} total={sections.length} savedId={currentSaved?.id} />
       <p className="dim">
         {birthLabel(matrix.birth)} ·{" "}
         {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]} ·{" "}

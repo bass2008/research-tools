@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .models import Entitlement, Purchase, Reading, User, iso, utcnow
+from .models import Entitlement, Purchase, Reading, User, as_utc, iso, utcnow
 from .products import PERSONAL, PRODUCTS
 
 
@@ -131,7 +131,7 @@ def reading_state(rights: list[Entitlement], reading: Reading) -> dict:
         return {"access": "granted", "access_until": None, "access_granted": True}
     if ends:
         # выданная подписка подписывается выданной везде: в бейдже, шапке разбора и PDF
-        return {"access": "subscription", "access_until": iso(max(ends)),
+        return {"access": "subscription", "access_until": iso(max(ends, key=as_utc)),
                 "access_granted": not bought_subscription}
     return {"access": "locked", "access_until": None, "access_granted": False}
 
@@ -161,7 +161,7 @@ def slots(rights: list[Entitlement], product: str) -> int:
 
 
 def saved_count(db: Session, user: User, product: str | None = None) -> int:
-    query = select(func.count(Reading.id)).where(Reading.user_id == user.id)
+    query = select(func.count(Reading.id)).where(Reading.user_id == user.id, Reading.removed_at.is_(None))
     if product:
         query = query.where(Reading.product == product)
     return int(db.scalar(query) or 0)
@@ -219,7 +219,7 @@ def product_summary(rights: list[Entitlement], product: str) -> dict:
         "unlimited_granted": not free and bool(subscriptions) and all(r.purchase_id is None for r in subscriptions),
         "owned": len(owned),
         "granted": len(given),
-        "until": iso(max(ends)) if ends else None,
+        "until": iso(max(ends, key=as_utc)) if ends else None,
         "limit": None if free or any(r.store_unlimited for r in rights) else 1 + len({r.reading_id or -r.id for r in singles}),
     }
 
@@ -239,7 +239,7 @@ def holdings(rights: list[Entitlement], subscription_name: str | None = None) ->
             ends = [r.expires_at for r in mine]
             out.append({"kind": "subscription", "source": source, "name": subscription_name,
                         "products": sorted({p for r in mine for p in r.product_list()}),
-                        "until": None if any(e is None for e in ends) else iso(max(ends))})
+                        "until": None if any(e is None for e in ends) else iso(max(ends, key=as_utc))})
     singles = [r for r in rights if r.per_reading]
     for code in PRODUCTS:
         mine = [r for r in singles if code in r.product_list()]

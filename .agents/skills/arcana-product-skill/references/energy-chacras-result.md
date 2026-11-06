@@ -12,7 +12,6 @@
 
 Результат — [«Общее энергополе в матрице судьбы»](https://arcana-sense.ru/encyclopedia/chakra/energy-field).
 Исходник статьи: [energy-field.json](../../../../tools/seo/content/ru/category-hubs/energy-field.json).
-Исходное задание: [energy-chacras-todo.md](../../../../tools/seo/energy-chacras-todo.md).
 Сохранённая семантика подготовки: [seo-keys.md](../../../../tools/seo/energy-field/seo-keys.md).
 
 По наблюдению владельца статья стала самой популярной на сайте и занимает первое органическое

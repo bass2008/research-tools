@@ -16,7 +16,7 @@ import { publicPath } from "./publicRouting";
 const UNWANTED = ["GPTBot", "ClaudeBot", "CCBot", "AhrefsBot"];
 
 // Приватные адреса: содержат чужую дату рождения либо оплату.
-const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/readings", "/pay", "/login", "/register", "/forgot", "/reset", "/print", "/api/"];
+const PRIVATE = ["/account", "/admin", "/report", "/matrices", "/matrix/individual/", "/readings", "/pay", "/login", "/register", "/forgot", "/reset", "/print", "/api/"];
 
 // Персональные разборы разделов помечены `noindex`: это почти-дубли одной формы, в выдаче им
 // делать нечего. Но `noindex` обход не запрещает — робот обязан скачать страницу целиком, чтобы

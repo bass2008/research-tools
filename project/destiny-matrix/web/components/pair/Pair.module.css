@@ -19,10 +19,8 @@
 .opt { text-transform: none; letter-spacing: 0; font-weight: 600; }
 .addNames { display: inline-block; margin-top: 14px; font: 600 13.5px var(--sans); color: var(--gold2); text-underline-offset: 3px; }
 .submit { margin-top: 16px; }
-.btn { display: inline-block; text-align: center; border: 0; border-radius: 12px; padding: 14px 20px; background: var(--gold); color: #fff; font: 700 15px var(--sans); cursor: pointer; text-decoration: none; }
-.btn:hover { background: var(--gold2); color: #fff; }
-.btnGold { background: var(--accent); }
-.btnGold:hover { background: var(--accent2); }
+.btn { composes: button from "../ui/ReadingButton.module.css"; }
+.btnGold { composes: gold from "../ui/ReadingButton.module.css"; }
 
 .keys h2 { font-size: 22px; margin: 0 0 12px; }
 .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }

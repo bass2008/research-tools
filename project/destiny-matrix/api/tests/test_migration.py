@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from app import access, errors, schema
-from app.models import Entitlement, Offer, Payment, Purchase, Reading, ReportJob, User, WorkTask
+from app.models import Entitlement, Offer, Payment, Purchase, Reading, ReportJob, User
 
 V0 = Path(__file__).parent / "fixtures" / "schema-v0.sql"
 
@@ -185,6 +185,7 @@ def test_migration_runs_once(base, capsys):
 def test_price_increase_on_existing_products_base(base, monkeypatch):
     engine, maker = base()
     with monkeypatch.context() as prior:
+        prior.setattr(schema, "seed_admin", lambda: None)
         prior.setattr(schema, "MIGRATIONS", [m for m in schema.MIGRATIONS if m[0] < "006"])
         schema.ensure()
     with engine.begin() as conn:
@@ -237,10 +238,10 @@ def test_empty_base_is_created_in_the_final_shape(tmp_path, monkeypatch):
     with engine.connect() as conn:
         applied = conn.exec_driver_sql("SELECT id FROM schema_migrations").scalars().all()
     assert applied == ["001_products", "002_subscription_price", "003_granted_beside_bought",
-                       "004_subscription_rename", "005_subscription_price_390", "006_prices_390_590", "007_unique_purchase_right", "008_static_pair_chakras", "009_work_task_identity"], \
+                       "004_subscription_rename", "005_subscription_price_390", "006_prices_390_590", "007_unique_purchase_right", "008_static_pair_chakras", "010_account_notifications", "012_remove_task_queue", "013_individual_orders"], \
         "новая база не должна потом мигрировать сама себя"
     with maker() as db:
-        assert {o.id: o.price for o in db.query(Offer)} == {"single": 39000, "month": 59000, "pair": 39000}
+        assert {o.id: o.price for o in db.query(Offer)} == {"single": 39000, "month": 59000, "pair": 39000, "individual": 199000}
     engine.dispose()
 
 
@@ -249,6 +250,7 @@ def test_purchase_right_migration_preserves_history_and_blocks_duplicates(base, 
     from sqlalchemy.exc import IntegrityError
     engine, maker = base()
     with monkeypatch.context() as prior:
+        prior.setattr(schema, 'seed_admin', lambda: None)
         prior.setattr(schema, 'MIGRATIONS', [m for m in schema.MIGRATIONS if m[0] < '007'])
         schema.ensure()
     with engine.begin() as conn:
@@ -267,64 +269,48 @@ def test_purchase_right_migration_preserves_history_and_blocks_duplicates(base, 
             conn.exec_driver_sql(f'INSERT INTO entitlements ({cols}) SELECT {cols} FROM entitlements WHERE id=?', (source,))
 
 
-def test_static_chakras_remove_only_the_retired_queue_and_tables(db_engine):
-    from app.models import WorkTask
-    with Session(db_engine) as db:
-        db.add_all([WorkTask(kind="pair_chakras", status="queued"),
-                    WorkTask(kind="pair_chakras", status="done"), WorkTask(kind="test")])
-        db.commit()
+def test_retired_task_queue_is_removed_without_affecting_individual_readings(db_engine):
     with db_engine.begin() as conn:
-        conn.exec_driver_sql("CREATE TABLE pair_chakra_waits (id INTEGER PRIMARY KEY)")
-        conn.exec_driver_sql("CREATE TABLE pair_chakra_texts (id INTEGER PRIMARY KEY, body TEXT)")
+        conn.exec_driver_sql("CREATE TABLE work_tasks (id INTEGER PRIMARY KEY, kind TEXT)")
+        conn.exec_driver_sql("INSERT INTO work_tasks VALUES (1, 'test')")
     raw = db_engine.raw_connection()
     try:
-        cur = raw.cursor()
-        assert schema.static_pair_chakras(cur)["старые задачи чакр удалены"] == 2
-        assert schema.static_pair_chakras(cur)["старые задачи чакр удалены"] == 0
+        schema.remove_task_queue(raw.cursor())
         raw.commit()
     finally:
         raw.close()
-    assert not {"pair_chakra_waits", "pair_chakra_texts"} & set(inspect(db_engine).get_table_names())
-    with Session(db_engine) as db:
-        assert [task.kind for task in db.query(WorkTask)] == ["test"]
+    tables = set(inspect(db_engine).get_table_names())
+    assert "work_tasks" not in tables
+    assert {"individual_readings", "readings", "users"} <= tables
 
 
-def test_work_task_migration_preserves_tasks_and_prevents_id_reuse(tmp_path, monkeypatch):
-    engine = create_engine(f"sqlite+pysqlite:///{tmp_path / 'tasks.db'}")
+def test_account_migration_on_previous_schema_preserves_rights_and_backfills_origin(tmp_path, monkeypatch):
+    from app.db import Base
+    from app.models import AccountOperation, Notification, NotificationDelivery
+    engine = create_engine(f"sqlite+pysqlite:///{tmp_path / 'cabinet.db'}")
+    Base.metadata.create_all(engine)
     maker = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
-    monkeypatch.setattr(schema, "engine", engine)
-    monkeypatch.setattr(schema, "SessionLocal", maker)
-    monkeypatch.setattr(errors, "SessionLocal", maker)
-    with monkeypatch.context() as prior:
-        prior.setattr(schema, "MIGRATIONS", [m for m in schema.MIGRATIONS if m[0] < "009"])
-        schema.ensure()
-    # Recreate the exact preceding table: INTEGER PRIMARY KEY without AUTOINCREMENT.
-    with engine.begin() as conn:
-        conn.exec_driver_sql("DROP TABLE work_tasks")
-        conn.exec_driver_sql(schema._table_ddl("work_tasks").replace(" AUTOINCREMENT", ""))
-        for ddl in schema._index_ddl("work_tasks"):
-            conn.exec_driver_sql(ddl)
+    monkeypatch.setattr(schema, 'engine', engine)
+    monkeypatch.setattr(schema, 'SessionLocal', maker)
+    monkeypatch.setattr(errors, 'SessionLocal', maker)
+    with engine.begin() as c:
+        c.exec_driver_sql("INSERT INTO users(id,email,password_hash,created_at) VALUES(1,'migration@example.ru','keep','2026-10-01')")
+        c.exec_driver_sql("INSERT INTO readings(id,user_id,product,inputs,subject_key,created_at) VALUES(1,1,'personal','{}','old-reading','2026-10-03')")
+        c.exec_driver_sql("INSERT INTO entitlements(id,user_id,products,per_reading,store_unlimited,starts_at,expires_at) VALUES(1,1,'[\"*\"]',0,1,'2026-10-01','2026-11-01')")
+        c.exec_driver_sql('DROP TABLE notification_deliveries')
+        c.exec_driver_sql('DROP TABLE notifications')
+        c.exec_driver_sql('DROP TABLE account_operations')
+        for col in ('email_verified_at','auth_version'): c.exec_driver_sql(f'ALTER TABLE users DROP COLUMN {col}')
+        for col in ('saved_via','removed_at'): c.exec_driver_sql(f'ALTER TABLE readings DROP COLUMN {col}')
+        c.exec_driver_sql('CREATE TABLE schema_migrations(id TEXT PRIMARY KEY)')
+        for name, _ in [m for m in schema.MIGRATIONS if m[0] < "010"]: c.exec_driver_sql('INSERT INTO schema_migrations(id) VALUES(?)',(name,))
+    schema.ensure(); schema.ensure()
     with maker() as db:
-        row = WorkTask(id=42, kind="test", status="signalled", attempts=2,
-                       params='{"request": "keep"}', error="keep error")
-        db.add(row)
-        db.commit()
-        original = row.item()
-    schema.ensure()
-    schema.ensure()  # The migration is applied only once.
-    with maker() as db:
-        row = db.get(WorkTask, 42)
-        assert row.item() == original
-        db.delete(row)
-        db.commit()
-    engine.dispose()  # Sequence survives deletion of the last row and a new connection.
-    with maker() as db:
-        row = WorkTask(kind="test")
-        db.add(row)
-        db.commit()
-        assert row.id > 42
-    with engine.connect() as conn:
-        assert {i["name"] for i in inspect(engine).get_indexes("work_tasks")} == {
-            i.name for i in WorkTask.__table__.indexes}
-        assert conn.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+        u = db.get(User, 1); row = db.get(Reading, 1)
+        assert u.password_hash == 'keep' and u.auth_version == 0 and u.email_verified_at is None
+        assert row.saved_via == 'subscription' and row.removed_at is None
+        assert db.get(Entitlement, 1).reading_id is None
+        assert db.query(Notification).count() == db.query(NotificationDelivery).count() == db.query(AccountOperation).count() == 0
+    with engine.connect() as c:
+        assert c.exec_driver_sql('PRAGMA foreign_key_check').all() == []
     engine.dispose()

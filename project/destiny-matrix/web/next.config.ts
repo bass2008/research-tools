@@ -48,10 +48,18 @@ const config: NextConfig = {
       "family_gifts", "soul_tasks", "purpose", "money", "money40", "relations",
       "parents_children", "ancestry", "body_resource", "chakras", "rest", "loops", "years",
     ];
-    return personal.flatMap((section) => ["", "/ru", "/en"].map((prefix) => ({
+    const privateArticles = ["", "/ru", "/en"].map(prefix => ({
+      source: `${prefix}/matrix/individual/:id`,
+      headers: [
+        { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        { key: "Referrer-Policy", value: "no-referrer" },
+        { key: "Cache-Control", value: "private, no-store" },
+      ],
+    }));
+    return [...privateArticles, ...personal.flatMap((section) => ["", "/ru", "/en"].map((prefix) => ({
       source: `${prefix}/encyclopedia/${section}/:slug`,
       headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
-    })));
+    })))];
   },
   async redirects() {
     // Переезды адресов энциклопедии, по одному правилу на адрес: список и правило — в lib/redirects.ts.

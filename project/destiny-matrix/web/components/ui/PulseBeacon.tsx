@@ -67,6 +67,8 @@ export default function PulseBeacon() {
     const visitor = visitorId();
     const tab = tabId();
     const beat = () => {
+      // A background tab woken by the browser is not a visitor.
+      if (document.visibilityState !== "visible") return;
       void fetch("/api/pulse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,7 +83,11 @@ export default function PulseBeacon() {
     };
     beat();
     const timer = setInterval(beat, EVERY);
-    return () => clearInterval(timer);
+    document.addEventListener("visibilitychange", beat);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", beat);
+    };
   }, [path]);
 
   return null;

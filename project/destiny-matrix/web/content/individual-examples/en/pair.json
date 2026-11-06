@@ -1,0 +1,2222 @@
+{
+ "product": "pair",
+ "kind": "pair",
+ "year": null,
+ "inputs": {
+  "a": {
+   "birth": "1990-09-05",
+   "name": null
+  },
+  "b": {
+   "birth": "1987-02-21",
+   "name": null
+  }
+ },
+ "locale": "en",
+ "title": "The Moon between the Star and the Sun",
+ "article": {
+  "version": 2,
+  "title": "The Moon between the Star and the Sun",
+  "lead": "In the matrix of your couple the lower corners hold Stars, the centre holds the Moon and the upper corners hold the Sun: three luminaries of the Tarot lined up on the scheme from bottom to top. You live by moonlight — you understand each other from reflections, without words, and that is your closeness. The main task is to turn guesses into things said and agreed, so that silence stays a rest and doesn’t become a wall. Below, “the September one” is whichever of you was born on 5 September 1990, and “the February one” is whoever was born on 21 February 1987. This is a symbolic reading for a couple’s self-knowledge, not a forecast and not a psychological diagnosis.",
+  "summary": [
+   "**You are a sensitive and quiet couple, and these qualities feed each other.** The Moon stands in the centre, the Hermit in the task, the common language and the values; the repeats add up in a circle: 9 + 9 = 18, 18 + 18 = 9. One partner’s silence turns into the other’s guesses.",
+   "**Your tool is an honest agreement.** Justice appears five times, from the image to the crossing of money and relationships: according to the book it means keeping accounts, a plan B and one’s word; the cost is a silent tally of contributions.",
+   "**One and the same Sun both fills you and makes you quarrel.** Both upper corners are the Sun, though they are added up from different points of yours; two Suns together give Strength (19 + 19 = 11) — the point you met for.",
+   "**Money comes through talent, prosperity through change.** At the entry to money stands the Star, in the point of prosperity the Tower, which neither of you has on your own.",
+   "**By the book’s standards your characters are compatible.** You both have the Fool as your dual, and one partner’s desires in relationships are the other’s spiritual purpose, crosswise.",
+   "**Order helps you make peace.** You both have the Emperor as your point of reconciliation; together it is Justice in the point “what connects you”: a quarrel ends with an agreement."
+  ],
+  "chapters": [
+   {
+    "kind": "key",
+    "h2": "The key of the couple: living by moonlight and stepping into the light",
+    "conclusion": "Your couple rests on wordless sensitivity and on each partner’s right to be alone for a while. In difficult times the same qualities turn into silence and guesses. The main idea of the report: what you sense about each other needs to be said out loud and turned into an agreement — gently and honestly.",
+    "cards": [
+     {
+      "arcanum": 18,
+      "label": "Atmosphere of the couple",
+      "caption": "The large circle in the centre is what is between you and not on show. The Moon: sensitivity, half-tones, understanding without words, and guesses.",
+      "points": [
+       "E"
+      ]
+     },
+     {
+      "arcanum": 9,
+      "label": "Main task and common language",
+      "caption": "The large circle at the bottom and the inner circle below the centre. The Hermit: silence, depth, a space of one’s own — and a habit of withdrawing into oneself.",
+      "points": [
+       "D",
+       "M"
+      ]
+     }
+    ],
+    "blocks": [
+     "If you look at the scheme of your couple from bottom to top, you can see a sky on it. In both lower corners — the Star, in the centre — the Moon, in both upper corners — the Sun. In the Tarot deck these three cards come in a row, 17, 18 and 19, and on your scheme they stand in the same order, from the lower edge to the upper one. This is not a law of how the scheme is built but a property of your two dates in particular, and it describes precisely how your couple lives.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 17,
+         "label": "Lower corners",
+         "points": [
+          "H",
+          "I"
+         ]
+        },
+        {
+         "arcanum": 18,
+         "label": "Centre",
+         "points": [
+          "E"
+         ]
+        },
+        {
+         "arcanum": 19,
+         "label": "Upper corners",
+         "points": [
+          "F",
+          "G"
+         ]
+        }
+       ],
+       "caption": "**17, 18, 19.** The Star, the Moon and the Sun stand on the couple’s scheme from bottom to top in the order they come in the deck. In a couple the lower corners are amplifiers, the centre is the atmosphere of the couple, and the upper corners are what fills the union and what can spoil it."
+      }
+     },
+     {
+      "h3": "Reflected light"
+     },
+     "Waite, describing the Moon and the Sun, contrasts them as two kinds of light. The Moon shines with reflected light: by it you can see outlines but not everything, and the imagination draws in the rest. The Sun is direct light: by it things are seen as they are. Your shared atmosphere is the Moon. You understand each other from reflections: from the pause before an answer, from the way the other closed their laptop, from a too-even “everything’s fine”. This is real closeness, and many couples don’t reach it in years. For Lisovskaya the Moon in the atmosphere means high sensitivity, a partner who is above all a friend, respect for personal space, understanding without words; over time such a couple grows together and every year discovers something new in each other.",
+     "But reflected light is deceptive. In the half-dark a familiar armchair is easily mistaken for a stranger’s figure, and a partner’s tiredness for a grievance against you. Among the Moon’s minuses the book lists grievances from made-up stories, disappointments over trifles and quarrels out of nowhere. It is the same sensitivity, only aimed at your own guesses instead of the living person beside you.",
+     {
+      "h3": "Three Hermits"
+     },
+     "The couple’s second main card is the Hermit, and it stands three times. In the main task (the large circle at the bottom). At the entry to the task, where the book places the couple’s shared desires, its agreements and its “common language” (the inner circle below the centre). And in the spiritual purpose — the values of the couple. You both need silence, time of your own, a deep conversation instead of chatter, the right to think first and answer later. In the Hermit’s plus each has their own place to be alone, love is shown through actions, agreements are trusted. In the task the same energy reads in the minus: in difficult times each hides in their own shell, and problems pile up in silence.",
+     {
+      "h3": "The loop: silence breeds guesses, guesses breed silence"
+     },
+     "Lisovskaya advises adding up a couple’s repeated energies: if the sum also stands in the matrix, it sounds at full strength. In your case this arithmetic closes into a circle.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 9,
+         "label": "Main task",
+         "points": [
+          "D"
+         ]
+        },
+        "+",
+        {
+         "arcanum": 9,
+         "label": "Common language",
+         "points": [
+          "M"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 18,
+         "label": "Atmosphere",
+         "points": [
+          "E",
+          "N"
+         ]
+        }
+       ],
+       "caption": "**9 + 9 = 18.** Two silences together give the Moon. When both withdraw into themselves, the space for guesses between you grows."
+      }
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 18,
+         "label": "Atmosphere",
+         "points": [
+          "E"
+         ]
+        },
+        "+",
+        {
+         "arcanum": 18,
+         "label": "Middle of the tasks",
+         "points": [
+          "N"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 9,
+         "label": "Task and common language",
+         "points": [
+          "D",
+          "M"
+         ]
+        }
+       ],
+       "caption": "**18 + 18 = 36 → 9.** Two Moons together give the Hermit. The more that is unclear between you, the stronger the pull to fall silent and figure it out alone."
+      }
+     },
+     "Lisovskaya analyses this link in her book on the couple Maria and Alexei. Their nines also add up to 18, but there is no eighteen in their shared matrix, and the author reads it as a faint trail: too much fantasy and an image of the partner give false hopes, and when they collapse, the person shuts down and, in her words, “torments the partner with their reticence”. In your case the same sum does not remain a trail: the Moon stands in the very centre of the couple. What sounds as background for Maria and Alexei is your shared atmosphere.",
+     "This is what the main mechanism of your couple looks like. One partner is tired and has withdrawn — that is the Hermit, and there is nothing wrong with it. The other sees a closed door and starts guessing what is behind it: a grievance? disappointment? irritation with them? That is the Moon. So as not to be wrong and not to impose, the second partner also falls silent and waits — the Hermit again. Now two people are silently drawing each other in. Two days later both sincerely believe the other was the first to pull away. Nobody did anything wrong, and yet there is a chill.",
+     "The circle can be broken at any point, and always in the same way: with words. Withdrawing becomes safe when it is named: “I need an evening of quiet, we’re fine.” A guess loses its power when it has been checked with a question: “I had the feeling you were upset with me — is that so?” This way out has a support in the matrix, and it stands at the top.",
+     {
+      "h3": "What you met for"
+     },
+     "Lisovskaya reads what a couple met for from the large circle at the top — only in its plus — together with the large circle on the left: the pluses of the two energies weave into the meaning of the meeting, the minuses into the couple’s earthly trials. At the top you have Strength, on the left Justice. Justice gives measure: what is fair, what was said, what was promised. In Waite, Strength is a woman who holds a lion with a chain of flowers: firmness without roughness, courage without pressure. Together it is the ability to tell the truth in a way that can be heard.",
+     "The Strength in the meeting point is added up from two quiet talents of yours — the September one’s Hermit and the February one’s High Priestess; more on this in the chapter on what each brings to the couple. Quiet plus quiet produced an energy that comes outward, and that says a lot about the meaning of your meeting.",
+     "For a couple with the Moon in the centre and the Hermit at the bottom, such a meeting means a lot. You met to learn to bring into the light what lives in the half-dark: to name what you are silent about, to agree on what each understood in their own way, and to do it with care. Your shared work is gentle clarity. Ruthless truth won’t replace it, and neither will polite silence.",
+     "The bond of Strength and Justice also has a trial, and a quiet couple has its own. Here truth is more often hoarded than imposed: you keep quiet until a lot has piled up, and then lay it all out at once and firmly, with the gentleness gone. Waite’s Strength holds the lion with a chain of flowers, and for you this is advice about the dose: speak a little at a time and on time, while the truth can still be carried gently.",
+     {
+      "h3": "Values of the couple"
+     },
+     "The couple’s spiritual purpose is the Hermit again. Lisovskaya reads it on its own and together with the upper corners, the atmosphere, the image and the meeting point. Your values are meaning, depth, a path of your own to understanding. The atmosphere — the Moon — gives this path sensitivity, Justice in the image gives honesty, Strength in the meeting point gives courage. The Sun in both upper corners reminds you: a couple lives the Hermit’s values in the light, in shared experiences, activities and pride in each other. A couple that only understands silently eventually stops understanding.",
+     {
+      "h3": "Your couple in one evening"
+     },
+     "Here is an evening in which your whole matrix can be seen. You are both at home, each busy with your own thing, and you feel good — that is the Hermit in the common language. One of you goes quiet a little differently than usual, and the other notices it before they have time to think — the Moon in the centre. They ask, and the conversation runs past midnight: one tells an unpleasant truth gently, the other takes it without offence — Strength and Justice, which you met for. In the morning there is an agreement on how to go on, and both feel calm — the Emperor in each one’s point of reconciliation. And at the weekend you go somewhere you have never been and come back feeling that you see each other clearly again — the Sun that fills you.",
+     "Hence one idea all the chapters converge on. **In your couple one partner’s silence turns into the other’s guesses by itself — that is how your numbers add up, and intuition alone is not enough against it. Your support is different: five Justices and Strength in the meeting point. Bring what you sense about each other and about your life to an agreement — a gentle but clear one.** Your money, your household, your quarrels and your care are all arranged by this rule.",
+     {
+      "h3": "The whole matrix of the couple at a glance"
+     },
+     "It is handy to come back to this table while reading the chapters: it has every point of the couple, its meaning according to the book and what it means for you.",
+     {
+      "table": {
+       "head": [
+        "Point and its meaning",
+        "What you have"
+       ],
+       "rows": [
+        [
+         "Image for others — large circle on the left",
+         "8 Justice: reliable, direct, restrained"
+        ],
+        [
+         "What you met for — large circle at the top",
+         "11 Strength: the gentle courage to tell the truth"
+        ],
+        [
+         "Addition to the meeting point — inner circle above the centre and the small point at the top",
+         "11 Strength and 13 Death: according to the book they have no meaning of their own"
+        ],
+        [
+         "Attitude to the material — large circle on the right",
+         "8 Justice: keeping accounts, a plan B, decisions made together"
+        ],
+        [
+         "Addition to the material point — small point on the right ray",
+         "7 Chariot: who holds the reins of the budget"
+        ],
+        [
+         "Main task — large circle at the bottom",
+         "9 Hermit: not hiding in your shell"
+        ],
+        [
+         "Atmosphere — centre",
+         "18 Moon: understanding without words, and guesses"
+        ],
+        [
+         "What fills you — upper left corner",
+         "19 Sun: experiences, pride in each other"
+        ],
+        [
+         "What can spoil things — upper right corner",
+         "19 Sun: comparisons and rivalry"
+        ],
+        [
+         "Amplifiers — lower corners",
+         "17 Star twice: they amplify the entry to money"
+        ],
+        [
+         "Parents in tandem — left of the centre",
+         "8 Justice: an honest order"
+        ],
+        [
+         "Attitude to the child — small point on the left",
+         "7 Chariot: a goal and a road of one’s own"
+        ],
+        [
+         "Entry to money — right of the centre",
+         "17 Star: talent and a dream, brought to a price"
+        ],
+        [
+         "Common language — below the centre",
+         "9 Hermit: an unhurried, deep conversation"
+        ],
+        [
+         "Middle of the tasks — lower, towards the bottom circle",
+         "18 Moon: the unspoken"
+        ],
+        [
+         "Through what prosperity will come",
+         "16 Tower: big shared changes"
+        ],
+        [
+         "What connects you",
+         "8 Justice: an honest word"
+        ],
+        [
+         "Crossing of money and relationships",
+         "8 Justice: it leaks through a feeling of inequality"
+        ],
+        [
+         "Values of the couple — not on the scheme",
+         "9 Hermit: meaning, depth, a path of your own"
+        ],
+        [
+         "Two small points near the centre — 8 on the left and 20 at the top",
+         "they are not read in a couple’s matrix: according to the book they are points of the health chart"
+        ]
+       ]
+      }
+     }
+    ],
+    "actions": [
+     "Agree on a signal phrase for withdrawing, for example “I need some quiet, we’re fine”, and say it every time you feel like closing off.",
+     "For a week, check every anxious guess about your partner with one direct question before reacting to it.",
+     "Once a week hold an evening when each tells what they have understood about the other over these days, and the other confirms or corrects it."
+    ]
+   },
+   {
+    "kind": "findings",
+    "h2": "What the automatic reading does not show",
+    "conclusion": "Eight links that cannot be seen if the points are read one by one: one Sun from two different sources, the sum of two Suns, a shared point of reconciliation, an identical crossing of money and relationships, a cross of desires and purposes, the Lovers, who are not in the couple but are in each of you, your signs in the Tarot, and which of you knows which theme of the couple from the inside.",
+    "cards": [
+     {
+      "arcanum": 8,
+      "label": "Five times in the couple’s matrix",
+      "caption": "Justice: the image, the material, parents in tandem, what connects you, the crossing of money and relationships.",
+      "points": [
+       "A",
+       "C",
+       "J",
+       "R1",
+       "R"
+      ]
+     },
+     {
+      "arcanum": 16,
+      "label": "New to both of you",
+      "caption": "The Tower in the point of prosperity. It is not in either of your personal matrices: this experience the couple lives only together.",
+      "points": [
+       "R2"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "finding": {
+       "title": "One Sun in both upper corners — from different points of yours",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 19,
+          "label": "What fills you",
+          "points": [
+           "F"
+          ]
+         },
+         "↔",
+         {
+          "arcanum": 19,
+          "label": "What can spoil things",
+          "points": [
+           "G"
+          ]
+         }
+        ],
+        "caption": "**19 ↔ 19.** The couple’s symmetrical upper corners are held by one card, though they add up from different points of yours: the left one from your points of inspiration (14 + 5), the right one from your triggers (10 + 9)."
+       },
+       "text": [
+        "Each point of a couple is the sum of the two partners’ points of the same name. The upper left corner, which for Lisovskaya is responsible for what fills the union, is added up from your personal points of inspiration: the September one’s Temperance and the February one’s Hierophant, 14 + 5 = 19. The upper right corner, what can spoil the union, comes from your triggers, the points through which each of you is easiest to hurt: the September one’s Wheel and the February one’s Hermit, 10 + 9 = 19. Two independent sums gave one card.",
+        "The meaning of the coincidence is simple and important: what inspires you and what hurts you meet in one energy. The Sun is your fuel and your main reason for quarrels, and the boundary between them runs along one question: is it shining for each of you? What this looks like at home and by what signs to notice a shift into the minus — in the chapter on what fills you.",
+        "Your side circles also coincide, and that is a separate coincidence: both the image of the couple and the material point hold Justice. The image is how people see the couple; the material point is its household, spending, savings and, according to Lisovskaya, also physical intimacy. How you look and how you live in material terms are one and the same. You have no gap between the shop window and the kitchen, while many couples do: generous outside, counting every trifle at home, or the other way round."
+       ],
+       "action": "Mark both partners’ successes in a shared calendar. If after a month only one name has collected there, it is a sign the Sun is shining for one, and it is time to find a reason to shine for the other."
+      }
+     },
+     {
+      "finding": {
+       "title": "Two Suns add up to Strength — the very one you met for",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 19,
+          "label": "What fills you",
+          "points": [
+           "F"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 19,
+          "label": "What can spoil things",
+          "points": [
+           "G"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 11,
+          "label": "What you met for",
+          "points": [
+           "B",
+           "K"
+          ]
+         }
+        ],
+        "caption": "**19 + 19 = 38 → 11.** The sum of the two Suns stands in the couple’s matrix twice: in the meeting point and below it, on the talent line."
+       },
+       "text": [
+        "Repeats, as a reminder, are added up, and if the sum is in the matrix, it works at full strength. Your two Suns give Strength — the very one that, according to the book, you met for. This answers the question from the previous finding: what to do with a Sun that both fills you and makes you quarrel. The light doesn’t need to be divided by working out who shines brighter. It needs to be added up.",
+        "Strength in a couple means two people who charge and reinforce each other, sense finely what the partner needs, and know how to give way and find a compromise. When two ambitions look in the same direction, the result is an endurance neither has on their own. When they look at each other, Strength does not add up: two separate ambitions remain.",
+        "One of you is preparing for an important interview or talk, and the other becomes the coach: drills the questions, listens to the rehearsal, takes over all the housework on the day. Six months later the roles switch. Each time the light is on one, and the credit is shared — that is how two Suns add up to Strength."
+       ],
+       "action": "Choose one goal where one partner’s success will be both partners’ success, and assign the roles: who leads, who covers the rear; in three months swap."
+      }
+     },
+     {
+      "finding": {
+       "title": "Five Justices lead back to the Emperor — the point of reconciliation for you both",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 4,
+          "label": "Reconciliation · September one",
+          "points": []
+         },
+         "+",
+         {
+          "arcanum": 4,
+          "label": "Reconciliation · February one",
+          "points": []
+         },
+         "=",
+         {
+          "arcanum": 8,
+          "label": "What connects the couple",
+          "points": [
+           "R1"
+          ]
+         }
+        ],
+        "caption": "**4 + 4 = 8.** In each of your personal matrices the point through which you can make peace with the person is the Emperor. In the couple’s matrix these two points add up to Justice in the point “what connects you”."
+       },
+       "text": [
+        "Justice stands in the couple’s matrix five times. Let’s add up the repeats, as Lisovskaya advises: 8 × 5 = 40, 4 + 0 = 4 — the Emperor. There is no Emperor in the couple’s matrix, and according to the book such a sum sounds weakly, as a trail. But it stands in your personal matrices, for both of you in the very same point — the middle of the relationship line. In her book for beginners Lisovskaya calls it the point of relationships: through what you can make peace with a person and find a common language.",
+        "So the same thing calms you both — order. A clear plan, a clear “who does what”, a decision that has been made and said out loud. After a quarrel it is not enough for you to hug and say “oh well”. You need to understand how things will go from here: “I won’t stay late again without calling”, “on Saturdays we clean together, then we’re free”. Until that “from here” exists, peace feels temporary.",
+        "Your two points of reconciliation add up in the couple’s matrix to Justice in the point “what connects you”. The result is a ready formula: two people calmed by order are connected through an honest agreement. And the good news: you have no clash of reconciliation styles. The same conversation suits you both — the one that ends with a concrete decision.",
+        "There is a subtlety too. The Emperor in the minus is rigid rules, control, decisions made for everyone. If there are too many agreements, order starts to suffocate, and every deviation becomes a violation. A rule is needed as long as it helps you both live more calmly."
+       ],
+       "action": "End every relationship showdown with one concrete agreement for the coming week — said out loud and clear to both."
+      }
+     },
+     {
+      "finding": {
+       "title": "An identical crossing of money and relationships — and a Tower that neither of you has",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 8,
+          "label": "Earnings · September one",
+          "points": []
+         },
+         "+",
+         {
+          "arcanum": 8,
+          "label": "Earnings · February one",
+          "points": []
+         },
+         "=",
+         {
+          "arcanum": 16,
+          "label": "Through what prosperity will come",
+          "points": [
+           "R2"
+          ]
+         }
+        ],
+        "caption": "**8 + 8 = 16.** The middle of the money line is Justice for both of you. In the couple’s matrix it doubles into the Tower, which stands in the point of prosperity."
+       },
+       "text": [
+        "In the lower right sector of a personal matrix money and relationships meet: the middle of the money line, the middle of the relationship line and the point where they cross. For both of you these three points are the same: 8, 4 and 22. Earnings through Justice, reconciliation through the Emperor, the dual is the Fool. In money and relationships you are built alike: both of you earn through clear, honest work, by agreement, both are calmed by order, both need freedom.",
+        "Matching duals in themselves speak of compatible characters: according to the book, when one person’s dual energy stands in a suitable point of the other’s matrix, people understand each other without explanations. What is new here is something else. Your two Justices of earnings add up in the couple to the Tower, and neither of you has the Tower in your personal matrix. Lisovskaya analyses a similar case in her book: if the partners don’t have an energy, the couple lives this experience for the first time and together.",
+        "Your couple’s prosperity will come through something you don’t do separately: through rebuilding. The Tower in finances in the plus is a shared budget and big shared investments, building or renovating together, discipline by rules invented together. Each of you knows how to earn honestly on your own. Together you have to learn to dare big changes: a move, a shared project, a change of lifestyle. The Tower’s minuses in money are sudden changes in income, fear of change, a habit of expecting the worst, and different views of money because of different levels of wealth in your parents’ families.",
+        "The duals add up the same way: 22 + 22 = 44 → 8. At the crossing of money and relationships in the couple’s matrix there is Justice again. Two freedoms together give the couple a rule: each one’s freedom rests on an honest agreement."
+       ],
+       "action": "Set up a separate “rebuilding” fund and agree what big change you are saving for and what the first step towards it will be this year."
+      }
+     },
+     {
+      "finding": {
+       "title": "One partner’s desires are the other’s path, crosswise",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 18,
+          "label": "Desires in relationships · September one",
+          "points": []
+         },
+         "=",
+         {
+          "arcanum": 18,
+          "label": "Spiritual purpose · February one",
+          "points": []
+         }
+        ],
+        "caption": "**18 = 18.** What the September one wants from relationships is the Moon; the February one’s spiritual purpose is also the Moon. From the other side the picture is the same: the February one’s desires and the September one’s path are the Hermit."
+       },
+       "text": [
+        "A personal matrix has a half-dual point — the inner circle below the centre, the start of the relationship line. Lisovskaya writes that it shows what a person wants from relationships and through which energy they look at others. The September one has the Moon here, the February one the Hermit. Now the spiritual purposes: the September one has the Hermit, the February one the Moon. Crosswise: what one seeks in closeness is the other’s road in life. And the February one’s Hermit also stands in the September one’s matrix in the place of the main talent.",
+        "According to the book for beginners, a half-dual energy found in the other person’s spiritual path or main talent speaks of compatibility. At the same time a half-dual, by her definition, is a person with whom you have many points of contact but some topics the two of you understand differently, as if in different languages, and there you have to learn to get your meaning across.",
+        "This is where those different languages lie for you. In closeness the September one needs the Moon: understanding without words, mystery, the feeling of being guessed. The February one needs the Hermit: silence, a space of one’s own, the right to think. Both get this from the partner, but in someone else’s rendering. The February one, respecting space, doesn’t press with questions, and the September one may read this as inattention. The September one expects to be sensed without words, and the February one may take this as an exam for which they were given no questions.",
+        "The good side of the cross is that each can learn their own desire from the other. The February one, for whom the Moon is a path, knows its subtleties better than many and can give the September one the wordless closeness they seek. The September one, for whom the Hermit is a path and a talent, can show the February one how solitude makes a person deeper without leading them away from the people close to them."
+       ],
+       "action": "Each of you finish the sentence “I feel you’ve understood me when you…” with three concrete examples, and swap sheets."
+      }
+     },
+     {
+      "finding": {
+       "title": "The Lovers: a counterweight to the Moon that the couple lacks but each of you has",
+       "formula": {
+        "items": [
+         {
+          "arcanum": 17,
+          "label": "Entry to money",
+          "points": [
+           "L"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 17,
+          "label": "Lower corner",
+          "points": [
+           "H"
+          ]
+         },
+         "+",
+         {
+          "arcanum": 17,
+          "label": "Lower corner",
+          "points": [
+           "I"
+          ]
+         },
+         "=",
+         {
+          "arcanum": 6,
+          "label": "Sum of the three Stars",
+          "points": []
+         }
+        ],
+        "caption": "**17 + 17 + 17 = 51 → 6.** The couple’s three Stars add up to the Lovers. There is no six in the couple’s matrix, so according to the book it sounds weakly, as a trail. But it is in each of your personal matrices."
+       },
+       "text": [
+        "The February one has the Lovers in the centre of their personal matrix, the September one in the karmic task. The couple’s matrix doesn’t have them: your shared atmosphere is the Moon. This matters, because for Lisovskaya the Lovers in a couple are an almost exact opposite of the lunar half-dark: sincerity, no secrets, lots of touch, talking about everything, deciding together even on trifles.",
+        "So what the couple lacks most, each of you carries inside, but it doesn’t pass into the shared atmosphere by itself. It has to be brought in consciously. It is easier for the February one: openness of feeling and a pull towards agreement are part of their own centre. It is harder for the September one: in their personal matrix the Lovers are a task, something they learn all their life. The couple is a good place to work through it, and next to them is someone for whom it comes naturally.",
+        "In practice these are small things. A touch in passing when you walk past each other in the kitchen. The word “love” for no reason. Deciding a trifle together — which bread to buy, where to hang a shelf. A compliment said rather than thought. Separately it is nothing, but it is exactly from such nothings that an atmosphere with less room for guesses is built. Let the February one set the tone and the September one pick it up."
+       ],
+       "action": "For a week, every day do one such small thing — a touch, a word of tenderness, a shared decision about a trifle — and at the end of the week discuss whether anything has changed at home."
+      }
+     },
+     {
+      "finding": {
+       "title": "Your signs in the Tarot are the two main cards of the couple",
+       "formula": null,
+       "text": [
+        "This is a different system, not the matrix method, and we give it as a separate observation. In the Western Tarot tradition — in the Golden Dawn correspondences, which Benebell Wen also uses in “Holistic Tarot” — each zodiac sign has its own card. Virgo, to which 5 September belongs, corresponds to the Hermit: Wen writes directly that this card can point to the sign of Virgo and the period from 23 August to 22 September. Pisces, to which 21 February belongs, corresponds to the Moon, the period from 19 February to 20 March.",
+        "The two cards of your signs are the two main cards of your couple: the Hermit in the task, the common language and the values, the Moon in the atmosphere and the middle of the tasks. More than that, for each of you the card of the sign coincides with your own spiritual purpose by the matrix: for the September one it is the Hermit, for the February one the Moon. Two independent systems show the same thing: each brings their own card into the couple, and the couple is built on their meeting.",
+        "This is no proof: the calculation of the matrix does not depend on the zodiac. But it lets your couple be described in words that make sense without a scheme. One is the one who looks inward, seeks meaning and is in no hurry. The other is the one with strong intuition who lives in half-tones, in a constant change of moods. If people close to you ask what your couple is about, you can answer like this."
+       ],
+       "action": "Each of you choose from the two cards, the Hermit and the Moon, the one that describes your partner more accurately, and compare answers: whether it matches the matrix or not, it is a good reason to talk."
+      }
+     },
+     {
+      "finding": {
+       "title": "Each theme of the couple is already known from the inside by one of you",
+       "formula": null,
+       "text": [
+        "Lisovskaya advises looking for a couple’s repeated energies in the personal matrices: that shows which of the two knows the theme from their own life. It is a resource, not a fault. The one who has the energy knows both its strength and its cost better, and it is easier for them to be the first to notice that the couple is sliding into the minus.",
+        "The Hermit is shared, and this is the main thing: both understand silence and depth. The Moon is what the September one seeks in closeness and what the February one lives as a path. Justice stands in both partners’ earnings, and for the February one also among the talents — it is easier for them to turn agreements into working rules. The Star, Strength and the Sun are brought by the September one: they have the Star in the parents’ point, Strength in a lower corner, the Sun in the material point. Both know the Chariot: the February one has it in the material point, the September one in a lower corner. Death, which stands on the couple’s talent line, is the February one’s entry to money. Nobody has the Tower, through which prosperity comes.",
+        "A practical conclusion. When the couple argues over successes and comparisons, it is easier for the September one to stop first: they know the Sun from the inside. When feelings need to be turned into an agreement, it is easier for the February one to lead. When the couple needs a dream and inspiration for money, the September one brings them. When you need to dare a change, the February one’s Death at the entry to money will come in handy — the ability to finish the old and start anew."
+       ],
+       "action": "Go through the table below and agree in which theme which of you is the first to say “stop, we’re sliding”."
+      }
+     },
+     {
+      "table": {
+       "head": [
+        "Energy of the couple",
+        "Where each of you has it"
+       ],
+       "rows": [
+        [
+         "9 Hermit — task, common language, values",
+         "September one: main talent and spiritual purpose; February one: desires in relationships, parents’ point, the point through which they are easiest to influence"
+        ],
+        [
+         "18 Moon — atmosphere, middle of the tasks",
+         "September one: desires in relationships; February one: spiritual purpose"
+        ],
+        [
+         "8 Justice — image, material, parents, what connects you, leaks",
+         "both: middle of the money line; February one: also the additional talent"
+        ],
+        [
+         "17 Star — entry to money, lower corners",
+         "September one: parents’ point"
+        ],
+        [
+         "11 Strength — what you met for",
+         "September one: lower corner, amplifier"
+        ],
+        [
+         "19 Sun — what fills you and what spoils things",
+         "September one: material point"
+        ],
+        [
+         "7 Chariot — attitude to the child, material ray",
+         "September one: lower corner; February one: material point"
+        ],
+        [
+         "16 Tower — through what prosperity will come",
+         "neither: this experience is only shared"
+        ]
+       ]
+      }
+     }
+    ],
+    "actions": []
+   },
+   {
+    "kind": "talents",
+    "h2": "What each brings to the couple",
+    "conclusion": "Your main personal energies hardly pass into the couple’s matrix as they are: they add up into new ones. The centres give the Moon, the masks Justice, the main talents Strength, the duals Justice again. You complement each other through your masks and talents and clash through your centres: what is natural for one is a personal lesson for the other.",
+    "cards": [
+     {
+      "arcanum": 18,
+      "label": "Your centres together",
+      "caption": "The couple’s atmosphere is added up from the September one’s Hanged Man and the February one’s Lovers.",
+      "points": [
+       "E"
+      ]
+     },
+     {
+      "arcanum": 11,
+      "label": "Your talents together",
+      "caption": "The meeting point is added up from the September one’s Hermit and the February one’s High Priestess.",
+      "points": [
+       "B"
+      ]
+     }
+    ],
+    "blocks": [
+     "The third step of Lisovskaya’s consultation is to look at which energies each of the two brings into the couple and where they end up in the shared matrix. Here we take the four main points of a personal matrix: the centre, the mask, the main talent and the dual. The point is not to find out which of you is more convenient or “heavier”. Every energy is a resource, and the only question is how you share it.",
+     {
+      "table": {
+       "head": [
+        "Point",
+        "September one · February one → couple"
+       ],
+       "rows": [
+        [
+         "Centre",
+         "12 Hanged Man · 6 Lovers → 18 Moon in the atmosphere"
+        ],
+        [
+         "Mask",
+         "5 Hierophant · 21 World → 8 Justice in the image"
+        ],
+        [
+         "Main talent",
+         "9 Hermit · 2 High Priestess → 11 Strength in the meeting point"
+        ],
+        [
+         "Dual",
+         "22 Fool · 22 Fool → 8 Justice at the crossing of money and relationships"
+        ],
+        [
+         "Spiritual purpose",
+         "9 Hermit · 18 Moon; the couple has 9 Hermit"
+        ]
+       ]
+      }
+     },
+     "Of all these energies only two cards remained directly in the couple’s matrix: the September one’s Hermit became the couple’s task, common language and values, and the Moon, the February one’s spiritual path, became its atmosphere. The rest dissolved into sums. So neither of you will recognise yourself in the couple entirely: the couple is a third character assembled from two.",
+     {
+      "h3": "Centres: wait or choose"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 12,
+         "label": "Centre · September one",
+         "points": []
+        },
+        "+",
+        {
+         "arcanum": 6,
+         "label": "Centre · February one",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 18,
+         "label": "Atmosphere of the couple",
+         "points": [
+          "E"
+         ]
+        }
+       ],
+       "caption": "**12 + 6 = 18.** The couple’s atmosphere is added up from your personal centres — the points where each of you feels calm and natural."
+      }
+     },
+     "The centre of a personal matrix is who a person is when no one is getting in their way. The September one has the Hanged Man there: the ability to stop, to wait, to look at a situation from an unexpected angle, to give up the momentary for the sake of meaning. The February one has the Lovers: choosing with the heart, open feelings, a need for agreement and warmth nearby. Together these two energies give the Moon, and it is clear why: one is in no hurry for certainty, the other seeks it in feelings, and a space of half-tones remains between them.",
+     "In everyday life this shows at every step. A question comes up — where to go in the summer, whether to change flats, whether to go to old friends’ birthday party. For the February one it matters to choose and to feel that the choice is shared: “let’s decide — are you with me?” For the September one it is natural to wait: “let’s see nearer the time, maybe everything will change”. For one, waiting is wisdom; for the other, it is a suspension in which it is unclear whether you are together. Neither is more right than the other. But if such questions hang for weeks, the Moon in the couple’s centre fills up with versions: “doesn’t want to go with me?”, “again everything has to be decided right now?”",
+     "For the dual Lisovskaya gives a rule: if one person’s energy stands in the other’s trigger, material karma or karmic tail, it is a point of conflict — the energy is good for one, while the other has misunderstandings around it. The same view is useful for the centres too, and for you it holds for both. The September one’s Hanged Man stands in the middle of the February one’s personal karmic tail. The February one’s Lovers are the September one’s karmic task. What is natural for one is a lesson that comes hard to the other. A calm “let’s wait” touches in the February one a theme they are working through in themselves. An open “let’s choose, let’s feel it” asks of the September one what they are learning all their life.",
+     "The same bond is the best textbook for both. Next to the September one, the February one can learn to wait without anxiety; next to the February one, the September one can learn to choose with the heart and talk about feelings. A simple rule for open questions helps: the one who wants to wait names how long, and after that deadline a decision is made without fail. “We wait until Friday, then we decide” suits both centres at once.",
+     {
+      "h3": "Masks: each looks like what the other needs"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 5,
+         "label": "Mask · September one",
+         "points": []
+        },
+        "+",
+        {
+         "arcanum": 21,
+         "label": "Mask · February one",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Image of the couple",
+         "points": [
+          "A"
+         ]
+        }
+       ],
+       "caption": "**5 + 21 = 26 → 8.** The image of the couple is added up from your personal masks — how each of you appears to people."
+      }
+     },
+     "The September one has the Hierophant in the point of the mask: seriousness, reliance on rules and knowledge, a manner of explaining. The February one has the World: breadth, openness, the ability to feel at home in any setting. Together they give the image of the couple — Justice: one brings solidity, the other breadth, and people see two people with everything in balance.",
+     "More interesting is where one partner’s mask stands in the other’s matrix. The September one’s Hierophant in the February one’s personal matrix is the point of inspiration. The February one’s World is the September one’s additional talent. Each looks on the outside like what the other has inside: the September one shows the world what inspires the February one, and the February one shows what the September one has as a hidden talent. Perhaps that is where your first attraction came from: in the other you saw something of your own, only expressed.",
+     "In company this is noticeable: it is easier for the February one to strike up a conversation with strangers, and for the September one to bring it to the point. In public you are a good team, as long as each does their own part and nobody tries to play someone else’s role.",
+     {
+      "h3": "Main talents: two quiet gifts add up to strength"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 9,
+         "label": "Main talent · September one",
+         "points": []
+        },
+        "+",
+        {
+         "arcanum": 2,
+         "label": "Main talent · February one",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 11,
+         "label": "What you met for",
+         "points": [
+          "B"
+         ]
+        }
+       ],
+       "caption": "**9 + 2 = 11.** The couple’s meeting point is added up from your main talents: the Hermit and the High Priestess."
+      }
+     },
+     "The September one’s main talent is the Hermit: thinking deeply and independently, getting to the essence. The February one’s main talent is the High Priestess: hearing the unspoken, understanding through half-tones, keeping what was entrusted. Both talents are quiet, both are about the inner world. Together they give Strength — an energy that comes outward. Separately each of you knows how to understand. Together you can also learn to act on that understanding, gently and firmly.",
+     "The September one’s matrix has no High Priestess at all, and it doesn’t pass into the couple’s matrix as it is. It is something new the February one brings: the ability to notice what is hidden in people and to keep other people’s secrets. For the September one this may be one of the reasons it feels calm next to this person: they are understood more deeply than they explain.",
+     "The September one’s Hermit, on the contrary, appears in the February one’s matrix three times: in the desires from relationships, in the parents’ point and in the trigger — the point through which a person is easiest to influence. For the February one, the September one’s depth and independence are both attractive and sensitive: this is exactly what they want from closeness, and exactly what hurts them most easily. When the September one withdraws into their thoughts, the February one values it as intelligence and depth. But if the withdrawal drags on or comes at a bad moment, they take it closer to heart than it looks from the outside.",
+     {
+      "h3": "Duals: one freedom for two"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 22,
+         "label": "Dual · September one",
+         "points": []
+        },
+        "+",
+        {
+         "arcanum": 22,
+         "label": "Dual · February one",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Money and relationships",
+         "points": [
+          "R"
+         ]
+        }
+       ],
+       "caption": "**22 + 22 = 44 → 8.** Two freedoms together give the couple Justice at the crossing of money and relationships."
+      }
+     },
+     "You both have the Fool as your dual, and for each it stands in the same point in the other’s matrix, at the crossing of money and relationships. The September one also has the Fool in the children’s point. According to Lisovskaya, when the dual matches a suitable point in the partner’s matrix, it speaks of compatible characters: you understand each other in the main thing — the need for freedom, lightness and the right to start over. In the couple two freedoms add up to Justice: your freedom rests on an agreement. How to arrange this in practice — in the chapter on relationships.",
+     {
+      "h3": "Spiritual purposes: one partner’s path became the couple’s path"
+     },
+     "The last thing Lisovskaya advises writing out for each person is the spiritual purpose. For the September one it is the Hermit, for the February one the Moon, for the couple the Hermit again. The September one’s path coincided with the couple’s path: depth, meaning, a way of one’s own to understand the world. The February one’s path became the couple’s atmosphere: the sensitivity and half-tones you live in every day. So the values of your union are closer to the September one, and its air to the February one. For both this is a resource: it is easier for the September one to keep the couple’s course on meaning, and for the February one to sense when something has shifted in the atmosphere.",
+     {
+      "h3": "What it looks like in one shared task"
+     },
+     "Say you are choosing where to go on holiday. The February one, with the World as mask, finds options, writes to people who have been there, easily agrees with the hosts. The September one, with the Hierophant as mask, checks reliability: reviews, terms, a backup plan. The February one’s High Priestess notices what the September one didn’t say: that they really want quiet, not a packed programme. The September one’s Hermit thinks the trip through to the end and finds meaning in it — a place they have long wanted to learn more about. If at the same time the September one doesn’t drag out the decision too long and the February one doesn’t demand an answer that same evening, you get a holiday that suits both and that you remember for a long time. All four points show here at once: the masks assigned the roles, the talents added depth, the centres set the pace, and an agreed deadline removed the clash.",
+     {
+      "h3": "What each can learn from the other"
+     },
+     "If you look at your personal matrices side by side, each has something the other lacks as a skill, and this is a ready-made programme of learning from each other.",
+     {
+      "ul": [
+       "**The September one from the February one** — choosing with the heart and talking about feelings (the Lovers in the February one’s centre are the September one’s karmic task) and hearing the unspoken (the September one has no High Priestess at all). An exercise: once a week the September one is the first to name one of their feelings and one decision they want to make together.",
+       "**The February one from the September one** — waiting without anxiety (the Hanged Man in the September one’s centre stands in the February one’s personal tail) and withdrawing without guilt (the September one’s Hermit is their main talent). An exercise: next time an open question hangs, the February one suggests a waiting period themselves and keeps to it.",
+       "**Both from each other** — freedom by agreement. You share a dual, and each can show the other how to be free without worrying the partner: in advance, clearly, with a story afterwards."
+      ]
+     },
+     {
+      "h3": "Where you complement each other and where you clash"
+     },
+     "You complement each other:",
+     {
+      "ul": [
+       "**through the mask and inspiration** — each shows the world what the other has inside: the September one’s Hierophant inspires the February one, the February one’s World is the September one’s hidden talent;",
+       "**through talents** — the Hermit’s depth and the High Priestess’s sensitivity together give Strength, which you met for;",
+       "**through duals** — the same need for freedom, so the very principle of freedom is not disputed between you;",
+       "**through desires and purposes** — the cross of half-duals from the findings: what one seeks in closeness is the other’s path."
+      ]
+     },
+     "You clash:",
+     {
+      "ul": [
+       "**through centres** — the Hanged Man and the Lovers stand in each other’s karmic tails: “let’s wait” against “let’s decide”;",
+       "**through the Hermit on the trigger** — the September one’s withdrawal hurts the February one more than it looks from the outside."
+      ]
+     },
+     "None of these clashes makes either of you a difficult partner. They are places where your natural energies need translating: what is simply character for one is a theme the other is working on in themselves. Knowing this, it is easier not to take the other’s nature as an attitude towards yourself."
+    ],
+    "actions": [
+     "For every open question, let the one who wants to wait name the waiting period; after it a decision is made without fail.",
+     "Tell each other what once attracted you in the other, and check it against the masks in the table: often what attracts us is our own, only expressed.",
+     "To the September one: when withdrawing into your thoughts for a long time, give a warning — for the February one this is a sensitive point. To the February one: remember that this depth is exactly what you wanted from closeness."
+    ]
+   },
+   {
+    "kind": "character",
+    "h2": "The couple outside and inside: a clear façade and a room in half-tones",
+    "conclusion": "On the outside you look like a composed, reliable and restrained couple that keeps its word. Inside there are more half-tones than can be seen from the outside: sensitivity, changes of mood, things left unsaid. Both are worth looking after, and the gap between them is worth watching.",
+    "cards": [
+     {
+      "arcanum": 8,
+      "label": "Image of the couple",
+      "caption": "The large circle on the left is how people see you. Justice: order, directness, promises that are kept.",
+      "points": [
+       "A"
+      ]
+     },
+     {
+      "arcanum": 18,
+      "label": "Atmosphere",
+      "caption": "The large circle in the centre is what is really between you. The Moon: sensitivity, intuition, half-tones.",
+      "points": [
+       "E"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "How you are seen"
+     },
+     "Lisovskaya describes Justice in the image of a couple like this: a conservative, organised, pragmatic couple without much spontaneity. Direct, restrained in public, but with love and passion. They looked each other over for a long time and took a long time to adjust to each other — and you can see it in how calmly they carry themselves now.",
+     "If your couple lives in the plus of this energy, people see two people they can rely on. Ask you to help with a move and you will arrive at nine, as agreed, with gloves and tape. Acquaintances come to you to settle a dispute, because you don’t play along with whoever is louder. You will rarely be called the most romantic couple in the group and almost always the most reliable. That the same Justice also stands in your material point is covered in the findings: as you look, so you live.",
+     "This image has a recognisable minus too. Directness in public sometimes backfires: one honestly corrects the other at the table — “not in 2019 but in 2020, and not in Sochi but in Adler” — and from the outside it looks like a small public exam. Among the minuses of Justice in the image, the book names a habit of exposing the partner’s shortcomings and a feeling that the two live like neighbours. Neither says anything about feelings. It is just that justice brought out in front of guests reads to others as coldness.",
+     {
+      "h3": "What is inside"
+     },
+     "Inside you have the Moon. It is an atmosphere only the two of you can see. A fine tuning to each other: you notice a change of mood before the person has realised it themselves. A world of fantasies, shared jokes only the two of you understand, a habit of exchanging a look instead of a sentence. In the Moon’s plus the partner is above all a friend, personal space is respected, and over time the couple grows together and stands up for each other like a wall.",
+     "What this Moon is made of — the September one’s Hanged Man and the February one’s Lovers — and why one of you tends to wait in it and the other to choose is covered in the chapter on what each brings to the couple.",
+     "The Moon’s minus inside is unclarity that piles up. The mood changes, but the reason isn’t named. Hurt arises over what the other “should have sensed”. The book warns of disappointments over trifles and that a partner’s secrets can become a weapon in a quarrel. Lisovskaya also advises not speaking badly of your partner, believing that with this energy what is said comes true especially easily. That is her belief, but its practical meaning is clear: in a couple where everything is felt, a hurtful word sticks for a long time.",
+     {
+      "h3": "The gap between the façade and the room"
+     },
+     "The most interesting thing about your couple is the distance between the image and the atmosphere. Outside is Justice: clarity, rules, everything named. Inside is the Moon: half-tones, and much is not named. Perhaps order on the outside is what helps you bear unclarity inside. When everything in feelings is shaky, it is nice to know that at least the bills are paid and the weekend plans are set.",
+     "The danger is that the façade starts to replace conversation. Everything looks right — things are done, promises kept — and so it seems there is nothing to talk about. And inside, the unspoken lives for weeks. Friends would be surprised to learn that such a clear couple has days when the two don’t understand each other. Sometimes you are surprised yourselves.",
+     "You have a way back too: the same Justice can be turned inward. Let clarity work not only for guests and bills but for feelings too. “I’m sad today, and it’s not because of you” is as honest an agreement as “you pay for electricity, I pay for the internet”. Justice knows how to call things by their names — exactly what the Moon lacks.",
+     {
+      "h3": "At home, visiting, in conflict"
+     },
+     {
+      "ul": [
+       "**At home.** Each of you can do your own thing in the same room — one reading, the other watching something with headphones — and it is rest. You sense each other even without talking. A worrying sign is when you spend the evening side by side but learn each other’s news from your phones.",
+       "**Visiting.** You keep an even, polite manner, listen well, are unlikely to be the life of the party, but people talk to you about important things. You come home with impressions that you discuss on the way, and for you that is the best part of the evening. A worrying sign is one of you correcting or judging the other in public.",
+       "**In conflict.** You argue about facts and get hurt by tone. Justice keeps the conversation within limits — what happened, who promised what — while the Moon remembers the voice it was said in. So a quarrel can formally end with the right decision and remain inside as an unspoken hurt. After an argument it helps to ask a separate question: “We’ve agreed on the matter. But how did the way I spoke feel to you?”"
+      ]
+     },
+     {
+      "h3": "What the people close to you see and don’t see"
+     },
+     "The people close to you see Justice in you — a couple where everything is fair. If that is how it is for you, your relatives feel calm with you, while friends sometimes don’t understand what is going on between you: you don’t take quarrels outside, and you don’t display tenderness. Some will decide everything is even with you and therefore boring, others that you are hiding something. In fact the Moon simply keeps the main things inside.",
+     "This point has one request for you. Justice in the image is honest, which means that with the people close to you, you can also talk honestly about difficulties when you need help. A couple with Justice in its image tends to keep up appearances to the last: “we’re fine”, when in fact it is hard. Asking for advice or support is also part of honesty, and it doesn’t make either of you weak.",
+     {
+      "h3": "Which couples to be friends with"
+     },
+     "The image of the couple also suggests whom you are at ease with. Justice in the image is drawn to people whose word matches their deed: with them there is no need to guess whether they are offended, and an agreed meeting isn’t moved at the last minute. The Hermit in the values chooses few and for a long time: two or three couples with whom you can talk about important things interest you more than a wide circle of acquaintances. And the Sun in what fills you reminds you that new people do charge you up — if meeting them gives you an experience and not just small talk.",
+     "Hence a simple landmark. You feel good with couples who can be silent with you and don’t take offence when you decline to come. It is hard where relationships are put on display or where it is customary to discuss those who are absent: Justice finds it unpleasant, and the Moon feels uneasy for a long time afterwards. If your circle has more people of the second kind than the first, it is no reason to cut ties, but it is a reason to choose consciously which meetings you spend your sunny days on.",
+     {
+      "h3": "How the image and the atmosphere change over time"
+     },
+     "According to the book, a couple with Justice in its image looks each other over for a long time and takes a long time to adjust, while a couple with the Moon in its atmosphere grows together over the years and every year discovers something new in the partner. For you this means: your first years together may have been cautious, with tests and pauses, and that is the normal pace of your couple. Your closeness grows slowly but doesn’t fade. If you compare yourselves with couples who live wide open from the first month, it is easy to decide something is wrong with you. Nothing is wrong; you simply have a different pace.",
+     "One more trait of your couple can be seen only from the inside: it is hard for you to praise each other in public and easy in private. Justice doesn’t like show, the Moon guards intimacy. People close to you sometimes think you are a bit dry with each other. That is not a problem, as long as in private the warmth really is put into words and not only guessed.",
+     "If you describe your couple in one sentence for friends: outside, a clear day; inside, an evening by lamplight. The evening is good as long as faces can be seen in it."
+    ],
+    "actions": [
+     "Agree that you will correct and judge each other only in private — even in small things like dates and names.",
+     "After any argument ask each other a second question — not about the matter but about the tone: “how did the way I spoke feel to you?”",
+     "If during a hard period the people close to you ask how you are, allow yourselves to answer honestly and ask for advice."
+    ]
+   },
+   {
+    "kind": "body",
+    "h2": "What fills you and what spoils things",
+    "conclusion": "You are filled by the Sun: bright shared experiences, pride in each other, each one’s growth. It also spoils things when it turns into comparison and competition. Silence restores each of you separately, while the couple is restored by light — things done and joys shared by the two of you.",
+    "cards": [
+     {
+      "arcanum": 19,
+      "label": "What fills you and what spoils things",
+      "caption": "Both upper corners are the Sun. The left one is what restores the union; the right one is what quarrels can arise over.",
+      "points": [
+       "F",
+       "G"
+      ]
+     },
+     {
+      "arcanum": 9,
+      "label": "Values of the couple",
+      "caption": "The couple’s spiritual purpose; it isn’t on the chart. The Hermit: silence and depth are what you value. But you are filled by light.",
+      "points": []
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "Silence restores you, light restores the couple"
+     },
+     "Here your couple has a trap. You both love silence, the couple’s values are the Hermit, and it is easy to decide that rest for you means an evening at home, each in their own corner. For each of you separately this is true: Lisovskaya directly advises accepting a partner’s need to withdraw, because that is how they recover. But according to the book, the union is filled by something else. In the upper left corner, which is responsible for what nourishes the couple and holds it together, stands the Sun.",
+     "The Sun in this corner means charm, vivid impressions, a dream coming true, a partner’s growth that pushes you to grow yourself, new acquaintances, love of life, passion. All of this happens outside, in the light and together. A couple that rests only in silence gets enough sleep but doesn’t recharge: each has come back to themselves, but shared warmth hasn’t grown.",
+     "So it helps you to tell two kinds of rest apart. Personal rest is silence, a book, a walk alone, an evening without talking. It needs no justification; a warning is enough. The couple’s rest is light: a trip, a new place, a celebration, a shared victory, an evening worth remembering. It shouldn’t be waited for; it should be planned, otherwise silence will take up all your free time.",
+     {
+      "h3": "What restores each of you"
+     },
+     "Lisovskaya calls the upper left corner of a personal matrix the point of inspiration. The September one has Temperance there, the February one the Hierophant, and together (14 + 5 = 19) they give the couple’s Sun. This hints at what fills each of you on your own. If that is how it is for you, the September one is inspired by measure and a calm rhythm: a day without hurry, nature and water, activities mixed in the right proportion — a little work, a little walking, a little silence. The February one is inspired by knowledge and tradition: learning from a master, reading a solid book, being where there is history, ritual, depth.",
+     "In practice it looks like this. The September one’s personal rest is a walk by the water, a sauna, slow cooking, a day off without a schedule. The February one’s personal rest is a lecture, a museum, a workshop, a long talk with someone they can learn from. The best shared sunny days combine both: a trip to an old town on a river, a workshop where a craft is taught, a hike with an overnight stay and a talk by the fire. Check whether this sounds like you — and if it does, planning rest will become easier.",
+     {
+      "h3": "What fills you: rituals in the light"
+     },
+     {
+      "ul": [
+       "**A sunny day once a month.** A whole day together somewhere neither of you has been: another city, an exhibition, a concert, a hike. There is one rule: the impression must be new. A favourite café is nice, but that is already cosiness, and the Sun needs novelty.",
+       "**Celebrate each other’s successes out loud.** Passed an exam, closed a project, finally fixed the tap — mark it. A small cake, a toast at dinner, a message in the middle of the day: “I’m proud of you.” The Sun feeds on recognition said in words.",
+       "**Grow side by side.** When one is learning something new, the other takes on a task too. A partner’s growth pushes you to grow yourself, and for you this is an engine: “you signed up for a course — and I’ll finally sign up for the pool.”",
+       "**People, sometimes.** The Hermit doesn’t need guests; the Sun does. Once every month or two, invite one or two couples you find interesting. You are good hosts when there are few guests and the conversation is real.",
+       "**Morning instead of evening.** In the evenings you tend to be quiet: it is a time of half-tones. Plan important joyful things for the morning and afternoon of your days off — a walk before breakfast, the market, a trip out of town. It sounds minor, but literal daylight helps this couple see each other more clearly.",
+       "**Make dreams come true in small steps.** The book directly names a dream coming true among the things that fill a couple with the Sun. Keep a list of shared “some days”, and once a season let one of them become “this Saturday”."
+      ]
+     },
+     {
+      "h3": "A holiday that suits both"
+     },
+     "A holiday is where the couple’s values and what fills it clash most strongly. The Hermit in the values pulls towards silence: a cabin by the water, nobody around, books. The Sun in what fills you demands impressions: a new city, people, events. If you choose only silence, you will come back rested, but each separately. If only impressions — tired, though with photos.",
+     "Your couple suits a holiday that alternates. Two or three days of silence, when each recovers in their own way: for the September one, with Temperance in the point of inspiration, water, nature, a slow rhythm; for the February one, with the Hierophant, a place with history, a good book, an unhurried tour with a knowledgeable guide. Then one or two sunny days together: something new for both that you will have stories about afterwards. It is convenient to plan the way you have already agreed on money and decisions: one gathers the options, the other names the deadline for deciding, and the result is shared.",
+     "And a small rule for the trip itself: devote at least one evening not to impressions but to talking about how the two of you are right now. On holiday, far from everyday affairs, your couple’s Moon becomes clearer, and what stayed in semi-darkness for months at home is easier to say.",
+     {
+      "h3": "What spoils things: when the Sun shines on one"
+     },
+     "The upper right corner is also the Sun, but there it is read in the minus. The book lists comparisons, arrogance, restricting the partner’s self-realisation, control disguised as care, inability to talk about problems, inflated expectations, taking credit for the partner’s victories. For your couple this is usually not loud. More like small jabs that pile up.",
+     "What it looks like for you. One gets recognition: a promotion, a successful project, praise from people whose opinion matters. In the evening the other is sincerely glad, and it charges the couple — you want to achieve something yourself, go somewhere together, celebrate. A month later there is too much of that same recognition. It is talked about at every dinner, the other answers more and more briefly, and one day it slips out: “well, you’re our star now.” The first hears envy and gets hurt. The Sun is the same, only now it shines on one.",
+     "The way out of this scene takes two. The one who is on the rise should ask about the other’s affairs themselves and help them find their own victory, even a small one. The one in the shade should say it plainly: “I’m glad for you, and it’s hard for me right now next to you.” Such a sentence removes the barb better than any self-control, because it names what the barb kept silent about.",
+     "Warning signs that the light has stopped being shared:",
+     {
+      "ul": [
+       "you catch yourself thinking “at their age I had already…” or “I had that too, and more serious”;",
+       "one person’s success is discussed at home longer than the other’s joy, and the other gradually goes quiet;",
+       "one gives the other advice on how to grow — unasked, in an expert’s tone;",
+       "one person’s rest is called laziness: “lying around again?”;",
+       "one of you said in front of people “nothing would have worked without me”, even as a joke;",
+       "one has stopped talking about their affairs because “it’s not interesting anyway”."
+      ]
+     },
+     "Each such signal means one thing: the Sun is shining on one. It is better to fix it at once and in words: “Stop, I’m comparing right now. Tell me again, I just want to be happy for you.”",
+     "A separate word about control. Among the Sun’s minuses the book names control and restricting the partner’s self-realisation. In your couple it will most likely come not with shouting but through Justice: “but I can objectively see what would be better for you.” Objectivity doesn’t help here. Advice can be offered; a decision cannot be made for the other, even a very right one.",
+     "Sometimes only one of you is tired. The Sun doesn’t require both to shine at the same time: in such a period the other can be the sun for two — arrange a small celebration, drag the partner out for a walk, take over the chores. In a month you will most likely swap. The main thing is to name what is happening: “I’m worn out, be my sun for a while” sounds better than silent waiting.",
+     {
+      "h3": "Why this matters for you in particular"
+     },
+     "For a couple with the Moon in the centre, the Sun is the main counterweight. The Moon makes everything hazy, the Sun makes it clear. When you are together in the light, you need to guess about each other less: you see how the other laughs, how their eyes light up, how proud of you they are. When there is little Sun, only moonlight and silence remain, and the loop from the couple’s key switches on: each in themselves, guesses grow. So a sunny day is prevention for you.",
+     "The one born in September also knows the Sun from their personal matrix: it stands in their material point. It is easier for them to notice when the light starts being shared unequally, and easier to be the first to say: “Tonight is your evening, tell me everything.” The February one, who has the Hermit in the point through which a person is easiest to influence, should know something else about themselves: they are easiest to bring out into the light through meaning. “Let’s go, it’ll be interesting to understand…” works better than “let’s go, it’ll be fun.”",
+     "And one last thing. The Sun in a couple loves generosity: gifts, surprises, a beautifully laid table. Justice loves proportion. A quarrel of “why so expensive” against “but it’s joy” is possible for you, and it is settled in advance: a line for joy in the budget, which we will come back to in the chapter on money."
+    ],
+    "actions": [
+     "Put a sunny day in the calendar for the coming month: date, place, who organises it.",
+     "Agree on a stop word for comparisons, for example “sun”: whoever says it is asking simply to share their joy, without judgements.",
+     "Start a list of shared “some days” and make one of them come true each season."
+    ]
+   },
+   {
+    "kind": "money",
+    "h2": "The couple’s money: an honest count, a dream at the entrance and change as the path to abundance",
+    "conclusion": "Your money rests on clear rules and honest accounting. New money comes through a dream and talent, if they are brought to a price. Abundance grows through big shared changes that you have yet to learn to dare together. It leaks away where honesty turns into a silent count of contributions.",
+    "cards": [
+     {
+      "arcanum": 8,
+      "label": "Attitude to the material",
+      "caption": "The large circle on the right: the household, spending, savings. Justice: accounting, a plan B, decisions made together.",
+      "points": [
+       "C"
+      ]
+     },
+     {
+      "arcanum": 16,
+      "label": "Through what abundance will come",
+      "caption": "The middle of the couple’s money line. The Tower: big shared investments and rebuilding your way of life.",
+      "points": [
+       "R2"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "Attitude to the material: rules clear to both"
+     },
+     "In the couple’s material point stands Justice. Lisovskaya describes its finances in the plus like this: official work and taxes, keeping track of income and expenses, planning ahead, big purchases decided together and calmly, there is always a plan B and a reserve. For you this comes naturally: money calms you when it is clear. You feel comfortable knowing how much there is, how much goes out and how much is set aside.",
+     "Lisovskaya reads the material point of a personal matrix as material karma — money habits a person comes with and has yet to straighten out. The September one has the Sun there, the February one the Chariot. If that is how it is for you, the September one is drawn to spend on what is bright and on recognition: gifts, impressions, things that show success. The February one on movement and speed: deciding fast, taking on several things at once, taking risks. In the couple these two impulses add up to Justice: 19 + 7 = 26 → 8. Accounting and a shared agreement are needed precisely so that neither personal impulse pulls the shared money towards itself.",
+     "The couple’s material line has a continuation — a small point on the right ray, between the material point and the entrance to money. The book considers it an addition to the material point.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 5,
+         "label": "Attitude to the material · September one",
+         "points": []
+        },
+        "+",
+        {
+         "arcanum": 20,
+         "label": "Attitude to the material · February one",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 7,
+         "label": "Addition to the material point",
+         "points": [
+          "Q"
+         ]
+        }
+       ],
+       "caption": "**5 + 20 = 25 → 7.** This point of the couple is added up from your personal points of attitude to the material: the Hierophant and Judgement. Together — the Chariot: movement and the question of who holds the reins of the budget."
+      }
+     },
+     "In a personal matrix Lisovskaya reads this point as the attitude to the material: moods, thoughts about money, the way of influencing it. If that is how it is for you, the September one, with the Hierophant, treats money “the proper way”: by the rules, by proven schemes, with respect for how elders did it. The February one, with Judgement, sees money through family and lineage and tends from time to time to review everything anew, giving themselves and the venture a second chance. One’s rules and the other’s reviews add up to the Chariot — movement that needs a clear steering wheel.",
+     "With the Chariot in finances, Lisovskaya advises entrusting the budget to one person, otherwise a tug of war begins; in the plus she lists several projects, hard work, accounting and planning. That doesn’t mean one person has to control the money: one keeps the accounts and reminds of agreements, decisions stay shared. Which of you finds this easier — below, in the section on the budget.",
+     "The minus of Justice in money is stinginess or, on the contrary, reckless spending, secret stashes, fear of change, a situation where one doesn’t work “on principle” and the other carries everything. For you it will more likely look quieter: each silently remembers who spent how much on shared things and collects small grievances. Accounting in itself is not to blame. Trouble begins when it is kept in one’s head and not shown.",
+     {
+      "h3": "Entrance to money: the Star"
+     },
+     "The entrance to the couple’s finance line is the Star, and it is reinforced: Stars also stand in both lower corners. According to the book, the lower corners in a couple are optional and weak in themselves, but if their energy is present somewhere else, they reinforce it. So the Star at the entrance to money sounds at full strength for you.",
+     "The book describes this point as the couple’s difficulties with income and how to avoid them. The Star in finances in the plus means supporting each other’s projects, earning through creativity and experience, always having a side job or a reserve, making shared wishes come true; after spending, new opportunities come. In the minus — talents go unused, chasing a beautiful life, sudden big expenses, new debts right after old ones are closed.",
+     "Your difficulties with money probably begin in one place. One or both of you has a talent people could pay for, and for years it remains a hobby. The Star loves doing things beautifully and for free, the Hermit in the couple’s task loves bringing things to perfection — together it is a recipe for an eternal “not ready yet”. The remedy is suggested by your personal entrances to money, from which this Star is made (4 + 13 = 17). The February one’s Death is the ability to declare work finished and let it go to people. The September one’s Emperor is the ability to give it a price and an order of sales. One says “done”, the other says “it costs this much”. The second difficulty is sudden spending on beautiful things: a dream trip on credit, an expensive item that is “really needed for inspiration”.",
+     {
+      "h3": "Abundance: a Tower neither of you has"
+     },
+     "Lisovskaya reads through what a couple will come to abundance by the middle of the money line. You have the Tower there. Neither of you has it in your personal matrix: it is born from your identical earning Justices, 8 + 8 = 16. The path to abundance is a new experience for both, and it can only be walked together.",
+     "The Tower in finances in the plus means a shared budget and big shared investments, building or renovating together, careful treatment of things, strict discipline by rules the two of you came up with, consistency and patience. Put simply: your abundance grows in leaps, after big decisions. Moving to another city, buying a home and renovating it with your own hands, one of you changing profession with the other’s support, a shared business — each such decision breaks the usual way of life and takes you to a new level.",
+     "The minuses of the Tower in money are a sudden loss of a job or income, a change of lifestyle against your will, fear of change and a habit of expecting the worst. The book also includes here different views on money due to different levels of wealth in the parents’ families. The Tower doesn’t promise disasters. It says your growth comes through changes, and it is better to choose them yourselves than to wait for them to happen.",
+     "You have the same resources for change. Death at the February one’s entrance to money is the knowledge that money comes through the end of the old: it is easier for them to decide. The September one’s Emperor is structure and a plan: it is easier for them to lead the couple through a change without losses. One helps to jump, the other to land.",
+     "For example, the job of one of you has for years demanded more and more commuting and energy, and both have long been tired of this routine. One evening the February one says: “Let’s consider this stage over.” The September one sits down and writes out the options: move closer, change jobs, negotiate remote work — with deadlines and a reserve for the transition month. Six months later you have a different routine, more time and no less money. That is the Tower in the plus: a change you chose yourselves.",
+     {
+      "h3": "The whole finance line: from a dream to an honest count"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 17,
+         "label": "Entrance: difficulties with income",
+         "points": [
+          "L"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 16,
+         "label": "Abundance",
+         "points": [
+          "R2"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 8,
+         "label": "Leaks",
+         "points": [
+          "R"
+         ]
+        }
+       ],
+       "caption": "**17 → 16 → 8.** The couple’s finance line is read from the entrance to the crossing with relationships: a dream, change, an honest count."
+      }
+     },
+     "Lisovskaya suggests reading the finance line both point by point and as a whole. As a whole, your line tells a simple story. Money begins with a dream and talent. The dream turns into income when you dare a big change for its sake. And the result is held by honest rules that both have agreed on. Skip the first step — and there will be nothing to change for. Skip the second — the dream will stay a dream. Skip the third — the change will eat itself, and grievances over unequal contributions will devalue what you have built.",
+     {
+      "h3": "Three money scenarios for your couple"
+     },
+     "These are hypotheses, not predictions: try them on and see which is closest to you right now.",
+     {
+      "ul": [
+       "**The eternal piggy bank.** Justice and the Hermit take over: you carefully save, risk nothing, keep preparing, but never dare. There is enough money, but no feeling of growth, and dreams lie for years on the “some day” list. The way out is to set a deadline for a big decision and turn the piggy bank into a “change fund” with a concrete goal.",
+       "**A leap without a map.** The Star and the Tower take over: you got inspired, decided, spent — a move, a renovation, a business — but didn’t think through rules and a reserve. Six months later you have to patch holes, and each quietly blames the other. The way out is to split big steps into stages, keep a reserve and agree in advance what each contributes.",
+       "**A strong couple.** The dream is named, the decision made together, stages and roles are clear, there is a reserve, each one’s contribution is recognised. This is how the finance line works as a whole, and your growth comes in leaps — after each big shared step."
+      ]
+     },
+     {
+      "h3": "How to make a big money decision"
+     },
+     "Since abundance comes to you through big steps, it helps to have an order in which you take them. Each stage here is taken from your matrix.",
+     {
+      "ol": [
+       "**Name the dream.** The Star at the entrance to money: first describe in words what you want and why — without figures and without “that’s unrealistic”. The Moon in the couple’s centre means each of you may picture the dream in your own way; check that you see the same picture.",
+       "**Give time to think — with a deadline.** The Hermit in the task and in the common language: each needs time to study the question alone. Justice asks for a deadline. Two or three weeks to study it, the date of the joint talk in the calendar.",
+       "**Write down the shares.** Justice in the material point and at the crossing of money and relationships: who contributes how much in money, time and effort, and what happens if plans change. What is written down removes future grievances in advance.",
+       "**Choose who leads.** The Chariot in the second material point: a project has one leader, the other provides oversight and support. It is good if you swap for the next big step.",
+       "**Set aside for the unexpected.** The Tower in the point of abundance: in any change something goes not according to plan. A reserve on top of the estimate is part of the decision, not a luxury.",
+       "**Celebrate the step.** The Sun in what fills you: when you finish, celebrate together. For your couple this is not a formality: this is how a big step becomes a shared victory, and the next change is easier to dare."
+      ]
+     },
+     {
+      "h3": "Leaks: where it drains away"
+     },
+     "Lisovskaya calls the crossing of the money line and the relationship line the couple’s financial leaks and shows here how each one’s status and self-realisation affect the union. You have Justice there again. For you money drains away through a feeling of inequality rather than through purchases. If one earns noticeably more, or one contributes money and the other time and housework, and nobody has discussed it, both build up a feeling that it is all unfair. A sense of injustice hits the relationship harder than any expense.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 8,
+         "label": "Material",
+         "points": [
+          "C"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Leaks",
+         "points": [
+          "R"
+         ]
+        }
+       ],
+       "caption": "**8 = 8.** One card in two roles: your attitude to money rests on it, and through it money also drains away when honesty stops being said out loud."
+      }
+     },
+     "The leak is closed by the same Justice, only said out loud: agree on what counts as a contribution. Money, time, housework, caring for parents, support in a hard year — all of this is a contribution, and let it be named. Then a difference in income remains a fact and doesn’t become a grievance.",
+     {
+      "h3": "Your money and relationships are linked in one point"
+     },
+     "Lisovskaya stresses that a couple’s finance line and relationship line should be read together: these areas are closely connected. Yours meet in one point, and in it stands Justice, and the middle of the relationship line is Justice too. So any money imbalance quickly becomes a relationship question for you, and any hurt in the relationship becomes a reason to recount who has put in how much. A quarrel over a renovation bill is often really a quarrel about whether each feels valued.",
+     "This link has a strong side too. When your money is in order — it is clear who contributes what, there is a reserve, agreements are kept — the relationship calms down too. A monthly money evening works for your couple as a conversation about trust, just with figures.",
+     {
+      "h3": "How to set up the budget"
+     },
+     {
+      "ol": [
+       "**A joint account, personal money and a change fund.** The joint account comes from Justice in the material point: everything that concerns the home is transparent to both. Personal money without reporting comes from your two Fool duals: each one’s freedom rests on an agreement, and a personal wallet is its money form. The change fund comes from the Tower in the point of abundance: it must have a named goal.",
+       "**The February one keeps the accounts, the September one plans big steps.** This division is by resources: age and gender have nothing to do with it. You both earn through Justice, but the February one also has it among their talents, so it is easier for them to turn agreements into working rules and to notice where they are broken. The September one has the Emperor at the entrance to money, so it is easier for them to build the plan of a big step: deadlines, stages, a reserve. If another way suits you better, the Chariot in the second material point asks for one thing: that each area has one person holding the reins.",
+       "**Each has their own pause.** The September one’s material point is the Sun, so they should pause before spending on bright things: gifts, impressions, things that show success. The February one’s material point is the Chariot, so they should pause before fast things: a new project, an investment, a decision made in one evening. A day’s pause on bright things for one and on urgent things for the other covers both personal impulses.",
+       "**A line for joy.** The Star at the entrance to money appears three times for you, and three Stars add up to the Lovers — those who spend on what they love (the finding about three Stars). A fixed monthly sum for beautiful and beloved things keeps this wish from breaking out in sudden purchases.",
+       "**A money evening begins with contributions.** Your money and relationships are linked in one Justice, and for you money drains away through a feeling of inequality. So once a month begin the talk about money with what each has put into the home — in money, time, care — and only then move on to figures."
+      ]
+     }
+    ],
+    "actions": [
+     "This week, split your money into a joint account, personal money and a change fund, and agree what share of income goes into each part.",
+     "Agree who keeps the accounts and who builds the plan of a big step; if the division by resources suits you — accounts with the February one, the plan with the September one.",
+     "Make a list of “what counts as a contribution to our home” — money, time, housework, care — and talk through how each of you values your own and the other’s contribution.",
+     "Name one big change you are saving for and the first step towards it in the next three months."
+    ]
+   },
+   {
+    "kind": "relations",
+    "h2": "Relationships and shared goals: silence, an honest word and freedom",
+    "conclusion": "Your couple’s common language is an unhurried deep conversation and each one’s right to think alone. You are joined by an honest word: promises that are kept and decisions made together. You want closeness in different ways: one wants to be guessed, the other wants to be given time to think.",
+    "cards": [
+     {
+      "arcanum": 9,
+      "label": "Common language of the couple",
+      "caption": "The inner circle below the centre: the couple’s desires, agreements, common language. The Hermit: silence, depth, a space of one’s own.",
+      "points": [
+       "M"
+      ]
+     },
+     {
+      "arcanum": 8,
+      "label": "What joins you",
+      "caption": "The middle of the couple’s relationship line. Justice: an honest word and shared decisions.",
+      "points": [
+       "R1"
+      ]
+     }
+    ],
+    "blocks": [
+     "The couple’s relationship line shows mutual understanding and respect: how the two settle questions between themselves. It runs from the point of desires and common language through the point “what joins you” to the crossing with money. For you these are the Hermit, Justice and Justice again.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 9,
+         "label": "Common language",
+         "points": [
+          "M"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 8,
+         "label": "What joins you",
+         "points": [
+          "R1"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 8,
+         "label": "Money and relationships",
+         "points": [
+          "R"
+         ]
+        }
+       ],
+       "caption": "**9 → 8 → 8.** The couple’s relationship line: from silence to an honest word, and the honest word also holds the crossing with money."
+      }
+     },
+     {
+      "h3": "Common language: silence and depth"
+     },
+     "Lisovskaya calls the inner circle below the centre the point of the couple’s shared desires, agreements and “common language”. You have the Hermit there. You understand each other best in an unhurried one-to-one conversation, without phones and without hurry. You are more interested in discussing why you act as you do than what happened during the day. Your good conversations are long and happen late in the evening, on the road, on a walk.",
+     "The Hermit in this point also sets your shared goals. Your shared desires are more about depth than speed: mastering something thoroughly, growing to mastery in your field, living the way that suits you, even if from the outside it looks strange. Your plans ripen slowly, but once ripe they hold for years.",
+     "The point stands on the line of tasks, so, as the book warns, a shared desire can also become resistance. Each wants to think on their own first, and important decisions are put off because nobody is ready to say something “raw”. The holiday isn’t booked because each is still weighing it up. The talk about the future hasn’t started because the thought hasn’t formed yet. Time passes, and there is no shared decision.",
+     {
+      "h3": "How you reach agreement"
+     },
+     "Reaching agreement in two steps suits you. The first is to say the raw thought out loud without waiting for it to become a conclusion: “I don’t know yet, but I’m drawn to…”. The second is to give time to think alone and immediately set when you will come back to the talk: “let’s decide on Sunday.” The Hermit needs a pause, Justice needs a deadline. Together you get a decision that has had time to ripen and no time to overripen.",
+     "The danger is when the first step is skipped. Each thinks alone and comes with a ready decision that isn’t up for discussion. The other learns of it as a fact, and even if the decision is right, a feeling remains that they weren’t asked. Justice doesn’t forgive this: for it what was decided matters, and so does how.",
+     "An example. One of you is offered work in another city for six months. They think for a week, weigh it up, consult only themselves and come with a conclusion: “I turned it down, it’ll be better for us this way.” The other might well have agreed with this decision. But they weren’t asked, and the evening passes in polite silence. If on the very first evening they had heard “I’ve had an offer, I don’t know yet, let’s think until the weekend”, the decision would have been shared, even if it turned out the same.",
+     {
+      "h3": "What joins you: an honest word"
+     },
+     "In the middle of the relationship line — the point that shows what joins the couple, which shared events and questions — you have Justice. You are joined by a promise kept. Said they would pick you up from the station — they did. Promised not to raise the subject in front of the parents — they didn’t. For you this is what romance is: a person whose word you can lean on.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 8,
+         "label": "What joins you",
+         "points": [
+          "R1"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 8,
+         "label": "Money and relationships",
+         "points": [
+          "R"
+         ]
+        }
+       ],
+       "caption": "**8 = 8.** One card in two roles on the relationship line: an honest word joins you, and through breaking it you lose the most — both trust and money."
+      }
+     },
+     "You are also joined by shared honest causes: sorting out documents together, standing up for your rights, settling a dispute between relatives, helping someone who was treated unfairly. Among the traits of Justice in a couple, Lisovskaya also names the wish to make the relationship official. How to handle this question is for you alone to decide. If it is open for you, it is better to talk about it directly: for a couple joined by an honest word, an unspoken status of the relationship weighs more than it seems from the outside.",
+     {
+      "h3": "Different desires: “guess me” and “don’t disturb me”"
+     },
+     "Here the finding about half-duals comes in handy. What each of you wants from closeness is shown by the point below the centre in the personal matrix. For the September one it is the Moon: closeness is when you are understood without words, sensed, guessed, and a little mystery remains in the relationship. For the February one it is the Hermit: closeness is when it is calm next to someone, nobody demands immediate answers and silence is respected. Added together (18 + 9 = 27 → 9) these desires give the couple’s common language — the Hermit: together you would rather stay silent than start guessing out loud.",
+     "These desires are compatible but speak different languages. A typical scene. The September one has had a hard day. At home there is a silence with an invitation hidden in it: sense it and come over. The February one senses it — and that is exactly why they don’t come over: another person’s silence should be respected, since at such a moment they themselves would want to be left alone. The September one concludes: “they don’t care.” The February one: “I gave them space and got hurt feelings in return.” Both acted out of love, and both were left alone. This scene is the main one for your couple, and in other chapters we only refer to it.",
+     "The way out is to agree on translating from one language to the other. The September one should say at least one sentence: “I feel bad, sit with me” or “I feel bad, give me an hour, then come.” The February one should ask, even if they think they understand: “do you want to be alone or with me?” Guessing doesn’t go away; it just gets checked.",
+     {
+      "h3": "Intimacy"
+     },
+     "Lisovskaya assigns physical intimacy to the couple’s material point, and you have Justice there. In intimacy it means mutuality: it must be good for both, and this can be talked about as calmly and directly as the budget. According to the book, a couple with Justice in its image is restrained in public but has love and passion, and the Sun in what fills you directly includes passion in what nourishes the union.",
+     "The difficulty here is a familiar one for you: desires are guessed rather than named. If one wants more tenderness, a different rhythm, more time without hurry, it is better to say it in words than to wait to be sensed. Your intimacy rests on three things: honesty — saying what you like and what you don’t; light — not only late in the evening when both are tired; and the novelty the Sun loves so much.",
+     {
+      "h3": "Freedom by agreement"
+     },
+     "You both have the Fool as your dual; what this means for the compatibility of your characters is in the chapter on what each brings to the couple. In Lisovskaya’s plus the Fool means trust, and therefore a lot of freedom, supporting each other’s hobbies, friendship. In the minus — an uncertain status, the relationship as a game, no boundaries and no responsibility.",
+     "In the couple your two Fools add up to Justice. Your freedom rests on an agreement: each is free in what was agreed, and calm because they know the rules. An evening with friends without reporting, a trip by one of you, a hobby that takes time — all of this suits you if it is agreed in advance. To Justice, freedom that wasn’t agreed looks like a breach, and an overly detailed agreement smothers the Fool. Look for the middle: few rules, but clear ones.",
+     {
+      "h3": "A separate word on jealousy"
+     },
+     "Among the Moon’s tasks the book names jealousy and hurt from made-up stories. Your couple has a clear mechanism for this: both need freedom, and the atmosphere is the Moon. One spent the evening with friends, came back happy and said little — it seems to them there is nothing to tell. The other fills in the picture: who they were with, why they are so cheerful, why they didn’t invite them. Nothing happened, but the other already has a version ready in their head, and it is not the kindest one.",
+     "Jealousy in your couple is rarely about a real threat and almost always about things left unsaid. So it is cured by the opposite of leaving things unsaid — by telling. The one who was free shares at least a couple of details: where they were, what was funny, whom they met. The one who is jealous talks about the feeling rather than accusing: “I felt uneasy, tell me how it went.” Such a story costs the Fool nothing, and for the Moon it replaces anxious fantasies with a living picture.",
+     {
+      "h3": "When one of you is going through a hard time"
+     },
+     "Losing a job, a parent’s illness, the failure of an important project, simply a hard year — every couple has such periods, and your matrix shows well where the danger lies in them. The Hermit tells the one who is struggling to withdraw and cope alone. The Moon tells the other the worst versions, and the Hermit tells them not to intrude. Both one’s and the other’s Justice adds the thought “I have no right to burden the other.” In the end two people go through one trouble in different rooms.",
+     "What helps you in exactly such periods:",
+     {
+      "ul": [
+       "**The one who is struggling names what they need:** “just be near”, “help with the chores”, “take my mind off it”, “give me a week, then we’ll talk”. Guessing during a hard period is especially difficult for both of you.",
+       "**The other offers something concrete, not general.** Not “if anything, I’m here”, but “today I’ll pick up the groceries myself and make dinner.”",
+       "**Agree on a time limit for silence.** The Hermit may withdraw, but with a clear return: “until the weekend”, “until the test results come.”",
+       "**Recount contributions for the time of trouble.** Your Justice loves equality, but in a hard year it is temporarily different: one carries more, and that is normal. Say it out loud so you don’t keep score later."
+      ]
+     },
+     "The book directly names one of the Hermit’s tasks: in difficulties not to hide in one’s shell but to help. For your couple a hard period is when this task gets solved fastest: having once gone through trouble together rather than apart, you remember for a long time that it can be done.",
+     {
+      "h3": "How to talk about the future"
+     },
+     "Talks about the future are hard for your couple, and the reason is clear. The Moon in the atmosphere loves to dream but doesn’t like certainty. The Hermit in the common language wants to think everything through first. Justice in what joins you wants what is said to become a promise. As a result, dreaming out loud is a bit scary: what if the other takes a dream as a plan, and a plan as an obligation.",
+     "It helps to separate these talks. An evening of dreams — when anything can be said, without criticism and without obligations: “what if we lived by the sea”, “what if I quit my job and studied.” Nobody says “that’s unrealistic” or starts counting costs. A week later — an evening of decisions: out of everything that was said, you choose one thing and decide what to do with it this year. The Moon gets freedom, the Hermit gets time, Justice gets a result.",
+     {
+      "h3": "What you strive for together"
+     },
+     "If you gather the relationship line into one goal, it comes out roughly like this: a home where each feels calm and can be themselves; a life in which it is clear who is responsible for what; and a shared movement into depth — towards your own work, your own knowledge, your own place. It is a quiet goal, and from the outside it may seem modest. But for a couple with the Hermit in its common language and values, depth is the main landmark, and there is no need to be ashamed of it in front of those who measure life by speed."
+    ],
+    "actions": [
+     "Introduce the raw-thought rule: say any important wish out loud before the decision has ripened, and immediately set the day you will come back to the talk.",
+     "Agree on two phrases for a bad day — “sit with me” and “give me an hour” — and let each say which one is needed right now.",
+     "Together, make a short list of freedoms: what each can do without checking with the other, and what needs a warning at least a day ahead.",
+     "If the question of your relationship’s status is open, set aside a calm, separate talk for it."
+    ]
+   },
+   {
+    "kind": "family",
+    "h2": "The couple as parents: fair order and a road of one’s own",
+    "conclusion": "As parents you are a tandem that divides duties fairly and keeps the same rules for everyone. You teach younger ones to set a goal and walk towards it themselves. If there are no children, the same energies work in caring for each other and for the parents of both families.",
+    "cards": [
+     {
+      "arcanum": 8,
+      "label": "Parents in tandem",
+      "caption": "The inner circle to the left of the centre: how the couple supports each other as parents and how a child sees them. Justice.",
+      "points": [
+       "J"
+      ]
+     },
+     {
+      "arcanum": 7,
+      "label": "Attitude to the child",
+      "caption": "The small point between the large and the inner circle on the left: what the couple teaches younger ones. The Chariot: a goal and movement.",
+      "points": [
+       "O"
+      ]
+     }
+    ],
+    "blocks": [
+     "We don’t know whether you have children, and we won’t guess. The chapter is written for two cases: if there are or will be children — and if not. For a couple without children, Lisovskaya advises looking above all at the tandem point: how the partners support each other in caring.",
+     {
+      "h3": "If there are or will be children"
+     },
+     "How a couple looks as parents is read from the inner circle to the left of the centre. You have Justice there, and it is made of your personal parents’ points: the September one’s Star and the February one’s Hermit, 17 + 9 = 26 → 8.",
+     "The Star in the September one’s parents’ point is inspiration and faith in the younger one, the ability to see their talent before they do. The February one’s Hermit is patience, the ability to give time to think and to explain why a rule is the way it is. How it can look: one tells the child “you can do it, I’ve seen how you draw”, the other sits down beside them and calmly works through what didn’t work and why. The tandem’s Justice is born not from strictness but from two adults telling the younger one the same thing — each in their own voice. If the voices start contradicting each other, the child will be the first to notice.",
+     "The attitude to the child — the small point on the left ray — is the Chariot for you. It is also made of your personal points, this time the children’s points: the September one’s Fool and the February one’s Empress, 22 + 3 = 25 → 7.",
+     "The September one’s Fool brings freedom, play, lightness and readiness to start over after a failure into upbringing. The February one’s Empress brings care, warmth and joy in how the younger one grows. One brings adventure, the other a nest, and together they give the Chariot: the younger one has a reliable home and a road they choose themselves. In Lisovskaya’s plus the Chariot means movement and clear roles, in the minus rivalry and tugging. There is no need to divide roles by gender: what matters is that you both have something to complement each other with.",
+     "How it can look in your couple. A child wants to quit music school in the middle of the year. Justice asks: what did we promise, what is fair to the teacher, to the child, to us? The Chariot asks: where do they want to move instead? A good answer comes if you discuss it first between the two of you, in private, and go to the child with a shared position. A bad one — if one says “you’ll finish until summer” and the other later quietly allows them to quit.",
+     "The risk of this combination is that order and goals can become cold. For the child of a couple with the Moon in the centre, it matters not only to know the rules but also to hear what you feel: “it hurts me that you lied to me” works more strongly than any prohibition. And another thing: in a couple where both love silence, a child may decide that the adults’ silence is about them. As with each other, it is worth telling them directly where your mood comes from.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 8,
+         "label": "Image of the couple",
+         "points": [
+          "A"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 7,
+         "label": "Attitude to the child",
+         "points": [
+          "O"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 8,
+         "label": "Parents in tandem",
+         "points": [
+          "J"
+         ]
+        }
+       ],
+       "caption": "**8 → 7 → 8.** The couple’s child–parent line: the Chariot between two Justices."
+      }
+     },
+     "The couple’s child–parent line is Justice, the Chariot, Justice. The Chariot also stands in the middle of the material ray. The same energy — movement and the question of “who holds the reins” — meets you both in money and in parenting. In both places one thing helps: agreeing on roles in advance.",
+     "Lisovskaya also reads how a child sees you by the tandem point. Justice in it means that for the younger one you are a couple they can rely on: what was said will happen, rules don’t change with mood, and parents settle disputed questions between themselves rather than through the child. The price of this image is strictness: a child may feel there is no negotiating a concession with you. Leave them room for negotiation: the rule is shared, but an exception can be earned by asking for it honestly.",
+     {
+      "h3": "If there are no children"
+     },
+     "The Justice tandem works without children too: in caring for each other and for those close to you. When one falls ill, the other takes over their share of the chores, and this is understood without long talks, because it is your habit to divide fairly. When one of the parents is going through a hard time, you decide together who will help and how.",
+     "A separate topic for a couple with Justice is the two families. Among the pluses of this energy the book names respect for the traditions of both families. Holidays taken in turn, equal help to parents without leaning to one side — for you this is no small thing. If you visit one family every weekend and the other once a year, sooner or later it will become a silent grievance. Most likely it won’t be said out loud — that is your way — which makes it all the more important to agree in advance.",
+     "The Chariot without children is the ability to support each other in your own movement: in study, career, sport, a move. You are good at helping each other set goals and reach them, as long as you don’t turn it into a race and don’t set the partner goals they didn’t ask for. Caring for younger ones in a broad sense belongs here too: nephews and nieces, godchildren, students, junior colleagues. A couple with the Chariot in this point is good at handing others the reins.",
+     {
+      "h3": "How you support each other in caring"
+     },
+     {
+      "ul": [
+       "**Inspire and explain.** In the parenting tandem one of you is the Star, the other the Hermit. When someone close is ill or going through a hard time, it is easier for the September one to support with hope and faith, and for the February one with patient explanation and time. Divide care by these roles, not equally by the hour.",
+       "**Adventure and a nest.** In your children’s points you have the Fool and the Empress: one knows how to entertain and pull someone out of routine, the other how to warm and feed. The person you are caring for needs both.",
+       "**Fatigue from caring.** The Hermit in the couple’s task pushes you to carry it in silence. In caring for loved ones this is especially dangerous: strength runs out unnoticed by the other, and they learn about it when it is too late to pick up the load.",
+       "**Recognition of care.** The Sun fills your couple with recognition. Care the other has noticed and named restores strength better than rest."
+      ]
+     }
+    ],
+    "actions": [
+     "Agree how you divide holidays and help between the two families, and write it down for the coming year.",
+     "If you are parents — before any disputed decision about a child, first discuss it between the two of you and go to the child with a shared position.",
+     "If there are no children — together, make an “if one falls ill” plan: who takes on what."
+    ]
+   },
+   {
+    "kind": "karma",
+    "h2": "The couple’s tasks: come out of your shell and don’t fill in each other’s picture",
+    "conclusion": "Your couple’s task is not to hide each in yourself in difficulties and not to think for the other. Silence remains your strength if it is named, and sensitivity if guesses are checked. This task is easier to work through with small habits than with big talks.",
+    "cards": [
+     {
+      "arcanum": 9,
+      "label": "The couple’s main task",
+      "caption": "The large circle at the bottom. The Hermit in the minus: each on their own, problems pile up in silence.",
+      "points": [
+       "D"
+      ]
+     },
+     {
+      "arcanum": 18,
+      "label": "Middle of the tasks",
+      "caption": "The small point between the centre and the lower circle. The Moon: guesses, fears, half-tones.",
+      "points": [
+       "N"
+      ]
+     }
+    ],
+    "blocks": [
+     "Lisovskaya calls the couple’s line of tasks the couple’s karmic programme and immediately clarifies: some tasks are karmic, and some are simply life tasks. The main point is the large circle at the bottom; the other two unfold it. The line is read mainly through the minus: what doesn’t work for the couple and what it has to learn. Your programme is the Hermit, the Moon, the Hermit: the entrance to the task through the couple’s common language, the middle of the path, the main task.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 9,
+         "label": "Entrance: common language",
+         "points": [
+          "M"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 18,
+         "label": "Middle",
+         "points": [
+          "N"
+         ]
+        },
+        "→",
+        {
+         "arcanum": 9,
+         "label": "Main task",
+         "points": [
+          "D"
+         ]
+        }
+       ],
+       "caption": "**9 → 18 → 9.** The task begins and ends with the Hermit, with the Moon between them. The sum of all three, 36, again folds into a nine: the programme is closed on its main card."
+      }
+     },
+     {
+      "h3": "Entrance: a shared love of silence"
+     },
+     "A couple enters its task through what it wants together. You both want silence, a space of your own, unhurriedness. This is a real shared desire, and it joins you. But standing on the line of tasks, it also becomes resistance: it is convenient not to raise a difficult topic because “we both love silence anyway”. The better you are at being silent together, the easier it is to stay silent about what matters.",
+     {
+      "h3": "Middle: the lunar stretch"
+     },
+     "In the middle of the task stands the Moon. The book gives this point no meaning of its own; it complements the main one. We read it as the path by which the couple goes from the shared desire to the task. In the river on the Moon card there is a small crayfish. Waite writes that the creature from the deep strives to climb out onto land but as a rule sinks back. A good image for your middle: the unspoken rises almost to words — and goes back, because the moment is wrong, the person is tired, “I’ll say it later”.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 18,
+         "label": "Atmosphere",
+         "points": [
+          "E"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 18,
+         "label": "Middle of the tasks",
+         "points": [
+          "N"
+         ]
+        }
+       ],
+       "caption": "**18 = 18.** The Moon stands both in the couple’s centre and in the middle of its task. Your usual atmosphere is the very road by which you go towards the main task."
+      }
+     },
+     "Among the Moon’s tasks the book names a habit of hiding feelings and seeing tenderness as weakness, hurt and jealousy from made-up stories, adjusting to the partner in a way that ends in irritation, quarrels out of nothing. For a quiet couple the first and third matter most. Each adjusts in silence, without saying they are uncomfortable — and then explodes over a trifle, and the other doesn’t understand where the explosion came from.",
+     "For example, one of you has agreed for years to spend holidays by the sea, though dreaming of the mountains. They don’t say so because the other loves the sea so much, and quarrelling over a holiday is silly. In the fifth year a forgotten sunscreen sets off a real quarrel: “I never wanted to come here in the first place!” The other is stunned — for five years they were sure both liked the seaside holidays. Neither lied. The truth simply never climbed out of the water onto the shore.",
+     {
+      "h3": "How the task changes over the years"
+     },
+     "Among the Moon’s tasks there is one more, important for any long-standing couple: the image of the partner created at the start, which later collapses. At the beginning of a relationship the Moon helps you fall in love: much in the other you filled in yourself, and filled in beautifully. After several years of living together, a real person is beside you — with habits, tiredness, their own fears. For a couple with the Moon in the middle of its task this is the most delicate moment: what people are usually disappointed in at this point is their own drawing; the living person has nothing to do with it.",
+     "The same habit of asking helps to get through it. The more you know about what the other really thinks and feels, the less room is left for a drawing that can collapse. You live together, and everyday details — how each gets tired, what irritates, what brings joy — are your best material: each detail asked out loud replaces a guess with knowledge.",
+     {
+      "h3": "The main task: don’t hide in your shell"
+     },
+     "The Hermit in the minus means each on their own, problems piling up in silence, work instead of family, one overshadowing the other, nitpicking and criticism. Lisovskaya formulates the tasks like this: in difficulties don’t hide in your shell, help; don’t stifle the partner’s interests; share and listen; more shared activity; build trust; sense when to support and when to leave alone.",
+     "Where the couple got this task and how to solve it can be seen in the personal matrices: the couple’s main task is made of your personal karmic tasks, 6 + 3 = 9. The September one’s personal karmic task is the Lovers: learning to feel openly, choose with the heart and talk about love. The February one’s is the Empress: learning care, warmth, the ability to enjoy life and accept joy from another. Both personal tasks are about openness and warmth. Added together they give the Hermit, the couple’s task of not hiding in a shell. So each, solving their personal task, also solves the shared one: when one learns to talk about feelings and the other to warm and accept warmth, the couple no longer needs to retreat to separate corners.",
+     "The last point is the core of your task. You both know how to leave someone alone. What you need to learn is something else: to understand when being left alone no longer helps, and to be the first to reach out to the other. Waite’s Hermit, by the way, is no runaway. Waite stresses that his figure has already reached the summit and holds up a light so that others can climb to it: “where I am, you also may be.” Solitude and returning to people are two halves of one card, and your couple needs both.",
+     {
+      "h3": "The task and the values are one card"
+     },
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 9,
+         "label": "Main task",
+         "points": [
+          "D"
+         ]
+        },
+        "=",
+        {
+         "arcanum": 9,
+         "label": "Values of the couple",
+         "points": []
+        }
+       ],
+       "caption": "**9 = 9.** The Hermit stands both in the couple’s main task and in its spiritual purpose — its values."
+      }
+     },
+     "This is an important coincidence, and it changes how you see the task. What is hardest for you — silence and withdrawing into yourself — is at the same time what you value most: depth, meaning, the right to your own path. So the task need not be solved by giving up silence. It is solved by filling silence with meaning: solitude from which you return with a thought and share it is valuable; solitude in which you hide is the task in the minus. The Hermit in the values also suggests a criterion: for you, good silence always ends in a conversation.",
+     {
+      "h3": "What follows from what"
+     },
+     "Lisovskaya reads a couple’s programme by combinations: each conclusion states which combination of energies it follows from. Let’s try the same.",
+     {
+      "ul": [
+       "**Talk about feelings before they become conclusions.** The Hermit thinks things through alone, the Moon thinks for the other; together you get a ready verdict that nobody discussed. (9 + 18)",
+       "**Tell solitude from hurt and say which one you are in right now.** Two silences side by side look the same from the outside. (9 + 9)",
+       "**Check a guess with a question.** The Moon in the middle makes the gloomiest versions seem plausible. (18)",
+       "**In difficulties, move towards each other, not into different rooms.** Fatigue, losses, a hard year are a test passed together or each alone; the second option cools the couple more than the difficulties themselves. (9 + 18 + 9)",
+       "**Don’t stifle each other’s interests.** The Hermit may find the partner’s hobby superficial, the Moon may be jealous of where the partner is happy without you. (9 + 18)",
+       "**Do more together.** A couple with this programme risks living in parallel, each in their own depth. A shared project, sport, a trip bring you back into one reality. (9 + 9)",
+       "**Trust without demanding proof.** The Moon asks for checks, the Hermit doesn’t like reporting. Trust grows from agreements that are kept. (18 + 9)"
+      ]
+     },
+     {
+      "h3": "How to work through the task so it doesn’t become a quarrel"
+     },
+     "The couple’s task turns into a quarrel when its solution is expected from the other: “let them speak first.” It can only be worked through together, and most simply with small regular actions.",
+     {
+      "ol": [
+       "**Name your silence.** Accompany every withdrawal with the signal phrase you agreed on (in the couple’s key we suggested one). Five words instead of two days of guessing.",
+       "**Whoever noticed comes out first.** Not the one who is to blame and not the one who withdrew, but the one who first felt the chill. This rule removes the question “why me again”.",
+       "**A day for the unspoken.** If something hurt, you have a day to say so in at least one sentence. After that the trifle starts to grow.",
+       "**Check the version.** “It seemed to me that you… — is that so?” No conclusions until the answer.",
+       "**A phone-free evening once a week.** The Hermit needs depth, the Moon needs closeness. A long talk between the two of you gives both."
+      ]
+     },
+     "Lisovskaya has two pieces of advice for the Moon that your couple should keep together. The first: don’t take the partner’s withdrawal for a lack of love — that is how they recover. The second: talk about feelings and don’t think for others. The first without the second turns into a wall, the second without the first into an interrogation. Together they are the solution to your task.",
+     "This task is solved without heroics. It doesn’t need heavy talks until morning or re-educating each other. It needs five words at the right moment and a habit of asking instead of guessing. The Hermit doesn’t go anywhere: the silence stays yours, only now the other knows what is in it."
+    ],
+    "actions": [
+     "Agree: whoever first noticed the chill is the first to come out of the silence.",
+     "Introduce the one-day rule: anything that hurt is named in at least one sentence within the day.",
+     "Once a year, for example on your anniversary, ask each other: “What did you agree to for my sake, though you wanted something else?”"
+    ]
+   },
+   {
+    "kind": "close",
+    "h2": "Where it breaks and how to fix it: four scenarios and a map of the rest",
+    "conclusion": "Your quarrels are more often quiet than loud. They have a mechanism of their own in four places: plans that fall through, arguments about who is right, a dream against fear, and disputes about what to spend on. The other difficult spots are covered in the chapters on the areas of life — here is their map and the way-out phrases. A clear plan helps you make up.",
+    "cards": [
+     {
+      "arcanum": 19,
+      "label": "What can spoil things",
+      "caption": "The upper right corner. The Sun in the minus: comparisons, rivalry, control disguised as care.",
+      "points": [
+       "G"
+      ]
+     },
+     {
+      "arcanum": 9,
+      "label": "Main task",
+      "caption": "The large circle at the bottom. Together with the material point it shows what the couple may be doing wrong.",
+      "points": [
+       "D"
+      ]
+     }
+    ],
+    "blocks": [
+     "According to the book, a couple’s difficulties are looked for in several places. The upper right corner shows what quarrels arise over. The material point together with the main task shows what the couple does wrong in material and spiritual matters and what spoils the relationship. Repetitions show which themes sound loudest. Most of your difficult spots are already covered in the chapters on the areas of life, so here are only the scenarios with a mechanism of their own and a map of the rest.",
+     {
+      "formula": {
+       "items": [
+        {
+         "arcanum": 10,
+         "label": "Trigger · September one",
+         "points": []
+        },
+        "+",
+        {
+         "arcanum": 9,
+         "label": "Trigger · February one",
+         "points": []
+        },
+        "=",
+        {
+         "arcanum": 19,
+         "label": "What can spoil things",
+         "points": [
+          "G"
+         ]
+        }
+       ],
+       "caption": "**10 + 9 = 19.** The couple’s point of discord is added up from your personal points of influence — what each of you is easiest to hurt through."
+      }
+     },
+     "Lisovskaya calls the upper right corner of a personal matrix the trigger: what a person is easiest to influence through. The September one has the Wheel of Fortune there, the February one the Hermit. If that is how it is for you, the September one is most easily thrown off balance by a change of circumstances: plans that fall through, sudden news, someone else’s decision that changes everything. The February one — by an intrusion into their silence or by disregard for what they have been thinking over for a long time. Together these two sensitive points give the Sun of discord.",
+     {
+      "h3": "Scenario 1. Plans that fall through"
+     },
+     "**How it starts.** Something the September one counted on collapses: a trip is cancelled, an important meeting is moved, news arrives that changes everything. At that moment the February one is deep in their thoughts — thinking something over, finishing something, working on their own task. **How it develops.** The September one waits for sympathy, gets an absent-minded “mm-hm” and hears indifference in it. The February one, pulled out of concentration, gets irritated: the silence was broken, and what they were thinking over wasn’t taken seriously. Each was hurt exactly in their sensitive point, and both are sure the other hurt them first. **The way out.** Know your triggers and name them at once. The September one: “everything’s gone sideways, I need half an hour of your attention.” The February one: “I’m in the middle of a thought, give me ten minutes and I’m all yours.” Ten minutes is not a refusal, and it is easy to accept once it has been said.",
+     "Your material point and main task are Justice and the Hermit. Together they show what the couple may be doing wrong: counting in silence and withdrawing in silence. This scenario — a silent count of contributions — is covered in detail in the chapter on money, and withdrawing into yourself in difficulties in the chapter on the couple’s tasks.",
+     {
+      "h3": "Scenario 2. An argument about who is right"
+     },
+     "**How it starts.** Where to spend the holiday, how to deal with a relative, whether to change jobs. Each has an honest position and arguments. **How it develops.** The argument stops being about the decision and becomes about who is right. Both bring ever new arguments and recall each other’s past mistakes. **The way out.** Waite’s Strength holds the lion with a chain of flowers: firmness without pressure. Agree on a simple rule: the goal of an argument is a shared decision. Whoever notices they are arguing to be right says: “Stop, I want to win, not to decide” — and the talk returns to the matter.",
+     {
+      "h3": "Scenario 3. A dream against fear"
+     },
+     "**How it starts.** One lights up with a big change: a move, a new business, a big purchase. The Star at the entrance to money and the Tower in the point of abundance make such ideas frequent for you. **How it develops.** The other is afraid but says so not directly but through nitpicking at details. The first hears “you don’t believe in me” and is hurt. **The way out.** Split the dream into stages with checkpoints: what we do in the first three months, how much it costs, what happens if it doesn’t work out. The other’s fear is a valuable contribution: it makes the Tower manageable. So it is worth calling it fear rather than hiding it in nitpicking.",
+     {
+      "h3": "Scenario 4. Bright against fast"
+     },
+     "**How it starts.** The September one wants to spend on something bright — give an expensive gift, arrange a trip, buy something that pleases the eye. At the same time the February one has lit up with something fast: paying for a course, starting a project, buying what the work needs right now. There isn’t money for everything at once. **How it develops.** Each considers the other’s spending optional and their own reasonable. Justice in the material point immediately gets out the scales: “last time it was already your way.” **The way out.** This is a clash of your two personal material points — the Sun and the Chariot — and neither is better than the other. The rules from the chapter on money help: each has their own pause and a line for joy, and disputed spending goes to the money evening, where the order of priority is decided, not who is right.",
+     {
+      "h3": "The other difficult spots — where they are covered"
+     },
+     {
+      "table": {
+       "head": [
+        "Difficult spot and where it is covered",
+        "Way-out phrase"
+       ],
+       "rows": [
+        [
+         "A silent count of contributions — chapter on money",
+         "“Let’s compare who put what into the home this month”"
+        ],
+        [
+         "One on the rise, the other in the shade — chapter on what fills you",
+         "“I’m glad for you, and it’s hard for me right now next to you”"
+        ],
+        [
+         "One is silent, the other guesses — the couple’s key",
+         "“It seemed to me that you… — is that so?”"
+        ],
+        [
+         "“Guess me” and “don’t disturb me” — chapter on relationships",
+         "“Do you want to be alone or with me?”"
+        ],
+        [
+         "Wait or decide now — chapter on what each brings",
+         "“We wait until Friday, then we decide”"
+        ],
+        [
+         "Freedom without warning and jealousy — chapter on relationships",
+         "“A heads-up in advance: on Saturday I’m out with friends”"
+        ],
+        [
+         "Two families — chapter on parents",
+         "“Let’s plan the holidays a year ahead”"
+        ],
+        [
+         "Things unsaid for years — chapter on the couple’s tasks",
+         "“What did you agree to for my sake, though you wanted something else?”"
+        ]
+       ]
+      }
+     },
+     {
+      "h3": "Early signs by your points"
+     },
+     "A quiet couple can quarrel for a week without ever saying the word “quarrel”. Each of your main energies has its own early sign:",
+     {
+      "ul": [
+       "**Justice:** a count has started in your head — who did how much, who sacrificed what;",
+       "**the Hermit:** conversations have shrunk to practical matters, evenings are spent in separate rooms;",
+       "**the Moon:** you have a ready version of what the other thinks, and you haven’t checked it;",
+       "**the Sun:** a barb appears in your voice when successes come up;",
+       "**Strength:** an argument about a matter has quietly become an argument about who is right."
+      ]
+     },
+     {
+      "h3": "How to make up"
+     },
+     "Both of you have the Emperor as the point of reconciliation. You need a quarrel to end in clarity: what happened, who felt what, what we change. A good order of making up: first each says what they felt, and they are not interrupted. Then each says what their part was. Then one concrete agreement for the week. A hug comes at the end: for you it puts a full stop and doesn’t replace the talk."
+    ],
+    "actions": [
+     "Each should know their trigger and name it at once: “everything’s gone sideways” or “I’m in the middle of a thought, give me ten minutes”.",
+     "Agree on a phrase for arguments about who is right: “stop, I want to win, not to decide”.",
+     "Move disputed spending to the money evening and decide the order of priority, not who is right.",
+     "Make up in three steps: what I felt, what my part was, what we change."
+    ]
+   },
+   {
+    "kind": "selfcheck",
+    "h2": "A self-check for two",
+    "conclusion": "Go through the couple’s main energies together and note where you are more often right now — in the plus or in the minus. Each answers alone, then compare: the differences will show what is worth talking about.",
+    "cards": [],
+    "blocks": [
+     "Read the questions aloud in turn. Don’t look for someone to blame: signs in the minus are what happens between the two of you, and nobody is to blame for them. If you recognise yourselves in both the plus and the minus of one energy, that is normal: that is how it works.",
+     {
+      "h3": "How to do the self-check together"
+     },
+     {
+      "ol": [
+       "**Each alone.** Take a sheet each and for every energy mark which statements are about you — from the plus and from the minus. Don’t confer and don’t peek.",
+       "**Comparison.** Put the sheets side by side. Where the answers match, everything is clear: this is your shared picture. Where they differ is the most interesting part.",
+       "**Differences — without arguing.** The one who marked a minus tells in what situation they see it. The other only listens and asks questions. There is no need to argue about who is right: each sees the couple from their own side, and both sides are real.",
+       "**One theme.** Choose one energy where there are the most minuses or the most noticeable difference, and start the plan from the next chapter with exactly that."
+      ]
+     },
+     "For your couple this exercise has a separate benefit. The Moon in the centre makes each sure they know what the other thinks. A self-check on paper is a way to test that certainty: it often turns out that the partner sees your couple more warmly than you thought, or notices what you considered unnoticeable.",
+     {
+      "selfcheck": [
+       {
+        "arcanum": 18,
+        "label": "Atmosphere and middle of the tasks",
+        "points": [
+         "E",
+         "N"
+        ],
+        "plus": [
+         "We notice each other’s mood before it is mentioned.",
+         "You can tell the other a strange thought or fear without worrying it will be turned against you.",
+         "We have jokes and pet words only the two of us understand."
+        ],
+        "minus": [
+         "We get hurt over what the other “should have sensed”.",
+         "We build theories about each other’s mood and rarely check them.",
+         "We agree on the matter but carry away hurt over the tone."
+        ]
+       },
+       {
+        "arcanum": 9,
+        "label": "Main task and common language",
+        "points": [
+         "D",
+         "M"
+        ],
+        "plus": [
+         "Each can be alone, and the other doesn’t take it as rejection.",
+         "We have long, deep conversations.",
+         "We don’t rush each other with decisions."
+        ],
+        "minus": [
+         "We go through difficulties each in our own room.",
+         "Important decisions are put off for months because nobody is ready to speak first.",
+         "We live in parallel: side by side, but each in our own world."
+        ]
+       },
+       {
+        "arcanum": 8,
+        "label": "Image, the material, what joins you",
+        "points": [
+         "A",
+         "C",
+         "R1"
+        ],
+        "plus": [
+         "We keep promises to each other, even small ones.",
+         "Money is clear to both: how much there is, where it goes, what is set aside.",
+         "Housework is divided, and both consider it fair."
+        ],
+        "minus": [
+         "Each silently keeps count of who did how much.",
+         "We correct and judge each other in front of people.",
+         "There are so many agreements that any deviation brings a reproach."
+        ]
+       },
+       {
+        "arcanum": 19,
+        "label": "What fills you and what spoils things",
+        "points": [
+         "F",
+         "G"
+        ],
+        "plus": [
+         "We are proud of each other’s successes and say so out loud.",
+         "One’s growth pushes the other to grow too.",
+         "We have bright days together that we remember afterwards."
+        ],
+        "minus": [
+         "We compare our successes.",
+         "One feels like a background next to the other.",
+         "We rest only each in our own silence."
+        ]
+       },
+       {
+        "arcanum": 11,
+        "label": "Strength of the meeting point — together with the image of the couple",
+        "points": [
+         "B",
+         "K"
+        ],
+        "plus": [
+         "We know how to say an unpleasant truth gently.",
+         "Next to each other we become braver.",
+         "We know how to give way without a feeling of defeat."
+        ],
+        "minus": [
+         "An argument often becomes a fight about who is right.",
+         "One presses, the other gives way and keeps it inside.",
+         "With each other we are sometimes harsher than with strangers."
+        ]
+       },
+       {
+        "arcanum": 17,
+        "label": "Entrance to money",
+        "points": [
+         "L",
+         "H",
+         "I"
+        ],
+        "plus": [
+         "We support each other’s projects and dreams.",
+         "Our talents bring money, or we are working on it.",
+         "Shared dreams come true, even if not at once."
+        ],
+        "minus": [
+         "Someone’s talent remains an unpaid hobby for years.",
+         "We suddenly spend on beautiful things and then regret it.",
+         "We dream out loud but take no steps towards the dream."
+        ]
+       },
+       {
+        "arcanum": 16,
+        "label": "Through what abundance will come",
+        "points": [
+         "R2"
+        ],
+        "plus": [
+         "We dared big changes and came out of them stronger.",
+         "We have a shared plan for a big step and a fund for it.",
+         "In hard times we stick together."
+        ],
+        "minus": [
+         "We put off changes out of fear, though we both want them.",
+         "Changes happen to us rather than by our decision.",
+         "We see money differently and don’t discuss why."
+        ]
+       },
+       {
+        "arcanum": 7,
+        "label": "Attitude to the child and movement",
+        "points": [
+         "O"
+        ],
+        "plus": [
+         "We support each other in our own goals.",
+         "Each has their own development outside the couple.",
+         "Our roles in shared tasks are clear."
+        ],
+        "minus": [
+         "We set each other goals nobody asked for.",
+         "Who holds the reins is an eternal argument for us.",
+         "Goals have crowded out joy."
+        ]
+       }
+      ]
+     },
+     "If one row has more minuses, start the plan from the next chapter with exactly that row. If you and your partner answered differently, that is the topic of your next talk: one sees what the other doesn’t, and that is not a mistake by either of you. In three months, do the self-check again and compare."
+    ],
+    "actions": []
+   },
+   {
+    "kind": "plan",
+    "h2": "A plan for two: where to start",
+    "conclusion": "Start with the loop of silence and guesses: agree on a signal for withdrawing and turn guesses into questions. Then a sunny day once a month for the couple and money order according to your resources. In a month, have one big talk about the future.",
+    "cards": [
+     {
+      "arcanum": 9,
+      "label": "Where to start",
+      "caption": "The couple’s main task and common language. The first step is to name your silence out loud.",
+      "points": [
+       "D",
+       "M"
+      ]
+     },
+     {
+      "arcanum": 19,
+      "label": "What to recharge with",
+      "caption": "The upper left corner: what fills the union. The second step is a sunny day once a month.",
+      "points": [
+       "F"
+      ]
+     }
+    ],
+    "blocks": [
+     {
+      "h3": "Where to start and why"
+     },
+     "It is worth starting with the couple’s main mechanism — the loop of the Hermit and the Moon. It affects everything else: quarrels about money, comparisons, disputes about relatives flare up more strongly for you when unspoken things pile up between you. Break the loop and the other chapters will become easier. As the second step, bring the Sun back to the couple: silence restores you separately, while light charges the couple. As the third, money order distributed according to your resources: accounts, a plan for a big step, each with their own pause. It comes easily to you and quickly gives a sense of support.",
+     {
+      "h3": "Right after reading"
+     },
+     "Each of you separately read “The main thing in a minute” and the chapter conclusions. Mark for yourself one point in which you definitely recognised your couple and one you doubt. Then swap marks — without arguing, just tell each other why. For a couple with the Moon in the centre this is already the first practice: you check in words what each thinks about your couple instead of guessing.",
+     {
+      "h3": "The first step for tomorrow"
+     },
+     "Tomorrow evening, tell each other one sentence you haven’t said for a long time: “I’m proud of you for…” or “it hurt me when…”. One, no more. And agree on a signal for withdrawing — in your own words or the phrase suggested in the couple’s key.",
+     {
+      "h3": "Habits for the month"
+     },
+     {
+      "ol": [
+       "**Week 1. Name the silence.** Every withdrawal comes with a signal. Every anxious guess becomes a question. Before bed, briefly: what was good today and what hurt.",
+       "**Week 2. Light.** Have the first sunny day — a new place together. Celebrate out loud at least one success each.",
+       "**Week 3. Order.** Split money into a joint account, personal money and a change fund, decide who keeps the accounts, hold the first money evening. Put the division of housework somewhere visible.",
+       "**Week 4. Freedom and agreement.** Make a list of freedoms: what each does without checking, what with a warning. Sum up the month: what took hold and what didn’t."
+      ]
+     },
+     {
+      "h3": "A talk worth having"
+     },
+     "At the end of the month, have one big talk — not at home, but where you both feel calm: on a long walk, on a trip, in a quiet place. The Hermit needs depth, Justice needs a result. Here are questions you can follow. Answer in turn and don’t argue with the other’s answer: first listen, then discuss.",
+     {
+      "ul": [
+       "When in the past year did you feel I understood you without words? And when did I understand you wrongly?",
+       "Which of my silences frightens you, and which calms you?",
+       "Which success of each of us did we never celebrate?",
+       "What did you agree to for my sake, though you wanted something else?",
+       "What big change do we want in three to five years, and where do we start this year?",
+       "What is a fair contribution to our shared life for each of us?",
+       "What do we both need to feel free next to each other?"
+      ]
+     },
+     "Afterwards, write down three agreements, no more. The Emperor in the point of reconciliation loves clarity for both of you, and long lists get in its way.",
+     {
+      "h3": "The second and third months"
+     },
+     {
+      "ol": [
+       "**Month 2. Money and a dream.** The second money evening, the first deposits into the change fund. If one of you has a talent people could pay for — the date of the first paid order. One postponed dream broken into stages: what we do in the next three months.",
+       "**Month 3. Family and care.** An agreement on holidays and help to the two families for the year. An “if one falls ill” plan. The second sunny day — organised by whoever didn’t organise the first."
+      ]
+     },
+     "For your couple a lapse is not dangerous in itself. What is dangerous is that the Hermit in the task prompts you to silently conclude: “it didn’t work out for us.” If a week went by without the plan, tell each other — “we dropped it, let’s get back to it” — and start from where you stopped.",
+     "The whole plan at a glance — it is handy to put on the fridge:",
+     {
+      "table": {
+       "head": [
+        "When",
+        "What we do"
+       ],
+       "rows": [
+        [
+         "Tomorrow",
+         "one sentence long unsaid; a signal for withdrawing"
+        ],
+        [
+         "Week 1",
+         "we name the silence, check guesses with a question"
+        ],
+        [
+         "Week 2",
+         "the first sunny day, each other’s successes out loud"
+        ],
+        [
+         "Week 3",
+         "joint account, personal money and a fund; accounts; the first money evening"
+        ],
+        [
+         "Week 4",
+         "list of freedoms, results of the month, the big talk"
+        ],
+        [
+         "Month 2",
+         "change fund, the dream in stages, a price for talent"
+        ],
+        [
+         "Month 3",
+         "two families and holidays, an “if one falls ill” plan, the second sunny day"
+        ],
+        [
+         "In 3 months",
+         "the self-check again, compare with the first"
+        ]
+       ]
+      }
+     },
+     {
+      "h3": "If you have very little time"
+     },
+     "If the whole plan feels too much, keep three things. The first is a signal for withdrawing. The second is one sunny day a month. The third is one concrete agreement at the end of every quarrel. These three habits cover the main things in your matrix: the loop of the Hermit and the Moon, the Sun that must shine on both, and the Emperor in each one’s point of reconciliation.",
+     {
+      "h3": "In three months"
+     },
+     "Do the self-check again. If there are fewer minuses in the atmosphere and the task, the loop is breaking. If a change fund has appeared in your money and you know the first step, the Tower is working for you. If you remember at least two sunny days, the couple has fuel.",
+     {
+      "h3": "Practices for the soul and for practical matters"
+     },
+     "The spiritual practices for your couple are those about attention and honesty. A silent walk together, after which each tells what they noticed. A short evening check-in: “what I felt about us today”. Thanking each other out loud for one concrete thing a day. The material ones are the budget, the change fund, the division of chores, the date of the first paid order for a talent that is still unpaid. For you one doesn’t hold without the other: the Moon needs clarity, Justice needs sensitivity."
+    ],
+    "actions": [
+     "Tomorrow: one sentence long unsaid and an agreement on a signal for withdrawing.",
+     "In the next two weeks: the first sunny day in the calendar.",
+     "In a month: the big talk using the questions above and three agreements written down."
+    ]
+   }
+  ],
+  "faq": [
+   {
+    "q": "Are we right for each other?",
+    "a": [
+     "Lisovskaya’s method gives no compatibility percentages, so the honest answer is this: by the standards of her book your characters are well compatible, and your difficulties are clear and workable.",
+     "She checks the compatibility of characters by duals and half-duals. You both have the Fool as your dual, and for each it stands in the same point in the other’s matrix. What one wants in a relationship is the other’s spiritual purpose, crosswise. Far from every couple has such coincidences, and Lisovskaya herself stresses that even without them a union can rest on other, often deeper reasons.",
+     "What comes hard to you is visible too: in difficulties each withdraws, and in semi-darkness it is easy to imagine too much. This is a task, not a verdict. A couple with your matrix can live it as a constant chill, or as a rare ability to be close without getting in each other’s way and without losing each other. Which of these you get is up to you — and you decide it every day with small actions.",
+     "If you need a very short answer: you are right for each other as two people who feel good side by side in silence and who keep their word. For it to stay that way for years, you will have to learn one thing — to say out loud what each is used to understanding silently. This doesn’t change your characters: it is a skill, and you already have the support for it — Justice appears five times in the couple’s matrix."
+    ]
+   },
+   {
+    "q": "What does the Moon in the centre mean for us and what do we do with it?",
+    "a": [
+     "The Moon in the centre means there is much understanding without words between you and much left unsaid. It is one trait with two sides. You sense each other more finely than most couples, and so you more easily make mistakes by taking your guess for knowledge.",
+     "Why sensing is not enough for you in particular is explained by your numbers: your two nines add up to 18, and this Moon stands in the very centre of the couple. One person’s silence turns into the other’s version by itself. So the Moon is worth translating into agreement in the most ordinary places — where it seems that “it’s obvious anyway”:",
+     {
+      "ul": [
+       "You think your partner didn’t like a gift. Ask: “do you really like it or are you being polite?” — for Justice in your couple an honest answer is worth more than a polite one.",
+       "You decided they don’t want to visit your parents and declined for both in advance. Ask first.",
+       "In intimacy you want something different but feel the partner should understand anyway. Say it — Justice in your material point is responsible for this too.",
+       "It seemed to you that your purchase upset them. “Did this spending bother you?” settles the question in a minute; otherwise it will surface at the money evening.",
+       "You sense the partner wants change but isn’t saying so. Name it yourself: “it seems to me you feel cramped in our current routine — is that so?”"
+      ]
+     },
+     "The Moon remains your gift as long as guesses reach a conversation and an agreement. Without that it becomes a source of hurt nobody wanted."
+    ]
+   },
+   {
+    "q": "We both love silence. Is that bad?",
+    "a": [
+     "No. Silence is your shared values and common language; it joins you. It becomes bad when silence stops being rest and becomes a way of not talking about what is difficult.",
+     "It is easy to tell them apart. Good silence is named, it has an end, and after it you feel good together. Bad silence lasts several evenings, nobody talks about it, and after it things are colder between you. If the second kind has become frequent, start with the chapter on the couple’s tasks.",
+     "And remember the difference from the chapter on what fills you: silence restores each of you, while the couple is charged by light — shared impressions and joys. You will always have enough silence, but sunny days will have to be planned.",
+     "One more hint: look not at the amount of silence but at who chooses it. If both want a quiet evening, it is rest. If one wants to talk and the other has shut down, it is already a reason for a signal and a promise to come back to the talk tomorrow."
+    ]
+   },
+   {
+    "q": "What if we didn’t recognise ourselves?",
+    "a": [
+     "It happens, and there are several reasons. The matrix shows strengths and forks in the road, not how you have already lived them. Perhaps you have long known how to talk about feelings, and the Moon’s minuses are unfamiliar to you. Then read the pluses — they are what you have already achieved.",
+     "The opposite happens too: a chapter seems foreign because its theme hasn’t arrived yet. Abundance through change, for example, opens up for many couples only after their first big shared decision.",
+     "Try doing the self-check separately and comparing the answers. Often one recognises the couple in what the other doesn’t, and that is a good reason to talk.",
+     "And another thing: the report describes the couple, not each of you separately. A person may not recognise themselves in the description of the couple because with other people they behave differently. The couple’s matrix shows exactly what arises between the two of you — so check whether you recognise your shared evenings, quarrels and decisions."
+    ]
+   },
+   {
+    "q": "Can we work together?",
+    "a": [
+     "You can, and the matrix has a hint on how. Each of you earns through Justice — the middle of the money line is the same for both — so a venture where everything is written down suits you: shares, roles, deadlines. The Chariot in the couple’s second material point asks that each area has one person responsible.",
+     "By your personal points the roles fall into place by themselves. The February one, with Justice among their talents, is closer to contracts, accounting and quality. The September one, with the Emperor at the entrance to money, to the plan, structure and prices. The Star at the couple’s entrance to money suggests that what you should sell is what you do with inspiration.",
+     "The risk is the Hermit in the couple’s task. Work talks can crowd out talks about the two of you, and “not ready yet” can stretch for years. Give the shared venture deadlines, and give your life an evening a week when work isn’t discussed."
+    ]
+   },
+   {
+    "q": "What do the numbers 13 and 20 on the chart mean, which the report says almost nothing about?",
+    "a": [
+     "The couple’s chart shows more numbers than the method reads. Lisovskaya doesn’t analyse every point in a couple, and here is what happens with the rest.",
+     {
+      "ul": [
+       "**13 in the small point at the top and 11 in the inner circle above the centre** are an addition to the meeting point. According to the book they have no separate meaning: the main thing on this line is the meeting point itself, Strength.",
+       "**20 above the centre and 8 to the left of the centre** are two small points by the centre. Lisovskaya writes directly that they have nothing to do with the compatibility matrix: they are points for the health map and the chakras, which a couple doesn’t have.",
+       "**7 on the right ray** is an addition to the material point, the Chariot; it is covered in the chapter on money."
+      ]
+     },
+     "If you want to read the thirteen at least as a background: Death between two Strengths on the line of talents resembles a hint that your shared strength grows through ending old forms. This is our light interpretation, not a statement from the book. Interestingly, the same Death stands at the February one’s entrance to money."
+    ]
+   },
+   {
+    "q": "Our numbers in the lower right corner match. Does that mean we are the same?",
+    "a": [
+     "In money and reconciliation — almost yes. The middle of the money line, the middle of the relationship line and the point where they cross are the same for you: 8, 4 and 22. You both earn by honest work under an agreement, order calms you both, you both need freedom.",
+     "But in the main thing you are different, and this can be seen in the chapter on what each brings to the couple. The centres are the Hanged Man and the Lovers: one likes to wait, the other to choose. The masks are the Hierophant and the World. The main talents are the Hermit and the High Priestess. The couple is made not of two identical people but of two different ones who are built the same way where money and reconciliation are decided. That is why agreeing about money is easy for you, while understanding each other in feelings takes work."
+    ]
+   },
+   {
+    "q": "Justice in the point “what joins you” — do we need to make our relationship official?",
+    "a": [
+     "The matrix doesn’t say what to do with your status — that is for you alone to decide. It says you are joined by an honest word and clear agreements. Among the traits of Justice in a couple the book also names the wish to make the relationship official.",
+     "If the question is open for you and it worries one of you, it is better to discuss it directly and calmly than to wait for the other to guess. For a couple with the Moon in the centre, leaving such an important question unsaid is especially heavy. If you are both happy with things as they are, that is also an honest agreement, and it is enough to say it out loud.",
+     "If the talk about status has long been put off, recall the rule from the chapter on what each brings to the couple: the one who wants to wait names the waiting period. For such a question this is especially fair to both."
+    ]
+   },
+   {
+    "q": "We have lived together for a long time and everyday life has become routine. Where do we start?",
+    "a": [
+     "With a sunny day. Routine for your couple is when only Justice and silence remain: chores are divided, promises kept, evenings calm. Everything is right, but there is little light. You are filled by the Sun: new impressions, celebrations, pride in each other.",
+     "For the coming month, choose one day together in a new place and one small shared event each week: breakfast out, a walk around an unfamiliar neighbourhood, an evening when each tells what they are proud of. And review the division of housework: sometimes routine rests on one unnoticed imbalance that one of you has kept quiet about for a year.",
+     "The third step is to bring back home a little of the Lovers, which the couple doesn’t have but each of you does: a passing touch, a compliment out loud, a shared decision about a small thing. Routine retreats when signs of attention appear again in an ordinary day.",
+     "One more hint is the Tower in the point of abundance. Sometimes routine is best broken not by a celebration but by a small change: rearrange the furniture, change your weekend routine, start something new together. For your couple a change chosen together means both money and freshness in the relationship."
+    ]
+   },
+   {
+    "q": "Why are there no chakras or age scale in the report?",
+    "a": [
+     "Because a couple’s matrix doesn’t have them. Lisovskaya doesn’t look at chakras and ancestral lines in the compatibility matrix: these are tools of the personal matrix. She allows age periods to be read in a couple only as possible crisis periods and optionally — we don’t cover them in this report. A couple is read by its own points: image, atmosphere, meeting point, tasks, money, relationships, parenthood and values. If you want each of you analysed by chakras and ages, that is what a personal reading does."
+    ]
+   }
+  ],
+  "sources": [
+   {
+    "title": "Yuliana Lisovskaya — “Destiny Matrix: Compatibility” (Ridero, 2024; in Russian)",
+    "url": "https://books.yandex.ru/books/ejSadGo3",
+    "note": "The basis of the report: the meaning of the couple’s points and lines, what is read together (chapter 3); reading rules and adding up repetitions (chapters 2–3); the energies 7, 8, 9, 11, 16, 17, 18, 19 and 22 in a couple (chapter 4); the order of a consultation, duals and half-duals, reading the couple’s programme by combinations (chapters 3 and 5). Links between points, life scenarios and recommendations are our interpretation."
+   },
+   {
+    "title": "Yuliana Lisovskaya — “Destiny Matrix for Beginners” (in Russian)",
+    "url": "https://litres.com/book/uliana-lisovskaya/matrica-sudby-dlya-nachinauschih-70224676/",
+    "note": "The roles of points in personal matrices, which show who brings which theme into the couple (chapter 1); the dual, the half-dual and the point of reconciliation on the relationship line (chapter 8). Conclusions about the couple are our interpretation."
+   },
+   {
+    "title": "Arthur Edward Waite — “The Pictorial Key to the Tarot” (1910)",
+    "url": "https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot",
+    "note": "The Moon and the Sun as reflected and direct light, Strength with a chain of flowers, the Hermit holding up his light (“where I am, you also may be”), the creature from the water on the Moon card (part II, § 2). Applying these images to the couple is our own."
+   },
+   {
+    "title": "Benebell Wen — “Holistic Tarot” (North Atlantic Books, 2015)",
+    "url": "https://www.penguin.com.au/books/holistic-tarot-9781583948354",
+    "note": "Correspondences of signs and cards in the Golden Dawn system: Virgo — the Hermit, Pisces — the Moon (chapter 9, Key 9 and Key 18). This is a different system, not the matrix method; the coincidence with the couple’s matrix is our observation."
+   }
+  ]
+ },
+ "matrix": {
+  "a": {
+   "A": 5,
+   "B": 9,
+   "C": 19,
+   "D": 6,
+   "E": 12,
+   "F": 14,
+   "G": 10,
+   "H": 7,
+   "I": 11,
+   "J": 17,
+   "K": 21,
+   "L": 4,
+   "M": 18,
+   "N": 6,
+   "O": 22,
+   "P": 3,
+   "Q": 5,
+   "R": 22,
+   "R1": 4,
+   "R2": 8,
+   "S": 11,
+   "T": 6,
+   "sky": 15,
+   "ground": 6,
+   "male": 21,
+   "female": 21,
+   "personal": 21,
+   "social": 6,
+   "spiritual": 9
+  },
+  "b": {
+   "A": 21,
+   "B": 2,
+   "C": 7,
+   "D": 3,
+   "E": 6,
+   "F": 5,
+   "G": 9,
+   "H": 10,
+   "I": 6,
+   "J": 9,
+   "K": 8,
+   "L": 13,
+   "M": 9,
+   "N": 12,
+   "O": 3,
+   "P": 10,
+   "Q": 20,
+   "R": 22,
+   "R1": 4,
+   "R2": 8,
+   "S": 15,
+   "T": 14,
+   "sky": 5,
+   "ground": 10,
+   "male": 15,
+   "female": 15,
+   "personal": 15,
+   "social": 3,
+   "spiritual": 18
+  },
+  "p": {
+   "A": 8,
+   "B": 11,
+   "C": 8,
+   "D": 9,
+   "E": 18,
+   "F": 19,
+   "G": 19,
+   "H": 17,
+   "I": 17,
+   "J": 8,
+   "K": 11,
+   "L": 17,
+   "M": 9,
+   "N": 18,
+   "O": 7,
+   "P": 13,
+   "Q": 7,
+   "R": 8,
+   "R1": 8,
+   "R2": 16,
+   "S": 8,
+   "T": 20,
+   "sky": 20,
+   "ground": 16,
+   "male": 9,
+   "female": 9,
+   "personal": 9,
+   "social": 18,
+   "spiritual": 9
+  }
+ },
+ "inserts": {},
+ "id": 0,
+ "status": "done",
+ "created_at": "2026-11-03T19:07:16.127121+00:00",
+ "approved_at": "2026-11-03T19:07:16.127121+00:00",
+ "href": "/matrix/individual-example/pair",
+ "can_pdf": false
+}

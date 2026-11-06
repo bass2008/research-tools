@@ -33,6 +33,7 @@ def site_context(monkeypatch):
     from app.config import settings
     from app import sites
     origin = "http://testserver"
+    monkeypatch.setattr(settings, "mail_site_origin", origin)
     monkeypatch.setattr(settings, "site_profiles", json.dumps([{
         "origin": origin, "defaultLocale": "ru", "locales": ["ru", "en"],
         "payments": [{"id": name, "provider": name,

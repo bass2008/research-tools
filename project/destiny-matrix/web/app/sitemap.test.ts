@@ -16,7 +16,8 @@ import {
 // у языка, где страницы нет, её не должно быть и в карте.
 const SERVICE_PATHS = servicePages().map((key) => SERVICE_PAGES[key].path);
 // адреса первого уровня, которые не являются концепт-хабами
-const STATIC_PATHS = ["/", "/encyclopedia", "/year", "/compatibility", ...SERVICE_PATHS];
+// the Individual tab is a product page with its own route, not a content hub
+const STATIC_PATHS = ["/", "/encyclopedia", "/year", "/compatibility", "/individual", ...SERVICE_PATHS];
 
 describe("карта сайта", () => {
   const paths = sitemap().map((entry) => splitPublicPath(new URL(entry.url).pathname).path);
@@ -94,6 +95,11 @@ describe("карта сайта", () => {
     const { ROOT_HUBS } = await import("@/lib/encyclopedia");
     const roots = paths.filter((p) => /^\/[a-z-]+$/.test(p) && !STATIC_PATHS.includes(p));
     for (const p of roots) expect(ROOT_HUBS).toContain(p.slice(1));
+  });
+
+  it("выдаёт лендинг индивидуального разбора и примеры", () => {
+    expect(paths).toContain("/individual");
+    expect(paths).toContain("/matrix/individual-example/personal");
   });
 
   it("держит шапки категорий независимо от наличия статей", () => {

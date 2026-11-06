@@ -1,3 +1,5 @@
+import type { IndividualPage, IndividualReading, IndividualRequest } from "./individualReading";
+import type { IndividualOrder, IndividualTerms } from "./individualPricing";
 import { reportBadFormat } from "./errors";
 import { holdingList, type Holding } from "@/lib/holdings";
 import { D } from "./i18n";
@@ -11,6 +13,7 @@ import { localized } from "./i18n/localized";
 import type { Sex } from "./matrix";
 
 export interface User {
+  email_verified_at?: string | null;
   id: number;
   email: string;
 }
@@ -22,6 +25,7 @@ export interface AuthResponse {
 
 /** Что открыто — решают действующие права, поле тарифа у пользователя не хранится. */
 export interface MeResponse {
+  pending_email_change?: PendingEmailChange | null;
   user: User;
   /** виды доступа: single | matrix | all */
   scopes: string[];
@@ -62,6 +66,7 @@ export interface MatrixListItem {
 
 /** Разбор любого продукта: продукт и введённые данные. */
 export interface ReadingItem {
+  can_delete?: boolean;
   id: number;
   product: string;
   inputs: Record<string, unknown>;
@@ -149,28 +154,6 @@ export interface ReportJobItem {
 export interface AdminReportJob extends ReportJobItem {
   user_id: number;
   email: string;
-}
-
-export interface WorkerStatus {
-  online: boolean;
-  last_seen_at: string | null;
-  offline_after: number;
-}
-
-export interface WorkTask {
-  id: number;
-  kind: string;
-  status: "queued" | "signalled" | "done" | "failed";
-  reading_id: number | null;
-  reason: string | null;
-  params: { keys?: string[]; response?: string };
-  error: string | null;
-  problems: string[];
-  attempts: number;
-  created_at: string;
-  due_at: string;
-  signalled_at: string | null;
-  finished_at: string | null;
 }
 
 export interface SweepRun {
@@ -396,6 +379,7 @@ export const forLocale = localized((L: Locale) => {
       }
       throw new ApiError(detail, res.status, L, messages);
     }
+    if (res.status === 204) return undefined as T;
     if (!parsed) {
       reportBadFormat(method, API_BASE + path, res.status, performance.now() - started);
       throw new ApiError(D.apiErrors.unexpected[L], res.status, L, D.apiErrors.unexpected);
@@ -439,6 +423,7 @@ export const forLocale = localized((L: Locale) => {
       const rights = (raw.access ?? {}) as Record<string, unknown>;
       return {
         user: raw.user as User,
+        pending_email_change: raw.pending_email_change as PendingEmailChange | null,
         scopes: scopeList(rights.scopes),
         can_store: raw.can_store === true,
         unlimited: raw.unlimited === true,
@@ -455,6 +440,31 @@ export const forLocale = localized((L: Locale) => {
       };
     },
 
+    removeReading: (id: number) => request<void>(`/readings/${id}`, { method: "DELETE" }),
+    changePassword: (current_password: string, new_password: string) => request<AuthResponse>("/auth/password/change", {
+      method: "POST", body: JSON.stringify({ current_password, new_password }) }),
+    verifyEmail: () => request<EmailVerificationResponse>("/auth/email/verification/request", { method: "POST", body: "{}" }),
+    changeEmail: (new_email: string, current_password: string) => request<EmailChangeResponse>("/auth/email/change/request", {
+      method: "POST", body: JSON.stringify({ new_email, current_password }) }),
+    confirmEmail: (kind: "change" | "verification", token: string) => request<EmailConfirmationResponse>(`/auth/email/${kind}/confirm`, {
+      method: "POST", body: JSON.stringify({ token }) }),
+    notifications: (page = 1, unread = false) => request<NotificationPage>(`/notifications?page=${page}&page_size=20&unread_only=${unread}&time_zone=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone)}`),
+    readNotification: (id: number) => request<{ read_at: string }>(`/notifications/${id}/read`, { method: "POST", body: "{}" }),
+    readAllNotifications: (through_id: number) => request<{ ok: boolean }>("/notifications/read-all", { method: "POST", body: JSON.stringify({ through_id }) }),
+    individualReadings: (page = 1, product = "all") => request<IndividualPage>(`/individual-readings?page=${page}&page_size=20${product === "all" ? "" : `&product=${product}`}`),
+    individualArticle: (id: number, token = "") => request<IndividualReading>(`/individual-readings/${id}/open`, { method: "POST", body: JSON.stringify({ token }) }),
+    individualPdf: (id: number) => request<{ url: string }>(`/individual-readings/${id}/pdf`, { method: "POST", body: "{}" }),
+    individualTerms: () => request<IndividualTerms>("/individual-orders/terms"),
+    /** Order of individual readings: the price is counted by the server from the order. */
+    individualOrder: (order: IndividualOrder, provider?: string) =>
+      request<PaymentResponse & { order_id: string; payment_url: string | null; status: string }>(
+        "/individual-orders/start", { method: "POST", body: JSON.stringify({ ...order, provider }) }),
+    adminIndividualReadings: (page = 1, status = "") => request<IndividualPage>(`/admin/individual-readings?page=${page}&page_size=20${status ? `&status=${status}` : ""}`),
+    createIndividualReading: (payload: IndividualRequest) => request<IndividualReading>("/admin/individual-readings", { method: "POST", body: JSON.stringify(payload) }),
+    approveIndividualReading: (id: number) => request<IndividualReading>(`/admin/individual-readings/${id}/approve`, { method: "POST", body: "{}" }),
+    individualPreview: (id: number) => request<{ url: string }>(`/admin/individual-readings/${id}/preview`),
+    adminNotifications: (params: URLSearchParams) => request<AdminNotificationPage>(`/admin/notifications?${params}&time_zone=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone)}`),
+
     matrices: () => request<{ items: MatrixListItem[] }>("/readings?product=personal"),
 
     /** Разборы кабинета: без продукта — все, с типом каждого. */
@@ -470,8 +480,8 @@ export const forLocale = localized((L: Locale) => {
     payments: () => request<{ items: PaymentItem[] }>("/payments"),
 
     admin: {
-      users: (page = 1, pageSize = 10, sort: AdminUserSort = "last_seen_at", order: "asc" | "desc" = "desc") => {
-        const q = new URLSearchParams({ page: String(page), page_size: String(pageSize), sort, order });
+      users: (page = 1, pageSize = 10, sort: AdminUserSort = "last_seen_at", order: "asc" | "desc" = "desc", search = "") => {
+        const q = new URLSearchParams({ page: String(page), page_size: String(pageSize), sort, order, search });
         return request<{ items: AdminUser[]; total: number; page: number; page_size: number }>(
           `/admin/users?${q.toString()}`,
         );
@@ -489,10 +499,6 @@ export const forLocale = localized((L: Locale) => {
         );
       },
       sweeps: () => request<{ items: SweepRun[] }>("/admin/sweeps"),
-      tasks: (page = 1) => request<{ items: WorkTask[]; pending: number; total: number; worker: WorkerStatus }>(`/admin/tasks?page=${page}`),
-      createTestTask: () => request<WorkTask>("/admin/tasks", { method: "POST", body: JSON.stringify({ kind: "test" }) }),
-      deleteTask: (id: number) => request<{ ok: boolean }>(`/admin/tasks/${id}`, { method: "DELETE" }),
-      retryTask: (id: number) => request<WorkTask>(`/admin/tasks/${id}/retry`, { method: "POST" }),
       pulse: () => request<Pulse>("/admin/pulse"),
       settings: () => request<ApplicationSettings>("/admin/settings"),
       /** Что станет с доступом после возврата: текст считает сервер по тем же правам, что кабинет. */
@@ -607,6 +613,8 @@ export const forLocale = localized((L: Locale) => {
         paid: boolean; matrix_id: number | null; product?: string | null;
         /** куплена подписка, а не разбор */
         subscription?: boolean;
+        /** an order of individual readings: requests are written, nothing opens at once */
+        individual?: boolean;
         until?: string | null;
         /** после возврата: что стало с доступом — текст сервера; открыт ли ещё разбор */
         outcome?: string;
@@ -626,6 +634,7 @@ export const forLocale = localized((L: Locale) => {
         /** чек без входа: разборы и кабинет не раскрывает */
         matrix_id?: null; product?: null;
         subscription: boolean;
+        individual?: boolean;
         until: string | null;
         outcome?: string;
         payment_id: string;
@@ -658,3 +667,55 @@ export const forLocale = localized((L: Locale) => {
 
 // Compatibility for callers that explicitly use the deployment default.
 export const { API_BASE, api } = forLocale(defaultLocale);
+
+export interface PendingEmailChange {
+  new_email: string;
+  expires_at: string;
+  require_old_confirmation: boolean;
+  old_confirmed: boolean;
+  new_confirmed: boolean;
+}
+
+export type EmailVerificationResponse =
+  | { ok: true; already_verified: true }
+  | { ok: true; expires_at: string; retry_after_seconds: number; pending_email_change: null };
+
+export interface EmailChangeResponse {
+  ok: true;
+  expires_at: string;
+  retry_after_seconds: number;
+  pending_email_change: PendingEmailChange;
+}
+
+export type EmailConfirmationResponse =
+  | { ok: true; verified: true }
+  | { ok: true; changed: true }
+  | { ok: true; changed: false; waiting_for: "new" | "old" };
+
+export interface NotificationItem {
+  delivery_id: number;
+  notification_id: number;
+  type: string;
+  title: string;
+  text: string;
+  action: { label: string; href: string };
+  created_at: string;
+  delivered_at: string;
+  read_at: string | null;
+}
+
+export interface NotificationListPage {
+  items: NotificationItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface NotificationPage extends NotificationListPage {
+  unread_count: number;
+  through_id: number;
+}
+
+export interface AdminNotificationPage extends NotificationListPage {
+  items: (NotificationItem & { user: { id: number; email: string } })[];
+}

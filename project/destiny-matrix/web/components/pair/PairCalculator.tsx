@@ -292,7 +292,7 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
       setError(DP.openFailed);
     }
   };
-  const open = isExample || openId ? undefined : unlimited ? (
+  const open = !signedIn || isExample || openId ? undefined : unlimited ? (
     <button type="button" className={`${styles.btn} ${styles.btnGold}`} onClick={openSaved} disabled={opening}
       data-testid="pair-open">{opening ? DP.opening[L] : fullUnits ? DP.saveToAccount[L] : DP.openFull[L]}</button>
   ) : undefined;

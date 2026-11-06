@@ -6,8 +6,9 @@ from test_runtime_localization import switch
 from test_pair import calc_pair
 
 
-@pytest.mark.parametrize('path,ids', [('/pay?for=pair', ['pair', 'month']),
-                                     ('/pay?for=personal', ['single', 'month']),
+# /pay is one page wherever "Buy" was pressed; the compatibility page keeps its own product.
+@pytest.mark.parametrize('path,ids', [('/pay?for=pair', ['single', 'pair', 'month']),
+                                     ('/pay?for=personal', ['single', 'pair', 'month']),
                                      ('/pay', ['single', 'pair', 'month']),
                                      ('/compatibility', ['pair', 'month'])])
 def test_tariffs_keep_product_on_language_switch(page, path, ids):

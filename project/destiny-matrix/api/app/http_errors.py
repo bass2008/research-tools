@@ -18,3 +18,7 @@ class LocalizedHTTPException(HTTPException):
     def __init__(self, status_code: int, *, detail: Callable[[], str]):
         self.messages = message_translations(detail)
         super().__init__(status_code, detail=self.messages[current_locale()])
+
+
+def error(code: int, ru: str, en: str) -> LocalizedHTTPException:
+    return LocalizedHTTPException(code, detail=lambda: en if current_locale() == "en" else ru)

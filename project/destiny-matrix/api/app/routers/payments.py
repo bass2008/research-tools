@@ -6,12 +6,12 @@ import re
 import uuid
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy import select
+from sqlalchemy import select, update as sql_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..i18n import say, say_for, current_locale, using_locale
-from .. import access, mail, offers, payments, printing, products, readings, sites
+from .. import access, individual_orders, mail, offers, payments, printing, products, readings, sites, notifications
 from ..http_errors import LocalizedHTTPException
 from ..config import settings
 from ..db import get_db
@@ -89,7 +89,9 @@ def _offer(db: Session, code: str) -> Offer:
     """Предложение канала этого запроса. Цену из браузера не берём никогда: браузер присылает
     код, цена — из базы."""
     offer = offers.get(db, code)
-    if offer is None or offer.channel != offers.channel():
+    # Individual readings are priced by the order and sold only through /individual-orders: here the
+    # hidden offer would have granted open access to every reading.
+    if offer is None or offer.channel != offers.channel() or offer.id == offers.INDIVIDUAL_ID:
         raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.no_tariff"))
     return offer
 
@@ -153,8 +155,12 @@ def _grant_once(db: Session, purchase: Purchase, now: dt.datetime) -> tuple[Enti
 def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
     """Единственное место, где исход платежа превращается в права. Названия статусов сюда не
     доходят — провайдер отдаёт нормализованный исход."""
+    # Acquire the write lock before checking the first paid transition, including on SQLite.
+    db.execute(sql_update(Payment).where(Payment.id == payment.id).values(status=Payment.status))
+    db.refresh(payment)
     now = utcnow()
     purchase = payment.purchase
+    first_paid = payment.paid_at is None
     payment.status = update.status or payment.status
     outcome = update.outcome
     if outcome is payments.Outcome.CANCELED:
@@ -163,22 +169,46 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
                    else payments.Outcome.FAILED)
     if outcome is payments.Outcome.PAID:
         payment.paid_at = payment.paid_at or now
-        right, fresh = _grant_once(db, purchase, now)
+        purchase.paid_at = purchase.paid_at or now
+        if purchase.body().get("kind") == offers.INDIVIDUAL_ID:
+            # No access right: the order turns into reading requests, created after the commit.
+            ids = _admin_paid(db, payment, purchase) if first_paid else []
+            db.commit()
+            notifications.deliver_emails(db, ids)
+            individual_orders.fulfil(db, purchase.id)
+            db.refresh(payment)
+            return payment
+        try:
+            right, fresh = _grant_once(db, purchase, now)
+        except AlreadyGranted:
+            # The provider really charged this payment; an existing right must not erase that fact.
+            right, fresh = None, False
+        body = purchase.body()
+        if body.get("per_reading", True) and purchase.reading:
+            purchase.reading.removed_at = None
+        ids = []
+        with using_locale(body.get("locale", "ru")), sites.using_site(sites.payment_site(payment)):
+            if first_paid and fresh:
+                ids += notifications.grant_event(db, payment.user, right, purchase.reading,
+                    paid=True, payment_id=payment.id, extra={"offer_name": body.get("display_name", body.get("name", "")),
+                        "external_id": payment.external_id})
+        if first_paid:
+            ids += _admin_paid(db, payment, purchase)
         db.commit()
+        notifications.deliver_emails(db, ids)
         if fresh:
-            body = purchase.body()
-            with using_locale(body.get("locale", "ru")), sites.using_site(sites.payment_site(payment)):
-                mail.purchase(payment.user.email, body.get("display_name", body["name"]),
-                              payment.external_id, reading=purchase.reading,
-                              subscription=not body.get("per_reading", True))
-            # печать начинается сразу, не дожидаясь нажатия: на слабой машине она идёт десятки
-            # секунд, и человеку незачем их ждать. Нажал раньше времени — запрос дождётся этой же
-            # печати, второго рендера не будет.
             with using_locale(body.get("locale", settings.site_lang)):
                 printing.warm(payment.user_id, purchase.reading_id)
     elif outcome is payments.Outcome.REFUNDED:
         first = payment.refunded_at is None
         payment.refunded_at = payment.refunded_at or now
+        if purchase.body().get("kind") == offers.INDIVIDUAL_ID:
+            # requests already written stay; what to do with them the admin decides
+            if payment.paid_at is not None:
+                purchase.refunded_at = purchase.refunded_at or now
+            db.commit()
+            db.refresh(payment)
+            return payment
         # заказ возвращён, только если вернули ту попытку, которой он оплачен
         if payment.paid_at is not None:
             purchase.refunded_at = purchase.refunded_at or now
@@ -195,6 +225,17 @@ def apply(db: Session, payment: Payment, update: payments.Update) -> Payment:
         db.commit()
     db.refresh(payment)
     return payment
+
+
+def _admin_paid(db: Session, payment: Payment, purchase: Purchase) -> list[int]:
+    body = purchase.body()
+    with using_locale(body.get("locale", "ru")), sites.using_site(sites.payment_site(payment)):
+        return notifications.emit(db, notifications.ADMIN_TYPE, f"payment:{payment.id}",
+            {**notifications.context(), "buyer_email": payment.user.email,
+             "buyer_id": payment.user_id, "offer_name": body.get("display_name", body.get("name", "")),
+             "amount": payment.amount, "currency": purchase.currency, "payment_id": payment.id,
+             "external_id": payment.external_id, "purchase_id": purchase.id,
+             "order_id": payment.order_id, "paid_at": iso(payment.paid_at)}, notifications.admin_ids(db))
 
 
 def _provider_of(payment: Payment) -> payments.Provider:
@@ -271,10 +312,42 @@ def _body(db: Session, payment: Payment, user: User, reading: Reading | None,
             "matrix_id": reading.id if reading else None, "matrix": item}
     # Токен выдаём только вместе с автосозданием аккаунта: иначе достаточно знать чужую почту,
     # чтобы «купить» и попасть в чужой кабинет.
-    body["token"] = create_token(user.id, user.password_hash) if autoregistered else None
+    body["token"] = create_token(user.id, user.password_hash, auth_version=user.auth_version) if autoregistered else None
     if not autoregistered:
         body["requires_login"] = True
     return body
+
+
+def begin_attempt(db: Session, purchase: Purchase, user: User, provider: payments.Provider,
+                  connection: sites.Connection) -> Payment:
+    """A new attempt to pay the order: the provider's form and its first outcome through apply().
+    Every purchase goes this way — automatic offers and individual orders alike."""
+    site = sites.current()
+    payment = Payment(user_id=user.id, purchase_id=purchase.id, amount=purchase.amount,
+                      external_id=f"new-{uuid.uuid4().hex[:24]}", provider=provider.name,
+                      status="NEW")
+    db.add(payment)
+    db.flush()
+
+    order = payments.order_id(payment.id)
+    query = urlencode({"order": order})
+    urls = PaymentUrls(success=f"{site.origin}/{current_locale()}/pay/done?{query}",
+                       fail=f"{site.origin}/{current_locale()}/pay/fail?{query}",
+                       notification=connection.notification_url)
+    try:
+        started = provider.start(order, purchase.amount, purchase.body()["name"], user.email, urls=urls)
+    except payments.PaymentError as exc:
+        db.rollback()
+        raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
+
+    payment.external_id = started.external_id
+    payment.pay_url = started.pay_url
+    payment.status = started.status
+    payment.order_id = order
+    db.flush()
+    apply(db, payment, payments.Update(external_id=started.external_id, order_id=order,
+                                       outcome=started.outcome, status=started.status))
+    return payment
 
 
 def _open(db: Session, payload: PaymentIn, connection: sites.Connection) -> dict:
@@ -310,31 +383,8 @@ def _open(db: Session, payload: PaymentIn, connection: sites.Connection) -> dict
         db.add(purchase)
         db.flush()
 
-    payment = Payment(user_id=user.id, purchase_id=purchase.id, amount=purchase.amount,
-                      external_id=f"new-{uuid.uuid4().hex[:24]}", provider=provider.name,
-                      status="NEW")
-    db.add(payment)
-    db.flush()
-
-    order = payments.order_id(payment.id)
-    query = urlencode({"order": order})
-    urls = PaymentUrls(success=f"{site.origin}/{current_locale()}/pay/done?{query}",
-                       fail=f"{site.origin}/{current_locale()}/pay/fail?{query}",
-                       notification=connection.notification_url)
     try:
-        started = provider.start(order, purchase.amount, purchase.body()["name"], user.email, urls=urls)
-    except payments.PaymentError as exc:
-        db.rollback()
-        raise LocalizedHTTPException(status.HTTP_502_BAD_GATEWAY, detail=exc.public_message) from exc
-
-    payment.external_id = started.external_id
-    payment.pay_url = started.pay_url
-    payment.status = started.status
-    payment.order_id = order
-    db.flush()
-    try:
-        apply(db, payment, payments.Update(external_id=started.external_id, order_id=order,
-                                           outcome=started.outcome, status=started.status))
+        payment = begin_attempt(db, purchase, user, provider, connection)
     except AlreadyGranted as exc:
         db.rollback()
         code = offer.product_list()[0] if offer.per_reading else None
@@ -343,7 +393,7 @@ def _open(db: Session, payload: PaymentIn, connection: sites.Connection) -> dict
             from exc
     db.refresh(user)
 
-    return _body(db, payment, user, reading, offer, order, autoregistered)
+    return _body(db, payment, user, reading, offer, payment.order_id or "", autoregistered)
 
 
 @router.post("/start")
@@ -417,7 +467,8 @@ def sync(payload: PaymentRef, user: User = Depends(current_user),
             "payment_id": payment.external_id,
             "tariff": purchase.offer_id,
             # подписка без разбора: чек говорит про подписку, а не «разбор сохранён в кабинете»
-            "subscription": not purchase.body().get("per_reading", True),
+            "subscription": not purchase.body().get("per_reading", True) and purchase.body().get("kind") != offers.INDIVIDUAL_ID,
+            "individual": purchase.body().get("kind") == offers.INDIVIDUAL_ID,
             "until": access.summary(db, user)["until"]}
     if payment.state() == "refunded":
         # чек возврата говорит то же, что окно возврата и письмо: доступ мог остаться
@@ -437,12 +488,13 @@ def receipt(payload: PaymentRef, db: Session = Depends(get_db)) -> dict:
         raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("pay.not_found"))
     _refresh(db, payment)
     purchase = payment.purchase
-    subscription = not purchase.body().get("per_reading", True)
+    individual = purchase.body().get("kind") == offers.INDIVIDUAL_ID
+    subscription = not purchase.body().get("per_reading", True) and not individual
     right = db.scalar(select(Entitlement).where(Entitlement.purchase_id == purchase.id))
     body = {"ok": True, "status": payment.status, "state": payment.state(),
             "paid": payment.paid_at is not None,
             "payment_id": payment.external_id, "tariff": purchase.offer_id,
-            "subscription": subscription,
+            "subscription": subscription, "individual": individual,
             "until": iso(right.expires_at) if subscription and right else None}
     if payment.state() == "refunded":
         body["outcome"] = access.refund_outcome(db, purchase, done=True)
@@ -494,4 +546,5 @@ def listing(user: User = Depends(current_user), db: Session = Depends(get_db)) -
     переписывает."""
     rows = db.scalars(select(Purchase).where(Purchase.user_id == user.id)
                       .order_by(Purchase.id.desc())).all()
-    return {"items": [row.item() for row in rows]}
+    # automatic readings of an individual order are its part, not purchases of their own
+    return {"items": [row.item() for row in rows if "part_of" not in row.body()]}

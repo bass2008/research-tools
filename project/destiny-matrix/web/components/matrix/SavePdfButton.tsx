@@ -17,6 +17,24 @@ import { useEffect, useState } from "react";
 
 type State = "idle" | "busy" | "ready" | "failed";
 
+export function PdfIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      {/* дискета: корпус, шторка и наклейка */}
+      <path
+        d="M4 3.5h11.2L20.5 8.8V20a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M7.8 3.5h7.4v5H7.8z" fill="currentColor" />
+      <path d="M7 13h10v7.5H7z" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M9.4 15.4h5.2M9.4 17.6h3.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export const forLocale = localized((L: Locale) => {
   const { api } = localizedApi(L);
 
@@ -104,19 +122,7 @@ export default function SavePdfButton({ locale: requestedLocale, ...localeProps 
         disabled={!ready || state === "busy"}
         aria-busy={state === "busy"}
       >
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          {/* дискета: корпус, шторка и наклейка */}
-          <path
-            d="M4 3.5h11.2L20.5 8.8V20a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-          <path d="M7.8 3.5h7.4v5H7.8z" fill="currentColor" />
-          <path d="M7 13h10v7.5H7z" fill="none" stroke="currentColor" strokeWidth="1.6" />
-          <path d="M9.4 15.4h5.2M9.4 17.6h3.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
+        <PdfIcon />
         {state === "busy"
           ? D.report.pdfPreparing[L]
           : state === "ready"

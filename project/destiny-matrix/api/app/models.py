@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 
-from sqlalchemy import (Boolean, Date, DateTime, ForeignKey, Index, Integer, String, Text, event,
+from sqlalchemy import (Boolean, DateTime, ForeignKey, Index, Integer, String, Text, event,
                         func, text)
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -105,6 +105,8 @@ class User(Base):
     # Пульс приходит каждые 45 секунд, но это поле обновляется пакетно раз в час: иначе одна
     # открытая вкладка превращала бы SQLite WAL в непрерывный журнал служебных записей.
     last_seen_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    email_verified_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    auth_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     readings: Mapped[list["Reading"]] = relationship(back_populates="user",
                                                      cascade="all, delete-orphan")
@@ -116,7 +118,8 @@ class User(Base):
                                                              cascade="all, delete-orphan")
 
     def public(self) -> dict:
-        return {"id": self.id, "email": self.email, "created_at": iso(self.created_at)}
+        return {"id": self.id, "email": self.email, "created_at": iso(self.created_at),
+                "email_verified_at": iso(self.email_verified_at)}
 
 
 class MetrikaClient(Base):
@@ -164,6 +167,8 @@ class Reading(Base):
     inputs: Mapped[str] = mapped_column(Text, nullable=False)              # JSON
     subject_key: Mapped[str] = mapped_column(String(200), nullable=False)
     title: Mapped[str | None] = mapped_column(String(200))
+    saved_via: Mapped[str | None] = mapped_column(String(24))
+    removed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                     default=utcnow, server_default=func.now())
 
@@ -192,6 +197,17 @@ class Reading(Base):
         if self.product == "personal":
             out |= {"birth": self.data()["birth"], "sex": self.data()["sex"]}
         return out
+
+
+class Price(Base):
+    """Prices that are not one offer each. Individual readings are priced by the whole order:
+    the ladder and the price after three. Kopecks, like offers."""
+
+    __tablename__ = "prices"
+
+    id: Mapped[str] = mapped_column(String(48), primary_key=True)
+    type: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class Purchase(Base):
@@ -460,41 +476,6 @@ class PaymentSweep(Base):
                 "error": self.error, "log": self.entries()}
 
 
-class WorkTask(Base):
-    """Задача для исполнителя (Claude Code / Codex через MCP `arcana-tasks`).
-
-    queued → (watch выдал сигнал) signalled → done | failed. Сигнал выдаётся один раз; задача,
-    которую не сдали за `task_lease_hours`, снова попадает в выдачу."""
-    __tablename__ = "work_tasks"
-    # Исполнитель может вернуть результат после удаления задачи: её ID нельзя выдать снова.
-    __table_args__ = {"sqlite_autoincrement": True}
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    kind: Mapped[str] = mapped_column(String(32), nullable=False)
-    status: Mapped[str] = mapped_column(String(16), nullable=False, default="queued", index=True)
-    reading_id: Mapped[int | None] = mapped_column(ForeignKey("readings.id", ondelete="SET NULL"), index=True)
-    reason: Mapped[str | None] = mapped_column(String(64))
-    params: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
-    problems: Mapped[str | None] = mapped_column(Text)
-    error: Mapped[str | None] = mapped_column(String(500))
-    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
-                                                    default=utcnow, server_default=func.now())
-    signalled_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
-    finished_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
-
-    def data(self) -> dict:
-        return json.loads(self.params)
-
-    def item(self) -> dict:
-        return {"id": self.id, "kind": self.kind, "status": self.status, "reading_id": self.reading_id,
-                "reason": self.reason, "params": self.data(), "error": self.error,
-                "problems": json.loads(self.problems) if self.problems else [],
-                "attempts": self.attempts, "created_at": iso(self.created_at),
-                "due_at": iso(as_utc(self.created_at) + dt.timedelta(days=1)),
-                "signalled_at": iso(self.signalled_at), "finished_at": iso(self.finished_at)}
-
-
 class ErrorLog(Base):
     """Пятисотки: по ним считается тревога и видно, что именно сломалось. Тела запросов и
     персональных данных здесь нет намеренно — только метод, путь и голова трассировки."""
@@ -533,5 +514,71 @@ class SecurityAudit(Base):
                 "outcome": self.outcome, "email": self.email, "ip": self.ip}
 
 
-AUDIT_ACTIONS = ("login", "register", "reset", "impersonate")
+AUDIT_ACTIONS = ("login", "register", "reset", "impersonate", "password_change", "email_verify", "email_change")
 AUDIT_OUTCOMES = ("success", "failed", "throttled")
+
+
+class AccountOperation(Base):
+    __tablename__ = "account_operations"
+    __table_args__ = (
+        Index("ux_account_operation_pending", "user_id", unique=True,
+              sqlite_where=text("completed_at IS NULL AND canceled_at IS NULL")),
+        {"sqlite_autoincrement": True},
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    type: Mapped[str] = mapped_column(String(32), nullable=False)
+    data: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+    expires_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    canceled_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    __table_args__ = (Index("ux_notification_event", "type", "event_key", unique=True),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    type: Mapped[str] = mapped_column(String(40), nullable=False)
+    event_key: Mapped[str] = mapped_column(String(200), nullable=False)
+    data: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class NotificationDelivery(Base):
+    __tablename__ = "notification_deliveries"
+    __table_args__ = (
+        Index("ux_notification_recipient", "notification_id", "user_id", unique=True),
+        Index("ix_notification_inbox", "user_id", "id"),
+        {"sqlite_autoincrement": True},
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    notification_id: Mapped[int] = mapped_column(ForeignKey("notifications.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    delivered_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+    read_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    email_status: Mapped[str | None] = mapped_column(String(8))
+    notification: Mapped[Notification] = relationship()
+    user: Mapped[User] = relationship()
+
+
+class IndividualReading(Base):
+    __tablename__ = "individual_readings"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    product: Mapped[str] = mapped_column(String(16))
+    kind: Mapped[str] = mapped_column(String(24), default="personal", server_default="personal")
+    year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    inputs: Mapped[str] = mapped_column(Text)
+    locale: Mapped[str] = mapped_column(String(2), default="ru")
+    comment: Mapped[str] = mapped_column(Text, default="")
+    automatic_reading: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(16), default="pending", index=True)
+    title: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    article: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    approved_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # the paid order that created the request; admin requests have none
+    purchase_id: Mapped[int | None] = mapped_column(ForeignKey("purchases.id", ondelete="SET NULL"), nullable=True, index=True)
+    user: Mapped[User] = relationship()

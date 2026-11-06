@@ -36,9 +36,13 @@ export const forLocale = localized((L: Locale) => {
 });
 
 export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
-  sections: EncSectionMeta[];
+  sections?: EncSectionMeta[];
   /** ключ позиции → раздел: «Разделы отчёта» и «Позиции карты» лежат в одном роуте */
-  positionKinds: Record<string, PositionSectionKey>;
+  positionKinds?: Record<string, PositionSectionKey>;
+  /** only the article outline, without encyclopedia sections */
+  tocOnly?: boolean;
+  /** on narrow screens, where the side outline is hidden, keep it in a bar above the article */
+  mobileToc?: boolean;
   /** адреса статей-хабов: они вне /encyclopedia, но принадлежат разделу «Статьи» */
   articlePaths?: string[];
   children: ReactNode;
@@ -46,9 +50,11 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
   const activeLocale = useLocale();
   const L = requestedLocale ?? activeLocale;
   const {
-    sections,
-    positionKinds,
+    sections = [],
+    positionKinds = {},
     articlePaths = [],
+    tocOnly = false,
+    mobileToc = false,
     children,
   } = localeProps;
   const { encyclopediaSectionFromPath, encyclopediaSectionHref } = forLocale(L);
@@ -72,6 +78,7 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
   const [toc, setToc] = useState<TocItem[] | null>(null);
   const [pane, setPane] = useState<"enc" | "art">("enc");
   const [current, setCurrent] = useState(-1);
+  const [tocOpen, setTocOpen] = useState(false);
   const reading = useRef<boolean | null>(null);
   const panes = useRef<HTMLDivElement | null>(null);
 
@@ -103,9 +110,9 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
 
   useEffect(() => {
     reading.current = null;
-    setPane("enc");
+    setPane(tocOnly ? "art" : "enc");
     setCurrent(-1);
-  }, [path]);
+  }, [path, tocOnly]);
 
   // Пока читают статью, меню само переключается на её оглавление, а у начала страницы —
   // обратно на энциклопедию. Ручной выбор вкладки держится до следующего такого перехода.
@@ -124,7 +131,7 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
       const now = !!first && first.getBoundingClientRect().top < innerHeight * 0.6;
       if (now !== reading.current) {
         reading.current = now;
-        setPane(now ? "art" : "enc");
+        setPane(now || tocOnly ? "art" : "enc");
       }
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(track); };
@@ -136,7 +143,7 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
       removeEventListener("resize", schedule);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [toc]);
+  }, [toc, tocOnly]);
 
   // Обычный переход по якорю добавляет запись истории без состояния роутера Next.js: «Назад» со
   // следующей страницы менял адрес, но оставлял её содержимое. Якорь меняем на месте.
@@ -206,23 +213,33 @@ export default function EncFrame({ locale: requestedLocale, ...localeProps }: ({
     ),
   );
 
+  const tocItems = (close?: () => void) => (toc ?? []).map((item, i) => (
+    <li key={item.id}>
+      <a href={`#${item.id}`} className={i === current ? "on" : i < current ? "done" : undefined}
+        aria-current={i === current ? "location" : undefined} onClick={(e) => { close?.(); jump(e, item.id); }}>{item.title}</a>
+    </li>
+  ));
+
   return (
     <div className="enc-layout">
-      <nav className="enc-nav" data-pane={pane} aria-label={D.octagram.encNavAria[L]}>
-        <div className="enc-tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={pane === "enc"}
-            onClick={() => setPane("enc")}>{D.enc.navEncyclopedia[L]}</button>
-          <button type="button" role="tab" aria-selected={pane === "art"}
-            onClick={() => setPane("art")}>{D.enc.navThisArticle[L]}</button>
-        </div>
-        <div className="enc-cats" ref={nav} hidden={pane === "art"}>{cats}</div>
+      {mobileToc && toc && <div className={tocOpen ? "enc-tocbar open" : "enc-tocbar"}>
+        <button type="button" aria-expanded={tocOpen} onClick={() => setTocOpen(!tocOpen)}>
+          <span>{D.enc.navThisArticle[L]}</span><b>{toc[Math.max(current, 0)]?.title}</b>
+        </button>
+        {tocOpen && <ol className="enc-toc" aria-label={D.enc.navTocAria[L]}>{tocItems(() => setTocOpen(false))}</ol>}
+      </div>}
+      <nav className={tocOnly ? "enc-nav toc-only" : "enc-nav"} data-pane={pane}
+        aria-label={tocOnly ? D.enc.navTocAria[L] : D.octagram.encNavAria[L]}>
+        {tocOnly ? <div className="enc-tabs one"><strong>{D.enc.navThisArticle[L]}</strong></div>
+          : <div className="enc-tabs" role="tablist">
+            <button type="button" role="tab" aria-selected={pane === "enc"}
+              onClick={() => setPane("enc")}>{D.enc.navEncyclopedia[L]}</button>
+            <button type="button" role="tab" aria-selected={pane === "art"}
+              onClick={() => setPane("art")}>{D.enc.navThisArticle[L]}</button>
+          </div>}
+        {!tocOnly && <div className="enc-cats" ref={nav} hidden={pane === "art"}>{cats}</div>}
         <ol className="enc-toc" ref={tocList} hidden={pane !== "art"} aria-label={D.enc.navTocAria[L]}>
-          {(toc ?? []).map((item, i) => (
-            <li key={item.id}>
-              <a href={`#${item.id}`} className={i === current ? "on" : i < current ? "done" : undefined}
-                aria-current={i === current ? "location" : undefined} onClick={(e) => jump(e, item.id)}>{item.title}</a>
-            </li>
-          ))}
+          {tocItems()}
         </ol>
       </nav>
 

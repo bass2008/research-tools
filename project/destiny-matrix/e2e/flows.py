@@ -137,10 +137,13 @@ def token_from(line: str | None) -> str | None:
 
 
 def save_current(page: Page) -> None:
-    """Сохранить дату из браузера в кабинет — кнопка живёт в кабинете под списком матриц."""
+    """Сохранить дату из браузера в кабинет — кнопкой над результатом расчёта."""
+    summary = page.locator(".save-reading-summary")
+    if not summary.count():
+        page.goto(BASE, wait_until="domcontentloaded")
+    summary.get_by_test_id("save-matrix").click()
+    page.wait_for_url(re.compile(r"/matrices/\d+$"), timeout=15_000)
     account(page)
-    page.get_by_test_id("save-matrix").click()
-    page.wait_for_timeout(1200)
 
 
 def matrix_ids(page: Page) -> list[int]:

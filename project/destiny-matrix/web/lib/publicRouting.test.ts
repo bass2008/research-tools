@@ -42,6 +42,18 @@ describe("Release 1 public URL migration", () => {
     expect(r.headers.get("x-middleware-request-x-arcana-path")).toBe("/year/16");
   });
 
+  it("opens the sample readings to search and keeps the bought ones closed", () => {
+    for (const host of ["arcana-sense.ru", "arcana-sense.com"]) {
+      const lang = host.endsWith(".ru") ? "ru" : "en";
+      expect(response(host, `/${lang}/matrix/individual-example/personal`).headers.get("x-robots-tag")).toBeNull();
+      expect(response(host, `/${lang}/individual`).headers.get("x-robots-tag")).toBeNull();
+      expect(response(host, `/${lang}/matrix/individual/7`).headers.get("x-robots-tag")).toContain("noindex");
+    }
+    const ru = configuredSites().find((s) => s.origin === "https://arcana-sense.ru")!;
+    expect(publicUrl("/matrix/individual-example/pair", ru, "en")).toBe("https://arcana-sense.com/en/matrix/individual-example/pair");
+    expect(publicUrl("/matrix/individual/7", ru, "en")).toBe("https://arcana-sense.ru/en/matrix/individual/7");
+  });
+
   it("maps only public navigation, preserves query/fragment and never doubles prefixes", () => {
     expect(publicPath("/year/16?tab=meaning#text", "ru")).toBe("/ru/year/16?tab=meaning#text");
     expect(publicPath("/ru/year/16", "ru")).toBe("/ru/year/16");

@@ -17,6 +17,9 @@ import { combination } from "./combination";
 import { enc, encArcanum, encChakra, encCombination, encLinks, encPosition } from "./enc";
 import { encCharacter, encTail, encYear } from "./encYear";
 import { pay, payForm, payResult } from "./pay";
+import { individualLanding } from "./individualLanding";
+import { individualLinks } from "./individualLinks";
+import { individualSale } from "./individualSale";
 import { common, meta } from "./common";
 import { home, homeMeta, quote, slides, unlockBox } from "./home";
 import { legal } from "./legal";
@@ -39,6 +42,9 @@ export const D = {
   pay,
   payForm,
   payResult,
+  individualLanding,
+  individualLinks,
+  individualSale,
   mapPoints,
   octagram,
   matrixPages,

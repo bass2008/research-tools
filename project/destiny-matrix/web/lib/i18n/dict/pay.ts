@@ -44,33 +44,31 @@ export const pay = {
     en: "The access could not be checked.",
   } satisfies Phrase,
   anyDates: { ru: "Любое число дат", en: "Any number of dates" } satisfies Phrase,
-  oneDate: { ru: "Одна дата", en: "One date" } satisfies Phrase,
-  onePairCap: { ru: "Одна пара", en: "One couple" } satisfies Phrase,
+  oneDate: { ru: "Одна дата · автоматический", en: "One date · automatic" } satisfies Phrase,
+  onePairCap: { ru: "Одна пара · автоматический", en: "One couple · automatic" } satisfies Phrase,
+  singleTitle: { ru: "Разбор одной даты", en: "Reading of one date" } satisfies Phrase,
+  pairTitle: { ru: "Совместимость пары", en: "Couple compatibility" } satisfies Phrase,
   onePayment: { ru: "один платёж", en: "one payment" } satisfies Phrase,
   // тарифная карточка
-  allSections: { ru: "Все 20 разделов разбора", en: "All 20 sections of the reading" } satisfies Phrase,
+  allSections: { ru: "Все 20 разделов автоматического разбора", en: "All 20 sections of the automatic reading" } satisfies Phrase,
   unlimitedDates: { ru: "Любое число дат рождения", en: "Any number of birth dates" } satisfies Phrase,
   singleDate: { ru: "Одна дата рождения", en: "One date of birth" } satisfies Phrase,
   storedInAccount: { ru: "Матрицы хранятся в кабинете", en: "Matrices are kept in your account" } satisfies Phrase,
   noSubscription: { ru: "Один платёж, без подписки", en: "One payment, no subscription" } satisfies Phrase,
-  opensAtOnce: { ru: "Открывается сразу после оплаты", en: "Opens right after payment" } satisfies Phrase,
+  opensAtOnce: { ru: "Открывается мгновенно после оплаты", en: "Opens instantly after payment" } satisfies Phrase,
   downloadsAsPdf: { ru: "Скачивается в PDF и остаётся у вас", en: "Downloads as a PDF and stays with you" } satisfies Phrase,
-  allReadings: { ru: "Все разделы личных разборов и разборов пары", en: "Every section of personal and couple readings" } satisfies Phrase,
+  allReadings: { ru: "Все разделы автоматических разборов: личных и пары", en: "Every section of automatic readings: personal and couple" } satisfies Phrase,
   unlimitedReadings: { ru: "Любые даты рождения и пары", en: "Any dates of birth and couples" } satisfies Phrase,
-  pairSections: { ru: "Все сферы разбора совместимости", en: "Every sphere of the compatibility reading" } satisfies Phrase,
+  pairSections: { ru: "Все сферы автоматического разбора совместимости", en: "Every sphere of the automatic compatibility reading" } satisfies Phrase,
   pairDates: { ru: "Одна пара — две даты рождения", en: "One couple — two dates of birth" } satisfies Phrase,
-  pairOpens: {
-    ru: "Полный разбор совместимости, включая толкования семи чакр и общего энергополя, открывается сразу после оплаты.",
-    en: "The full compatibility reading, including all seven chakras and the overall energy field, opens immediately after payment.",
-  } satisfies Phrase,
   chooseTitle: { ru: "Что покупаем", en: "What would you like to buy" } satisfies Phrase,
   openedFor: {
     ru: (period: string) => `Открыто ${period}, дальше закрывается`,
     en: (period: string) => `Open ${period}, then it closes`,
   } satisfies PhraseFn<[string]>,
-  manualRenewal: {
-    ru: "Без автосписаний: продление вручную",
-    en: "No automatic charges: renewal is manual",
+  noAutomaticCharges: {
+    ru: "Без автосписаний",
+    en: "No automatic charges",
   } satisfies Phrase,
   buyFor: {
     ru: (price: string) => `Купить за ${price}`,
@@ -132,11 +130,11 @@ export const payForm = {
     ru: (price: string, period: string, everything: boolean) => (everything
       ? `Все разделы личных разборов и разборов пары — для любых дат и пар ${period}. `
       : `Все 20 разделов разбора — для любых дат ${period}. `)
-      + `Стоимость — ${price}, без автосписаний: продление вручную.`,
+      + `Стоимость — ${price}, без автосписаний.`,
     en: (price: string, period: string, everything: boolean) => (everything
       ? `All sections of personal and couple readings, for any dates and couples, ${period}. `
       : `All 20 sections of the reading, for any dates, ${period}. `)
-      + `The price is ${price}, with no auto-renewal: you renew by hand.`,
+      + `The price is ${price}, with no automatic charges.`,
   } satisfies PhraseFn<[string, string, boolean]>,
   planGroup: { ru: "Тариф", en: "Plan" } satisfies Phrase,
   paymentOpens: { ru: "Платёж откроет", en: "The payment opens" } satisfies Phrase,

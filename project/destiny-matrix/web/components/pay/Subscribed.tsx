@@ -24,9 +24,18 @@ export function Subscribed({ locale: L, pair = false }: { locale: Locale; pair?:
   );
 }
 
-/** Выбор перед формой оплаты, а подписчику — что у него уже всё открыто. */
-export function PayChoice({ locale, pair = false, carry }: { locale: Locale; pair?: boolean; carry?: PlanCarry }) {
-  return useOfferMode() === "subscription"
-    ? <Subscribed locale={locale} pair={pair} />
-    : <Plans locale={locale} place="buy" carry={carry} />;
+/** Automatic offers on /pay: always all three; a subscriber sees one line instead, since everything automatic is open. */
+export function PayChoice({ locale: L, carry }: { locale: Locale; carry?: PlanCarry }) {
+  const session = useSession();
+  const subscribed = useOfferMode() === "subscription";
+  const until = session.until ? localizedI18n(L).dateLabel(session.until.slice(0, 10), L) : "";
+  return <>
+    <p className="lead">{subscribed ? D.individualSale.leadSubscribed[L] : D.individualSale.lead[L]}</p>
+    {subscribed
+      ? <p className="panel pay-subscribed" data-testid="pay-subscribed">{D.individualSale.subscribedLine[L](until)}</p>
+      : <>
+        <p className="isale-divider">{D.individualSale.autoDivider[L]}</p>
+        <Plans locale={L} place="buy" carry={carry} />
+      </>}
+  </>;
 }

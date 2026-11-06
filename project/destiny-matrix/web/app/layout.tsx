@@ -1,3 +1,4 @@
+import { NotificationsProvider } from "@/components/account/NotificationsProvider";
 import { requestSite } from "@/lib/siteProfile.server";
 import TariffsProvider from "@/components/pay/TariffsProvider";
 import Footer from "@/components/ui/Footer";
@@ -68,9 +69,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <LocaleProvider locale={L} site={site}>
           <TariffsProvider product="personal" locale={L}>
-            <Header locale={L} />
-            {children}
-            <Footer locale={L} />
+            <NotificationsProvider>
+              <Header locale={L} />
+              {children}
+              <Footer locale={L} />
+            </NotificationsProvider>
           </TariffsProvider>
           <Metrika />
           <PulseBeacon />

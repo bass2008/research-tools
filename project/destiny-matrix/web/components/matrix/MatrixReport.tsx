@@ -14,6 +14,7 @@ import { useOfferMode } from "@/components/pay/useOfferMode";
 import { useOwnDates } from "@/components/matrix/CalculationProvider";
 import MatrixResult from "@/components/matrix/MatrixResult";
 import ReportSections from "@/components/matrix/ReportSections";
+import SaveReadingSummary from "./SaveReadingSummary";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
 import Plans from "@/components/pay/Plans";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
@@ -89,6 +90,8 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
   return (
     <div id="result">
       <section className="wrap section-gap" style={{ padding: 0 }}>
+        {!example && <SaveReadingSummary birth={matrix.birth} sex={matrix.sex}
+          opened={sections.filter(s => !s.locked).length} total={sections.length} savedId={thisDateSaved?.id} />}
         <MatrixResult locale={L} m={matrix} example={example}
           chakraReading={access.reading}
           chakraReadingStatus={access.readingStatus}

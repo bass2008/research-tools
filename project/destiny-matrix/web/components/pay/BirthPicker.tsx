@@ -38,9 +38,11 @@ function usePrefill(ready: boolean, initial: unknown, apply: () => void) {
 }
 
 /** Дата и пол для разбора одной даты — те же поля, что в калькуляторе на главной. */
-export function BirthPicker({ locale: L, initial, ready, disabled, onChange }: {
+export function BirthPicker({ locale: L, initial, ready, disabled, onChange, idPrefix = "pay" }: {
   locale: Locale;
   initial: StoredBirth | null;
+  /** several pickers on one form: a label must point at its own field */
+  idPrefix?: string;
   ready: boolean;
   disabled: boolean;
   onChange: (value: { date: PickedDate; sex: Sex }) => void;
@@ -59,7 +61,7 @@ export function BirthPicker({ locale: L, initial, ready, disabled, onChange }: {
 
   return (
     <div className="paybirth" data-testid="pay-birth">
-      <DateFields locale={L} id={(part) => `pay-${part}`} testId={(part) => `pay-${part}`} value={date}
+      <DateFields locale={L} id={(part) => `${idPrefix}-${part}`} testId={(part) => `pay-${part}`} value={date}
         maxYear={maxYear} disabled={disabled}
         onChange={(part, value) => { touch(); setDate((prev) => ({ ...prev, [part]: value })); }} />
       <div className="sexrow" role="group" aria-label={D.calc.sex[L]}>
@@ -76,8 +78,9 @@ export function BirthPicker({ locale: L, initial, ready, disabled, onChange }: {
 }
 
 /** Две даты для разбора пары — те же поля, что в калькуляторе совместимости. */
-export function PairPicker({ locale: L, initial, ready, disabled, onChange }: {
+export function PairPicker({ locale: L, initial, ready, disabled, onChange, labels }: {
   locale: Locale;
+  labels?: { a: string; b: string };
   initial: StoredPair | null;
   ready: boolean;
   disabled: boolean;
@@ -104,8 +107,8 @@ export function PairPicker({ locale: L, initial, ready, disabled, onChange }: {
   );
   return (
     <div className="paybirth" data-testid="pay-pair">
-      {partner("a", DP.first[L])}
-      {partner("b", DP.second[L])}
+      {partner("a", labels?.a ?? DP.first[L])}
+      {partner("b", labels?.b ?? DP.second[L])}
     </div>
   );
 }

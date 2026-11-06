@@ -72,9 +72,9 @@ export const forLocale = localized((L: Locale) => {
 
 export const { encSections, articleList, articlePaths } = forLocale(defaultLocale);
 
-export default function EncShell({ locale: requestedLocale, ...localeProps }: ({ children: ReactNode }) & { locale?: Locale }) {
+export default function EncShell({ locale: requestedLocale, ...localeProps }: ({ children: ReactNode; hero?: boolean }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
-  const { children } = localeProps;
+  const { children, hero = true } = localeProps;
   const { ARCANA, CHAKRA_PAGES, POSITIONS, ENCYCLOPEDIA_SLIDES, categoryHub, encSections, articleList } = forLocale(L);
   const energyField = categoryHub("energy-field");
 
@@ -88,11 +88,11 @@ export default function EncShell({ locale: requestedLocale, ...localeProps }: ({
 
   return (
     <main id="content" className="page">
-      <CalcHero locale={L} slides={ENCYCLOPEDIA_SLIDES} h1={false} place="encyclopedia">
+      {hero && <CalcHero locale={L} slides={ENCYCLOPEDIA_SLIDES} h1={false} place="encyclopedia">
         {/* В справочнике отчёта нет: после расчёта сразу открываем карту на главной. Раньше
             оставляли человека в статье с малозаметной второй ссылкой, и кнопка казалась сломанной. */}
         <MatrixForm locale={L} finish={{ kind: "go", href: "/#result" }} place="encyclopedia" />
-      </CalcHero>
+      </CalcHero>}
 
       <div className="wrap">
         <EncCrumbs locale={L}

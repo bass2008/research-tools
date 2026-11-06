@@ -98,3 +98,26 @@ class PulseIn(BaseModel):
 class MetrikaClientIn(BaseModel):
     counter_id: int = Field(gt=0, le=9007199254740991)
     client_id: str = Field(pattern=r"^[0-9]{1,64}$")
+
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(min_length=1, max_length=200)
+    new_password: str = Field(min_length=3, max_length=200)
+
+
+class EmailChange(BaseModel):
+    new_email: EmailStr
+    current_password: str = Field(min_length=1, max_length=200)
+
+    @field_validator("new_email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+class OperationConfirm(BaseModel):
+    token: str = Field(min_length=20, max_length=2000)
+
+
+class ReadAllNotifications(BaseModel):
+    through_id: int = Field(ge=0)

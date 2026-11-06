@@ -4,6 +4,7 @@ import { requestLocale } from "./i18n/request";
 import { apiUpstream } from "./settings/server";
 import { requestSiteHeaders } from "./siteProfile.server";
 import type { PaymentProvider, Tariff } from "./tariffs";
+import { DEFAULT_PRICES, type Prices } from "./individualPricing";
 
 export interface Billing {
   items: Tariff[];
@@ -37,6 +38,20 @@ export const getBilling = cache(async (product = "personal"): Promise<Billing> =
     };
   } catch {
     return unknown;
+  }
+});
+
+/** Prices of individual readings from the database, for the page markup; the seeded ones if the API is silent. */
+export const individualPrices = cache(async (): Promise<Prices> => {
+  try {
+    const res = await fetch(`${apiUpstream()}/api/individual-orders/terms`, {
+      cache: "no-store",
+      headers: { "Accept-Language": await requestLocale(), ...await requestSiteHeaders() },
+    });
+    const body = res.ok ? await res.json() : null;
+    return body?.prices ?? DEFAULT_PRICES;
+  } catch {
+    return DEFAULT_PRICES;
   }
 });
 

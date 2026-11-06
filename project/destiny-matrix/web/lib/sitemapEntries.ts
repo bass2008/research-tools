@@ -9,6 +9,7 @@ import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
 import { buildSettings } from "./settings/build";
 import { ENERGY_FIELD_HREF } from "./readingTypes";
 import { publicUrl } from "./publicRouting";
+import { EXAMPLE_SLUGS, individualExample } from "./individualExamples";
 
 // По решению владельца от 27.09.2026 все адреса снова получают общую дату релиза, как до
 // 6abed77 (30.08). Тогда карта была статической и new Date() фиксировалась при сборке.
@@ -39,6 +40,10 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
   return unique([
     { url: abs("/"), priority: 1 },
     { url: abs("/encyclopedia"), priority: 0.9 },
+    // The Individual tab: the landing in every language, the sample readings where they are written.
+    { url: abs("/individual"), priority: 0.85 },
+    ...EXAMPLE_SLUGS.filter((slug) => individualExample(slug, L)?.locale === L)
+      .map((slug) => ({ url: abs(`/matrix/individual-example/${slug}`), priority: 0.6 })),
     // Шапки разделов: у каждой свой текст и свой головной запрос. Приоритет выше листьев —
     // это цель обхода, с которой раздаётся весь раздел.
     ...[ARCANUM_HUB, POSITION_HUB, CHAKRA_HUB].map((url) => ({

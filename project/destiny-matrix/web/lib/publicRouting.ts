@@ -7,7 +7,7 @@ const PUBLIC_ROOTS = new Set([
   "compatibility", "contacts", "support", "terms", "privacy", "refund", "energies",
   "programs", "full-reading", "year", "karmic-matrix", "compatibility-center",
   "how-to-read", "decoding", "business-compatibility", "meaning", "method", "author",
-  "by-birth-date", "encyclopedia",
+  "by-birth-date", "encyclopedia", "individual",
 ]);
 
 export function splitPublicPath(path: string): { locale?: Lang; path: string } {
@@ -18,13 +18,15 @@ export function splitPublicPath(path: string): { locale?: Lang; path: string } {
 export function isPublicPath(path: string): boolean {
   if (path === "/") return true;
   const parts = path.split("/").filter(Boolean);
+  // Readings under /matrix are private; only the sample readings are public pages.
+  if (parts[0] === "matrix") return parts[1] === "individual-example" && parts.length === 3;
   return PUBLIC_ROOTS.has(parts[0]) &&
     (parts.length === 1 || parts[0] === "encyclopedia" || (parts[0] === "year" && parts.length === 2));
 }
 
 /** Application pages keep their session/payment host while their language lives in the URL. */
 export function isUserPath(path: string): boolean {
-  return isPublicPath(path) || /^\/(account|admin|report|matrices|readings|pay|login|register|forgot|reset|print)(\/|$)/.test(path);
+  return isPublicPath(path) || /^\/(account|admin|report|matrices|matrix\/individual|matrix\/individual-example|individual|readings|pay|login|register|forgot|reset|print)(\/|$)/.test(path);
 }
 
 /** Idempotent mapping of user-facing paths; API, assets and external URLs are untouched. */

@@ -1,22 +1,21 @@
 """Админка: кто зарегистрирован, когда заходил, что купил и какие даты сохранил."""
 from __future__ import annotations
 
-import json
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends, Request, status
+from sqlalchemy import func, select, or_
 from sqlalchemy.orm import Session
 
-from .. import access, audit, monitor, offers, printing, products, readings
+from .. import access, audit, grants, monitor, notifications, offers, printing, products, readings
 from .. import reports as report_store
 from .. import payments as gateway
 from ..routers.payments import apply as apply_payment
 from ..config import settings
-from ..db import get_db
+from ..db import begin_write, get_db
 from ..deps import current_user
-from ..i18n import using_locale, say, validation_message
+from ..i18n import using_locale, say
 from ..http_errors import LocalizedHTTPException
 from ..models import (Payment, PaymentSweep, Purchase, Reading, ReportJob, SecurityAudit,
                       User, MetrikaClient, iso)
@@ -34,12 +33,21 @@ def admin_user(user: User = Depends(current_user)) -> User:
     return user
 
 
+@router.get("/readings/{reading_id}")
+def reading_preview(reading_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
+    row = db.get(Reading, reading_id)
+    if row is None:
+        raise LocalizedHTTPException(status.HTTP_404_NOT_FOUND, detail=lambda: say("admin.not_found"))
+    return {**row.item(), "unlocked": True, "owner": {"id": row.user_id, "email": row.user.email}}
+
+
 def _row(db: Session, user: User) -> dict:
     rights = access.active_rights(db, user)
+    # Payments, not purchases: an individual order adds free purchases for its automatic readings.
     paid = db.execute(
-        select(func.count(Purchase.id), func.coalesce(func.sum(Purchase.amount), 0))
-        .where(Purchase.user_id == user.id, Purchase.paid_at.is_not(None),
-               Purchase.refunded_at.is_(None))
+        select(func.count(Payment.id), func.coalesce(func.sum(Payment.amount), 0))
+        .where(Payment.user_id == user.id, Payment.paid_at.is_not(None),
+               Payment.refunded_at.is_(None))
     ).one()
     summary = access.summary(db, user)
     return {
@@ -73,23 +81,30 @@ USER_COMPUTED = {"matrices": lambda r: r["matrices"], "payments": lambda r: r["p
 
 
 @router.get("/users")
-def users(page: int = 1, page_size: int = 10,
+def users(page: int = 1, page_size: int = 10, search: str = "",
           sort: Literal["id", "email", "matrices", "payments", "spent", "access",
                         "last_seen_at", "created_at"] = "last_seen_at",
           order: Literal["asc", "desc"] = "desc",
           _: User = Depends(admin_user), db: Session = Depends(get_db)) -> dict:
     page = max(1, page)
     page_size = min(max(page_size, 1), 200)
-    total = db.scalar(select(func.count(User.id))) or 0
+    query = select(User)
+    term = search.strip().lower()
+    if term:
+        match = func.lower(User.email).contains(term, autoescape=True)
+        if term.isdecimal() and len(term) <= 18:
+            match = or_(match, User.id == int(term))
+        query = query.where(match)
+    total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
     start = (page - 1) * page_size
     if sort in USER_COMPUTED:
-        rows = [_row(db, u) for u in db.scalars(select(User).order_by(User.id.desc())).all()]
+        rows = [_row(db, u) for u in db.scalars(query.order_by(User.id.desc())).all()]
         rows.sort(key=USER_COMPUTED[sort], reverse=order == "desc")
         items = rows[start:start + page_size]
     else:
         column = USER_COLUMNS[sort]
         direction = column.desc() if order == "desc" else column.asc()
-        found = db.scalars(select(User).order_by(direction.nulls_last(), User.id.desc())
+        found = db.scalars(query.order_by(direction.nulls_last(), User.id.desc())
                            .offset(start).limit(page_size)).all()
         items = [_row(db, u) for u in found]
     return {"items": items, "total": int(total), "page": page, "page_size": page_size,
@@ -233,26 +248,12 @@ def impersonate(user_id: int, request: Request, admin: User = Depends(admin_user
     audit.record("impersonate", "success", email=target.email, ip=audit.client_ip(request))
     log.info("админ %s вошёл под %s", admin.email, target.email)
     # Сессия помечена как чужая: она не двигает «последнее появление» покупателя (см. pulse).
-    return {"token": create_token(target.id, target.password_hash, ghost=True),
+    return {"token": create_token(target.id, target.password_hash, ghost=True, auth_version=target.auth_version),
             "user": target.public()}
 
 
 def _grant(db: Session, user: User, product: products.Product, raw: dict) -> dict:
-    """Выдать разбор без оплаты: открыт, но правом без заказа.
-
-    Право бессрочное и без `purchase_id` — по этому признаку кабинет показывает разбор открытым, но
-    не купленным (`access.reading_state`). Повторная выдача того же ввода ничего не ломает: разбор
-    находится по вводу, а право не задваивается.
-    """
-    row = readings.create(db, user, product, raw, limited=False)
-    db.commit()
-    body = {"products": [product.code], "per_reading": True}
-    fresh = not access.covering(access.granted(access.active_rights(db, user)), body, row, forever=True)
-    if fresh:
-        access.grant(db, user, body, reading_id=row.id, note="выдана админом")
-        db.commit()
-        printing.warm(user.id, row.id)
-    return {**row.item(), **access.reading_state(access.active_rights(db, user), row), "granted_now": fresh}
+    return grants.grant_reading(db, user, product, raw)
 
 
 def _user_or_404(db: Session, user_id: int) -> User:
@@ -284,6 +285,7 @@ def add_subscription(user_id: int, _: User = Depends(admin_user), db: Session = 
     """Выдать подписку без оплаты: те же продукты, хранение и срок, что у предложения `month`.
     Пока действует такая же выданная подписка, вторая не выдаётся — повторное нажатие ничего не
     меняет. Оплаченная не в счёт: выданная переживает её возврат."""
+    begin_write(db)
     user = _user_or_404(db, user_id)
     offer = offers.get(db, offers.MONTH_ID)
     if offer is None:
@@ -291,8 +293,10 @@ def add_subscription(user_id: int, _: User = Depends(admin_user), db: Session = 
     body = offer.body()
     current = access.covering(access.granted(access.active_rights(db, user)), body)
     if not current:
-        access.grant(db, user, body, note="выдана админом")
+        right = access.grant(db, user, body, note="выдана админом")
+        ids = notifications.grant_event(db, user, right)
         db.commit()
+        notifications.deliver_emails(db, ids)
     summary = access.summary(db, user)
     return {"ok": True, "already": bool(current), "until": summary["until"],
             "products": summary["products"]}

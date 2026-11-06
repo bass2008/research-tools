@@ -15,8 +15,9 @@ import { useSession } from "@/components/account/useSession";
 import ActionsMenu from "@/components/admin/ActionsMenu";
 import AdminPulse from "@/components/admin/AdminPulse";
 import AdminSecurityAudit from "@/components/admin/AdminSecurityAudit";
+import AdminNotifications from "./AdminNotifications";
+import AdminIndividualReadings from "./AdminIndividualReadings";
 import AdminSettings from "@/components/admin/AdminSettings";
-import AdminTasks from "@/components/admin/AdminTasks";
 import UserActions from "@/components/admin/UserActions";
 
 const USER_SIZES = [10, 25, 50, 100];
@@ -352,7 +353,7 @@ function accessLine(u: AdminUser): string {
         </div>
       </div>
 
-      <div className="panel section-gap">
+      <div className="panel section-gap" id="payments">
         <h3>{t("Все платежи")}</h3>
         <div className="cap">{t("Цена в строке — снимок тарифа на момент покупки")}</div>
         {refundError ? (
@@ -529,7 +530,6 @@ function accessLine(u: AdminUser): string {
         </div>
       </div>
 
-      <AdminTasks />
 
       <div className="panel section-gap">
         <h3>{t("Досверка платежей")}</h3>
@@ -590,6 +590,8 @@ function accessLine(u: AdminUser): string {
         </div>
       </div>
 
+      <AdminIndividualReadings />
+      <AdminNotifications />
       <AdminSettings />
     </>
   );

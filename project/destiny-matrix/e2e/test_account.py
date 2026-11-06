@@ -8,15 +8,15 @@ from conftest import BASE
 
 
 def test_purchase_adds_a_storage_slot(page, mail):
-    """Бесплатная дата одна; каждая покупка добавляет слот — это видно в кабинете."""
+    """Бесплатная дата одна; покупка добавляет слот: купленная дата встаёт рядом с бесплатной."""
     flows.register(page, mail)
-    flows.account(page)
-    slots = page.locator("dd", has_text="слот даёт")
-    assert "из 1" in slots.inner_text(), slots.inner_text()
+    flows.calculate(page, 1, 2, 1990)
+    flows.save_current(page)
 
     flows.buy(page, mail, 3, 4, 1991)
     flows.account(page)
-    assert "из 2" in page.locator("dd", has_text="слот даёт").inner_text()
+    expect(flows.matrix_cards(page)).to_have_count(2)
+    assert "1 февраля 1990" in flows.matrix_cards(page).filter(has_text="1990").first.inner_text()
 
 
 def test_paid_matrix_is_marked_and_can_be_renamed(page, mail):
@@ -36,9 +36,12 @@ def test_paid_matrix_is_marked_and_can_be_renamed(page, mail):
 
 
 def test_payment_appears_in_history(page, mail):
+    """Оплата остаётся видна покупателю: уведомление «Разбор доступен» с пометкой «Оплачен»."""
     flows.buy(page, mail, 6, 6, 1996)
-    flows.account(page)
-    expect(page.get_by_test_id("payments-panel")).to_contain_text("390")
+    page.goto(f"{BASE}/account?tab=notifications", wait_until="domcontentloaded")
+    card = page.locator(".notification-card").filter(has_text="Разбор доступен")
+    expect(card).to_have_count(1)
+    expect(card).to_contain_text("Оплачен")
 
 
 def test_access_survives_logout_and_login(page, mail):

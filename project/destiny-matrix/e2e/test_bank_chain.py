@@ -110,11 +110,11 @@ def test_refund_of_a_paid_payment_takes_the_access_back(page, mail, api_log):
     """Отмена уже списанного платежа — это возврат: доступ снимается, письмо уходит."""
     flows.buy_on_bank(page, mail, 7, 7, 1987)
     matrix_id = page.request.get(f"{BASE}/api/payments").json()["items"][0]["matrix_id"]
-    payment_id = page.request.get(f"{BASE}/api/payments").json()["items"][0]["id"]
     assert page.request.get(f"{BASE}/api/matrices/{matrix_id}").json()["unlocked"] is True
 
     flows.logout(page)
     flows.login(page, *ADMIN)
+    payment_id = next(r for r in page.request.get(f"{BASE}/api/admin/payments").json()["items"] if r["email"] == mail)["id"]
     answer = page.request.post(f"{BASE}/api/admin/payments/{payment_id}/refund")
     assert answer.ok, answer.text()
 

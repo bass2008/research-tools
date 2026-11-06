@@ -34,12 +34,15 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
   /** В PDF относительный адрес указывает на внутренний хост службы печати: 12 кружков карты
    *  уезжали покупателю ссылками на `http://web:3000`. */
   printing?: boolean;
+  /** Точки, о которых идёт речь: они обведены, остальные приглушены. */
+  focus?: readonly string[];
 }) & { locale?: Locale; site?: SiteProfile }) {
   const L = requestedLocale ?? defaultLocale;
   const {
     m,
     linked = true,
     printing = false,
+    focus,
   } = localeProps;
   const { arcanumTitle, mapPoint, publicHref } = forLocale(L, site);
 
@@ -128,6 +131,7 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
     return (
       <OctagramPoint key={key} pointKey={spec.pointKey} angle={spec.angle} radius={spec.radius ?? radius}
         size={size} font={font} small={small} value={spec.value} color={spec.color}
+        muted={focus ? !focus.includes(spec.pointKey) : false} focused={focus?.includes(spec.pointKey)}
         title={D.octagram.nodeTitle[L](spec.label, spec.value, arcanumTitle(spec.value))}
         href={linked ? (printing ? publicHref(href) : href) : undefined}
         chakras={printing ? undefined : chakras} />

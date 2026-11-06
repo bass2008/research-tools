@@ -134,7 +134,7 @@ XMLRiver: до 100 ₽ за прогон без спроса, больше — �
 - Hawk — ~/.config/arcana/hawk.env;
 - Метрика — ~/.config/arcana/metrika.env;
 - Вебмастер — ~/.config/arcana/webmaster.token;
-- GSC — только .ru, только чтение: ключ и способ входа в seo-long-plan-google.md, раздел 2;
+- GSC — только .ru, только чтение: ключ и способ входа в docs/semcore.md, «Доступ к Search Console API»;
 - Python — conda activate research3.12.
 
 ТВОЯ ПАПКА

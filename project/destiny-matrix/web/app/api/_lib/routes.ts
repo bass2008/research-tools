@@ -95,3 +95,56 @@ export async function saveMatrix(req: Request) {
   const title = body.title === undefined || body.title === null ? undefined : String(body.title).slice(0, 200);
   return forward("/matrices", { source: req, method: "POST", auth: true, body: { birth, sex, title } });
 }
+
+/** Individual order: the site builds the automatic readings of the order's dates and sends them
+ *  along — the API stores them with the requests it creates once the order is paid. */
+export async function individualOrder(req: Request, path: string) {
+  const L = await requestLocale(req);
+  const { emailError } = emailForLocale(L);
+  const body = await readJson(req);
+  const mail = email(body);
+  const wrong = emailError(mail);
+  if (wrong) return jsonError((locale) => emailForLocale(locale).emailError(mail)!, L, 422);
+  const raw = Array.isArray(body.persons) ? (body.persons as Record<string, unknown>[]).slice(0, 60) : [];
+  const persons = raw.map((p) => ({ birth: String(p?.birth ?? ""), sex: p?.sex === "m" ? "m" : "f" }));
+  if (persons.some((p) => !/^\d{4}-\d{2}-\d{2}$/.test(p.birth))) return jsonError(D.bffErrors.badDate, L, 400);
+  const kinds = ["personal", "pair", "year"];
+  const readings = (Array.isArray(body.readings) ? (body.readings as Record<string, unknown>[]).slice(0, 30) : [])
+    .map((r) => ({
+      kind: String(r?.kind ?? ""),
+      who: (Array.isArray(r?.who) ? r.who : []).slice(0, 2).map((i) => Math.trunc(Number(i))),
+      ...(r?.year !== undefined ? { year: Math.trunc(Number(r.year)) || undefined } : {}),
+      ...(r?.relation ? { relation: String(r.relation).slice(0, 200) } : {}),
+    }));
+  // a reading the API would refuse anyway; dropping it here would charge for a different order
+  if (readings.some((r) => !kinds.includes(r.kind) || !r.who.length || r.who.some((i) => !(i >= 0 && i < persons.length)))) {
+    return jsonError(D.bffErrors.badDate, L, 400);
+  }
+  const lang = L === "en" ? "en" : "ru";
+  // the automatic reading of every person and couple of the order, keyed as the API expects
+  const snapshots: Record<string, unknown> = {};
+  try {
+    const { pairSnapshot, personalSnapshot } = await import("./automaticSnapshot");
+    for (const r of readings) {
+      const [a, b] = r.who.map((i) => persons[i]);
+      if (r.kind === "pair" && b) snapshots[`pair_${r.who[0]}_${r.who[1]}`] ??= pairSnapshot(a.birth, b.birth, lang);
+      if (r.kind !== "pair") snapshots[`personal_${r.who[0]}`] ??= personalSnapshot(a.birth, a.sex, lang);
+    }
+  } catch {
+    return jsonError(D.bffErrors.badDate, L, 422);
+  }
+  return forward(path, {
+    source: req,
+    method: "POST",
+    optionalAuth: true,
+    body: {
+      provider: body.provider,
+      email: mail,
+      persons,
+      readings,
+      question: String(body.question ?? "").slice(0, 5000),
+      snapshots,
+    },
+    capture: true,
+  });
+}

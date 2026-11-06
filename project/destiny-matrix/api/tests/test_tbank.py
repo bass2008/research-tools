@@ -241,11 +241,16 @@ def test_second_payment_for_the_same_date_is_accepted_by_the_bank_and_grants_not
     caplog.clear()
     answer = client.post("/api/payments/notify", json=late)
     assert answer.status_code == 200, answer.text
-    assert answer.json()["duplicate"] is True
+    assert answer.json()["status"] == "CONFIRMED"
     received, completed = webhook_records(caplog)
     assert received["payload"]["PaymentId"] == "999"
-    assert completed["result"] == "duplicate" and completed["http_status"] == 200
-    assert completed["status_before"] == completed["status_after"] == "NEW"
+    assert completed["result"] == "applied" and completed["http_status"] == 200
+    assert completed["status_before"] == "NEW" and completed["status_after"] == "CONFIRMED"
+    second = db.scalar(select(Payment).where(Payment.external_id == "999"))
+    db.refresh(second)
+    assert second.paid_at is not None and second.purchase.paid_at is not None
+    from app.models import Notification
+    assert len(db.scalars(select(Notification).where(Notification.type == "admin_payment_succeeded")).all()) == 2
     assert len(db.scalars(select(Entitlement)).all()) == 1
 
 
@@ -381,7 +386,7 @@ def test_admin_refund_revokes_access(client, auth, db, bank, monkeypatch):
 
 
 def test_refund_is_admin_only(client, auth, db, bank):
-    body = start(client, "notadmin@example.ru")
+    start(client, "notadmin@example.ru")
     payment = db.scalars(select(Payment)).one()
     stranger = auth("stranger@example.ru")
     assert client.post(f"/api/admin/payments/{payment.id}/refund", headers=stranger).status_code == 404
@@ -560,7 +565,6 @@ def test_sweep_skips_empty_runs(client, db, bank):
 def test_sweep_finishes_the_payment_nobody_confirmed(client, db, bank, monkeypatch):
     """Уведомление не дошло, браузер закрыт — доступ открывает досверка."""
     from app import sweep
-    from app.models import PaymentSweep
 
     body = start(client, "lost@example.ru")
     payment = db.scalars(select(Payment)).one()
@@ -792,7 +796,7 @@ def test_second_refund_returns_state_instead_of_an_error(client, auth, db, bank,
     from app.config import settings
     from app.models import Payment
 
-    body = paid_once(client, bank, "twice-refund@example.ru", "1995-05-05")
+    paid_once(client, bank, "twice-refund@example.ru", "1995-05-05")
     monkeypatch.setattr(payments.PROVIDERS["tbank"], "cancel",
                         lambda pid: payments.Update(external_id=pid, order_id=None,
                                                     outcome=payments.Outcome.REFUNDED,

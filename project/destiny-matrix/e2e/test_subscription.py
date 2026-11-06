@@ -26,7 +26,8 @@ def test_subscriber_is_offered_nothing_and_sees_everything(page: Page, mail: str
 
     for path in PAGES:
         page.goto(BASE + path, wait_until="networkidle")
-        expect(page.locator("a[href^='/ru/pay']"), path).to_have_count(0)
+        # «Купить» in the header stays for individual readings (docs/individual-reading.md); the page offers nothing
+        expect(page.locator("main a[href^='/ru/pay']"), path).to_have_count(0)
         expect(page.get_by_role("button", name=re.compile("Купить"))).to_have_count(0)
         expect(page.locator("main, #content").first, path).not_to_contain_text("₽")
 
@@ -87,7 +88,8 @@ def test_admin_grants_a_pair_and_a_subscription(page: Page, mail: str):
     card.get_by_role("link").first.click()
     page.wait_for_url(re.compile(r"/readings/\d+"))
     expect(page.get_by_test_id("pair-report")).to_have_attribute("data-mode", "full")
-    expect(page.get_by_test_id("buy-top")).to_have_count(0)
+    # individual readings are sold to subscribers too: "Buy" stays (docs/individual-reading.md)
+    expect(page.get_by_test_id("buy-top")).to_have_count(1)
 
 
 def test_admin_sees_a_pair_buyer_and_grants_over_the_purchase(page: Page, mail: str):
@@ -118,9 +120,9 @@ def test_access_line_names_granted_and_bought_rights_without_prices(page: Page, 
     flows.open_pair_pay(page)
     assert pay(page, mail) == ""
     page.goto(f"{BASE}/account", wait_until="networkidle")
-    access = page.get_by_test_id("account-access")
-    expect(access).to_have_text(re.compile(r"Куплено навсегда: 1 пара"))
-    expect(access).not_to_contain_text("не оплачен")
+    pair_card = page.get_by_test_id("pair-card").first
+    expect(pair_card).to_contain_text("Куплена")
+    expect(pair_card).not_to_contain_text("не оплачен")
 
     flows.logout(page)
     flows.login(page, *ADMIN)
@@ -145,9 +147,11 @@ def test_access_line_names_granted_and_bought_rights_without_prices(page: Page, 
     flows.logout(page)
     flows.login(page, mail)
     access = page.get_by_test_id("account-access")
-    expect(access).to_contain_text("Выдано: 1 дата")
-    expect(access).to_contain_text("· выдана")
+    expect(access).to_contain_text("выдана")
     expect(access).not_to_contain_text("₽")
+    granted = page.get_by_test_id("matrix-card").filter(has_text="8 августа 1988")
+    expect(granted).to_contain_text("Выдана")
+    expect(page.get_by_test_id("matrices-list")).not_to_contain_text("₽")
 
 
 def test_refund_dialog_says_what_really_happens_to_access(page: Page, mail: str):

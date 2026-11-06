@@ -1,5 +1,7 @@
+import { NotificationBell } from "@/components/account/Notifications";
 import SessionBadge from "@/components/account/SessionBadge";
 import BuyButton from "@/components/ui/BuyButton";
+import IndividualNavLink from "@/components/ui/IndividualNavLink";
 import Logo from "@/components/ui/Logo";
 import SiteLink from "@/components/ui/SiteLink";
 import { D } from "@/lib/i18n";
@@ -26,8 +28,10 @@ export default function Header({ locale: requestedLocale, ...localeProps }: ({
           <SiteLink plain={plain} href="/report">{D.nav.myReading[L]}</SiteLink>
           <SiteLink plain={plain} href="/compatibility">{DP.navTitle[L]}</SiteLink>
           <SiteLink plain={plain} href="/encyclopedia">{D.nav.encyclopedia[L]}</SiteLink>
+          <IndividualNavLink plain={plain} />
         </nav>
         <span className="hspacer">
+          {!plain && <NotificationBell />}
           <SessionBadge locale={L} plain={plain} />
         </span>
         {/* Кабинет стоит рядом с «Выйти», а не в общем меню: это личные страницы, и вместе с

@@ -5,7 +5,7 @@ import threading
 import time
 import urllib.request
 
-from . import monitor, presence, printing
+from . import monitor, notifications, presence, printing
 from .config import settings
 
 log = logging.getLogger("arcana.startup")
@@ -19,6 +19,7 @@ def startup() -> None:
     на релизе раньше сайта, и печать, отправленная сразу, падает на ненайденном адресе."""
     monitor.start()
     presence.start()
+    notifications.start()
     threading.Thread(target=when_web_is_up, name="startup", daemon=True).start()
 
 

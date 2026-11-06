@@ -59,7 +59,7 @@ def test_locked_widget_and_payment_link(page):
     expect(page).to_have_url(re.compile(r'/pay\?for=personal'))
     expect(page.get_by_test_id('plan-single')).to_be_visible()
     expect(page.get_by_test_id('plan-month')).to_be_visible()
-    expect(page.get_by_test_id('plan-pair')).to_have_count(0)
+    expect(page.get_by_test_id('plan-pair')).to_be_visible()
 
 
 def test_paid_widget_all_chakras_desktop_mobile_and_other_date(page, mail):

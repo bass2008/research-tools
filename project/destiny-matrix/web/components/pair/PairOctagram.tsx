@@ -32,18 +32,20 @@ const NODES: Array<{ k: PointKey; angle: number; r: number; size: Size; color: s
 ];
 
 /** Карта партнёра или пары по буквам Лисовской; каждая точка ведёт к своему аркану. */
-export default function PairOctagram({ m, label, title, href }: {
+export default function PairOctagram({ m, label, title, href, focus }: {
   m: Points;
   label: string;
   title: (n: number) => string;
   href?: (n: number) => string;
+  focus?: readonly string[];
 }) {
   return (
     <OctagramFrame label={label}>
       {NODES.map((n) => {
         const [size, font] = SIZE[n.size];
         return <OctagramPoint key={n.k} pointKey={n.k} angle={n.angle} radius={n.r} size={size} font={font}
-          small={n.size === "s"} muted={n.muted} value={m[n.k]} color={n.color}
+          small={n.size === "s"} muted={focus ? !focus.includes(n.k) : n.muted} focused={focus?.includes(n.k)}
+          value={m[n.k]} color={n.color}
           title={`${label}: ${title(m[n.k])}`} href={href?.(m[n.k])} />;
       })}
     </OctagramFrame>

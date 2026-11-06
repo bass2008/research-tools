@@ -25,11 +25,10 @@ export default async function AccountPage() {
 
   return (
     <main id="content" className="page">
-      <div className="wrap">
+      <div className="wrap cabinet-wrap">
         <p className="crumbs">
           <Link href="/">{D.nav.home[L]}</Link> <span>/</span> <span>{D.nav.account[L]}</span>
         </p>
-        <h1>{D.pages.accountTitle[L]}</h1>
         <AccountView locale={L} />
       </div>
     </main>

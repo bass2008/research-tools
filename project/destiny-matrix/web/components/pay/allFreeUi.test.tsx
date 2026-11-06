@@ -12,12 +12,13 @@ vi.mock("@/components/pay/TariffsProvider", () => ({
 }));
 
 import Header from "@/components/ui/Header";
+import { NotificationsProvider } from "@/components/account/NotificationsProvider";
 import Plans from "@/components/pay/Plans";
 import { PriceOrFree } from "@/components/pay/Price";
 
 describe("интерфейс на витрине без оплаты", () => {
   it("не предлагает купить в шапке", () => {
-    const html = renderToStaticMarkup(<Header />);
+    const html = renderToStaticMarkup(<NotificationsProvider><Header /></NotificationsProvider>);
     expect(html).not.toContain("buy-top");
     expect(html).toContain(D.nav.encyclopedia[L]);
   });

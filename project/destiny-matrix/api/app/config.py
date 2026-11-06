@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     jwt_secret: str = Field(default_factory=_generated_secret)
     jwt_algorithm: str = "HS256"
     jwt_ttl_days: int = 30
+    notification_check_secret: str = ""
+    notification_check_since: str = ""
 
     # Выключено по умолчанию: включённая мок-оплата открывает платный разбор любому, кто
     # знает адрес /api/payments/mock. Стенды включают её явно.
@@ -82,6 +84,7 @@ class Settings(BaseSettings):
     postbox_endpoint: str = "https://postbox.cloud.yandex.net"
     postbox_region: str = "ru-central1"
     # Почтовый домен один на оба языка: форвардер бесплатно обслуживает один домен, и это .com.
+    mail_site_origin: str = "https://arcana-sense.ru"
     mail_from: str = "noreply@arcana-sense.com"
     mail_from_name: str = "Arcana Sense"
     mail_reply_to: str = "hello@arcana-sense.com"
@@ -99,7 +102,8 @@ class Settings(BaseSettings):
     # адрес, по которому браузер видит фронт (внутренняя сеть compose)
     web_internal_url: str = "http://web:3000"
     print_token_ttl_seconds: int = Field(default=120, ge=30, le=900)
-    task_lease_hours: int = Field(default=6, ge=1, le=72)
+    # Agent token for /internal/individual-readings: no revocation list, so it expires instead.
+    worker_token_ttl_days: int = Field(default=30, ge=1, le=365)
 
     # Object Storage под готовые отчёты. Без ключей печать отключена — файлу негде лежать.
     # где лежат готовые отчёты: s3 на проде, local на стендах (см. app/store.py)
@@ -215,6 +219,7 @@ class Settings(BaseSettings):
 SENSITIVE_SETTINGS = frozenset({
     "database_url",
     "jwt_secret",
+    "notification_check_secret",
     "smtp_user",
     "smtp_password",
     "postbox_key_id",

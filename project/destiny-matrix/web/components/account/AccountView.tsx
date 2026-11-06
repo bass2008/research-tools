@@ -3,22 +3,26 @@
 import { useSession } from "@/components/account/useSession";
 import { useOfferMode } from "@/components/pay/useOfferMode";
 import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
-import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
+import Notifications from "./Notifications";
+import { useUnreadCount } from "./NotificationsProvider";
+import AccountProfile from "./AccountProfile";
+import { useIndividualReadings } from "./useIndividualReadings";
+import { Pagination } from "./Notifications";
+import { INDIVIDUAL_KINDS, individualDates, type IndividualReading } from "@/lib/individualReading";
+import { useTariffs } from "@/components/pay/TariffsProvider";
 import AccessBadge from "@/components/account/AccessBadge";
 import { useLocale } from "@/components/ui/LocaleProvider";
-import { ALL_FREE } from "@/lib/access";
-import { ApiError, forLocale as localizedApi, type PaymentItem, type ReadingItem } from "@/lib/api";
+import { ApiError, forLocale as localizedApi, type ReadingItem } from "@/lib/api";
 import { DP } from "@/lib/i18n/dict/pair";
-import { D, forLocale as localizedI18n } from "@/lib/i18n";
+import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { useMessage, type Message } from "@/lib/i18n/useMessage";
-import { forLocale as localizedMatrix } from "@/lib/matrix";
 import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
-import { useBirth } from "@/lib/useBirth";
 import { buyHref } from "@/lib/readingLinks";
 import { useLinkStatus } from "next/link";
+import { useSearchParams } from "next/navigation";
 import Link from "@/components/ui/LocalizedLink";
 import { useCallback, useEffect, useState } from "react";
 
@@ -33,22 +37,9 @@ function OpenReadingLabel({ locale }: { locale: Locale }) {
 }
 
 export const forLocale = localized((L: Locale) => {
-  const { dateTimeLabel, dayLabel } = localizedI18n(L);
   const { api } = localizedApi(L);
-  const { calculate } = localizedMatrix(L);
-  const { money, priceLabel } = localizedTariffs(L);
   const { birthLabel } = localizedMatrixResult(L);
-
-  const dateCount = (n: number) => D.account.datesCount[L](n);
-
-  function safeCenter(birth: string, sex: "m" | "f"): string {
-    try {
-      return String(calculate(birth, sex).center);
-    } catch {
-      return "—";
-    }
-  }
-  return { dateTimeLabel, dayLabel, api, calculate, money, priceLabel, birthLabel, dateCount, safeCenter };
+  return { api, birthLabel };
 });
 
 /**
@@ -149,315 +140,120 @@ function MatrixName({ locale: requestedLocale, ...localeProps }: ({
   );
 }
 
-export default function AccountView({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
-  const activeLocale = useLocale();
-  const L = requestedLocale ?? activeLocale;
-  const { api, birthLabel, safeCenter } = forLocale(L);
+export default function AccountView({ locale: requestedLocale }: { locale?: Locale } = {}) {
+  const activeLocale = useLocale(), L = requestedLocale ?? activeLocale, en = L === "en";
+  const { api, birthLabel } = forLocale(L);
   const { holdingLines } = localizedHoldings(L);
-
-  const session = useSession();
-  const mode = useOfferMode();
+  const { priceLabel, periodLabel } = localizedTariffs(L);
+  const session = useSession(), mode = useOfferMode(), tariffs = useTariffs();
+  const unread = useUnreadCount();
+  const params = useSearchParams(), selectedTab = params.get("tab"), selectedFilter = params.get("filter") ?? "";
+  const tab = selectedTab === "profile" || selectedTab === "notifications" ? selectedTab : "readings";
+  const [filter, setFilter] = useState(["personal", "pair", "individual"].includes(selectedFilter) ? selectedFilter : "all");
   const [items, setItems] = useState<ReadingItem[] | null>(null);
   const [error, setError] = useMessage(L);
   const [note, setNote] = useMessage(L);
-  // дата из браузера — общим хуком: своё чтение при монтировании не замечало смену даты
-  const local = useBirth();
-
+  const [removing, setRemoving] = useState<number | null>(null);
+  const [newOpen, setNewOpen] = useState(false);
+  const [individualPage, setIndividualPage] = useState(1);
+  const showIndividual = filter === "all" || filter === "individual";
+  const individual = useIndividualReadings(session.status === "user" && showIndividual, individualPage);
   const reload = useCallback(async () => {
-    try {
-      const res = await api.readings();
-      setItems(res.items);
-      setError(null);
-    } catch (err) {
-      setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.account.unavailable[locale]);
-    }
+    try { const res = await api.readings(); setItems(res.items); setError(null); }
+    catch (err) { setError(locale => err instanceof ApiError ? err.messageFor(locale) : D.account.unavailable[locale]); }
   }, [L]);
-
-  useEffect(() => {
-    if (session.status !== "user") return;
-    void reload();
-  }, [session.status, session.email, reload]);
-
-  // уведомление живёт несколько секунд: постоянная плашка «имя изменено» мешала бы читать список
-  useEffect(() => {
-    if (!note) return;
-    const timer = setTimeout(() => setNote(null), 4000);
-    return () => clearTimeout(timer);
-  }, [note]);
-
-  /** Возвращает текст отказа: строка сама решает, что показать рядом с полем. */
+  useEffect(() => { if (session.status === "user") void reload(); }, [session.status, session.email, reload]);
+  useEffect(() => { if (!note) return; const timer = setTimeout(() => setNote(null), 4000); return () => clearTimeout(timer); }, [note]);
+  const selectTab = (value: string) => { const url = new URL(window.location.href); url.searchParams.set("tab", value); window.history.replaceState(null, "", url); };
   const rename = async (id: number, title: string): Promise<Message | null> => {
-    try {
-      const row = await api.renameReading(id, title);
-      setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, title: row.title } : x)) ?? prev);
-      setNote((locale) => D.account.renamed[locale]);
-      setError(null);
-      return null;
-    } catch (err) {
-      return (locale) => err instanceof ApiError ? err.messageFor(locale) : D.account.renameFailed[locale];
-    }
+    try { const row = await api.renameReading(id, title); setItems(prev => prev?.map(x => x.id === id ? { ...x, title: row.title } : x) ?? prev); setNote(locale => D.account.renamed[locale]); return null; }
+    catch (err) { return locale => err instanceof ApiError ? err.messageFor(locale) : D.account.renameFailed[locale]; }
   };
-
-  if (session.status === "loading") return <p className="skeleton">{D.account.checkingAccess[L]}</p>;
-
-  if (session.status !== "user") {
-    return (
-      <div className="panel narrow">
-        <h3>{D.account.needSignIn[L]}</h3>
-        <p className="dim">
-          {D.account.needSignInText[L]}
-        </p>
-        {session.status === "offline" ? (
-          <div className="err" role="alert" aria-live="assertive">{session.error ?? D.account.serverSilent[L]} {D.account.refreshPage[L]}</div>
-        ) : null}
-        <Link className="btn wide" href="/login">
-          {D.auth.signIn[L]}
-        </Link>
-        <p className="hint">
-          {D.auth.noAccount[L]} <Link href="/register">{D.auth.register[L]}</Link>{" "}
-          {D.account.orJustCalculate[L]}{" "}
-          <Link href="/#calc">{D.account.justCalculate[L]}</Link>
-        </p>
-      </div>
-    );
-  }
-
-  const list = items ?? [];
-  const personal = list.filter((row) => row.product === "personal" && row.birth && row.sex);
-  // «Мой разбор» ведёт на купленную дату, а не на первую в списке: список отсортирован по
-  // сохранению, и после нового расчёта пункт уводил на закрытую матрицу с предложением купить.
-  const paidFirst = personal.find((row) => row.access !== "locked") ?? null;
-  const pairDates = (row: ReadingItem) => {
-    const a = (row.inputs.a as { birth?: string } | undefined)?.birth;
-    const b = (row.inputs.b as { birth?: string } | undefined)?.birth;
+  const remove = async (id: number) => {
+    if (!window.confirm(en ? "Remove this reading from your account?" : "Удалить разбор из личного кабинета?")) return;
+    setRemoving(id);
+    try { await api.removeReading(id); await reload(); await session.refresh(); }
+    catch (err) { setError(locale => err instanceof ApiError ? err.messageFor(locale) : D.account.unavailable[locale]); }
+    finally { setRemoving(null); }
+  };
+  if (session.status === "loading" && !session.email) return <p className="skeleton">{D.account.checkingAccess[L]}</p>;
+  if (session.status !== "user" && !(session.status === "loading" && session.email)) return <div className="panel narrow">
+    <h2>{D.account.needSignIn[L]}</h2><p className="dim">{D.account.needSignInText[L]}</p>
+    {session.status === "offline" && <p className="err" role="alert">{session.error}</p>}
+    <Link className="btn" href="/login">{D.auth.signIn[L]}</Link>
+  </div>;
+  const subscription = session.holdings.filter(h => h.kind === "subscription");
+  const offer = tariffs.find(t => t.id === "month");
+  const rows = (items ?? []).filter(row => filter === "all" || row.product === filter);
+  const dates = (row: ReadingItem) => {
+    if (row.product !== "pair") return birthLabel(row.birth!);
+    const a = (row.inputs.a as { birth?: string })?.birth, b = (row.inputs.b as { birth?: string })?.birth;
     return a && b ? `${birthLabel(a)} + ${birthLabel(b)}` : "";
   };
-
-  return (
-    <>
-      <div className="panel">
-        <h3>{D.account.yourAccess[L]}</h3>
-        <div className="cap" data-testid="account-email">
-          {session.email}
-        </div>
-        <dl className="kv">
-          <dt>{D.account.accessWord[L]}</dt>
-          <dd data-testid="account-access">
-            {/* строки — сводка прав с сервера (`access.holdings`): покупки, выданное и подписка
-                живут одновременно, экран их только выводит */}
-            {mode === "free" ? (
-              <div>{D.account.allFreeAccess[L]}</div>
-            ) : session.holdings.length ? (
-              holdingLines(session.holdings).map((line) => (
-                <div key={line.text}>
-                  {line.lifetime ? <><i className="lifetime" aria-hidden="true">∞</i>{" "}</> : null}
-                  {line.text}
-                </div>
-              ))
-            ) : (
-              <div>{D.account.notPaid[L]}{D.account.twoFreeSections[L]}</div>
-            )}
-          </dd>
-          <dt>{D.account.matricesWord[L]}</dt>
-          <dd>
-            {/* после возврата слот пропадает, а сохранённое остаётся: строка «2 из 1» выглядела
-                поломкой и не объясняла, почему нельзя добавить дату */}
-            {session.limit === null
-              ? D.account.storageUnlimited[L](session.used)
-              : session.used > session.limit
-                ? D.account.storageOver[L](session.used, session.limit)
-                : D.account.storageOf[L](session.used, session.limit)}
-          </dd>
-        </dl>
-        <div className="taglist" style={{ marginTop: 12 }}>
-          {/* На чистом устройстве /report не знает дату из sessionStorage. Сохранённую матрицу
-              открываем по её серверному id, поэтому ссылка работает на любом устройстве. */}
-          {items === null ? (
-            <span className="dim" aria-disabled="true">{D.account.reportLoading[L]}</span>
-          ) : paidFirst ? (
-            <Link data-testid="account-report" href={`/matrices/${paidFirst.id}`}>{D.nav.myReading[L]}</Link>
-          ) : personal.length ? (
-            <Link data-testid="account-report" href={`/matrices/${personal[0].id}`}>{D.nav.myReading[L]}</Link>
-          ) : (
-            <Link data-testid="account-report" href="/report">{D.nav.myReading[L]}</Link>
-          )}
-          <Link href="/#calc">{D.nav.newCalculation[L]}</Link>
-          {/* покупку предлагаем тем, у кого прав нет. Смотрим на права, а не на найденный
-              тариф: «на все даты» снят с витрины, и оплатившему предлагали купить снова */}
-          {mode !== "sell" || session.paid ? null : (
-            <Link href={buyHref("personal")}>{D.account.buyFullReading[L]}</Link>
-          )}
-          {session.admin ? <Link href="/admin">{D.account.admin[L]}</Link> : null}
-        </div>
-        <p className="hint" style={{ textAlign: "left" }}>
-          {D.account.accessLivesInAccount[L]}
-        </p>
+  const readingCard = (it: ReadingItem) => {
+    const pair = it.product === "pair", open = pair ? `/readings/${it.id}` : `/matrices/${it.id}`;
+    return <li className={`cabinet-reading ${it.access}`} key={`r${it.id}`} data-testid={pair ? "pair-card" : "matrix-card"} data-product={it.product} data-birth={it.birth} data-access={it.access}>
+      <div className="cabinet-reading-kind"><span className="reading-symbol" aria-hidden="true">{pair ? "∞" : "✧"}</span><span>{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span></div>
+      <div className="cabinet-reading-name"><MatrixName locale={L} item={it} fallback={dates(it)} onSave={title => rename(it.id, title)} /></div>
+      <p className="small">{dates(it)}</p>
+      <div className="cabinet-reading-bottom"><span className="small">{it.access === "locked" ? en ? "Free sections" : "Бесплатные разделы" : en ? "Full reading" : "Полный разбор"}</span><Link href={open}><OpenReadingLabel locale={L} /> →</Link></div>
+      {(it.can_delete || (it.access === "locked" && mode === "sell")) && <div className="cabinet-reading-extra">
+        {it.can_delete && <button disabled={removing === it.id} className="profile-text-button" onClick={() => void remove(it.id)}>{en ? "Remove from account" : "Удалить из кабинета"}</button>}
+        {it.access === "locked" && mode === "sell" && <Link href={buyHref(pair ? "pair" : "personal", it.id)}>{D.nav.buy[L]}</Link>}
+      </div>}
+    </li>;
+  };
+  const individualCard = (row: IndividualReading) => {
+    const ready = row.status === "done";
+    return <li className="cabinet-reading" key={`i${row.id}`} data-testid="individual-card" data-status={ready ? "done" : "in-progress"}>
+      <div className="cabinet-reading-kind"><span className="reading-symbol" aria-hidden="true">✦</span><span>{en ? "Individual reading" : "Индивидуальный разбор"}</span></div>
+      <div className="cabinet-reading-name"><span className="matname">{ready ? row.title : en
+        ? `We are writing your ${row.year ? `${row.year} ` : ""}reading` : `Пишем ваш разбор${row.year ? ` на ${row.year} год` : ""}`}</span></div>
+      <p className="small">{individualDates(row, birthLabel)}</p>
+      {!ready && <p className="small">{en ? "We will notify you by email and here in your account when it is ready."
+        : "Пришлём уведомление на почту и в кабинет, когда он будет готов."}</p>}
+      <div className="cabinet-reading-bottom"><span className="small">{INDIVIDUAL_KINDS[row.kind][L]}{row.year ? (en ? ` for ${row.year}` : ` на ${row.year} год`) : ""}</span>
+        {ready ? <Link href={row.href}><OpenReadingLabel locale={L} /> →</Link> : <span className="small">{en ? "In progress" : "В работе"}</span>}</div>
+    </li>;
+  };
+  return <div className="cabinet">
+    <header className="cabinet-heading"><div><h1>{D.pages.accountTitle[L]}</h1><p>{en ? "Your readings and discoveries" : "Ваши разборы и открытия"}</p>
+      {session.admin && <Link className="btn ghost sm" style={{ marginTop: 12 }} href="/admin">{en ? "Go to administration" : "Перейти в админку"} →</Link>}</div>
+      <div className="cabinet-subscription" data-testid="account-access">
+        {mode === "free" ? <><strong>{en ? "All readings available" : "Все разборы доступны"}</strong><p>{D.account.allFreeAccess[L]}</p></> : subscription.length ? <>
+          <strong className="active">{en ? "Subscription active" : "Подписка активна"}</strong>
+          {holdingLines(subscription).map(line => <p key={line.text}>{line.text}</p>)}
+        </> : <><strong>{en ? "More with a subscription" : "Больше с подпиской"}</strong><p>{offer ? `${priceLabel(offer)} · ${periodLabel(offer)}` : en ? "Access to all readings" : "Доступ ко всем разборам"}</p>
+          {offer && <Link href={`/pay/${offer.id}`}>{en ? "Get a subscription" : "Оформить подписку"} →</Link>}</>}
       </div>
-
-      <div className="panel section-gap">
-        <h3>{D.account.savedMatrices[L]}</h3>
-        <div className="cap">
-          {ALL_FREE ? D.account.savedMatricesHintFree[L] : D.account.savedMatricesHint[L]}
+    </header>
+    <nav className="cabinet-tabs" aria-label={en ? "Account sections" : "Разделы кабинета"}>{[
+      ["readings", en ? "My readings" : "Мои разборы"], ["notifications", en ? "Notifications" : "Уведомления"], ["profile", en ? "Profile" : "Профиль"],
+    ].map(([key, label]) => <button key={key} aria-current={tab === key ? "page" : undefined} onClick={() => selectTab(key)}>{label}{key === "notifications" && unread > 0 && <span>{unread}</span>}</button>)}</nav>
+    {tab === "profile" ? <AccountProfile /> : tab === "notifications" ? <Notifications /> : <section aria-label={en ? "My readings" : "Мои разборы"}>
+      <div className="cabinet-toolbar"><div className="cabinet-filters">{[["all", en ? "All" : "Все"], ["personal", en ? "Personal" : "Личные"], ["pair", en ? "Compatibility" : "Совместимость"], ["individual", en ? "Individual" : "Индивидуальные"]].map(([key, label]) => <button key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label}</button>)}</div>
+        <div className="cabinet-new"><button className="btn" aria-expanded={newOpen} onClick={() => setNewOpen(v => !v)}>＋ {en ? "New reading" : "Новый разбор"}</button>
+          {newOpen && <div className="cabinet-new-menu"><Link href="/#calc">{en ? "Personal reading" : "Личный разбор"}</Link><Link href="/compatibility">{en ? "Compatibility" : "Совместимость"}</Link></div>}
         </div>
-        {note ? (
-          <div className="okmsg" role="status" data-testid="account-note">
-            {note}
-          </div>
-        ) : null}
-        {/* Список рисуется всегда, даже пустой: по нему видно, что кабинет открыт, а не сломан. */}
-        <ul
-          className="matlist"
-          data-testid="matrices-list"
-          style={{ listStyle: "none", padding: 0, margin: 0 }}
-        >
-          {/* отказ сети раньше оставлял вечное «Загружаем список…» рядом с сообщением об
-              ошибке и предложением сохранить дату — три состояния одновременно */}
-          {items === null && error ? (
-            <li className="dim">{D.account.listFailed[L](error)}</li>
-          ) : items === null ? (
-            <li className="skeleton">{D.account.listLoading[L]}</li>
-          ) : list.length === 0 ? (
-            <li className="dim">{D.account.listEmpty[L]}</li>
-          ) : (
-            list.map((it) => {
-              const pair = it.product === "pair";
-              const open = pair ? `/readings/${it.id}` : `/matrices/${it.id}`;
-              return (
-                <li
-                  className={it.access === "locked" ? "matrow locked" : `matrow ${it.access}`}
-                  key={it.id}
-                  data-testid={pair ? "pair-card" : "matrix-card"}
-                  data-product={it.product}
-                  data-birth={it.birth}
-                  data-access={it.access}
-                >
-                  <div>
-                    <span className="badge sub mattype">{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span>
-                    <MatrixName locale={L} item={it} fallback={pair ? pairDates(it) : birthLabel(it.birth!)}
-                      onSave={(title) => rename(it.id, title)} />
-                    <div className="small">
-                      {pair ? pairDates(it) : <>
-                        {birthLabel(it.birth!)} ·{" "}
-                        {it.sex === "f" ? D.calc.femaleChart[L] : D.calc.maleChart[L]}{" "}
-                        {D.account.chartWord[L]} · {D.account.centreArcanum[L]}{" "}
-                        {safeCenter(it.birth!, it.sex!)}
-                      </>}
-                    </div>
-                  </div>
-                  {it.access === "locked" ? (
-                    <span className="matact">
-                      <Link className="btn ghost sm" href={open}>
-                        <OpenReadingLabel locale={L} />
-                      </Link>
-                      {/* id разбора уходит в ссылку: на экране оплаты он уже выбран, и платёж
-                          открывает именно его, а не «первый сохранённый» */}
-                      <Link className="btn sm" href={buyHref(pair ? "pair" : "personal", it.id)}>
-                        {D.nav.buy[L]}
-                      </Link>
-                    </span>
-                  ) : (
-                    <Link className="btn ghost sm" href={open}>
-                      <OpenReadingLabel locale={L} />
-                    </Link>
-                  )}
-                </li>
-              );
-            })
-          )}
-        </ul>
-
-        {/* дата из браузера предлагается к сохранению только если её ещё нет в списке:
-            иначе предложение висело под карточкой той же даты, а кнопка ничего не делала */}
-        {/* пока список не пришёл, мы не знаем, сохранена дата или нет: предлагать сохранение
-            поверх ошибки загрузки — третье состояние на том же экране */}
-        {items !== null && local && !personal.some((it) => it.birth === local.birth && it.sex === local.sex) ? (
-          <div style={{ marginTop: 14 }}>
-            <p className="small">
-              {D.account.localCalc[L](birthLabel(local.birth))}
-            </p>
-            <SaveMatrixButton locale={L}
-              birth={local.birth}
-              sex={local.sex}
-              label={D.account.saveCurrent[L]}
-              openReport={false}
-              onSaved={async () => {
-                await reload();
-                await session.refresh();
-              }}
-            />
-          </div>
-        ) : (
-          <p className="small" style={{ marginTop: 14 }}>
-            <Link href="/#calc">{D.account.calculateToSave[L]}</Link>{D.account.calculateToSaveTail[L]}
-          </p>
-        )}
-
-        {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}
       </div>
-
-      {/* платить негде: истории платежей на витрине без кассы не бывает */}
-      {ALL_FREE ? null : <PaymentsPanel locale={L} />}
-    </>
-  );
-}
-
-/**
- * История платежей. Отдельным запросом и отдельной панелью: список матриц нужен на каждом
- * открытии кабинета, а платежи — справка, и грузить их вместе смысла нет.
- */
-function PaymentsPanel({ locale: requestedLocale, ...localeProps }: ({}) & { locale?: Locale } = {}) {
-  const activeLocale = useLocale();
-  const L = requestedLocale ?? activeLocale;
-  const { dateTimeLabel, api, money } = forLocale(L);
-
-  const [rows, setRows] = useState<PaymentItem[] | null>(null);
-  const [failed, setFailed] = useMessage(L);
-
-  useEffect(() => {
-    api
-      .payments()
-      .then((res) => { setRows(res.items); setFailed(null); })
-      .catch((err) => setFailed((locale) => err instanceof ApiError ? err.messageFor(locale) : D.account.paymentsUnavailable[locale]));
-  }, [L]);
-
-  return (
-    <div className="panel section-gap" data-testid="payments-panel">
-      <h3>{D.account.myPayments[L]}</h3>
-      <div className="cap">{D.account.paymentsHint[L]}</div>
-      {failed ? <div className="err" role="alert" aria-live="assertive">{failed}</div> : null}
-      {rows === null && !failed ? <p className="skeleton">{D.account.paymentsLoading[L]}</p> : null}
-      {rows && rows.length === 0 ? <p className="dim">{D.account.paymentsEmpty[L]}</p> : null}
-      {rows && rows.length ? (
-        <ul className="paylist">
-          {rows.map((p) => {
-            const when = new Date(p.paid_at ?? p.created_at);
-            return (
-              <li key={p.id} data-testid="payment-row">
-                <span className="pw">
-                  <b>{p.tariff.display_name ?? p.tariff.name ?? D.account.planWord[L]}</b>
-                  <span className="small">
-                    {dateTimeLabel(p.paid_at ?? p.created_at)} · {p.external_id}
-                  </span>
-                </span>
-                <span className="pa">
-                  {D.pay.priceFormat[L](money(p.amount))}
-                  <span className="small">
-                    {p.state === "refunded"
-                      ? D.account.stateRefunded[L]
-                      : p.state === "paid"
-                        ? D.account.statePaid[L]
-                        : p.state === "abandoned"
-                          ? D.account.stateAbandoned[L]
-                          : p.state === "failed"
-                            ? D.account.stateFailed[L]
-                            : D.account.stateUnpaid[L]}
-                  </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
-    </div>
-  );
+      {note && <p className="okmsg" role="status" data-testid="account-note">{note}</p>}
+      {error && filter !== "individual" && <p className="err" role="alert">{error} <button className="iconbtn" onClick={() => void reload()}>{en ? "Retry" : "Повторить"}</button></p>}
+      {individual.error && <p className="err" role="alert">{individual.error}</p>}
+      <ul className="cabinet-readings" data-testid="matrices-list">{(() => {
+        const regular = filter === "individual" ? [] : rows;
+        const extra = showIndividual ? individual.data?.items ?? [] : [];
+        const loading = (filter !== "individual" && items === null) || (showIndividual && individual.data === null && !individual.error);
+        if (loading && regular.length + extra.length === 0) return <li className="cabinet-empty">{error ? D.account.unavailable[L] : D.account.listLoading[L]}</li>;
+        if (regular.length + extra.length === 0) return <li className="cabinet-empty">{filter === "individual"
+          ? en ? "No individual readings yet" : "Индивидуальных разборов пока нет"
+          : en ? "No saved readings here yet" : "Здесь пока нет сохранённых разборов"}</li>;
+        const cards = [
+          ...regular.map(it => ({ at: Date.parse(it.created_at), card: readingCard(it) })),
+          ...extra.map(row => ({ at: Date.parse(row.approved_at ?? row.created_at), card: individualCard(row) })),
+        ];
+        return cards.sort((a, b) => (b.at || 0) - (a.at || 0)).map(x => x.card);
+      })()}</ul>
+      {filter === "individual" && individual.data && <Pagination page={individualPage} size={individual.data.page_size} total={individual.data.total} onChange={setIndividualPage} />}
+    </section>}
+  </div>;
 }

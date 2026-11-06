@@ -81,7 +81,10 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
       // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
       // Вход с чека оплаты возвращает к этому заказу, а не в общий кабинет.
       const order = new URLSearchParams(window.location.search).get("order") ?? "";
-      router.replace(publicPath(ORDER.test(order) ? `/pay/done?order=${order}` : "/account", L));
+      const reading = new URLSearchParams(window.location.search).get("reading") ?? "";
+      const destination = ORDER.test(order) ? `/pay/done?order=${order}`
+        : /^[1-9]\d*$/.test(reading) ? `/matrix/individual/${reading}` : "/account";
+      router.replace(publicPath(destination, L));
     } catch (err) {
       setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
       // Ошибка остаётся объявленной через role=alert, но набор продолжается в поле, которое

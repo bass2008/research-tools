@@ -22,7 +22,9 @@ def test_declined_payment_retry_keeps_older_matrix(page, mail):
                 "tariff": "single", "email": mail, "birth": birth, "sex": "f"})
             assert response.ok, response.text()
             ids.append(response.json()["matrix_id"])
-            payment = page.request.get(BASE + "/api/payments").json()["items"][0]
+            # The account history lists orders; a refund takes a payment from the admin list.
+            payment = next(r for r in admin.request.get(BASE + "/api/admin/payments").json()["items"]
+                           if r["email"] == mail and not r.get("refunded_at"))
             assert admin.request.post(BASE + f'/api/admin/payments/{payment["id"]}/refund').ok
     finally:
         admin.close()

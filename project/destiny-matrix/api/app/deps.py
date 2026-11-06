@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from .i18n import say
-from .http_errors import LocalizedHTTPException
+from .http_errors import LocalizedHTTPException, error
 from .db import get_db
 from .models import User
 from .security import password_fingerprint, read_token
@@ -22,9 +22,9 @@ def optional_user(
     read = read_token(credentials.credentials)
     if read is None:
         return None
-    user_id, fingerprint, _ = read
+    user_id, fingerprint, _, version = read
     user = db.get(User, user_id)
-    if user is None or password_fingerprint(user.password_hash) != fingerprint:
+    if user is None or password_fingerprint(user.password_hash) != fingerprint or user.auth_version != version:
         return None
     return user
 
@@ -40,4 +40,13 @@ def ghost_session(credentials: HTTPAuthorizationCredentials | None = Depends(bea
 def current_user(user: User | None = Depends(optional_user)) -> User:
     if user is None:
         raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("auth.token_required"))
+    return user
+
+
+def writable_user(db: Session, user_id: int, version: int, ghost: bool) -> User:
+    if ghost:
+        raise error(403, "Изменять реквизиты в чужом кабинете нельзя.", "Account changes are unavailable while impersonating.")
+    user = db.get(User, user_id, populate_existing=True)
+    if not user or user.auth_version != version:
+        raise error(401, "Войдите снова.", "Please sign in again.")
     return user

@@ -39,7 +39,6 @@ python -m app.schema reset    # снести всё и создать занов
 | `payments` | попытка оплатить заказ у провайдера: номер у банка, ссылка на форму, банковский статус |
 | `entitlements` | право: продукты, разбор или «любые», хранение, сроки, отзыв; ссылается на заказ |
 | `report_jobs` | печать PDF разбора на языке |
-| `work_tasks` | задача исполнителя (MCP `arcana-tasks`): тип, статус `queued → signalled → done/failed`, разбор, причина, параметры |
 
 Продукт — это код (`api/app/products.py`, `web/lib/pair/`): какие данные вводят, когда два ввода —
 один разбор, как его подписать и где напечатать. Деньги, права, печать, кабинет и админка от
@@ -71,7 +70,6 @@ readings  ─< purchases.reading_id        (SET NULL — заказ пережи
 readings  ─< entitlements.reading_id     (CASCADE — право без разбора бессмысленно)
 purchases ─< entitlements.purchase_id    (SET NULL — право переживает чистку заказов)
 readings  ─< report_jobs.reading_id      (CASCADE)
-readings  ─< work_tasks.reading_id       (SET NULL — задача сохраняется после удаления разбора)
 ```
 
 ## Предложения

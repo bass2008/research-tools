@@ -129,6 +129,31 @@ for d in r["docs"]:
 | **Метрика** | визиты из поиска с разбивкой по поисковику и странице входа | API открыт, счётчик `111856670`; позиций не даёт |
 | **Яндекс.Вебмастер** | «Страницы в поиске», исключённые с причинами, статистика обхода | только выгрузка владельцем: API с метрическим токеном отвечает `ACCESS_FORBIDDEN`, нужен свой scope |
 
+### Доступ к Search Console API
+
+Только `.ru` и только чтение. Ключ — сервисный аккаунт:
+`/home/sergey/Documents/eco-tape-274510-652cc670515a.json`. Содержимое ключа и токены в git и отчёты
+не переносить.
+
+| Параметр | Значение |
+|---|---|
+| Проект Google Cloud | `eco-tape-274510` |
+| Сервисный аккаунт | `searchapi@eco-tape-274510.iam.gserviceaccount.com`, в RU Search Console уже добавлен, уровень `siteFullUser` |
+| Scope | `https://www.googleapis.com/auth/webmasters.readonly` |
+| Ресурс | `sc-domain:arcana-sense.ru`; английского домена у аккаунта нет |
+| Авторизация | JSON ключа → JWT RS256 → `https://oauth2.googleapis.com/token` → `Authorization: Bearer …` |
+
+| Назначение | Метод |
+|---|---|
+| ресурсы | `GET https://www.googleapis.com/webmasters/v3/sites` |
+| карты сайта | `GET …/webmasters/v3/sites/sc-domain%3Aarcana-sense.ru/sitemaps` |
+| показы и клики | `POST …/webmasters/v3/sites/sc-domain%3Aarcana-sense.ru/searchAnalytics/query` |
+| проверка адреса | `POST https://searchconsole.googleapis.com/v1/urlInspection/index:inspect` с `inspectionUrl`, `siteUrl` |
+
+Проверка адреса отдаёт сохранённое у Google состояние (последний обход, robots, индексация,
+canonical), но не HTML, не живой тест и не переиндексацию. Квота на 27.09.2026 — 2 000 запросов в
+сутки и 600 в минуту. Отчёт «Индексирование страниц» целиком через API не выгружается.
+
 ### Подсказки: команды и исторический замер
 
 Методика волн, остановки сбора и распределения форм — в
