@@ -13,5 +13,5 @@ export function WorkBadge({ locale }: { locale?: Locale }) {
 export default function ReadingBadges({ locale, item, inWork = false }: {
   locale?: Locale; item: { access: string; access_until?: string | null; access_granted?: boolean }; inWork?: boolean;
 }) {
-  return <span className="badges"><AccessBadge locale={locale} item={item} />{inWork && <WorkBadge locale={locale} />}</span>;
+  return <span className="badges"><AccessBadge locale={locale} item={item} reading />{inWork && <WorkBadge locale={locale} />}</span>;
 }

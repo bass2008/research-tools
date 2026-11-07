@@ -14,6 +14,7 @@ it("marks every granted access as granted", () => {
 
 it("keeps bought and paid subscriptions unmarked", () => {
   expect(badge({ access: "forever" })).toContain("Куплена");
+  expect(renderToStaticMarkup(<AccessBadge item={{ access: "forever" }} reading />)).toContain("Куплен<");
   expect(badge({ access: "subscription", access_until: "2027-01-07T12:00:00+00:00", access_granted: false }))
     .not.toContain("выдана");
 });

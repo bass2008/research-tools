@@ -9,8 +9,9 @@ import { type Lang as Locale } from "@/lib/i18n/lang";
  * человека, даже когда подписка кончится. Знак пожизненного владения — ∞ в золотом круге.
  * Выданная админом открыта так же, но золота не получает: подарок — не покупка.
  */
-export default function AccessBadge({ locale: requestedLocale, item }: {
+export default function AccessBadge({ locale: requestedLocale, item, reading = false }: {
   locale?: Locale;
+  reading?: boolean;
   item: { access: string; access_until?: string | null; access_granted?: boolean };
 }) {
   const activeLocale = useLocale();
@@ -23,7 +24,7 @@ export default function AccessBadge({ locale: requestedLocale, item }: {
         <i className="lifetime" aria-hidden="true">
           ∞
         </i>
-        {D.account.badgeBought[L]}
+        {(reading ? D.account.badgeBoughtReading : D.account.badgeBought)[L]}
       </span>
     );
   }

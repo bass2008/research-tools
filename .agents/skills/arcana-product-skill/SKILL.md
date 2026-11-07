@@ -49,7 +49,7 @@ description: "Продукт Arcana Sense (матрица судьбы) и то,
 | [references/search-map.md](references/search-map.md) | когда текст или запрос касается слов из поиска: «сердце», «под долларом», «программа N»… |
 | [references/seo-research.md](references/seo-research.md) | перед исследованием спроса: Вордстат, кэш, подсказки, числовые фразы, ограничения и исторические ошибки |
 | [references/page-audit.md](references/page-audit.md) | при оценке существующих страниц: спрос, показы, позиции, индексирование и сопоставимость периодов |
-| [references/energy-chacras-result.md](references/energy-chacras-result.md) | перед подготовкой SEO-статьи: кейс энергополя как образец прямого ответа, проверяемой конкретики и связи с продуктом; результаты и границы доказательств |
+| [references/energy-chacras-result.md](references/energy-chacras-result.md) | **перед любой новой тематической статьёй**: статья об энергополе — эталон, по которому пишем все новые темы; каркас, обязательные части, результаты и границы доказательств |
 | [references/mistakes.md](references/mistakes.md) | перед написанием и перед проверкой: ошибки, которые уже делали |
 | [references/deck-images.md](references/deck-images.md) | когда текст касается рисунка карты |
 | [references/content-format.md](references/content-format.md) | когда сдаёшь текст на сайт: формат JSON, title и description, адреса, разметка, индексация |
@@ -68,9 +68,17 @@ description: "Продукт Arcana Sense (матрица судьбы) и то,
 | [prompts/individual-reading-prompt.md](prompts/individual-reading-prompt.md) | автор индивидуального разбора за 1990 ₽: бриф, исследование, статья, сдача через `scripts/individual_reading.py` |
 | [prompts/individual-reading-review-prompt.md](prompts/individual-reading-review-prompt.md) | независимый проверяющий индивидуального разбора: впечатление читателя, пересказ калькулятора, открытия, правда; ничего не правит |
 | [references/individual-sources.md](references/individual-sources.md) | литература индивидуального разбора с проверенными публичными ссылками |
+| [prompts/topic-article-prompt.md](prompts/topic-article-prompt.md) | писатель новой тематической статьи энциклопедии по эталону энергополя: карта вопросов, конкуренты, числа из движка, статья, SEO; подстановки — тема, адрес, запросы, расчёт, корпус |
+| [prompts/triples-corpus-prompt.md](prompts/triples-corpus-prompt.md) | писатель пакета из 20 толкований троек для корпуса продукта по образцу энергополя; внизу — как заказчику завести новый корпус |
 | [prompts/article-translate-prompt.md](prompts/article-translate-prompt.md) | переводчик статьи на английский: один агент на статью; проверка — `tools/seo/check-translation.py <категория> <ключ>` |
 
 ## Набор статей
+
+Новая тематическая статья энциклопедии (аркан на месяц, материальная карма и следующие темы)
+пишется **по эталону энергополя**: [`energy-chacras-result.md`](references/energy-chacras-result.md),
+промпт — [`topic-article-prompt.md`](prompts/topic-article-prompt.md). Корпус толкований троек для
+продукта — по [`triples-corpus-prompt.md`](prompts/triples-corpus-prompt.md).
+
 
 1. N писателей — по промпту своего типа, с этим скиллом и `arcana-skill`.
 2. Один проверяющий на весь набор, с этим скиллом. Режим «отчёт» — `seo-check-prompt.md`, режим

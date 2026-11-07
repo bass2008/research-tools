@@ -184,7 +184,6 @@ export default function AccountProfile() {
         <div className="profile-row">
           <div>
             <strong>{en ? "Password" : "Пароль"}</strong>
-            <p className="small">{en ? "Update your account password" : "Обновите пароль для входа в кабинет"}</p>
           </div>
           <button className="btn ghost sm" disabled={busy} onClick={() => changeForm(form === "password" ? null : "password")}>
             {en ? "Change" : "Изменить"}

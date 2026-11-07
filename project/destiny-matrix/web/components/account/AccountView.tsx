@@ -196,8 +196,7 @@ export default function AccountView({ locale: requestedLocale }: { locale?: Loca
   const symbol = (trio: Trio | null, sign: string) => trio ? <ArcanaFan cards={trio} size="sm" /> : <span className="reading-symbol" aria-hidden="true">{sign}</span>;
   const readingCard = (it: ReadingItem) => {
     const pair = it.product === "pair", open = pair ? `/readings/${it.id}` : `/matrices/${it.id}`;
-    const owned = it.access === "forever" || it.access === "granted";
-    const trio = owned ? readingTrio({ birth: it.birth, ...it.inputs }) : null;
+    const trio = readingTrio({ birth: it.birth, ...it.inputs });
     return <li className={`cabinet-reading ${it.access}`} key={`r${it.id}`} data-testid={pair ? "pair-card" : "matrix-card"} data-product={it.product} data-birth={it.birth} data-access={it.access}>
       <div className="cabinet-reading-kind">{symbol(trio, pair ? "∞" : "✧")}<span>{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span></div>
       <div className="cabinet-reading-name"><MatrixName locale={L} item={it} fallback={dates(it)} onSave={title => rename(it.id, title)} /></div>

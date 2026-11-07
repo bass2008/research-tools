@@ -95,6 +95,7 @@ export const account = {
   save: { ru: "Сохранить", en: "Save" } satisfies Phrase,
   cancel: { ru: "Отменить", en: "Cancel" } satisfies Phrase,
   badgeBought: { ru: "Куплена", en: "Bought" } satisfies Phrase,
+  badgeBoughtReading: { ru: "Куплен", en: "Bought" } satisfies Phrase,
   badgeInWork: { ru: "В работе", en: "In progress" } satisfies Phrase,
   badgeOpen: { ru: "Открыта", en: "Open" } satisfies Phrase,
   badgeGranted: { ru: "Выдана", en: "Granted" } satisfies Phrase,
