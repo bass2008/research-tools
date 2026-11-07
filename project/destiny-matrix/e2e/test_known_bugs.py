@@ -145,7 +145,7 @@ def test_a4_target_list_button_and_request_agree(page, mail):
         route.abort()
 
     page.route("**/payments/start", catch)
-    page.goto(f"{BASE}/pay?m={max(known) + 50}", wait_until="networkidle")
+    page.goto(f"{BASE}/pay/single?m={max(known) + 50}", wait_until="networkidle")
     page.wait_for_timeout(1500)
 
     chosen = page.evaluate("""() => {

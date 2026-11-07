@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
 import { PdfIcon } from "@/components/matrix/SavePdfButton";
+import ShareButton from "@/components/ui/ShareButton";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import { ApiError, forLocale } from "@/lib/api";
 import { D } from "@/lib/i18n";
 import { individualDates, individualKind, type IndividualReading } from "@/lib/individualReading";
+import { publicPath } from "@/lib/publicRouting";
 
 export default function IndividualSaveBar({ row, compact = false }: { row: IndividualReading; compact?: boolean }) {
   const L = useLocale(), en = L === "en";
@@ -18,7 +20,8 @@ export default function IndividualSaveBar({ row, compact = false }: { row: Indiv
     if (busy) return;
     setBusy(true); setNote("");
     try {
-      const { url } = await forLocale(L).api.individualPdf(row.id);
+      const { api } = forLocale(L);
+      const { url } = await (row.example ? api.examplePdf(row.example) : api.individualPdf(row.id));
       window.open(url, "_blank", "noopener");
     } catch (err) {
       setNote(err instanceof ApiError ? err.messageFor(L) : D.report.pdfFailed[L]);
@@ -26,11 +29,14 @@ export default function IndividualSaveBar({ row, compact = false }: { row: Indiv
       setBusy(false);
     }
   };
-  const actions = row.can_pdf && <div className="individual-save-actions">
+  const actions = (row.can_pdf || row.example) && <div className="individual-save-actions">
     <button type="button" className={busy ? "btn ghost sm pdfbtn working" : "btn ghost sm pdfbtn"}
       data-testid="save-pdf" onClick={() => void pdf()} disabled={!ready || busy} aria-busy={busy}>
       <PdfIcon />{busy ? D.report.pdfPreparing[L] : D.report.savePdf[L]}
     </button>
+    {row.example
+      ? <ShareButton kind="example" href={publicPath(`/matrix/individual-example/${row.example}`, L)} label={individualKind(row, L)} />
+      : <ShareButton kind="individual" id={row.id} label={individualDates(row, birthLabel)} />}
     {note && <span className="err" role="status" data-testid="pdf-error">{note}</span>}
   </div>;
   if (compact) return actions ? <section className="ir-pdf" data-testid="individual-save">{actions}</section> : null;

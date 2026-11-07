@@ -13,9 +13,10 @@ import { D, forLocale as localizedI18n } from "@/lib/i18n";
 import { OWN, defaultChoices, defaultYears, problemOf, readingsOf, resolve, slotsOf, type Choices } from "@/lib/individualOrder";
 import { workdaysFrom, type Cart } from "@/lib/individualPricing";
 import type { Sex } from "@/lib/matrix";
-import type { StoredBirth } from "@/lib/storage";
+import type { StoredBirth, StoredPair } from "@/lib/storage";
 import type { PaymentProvider } from "@/lib/tariffs";
 import { browserDay } from "@/lib/today";
+import { pairTrio, personalTrio, yearTrio, type Trio } from "@/lib/arcanaTrio";
 
 const MIN_PASSWORD = 3;
 
@@ -27,10 +28,10 @@ function validDate(d: PickedDate): boolean {
 }
 
 /** Who each reading is for, a question, the account and the payment — everything before paying. */
-export default function OrderForm({ cart, baseYear, total, providers, payable, initialBirth, question, setQuestion, topics, latest, onDates, onYears, summary }: {
-  cart: Cart; baseYear: number; total: string; providers: PaymentProvider[]; payable: boolean; initialBirth: StoredBirth | null;
+export default function OrderForm({ cart, baseYear, total, providers, payable, initialBirth, initialPair, question, setQuestion, topics, latest, onDates, onYears, onTrio, summary }: {
+  cart: Cart; baseYear: number; total: string; providers: PaymentProvider[]; payable: boolean; initialBirth: StoredBirth | null; initialPair?: StoredPair | null;
   question: string; setQuestion: (q: string) => void; topics: ReactNode; latest: string;
-  onDates: (dates: string[]) => void; onYears: (years: number[]) => void; summary: string;
+  onDates: (dates: string[]) => void; onYears: (years: number[]) => void; onTrio?: (trio: Trio | null) => void; summary: string;
 }) {
   const L = useLocale();
   const T = D.individualSale;
@@ -56,6 +57,9 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   useEffect(() => { setChoices(defaultChoices(cart)); }, [cart]);
 
   const roles = slots.flatMap((s) => s.roles);
+  // the couple calculated last fills the first pair; everyone else starts empty, the first one from the stored date
+  const initialOf = (role: string): StoredBirth | null => initialPair && role === "a0" ? { birth: initialPair.a.birth, sex: "f" }
+    : initialPair && role === "b0" ? { birth: initialPair.b.birth, sex: "f" } : role === roles[0] ? initialBirth : null;
   const { owners, person } = resolve(slots, choices);
   const fallbackYears = defaultYears(slots, person, baseYear);
   const yearOf = (role: string) => years[role] || fallbackYears[role];
@@ -70,6 +74,14 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   useEffect(() => { onDates(ownerDates ? ownerDates.split(", ") : []); }, [ownerDates, onDates]);
   const chosenYears = slots.filter((s) => s.kind === "year").map((s) => yearOf(s.roles[0])).join(",");
   useEffect(() => { onYears(chosenYears ? chosenYears.split(",").map(Number) : []); }, [chosenYears, onYears]);
+  // the order card shows the cards of the couple if there is one, otherwise of the person
+  const births = owners.map((o) => people[o] ? isoOf(people[o].date) : "");
+  const main = readings.find((r) => r.kind === "pair") ?? readings.find((r) => r.kind === "personal") ?? readings[0];
+  const [w0, w1] = main ? main.who.map((i) => births[i]) : [];
+  const trio = !main || !w0 ? null : main.kind === "pair" ? (w1 ? pairTrio(w0, w1) : null)
+    : main.kind === "year" && main.year ? yearTrio(w0, main.year) : personalTrio(w0);
+  const trioKey = trio ? trio.join("-") : "";
+  useEffect(() => { onTrio?.(trioKey ? trioKey.split("-").map(Number) as Trio : null); }, [trioKey, onTrio]);
 
   const choose = (role: string, target: string) => { setError(""); setChoices((c) => ({ ...c, [role]: target })); };
   const who = (role: string, label?: string) => {
@@ -91,7 +103,7 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   // kept mounted while someone else is chosen: switching back must not lose the typed date
   const picker = (role: string) => (
     <div hidden={!owners.includes(role)}>
-      <BirthPicker locale={L} idPrefix={`lp-${role}`} initial={role === roles[0] ? initialBirth : null} ready disabled={busy}
+      <BirthPicker locale={L} idPrefix={`lp-${role}`} initial={initialOf(role)} ready disabled={busy}
         onChange={(value) => setPeople((p) => ({ ...p, [role]: value }))} />
     </div>
   );

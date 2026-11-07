@@ -30,7 +30,7 @@ def listing(product: str | None = None, user: User = Depends(current_user),
 def create(payload: ReadingIn, user: User = Depends(current_user),
            db: Session = Depends(get_db)) -> dict:
     product = readings.product_or_404(payload.product)
-    row = readings.create(db, user, product, payload.inputs, payload.title)
+    row = readings.create(db, user, product, payload.inputs, payload.title, rename=True)
     db.commit()
     db.refresh(row)
     # разовое право могло быть куплено до ввода — этот разбор и есть оплаченный;

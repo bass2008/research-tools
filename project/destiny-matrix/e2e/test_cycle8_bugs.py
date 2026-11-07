@@ -177,6 +177,7 @@ def test_unknown_matrix_in_pay_link_does_not_substitute_another(page: Page):
     flows.calculate(page, 5, 12, 1994)
 
     page.goto(f"{BASE}/pay?m=999999", wait_until="domcontentloaded")
+    page.get_by_test_id("plan-single").click()
     page.wait_for_selector("[data-testid=pay-submit]")
     page.wait_for_timeout(1500)
     picked = page.get_by_test_id("pay-target").get_attribute("data-value")

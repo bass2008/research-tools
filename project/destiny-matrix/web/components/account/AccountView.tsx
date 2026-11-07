@@ -21,6 +21,9 @@ import { useMessage, type Message } from "@/lib/i18n/useMessage";
 import { forLocale as localizedHoldings } from "@/lib/holdings";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { buyHref } from "@/lib/readingLinks";
+import ArcanaFan from "@/components/matrix/ArcanaFan";
+import ReadingBadges from "@/components/account/ReadingBadges";
+import { readingTrio, type Trio } from "@/lib/arcanaTrio";
 import { useLinkStatus } from "next/link";
 import { useSearchParams } from "next/navigation";
 import Link from "@/components/ui/LocalizedLink";
@@ -190,10 +193,13 @@ export default function AccountView({ locale: requestedLocale }: { locale?: Loca
     const a = (row.inputs.a as { birth?: string })?.birth, b = (row.inputs.b as { birth?: string })?.birth;
     return a && b ? `${birthLabel(a)} + ${birthLabel(b)}` : "";
   };
+  const symbol = (trio: Trio | null, sign: string) => trio ? <ArcanaFan cards={trio} size="sm" /> : <span className="reading-symbol" aria-hidden="true">{sign}</span>;
   const readingCard = (it: ReadingItem) => {
     const pair = it.product === "pair", open = pair ? `/readings/${it.id}` : `/matrices/${it.id}`;
+    const owned = it.access === "forever" || it.access === "granted";
+    const trio = owned ? readingTrio({ birth: it.birth, ...it.inputs }) : null;
     return <li className={`cabinet-reading ${it.access}`} key={`r${it.id}`} data-testid={pair ? "pair-card" : "matrix-card"} data-product={it.product} data-birth={it.birth} data-access={it.access}>
-      <div className="cabinet-reading-kind"><span className="reading-symbol" aria-hidden="true">{pair ? "∞" : "✧"}</span><span>{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span></div>
+      <div className="cabinet-reading-kind">{symbol(trio, pair ? "∞" : "✧")}<span>{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span></div>
       <div className="cabinet-reading-name"><MatrixName locale={L} item={it} fallback={dates(it)} onSave={title => rename(it.id, title)} /></div>
       <p className="small">{dates(it)}</p>
       <div className="cabinet-reading-bottom"><span className="small">{it.access === "locked" ? en ? "Free sections" : "Бесплатные разделы" : en ? "Full reading" : "Полный разбор"}</span><Link href={open}><OpenReadingLabel locale={L} /> →</Link></div>
@@ -205,15 +211,17 @@ export default function AccountView({ locale: requestedLocale }: { locale?: Loca
   };
   const individualCard = (row: IndividualReading) => {
     const ready = row.status === "done";
+    const trio = readingTrio(row.inputs, row.year);
     return <li className="cabinet-reading" key={`i${row.id}`} data-testid="individual-card" data-status={ready ? "done" : "in-progress"}>
-      <div className="cabinet-reading-kind"><span className="reading-symbol" aria-hidden="true">✦</span><span>{en ? "Individual reading" : "Индивидуальный разбор"}</span></div>
-      <div className="cabinet-reading-name"><span className="matname">{ready ? row.title : en
-        ? `We are writing your ${row.year ? `${row.year} ` : ""}reading` : `Пишем ваш разбор${row.year ? ` на ${row.year} год` : ""}`}</span></div>
+      <div className="cabinet-reading-kind">{symbol(trio, "✦")}<span>{en ? "Individual reading" : "Индивидуальный разбор"}</span></div>
+      <div className="cabinet-reading-name"><span className="matname"><span>{ready ? row.title : en
+        ? `We are writing your ${row.year ? `${row.year} ` : ""}reading` : `Пишем ваш разбор${row.year ? ` на ${row.year} год` : ""}`}</span>
+        <ReadingBadges locale={L} item={{ access: "forever" }} inWork={!ready} /></span></div>
       <p className="small">{individualDates(row, birthLabel)}</p>
       {!ready && <p className="small">{en ? "We will notify you by email and here in your account when it is ready."
         : "Пришлём уведомление на почту и в кабинет, когда он будет готов."}</p>}
       <div className="cabinet-reading-bottom"><span className="small">{INDIVIDUAL_KINDS[row.kind][L]}{row.year ? (en ? ` for ${row.year}` : ` на ${row.year} год`) : ""}</span>
-        {ready ? <Link href={row.href}><OpenReadingLabel locale={L} /> →</Link> : <span className="small">{en ? "In progress" : "В работе"}</span>}</div>
+        {ready && <Link href={row.href}><OpenReadingLabel locale={L} /> →</Link>}</div>
     </li>;
   };
   return <div className="cabinet">

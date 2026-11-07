@@ -1,36 +1,39 @@
 import IndividualArticleView from "@/components/account/IndividualArticleView";
 import { PrintLinks } from "@/components/ui/PrintLinks";
+import type { Lang } from "@/lib/i18n/lang";
 import { requestLocale } from "@/lib/i18n/request";
 import { individualCardLinks } from "@/lib/individualCardLinks";
+import { individualExample } from "@/lib/individualExamples";
 import { resolvePrintLinkSite } from "@/lib/siteProfile.config";
 import { requestSite } from "@/lib/siteProfile.server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { readPrintIndividual } from "../../_lib/access";
 
-type Search = Promise<Record<string, string | string[] | undefined>>;
+type Params = Record<string, string | string[] | undefined>;
+type Search = Promise<Params>;
 
 // Страница существует ради PDF: её открывает браузерный сервис по одноразовому пропуску.
 export const dynamic = "force-dynamic";
 
-function pass(params: Record<string, string | string[] | undefined>): { id: number; token: string } | null {
-  const id = Number(Array.isArray(params.r) ? params.r[0] : params.r);
-  const token = String((Array.isArray(params.t) ? params.t[0] : params.t) ?? "");
-  return Number.isInteger(id) && id > 0 && token ? { id, token } : null;
+const one = (value: string | string[] | undefined) => String((Array.isArray(value) ? value[0] : value) ?? "");
+
+// The sample readings are public: they print without a pass.
+async function printed(params: Params, L: Lang) {
+  if (params.example) return individualExample(one(params.example), L);
+  const id = Number(one(params.r)), token = one(params.t);
+  return Number.isInteger(id) && id > 0 && token ? readPrintIndividual(id, token, L) : null;
 }
 
 export async function generateMetadata({ searchParams }: { searchParams: Search }): Promise<Metadata> {
   const L = await requestLocale();
-  const given = pass(await searchParams);
-  const row = given ? await readPrintIndividual(given.id, given.token, L) : null;
+  const row = await printed(await searchParams, L);
   return { title: row?.article?.title ?? "Arcana Sense", robots: { index: false, follow: false } };
 }
 
 export default async function PrintIndividualPage({ searchParams }: { searchParams: Search }) {
   const L = await requestLocale();
-  const given = pass(await searchParams);
-  if (!given) notFound();
-  const row = await readPrintIndividual(given.id, given.token, L);
+  const row = await printed(await searchParams, L);
   if (!row?.article) notFound();
   const site = resolvePrintLinkSite(await requestSite(), L);
   return <main className="page printmode theme-gold"><div className="wrap"><PrintLinks site={site} locale={L}>

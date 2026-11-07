@@ -35,7 +35,7 @@ it.each([false, true])("buys the displayed preview with previous calculation=%s"
   const button = purchaseLink({ place: "report", birth: preview });
   // Merely rendering an example must not replace the visitor's calculation.
   expect(loadBirth()).toEqual(hasPrevious ? previous : null);
-  expect(button.props.href).toBe("/pay?for=personal");
+  expect(button.props.href).toBe("/pay");
   button.props.onClick();
   expect(loadBirth()).toEqual(preview);
   const { pickTarget, targetLabel } = forLocale("ru");
@@ -49,7 +49,7 @@ it.each([false, true])("buys the displayed preview with previous calculation=%s"
 it("preserves an explicit saved matrix as the checkout target", () => {
   alignBirth(previous);
   const button = purchaseLink({ place: "report", birth: preview, matrixId: 42 });
-  expect(button.props.href).toBe("/pay?for=personal&m=42");
+  expect(button.props.href).toBe("/pay?m=42");
   button.props.onClick();
   expect(loadBirth()).toEqual(previous);
 });

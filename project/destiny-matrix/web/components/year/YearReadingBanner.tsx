@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { arcanumImage } from "@/components/matrix/ArcanumCard";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
@@ -45,14 +45,25 @@ export default function YearReadingBanner({ arcanum, year, years, price, place }
     if (birth) alignBirth({ birth: `${birth.y}-${pad(birth.m)}-${pad(birth.d)}`, sex: stored?.sex ?? "f" });
   };
   const [error, setError] = useState(false);
+  const [meanings, setMeanings] = useState<Record<string, string>>({});
   const field = useId();
 
   const shown = useMemo(() => {
     if (!birth) return null;
     const y = yearMatrix(birth, picked);
-    return T.yearFor[L](T.yourYear[L](picked), `${y.centre} ${arcanumTitle(y.centre)}`,
-      y.periods.map((n) => arcanumTitle(n)) as [string, string, string]);
+    return { centre: y.centre, text: T.yearFor[L](T.yourYear[L](picked), `${y.centre} ${arcanumTitle(y.centre)}`,
+      y.periods.map((n) => arcanumTitle(n)) as [string, string, string]) };
   }, [birth, picked, L, T, arcanumTitle]);
+  const asked = Boolean(birth);
+  useEffect(() => {
+    if (!asked) return;
+    let alive = true;
+    fetch("/api/year-meanings", { headers: { "Accept-Language": L } })
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((body) => { if (alive) setMeanings(body as Record<string, string>); })
+      .catch(() => undefined);
+    return () => { alive = false; };
+  }, [asked, L]);
 
   const show = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +96,12 @@ export default function YearReadingBanner({ arcanum, year, years, price, place }
           </div>
           {error && <p className="yb-err">{T.yearBannerDateError[L]}</p>}
         </form>
-        {shown && <p className="yb-result" data-testid="year-reading-result"><RichText text={shown} /><small>{T.yearBannerHint[L]}</small></p>}
+        {shown && <div className="yb-result" data-testid="year-reading-result">
+          <p><RichText text={shown.text} /></p>
+          {meanings[shown.centre] && <p className="yb-mean">{meanings[shown.centre]}</p>}
+          {shown.centre !== arcanum && <Link className="yb-more" href={`/year/${shown.centre}`} data-testid="year-reading-more">{T.yearBannerMore[L](`${shown.centre} ${arcanumTitle(shown.centre)}`)}</Link>}
+          <small>{T.yearBannerHint[L]}</small>
+        </div>}
         <div className="yb-cta">
           <Link className="yb-btn" onClick={order} href={`/pay?${cartQuery({ ...EMPTY_CART, year: 1 }, picked)}#order`}>{T.yearBannerOrder[L](picked, rub(price, L))}</Link>
           <Link className="yb-link" href="/matrix/individual-example/year">{T.yearBannerExample[L]}</Link>

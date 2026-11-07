@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import json
+import re
 import threading
 from collections import defaultdict
 from typing import Annotated, Literal, Union
@@ -314,14 +315,26 @@ def pdf_key(row: IndividualReading) -> str:
     return f"individual/{PDF_REVISION}/{row.id}/{row.locale}/{hashlib.sha256(row.article.encode()).hexdigest()[:16]}.pdf"
 
 
-def ensure_pdf(row: IndividualReading) -> str:
-    key = pdf_key(row)
+def _print_once(key: str, query: str, locale: str) -> None:
     # A click during the background print waits for that file instead of printing it again.
     with _print_locks[key]:
         if not reports.store().exists(key):
-            url = (f"{settings.web_internal_url.rstrip('/')}/{row.locale}/print/individual"
-                   f"?r={row.id}&t={print_token(row)}")
-            reports.upload(key, reports.render(url))
+            reports.upload(key, reports.render(f"{settings.web_internal_url.rstrip('/')}/{locale}/print/individual?{query}"))
+
+
+def _printed(key: str, query: str, locale: str, filename: str) -> dict:
+    if not settings.pdf_enabled and not reports.store().exists(key):
+        raise error(503, "Печать PDF сейчас выключена.", "PDF printing is currently off.")
+    try:
+        _print_once(key, query, locale)
+    except Exception as exc:                       # noqa: BLE001
+        raise error(502, "Не удалось напечатать PDF. Попробуйте ещё раз.", "Unable to print the PDF. Please try again.") from exc
+    return {"url": reports.link(key, filename)}
+
+
+def ensure_pdf(row: IndividualReading) -> str:
+    key = pdf_key(row)
+    _print_once(key, f"r={row.id}&t={print_token(row)}", row.locale)
     return key
 
 
@@ -344,13 +357,22 @@ def pdf(db: Session, row_id: int, user: User) -> dict:
     # The owner gets the PDF of the published article; the admin may print a draft on demand.
     if not row.article or (row.status != "done" and not admin):
         raise error(409, "PDF появится после публикации статьи.", "The PDF is available once the article is published.")
-    if not settings.pdf_enabled and not reports.store().exists(pdf_key(row)):
-        raise error(503, "Печать PDF сейчас выключена.", "PDF printing is currently off.")
-    try:
-        key = ensure_pdf(row)
-    except Exception as exc:                       # noqa: BLE001
-        raise error(502, "Не удалось напечатать PDF. Попробуйте ещё раз.", "Unable to print the PDF. Please try again.") from exc
-    return {"url": reports.link(key, f"{(row.title or 'Individual reading').replace('/', '-')}.pdf")}
+    return _printed(pdf_key(row), f"r={row.id}&t={print_token(row)}", row.locale,
+                    f"{(row.title or 'Individual reading').replace('/', '-')}.pdf")
+
+
+EXAMPLE_NAMES = {"personal": ("личный разбор", "personal reading"), "pair": ("совместимость пары", "couple compatibility"),
+                 "year": ("разбор года", "year reading")}
+
+
+def example_pdf(slug: str, locale: str) -> dict:
+    if slug not in EXAMPLE_NAMES:
+        raise error(404, "Такого примера нет.", "There is no such example.")
+    # The examples ship with the web build, so a release is their version: at most one print per example and language.
+    build = re.sub(r"[^\w.-]", "_", settings.build_commit) or "dev"
+    ru, en = EXAMPLE_NAMES[slug]
+    return _printed(f"individual-example/{PDF_REVISION}/{build}/{slug}/{locale}.pdf", f"example={slug}", locale,
+                    f"Пример разбора — {ru}.pdf" if locale == "ru" else f"Sample reading — {en}.pdf")
 
 
 def open_article(db: Session, row_id: int, user: User | None, token: str) -> dict:

@@ -1,23 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { arcanumImage } from "@/components/matrix/ArcanumCard";
+import ArcanaFan from "@/components/matrix/ArcanaFan";
 import { Ladder, Steppers } from "@/components/pay/IndividualBuilder";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import RichText from "@/components/ui/RichText";
 import { track } from "@/lib/analytics";
 import { D } from "@/lib/i18n";
 import { EMPTY_CART, KIND_CARDS, SETS, quote, type Cart } from "@/lib/individualPricing";
-import type { StoredBirth } from "@/lib/storage";
+import type { StoredBirth, StoredPair } from "@/lib/storage";
+import type { Trio } from "@/lib/arcanaTrio";
 import type { PaymentProvider } from "@/lib/tariffs";
 import OrderForm from "./OrderForm";
 import type { Kind, SetKey } from "./types";
 import { useSets } from "./useSets";
 
 /** The order on the landing: which set, the form with the people of every reading, the order card beside it. */
-export default function OrderSection({ set, setSet, formKind, setFormKind, custom, setCustom, year, providers, initialBirth, latest }: {
+export default function OrderSection({ set, setSet, formKind, setFormKind, custom, setCustom, year, providers, initialBirth, initialPair, latest }: {
   set: SetKey; setSet: (s: SetKey) => void; formKind: Kind; setFormKind: (k: Kind) => void; custom: Cart; setCustom: (c: Cart) => void;
-  year: number; providers: PaymentProvider[]; initialBirth: StoredBirth | null; latest: string;
+  year: number; providers: PaymentProvider[]; initialBirth: StoredBirth | null; initialPair?: StoredPair | null; latest: string;
 }) {
   const L = useLocale();
   const T = D.individualSale;
@@ -27,6 +28,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
   const [topic, setTopic] = useState<number | null>(null);
   const [orderDates, setOrderDates] = useState<string[]>([]);
   const [orderYears, setOrderYears] = useState<number[]>([]);
+  const [trio, setTrio] = useState<Trio | null>(null);
   const shownYear = orderYears[0] ?? year;
   const cart: Cart = useMemo(() => set === "custom" ? custom
     : set === "one" ? { ...EMPTY_CART, [formKind]: 1 } : SETS[set === "selfYear" ? "selfYear" : "couple"]("personal"), [set, custom, formKind]);
@@ -78,8 +80,8 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
             <Steppers cart={custom} setCart={setCustom} p="lp" />
             <Ladder count={quote(custom, 0, prices).count} bought={terms.bought} prices={prices} p="lp" />
           </div>}
-          <OrderForm cart={cart} baseYear={year} total={total} providers={providers} payable={terms.payable} initialBirth={initialBirth}
-            question={question} setQuestion={setQuestion} latest={latest} onDates={setOrderDates} onYears={setOrderYears}
+          <OrderForm cart={cart} baseYear={year} total={total} providers={providers} payable={terms.payable} initialBirth={initialBirth} initialPair={initialPair}
+            question={question} setQuestion={setQuestion} latest={latest} onDates={setOrderDates} onYears={setOrderYears} onTrio={setTrio}
             summary={`**${setTitle}**${byDates ? ` · ${byDates}` : ""} · ${TL.summaryWhen[L](latest)}`}
             topics={<>
               <div className="lp-topics">{topics.map(([label, text, s, k], i) => (
@@ -101,7 +103,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
             </>} />
         </div>
         <aside className="lp-summary-card">
-          <div className="lp-sc-fan">{KIND_CARDS.personal.map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div>
+          <ArcanaFan className="lp-sc-fan" cards={trio ?? KIND_CARDS[formKind]} />
           <h3>{setTitle}</h3>
           <p className="lp-sc-date">{byDates ? byDates.charAt(0).toUpperCase() + byDates.slice(1) : TL.noDate[L]}</p>
           <p className="lp-price" style={{ margin: "0 0 14px" }}>{total}</p>

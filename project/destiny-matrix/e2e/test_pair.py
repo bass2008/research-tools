@@ -51,8 +51,8 @@ def test_free_part_shows_two_spheres_and_keeps_dates_in_the_browser(page: Page):
     expect(page.get_by_test_id("pair-summary")).to_contain_text(FREE_MEANING)
     expect(page.locator("details[data-sec]:not([data-sec^=business])")).to_have_count(2)
     expect(page.get_by_test_id("pair-locks").locator("> div")).to_have_count(11)
-    expect(page.get_by_test_id("plan-pair")).to_contain_text("390")
-    expect(page.get_by_test_id("plan-month")).to_contain_text("590")
+    expect(page.get_by_test_id("pair-buy")).to_contain_text("390")
+    expect(page.get_by_test_id("plan-pair")).to_have_count(0)
     expect(page.get_by_test_id("pair-main-cards")).to_contain_text("Постоянные перемены")
 
     for url in sent:
@@ -73,7 +73,7 @@ def test_example_before_any_dates(page: Page):
     expect(report).to_have_attribute("data-mode", "free")
     expect(report).to_contain_text("Партнёр 1")
     expect(page.get_by_test_id("pair-locks").locator("> div")).to_have_count(10)
-    expect(page.get_by_test_id("plan-pair")).to_have_count(0)
+    expect(page.get_by_test_id("pair-buy")).to_have_count(0)
     expect(page.get_by_test_id("pair-example-cta")).to_be_visible()
 
 
@@ -113,7 +113,7 @@ def test_bought_pair_opens_full_reading_pdf_and_account(page: Page, mail: str):
     expect(page.get_by_test_id("pair-report")).to_have_attribute("data-mode", "full")
     calc_pair(page)
     expect(page.get_by_test_id("pair-report")).to_have_attribute("data-mode", "full")
-    expect(page.get_by_test_id("plan-pair")).to_have_count(0)
+    expect(page.get_by_test_id("pair-buy")).to_have_count(0)
 
 
 def test_someone_elses_pair_is_not_shown(page: Page, mail: str):
@@ -219,7 +219,7 @@ def test_pair_form_starts_from_the_couple_not_an_example(page: Page, mail: str):
     """Форма пары подставляла пример «1 апреля 1996 и 1 апреля 1994»: гостю по ссылке на пару из
     кабинета и купившему пару при повторном заходе."""
     calc_pair(page)
-    page.goto(f"{BASE}/pay?r=999999", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/pay/pair?r=999999", wait_until="domcontentloaded")
     expect(page.get_by_test_id("pay-login-note")).to_be_visible(timeout=10_000)
     expect(page.get_by_test_id("pay-pair")).to_have_count(0)
     expect(page.get_by_test_id("pay-submit")).to_be_disabled()

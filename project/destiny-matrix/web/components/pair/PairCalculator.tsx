@@ -27,8 +27,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import DateFields from "@/components/matrix/DateFields";
 import SavePdfButton from "@/components/matrix/SavePdfButton";
+import ShareButton from "@/components/ui/ShareButton";
+import { pairDates } from "@/lib/sharedHeadline";
 import { buyHref } from "@/lib/readingLinks";
-import Plans from "@/components/pay/Plans";
+import IndividualLinksOffer from "@/components/individual/IndividualLinksOffer";
 import PairReport from "./PairReport";
 import styles from "./Pair.module.css";
 
@@ -144,6 +146,18 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
     (row.inputs.b as { birth?: string } | undefined)?.birth) === subject) ?? null;
   const openId = mineHere?.unlocked ? mineHere.id : ownedRow && ownedRow.access !== "locked" ? ownedRow.id : null;
   const savedId = mineHere?.id ?? ownedRow?.id ?? null;
+  // A saved couple recalculated with corrected names: the record takes them, so its page, PDF and share link agree.
+  type Partner = { birth?: string; name?: string | null } | undefined;
+  const namesByDate = (a: Partner, b: Partner) => [a, b].map((p) => `${p?.birth}=${(p?.name ?? "").trim()}`).sort().join("|");
+  const savedPair = (mineHere?.pair ?? ownedRow?.inputs) as { a?: Partner; b?: Partner } | undefined;
+  const renamed = savedId && savedPair && namesByDate(savedPair.a, savedPair.b) !== namesByDate(pair.a, pair.b)
+    ? `${savedId}:${namesByDate(pair.a, pair.b)}` : "";
+  useEffect(() => {
+    if (!renamed) return;
+    localizedApi(L).api.saveReading("pair", pair)
+      .then((row) => setOwned((rows) => rows.map((r) => (r.id === row.id ? { ...r, inputs: row.inputs } : r))))
+      .catch(() => undefined);
+  }, [renamed, L]);
   const serverUnits = mineHere?.unlocked && mineHere.id === openId ? mineHere.units : null;
   const [ownUnits, setOwnUnits] = useState<{ id: number; units: Record<string, PairUnit | null> } | null>(null);
   useEffect(() => {
@@ -310,9 +324,9 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
       example={isExample}
       buyHref={isExample || !sells ? undefined : buyHref("pair", savedId)}
       open={open}
-      pdf={openId && openUnits ? <SavePdfButton locale={L} readingId={openId} /> : fullUnits ? open : undefined}
+      pdf={openId && openUnits ? <><SavePdfButton locale={L} readingId={openId} /><ShareButton kind="pair" id={openId} label={pairDates(L, pair.a.birth, pair.b.birth)} /></> : fullUnits ? open : undefined}
       price={price}
-      plans={<Plans locale={L} place="pair" carry={{ r: savedId ? String(savedId) : undefined }} />}
+      offer={isExample ? null : <IndividualLinksOffer pair={{ a: pair.a.birth, b: pair.b.birth, names: { a: pair.a.name || DP.partnerA[L], b: pair.b.name || DP.partnerB[L] } }} />}
       heading="h2"
       />
     </div>,

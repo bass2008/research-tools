@@ -144,6 +144,22 @@ def read_print_token(token: str) -> tuple[int, int] | None:
         return None
 
 
+# A share link opens one reading to anyone holding it, with no expiry; it never signs anyone in.
+def create_share_token(kind: str, row_id: int, user_id: int) -> str:
+    return jwt.encode({"typ": "share", "k": kind, "rid": int(row_id), "sub": str(user_id)},
+                      settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def read_share_token(token: str) -> tuple[str, int, int] | None:
+    try:
+        claims = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        if claims.get("typ") != "share" or claims.get("k") not in ("reading", "individual"):
+            return None
+        return str(claims["k"]), int(claims["rid"]), int(claims["sub"])
+    except (jwt.PyJWTError, KeyError, TypeError, ValueError):
+        return None
+
+
 def create_worker_token() -> str:
     """Токен для подготовки индивидуальных статей через /internal/individual-readings."""
     now = dt.datetime.now(dt.timezone.utc)

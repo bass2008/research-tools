@@ -236,7 +236,8 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
   function secondLink(s: HeroSlide) {
     const href = s.link.href.split(/[?#]/)[0] ?? s.link.href;
     const here = href.replace(/\/$/, "") === path.replace(/\/$/, "");
-    if (here) return null;
+    // a subscriber has every automatic reading open: nothing to compare on the buy page
+    if (here || (mode !== "sell" && href === "/pay")) return null;
     return (
       <Link className="btn ghost" href={s.link.href}>
         {s.link.label}
@@ -263,7 +264,7 @@ export default function CalcHero({ locale: requestedLocale, ...localeProps }: ({
     return (
       <Link
         className="btn gold"
-        href={fullReport ? "#result" : "/#plans"}
+        href={fullReport ? "#result" : "/pay"}
         onClick={() => {
           if (!fullReport) track("buy_click", { place: `${place}-hero` });
         }}

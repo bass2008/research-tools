@@ -66,6 +66,7 @@ export interface IndividualReading {
   email?: string; comment?: string; automatic_reading?: unknown;
   article?: IndividualArticle | IndividualReport | null; inserts?: ReportInserts;
   email_errors?: number; can_pdf?: boolean;
+  example?: string;
 }
 export interface IndividualPage { items: IndividualReading[]; total: number; page: number; page_size: number }
 export interface IndividualRequest {

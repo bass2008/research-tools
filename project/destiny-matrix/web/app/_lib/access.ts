@@ -258,6 +258,17 @@ export async function readPrintIndividual(id: number, token: string, L: Lang = S
   return res.ok && res.body && typeof res.body === "object" ? res.body as IndividualReading : null;
 }
 
+/** Разбор по ссылке «поделиться»: без входа, ровно то, что видит владелец. */
+export async function readShared(token: string, L: Lang = SITE_LANG): Promise<(ReadingRow & { shared: "reading" }) | (IndividualReading & { shared: "individual" }) | null> {
+  if (!/^[\w.-]{20,1000}$/.test(token)) return null;
+  const res = await upstream(`/shared/${encodeURIComponent(token)}`, "", L);
+  if (!res.ok || !res.body || typeof res.body !== "object") return null;
+  const body = res.body as Record<string, unknown>;
+  if (body.shared === "individual") return { ...(body as unknown as IndividualReading), shared: "individual" };
+  const row = readingRow(body);
+  return row ? { ...row, shared: "reading" } : null;
+}
+
 /** Разборы продукта в кабинете — для страниц, которые открывают «свою» запись, как /report. */
 export async function readReadings(product: string): Promise<ReadingItem[]> {
   const token = await sessionToken();

@@ -19,10 +19,9 @@ export function payHref(reading: ReadingRef | null | undefined, product?: string
 
 export type BuyFor = "personal" | "pair";
 
-/** «Купить» со страницы продукта: разовая покупка этого продукта или подписка. Без продукта —
- *  все предложения сайта. Номер записи доезжает до формы и ставит её в поля. */
+/** «Купить» ведёт на один экран со всеми предложениями. Номер сохранённой записи доезжает до формы
+ *  своего предложения: иначе деньги откроют не ту дату, что человек читал. */
 export function buyHref(product?: BuyFor | null, reading?: number | null): string {
-  if (!product) return "/pay";
-  const id = reading ? `&${product === "pair" ? "r" : "m"}=${reading}` : "";
-  return `/pay?for=${product}${id}`;
+  if (!product || !reading) return "/pay";
+  return `/pay?${product === "pair" ? "r" : "m"}=${reading}`;
 }

@@ -118,7 +118,7 @@ def test_refunded_date_keeps_the_exact_payment_target(page: Page):
     expect(buy).to_be_visible()
     # Пока не приехал прайс, кнопка живёт как `button` без адреса: чтение атрибута сразу после
     # появления давало плавающее падение под нагрузкой полного прогона.
-    expect(buy).to_have_attribute("href", f"/ru/pay?for=personal&m={bought_id}", timeout=15_000)
+    expect(buy).to_have_attribute("href", f"/ru/pay?m={bought_id}", timeout=15_000)
 
     buy.click()
     page.get_by_test_id("plan-single").click()
@@ -146,7 +146,7 @@ def test_recalculating_a_paid_date_opens_it_on_the_landing(page: Page, browser: 
     assert not flows.pay(page, mail)
 
     page.goto(BASE, wait_until="domcontentloaded")
-    assert page.locator('a[href="/#plans"]').count() >= 5
+    assert page.locator('a[href="/ru/pay"]').count() >= 2
 
     flows.calculate(page, 31, 3, 1993, sex="m")
     page.wait_for_url(re.compile(rf"/\?m={first}#result$"), timeout=15_000)
@@ -221,7 +221,7 @@ def test_pay_link_shows_loading_before_it_decides_the_date_is_missing(page: Page
         route.continue_()
 
     page.route("**/api/readings*", hold)
-    page.goto(f"{BASE}/pay?m={matrix_id}", wait_until="domcontentloaded")
+    page.goto(f"{BASE}/pay/single?m={matrix_id}", wait_until="domcontentloaded")
     expect(page.get_by_test_id("pay-target-loading")).to_be_visible(timeout=10_000)
     assert page.get_by_test_id("pay-missing-note").count() == 0
     assert page.get_by_test_id("pay-submit").is_disabled()

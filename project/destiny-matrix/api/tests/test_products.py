@@ -5,7 +5,7 @@ from __future__ import annotations
 from sqlalchemy import select
 
 from app.config import settings
-from app.models import Entitlement, Payment, Purchase, Reading
+from app.models import Entitlement, Payment, Purchase, Reading, ReportJob, User
 
 PAIR = {"a": {"birth": "1993-03-31", "name": "Сергей"}, "b": {"birth": "1994-12-28", "name": "Виктория"}}
 
@@ -26,6 +26,26 @@ def test_pair_is_saved_once_whatever_the_order(client, auth):
     body = first.json()
     assert body["product"] == "pair" and body["title"] == "Сергей и Виктория"
     assert body["access"] == "locked" and body["unlocked"] is False
+
+
+def test_corrected_names_reach_the_saved_pair_and_its_pdf(client, auth, db):
+    headers, admin = auth(), auth(settings.admins[0])
+    rid = client.post("/api/readings", json={"product": "pair", "inputs": PAIR}, headers=headers).json()["id"]
+    db.add(ReportJob(user_id=db.get(Reading, rid).user_id, reading_id=rid, status="done", object_key="v9/old.pdf"))
+    db.commit()
+    fixed = {"a": {**PAIR["a"], "name": "Серёжа"}, "b": PAIR["b"]}
+    again = client.post("/api/readings", json={"product": "pair", "inputs": fixed}, headers=headers).json()
+    assert again["id"] == rid and again["title"] == "Серёжа и Виктория"
+    db.expire_all()
+    assert db.scalar(select(ReportJob).where(ReportJob.reading_id == rid)).status == "expired"
+    # names travel with their dates when the partners are swapped
+    swapped = client.post("/api/readings", json={"product": "pair", "inputs": {"a": fixed["b"], "b": fixed["a"]}}, headers=headers).json()
+    assert swapped["inputs"]["a"] == {"birth": "1994-12-28", "name": "Виктория"}
+    # a grant or an order carries no names and leaves them as they are
+    uid = db.scalar(select(User).where(User.email == "user@example.ru")).id
+    plain = {"a": {"birth": "1993-03-31"}, "b": {"birth": "1994-12-28"}}
+    client.post(f"/api/admin/users/{uid}/readings", json={"product": "pair", "inputs": plain}, headers=admin)
+    assert client.get(f"/api/readings/{rid}", headers=headers).json()["title"] == "Виктория и Серёжа"
 
 
 def test_pair_without_names_is_titled_by_dates(client, auth):

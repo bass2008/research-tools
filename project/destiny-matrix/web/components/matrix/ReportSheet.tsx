@@ -3,8 +3,10 @@ import { resolvePrintLinkSite } from "@/lib/siteProfile.config";
 // Разбор, напечатанный сервером: сюда попадают толкования платных разделов, поэтому компонент
 // серверный и вызывается только после того, как кука подтвердила тариф.
 import MatrixResult, { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import IndividualLinksOffer from "@/components/individual/IndividualLinksOffer";
 import ReportSections from "@/components/matrix/ReportSections";
 import SavePdfButton from "@/components/matrix/SavePdfButton";
+import ShareButton from "@/components/ui/ShareButton";
 import UnlockCta from "@/components/pay/UnlockCta";
 import LockIcon from "@/components/ui/LockIcon";
 import { ALL_FREE } from "@/lib/access";
@@ -46,6 +48,8 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
   embedded?: boolean;
   /** Administrative preview does not use the owner's PDF download endpoint. */
   showPdf?: boolean;
+  /** Opened by a share link: what the owner sees, without the owner's controls and purchases. */
+  shared?: boolean;
 }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
   const site = await requestSite();
@@ -59,7 +63,9 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
     printing = false,
     embedded = false,
     showPdf = true,
+    shared = false,
   } = localeProps;
+  const ownId = shared ? undefined : currentId;
   const linkSite = printing ? resolvePrintLinkSite(site, L) : site;
   const { DISCLAIMER, birthLabel, printedBy } = forLocale(L, site);
 
@@ -69,7 +75,7 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
 
   return (
     <>
-      {printing || embedded ? null : (
+      {printing || embedded || shared ? null : (
         <p className="crumbs">
           <Link href="/">{D.nav.home[L]}</Link> <span>/</span>{" "}
           <Link href="/account">{D.nav.account[L]}</Link> <span>/</span>{" "}
@@ -83,29 +89,32 @@ export default async function ReportSheet({ locale: requestedLocale, ...localePr
           {matrix.sex === "f" ? D.calc.femaleChartLabel[L] : D.calc.maleChartLabel[L]}
           {/* Чем открыт разбор, в PDF не печатаем: файл живёт дольше прав — после возврата или
               выдачи подпись в нём устарела бы. Живая подпись — на странице и в кабинете. */}
-          {printing ? null : <> · {!ALL_FREE && unlocked ? planName : D.sheet.freeAccess[L]}</>} —{" "}
+          {printing || shared ? null : <> · {!ALL_FREE && unlocked ? planName : D.sheet.freeAccess[L]}</>} —{" "}
           {D.sheet.openOf[L](open, sections.length)}
         </p>
-        {printing || locked.length || !showPdf ? null : (
+        {printing || shared || locked.length || !showPdf ? null : (
           /* кнопка и её сообщение живут в одной ячейке: иначе текст ошибки становился третьим
              элементом строки и сдвигал кнопку от правого края.
              На закрытом разборе кнопки нет вовсе: она была активной и всегда отвечала
              «Разбор этой даты не оплачен» — обещание, которого страница не выполняет */
           <span className="pdfslot">
             <SavePdfButton locale={L} readingId={currentId} hint={birthLabel(matrix.birth)} />
+            <ShareButton kind="reading" id={currentId} label={birthLabel(matrix.birth)} />
           </span>
         )}
       </div>
 
       <div className="section-gap">
         <MatrixResult site={linkSite} locale={L} m={matrix} printing={printing}
-          chakraUnlocked={unlocked || ALL_FREE} matrixId={currentId}
+          chakraUnlocked={unlocked || ALL_FREE} matrixId={ownId}
           chakraReading={unlocked || ALL_FREE ? sections.find((s) => s.key === "chakras")?.longform : undefined} />
       </div>
 
-      <ReportSections site={linkSite} locale={L} sections={sections} matrixId={currentId} printing={printing} />
+      {printing || shared ? null : <IndividualLinksOffer matrix={matrix} />}
 
-      {locked.length && !printing ? (
+      <ReportSections site={linkSite} locale={L} sections={sections} matrixId={ownId} printing={printing} />
+
+      {locked.length && !printing && !shared ? (
         <div className="allbox">
           <h3>{D.sheet.moreInFull[L](locked.length)}</h3>
           <p>{D.sheet.moreInFullText[L]}</p>

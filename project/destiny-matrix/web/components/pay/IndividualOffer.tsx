@@ -18,6 +18,7 @@ import {
 } from "@/lib/individualPricing";
 import { SAMPLE_BIRTH } from "@/lib/individualSample";
 import { useBirth } from "@/lib/useBirth";
+import { usePair } from "@/lib/usePair";
 import { yearMatrix } from "@/lib/yearMatrix";
 import { priceWords, rub } from "@/lib/individualMoney";
 import { browserDay } from "@/lib/today";
@@ -39,6 +40,7 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
   const P = priceWords(terms.prices, L);
   const { arcanumTitle } = arcanaForLocale(L);
   const stored = useBirth();
+  const storedPair = usePair();
   const year = initialYear || terms.defaultYear;
   const asked = initialCart ? setOf(initialCart) : null;
   const [oneKind, setOneKind] = useState<Kind>(asked?.kind ?? "personal");
@@ -67,12 +69,11 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
   const y = year ? yearMatrix({ y: by, m: bm, d: bd }, year) : null;
   const q = quote(custom, terms.bought, terms.prices);
   return (
-    <section className="theme-gold isale" aria-labelledby="isale-h" data-testid="individual-offer">
+    <section className="theme-gold isale" aria-label={T.goldCapLeft[L]} data-testid="individual-offer">
       <p className="isale-divider">{T.goldDivider[L]}</p>
       <div className="pw-gsec">
         <div className="pw-gcap">{T.goldCapLeft[L]} <span>{T.goldCapRight[L]}</span></div>
         <div className="pw-gin">
-          <h2 id="isale-h" className="pw-isec-h">{T.heading[L]}</h2>
           <p className="pw-isec-sub">{T.sub[L]}</p>
           {after && <p className="pw-perk" data-testid="isale-perk"><b>{T.perkThreeStrong[L]}</b> {T.perkThree[L](P)}</p>}
           <div className="pw-iplans">
@@ -128,7 +129,7 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
       </div>
       {open && <div className="ilp isale-order">
         <OrderSection set={set} setSet={setSet} formKind={formKind} setFormKind={setFormKind} custom={custom} setCustom={setCustom}
-          year={year} providers={providers} initialBirth={stored} latest={latest} />
+          year={year} providers={providers} initialBirth={stored} initialPair={storedPair} latest={latest} />
       </div>}
     </section>
   );

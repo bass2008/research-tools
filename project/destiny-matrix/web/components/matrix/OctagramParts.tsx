@@ -1,5 +1,6 @@
 import LocalizedAnchor from "@/components/ui/LocalizedAnchor";
 import type { CSSProperties, ReactNode } from "react";
+import { CHAKRA_COLORS } from "@/lib/octagramColors";
 import styles from "./ChakraMapHover.module.css";
 
 // Геометрия перенесена из рукописного лендинга: viewBox 620×620, центр 310, внешний радиус 248,
@@ -7,7 +8,7 @@ import styles from "./ChakraMapHover.module.css";
 export const C = 310;
 export const R = 248;
 export const RIN = 142;
-export const CHAKRA_COLORS = ["#c9453a", "#dd7b2a", "#d9ac1e", "#159c69", "#1f9ed6", "#3f5ec9", "#8e5bc4"];
+export { CHAKRA_COLORS };
 export const GREY = "#7d92a1";
 
 export function pt(angle: number, radius: number): [number, number] {

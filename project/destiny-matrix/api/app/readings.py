@@ -11,7 +11,7 @@ from . import access, offers, products
 from .config import settings
 from .http_errors import LocalizedHTTPException
 from .i18n import say, say_for, validation_message
-from .models import Reading, User, Purchase, Entitlement
+from .models import Reading, ReportJob, User, Purchase, Entitlement
 
 
 def product_or_404(code: str | None) -> products.Product:
@@ -37,6 +37,17 @@ def find(db: Session, user: User, product: products.Product, inputs: dict) -> Re
                       .order_by(Reading.id)).first()
 
 
+def _keep_names(db: Session, row: Reading, inputs: dict) -> None:
+    # The same subject typed again with corrected names (a couple is found by its dates): the record takes
+    # the new names, and its printed PDF, which carries the old ones, is printed again on the next request.
+    if json.loads(row.inputs) == inputs:
+        return
+    row.inputs = json.dumps(inputs, ensure_ascii=False)
+    for job in db.scalars(select(ReportJob).where(ReportJob.reading_id == row.id, ReportJob.status == "done")):
+        job.status, job.object_key = "expired", None
+    db.flush()
+
+
 def _no_room(db: Session, product: products.Product, used: int) -> HTTPException:
     """Места кончились: один разбор бесплатно плюс по одному за каждое купленное разовое право.
 
@@ -53,7 +64,7 @@ def _no_room(db: Session, product: products.Product, used: int) -> HTTPException
 
 
 def create(db: Session, user: User, product: products.Product, raw: dict,
-           title: str | None = None, *, limited: bool = True) -> Reading:
+           title: str | None = None, *, limited: bool = True, rename: bool = False) -> Reading:
     """Сохранить разбор или вернуть уже сохранённый с тем же вводом.
 
     `limited=False` — сохранение ради оплаты или выдачи админом: место под оплаченный разбор
@@ -61,6 +72,9 @@ def create(db: Session, user: User, product: products.Product, raw: dict,
     """
     inputs = normalized(product, raw)
     row = find(db, user, product, inputs)
+    # only the person's own save renames: orders and grants carry no names and must not wipe them
+    if rename and row is not None and product.code == products.PAIR:
+        _keep_names(db, row, inputs)
     if row is not None and row.removed_at is None:
         return row
     used = access.saved_count(db, user)

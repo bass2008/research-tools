@@ -91,7 +91,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
       if (chosen?.unlocked) {
         paidResult = (
           <div id="result">
-            <section id="plans" className="wrap section-gap" style={{ padding: 0 }}>
+            <section className="wrap section-gap" style={{ padding: 0 }}>
               <SavedReport locale={L} chosen={chosen} saved={saved} access={access} embedded />
             </section>
           </div>

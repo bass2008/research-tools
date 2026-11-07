@@ -7,10 +7,10 @@ import type { SavedMatrix } from "@/app/_lib/access";
 import { useSession } from "@/components/account/useSession";
 import { useOfferMode } from "@/components/pay/useOfferMode";
 import MatrixResult, { forLocale as localizedMatrixResult } from "@/components/matrix/MatrixResult";
+import IndividualLinksOffer from "@/components/individual/IndividualLinksOffer";
 import ReportSections from "@/components/matrix/ReportSections";
 import SaveReadingSummary from "./SaveReadingSummary";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
-import Plans from "@/components/pay/Plans";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import UnlockCta from "@/components/pay/UnlockCta";
 import { useLocale } from "@/components/ui/LocaleProvider";
@@ -117,6 +117,8 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
           chakraReading={full?.find((s) => s.key === "chakras")?.longform} matrixId={currentSaved?.id} />
       </div>
 
+      <IndividualLinksOffer matrix={matrix} />
+
       <ReportSections locale={L} sections={sections} />
 
       {open ? (
@@ -177,7 +179,6 @@ export default function ReportView({ locale: requestedLocale, ...localeProps }: 
         </div>
       )}
 
-      {!open && locked.length ? <Plans locale={L} place="report" /> : null}
     </>
   );
 }

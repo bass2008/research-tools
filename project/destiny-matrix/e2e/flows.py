@@ -50,7 +50,8 @@ def open_pay(page: Page, plan: str = "single") -> None:
 
 
 def open_pair_pay(page: Page) -> None:
-    """Тарифы под разбором пары — как на главной: карточка пары ведёт в её форму."""
+    """«Купить» под разбором пары ведёт на экран всех предложений, карточка пары — в её форму."""
+    page.get_by_test_id("pair-buy").click()
     page.get_by_test_id("plan-pair").click()
     expect(page.get_by_test_id("pay-submit")).to_be_visible()
 

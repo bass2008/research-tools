@@ -13,10 +13,10 @@ import { useSession } from "@/components/account/useSession";
 import { useOfferMode } from "@/components/pay/useOfferMode";
 import { useOwnDates } from "@/components/matrix/CalculationProvider";
 import MatrixResult from "@/components/matrix/MatrixResult";
+import IndividualLinksOffer from "@/components/individual/IndividualLinksOffer";
 import ReportSections from "@/components/matrix/ReportSections";
 import SaveReadingSummary from "./SaveReadingSummary";
 import SaveMatrixButton from "@/components/matrix/SaveMatrixButton";
-import Plans from "@/components/pay/Plans";
 import { useLead, usePriceKnown } from "@/components/pay/TariffsProvider";
 import UnlockCta from "@/components/pay/UnlockCta";
 import { useLocale } from "@/components/ui/LocaleProvider";
@@ -97,6 +97,7 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
           chakraReadingStatus={access.readingStatus}
           chakraUnlocked={access.unlocked}
           matrixId={access.matrixId} />
+        {!example && <IndividualLinksOffer matrix={matrix} />}
         <ReportSections locale={L} sections={sections} place="landing" />
 
         {open ? (
@@ -115,7 +116,7 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
             )}
           </div>
         ) : (
-          <div className="allbox" id={thisDatePaid || anyDate ? "plans" : undefined}>
+          <div className="allbox">
             <h3>{example ? D.unlockBox.exampleTitle[L] : D.unlockBox.openTitle[L]}</h3>
             <p>
               {example ? D.unlockBox.exampleLead[L] : D.unlockBox.openLead[L]}
@@ -172,9 +173,6 @@ export default function MatrixReport({ locale: requestedLocale, ...localeProps }
 
         )}
 
-        {/* тарифы не показываем тому, у кого эта дата уже открыта: на /report блок тоже
-            скрыт при полном доступе, а здесь предлагал купить купленное */}
-        {open || thisDatePaid || anyDate ? null : <Plans locale={L} place="landing" />}
       </section>
     </div>
   );

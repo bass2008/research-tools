@@ -18,8 +18,8 @@ describe("ссылки разбора", () => {
 
   it("«Купить» со страницы продукта предлагает его и подписку, без продукта — всё", () => {
     expect(buyHref()).toBe("/pay");
-    expect(buyHref("personal")).toBe("/pay?for=personal");
-    expect(buyHref("personal", 7)).toBe("/pay?for=personal&m=7");
-    expect(buyHref("pair", 9)).toBe("/pay?for=pair&r=9");
+    expect(buyHref("personal")).toBe("/pay");
+    expect(buyHref("personal", 7)).toBe("/pay?m=7");
+    expect(buyHref("pair", 9)).toBe("/pay?r=9");
   });
 });

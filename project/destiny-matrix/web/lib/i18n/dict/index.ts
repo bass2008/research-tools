@@ -19,6 +19,7 @@ import { encCharacter, encTail, encYear } from "./encYear";
 import { pay, payForm, payResult } from "./pay";
 import { individualLanding } from "./individualLanding";
 import { individualLinks } from "./individualLinks";
+import { pairLinks } from "./pairLinks";
 import { individualSale } from "./individualSale";
 import { common, meta } from "./common";
 import { home, homeMeta, quote, slides, unlockBox } from "./home";
@@ -44,6 +45,7 @@ export const D = {
   payResult,
   individualLanding,
   individualLinks,
+  pairLinks,
   individualSale,
   mapPoints,
   octagram,

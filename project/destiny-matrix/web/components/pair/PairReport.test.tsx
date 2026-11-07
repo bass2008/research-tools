@@ -100,19 +100,19 @@ describe.each(["ru", "en"] as const)("закрытая часть разбора
       units={pairUnits(locale, result, dates, false)} mode="free" buyHref={buyHref} price="250 ₽" />);
 
   it("закрытые сферы — карты и кнопка, чакры — раскладка под замком", () => {
-    const html = render("/pay?for=pair");
+    const html = render("/pay?r=7");
     const bizLocked = BUSINESS_SPHERES.length - BUSINESS_FREE.length;
     expect(html.match(/data-testid="pair-lock-(?!business)/g)).toHaveLength(locked.length + 1);
     expect(html.match(/data-testid="pair-lock-business-/g)).toHaveLength(bizLocked);
     expect(html.match(/data-testid="pair-buy-/g)).toHaveLength(locked.length + 1 + bizLocked);
-    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/(?:ru|en)\/pay\?for=pair"/g)).toHaveLength(8);
+    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/(?:ru|en)\/pay\?r=7"/g)).toHaveLength(8);
     expect(text(html)).toContain(DP.chakras.lockedRow[locale]);
     expect(text(html)).toContain(`${D.report.unlockSection[locale]}250 ₽`);
-    expect(html).toContain(`href="/${DEFAULT_SITE.defaultLocale}/pay?for=pair"`);
+    expect(html).toContain(`href="/${DEFAULT_SITE.defaultLocale}/pay?r=7"`);
   });
 
   it("платные тексты сфер и чакр в разметку не попадают", () => {
-    const html = text(render("/pay?for=pair"));
+    const html = text(render("/pay?r=7"));
     const paid = readingUnits(locale, a, b, p);
     const lockedKeys = locked.flatMap((s) => unitKeys(s, a, b, p));
     const chakraTexts = pairChakraKeys(locale, dates).map((key) => unit(locale, key));

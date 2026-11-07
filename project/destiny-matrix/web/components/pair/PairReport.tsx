@@ -49,8 +49,7 @@ export interface PairReportProps {
   heading?: "h1" | "h2";
   /** разбор уже открыт человеку (куплен или подписка): вместо покупки — переход к нему */
   open?: ReactNode;
-  /** тарифы под разбором — как на главной: эта пара или подписка */
-  plans?: ReactNode;
+  offer?: ReactNode;
 }
 
 function paragraphs(unit: PairUnit | null | undefined): string[] {
@@ -381,6 +380,8 @@ export default function PairReport(props: PairReportProps) {
         </div>
       </section>
 
+      {printing ? null : props.offer}
+
       <PairChakras locale={L} dates={dates} printing={printing} locked={mode !== "full"} reading={chakraReading}
         cta={props.open ?? (props.buyHref
           ? <BuyLink className={`${styles.btn} ${styles.btnGold}`} href={props.buyHref} analytics={{ tariff: "pair", place: "pair-main" }}>{props.price ? DP.buy[L](props.price) : DP.buyNoPrice[L]}</BuyLink>
@@ -506,12 +507,13 @@ export default function PairReport(props: PairReportProps) {
                     unlock={buying ? (className, label) => <BuyLink className={className} href={props.buyHref!} analytics={{ tariff: "pair", place: "pair-chakra", section: "chakras" }}>{label}</BuyLink> : undefined} />)}
               </div>
               {bizSection}
-              {props.open ? (
+              {props.open || props.buyHref ? (
                 <div className={`${styles.card} ${styles.cta}`} data-testid="pair-cta">
                   <div><h3>{DP.ctaTitle[L]}</h3><p className={styles.dim}>{DP.ctaText[L](locked.length + bizLocked.length)}</p></div>
-                  {props.open}
+                  {props.open ?? <BuyLink className={`${styles.btn} ${styles.btnGold}`} href={props.buyHref!} data-testid="pair-buy"
+                    analytics={{ tariff: "pair", place: "pair-bottom" }}>{props.price ? DP.buy[L](props.price) : DP.buyNoPrice[L]}</BuyLink>}
                 </div>
-              ) : props.buyHref ? props.plans ?? null : null}
+              ) : null}
             </>
           ) : bizSection}
           {example ? (

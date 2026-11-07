@@ -8,8 +8,8 @@ it.each(["pair-main", "pair-section", "pair-chakra"])("tracks one purchase click
   vi.stubGlobal("window", { ym });
   vi.stubGlobal("document", { documentElement: { getAttribute: () => "111856670" } });
   const analytics = { tariff: "pair", place, section: "chakras" };
-  const link = BuyLink({ href: "/pay?for=pair&r=42", className: "btn gold", analytics, children: "Открыть" });
-  expect(link.props.href).toBe("/pay?for=pair&r=42");
+  const link = BuyLink({ href: "/pay?r=42", className: "btn gold", analytics, children: "Открыть" });
+  expect(link.props.href).toBe("/pay?r=42");
   expect(link.props.className).toBe("btn gold");
   expect(ym).not.toHaveBeenCalled();
   link.props.onClick();

@@ -42,22 +42,21 @@ it("«Купить» without a product offers all three purchases", async () => 
 
 // One page wherever "Buy" was pressed (docs/individual-reading.md): the product only carries its record.
 it("a personal reading still shows all three offers and carries the saved matrix", async () => {
-  const node = await page({ for: "personal", m: "12" });
+  const node = await page({ m: "12" });
   expect(ids(node)).toEqual(["single", "pair", "month"]);
-  expect(find(node as Node, "carry")).toEqual({ m: "12" });
+  expect(find(node as Node, "carry")).toEqual({ m: "12", r: undefined });
 });
 
 it("a couple still shows all three offers and carries the saved reading", async () => {
-  const node = await page({ for: "pair", r: "7" });
+  const node = await page({ r: "7" });
   expect(ids(node)).toEqual(["single", "pair", "month"]);
-  expect(find(node as Node, "carry")).toEqual({ r: "7" });
+  expect(find(node as Node, "carry")).toEqual({ m: undefined, r: "7" });
 });
 
 it("a broken record number is not carried into the form", async () => {
-  expect(find((await page({ for: "personal", m: "12abc" })) as Node, "carry")).toEqual({ m: undefined });
+  expect(find((await page({ m: "12abc" })) as Node, "carry")).toEqual({ m: undefined, r: undefined });
 });
 
-it("old links with a saved reading go straight to its form", async () => {
-  await expect(page({ m: "12" })).rejects.toThrow("REDIRECT /ru/pay/single?m=12");
-  await expect(page({ r: "7" })).rejects.toThrow("REDIRECT /ru/pay/pair?r=7");
+it("the leftover product parameter changes nothing", async () => {
+  expect(find((await page({ for: "personal", m: "12" })) as Node, "carry")).toEqual({ m: "12", r: undefined });
 });

@@ -73,18 +73,15 @@ def test_carousel_button_never_points_at_the_page_it_stands_on(page: Page, path)
 
 
 def test_buy_button_from_encyclopedia_lands_on_the_price_block(page: Page):
-    """Кнопка «Купить полный разбор» уводила на верх главной: до тарифов оставалось 5000 px."""
+    """Кнопка «Купить полный разбор» уводила на верх главной: до тарифов оставалось 5000 px.
+    Теперь она ведёт на экран «Купить», где тарифы — первое, что видно."""
     page.goto(f"{BASE}/encyclopedia", wait_until="domcontentloaded")
     page.wait_for_selector(".slide .btn.gold")
     page.locator(".slide .btn.gold").first.click()
-    page.wait_for_url("**/#plans")
-    page.wait_for_timeout(2500)
-    top = page.evaluate(
-        "() => { const e = document.querySelector('#plans');"
-        " return e ? Math.round(e.getBoundingClientRect().top) : null; }"
-    )
-    assert top is not None, "на главной нет блока тарифов #plans"
-    assert -200 < top < 400, f"после перехода блок тарифов на {top} px от верха экрана — человек его не видит"
+    page.wait_for_url(re.compile(r"/pay$"))
+    page.wait_for_selector("#plans")
+    top = page.evaluate("() => Math.round(document.querySelector('#plans').getBoundingClientRect().top)")
+    assert -200 < top < 700, f"на экране «Купить» тарифы на {top} px от верха экрана — человек их не видит"
 
 
 # «Какой раздел открыт» читается по подсвеченному пункту меню: он есть на каждой странице
@@ -234,6 +231,9 @@ def test_guest_can_pay_for_the_local_date_when_link_asks_for_a_saved_one(page: P
     page.wait_for_timeout(800)
 
     page.goto(f"{BASE}/pay?m=999999", wait_until="domcontentloaded")
+    single = page.get_by_test_id("plan-single")
+    expect(single).to_have_attribute("href", "/ru/pay/single?m=999999")
+    single.click()
     # гостю дату из кабинета не подменяют датой браузера: сначала просят войти
     expect(page.get_by_test_id("pay-login-note")).to_be_visible(timeout=10_000)
     page.get_by_test_id("pay-login-note").get_by_role("link", name="выбрать без входа").click()

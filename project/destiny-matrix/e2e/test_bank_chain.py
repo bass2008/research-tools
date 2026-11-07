@@ -162,10 +162,10 @@ def test_two_tabs_do_not_create_two_payments_for_one_date(page, mail):
     matrix_id = flows.matrix_ids(page)[0]
 
     first = page
-    first.goto(f"{BASE}/pay?m={matrix_id}", wait_until="networkidle")
+    first.goto(f"{BASE}/pay/single?m={matrix_id}", wait_until="networkidle")
     first.wait_for_timeout(1500)
     second = page.context.new_page()
-    second.goto(f"{BASE}/pay?m={matrix_id}", wait_until="networkidle")
+    second.goto(f"{BASE}/pay/single?m={matrix_id}", wait_until="networkidle")
     second.wait_for_timeout(1500)
     assert not second.get_by_test_id("pay-submit").is_disabled(), \
         "вторая вкладка не видит цель — гонку так не проверить"

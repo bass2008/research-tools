@@ -132,6 +132,8 @@ export const individualLinks = {
   } satisfies PhraseFn<[number]>,
 
   section: { ru: "Связи в вашей матрице", en: "Links in your matrix" } satisfies Phrase,
+  showAll: { ru: (n: number) => `Развернуть связи · ${n}`, en: (n: number) => `Expand the links · ${n}` } satisfies PhraseFn<[number]>,
+  hideAll: { ru: "Свернуть связи", en: "Hide the links" } satisfies Phrase,
   titleStart: { ru: "В вашей матрице есть связи, которых ", en: "Your matrix has links you " } satisfies Phrase,
   titleAccent: { ru: "не видно по отдельности", en: "cannot see point by point" } satisfies Phrase,
   sub: {

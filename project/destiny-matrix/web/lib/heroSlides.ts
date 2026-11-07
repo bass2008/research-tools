@@ -16,7 +16,7 @@ export const forLocale = localized((L: Locale) => {
 
   // Тексты слайдов живут в словаре языка, адреса — здесь: путь у всех языков один.
   const HREFS = [
-    "/#plans",
+    "/pay",
     encyclopediaSectionHref("pts"),
     encyclopediaSectionHref("arc"),
     "/year",

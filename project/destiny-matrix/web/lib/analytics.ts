@@ -2,7 +2,8 @@
 // код тарифа, раздел и год-десятилетие — ничего, по чему восстанавливается дата.
 export type Goal = "calc" | "buy_click" | "pay_open" | "tariff_select" | "purchase"
   | "pdf_click" | "pair_calc" | "individual_click" | "individual_example" | "individual_date"
-  | "individual_order_view" | "individual_set" | "individual_order_submit" | "individual_year_date" | "individual_year_order";
+  | "individual_order_view" | "individual_set" | "individual_order_submit" | "individual_year_date" | "individual_year_order"
+  | "individual_report_more" | "individual_report_order" | "share_open" | "share_send";
 
 export interface GoalParams {
   tariff?: string;
@@ -11,6 +12,7 @@ export interface GoalParams {
   decade?: number;
   example?: string;
   count?: number;
+  network?: string;
 }
 
 declare global {

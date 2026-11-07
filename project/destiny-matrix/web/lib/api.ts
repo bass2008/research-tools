@@ -454,6 +454,9 @@ export const forLocale = localized((L: Locale) => {
     individualReadings: (page = 1, product = "all") => request<IndividualPage>(`/individual-readings?page=${page}&page_size=20${product === "all" ? "" : `&product=${product}`}`),
     individualArticle: (id: number, token = "") => request<IndividualReading>(`/individual-readings/${id}/open`, { method: "POST", body: JSON.stringify({ token }) }),
     individualPdf: (id: number) => request<{ url: string }>(`/individual-readings/${id}/pdf`, { method: "POST", body: "{}" }),
+    examplePdf: (slug: string) => request<{ url: string }>(`/individual-examples/${encodeURIComponent(slug)}/pdf`, { method: "POST", body: "{}" }),
+    shareReading: (id: number) => request<{ token: string }>(`/readings/${id}/share`, { method: "POST", body: "{}" }),
+    shareIndividual: (id: number) => request<{ token: string }>(`/individual-readings/${id}/share`, { method: "POST", body: "{}" }),
     individualTerms: () => request<IndividualTerms>("/individual-orders/terms"),
     /** Order of individual readings: the price is counted by the server from the order. */
     individualOrder: (order: IndividualOrder, provider?: string) =>

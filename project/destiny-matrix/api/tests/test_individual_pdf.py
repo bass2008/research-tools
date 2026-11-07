@@ -103,3 +103,21 @@ def test_admin_preview_is_the_print_page_itself(client, auth, reading):
     assert url.startswith(f"/ru/print/individual?r={row.id}&t=")
     page = client.get(f"/api/individual-readings/{row.id}/print", params={"t": url.split("&t=")[1]})
     assert page.status_code == 200 and page.json()["article"]["title"] == ARTICLE["title"]
+
+
+def test_anyone_gets_the_example_pdf_printed_once_per_language(client, printer):
+    files, rendered = printer
+    first = client.post("/api/individual-examples/pair/pdf", headers={"Accept-Language": "ru"})
+    assert first.status_code == 200, first.text
+    assert first.json()["url"].endswith("name=Пример разбора — совместимость пары.pdf")
+    assert len(rendered) == 1 and rendered[0].endswith("/ru/print/individual?example=pair")
+    assert client.post("/api/individual-examples/pair/pdf", headers={"Accept-Language": "ru"}).json() == first.json()
+    assert len(rendered) == 1
+    english = client.post("/api/individual-examples/pair/pdf", headers={"Accept-Language": "en"})
+    assert english.json()["url"].endswith("name=Sample reading — couple compatibility.pdf")
+    assert len(rendered) == 2 and len(files) == 2
+
+
+def test_an_unknown_example_prints_nothing(client, printer):
+    assert client.post("/api/individual-examples/secret/pdf").status_code == 404
+    assert printer[1] == []

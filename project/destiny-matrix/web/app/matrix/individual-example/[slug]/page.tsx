@@ -55,6 +55,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     <p className="ir-example-note" data-testid="individual-example-note">{en
       ? "This is an example of an individual reading for a sample date. Your reading is written for your date and your question."
       : "Это пример индивидуального разбора на условную дату. Ваш разбор пишется по вашей дате и вашему вопросу."}</p>
-    <EncFrame locale={L} tocOnly mobileToc><IndividualArticleView row={row} links={individualCardLinks(L)} /></EncFrame>
+    <EncFrame locale={L} tocOnly mobileToc><IndividualArticleView row={{ ...row, example: slug }} links={individualCardLinks(L)} /></EncFrame>
   </div></main>;
 }

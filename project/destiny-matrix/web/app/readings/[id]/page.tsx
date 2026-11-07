@@ -16,8 +16,9 @@ import type { Metadata } from "next";
 import Link from "@/components/ui/LocalizedLink";
 import { notFound, redirect } from "next/navigation";
 import { buyHref } from "@/lib/readingLinks";
-import Plans from "@/components/pay/Plans";
-import TariffsProvider from "@/components/pay/TariffsProvider";
+import IndividualLinksOffer from "@/components/individual/IndividualLinksOffer";
+import ShareButton from "@/components/ui/ShareButton";
+import { pairDates } from "@/lib/sharedHeadline";
 import { readAccess, readReading } from "../../_lib/access";
 import { Sheet } from "../../_lib/report";
 
@@ -80,14 +81,10 @@ export default async function ReadingPage({ params }: { params: Promise<{ id: st
         {...view}
         units={units}
         mode={reading.unlocked ? "full" : "free"}
-        pdf={reading.unlocked ? <SavePdfButton locale={L} readingId={reading.id} hint={reading.title ?? undefined} /> : null}
+        pdf={reading.unlocked ? <><SavePdfButton locale={L} readingId={reading.id} hint={reading.title ?? undefined} /><ShareButton kind="pair" id={reading.id} label={pairDates(L, view.dates.a, view.dates.b)} /></> : null}
         buyHref={sells ? buyHref("pair", reading.id) : undefined}
-        plans={billing ? (
-          <TariffsProvider product={billing.product} locale={L} server={billing.items} providers={billing.providers}>
-            <Plans locale={L} place="pair" carry={{ r: String(reading.id) }} />
-          </TariffsProvider>
-        ) : null}
         price={offer ? localizedTariffs(L).priceLabel(offer) : null}
+        offer={<IndividualLinksOffer pair={{ ...view.dates, names: view.names }} />}
       />
     </Sheet>
   );

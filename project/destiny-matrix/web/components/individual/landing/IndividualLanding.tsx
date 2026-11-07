@@ -15,6 +15,7 @@ import { calculate } from "@/lib/matrix";
 import type { PaymentProvider } from "@/lib/tariffs";
 import { browserDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
+import { usePair } from "@/lib/usePair";
 import { FindingSheet, SummarySheet, TocSheet, ToggleSheet, useMobile } from "./ExampleSheets";
 import LinksMap from "./LinksMap";
 import OrderSection from "./OrderSection";
@@ -37,6 +38,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
   const year = initialYear || terms.defaultYear || serverYear;
   const mobile = useMobile();
   const stored = useBirth();
+  const storedPair = usePair();
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const asked = initialCart ? setOf(initialCart) : null;
@@ -145,7 +147,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
       </section>
 
       <OrderSection set={set} setSet={setSet} formKind={formKind} setFormKind={setFormKind} custom={custom} setCustom={setCustom}
-        year={year} providers={providers} initialBirth={userBirth} latest={latest} />
+        year={year} providers={providers} initialBirth={userBirth} initialPair={storedPair} latest={latest} />
 
       <section className="lp-sec lp-faq" id="faq">
         <div className="lp-wrap" style={{ maxWidth: 820 }}>

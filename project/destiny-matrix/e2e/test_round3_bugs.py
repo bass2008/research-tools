@@ -37,7 +37,7 @@ def test_d3_link_without_a_session_does_not_silently_switch_the_date(page, mail)
     sent: dict = {}
     page.route("**/payments/start", lambda route: (
         sent.update(json.loads(route.request.post_data or "{}")), route.abort()))
-    page.goto(f"{BASE}/pay?m={wanted}", wait_until="networkidle")
+    page.goto(f"{BASE}/pay/single?m={wanted}", wait_until="networkidle")
     page.wait_for_timeout(1500)
 
     hint = page.inner_text("main")

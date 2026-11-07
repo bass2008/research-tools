@@ -118,7 +118,7 @@ def test_c3_link_from_account_pays_for_the_date_it_promises(page, mail):
         route.abort()
 
     page.route("**/payments/start", catch)
-    page.goto(f"{BASE}/pay?m={wanted}", wait_until="networkidle")   # полная загрузка, как по ссылке
+    page.goto(f"{BASE}/pay/single?m={wanted}", wait_until="networkidle")   # полная загрузка, как по ссылке из карточки
     page.wait_for_timeout(2000)
 
     chosen = page.evaluate("""() => {

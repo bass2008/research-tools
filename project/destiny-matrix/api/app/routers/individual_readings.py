@@ -10,6 +10,7 @@ from ..db import get_db
 from ..deps import current_user, optional_user
 from ..models import User
 from .admin import admin_user
+from ..i18n import current_locale
 from ..security import read_worker_token
 
 def article_author(x_internal_token: str | None = Header(default=None)) -> None:
@@ -39,6 +40,11 @@ class OpenIn(BaseModel):
 def open_article(row_id: int, payload: OpenIn, user: User | None = Depends(optional_user),
                  db: Session = Depends(get_db)):
     return service.open_article(db, row_id, user, payload.token)
+
+
+@router.post("/individual-examples/{slug}/pdf", dependencies=[Depends(private_response)])
+def example_pdf(slug: str):
+    return service.example_pdf(slug, current_locale())
 
 
 @router.post("/individual-readings/{row_id}/pdf", dependencies=[Depends(private_response)])

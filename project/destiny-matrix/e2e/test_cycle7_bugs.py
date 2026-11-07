@@ -190,7 +190,9 @@ def test_pay_link_to_an_open_matrix_does_not_swap_the_date(page: Page):
     assert len(ids) >= 2, f"в кабинете {len(ids)} матриц — случай не собран"
     open_id = min(ids)  # оплаченная сохранена первой
 
+    # «Купить» shows every offer; the number rides through the card into the form of its own offer
     page.goto(f"{BASE}/pay?m={open_id}", wait_until="domcontentloaded")
+    page.get_by_test_id("plan-single").click()
     page.wait_for_selector("[data-testid=pay-submit]")
     page.wait_for_timeout(1200)
     year = page.get_by_test_id("pay-y").input_value()

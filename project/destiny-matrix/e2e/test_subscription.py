@@ -26,10 +26,11 @@ def test_subscriber_is_offered_nothing_and_sees_everything(page: Page, mail: str
 
     for path in PAGES:
         page.goto(BASE + path, wait_until="networkidle")
-        # «Купить» in the header stays for individual readings (docs/individual-reading.md); the page offers nothing
-        expect(page.locator("main a[href^='/ru/pay']"), path).to_have_count(0)
+        # only the individual readings are still offered (header «Купить», the links block): the subscription does not include them
+        expect(page.locator("main a[href^='/ru/pay']:not(.ro-links a)"), path).to_have_count(0)
         expect(page.get_by_role("button", name=re.compile("Купить"))).to_have_count(0)
-        expect(page.locator("main, #content").first, path).not_to_contain_text("₽")
+        assert "₽" not in page.evaluate("""() => { const main = (document.querySelector("main") || document.querySelector("#content")).cloneNode(true);
+          main.querySelectorAll(".ro-links").forEach((el) => el.remove()); return main.textContent; }"""), path
 
     page.goto(f"{BASE}/report", wait_until="networkidle")
     expect(page.locator("[data-locked=true]")).to_have_count(0)
