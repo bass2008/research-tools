@@ -18,6 +18,19 @@
 Текущие вопросы: понятен ли объём разовой покупки, заметна ли ценность подписки для нескольких
 расчётов, соответствует ли предложение задаче посетителя и где прерывается путь к оплате.
 
+## Конспекты
+
+Своими словами, со ссылками на главы и страницы, без больших цитат: книги платные, а репозиторий
+публичный. Скилл, который ими пользуется, — `.agents/skills/conversion-skill/`.
+
+| Книга | Конспект |
+|---|---|
+| Klement — работа клиента, силы прогресса | [books/01-klement-jtbd.md](books/01-klement-jtbd.md) |
+| Shotton — 25 искажений выбора | [books/02-shotton-choice-factory.md](books/02-shotton-choice-factory.md) |
+| Podmajersky — тексты интерфейса | [books/03-podmajersky-ux-writing.md](books/03-podmajersky-ux-writing.md) |
+| Silkoset — решения о цене | [books/04-silkoset-pricing.md](books/04-silkoset-pricing.md) |
+| Wendel — путь к действию, воронка CREATE | [books/05-wendel-behavior-change.md](books/05-wendel-behavior-change.md) |
+
 ## Книги и файлы
 
 Книги куплены и лежат в `sources/`. В git их нет: репозиторий публичный, папка в `.gitignore`.
