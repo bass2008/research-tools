@@ -61,6 +61,10 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
   };
   const after = terms.bought >= 3;
   const price = (c: Cart) => quote(c, terms.bought, terms.prices).total;
+  const was = (c: Cart) => {
+    const regular = quote(c, 0, terms.prices).total;
+    return after && regular > price(c) ? <s>{r(regular)}</s> : null;
+  };
   const oneCart = { ...EMPTY_CART, [oneKind]: 1 };
   const self = SETS.selfYear("personal"), couple = SETS.couple("personal");
   const kindName: Record<Kind, string> = { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindAnyYear[L] };
@@ -83,7 +87,7 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
                 {(["personal", "pair", "year"] as const).map((k) => <button key={k} type="button" className={oneKind === k ? "pw-on" : undefined} onClick={() => setOneKind(k)}>{kindName[k]}</button>)}
               </div>
               <p className="pw-desc">{TL.kindDesc[L][oneKind](oneKind === "personal" ? TL.yourDate[L] : String(year))}</p>
-              <p className="pw-iprice">{r(price(oneCart))}</p>
+              <p className="pw-iprice">{r(price(oneCart))}{was(oneCart)}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : T.setOneSub[L]}</p>
               <a className="pw-ibtn pw-ghost" href="#order" onClick={choose("one", `one-${oneKind}`, oneKind)}>{T.choose[L]}</a>
               <Link className="pw-ex-link" href={`/matrix/individual-example/${oneKind}`}>{TL.exLabel[L][oneKind]}</Link>
@@ -94,7 +98,7 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
               <p className="pw-desc">{TL.selfYearDesc[L](year)}</p>
               {y && <p className="pw-y2027"><RichText text={T.yearFor[L](stored ? T.yourYear[L](year) : T.yearOfDate[L](year, birth.split("-").reverse().join(".")),
                 `${y.centre} ${arcanumTitle(y.centre)}`, y.periods.map((n) => arcanumTitle(n)) as [string, string, string])} /></p>}
-              <p className="pw-iprice">{r(price(self))}</p>
+              <p className="pw-iprice">{r(price(self))}{was(self)}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : T.separately[L](r(terms.prices.first * 2))}</p>
               <a className="pw-ibtn pw-gold" href="#order" onClick={choose("selfYear", "self-year")}>{T.choose[L]}</a>
               <Link className="pw-ex-link" href="/matrix/individual-example/year">{TL.exLabel[L].year}</Link>
@@ -102,7 +106,7 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
             <article className="pw-iplan" data-testid="iset-couple">
               <div className="pw-ph"><div><h3>{T.setCouple[L]}</h3><p className="pw-tagline">{TL.coupleTagline[L]}</p></div><Cards ns={COUPLE_CARDS} /></div>
               <p className="pw-desc">{TL.coupleDesc[L]}</p>
-              <p className="pw-iprice">{r(price(couple))}</p>
+              <p className="pw-iprice">{r(price(couple))}{was(couple)}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : `${T.separately[L](r(terms.prices.first * 3))} · ${T.coupleExtra[L](P)}`}</p>
               <a className="pw-ibtn pw-ghost" href="#order" onClick={choose("couple", "couple")}>{T.choose[L]}</a>
               <Link className="pw-ex-link" href="/matrix/individual-example/pair">{TL.exLabel[L].pair}</Link>

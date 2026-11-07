@@ -151,6 +151,14 @@ def test_pagination_isolation_read_boundary_and_admin_filters(client, auth, db):
     assert client.get('/api/admin/notifications?page_size=101', headers=admin).status_code == 422
     assert client.get('/api/notifications?page=999', headers=first).json()['items'] == []
 
+def test_admin_view_links_to_the_recipient_card(client, auth, db):
+    own, admin = auth(), auth(settings.admins[0])
+    a = user(db)
+    notifications.emit(db, 'subscription_active', 'card', {**notifications.context(), 'until': '2027-01-01'}, [a.id]); db.commit()
+    row = client.get(f'/api/admin/notifications?user_id={a.id}', headers=admin).json()['items'][0]
+    assert row['action']['href'] == f'/admin/users/{a.id}'
+    assert client.get('/api/notifications', headers=own).json()['items'][0]['action']['href'] == '/account'
+
 def test_payment_events_once_and_independent_admin_recipients(client, auth, db, monkeypatch, transport):
     monkeypatch.setattr(settings, 'admin_emails', 'one@example.ru,two@example.ru')
     admins = [auth('one@example.ru'), auth('two@example.ru')]

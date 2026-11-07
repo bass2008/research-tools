@@ -24,6 +24,10 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
   const { arcanumTitle } = arcanaForLocale(L);
   const { terms, prices, PW, r, priceOf, plans, kindName } = useSets();
   const after = terms.bought >= 3;
+  const was = (c: Cart) => {
+    const regular = quote(c, 0, prices).total;
+    return after && regular > priceOf(c) ? <s>{r(regular)}</s> : null;
+  };
   const oneCart = { ...EMPTY_CART, [oneKind]: 1 };
   const sampleYear = useMemo(() => {
     const [y, m, d] = sampleBirth.split("-").map(Number);
@@ -44,7 +48,7 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
             {(["personal", "pair", "year"] as const).map((k) => <button key={k} type="button" className={oneKind === k ? "lp-on" : undefined} onClick={() => setOneKind(k)}>{kindName[k]}</button>)}
           </div>
           <p className="lp-desc">{TL.kindDesc[L][oneKind](oneKind === "personal" ? (user ? TL.theDate[L](showDate(user.date)) : TL.yourDate[L]) : String(year))}</p>
-          <p className="lp-price">{r(priceOf(oneCart))}</p>
+          <p className="lp-price">{r(priceOf(oneCart))}{was(oneCart)}</p>
           <p className="lp-price-sub">{after ? T.afterThreeSub[L](PW) : T.setOneSub[L]}</p>
           <a className="lp-btn lp-ghost" href="#order" onClick={(e) => { e.preventDefault(); goOrder("one", oneKind); }}>{T.choose[L]}</a>
           <Link className="lp-ex-link" href={`/matrix/individual-example/${oneKind}`}>{TL.exLabel[L][oneKind]}</Link>
@@ -55,7 +59,7 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
             <div className="lp-cardrow">{SELF_YEAR_CARDS.map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div></div>
           <p className="lp-desc">{TL.selfYearDesc[L](year)}</p>
           <p className="lp-y2027"><RichText text={TL.yearNote[L](Boolean(user), year, `${sampleYear.centre} ${arcanumTitle(sampleYear.centre)}`, sampleYear.periods.map((n) => arcanumTitle(n)) as [string, string, string])} /></p>
-          <p className="lp-price">{r(priceOf(plans.self))}</p>
+          <p className="lp-price">{r(priceOf(plans.self))}{was(plans.self)}</p>
           <p className="lp-price-sub">{after ? T.afterThreeSub[L](PW) : T.separately[L](r(prices.first * 2))}</p>
           <a className="lp-btn lp-gold" href="#order" onClick={(e) => { e.preventDefault(); goOrder("selfYear"); }}>{T.choose[L]}</a>
           <Link className="lp-ex-link" href="/matrix/individual-example/year">{TL.exLabel[L].year}</Link>
@@ -64,7 +68,7 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
           <div className="lp-ph"><div><h3>{T.setCouple[L]}</h3><p className="lp-tagline">{TL.coupleTagline[L]}</p></div>
             <div className="lp-cardrow">{COUPLE_CARDS.map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div></div>
           <p className="lp-desc">{TL.coupleDesc[L]}</p>
-          <p className="lp-price">{r(priceOf(plans.couple))}</p>
+          <p className="lp-price">{r(priceOf(plans.couple))}{was(plans.couple)}</p>
           <p className="lp-price-sub">{after ? T.afterThreeSub[L](PW) : `${T.separately[L](r(prices.first * 3))} · ${T.coupleExtra[L](PW)}`}</p>
           <a className="lp-btn lp-ghost" href="#order" onClick={(e) => { e.preventDefault(); goOrder("couple"); }}>{T.choose[L]}</a>
           <Link className="lp-ex-link" href="/matrix/individual-example/pair">{TL.exLabel[L].pair}</Link>

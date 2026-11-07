@@ -8,7 +8,8 @@ from conftest import BASE
 
 
 def test_couple_set_is_ordered_from_the_landing(page, mail):
-    """Своя дата из блока связей встаёт в форму, у пары свои люди, заказ оплачивается."""
+    """Своя дата из блока связей встаёт в форму, у пары свои люди, заказ оплачивается;
+    после трёх разборов наборы стоят по личной цене, обычная зачёркнута."""
     page.goto(f"{BASE}/individual", wait_until="networkidle")
     page.locator("#lm-bd").fill("05031990")
     page.locator(".lm-dform button").click()
@@ -35,6 +36,12 @@ def test_couple_set_is_ordered_from_the_landing(page, mail):
         expect(card).to_have_attribute("data-status", "in-progress")
         expect(card.get_by_test_id("work-badge")).to_have_text("В работе")
         expect(card.locator(".afan img")).to_have_count(3)
+
+    for path, price in (("/pay", ".pw-iprice"), ("/individual", ".lp-price")):
+        page.goto(f"{BASE}{path}", wait_until="networkidle")
+        expect(page.get_by_test_id("isale-perk")).to_be_visible()
+        expect(page.get_by_test_id("iset-selfYear").locator(price)).to_have_text(re.compile(r"2\s380\s₽\s*2\s990\s₽"))
+        expect(page.get_by_test_id("iset-selfYear").locator(f"{price} s")).to_have_text(re.compile(r"2\s990\s₽"))
 
 
 def test_a_set_from_the_pay_page_opens_the_form_in_place(page):

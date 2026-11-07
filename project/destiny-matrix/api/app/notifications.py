@@ -82,14 +82,14 @@ def subscription_date(value: str | None, locale: str, time_zone: str | None) -> 
 
 
 def render(notification: Notification, locale: str, *, email: bool = False,
-           admin: bool = False, time_zone: str | None = None) -> dict:
+           admin: bool = False, user_id: int | None = None, time_zone: str | None = None) -> dict:
     en = locale == "en"
     d = json.loads(notification.data)
     pair = d.get("product") == "pair"
     product = ("Compatibility" if en else "Совместимость") if pair else ("Personal reading" if en else "Личный разбор")
     # Название разбора может содержать даты рождения: в письме только тип продукта.
     label = product if email else (d.get("titles", {}).get(locale) or d.get("title") or product)
-    account = "/account"
+    account = f"/admin/users/{user_id}" if admin and user_id else "/account"
     rid = d.get("reading_id")
     href = (f"/readings/{rid}" if pair else f"/matrices/{rid}") if rid else ("/compatibility" if pair else "/#calc")
     kind = notification.type
@@ -134,7 +134,8 @@ def render(notification: Notification, locale: str, *, email: bool = False,
                 if en else
                 f"Индивидуальный разбор: {parts}. Обычно готов к {day(d['typical'])}, не позже {day(d['latest'])}. "
                 "Пришлём письмо, как только он будет готов. Автоматические разборы тех же дат уже открыты.")
-        href, action = "/account?filter=individual", "My readings" if en else "Мои разборы"
+        href = account if admin and user_id else "/account?filter=individual"
+        action = "My readings" if en else "Мои разборы"
     elif kind == ADMIN_TYPE:
         title = "New successful payment" if en else "Новая успешная оплата"
         amount = f"{d.get('amount', 0)/100:.2f} {d.get('currency', 'RUB')}"

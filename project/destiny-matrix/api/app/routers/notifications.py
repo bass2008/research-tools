@@ -37,7 +37,7 @@ def listing(db: Session, rules: list, page: int, size: int, *, admin: bool = Fal
     items = []
     for d in rows:
         item = {"delivery_id": d.id, "notification_id": d.notification_id, "type": d.notification.type,
-                **service.render(d.notification, current_locale(), admin=admin, time_zone=time_zone),
+                **service.render(d.notification, current_locale(), admin=admin, user_id=d.user_id, time_zone=time_zone),
                 "created_at": iso(d.notification.created_at),
                 "delivered_at": iso(d.delivered_at), "read_at": iso(d.read_at)}
         if admin:
