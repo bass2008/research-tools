@@ -42,7 +42,7 @@ export const TERMS: LegalDocs = {
         p: ["Расчёт карты (октаграмма, все позиции, карта энергий по чакрам) и два раздела "
           + "страницы — «Характер и личные качества» и «Центр и внутренние точки» — исполнитель "
           + "выполняет бесплатно и без регистрации, в демонстрационных целях. Остальные "
-          + "восемнадцать разделов входят в оплачиваемый объём работ."],
+          + "девятнадцать разделов входят в оплачиваемый объём работ."],
       },
       { tariffs: "table" },
       {
@@ -143,7 +143,7 @@ export const TERMS: LegalDocs = {
   },
   // Английские условия — самостоятельный документ, а не перевод российской оферты: продавец и
   // право у рынков разные. Разделы о цене, оплате и подсудности спора по сделке появляются
-  // вместе с кассой (docs/foreign-acquiring.md) — до неё они обещали бы сделку, которой негде
+  // вместе с кассой — до неё они обещали бы сделку, которой негде
   // состояться. Реквизиты продавца по той же причине не печатаются.
   en: {
     h1: "Terms of service",
@@ -161,7 +161,7 @@ export const TERMS: LegalDocs = {
       { h2: "2. What the service is" },
       {
         p: ["The service builds a destiny matrix chart from a date of birth and prepares a "
-          + "reading of that chart in up to 20 sections; from two dates of birth it builds a "
+          + "reading of that chart in up to 21 sections; from two dates of birth it builds a "
           + "couple compatibility matrix and its reading. The chart itself is calculated in the "
           + "browser; the text of the reading is written by us and shown on the website."],
       },

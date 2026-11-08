@@ -11,6 +11,7 @@ import { D, forLocale as localizedI18n } from "./i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { forLocale as localizedPublicLabels } from "./i18n/publicLabels";
+import { materialKarmaOf } from "./materialKarmaRow";
 
 export type Sex = "m" | "f";
 
@@ -52,6 +53,8 @@ export interface Matrix {
   descendants: number;
   inheritance: number;
   karmic_tail: number[];
+  /** C → Q → L по правому лучу: материальная задача, отношение к материальному (C + L), вход денег. */
+  material_karma: number[];
 
   comfort_west: number;
   comfort_north: number;
@@ -267,6 +270,7 @@ export const forLocale = localized((L: Locale) => {
     m.love = [m.comfort_south, fold(m.comfort_south + crossing), crossing];
     m.talent = [m.month, fold(m.month + m.comfort_north), m.comfort_north];
     m.karmic_tail = [m.comfort_south, fold(m.mission + m.comfort_south), m.mission];
+    m.material_karma = materialKarmaOf(m);
 
     const ch = chakras(m);
     m.chakras = ch.rows;
@@ -283,7 +287,7 @@ export const forLocale = localized((L: Locale) => {
       m.comfort_west, m.comfort_north, m.comfort_east, m.comfort_south,
       m.harmony, m.planetary, m.purpose_personal, m.purpose_social,
       ...m.sky, ...m.ground, ...m.social_male, ...m.social_female,
-      ...m.karmic_tail, ...m.money, ...m.love, ...m.talent,
+      ...m.karmic_tail, ...materialKarmaOf(m), ...m.money, ...m.love, ...m.talent,
     ];
     for (const r of m.chakras) out.push(r.physics, r.energy, r.emotions);
     out.push(m.chakra_totals.physics, m.chakra_totals.energy, m.chakra_totals.emotions);

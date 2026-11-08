@@ -1,7 +1,7 @@
 import type { Phrase, PhraseFn } from "./index";
 
 type Pair<T> = Record<"ru" | "en", T>;
-type Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "S" | "T" | "R" | "R1" | "R2";
+type Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "S" | "T" | "R" | "R1" | "R2";
 
 const ruPlural = (n: number, one: string, few: string, many: string) => {
   const m10 = n % 10, m100 = n % 100;
@@ -22,6 +22,7 @@ export const individualLinks = {
       K: ["второй талант", "внутренний круг сверху", "дела"], L: ["вход в деньги", "внутренний круг справа", "денег"],
       M: ["вход в отношения", "внутренний круг снизу", "отношений"], N: ["середина кармического хвоста", "малая точка снизу", "кармического хвоста"],
       O: ["точка детей", "малая точка слева", "отношений с детьми"], P: ["середина линии талантов", "малая точка сверху", "дела"],
+      Q: ["отношение к материальному", "малая точка справа", "денег"],
       S: ["любовь в поступках", "малая точка слева у центра (анахата)", "близости"], T: ["любовь внутри", "малая точка сверху у центра (анахата)", "близости"],
       R: ["точка «своего» человека", "малая точка на диагонали справа снизу", "отношений|денег"], R1: ["точка примирения", "малая точка справа снизу", "отношений"],
       R2: ["заработок", "малая точка справа снизу", "денег"],
@@ -35,6 +36,7 @@ export const individualLinks = {
       K: ["second talent", "inner circle at the top", "work"], L: ["money entrance", "inner circle on the right", "money"],
       M: ["relationship entrance", "inner circle at the bottom", "relationships"], N: ["middle of the karmic tail", "small point at the bottom", "the karmic tail"],
       O: ["children’s point", "small point on the left", "relations with children"], P: ["middle of the line of talents", "small point at the top", "work"],
+      Q: ["attitude to the material", "small point on the right", "money"],
       S: ["love in actions", "small point left of the centre (anahata)", "closeness"], T: ["love inside", "small point above the centre (anahata)", "closeness"],
       R: ["point of “your” person", "small point on the lower right diagonal", "relationships|money"], R1: ["point of reconciliation", "small point lower right", "relationships"],
       R2: ["earnings", "small point lower right", "money"],
@@ -160,8 +162,8 @@ export const individualLinks = {
   inReading: { ru: "в разборе", en: "in the reading" } satisfies Phrase,
   freeKicker: { ru: "Открыто бесплатно: что говорит корпус книг", en: "Open for free: what the corpus of books says" } satisfies Phrase,
   moreText: {
-    ru: "Автоматический разбор объясняет каждую точку по отдельности. Индивидуальный пишется для вас с нуля: что следует из этих совпадений для денег, близости и вашего возраста — и что с этим делать.",
-    en: "The automatic reading explains each point on its own. The individual one is written for you from scratch: what follows from these coincidences for money, closeness and your age — and what to do about it.",
+    ru: "Автоматический разбор объясняет каждый раздел отдельно. Индивидуальный пишется для вас с нуля: что следует из этих совпадений для денег, близости и вашего возраста — и что с этим делать.",
+    en: "The automatic reading explains each section on its own. The individual one is written for you from scratch: what follows from these coincidences for money, closeness and your age — and what to do about it.",
   } satisfies Phrase,
   whatInMine: { ru: "Что будет в моём разборе", en: "What will be in my reading" } satisfies Phrase,
   seeExample: { ru: "Посмотреть пример", en: "See an example" } satisfies Phrase,

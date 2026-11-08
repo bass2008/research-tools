@@ -99,6 +99,7 @@ def test_declared_reachable_arcana_are_exhaustive_for_supported_dates():
             if isinstance(value, int):
                 seen[key].add(value)
         seen["karmic_tail_middle"].add(m.karmic_tail[1])
+        seen["material_attitude"].add(m.material_karma[1])
         seen["love_middle"].add(m.love[1])
         seen["money_middle"].add(m.money[1])
         seen["money_love_crossing"].add(m.love[2])

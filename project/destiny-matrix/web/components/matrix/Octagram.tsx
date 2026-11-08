@@ -4,6 +4,7 @@ import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import type { Matrix } from "@/lib/matrix";
+import { materialKarmaOf } from "@/lib/materialKarmaRow";
 import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
 import { forLocale as localizedSite } from "@/lib/site";
 import chakraLevels from "@/lib/__fixtures__/chakras.json";
@@ -65,13 +66,14 @@ export default function Octagram({ site = DEFAULT_SITE, locale: requestedLocale,
   ];
 
   // Точки второго порядка — те, что метод считает из внутренних: середины линий любви, денег,
-  // хвоста и таланта плюс чакровые пары аджны и анахаты. Их значения продукт и так показывает
+  // хвоста, таланта и материальной кармы плюс чакровые пары аджны и анахаты. Их значения продукт и так показывает
   // в разделах и в таблице чакр, но на самой карте их не было — человек читал «10 под сердцем»
   // и не находил на схеме места, о котором речь. Координаты берутся из общей геометрии
   // (`lib/matrixMap`), чтобы карта здесь и схема в энциклопедии не разъехались.
   const chakra = (key: string) => m.chakras.find((row) => row.key === key);
   const derived: NodeSpec[] = ([
     ["karmic_tail_middle", m.karmic_tail[1]],
+    ["material_attitude", materialKarmaOf(m)[1]],
     ["money_love_crossing", m.love[2]],
     ["love_middle", m.love[1]],
     ["money_middle", m.money[1]],

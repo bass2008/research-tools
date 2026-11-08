@@ -321,6 +321,20 @@ export default async function PositionPage({ params }: { params: Promise<Params>
         </div>
       ) : null}
 
+      {p.kind === "point" && extra.links?.length ? (
+        <div className="panel section-gap">
+          <h2>{D.encPosition.pointLineTitle[L]}</h2>
+          <div className="cap">{D.encPosition.pointLineHint[L]}</div>
+          <div className="taglist">
+            {extra.links.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {p.kind === "section" ? (
         extra.points.length ? (
           <div className="panel section-gap">

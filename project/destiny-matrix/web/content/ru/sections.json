@@ -1,5 +1,5 @@
 {
- "count": 20,
+ "count": 21,
  "items": [
   {
    "key": "character",
@@ -48,6 +48,11 @@
    ]
   },
   {
+   "key": "purpose",
+   "title": "Ваше предназначение",
+   "access": "paid"
+  },
+  {
    "key": "profession",
    "title": "Профессия и дело по душе",
    "access": "paid"
@@ -58,33 +63,13 @@
    "access": "paid"
   },
   {
-   "key": "karma40",
-   "title": "Кармическая задача до 40 лет",
-   "access": "paid"
-  },
-  {
    "key": "resources",
    "title": "Что открывает вам блага и ресурс",
    "access": "paid"
   },
   {
-   "key": "family_gifts",
-   "title": "Поддержка и дары вашего рода",
-   "access": "paid"
-  },
-  {
-   "key": "soul_tasks",
-   "title": "Духовные задачи и уроки души",
-   "access": "paid"
-  },
-  {
-   "key": "past_lives",
-   "title": "Кармический хвост",
-   "access": "paid"
-  },
-  {
-   "key": "purpose",
-   "title": "Ваше предназначение",
+   "key": "material_karma",
+   "title": "Материальная карма в матрице судьбы",
    "access": "paid"
   },
   {
@@ -108,8 +93,33 @@
    "access": "paid"
   },
   {
+   "key": "family_gifts",
+   "title": "Поддержка и дары вашего рода",
+   "access": "paid"
+  },
+  {
    "key": "ancestry",
    "title": "Родовые задачи до седьмого колена",
+   "access": "paid"
+  },
+  {
+   "key": "karma40",
+   "title": "Кармическая задача до 40 лет",
+   "access": "paid"
+  },
+  {
+   "key": "past_lives",
+   "title": "Кармический хвост",
+   "access": "paid"
+  },
+  {
+   "key": "soul_tasks",
+   "title": "Духовные задачи и уроки души",
+   "access": "paid"
+  },
+  {
+   "key": "loops",
+   "title": "Программы: что повторяется по кругу",
    "access": "paid"
   },
   {
@@ -125,11 +135,6 @@
   {
    "key": "rest",
    "title": "Ваш идеальный формат отдыха",
-   "access": "paid"
-  },
-  {
-   "key": "loops",
-   "title": "Программы: что повторяется по кругу",
    "access": "paid"
   },
   {

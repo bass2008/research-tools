@@ -233,8 +233,8 @@ export const encYear = {
   } satisfies Phrase,
   allYearArcana: { ru: "Все арканы на год", en: "All arcana for the year" } satisfies Phrase,
   fullReadingAll: {
-    ru: "полный разбор всех 20 разделов карты —",
-    en: "the full reading of all 20 sections of the chart —",
+    ru: "полный разбор всех 21 раздела карты —",
+    en: "the full reading of all 21 sections of the chart —",
   } satisfies Phrase,
   yearFrameLead: {
     ru: "Годовая рамка читается по карте рождения — начните с расчёта по дате. Он бесплатный;",
@@ -244,4 +244,11 @@ export const encYear = {
     ru: "Годовую рамку читают поверх карты рождения, а её расчёт бесплатный и идёт в браузере.",
     en: "The frame of the year is read on top of the birth chart, and that calculation is free and runs in the browser.",
   } satisfies Phrase,
+  // статья «Аркан на месяц»: внизу — к разбору года, где все двенадцать месяцев посчитаны
+  monthYearTitle: { ru: "Двенадцать месяцев вашего года", en: "The twelve months of your year" } satisfies Phrase,
+  monthYearText: {
+    ru: "В индивидуальном разборе года каждый месяц посчитан по вашей дате: центр, задача и то, как месяц продолжает год.",
+    en: "In the individual year reading every month is calculated for your date: its centre, its task and how the month carries on the year.",
+  } satisfies Phrase,
+  monthYearExample: { ru: "Пример разбора года", en: "Sample year reading" } satisfies Phrase,
 };

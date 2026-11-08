@@ -21,6 +21,7 @@ import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import type { Matrix } from "./matrix";
 import type {
+  ChakraReadingRow,
   LongformReading,
   ReadingConclusion,
   ReadingRole,
@@ -78,6 +79,8 @@ export interface SectionOut {
   longform?: LongformReading;
   /** Короткая расшифровка ordered-хвоста; полная статья остаётся бесплатной на сайте. */
   tailReading?: { paragraphs: Paragraph[] };
+  /** Связное толкование тройки материальной кармы C–Q–L; в закрытом разделе — заглушка той же формы. */
+  tripleReading?: ChakraReadingRow;
 }
 
 /** Имя раздела — публичное: оно и в энциклопедии, и в списке «под замком». */
@@ -184,8 +187,8 @@ export const forLocale = localized((L: Locale) => {
 
   const ROWS = catalog.items as PublicSectionRow[];
 
-  if (ROWS.length !== 20 || new Set(ROWS.map((row) => row.key)).size !== 20) {
-    throw new Error(`sections.json: ожидалось 20 уникальных разделов, получено ${ROWS.length}`);
+  if (ROWS.length !== 21 || new Set(ROWS.map((row) => row.key)).size !== 21) {
+    throw new Error(`sections.json: ожидался 21 уникальный раздел, получено ${ROWS.length}`);
   }
 
   const CATALOG: SectionMeta[] = ROWS.map((s) => ({

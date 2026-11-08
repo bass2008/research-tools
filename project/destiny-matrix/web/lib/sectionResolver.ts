@@ -2,6 +2,7 @@ import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { forLocale as localizedPublicLabels } from "./i18n/publicLabels";
 import type { Matrix } from "./matrix";
+import { materialKarmaOf } from "./materialKarmaRow";
 
 export interface SectionPositionDefinition {
   label?: string;
@@ -33,6 +34,7 @@ export const forLocale = localized((L: Locale) => {
       M: matrix.comfort_south,
       N: matrix.karmic_tail[1],
       P: matrix.talent[1],
+      Q: materialKarmaOf(matrix)[1],
       R: matrix.money[2],
       R1: matrix.love[1],
       R2: matrix.money[1],

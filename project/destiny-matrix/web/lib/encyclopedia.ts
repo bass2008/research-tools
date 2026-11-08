@@ -46,7 +46,7 @@ export const forLocale = localized((L: Locale) => {
   const POSITIONS: PositionPage[] = unique(
     positions.items.map((row) => ({ key: row.key, kind: row.kind as PositionPage["kind"], title: row.title })),
     (row) => row.key,
-    38,
+    positions.items.some((row) => row.key === "material_karma") ? 39 : 38,
     "positions.json",
   );
 

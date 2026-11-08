@@ -52,6 +52,7 @@ STATIC_INDEXED = {
     "/encyclopedia/position": "position_hub",
     "/encyclopedia/chakra": "chakra_hub",
     "/encyclopedia/chakra/energy-field": "energy_field",
+    "/encyclopedia/month": "month_article",
     "/encyclopedia/karmic-tail": "tail_hub", "/year": "year_hub",
     "/contacts": "legal", "/terms": "legal", "/privacy": "legal", "/refund": "legal",
 }

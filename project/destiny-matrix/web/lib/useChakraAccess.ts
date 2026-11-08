@@ -13,7 +13,7 @@ export type ChakraReadingStatus = "loading" | "error";
 
 // One access rule for the chart on every page. Access is by date, not by date and sex: sex
 // changes no number in the chart (engine/tests/test_method_contract.py), and the offer promises
-// all 20 sections for one birth date.
+// all 21 sections for one birth date.
 export function useChakraAccess(m: Matrix | null, dates: MatrixListItem[], full: SectionOut[] | null) {
   const L = useLocale();
   const mode = useOfferMode();

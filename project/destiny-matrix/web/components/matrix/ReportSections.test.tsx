@@ -25,14 +25,17 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
     const sections = withLockedPreview(matrix, build(matrix, false));
     const html = renderToStaticMarkup(
       <ReportSections locale={locale} sections={sections} place="report" matrixId={7} />);
-    expect(html.match(/data-locked="true"/g)).toHaveLength(18);
-    expect(html.match(/class="mp"/g)).toHaveLength(17);
+    expect(html.match(/data-locked="true"/g)).toHaveLength(19);
+    expect(html.match(/class="mp"/g)).toHaveLength(18);
     const cards = sections.filter((s) => s.locked && s.key !== "chakras").flatMap((s) => s.positions);
     expect(html.match(/class="mpc"/g)).toHaveLength(cards.length);
     const gist = arcanumShort(cards[0].arcanum);
     expect(html).toContain(gist.charAt(0).toLocaleUpperCase(locale) + gist.slice(1));
-    expect(html.match(/data-testid="section-buy-/g)).toHaveLength(18);
-    expect(html.match(/href="\/(?:ru|en)\/pay\?m=7"/g)).toHaveLength(36 + 8);
+    expect(html.match(/data-testid="section-buy-/g)).toHaveLength(19);
+    // по две ссылки на раздел, восемь замков чакр и замок связного толкования материальной кармы,
+    // если у языка уже есть её корпус
+    const tripleLock = sections.find((s) => s.key === "material_karma")?.tripleReading ? 1 : 0;
+    expect(html.match(/href="\/(?:ru|en)\/pay\?m=7"/g)).toHaveLength(38 + 8 + tripleLock);
     expect(html).toContain(D.report.unlockSection[locale]);
 
     const chakras = sections.find((s) => s.key === "chakras")!.longform!;
@@ -40,7 +43,7 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
     for (const row of [...chakras.chakraRows!, chakras.energyField!]) {
       expect(html).toContain(D.report.lockedWords[locale](row.lockedWords!));
     }
-    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/(?:ru|en)\/pay\?m=7"/g)).toHaveLength(8);
+    expect(html.match(/data-testid="chakra-lock-[^"]*"><a [^>]*href="\/(?:ru|en)\/pay\?m=7"/g)).toHaveLength(8 + tripleLock);
     expect(html).not.toContain("chakras-reading");
     if (locale === "en") expect(text(html)).not.toMatch(/[А-Яа-яЁё]/);
   });
@@ -57,7 +60,7 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
   it("печать закрытого разбора — только строки разделов", () => {
     const sections = withLockedPreview(matrix, build(matrix, false));
     const html = renderToStaticMarkup(<ReportSections locale={locale} sections={sections} printing />);
-    expect(html.match(/data-locked="true"/g)).toHaveLength(18);
+    expect(html.match(/data-locked="true"/g)).toHaveLength(19);
     expect(html).not.toContain('class="mp"');
     expect(html).not.toContain("chakras-locked");
   });

@@ -79,3 +79,17 @@ cd /home/sergey/Personal/research-tools && python3 tools/seo/{ключ}/check_pa
 4. Писатели — по пакету на исполнителя, этим заданием с подстановками. Проверяющий — по
    правилам `seo-check-prompt.md` на выборке из каждого пакета.
 5. Английская версия — отдельным переводом по готовому русскому корпусу.
+
+**Модель и запуск.** Пакеты пишет Codex `gpt-6.1-sol` на `xhigh` (решение в `SKILL.md`, раздел
+«Набор статей»). Один пакет — один запуск, не больше 5 одновременно; задание с подстановками —
+в файле `<задание>.md`:
+
+```bash
+cd /home/sergey/Personal/research-tools
+codex --ask-for-approval never exec --ephemeral --cd /home/sergey/Personal/research-tools \
+  --model gpt-6.1-sol -c 'model_reasoning_effort="xhigh"' \
+  -c 'mcp_servers.taskworker.enabled=false' -c 'mcp_servers.arcana-tasks.enabled=false' \
+  --sandbox workspace-write --output-last-message <отчёт>.md - < <задание>.md > <лог>.log 2>&1
+```
+
+10 толкований на `xhigh` заняли около 12 минут. Запускать в фоне и смотреть лог раз в минуту.

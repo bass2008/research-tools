@@ -24,6 +24,7 @@ DATA_FILES = frozenset({
     "chakra-personal.json",
     "chakras.json",
     "in-positions.json",
+    "material-karma.json",
     "pairs.json",
     "points.json",
     "sections.json",

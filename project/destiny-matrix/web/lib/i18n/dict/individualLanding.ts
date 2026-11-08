@@ -152,12 +152,12 @@ export const individualLanding = {
   cmpRows: {
     ru: [
       ["Когда", "мгновенно", "обычно через 1 рабочий день, максимум 3", "по записи, час разговора"],
-      ["Что внутри", "20 разделов, каждая точка отдельно", "около 15 тыс. слов о вас: связи, главный узел, план", "разговор; запись или PDF дают не всегда"],
+      ["Что внутри", "21 раздел, каждый отдельно", "около 15 тыс. слов о вас: связи, главный узел, план", "разговор; запись или PDF дают не всегда"],
       ["Ваш вопрос", "—", "ответят главы и раздел вопросов", "да"],
     ],
     en: [
       ["When", "instantly", "usually in 1 working day, at most 3", "by appointment, an hour of talk"],
-      ["What is inside", "20 sections, each point separately", "about 15,000 words about you: links, the main knot, a plan", "a talk; a recording or a PDF not always"],
+      ["What is inside", "21 sections, each on its own", "about 15,000 words about you: links, the main knot, a plan", "a talk; a recording or a PDF not always"],
       ["Your question", "—", "answered by the chapters and the questions section", "yes"],
     ],
   } satisfies Pair<[string, string, string, string][]>,

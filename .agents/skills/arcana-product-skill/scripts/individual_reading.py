@@ -20,6 +20,20 @@ from engine.matrix import calculate, digit_sum, fold  # noqa: E402
 WORK = Path(os.environ["ARCANA_REPORTS_DIR"]) if os.environ.get("ARCANA_REPORTS_DIR") else PROJECT / "reports/individual"
 LOCAL = re.compile(r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$")
 
+def material_attitude(m):
+    # Q = C + L; matrices saved before 08.11.2026 have no material_karma field.
+    karma = m.get("material_karma")
+    if isinstance(karma, list) and len(karma) == 3:
+        return karma[1]
+    c, l = m.get("year"), m.get("comfort_east")
+    if not (isinstance(c, int) and isinstance(l, int)):
+        return None
+    q = c + l
+    while q > 22:
+        q = sum(map(int, str(q)))
+    return q
+
+
 POINTS = [
     ("A", "day", "Портрет личности", "крупный круг слева"),
     ("B", "month", "Духовная задача", "крупный круг сверху"),
@@ -37,6 +51,7 @@ POINTS = [
     ("N", ("karmic_tail", 1), "Середина кармического хвоста", "малая точка между внутренним и крупным кругом снизу"),
     ("O", ("chakras", 1, "physics"), "Аджна · физика", "малая точка между крупным и внутренним кругом слева"),
     ("P", ("talent", 1), "Аджна · энергия, середина линии талантов", "малая точка между крупным и внутренним кругом сверху"),
+    ("Q", material_attitude, "Отношение к материальному", "малая точка на правом луче между крупным правым и внутренним правым кругом"),
     ("S", ("chakras", 3, "physics"), "Анахата · физика", "малая точка слева, ближе к центру"),
     ("T", ("chakras", 3, "energy"), "Анахата · энергия", "малая точка сверху, ближе к центру"),
     ("R2", ("money", 1), "Середина денежной линии", "малая точка справа снизу от центра, ближе к правому кругу"),
@@ -50,7 +65,7 @@ POINTS = [
 LISOVSKAYA = {"A": "маска, внешнее проявление", "B": "главный талант", "C": "материальная карма",
               "D": "кармическая задача", "E": "центр, «наше Я»", "F": "вдохновение", "G": "триггер",
               "H": "усилитель", "I": "усилитель", "J": "родители", "O": "дети", "P": "дополнительный талант",
-              "K": "дополнительный талант", "L": "вход в финансы", "N": "помощница кармического хвоста",
+              "K": "дополнительный талант", "L": "вход в финансы", "Q": "отношение к материальному", "N": "помощница кармического хвоста",
               "M": "чего хочет от отношений", "R1": "взаимоотношения: через что можно примириться",
               "R": "дуал", "R2": "прибыль и заработок"}
 SCHEME = ("Над статьёй читатель видит схему своей матрицы без букв: только числа в кругах, подписи «небо» "
@@ -76,6 +91,9 @@ YEAR_SKELETON = ("key", "year", "time", "quarter", "relations", "money", "plan")
 PAIR_SKELETON = ("key", "findings", "talents", "character", "body", "money", "relations", "family", "karma", "close",
                  "selfcheck", "plan")
 OPERATORS = ("+", "=", "↔", "→")
+# year matrix points as the site draws them; P1–P3 are the thirds of the year
+YEAR_LETTERS = ("A", "B", "C", "D", "E", "F", "G", "H", "I", "P1", "P2", "P3")
+MONTH_LETTERS = YEAR_LETTERS[:9]
 POINT_LETTERS = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
                  "R", "R1", "R2", "S", "T"}
 SIGNS = [  # sign, start (month, day), element, Golden Dawn trump (site numbering), traditional ruler
@@ -150,7 +168,7 @@ YEAR_ROLES = [
 def year_blocks(task, name):
     inputs, year = task["inputs"], task["year"]
     if inputs.get("birth"):
-        return year_block(inputs["birth"], year, name)
+        return year_block(inputs["birth"], year, name, drawn=True)
     roles = (task.get("automatic_reading") or {}).get("roles") or {}
     who = {"parent": "родитель", "child": "ребёнок"}
     out = [f"## Год {year} для двоих", "",
@@ -195,10 +213,10 @@ def year_details(task, name):
             "По книге блок предназначений в матрице года читают по третям года. Первые два периода — события и задачи, "
             "третий — итог того, что начато в первых двух, и свои задачи. Пары внутри периода в этой матрице — духовная и "
             "материальная стороны (`read_section.py forecast`, «Что делать с блоком предназначений»).", "",
-            "| Период | Как считается | Составляющие | Итог периода |", "|---|---|---|---|"]
+            "| Период | Как считается | Составляющие | Итог периода (точка на колесе третей) |", "|---|---|---|---|"]
     how = ["B + D и A + C", "F + H и G + I", "итог первого + итог второго"]
-    for (label, rule), p in zip(zip(["январь–апрель", "май–август", "сентябрь–декабрь"], how), lisovskaya.year_periods(y)):
-        out.append(f"| {label} | {rule} | {', '.join(f'{n} {name(n)}' for n in p['parts'])} | {p['total']} {name(p['total'])} |")
+    for j, ((label, rule), p) in enumerate(zip(zip(["январь–апрель", "май–август", "сентябрь–декабрь"], how), lisovskaya.year_periods(y)), 1):
+        out.append(f"| {label} | {rule} | {', '.join(f'{n} {name(n)}' for n in p['parts'])} | {p['total']} {name(p['total'])} · `P{j}` |")
     out += ["", "### Матрицы месяцев", "",
             f"По книге («Прогноз на месяц»): дата месяца — день = сумма цифр года ({digit_sum(year)}) + номер месяца, месяц = номер "
             "месяца, год = год; она складывается с датой рождения, остальные точки — как в матрице года. Значения точек те же, "
@@ -225,7 +243,7 @@ def year_details(task, name):
     return out
 
 
-def year_block(birth, year, name, person=None):
+def year_block(birth, year, name, person=None, drawn=False):
     y = lisovskaya.year_matrix(birth, year)
     born = dt.date.fromisoformat(str(birth))
     days = 366 if calendar.isleap(year) else 365
@@ -234,7 +252,9 @@ def year_block(birth, year, name, person=None):
            "Основа годового разбора — «Прогноз на год» Лисовской (`library/lisovskaya-prognosis`, `read_section.py year`). "
            f"Дата года: день — сумма дней года ({days}) → {fold(digit_sum(days))}, месяц — сумма цифр года + 12 = "
            f"{digit_sum(year) + 12} (не сворачивается до сложения с месяцем рождения, как 19 в примере книги); она складывается с датой рождения, остальные точки — суммы соседних. "
-           "На схеме над статьёй этой матрицы нет: читатель видит её только из текста.", "",
+           + ("Над статьёй сайт рисует эту матрицу, как виджет страниц года: девять точек и колесо третей. У карт её точек пиши "
+            "`year` с буквами из таблицы (трети — `P1`–`P3`), у карт матрицы месяца — `month`: `{\"n\": 1, \"points\": [\"E\"]}`."
+            if drawn else "На схеме над статьёй этой матрицы нет: у её карт `year` не пиши."), "",
            "| Точка (буква сайта) | Место в матрице года | Аркан | Что значит в прогнозе (по книге) |", "|---|---|---|---|"]
     for letter, place, role in YEAR_ROLES:
         out.append(f"| {letter} | {place} | {y[letter]} {name(y[letter])} | {role} |")
@@ -282,9 +302,9 @@ def extra_block(m, name):
         karma = lisovskaya.material_karma(mx)
         strength = lisovskaya.family_strength(mx)
         family = dict(zip("FGHI", lisovskaya.family_lines(mx).values()))
-        out += ["", "Досчитано по книгам Лисовской (`engine/lisovskaya.py`, формулы сверены с примерами автора; на схеме сайта нет):",
-                f"- Q, отношение к материальному = C + L: {karma[1]} {name(karma[1])}; линия материальной кармы C → Q → L: "
-                + " → ".join(map(str, karma)),
+        out += ["", "Материальная карма C → Q → L — на схеме и в разделе «Материальная карма» автоматического разбора "
+                "(с 08.11.2026; Q не называть «досчитанной»): " + " → ".join(f"{n} {name(n)}" for n in karma),
+                "", "Досчитано по книгам Лисовской (`engine/lisovskaya.py`, формулы сверены с примерами автора; на схеме сайта нет):",
                 f"- сила рода = F + G + H + I: {strength} {name(strength)}"
                 + (" — совпадает с социальным предназначением (так у 68 % дат: оба числа собраны из тех же четырёх углов), "
                    "отдельным открытием это не считается" if strength == mx.purpose_social else
@@ -361,6 +381,8 @@ def matrix_type_block(m, name, visible):
 
 
 def point_value(m, key):
+    if callable(key):
+        return key(m)
     if isinstance(key, str):
         return m.get(key)
     value = m
@@ -460,8 +482,6 @@ def pair_details(m, name):
 
 def pair_block(m, name):
     places = {letter: place for letter, _, _, place in POINTS if letter}
-    # The couple chart draws Q, unlike the personal one.
-    places["Q"] = "малая точка на правом луче между крупным правым и внутренним правым кругом"
     labels = {letter: label for letter, _, label, _ in POINTS if letter}
     out = ["Над статьёй — схема матрицы пары (третья колонка) без букв, точки на тех же местах, что в личной схеме. "
            "Чакр и возрастной шкалы у пары нет. Буквы — для тебя; читателю называй точку по месту и смыслу.", "",
@@ -712,6 +732,14 @@ def points_ok(points):
     return isinstance(points, list) and len(points) <= 6 and all(x in POINT_LETTERS for x in points)
 
 
+def forecast_ok(x):
+    year, month = x.get("year", []), x.get("month")
+    return isinstance(year, list) and len(year) <= 6 and all(v in YEAR_LETTERS for v in year) and (
+        month is None or isinstance(month, dict) and set(month) == {"n", "points"} and isinstance(month["n"], int)
+        and 1 <= month["n"] <= 12 and isinstance(month["points"], list) and 1 <= len(month["points"]) <= 6
+        and all(v in MONTH_LETTERS for v in month["points"]))
+
+
 def formula_errors(f, where):
     if not isinstance(f, dict) or set(f) - {"items", "caption"} or not isinstance(f.get("items"), list) \
             or not 2 <= len(f["items"]) <= 9 or len(str(f.get("caption", ""))) > 1000:
@@ -721,8 +749,9 @@ def formula_errors(f, where):
         if isinstance(x, str):
             if x not in OPERATORS:
                 errors.append(f"{where}: знак формулы «{x}» — допустимы {' '.join(OPERATORS)}")
-        elif not isinstance(x, dict) or set(x) - {"points"} != {"arcanum", "label"} or not isinstance(x.get("arcanum"), int) \
-                or not 1 <= x["arcanum"] <= 22 or not text_ok(x.get("label"), 120) or not points_ok(x.get("points", [])):
+        elif not isinstance(x, dict) or set(x) - {"points", "year", "month"} != {"arcanum", "label"} or not isinstance(x.get("arcanum"), int) \
+                or not 1 <= x["arcanum"] <= 22 or not text_ok(x.get("label"), 120) or not points_ok(x.get("points", [])) \
+                or not forecast_ok(x):
             errors.append(f"{where}: карта формулы {json.dumps(x, ensure_ascii=False)[:120]}")
     return errors
 
@@ -752,9 +781,9 @@ def report_shape_errors(a):
         if not isinstance(cards, list) or len(cards) > 4:
             errors.append(f"{where}: cards — до четырёх карт")
         for card in cards if isinstance(cards, list) else []:
-            if set(card) - {"points"} != {"arcanum", "label", "caption"} or not isinstance(card.get("arcanum"), int) \
+            if set(card) - {"points", "year", "month"} != {"arcanum", "label", "caption"} or not isinstance(card.get("arcanum"), int) \
                     or not 1 <= card["arcanum"] <= 22 or not text_ok(card.get("label"), 150) \
-                    or not text_ok(card.get("caption"), 1000) or not points_ok(card.get("points", [])):
+                    or not text_ok(card.get("caption"), 1000) or not points_ok(card.get("points", [])) or not forecast_ok(card):
                 errors.append(f"{where}: карта {json.dumps(card, ensure_ascii=False)[:120]}")
         actions = c.get("actions", [])
         if not isinstance(actions, list) or len(actions) > 8 or not all(text_ok(x, 2000) for x in actions):
@@ -794,9 +823,9 @@ def report_shape_errors(a):
                     errors.append(f"{where}: шкала времени {json.dumps(value, ensure_ascii=False)[:160]}")
             elif kind == "selfcheck":
                 if not isinstance(value, list) or not 1 <= len(value) <= 12 or not all(
-                        isinstance(x, dict) and set(x) - {"points"} == {"arcanum", "label", "plus", "minus"}
+                        isinstance(x, dict) and set(x) - {"points", "year", "month"} == {"arcanum", "label", "plus", "minus"}
                         and isinstance(x.get("arcanum"), int) and 1 <= x["arcanum"] <= 22 and text_ok(x.get("label"), 120)
-                        and points_ok(x.get("points", [])) and all(isinstance(x.get(k), list) and 1 <= len(x[k]) <= 6
+                        and points_ok(x.get("points", [])) and forecast_ok(x) and all(isinstance(x.get(k), list) and 1 <= len(x[k]) <= 6
                                                                   and all(text_ok(y, 1000) for y in x[k]) for k in ("plus", "minus"))
                         for x in value):
                     errors.append(f"{where}: самопроверка {json.dumps(value, ensure_ascii=False)[:160]}")
@@ -896,10 +925,10 @@ def chakra_paragraphs(a):
     return counts
 
 
-def report_points(a):
+def report_items(a):
     for i, c in enumerate(a["chapters"], 1):
         for card in c.get("cards", []):
-            yield i, card["arcanum"], card.get("points", [])
+            yield i, card
         for b in c["blocks"]:
             if not isinstance(b, dict):
                 continue
@@ -907,9 +936,70 @@ def report_points(a):
             for f in formulas:
                 for x in f["items"]:
                     if isinstance(x, dict):
-                        yield i, x["arcanum"], x.get("points", [])
+                        yield i, x
             for x in b.get("selfcheck", []):
-                yield i, x["arcanum"], x.get("points", [])
+                yield i, x
+
+
+def report_points(a):
+    for i, x in report_items(a):
+        yield i, x["arcanum"], x.get("points", [])
+
+
+def forecast_errors(a, task):
+    """`year` and `month` name points of the year and month matrices the site draws over a year reading."""
+    errors, warnings = [], []
+    birth, year = ((task or {}).get("inputs") or {}).get("birth"), (task or {}).get("year")
+    used = [(i, x) for i, x in report_items(a) if x.get("year") or x.get("month")]
+    if not (birth and year):
+        return ([f"глава {i}: year и month — только в разборе на год одной даты" for i, _ in used[:3]] if task else []), []
+    y = lisovskaya.year_matrix(birth, year)
+    values = {**{k: y[k] for k in MONTH_LETTERS}, **{f"P{j}": p["total"] for j, p in enumerate(lisovskaya.year_periods(y), 1)}}
+    for i, x in used:
+        for letter in x.get("year", []):
+            if values[letter] != x["arcanum"]:
+                errors.append(f"глава {i}: в точке {letter} матрицы {year} года стоит {values[letter]}, а карта — {x['arcanum']}")
+        month = x.get("month")
+        if month:
+            m = {k: v for k, v in lisovskaya.month_matrix(birth, year, month["n"]).items() if k in MONTH_LETTERS}
+            for letter in month["points"]:
+                if m[letter] != x["arcanum"]:
+                    errors.append(f"глава {i}: в точке {letter} матрицы месяца {month['n']} стоит {m[letter]}, а карта — {x['arcanum']}")
+    if not used:
+        warnings.append("ни у одной карты нет year или month: схем матрицы года и месяцев рядом с картами не будет")
+    # A repeat is drawn as an arc only through the named points: a card, a self-check line or a whole formula
+    # shares one map, so the points are gathered over it.
+    for i, group in forecast_groups(a):
+        for (scope, n), listed in group.items():
+            matrix = values if scope == "year" else {k: v for k, v in lisovskaya.month_matrix(birth, year, scope).items() if k in MONTH_LETTERS}
+            rest = [k for k, v in matrix.items() if v == n and k not in listed]
+            if rest:
+                where = f"матрице {year} года" if scope == "year" else f"матрице месяца {scope}"
+                warnings.append(f"глава {i}: карта {n} стоит в {where} ещё в {', '.join(rest)} — назови все точки, чтобы связь "
+                                "нарисовалась линией")
+    return errors, warnings
+
+
+def forecast_groups(a):
+    def gather(items):
+        out = {}
+        for x in items:
+            if x.get("year"):
+                out.setdefault(("year", x["arcanum"]), set()).update(x["year"])
+            if x.get("month"):
+                out.setdefault((x["month"]["n"], x["arcanum"]), set()).update(x["month"]["points"])
+        return out
+    for i, c in enumerate(a["chapters"], 1):
+        for card in c.get("cards", []):
+            yield i, gather([card])
+        for b in c["blocks"]:
+            if not isinstance(b, dict):
+                continue
+            formulas = [b["formula"]] if "formula" in b else [b["finding"]["formula"]] if b.get("finding", {}).get("formula") else []
+            for f in formulas:
+                yield i, gather([x for x in f["items"] if isinstance(x, dict)])
+            for x in b.get("selfcheck", []):
+                yield i, gather([x])
 
 
 def check_report(a, task, online):
@@ -931,6 +1021,10 @@ def check_report(a, task, online):
                 errors.append(f"глава {i}: в точке {letter} стоит {value}, а карта — {arcanum}")
         if allowed and arcanum not in allowed:
             warnings.append(f"глава {i}: карты {arcanum} нет в расчёте и в досчитанных точках — формула должна быть в тексте")
+    if task:
+        more_errors, more_warnings = forecast_errors(a, task)
+        errors += more_errors
+        warnings += more_warnings
     kinds = [c["kind"] for c in a["chapters"]]
     blocks = [b for c in a["chapters"] for b in c["blocks"] if isinstance(b, dict)]
     inserted = {b["insert"] for b in blocks if "insert" in b}

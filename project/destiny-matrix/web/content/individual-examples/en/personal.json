@@ -98,7 +98,7 @@
        "caption": "**12 = 12.** The Hanged Man stands both in the mask and in the spiritual purpose — for about one date in twenty. Lisovskaya writes that the spiritual purpose works together with the mask, the centre and the main talent and serves as a landmark all your life, long before sixty. For you a pause is a lifelong lesson."
       }
      },
-     "The main argument of the matrix is between this pause and the centre. The centre holds the Wheel: a sense of timing, a love of movement, the ability to notice a turn before others do. The Chariot — speed and a goal — appears on the scheme twice, in the middle of the relationship line and in the children’s point, and once more in the calculated point of attitude to the material. Inside lives a person of movement. On the outside the Hanged Man teaches waiting. The energy of the centre does not always open up at full strength, especially when the mask holds a bigger energy (more on this in the findings), and in your case twelve is bigger than ten. So people around you see your pause more often than your inner pace, and you yourself sometimes take someone else’s “be patient” for your own decision.",
+     "The main argument of the matrix is between this pause and the centre. The centre holds the Wheel: a sense of timing, a love of movement, the ability to notice a turn before others do. The Chariot — speed and a goal — appears on the scheme twice, in the middle of the relationship line and in the children’s point, and once more in point Q, the attitude to the material. Inside lives a person of movement. On the outside the Hanged Man teaches waiting. The energy of the centre does not always open up at full strength, especially when the mask holds a bigger energy (more on this in the findings), and in your case twelve is bigger than ten. So people around you see your pause more often than your inner pace, and you yourself sometimes take someone else’s “be patient” for your own decision.",
      {
       "h3": "What the Wheel adds"
      },
@@ -477,7 +477,9 @@
          {
           "arcanum": 7,
           "label": "Attitude to the material",
-          "points": []
+          "points": [
+           "Q"
+          ]
          },
          "=",
          {
@@ -496,10 +498,10 @@
           ]
          }
         ],
-        "caption": "**7 = 7 = 7.** The calculated point of attitude to the material (the material task 21 plus the entry to money 4: 25 → 7), the middle of the relationship line and the children’s point are one Chariot."
+        "caption": "**7 = 7 = 7.** The Chariot appears at point Q for your attitude to the material (material task 21 plus entry to money 4: 25 → 7), in the middle of the relationship line and at the children’s point."
        },
        "text": [
-        "In money you want to achieve things quickly, in a quarrel to make peace sooner through action, with younger people to lead them forward. This is one card in three places. The line of material karma runs from the material task to the centre: the World, then the calculated point of attitude to the material, then the entry to money. The middle point, which is not on the scheme, describes your mood about money. Yours holds the Chariot — speed, a goal, a dash. You will find it in the middle of the relationship line too, which shows through what you can make peace with a person, and in the children’s point.",
+        "In money you want to achieve things quickly, in a quarrel to make peace sooner through action, with younger people to lead them forward. This is one card in three places. The line of material karma runs from the material task to the centre: the World, then point Q, the attitude to the material, then the entry to money. The middle point Q describes your mood about money. Yours holds the Chariot — speed, a goal, a dash. You will find it in the middle of the relationship line too, which shows through what you can make peace with a person, and in the children’s point.",
         "In money it is the wish to set a goal and dash for it; in the minus of the seven it is the habit of sacrificing your interests and wishes for the sake of the material. In reconciliation it is easier to come to terms with you through action than through talk: to go somewhere together, to do something, to rearrange things. In your attitude to children — your own, other people’s or children in general — it is the wish to develop them and move them forward.",
         "The risk is substituting one thing for another: making peace with a purchase, curing a quarrel with a trip you cannot afford, hurrying a child or yourself towards a result because standing still is unbearable. The strength is the same speed directed at a clear goal and shared with another person."
        ],
@@ -764,7 +766,9 @@
         {
          "arcanum": 7,
          "label": "Attitude to the material",
-         "points": []
+         "points": [
+          "Q"
+         ]
         },
         "→",
         {
@@ -775,7 +779,7 @@
          ]
         }
        ],
-       "caption": "**21 → 7 → 4.** The line of material karma: the World sets the theme, the calculated Chariot (21 + 4 = 25 → 7) shows your mood about money, the Emperor is the entry."
+       "caption": "**21 → 7 → 4.** The line of material karma: the World sets the theme, the Chariot at point Q (21 + 4 = 25 → 7) shows your mood about money, and the Emperor is the entry."
       }
      },
      "In material matters you can do more than you allow yourself. The main point of the line is the World: scale, freedom from borders, other cities and countries, languages, big projects. In its minus — closedness, categorical thinking and a fear of expanding. This line is lived from birth mostly in the minus, and the task is to notice how its energies work in you and to bring them into the plus.",
@@ -1121,7 +1125,7 @@
      {
       "h3": "What fills you up"
      },
-     "**Movement.** The Chariot appears in your matrix three times, counting the calculated point, and the seven is charged with energy precisely in motion: a walk with a route, cycling, swimming, dancing, a weekend hike. This restores you faster than the sofa.",
+     "**Movement.** The Chariot appears in your matrix three times, counting point Q, and the seven is charged with energy precisely in motion: a walk with a route, cycling, swimming, dancing, a weekend hike. This restores you faster than the sofa.",
      "**A change of scene.** The Wheel in the centre loves a turn. The same weekends in the same place stop being restful after a month. Something small is enough: another park, a new route, a day trip to a nearby town.",
      "**The warmth of people.** The Sun in the dual point and in the personal purpose asks for light: company, laughter, a shared celebration.",
      "**A finished stage.** Judgement in the point of inspiration makes marking what you have done a form of rest too. A small ritual at the end of a project or a hard week — a dinner, a trip, simply a note of “what worked” — restores your strength better than jumping straight into the next task.",

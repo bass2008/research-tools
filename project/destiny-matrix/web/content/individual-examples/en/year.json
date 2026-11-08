@@ -31,7 +31,10 @@
       "arcanum": 11,
       "label": "Centre of 2027",
       "caption": "The main background of the year, according to Lisovskaya. This energy isn’t in any point of your personal chart: the year brings it from outside, as a new tool.",
-      "points": []
+      "points": [],
+      "year": [
+       "E"
+      ]
      },
      {
       "arcanum": 7,
@@ -64,7 +67,10 @@
         {
          "arcanum": 11,
          "label": "Centre 2027",
-         "points": []
+         "points": [],
+         "year": [
+          "E"
+         ]
         },
         "→",
         {
@@ -86,7 +92,11 @@
         {
          "arcanum": 10,
          "label": "Year: money and trials",
-         "points": []
+         "points": [],
+         "year": [
+          "C",
+          "D"
+         ]
         },
         "=",
         {
@@ -127,7 +137,11 @@
         {
          "arcanum": 20,
          "label": "Year: what it is good for",
-         "points": []
+         "points": [],
+         "year": [
+          "H",
+          "P1"
+         ]
         },
         "=",
         {
@@ -174,13 +188,20 @@
       "arcanum": 6,
       "label": "Upper point of the year — the plus",
       "caption": "The strong side of 2027: partnership, contracts, choice. From April the Lovers also stand on your age ring.",
-      "points": []
+      "points": [],
+      "year": [
+       "B",
+       "P3"
+      ]
      },
      {
       "arcanum": 16,
       "label": "Upper right corner of the year — the weak spot",
       "caption": "What is better postponed and what throws you off: decisions in the heat of the moment, burnt bridges, rebuilding without a plan.",
-      "points": []
+      "points": [],
+      "year": [
+       "G"
+      ]
      }
     ],
     "blocks": [
@@ -392,19 +413,31 @@
         {
          "arcanum": 20,
          "label": "January–April",
-         "points": []
+         "points": [],
+         "year": [
+          "P1",
+          "H"
+         ]
         },
         "+",
         {
          "arcanum": 4,
          "label": "May–August",
-         "points": []
+         "points": [],
+         "year": [
+          "P2",
+          "I"
+         ]
         },
         "=",
         {
          "arcanum": 6,
          "label": "September–December",
-         "points": []
+         "points": [],
+         "year": [
+          "P3",
+          "B"
+         ]
         }
        ],
        "caption": "**20 + 4 = 24 → 6.** The result of winter and spring and the result of summer add up to autumn. The Lovers at the end of the year are a choice you will make relying on what you sorted through and built earlier."
@@ -528,7 +561,13 @@
       "arcanum": 8,
       "label": "Centre of January",
       "caption": "The background of the month is an honest count and making things official. This card is the hint of all of 2027 and the main point of your material karma.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 1,
+       "points": [
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -572,7 +611,13 @@
         {
          "arcanum": 8,
          "label": "Centre of January",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 1,
+          "points": [
+           "E"
+          ]
+         }
         },
         "=",
         {
@@ -625,7 +670,14 @@
       "arcanum": 12,
       "label": "Centre and plus of February",
       "caption": "The Hanged Man twice: a pause, a change of priorities, fresh ideas from an unexpected side. On your chart it stands at the entrance to relationships and in the parents’ point.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 2,
+       "points": [
+        "E",
+        "B"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -680,7 +732,14 @@
         {
          "arcanum": 12,
          "label": "Centre of February",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 2,
+          "points": [
+           "E",
+           "B"
+          ]
+         }
         },
         "=",
         {
@@ -718,7 +777,14 @@
       "arcanum": 7,
       "label": "Centre and support of March",
       "caption": "The Chariot twice: movement, trips, a team, a launch. On your chart it is the most frequent energy — it appears there four times.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 3,
+       "points": [
+        "F",
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -762,13 +828,27 @@
         {
          "arcanum": 7,
          "label": "Centre of March",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 3,
+          "points": [
+           "E",
+           "F"
+          ]
+         }
         },
         "=",
         {
          "arcanum": 7,
          "label": "Support of March",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 3,
+          "points": [
+           "F",
+           "E"
+          ]
+         }
         },
         "=",
         {
@@ -819,7 +899,13 @@
       "arcanum": 11,
       "label": "Centre of April and centre of the year",
       "caption": "Strength in the centre of the month matches the centre of the year. April is a scaled-down copy of 2027 on which it is handy to check what works.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 4,
+       "points": [
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -891,7 +977,13 @@
       "arcanum": 6,
       "label": "Centre of May",
       "caption": "The Lovers — choice, alliance, contracts. This card is the plus of the whole year, the result of September–December and the point of your age ring from April.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 5,
+       "points": [
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -936,7 +1028,13 @@
         {
          "arcanum": 15,
          "label": "Plus of May",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 5,
+          "points": [
+           "B"
+          ]
+         }
         },
         "=",
         {
@@ -973,13 +1071,26 @@
       "arcanum": 10,
       "label": "Centre of June",
       "caption": "The Wheel — a chance and a repeat of old scenarios at the same time. On your chart it is your spiritual task, your main talent.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 6,
+       "points": [
+        "E",
+        "C"
+       ]
+      }
      },
      {
       "arcanum": 16,
       "label": "Plus of June",
       "caption": "The Tower in the pure plus — rebuilding, renovation, renewal. In June the weak spot of the year works for you.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 6,
+       "points": [
+        "B"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1033,13 +1144,24 @@
         {
          "arcanum": 10,
          "label": "Centre of June",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 6,
+          "points": [
+           "E",
+           "C"
+          ]
+         }
         },
         "=",
         {
          "arcanum": 10,
          "label": "Minus of the year",
-         "points": []
+         "points": [],
+         "year": [
+          "C",
+          "D"
+         ]
         },
         "=",
         {
@@ -1073,7 +1195,13 @@
       "arcanum": 5,
       "label": "Centre of July",
       "caption": "The Hierophant — mentor, tradition, learning, family celebrations. On your chart it stands in the centre and matches your personal purpose.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 7,
+       "points": [
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1117,7 +1245,13 @@
         {
          "arcanum": 5,
          "label": "Centre of July",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 7,
+          "points": [
+           "E"
+          ]
+         }
         },
         "=",
         {
@@ -1162,7 +1296,14 @@
       "arcanum": 9,
       "label": "Centre of August",
       "caption": "The Hermit — time for yourself, a holiday, focus, personal boundaries. In the year’s matrix it is the support.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 8,
+       "points": [
+        "E",
+        "D"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1230,7 +1371,13 @@
         {
          "arcanum": 18,
          "label": "Plus of August",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 8,
+          "points": [
+           "B"
+          ]
+         }
         },
         "=",
         {
@@ -1264,7 +1411,13 @@
       "arcanum": 13,
       "label": "Centre of September",
       "caption": "Death — completion and renewal, “finances need changes”. On your chart it is the entrance to the money line.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 9,
+       "points": [
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1308,7 +1461,13 @@
         {
          "arcanum": 13,
          "label": "Centre of September",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 9,
+          "points": [
+           "E"
+          ]
+         }
         },
         "=",
         {
@@ -1353,7 +1512,13 @@
       "arcanum": 20,
       "label": "Plus of October",
       "caption": "Judgement in the pure plus — the results of past actions. On your chart it is the middle of the money line, the point of profit.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 10,
+       "points": [
+        "B"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1424,7 +1589,13 @@
         {
          "arcanum": 20,
          "label": "Plus of October",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 10,
+          "points": [
+           "B"
+          ]
+         }
         },
         "=",
         {
@@ -1462,7 +1633,13 @@
       "arcanum": 21,
       "label": "Plus of November",
       "caption": "The World in the pure plus — completion, a wide horizon, trips, freedom. The card that closes the circle of the major arcana.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 11,
+       "points": [
+        "B"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1507,13 +1684,23 @@
         {
          "arcanum": 6,
          "label": "Minus of November",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 11,
+          "points": [
+           "D"
+          ]
+         }
         },
         "=",
         {
          "arcanum": 6,
          "label": "Result of September–December",
-         "points": []
+         "points": [],
+         "year": [
+          "P3",
+          "B"
+         ]
         }
        ],
        "caption": "**6 = 6.** The Lovers, the result of the last third of the year, stand in the point of trials in November. The choice that the whole autumn led up to comes hardest this month."
@@ -1550,7 +1737,14 @@
       "arcanum": 7,
       "label": "Centre and support of December",
       "caption": "The Chariot twice — movement, plans, a team. The year that began after your year of the Chariot ends with it.",
-      "points": []
+      "points": [],
+      "month": {
+       "n": 12,
+       "points": [
+        "F",
+        "E"
+       ]
+      }
      }
     ],
     "blocks": [
@@ -1622,7 +1816,13 @@
         {
          "arcanum": 22,
          "label": "Plus of December",
-         "points": []
+         "points": [],
+         "month": {
+          "n": 12,
+          "points": [
+           "B"
+          ]
+         }
         },
         "→",
         {
@@ -1655,7 +1855,11 @@
       "arcanum": 6,
       "label": "Plus of the year and your ring from April",
       "caption": "The Lovers in the upper point of the year and on the age ring from 7 April 2027: alliance, choice, partnership.",
-      "points": []
+      "points": [],
+      "year": [
+       "B",
+       "P3"
+      ]
      }
     ],
     "blocks": [
@@ -1780,7 +1984,11 @@
       "arcanum": 10,
       "label": "Material point of the year — and of every month",
       "caption": "The Wheel in the right point of the year also stands in the right point of all twelve monthly matrices — that is how the calculation works. The risk of repetition and impulse accompanies the whole year.",
-      "points": []
+      "points": [],
+      "year": [
+       "C",
+       "D"
+      ]
      }
     ],
     "blocks": [
@@ -1799,18 +2007,20 @@
         {
          "arcanum": 21,
          "label": "Attitude to the material",
-         "points": []
+         "points": [
+          "Q"
+         ]
         },
         "→",
         {
          "arcanum": 13,
-         "label": "Entrance to the money line",
+         "label": "Entry of the money line",
          "points": [
           "L"
          ]
         }
        ],
-       "caption": "**8 → 21 → 13.** Your material karma. The middle point is calculated according to the book (8 + 13 = 21) and isn’t visible on the chart."
+       "caption": "**8 → 21 → 13.** Your material karma. The middle point is the sum of the two outer ones: 8 + 13 = 21."
       }
      },
      {
@@ -2058,6 +2268,9 @@
          "Having the last word in an argument matters more than the decision",
          "You keep control of what you could delegate",
          "A week of pushing is followed by a week of emptiness"
+        ],
+        "year": [
+         "E"
         ]
        },
        {
@@ -2073,6 +2286,10 @@
          "“Right now” decisions you later regret",
          "Returning to schemes and people who have let you down before",
          "Failures are explained by bad luck"
+        ],
+        "year": [
+         "C",
+         "D"
         ]
        },
        {
@@ -2088,6 +2305,10 @@
          "An eternal “we’ll see” on important questions",
          "Choices are made under pressure or out of pity",
          "Spending to please"
+        ],
+        "year": [
+         "B",
+         "P3"
         ]
        },
        {
@@ -2103,6 +2324,9 @@
          "After a heavy load you vanish from everyone",
          "You refuse help on principle",
          "Silence has turned into isolation"
+        ],
+        "year": [
+         "F"
         ]
        },
        {
@@ -2117,6 +2341,9 @@
          "Abrupt decisions in anger",
          "Burnt bridges you later regret",
          "Demolishing what was still holding"
+        ],
+        "year": [
+         "G"
         ]
        },
        {
@@ -2132,6 +2359,9 @@
          "You have taken on more than circumstances allow",
          "Failures are explained by external reasons",
          "There are plans, but no footing under them"
+        ],
+        "year": [
+         "A"
         ]
        }
       ]

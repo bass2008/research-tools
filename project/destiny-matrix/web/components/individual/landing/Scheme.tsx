@@ -4,7 +4,7 @@ import { CX, OUTLINE, POINT, R_IN as RI, R_OUT as RO, at, f1, poly, xy, type Siz
 
 const COLORS: Partial<Record<Letter, string>> = { A: "#d9ac1e", B: "#8e5bc4", C: "#1f9ed6", D: "#c9453a", F: "#3f5ec9", G: "#3f5ec9", H: "#159c69", I: "#dd7b2a", E: "#0e8f88" };
 const SIZE: Record<Size, [number, number]> = { big: [24, 19], mid: [19, 15.5], in: [15, 13], sm: [13, 11], ctr: [31, 23] };
-const ORDER: Letter[] = ["N", "O", "P", "S", "T", "R", "R1", "R2", "J", "K", "L", "M", "A", "F", "B", "G", "C", "H", "D", "I", "E"];
+const ORDER: Letter[] = ["N", "O", "P", "Q", "S", "T", "R", "R1", "R2", "J", "K", "L", "M", "A", "F", "B", "G", "C", "H", "D", "I", "E"];
 
 const TICKS = Array.from({ length: 80 }, (_, i) => {
   const a = 180 + i * 4.5, [x1, y1] = xy(a, RO + 22), [x2, y2] = xy(a, i % 5 ? RO + 27 : RO + 31);

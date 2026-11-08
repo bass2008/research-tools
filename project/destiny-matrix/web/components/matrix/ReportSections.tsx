@@ -6,7 +6,7 @@ import { DEFAULT_SITE, type SiteProfile } from "@/lib/siteProfile";
 // толкований нет вовсе: закрытый раздел приходит картами позиций и заглушкой.
 import { Paragraphs } from "@/components/enc/Sections";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
-import ChakraReadingView from "@/components/matrix/ChakraReadingView";
+import ChakraReadingView, { ChakraReadingBlock, type UnlockLink } from "@/components/matrix/ChakraReadingView";
 import CharacterConclusionView from "@/components/matrix/CharacterConclusionView";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CharacterRoleParts from "@/components/matrix/CharacterRoleParts";
@@ -43,6 +43,21 @@ export const forLocale = localized((L: Locale, site) => {
 
   return { arcanumTitle, publicHref, gridColumns };
 });
+
+/** Закрытая материальная карма: карты тройки и заглушка связного толкования той же формы. */
+function MaterialKarmaPreview({ locale: L, site, section, unlock }: {
+  locale: Locale; site?: SiteProfile; section: SectionOut; unlock: UnlockLink;
+}) {
+  return (
+    <div data-testid="material-karma-preview">
+      <LockedCards locale={L} cards={section.positions.map((p) => ({ n: p.arcanum, who: p.label, href: p.href }))} />
+      {section.tripleReading ? (
+        <ChakraReadingBlock row={section.tripleReading} locale={L} site={site} titleTag="p"
+          labelId={`${section.key}-locked-reading`} unlock={unlock} />
+      ) : null}
+    </div>
+  );
+}
 
 export default function ReportSections({ site = DEFAULT_SITE, locale: requestedLocale, ...localeProps }: ({
   sections: SectionOut[];
@@ -138,7 +153,12 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                   );
                 })}
               </ul>
-              {s.tailReading ? (
+              {s.tripleReading ? (
+                <div className="section-gap" data-testid="material-karma-reading">
+                  <ChakraReadingBlock row={s.tripleReading} locale={L} site={site} printing={printing}
+                    labelId={`${s.key}-reading`} titleTag="p" />
+                </div>
+              ) : s.tailReading ? (
                 <article className="section-gap report-article" data-testid="past-lives-tail-reading">
                   <Paragraphs items={s.tailReading.paragraphs} locale={L} />
                 </article>
@@ -194,6 +214,11 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
               }>
                 {s.longform?.layout === "chakras"
                   ? <ChakraReadingView site={site} locale={L} reading={s.longform} unlock={(className, label) => (
+                    <UnlockCta locale={L} className={className} place={place} section={s.key} matrixId={matrixId}
+                      unavailable={<span className={className}>{label}</span>}>{label}</UnlockCta>
+                  )} />
+                  : s.tripleReading
+                  ? <MaterialKarmaPreview locale={L} site={site} section={s} unlock={(className, label) => (
                     <UnlockCta locale={L} className={className} place={place} section={s.key} matrixId={matrixId}
                       unavailable={<span className={className}>{label}</span>}>{label}</UnlockCta>
                   )} />

@@ -190,7 +190,12 @@ def build_positions(ctx: Ctx) -> list[dict]:
     point_by_key = ctx.point_by_key
     out = []
     for key in SECTION_KEYS:
-        meta = section_meta[key]
+        meta = section_meta.get(key)
+        if meta is None:
+            # Раздел есть в методе, но у языка ещё нет его текста: страницу не собираем, а
+            # content.validate отметит недостачу — выдумывать перевод сборка не должна.
+            print(f"[{ctx.lang}] нет текста раздела {key}: страница не собрана")
+            continue
         title = ctx.text.section_title(key)
         item = {
             "key": key,
@@ -231,6 +236,11 @@ def build_positions(ctx: Ctx) -> list[dict]:
             "arcana": _arcanum_refs(ctx),
             "seo": seo.position(point, "point", ctx.lang),
         }
+        # A point page lists no report sections; the line article is the one it must lead to.
+        links = [{"label": ctx.text.section_title(k), "href": position_href(k)}
+                 for k in point["sections"] if k == "material_karma"]
+        if links:
+            item["links"] = links
         if point.get("article_sections"):
             item["article_sections"] = list(point["article_sections"])
         if point.get("faq"):
@@ -342,6 +352,9 @@ def build_all(lang: str = DEFAULT_LANG) -> dict[str, list[dict]]:
     # на этапе редакционной переработки и не заменяются общими значениями аркана.
     personal = Path(__file__).parent / "data" / lang / "chakra-personal.json"
     write_raw(lang, "chakra-personal.json", json.loads(personal.read_text(encoding="utf-8")))
+    # Связные толкования материальной кармы — тоже по точной тройке C–Q–L.
+    material = Path(__file__).parent / "data" / lang / "material-karma.json"
+    write_raw(lang, "material-karma.json", json.loads(material.read_text(encoding="utf-8")))
     pages = sum(len(items) for items in parts.values()) + 1
     print(f"[{lang}] страниц энциклопедии: {pages}")
     return parts

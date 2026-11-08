@@ -6753,6 +6753,22 @@
       "release": "unified"
     },
     {
+      "old_url": "/encyclopedia/month",
+      "entity_type": "month_article",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/month",
+      "sitemap": true,
+      "reason": "каноническая публичная страница",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
       "old_url": "/encyclopedia/position",
       "entity_type": "position_hub",
       "index_now": true,
@@ -7677,6 +7693,22 @@
       "canonical": "/encyclopedia/position/love_middle/9",
       "sitemap": true,
       "reason": "пересечение со спросом 557: 9 под сердцем в матрице судьбы",
+      "owner": "seo+product",
+      "release": "unified"
+    },
+    {
+      "old_url": "/encyclopedia/position/material_karma",
+      "entity_type": "section",
+      "index_now": true,
+      "impressions": null,
+      "clicks": null,
+      "backlinks": null,
+      "decision": "keep",
+      "new_url": null,
+      "status_code": 200,
+      "canonical": "/encyclopedia/position/material_karma",
+      "sitemap": true,
+      "reason": "каноническая позиция метода",
       "owner": "seo+product",
       "release": "unified"
     },

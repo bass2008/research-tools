@@ -33,6 +33,9 @@ export function useIndividualTerms(): Terms {
   return terms;
 }
 
+/** What one reading costs this buyer: from three paid on, `after_three`. */
+export const onePrice = (t: Terms) => t.bought >= 3 ? t.prices.after_three : t.prices.first;
+
 /** Any year can be chosen; the input only keeps it a plausible one. */
 export function YearInput({ value, onChange, label }: { value: number; onChange: (y: number) => void; label: string }) {
   return <input className="iyear" type="number" inputMode="numeric" min={1900} max={2200} value={value || ""} aria-label={label}

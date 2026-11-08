@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from sqlalchemy import select
 
+from app import printing
 from app.config import settings
 from app.models import Entitlement, Payment, Purchase, Reading, ReportJob, User
 
@@ -31,7 +32,7 @@ def test_pair_is_saved_once_whatever_the_order(client, auth):
 def test_corrected_names_reach_the_saved_pair_and_its_pdf(client, auth, db):
     headers, admin = auth(), auth(settings.admins[0])
     rid = client.post("/api/readings", json={"product": "pair", "inputs": PAIR}, headers=headers).json()["id"]
-    db.add(ReportJob(user_id=db.get(Reading, rid).user_id, reading_id=rid, status="done", object_key="v9/old.pdf"))
+    db.add(ReportJob(user_id=db.get(Reading, rid).user_id, reading_id=rid, status="done", object_key=f"{printing.PDF_REVISION}/old.pdf"))
     db.commit()
     fixed = {"a": {**PAIR["a"], "name": "Серёжа"}, "b": PAIR["b"]}
     again = client.post("/api/readings", json={"product": "pair", "inputs": fixed}, headers=headers).json()

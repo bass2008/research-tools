@@ -7,7 +7,10 @@ export const INDIVIDUAL_KINDS = {
 } as const;
 export type IndividualKind = keyof typeof INDIVIDUAL_KINDS;
 
-export interface IndividualCard { arcanum: number; label: string; caption: string; points?: string[] }
+// `points` are letters of the personal scheme; `year` and `month` — of the year matrix (with the thirds P1–P3) and of a month matrix.
+export interface MonthPoints { n: number; points: string[] }
+export interface ForecastPoints { year?: string[]; month?: MonthPoints | null }
+export interface IndividualCard extends ForecastPoints { arcanum: number; label: string; caption: string; points?: string[] }
 export interface IndividualSource { title: string; url: string; note: string }
 export interface IndividualChakraBlock { chakra: string }
 export interface IndividualSection extends Omit<Section, "paragraphs"> {
@@ -16,11 +19,11 @@ export interface IndividualSection extends Omit<Section, "paragraphs"> {
 export interface IndividualArticle { version?: undefined; title: string; lead: string; sections: IndividualSection[] }
 
 export type FormulaOperator = "+" | "=" | "↔" | "→";
-export interface FormulaItem { arcanum: number; label: string; points?: string[] }
+export interface FormulaItem extends ForecastPoints { arcanum: number; label: string; points?: string[] }
 export interface Formula { items: (FormulaItem | FormulaOperator)[]; caption?: string }
 export interface Finding { title: string; formula?: Formula | null; text: string[]; action?: string }
 export interface TimelineItem { age: string; arcanum: number; title: string; text: string; now?: boolean }
-export interface SelfCheckItem { arcanum: number; label: string; points?: string[]; plus: string[]; minus: string[] }
+export interface SelfCheckItem extends ForecastPoints { arcanum: number; label: string; points?: string[]; plus: string[]; minus: string[] }
 export type ReportBlock = Paragraph | IndividualChakraBlock | { formula: Formula } | { finding: Finding }
   | { timeline: TimelineItem[] } | { selfcheck: SelfCheckItem[] } | { insert: "chakras" | "karmic_tail" };
 export type ChapterKind = "key" | "findings" | "character" | "talents" | "money" | "relations" | "family" | "karma"

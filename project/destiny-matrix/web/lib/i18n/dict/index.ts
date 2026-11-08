@@ -20,6 +20,7 @@ import { pay, payForm, payResult } from "./pay";
 import { individualLanding } from "./individualLanding";
 import { individualLinks } from "./individualLinks";
 import { pairLinks } from "./pairLinks";
+import { yearLinks } from "./yearLinks";
 import { individualSale } from "./individualSale";
 import { common, meta } from "./common";
 import { home, homeMeta, quote, slides, unlockBox } from "./home";
@@ -46,6 +47,7 @@ export const D = {
   individualLanding,
   individualLinks,
   pairLinks,
+  yearLinks,
   individualSale,
   mapPoints,
   octagram,

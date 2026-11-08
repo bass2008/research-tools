@@ -6,14 +6,14 @@ from __future__ import annotations
 import calendar
 import datetime as _dt
 
-from .matrix import Matrix, digit_sum, fold
+from .matrix import Matrix, _material_karma, digit_sum, fold
 
 CORNERS = ("father_line", "mother_line", "descendants", "inheritance")
 
 
 def material_karma(m: Matrix) -> list[int]:
     """C → Q → L: материальная задача, «отношение к материальному» (C + L), вход денег."""
-    return [m.year, fold(m.year + m.comfort_east), m.comfort_east]
+    return _material_karma(m)
 
 
 def family_strength(m: Matrix) -> int:

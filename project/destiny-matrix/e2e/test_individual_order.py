@@ -57,30 +57,29 @@ def test_a_set_from_the_pay_page_opens_the_form_in_place(page):
 def test_the_year_widget_orders_on_the_pay_page_with_its_date(page):
     """«Заказать» в виджете года ведёт на «Купить»: разбор выбранного года и введённая дата уже в форме."""
     page.goto(f"{BASE}/year/7", wait_until="networkidle")
-    widget = page.get_by_test_id("year-reading-banner")
-    widget.locator("input").press_sequentially("07101988")
-    widget.locator(".yb-row button").click()
-    widget.locator(".yb-btn").click()
-    page.wait_for_url("**/pay?year=1&y=*")
+    widget = page.get_by_test_id("year-individual-offer")
+    widget.locator("#year-links-bd").fill("24.05.1981")
+    widget.locator(".lm-dform button.lm-btn-gold").click()
+    expect(widget.locator(".lm-map-cap")).to_contain_text("24.05.1981")
+    year = widget.locator(".yb-years button[aria-pressed=true]").inner_text()
+    widget.get_by_test_id("year-offer-order").first.click()
+    page.wait_for_url(f"**/pay?year=1&y={year}*")
     expect(page.locator('input[name="lp-set"][value="one"]')).to_be_checked()
     expect(page.locator(".lp-summary-card h3")).to_contain_text("год")
-    expect(page.locator("#lp-y0-y")).to_have_value("1988")
+    expect(page.locator("#lp-y0-y")).to_have_value("1981")
 
 
-def test_the_year_widget_explains_the_year_and_links_to_its_centre(page):
-    """После «Показать мой» — смысл центра года и ссылка на его статью, кроме статьи этого же центра."""
-    def show(path):
-        page.goto(f"{BASE}{path}", wait_until="networkidle")
-        widget = page.get_by_test_id("year-reading-banner")
-        widget.locator("input").press_sequentially("07101988")
-        widget.locator(".yb-row button").click()
-        result = page.get_by_test_id("year-reading-result")
-        expect(result.locator(".yb-mean")).not_to_be_empty()
-        return result
-
-    more = show("/year/1").get_by_test_id("year-reading-more")
-    href = more.get_attribute("href")
-    centre = int(re.search(r"/year/(\d+)$", href).group(1))
-    assert centre != 1, "pick a page of another centre for this date"
-    expect(more).to_contain_text(str(centre))
-    expect(show(f"/year/{centre}").get_by_test_id("year-reading-more")).to_have_count(0)
+def test_the_year_widget_follows_the_picked_year(page):
+    """Другой год в виджете — другая матрица года: подпись схемы, кнопка показа и заказ этого года."""
+    page.goto(f"{BASE}/year", wait_until="networkidle")
+    widget = page.get_by_test_id("year-individual-offer")
+    widget.locator("#year-links-bd").fill("17.09.1986")
+    widget.locator("#year-links-bd").press("Enter")
+    expect(widget.locator(".lm-map-cap")).to_contain_text("17.09.1986")
+    other = widget.locator(".yb-years button[aria-pressed=false]")
+    year = other.inner_text()
+    other.click()
+    expect(widget.locator(".lm-map-cap")).to_contain_text(f"17.09.1986 → {year}")
+    expect(widget.locator(".lm-dform button.lm-btn-gold")).to_contain_text(year)
+    expect(widget.get_by_test_id("year-offer-order").first).to_contain_text(year)
+    expect(widget.get_by_test_id("year-offer-order").first).to_have_attribute("href", re.compile(rf"y={year}"))

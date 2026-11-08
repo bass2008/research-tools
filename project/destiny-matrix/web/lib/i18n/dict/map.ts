@@ -15,6 +15,7 @@ export const mapPoints = {
   comfort_east: { ru: "Вход денежной линии", en: "Entry of the money line" } satisfies Phrase,
   comfort_south: { ru: "Вход отношений и хвоста", en: "Entry of relationships and the tail" } satisfies Phrase,
   karmic_tail_middle: { ru: "Середина кармического хвоста", en: "Middle of the karmic tail" } satisfies Phrase,
+  material_attitude: { ru: "Отношение к материальному", en: "Attitude to the material" } satisfies Phrase,
   ajna_physics: { ru: "Аджна, физика", en: "Ajna, physics" } satisfies Phrase,
   ajna_energy: { ru: "Аджна, энергия", en: "Ajna, energy" } satisfies Phrase,
   anahata_physics: { ru: "Анахата, физика", en: "Anahata, physics" } satisfies Phrase,
@@ -47,11 +48,11 @@ export const octagram = {
     en: (label: string, n: number, title: string) => `${label}: arcanum ${n} — ${title}`,
   } satisfies PhraseFn<[string, number, string]>,
   diagramAria: {
-    ru: "Октаграмма матрицы судьбы: восемь внешних позиций, четыре точки комфорта, центр и восемь "
-      + "точек второго порядка — середины линий любви, денег, кармического хвоста и таланта",
+    ru: "Октаграмма матрицы судьбы: восемь внешних позиций, четыре точки комфорта, центр и девять "
+      + "точек второго порядка — середины линий любви, денег, кармического хвоста, таланта и материальной кармы",
     en: "The octagram of the destiny matrix: eight outer positions, four comfort points, the centre "
-      + "and eight second-order points — the middles of the lines of love, money, the karmic tail "
-      + "and talent",
+      + "and nine second-order points — the middles of the lines of love, money, the karmic tail, "
+      + "talent and material karma",
   } satisfies Phrase,
   mapAria: {
     ru: (names: string) => `Схема матрицы судьбы, отмечено: ${names}`,
@@ -78,7 +79,7 @@ export const octagram = {
   hubWhereNextHint: { ru: "Справочник и полный разбор", en: "The encyclopedia and the full reading" } satisfies Phrase,
   karmicTail: { ru: "Кармический хвост", en: "Karmic tail" } satisfies Phrase,
   matrixForYear: { ru: "Матрица судьбы на год", en: "Destiny matrix for the year" } satisfies Phrase,
-  fullReadingAll: { ru: "Полный разбор всех 20 разделов —", en: "The full reading of all 20 sections —" } satisfies Phrase,
+  fullReadingAll: { ru: "Полный разбор всех 21 раздела —", en: "The full reading of all 21 sections —" } satisfies Phrase,
   calcFreeLead: {
     ru: "Расчёт бесплатный и идёт в браузере: дата рождения не уходит на сервер.",
     en: "The calculation is free and runs in the browser: the date of birth never goes to the server.",

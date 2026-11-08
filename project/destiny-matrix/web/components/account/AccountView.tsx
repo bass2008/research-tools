@@ -100,7 +100,6 @@ function MatrixName({ locale: requestedLocale, ...localeProps }: ({
         >
           ✎
         </button>
-        <AccessBadge locale={L} item={item} />
       </span>
     );
   }
@@ -198,7 +197,7 @@ export default function AccountView({ locale: requestedLocale }: { locale?: Loca
     const pair = it.product === "pair", open = pair ? `/readings/${it.id}` : `/matrices/${it.id}`;
     const trio = readingTrio({ birth: it.birth, ...it.inputs });
     return <li className={`cabinet-reading ${it.access}`} key={`r${it.id}`} data-testid={pair ? "pair-card" : "matrix-card"} data-product={it.product} data-birth={it.birth} data-access={it.access}>
-      <div className="cabinet-reading-kind">{symbol(trio, pair ? "∞" : "✧")}<span>{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span></div>
+      <div className="cabinet-reading-kind">{symbol(trio, pair ? "∞" : "✧")}<span className="cabinet-reading-tags"><span>{pair ? DP.kind[L] : D.account.kindPersonal[L]}</span><AccessBadge locale={L} item={it} /></span></div>
       <div className="cabinet-reading-name"><MatrixName locale={L} item={it} fallback={dates(it)} onSave={title => rename(it.id, title)} /></div>
       <p className="small">{dates(it)}</p>
       <div className="cabinet-reading-bottom"><span className="small">{it.access === "locked" ? en ? "Free sections" : "Бесплатные разделы" : en ? "Full reading" : "Полный разбор"}</span><Link href={open}><OpenReadingLabel locale={L} /> →</Link></div>
@@ -212,10 +211,10 @@ export default function AccountView({ locale: requestedLocale }: { locale?: Loca
     const ready = row.status === "done";
     const trio = readingTrio(row.inputs, row.year);
     return <li className="cabinet-reading" key={`i${row.id}`} data-testid="individual-card" data-status={ready ? "done" : "in-progress"}>
-      <div className="cabinet-reading-kind">{symbol(trio, "✦")}<span>{en ? "Individual reading" : "Индивидуальный разбор"}</span></div>
-      <div className="cabinet-reading-name"><span className="matname"><span>{ready ? row.title : en
-        ? `We are writing your ${row.year ? `${row.year} ` : ""}reading` : `Пишем ваш разбор${row.year ? ` на ${row.year} год` : ""}`}</span>
+      <div className="cabinet-reading-kind">{symbol(trio, "✦")}<span className="cabinet-reading-tags"><span>{en ? "Individual reading" : "Индивидуальный разбор"}</span>
         <ReadingBadges locale={L} item={{ access: "forever" }} inWork={!ready} /></span></div>
+      <div className="cabinet-reading-name"><span className="matname"><span>{ready ? row.title : en
+        ? `We are writing your ${row.year ? `${row.year} ` : ""}reading` : `Пишем ваш разбор${row.year ? ` на ${row.year} год` : ""}`}</span></span></div>
       <p className="small">{individualDates(row, birthLabel)}</p>
       {!ready && <p className="small">{en ? "We will notify you by email and here in your account when it is ready."
         : "Пришлём уведомление на почту и в кабинет, когда он будет готов."}</p>}

@@ -211,8 +211,7 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
     setDraft({ ...form, [who]: { ...form[who], [key]: value } });
   };
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = () => {
     const next = {} as StoredPair;
     for (const [who, label] of [["a", DP.first], ["b", DP.second]] as const) {
       const { name, day, month, year } = form[who];
@@ -244,7 +243,7 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
       {namesOpen ? (
         <div className={styles.whoName}>
           <label htmlFor={`pair-${who}-name`}>{DP.name[L]} <span className={styles.opt}>· {DP.optional[L]}</span></label>
-          <input id={`pair-${who}-name`} name={`${who}-name`} type="text" maxLength={60} value={form[who].name}
+          <input id={`pair-${who}-name`} name={`${who}-name`} type="text" autoComplete="off" maxLength={60} value={form[who].name}
             onChange={(e) => field(who, "name", e.target.value)} disabled={!hydrated} />
         </div>
       ) : null}
@@ -254,7 +253,9 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
   );
 
   const calculator = (
-    <form className="form" onSubmit={submit} autoComplete="off" noValidate id="pair-form" data-testid="pair-form">
+    // not a <form>: Metrika would count its submit as an auto-goal next to pair_calc
+    <div className="form" role="group" aria-label={DP.formTitle[L]} id="pair-form" data-testid="pair-form"
+      onKeyDown={(e) => { if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT" && hydrated) { e.preventDefault(); submit(); } }}>
       <h2 className="fh2">{DP.formTitle[L]}</h2>
       <div className="sub">{DP.formHint[L]}</div>
       {partner("a", DP.first[L])}
@@ -268,11 +269,11 @@ export default function PairCalculator({ example, mine = null, top, lead, sells 
           + {DP.addNames[L]}
         </button>
       )}
-      <button className={`btn wide ${styles.submit}`} type="submit" disabled={!hydrated} data-testid="pair-submit">
+      <button className={`btn wide ${styles.submit}`} type="button" onClick={submit} disabled={!hydrated} data-testid="pair-submit">
         {hydrated ? DP.submit[L] : D.calc.submitWaiting[L]}
       </button>
       {error ? <div className="err" role="alert" aria-live="assertive">{error}</div> : null}
-    </form>
+    </div>
   );
 
   const slides: HeroSlide[] = DP.slides.map((s) => ({

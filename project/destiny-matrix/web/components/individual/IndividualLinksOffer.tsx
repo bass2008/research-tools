@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import LinksMap from "@/components/individual/landing/LinksMap";
-import { useIndividualTerms } from "@/components/pay/individualTerms";
+import { onePrice, useIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
 import { track } from "@/lib/analytics";
@@ -33,7 +33,7 @@ export default function IndividualLinksOffer(props: { matrix: Matrix } | { pair:
     if (pair) savePair({ a: { birth: pair.a }, b: { birth: pair.b } });
   };
   const orderButton = <Link className="lm-btn lm-btn-gold" href={matrix ? "/pay?personal=1#order" : "/pay?pair=1#order"} onClick={order}
-    data-testid={`${place}-offer-order`}>{T.reportOfferOrder[L](rub(terms.prices.first, L))}</Link>;
+    data-testid={`${place}-offer-order`}>{T.reportOfferOrder[L](rub(onePrice(terms), L))}</Link>;
   const exampleButton = <Link className="lm-btn lm-btn-ghost lm-ex" href={`/matrix/individual-example/${matrix ? "personal" : "pair"}`}
     data-testid={`${place}-offer-example`}>{matrix ? T.reportOfferExample[L] : `${D.individualLanding.exLabel[L].pair} →`}</Link>;
   return (

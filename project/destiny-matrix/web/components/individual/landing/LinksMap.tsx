@@ -5,70 +5,24 @@ import { arcanumImage } from "@/components/matrix/ArcanumCard";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
 import RichText from "@/components/ui/RichText";
-import { track } from "@/lib/analytics";
+import { track, type Goal, type GoalParams } from "@/lib/analytics";
 import { forLocale as arcanaForLocale } from "@/lib/arcana";
 import { D } from "@/lib/i18n";
 import { COLORS, cap, linksOf, personalModel, valuesOf, type Link as MatrixLink, type LinksModel } from "@/lib/individualLinks";
 import { pairModel } from "@/lib/pairLinks";
+import type { YearLinksModel } from "@/lib/yearLinks";
 import { browserDay } from "@/lib/today";
 import { CX, OUTLINE, POINT, R_IN, R_OUT, at, f1, poly, xy, type Size } from "./geometry";
+import { routePath, type Pos } from "./routes";
+import { Frame, SIZE, YearFrame } from "./schemeParts";
+import { R_WHEEL, THIRD_EDGES, THIRDS, yearAt, yearSize } from "./yearGeometry";
 import { showDate as show } from "./types";
 
-const SIZE: Record<Size, [number, number]> = { big: [24, 20], mid: [21, 17.5], in: [19, 16], sm: [15.5, 13.5], ctr: [33, 27] };
+type Day = { y: number; m: number; d: number };
+type Model = LinksModel & Partial<Pick<YearLinksModel, "frame" | "wheel" | "accent" | "example" | "sampleNext" | "moreTitle">>;
+
 const EXAMPLE = "/matrix/individual-example/personal";
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-
-// A link is drawn as arcs through its points, nearest to nearest, bowing away from the centre.
-function chain(keys: string[]): string[] {
-  if (keys.length < 3) return keys;
-  const pts = keys.map((k) => [k, ...at(k)] as const);
-  const cx = pts.reduce((s, p) => s + p[1], 0) / pts.length, cy = pts.reduce((s, p) => s + p[2], 0) / pts.length;
-  let cur = pts.reduce((m, p) => Math.hypot(p[1] - cx, p[2] - cy) > Math.hypot(m[1] - cx, m[2] - cy) ? p : m, pts[0]);
-  const out = [cur], left = pts.filter((p) => p !== cur);
-  while (left.length) {
-    let bi = 0;
-    left.forEach((p, i) => { if (Math.hypot(p[1] - cur[1], p[2] - cur[2]) < Math.hypot(left[bi][1] - cur[1], left[bi][2] - cur[2])) bi = i; });
-    cur = left.splice(bi, 1)[0]; out.push(cur);
-  }
-  return out.map((p) => p[0]);
-}
-function routePath(keys: string[]) {
-  const ks = chain(keys);
-  let d = "";
-  for (let i = 0; i < ks.length - 1; i++) {
-    const [x1, y1] = at(ks[i]), [x2, y2] = at(ks[i + 1]);
-    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, len = Math.hypot(x2 - x1, y2 - y1);
-    let nx = -(y2 - y1) / len, ny = (x2 - x1) / len;
-    if ((mx - CX) * nx + (my - CX) * ny < 0) { nx = -nx; ny = -ny; }
-    const bow = Math.min(64, Math.max(14, len * 0.2));
-    d += `${i ? "" : `M${f1(x1)},${f1(y1)}`} Q${f1(mx + nx * bow)},${f1(my + ny * bow)} ${f1(x2)},${f1(y2)}`;
-  }
-  return d;
-}
-
-function Frame({ mini, sky, earth, ages }: { mini: boolean; sky: string; earth: string; ages: boolean }) {
-  return <>
-    {!mini && <>
-      <circle className="lm-ring" cx={CX} cy={CX} r={R_OUT + 30} /><circle className="lm-ring" cx={CX} cy={CX} r={R_OUT + 18} />
-      {ages && Array.from({ length: 80 }, (_, i) => {
-        const a = 180 + i * 4.5, [x1, y1] = xy(a, R_OUT + 18), [x2, y2] = xy(a, R_OUT + (i % 5 ? 23 : 27));
-        const age = i % 10 === 0 && i ? xy(a, R_OUT + 39) : null;
-        return <g key={i}>
-          <line className="lm-tick" x1={f1(x1)} y1={f1(y1)} x2={f1(x2)} y2={f1(y2)} strokeWidth={i % 5 ? 0.7 : 1.3} />
-          {age && <text className="lm-age" x={f1(age[0])} y={f1(age[1])}>{i}</text>}
-        </g>;
-      })}
-    </>}
-    <polygon className="lm-side" points={poly(OUTLINE, R_OUT)} />
-    <polygon className="lm-diag" points={poly([-90, 0, 90, 180], R_IN)} />
-    <polygon className="lm-diag" points={poly([-45, 45, 135, 225], R_IN)} />
-    {[180, 225, -90, -45].map((a) => { const [x1, y1] = xy(a, R_OUT), [x2, y2] = xy(a + 180, R_OUT); return <line key={a} className="lm-axis" x1={f1(x1)} y1={f1(y1)} x2={f1(x2)} y2={f1(y2)} />; })}
-    {!mini && <>
-      <text className="lm-lbl" x={CX} y={CX - R_IN + 34}>{sky}</text><text className="lm-lbl" x={CX} y={CX + R_IN - 26}>{sky}</text>
-      <text className="lm-lbl" x={CX - R_IN} y={CX - 30}>{earth}</text><text className="lm-lbl" x={CX + R_IN} y={CX - 30}>{earth}</text>
-    </>}
-  </>;
-}
 
 function isoDate(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -88,15 +42,25 @@ function parseDate(s: string) {
 
 /** "Your matrix has links you cannot see point by point": the visitor's date, its links and one rule of the corpus.
  *  With `date` (the report) or `pair` (the couple) the chart is known: no form, and it draws itself once it is on screen. */
-export default function LinksMap({ sample = "", sampleFinding = "", onDate, date: fixedDate, pair, cta, endCta, id = "map", palette, place: goalPlace = "report" }: {
-  sample?: string; sampleFinding?: string; onDate?: (date: { y: number; m: number; d: number }, links: number) => void;
-  date?: { y: number; m: number; d: number }; cta?: ReactNode; endCta?: ReactNode; id?: string; palette?: readonly string[];
+export default function LinksMap({ sample = "", sampleFinding = "", onDate, date: fixedDate, pair, cta, endCta, id = "map", palette, place: goalPlace = "report",
+  build, formExtra, compact = false, submitLabel, dateGoal = "individual_date", goalParams, autoGoal = true, titleTag: Title = "h2" }: {
+  sample?: string; sampleFinding?: string; onDate?: (date: Day, links: number) => void;
+  date?: Day; cta?: ReactNode; endCta?: ReactNode; id?: string; palette?: readonly string[];
   pair?: { a: string; b: string; names: { a: string; b: string } }; place?: string;
+  // another chart for the same block (the year): the form stays, the list starts folded like under a reading
+  build?: (date: Day) => Model; formExtra?: ReactNode; compact?: boolean; submitLabel?: string; dateGoal?: Goal; goalParams?: GoalParams;
+  // above the page h1 (year pages) the block title must not be a heading
+  titleTag?: "h2" | "p";
+  // Metrika counts every <form> submit as its own auto-goal; without it the date is sent by the button and Enter only
+  autoGoal?: boolean;
 }) {
   const L = useLocale();
   const T = D.individualLinks;
   const { arcanumTitle } = arcanaForLocale(L);
   const known = Boolean(fixedDate || pair);
+  const folded = known || compact;
+  // the landing keeps its old field id: tests and the anchor of the form point at it
+  const field = id === "map" ? "lm-bd" : `${id}-bd`;
   const [input, setInput] = useState(sample);
   const [date, setDate] = useState(() => fixedDate ?? (pair ? isoDate(pair.a) : parseDate(sample)!));
   const [own, setOwn] = useState(known);
@@ -105,12 +69,22 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
   const [focused, setFocused] = useState<number | null>(null);
   const [tip, setTip] = useState<{ lines: string[]; left: number; top: number } | null>(null);
   const [run, setRun] = useState(0);
-  const [more, setMore] = useState(!known);
+  const [more, setMore] = useState(!folded);
   const dateReported = useRef(false);
   const pa = pair?.a, pb = pair?.b, na = pair?.names.a, nb = pair?.names.b;
-  const M: LinksModel = useMemo(() => pa && pb ? pairModel(L, pa, pb, { a: na ?? "", b: nb ?? "" }) : personalModel(L, valuesOf(date.y, date.m, date.d)),
-    [L, date, pa, pb, na, nb]);
+  const M: Model = useMemo(() => build ? build(date) : pa && pb ? pairModel(L, pa, pb, { a: na ?? "", b: nb ?? "" }) : personalModel(L, valuesOf(date.y, date.m, date.d)),
+    [L, date, pa, pb, na, nb, build]);
   const { values, links } = M;
+  const year = M.frame === "year";
+  const pos: Pos = year ? yearAt : at;
+  const sizeOf = (k: string): Size => year ? yearSize(k) : POINT[k as keyof typeof POINT].size;
+  // a new year redraws the same date: start again from the first link
+  const built = useRef(build);
+  useEffect(() => {
+    if (built.current === build) return;
+    built.current = build;
+    setOpen(0); setFocused(null); setRun((r) => r + 1);
+  }, [build]);
   const focusI = focused !== null && focused < links.length ? focused : null;
   const by = useMemo(() => { const o: Record<string, number> = {}; links.forEach((c, i) => c.keys.forEach((k) => { o[k] = i; })); return o; }, [links]);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -158,8 +132,8 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
     });
   }, [run, waiting]);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = (e?: { preventDefault(): void }) => {
+    e?.preventDefault();
     const p = parseDate(input);
     if (!p) { setErr(true); return; }
     setErr(false);
@@ -170,8 +144,8 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
     setFocused(null);
     setRun((r) => r + 1);
     if (mine && onDate) {
-      onDate(p, linksOf(L, valuesOf(p.y, p.m, p.d)).length);
-      if (!dateReported.current) track("individual_date");
+      onDate(p, build ? build(p).links.length : linksOf(L, valuesOf(p.y, p.m, p.d)).length);
+      if (!dateReported.current) track(dateGoal, goalParams);
       dateReported.current = true;
     }
     if (innerWidth < 1000) mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -190,7 +164,7 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
     const owner: Record<string, number> = {};
     list.forEach((c, i) => c.keys.forEach((k) => { owner[k] = i; }));
     const node = (k: string) => {
-      const [x, y] = at(k), i = owner[k], lit = i !== undefined, size = POINT[k as keyof typeof POINT].size, [r, fs] = SIZE[size];
+      const [x, y] = pos(k), i = owner[k], lit = i !== undefined, size = sizeOf(k), [r, fs] = SIZE[size];
       if (mini) return <circle key={k} cx={f1(x)} cy={f1(y)} r={lit ? r * 0.9 : 7} fill={lit ? paint(list[i]) : "#2b4366"} />;
       return <g key={k} className={`lm-node lm-${size}${lit ? " lm-on" : ""}${lit && i === focusI ? " lm-f" : ""}`} tabIndex={0}
         onMouseEnter={(e) => tipFor(k, e.currentTarget)} onMouseLeave={() => setTip(null)}
@@ -201,8 +175,8 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
       </g>;
     };
     return <svg className={`lm-oct${mini ? " lm-m" : ""}${!mini && focusI !== null ? " lm-focus" : ""}${!mini && waiting ? " lm-wait" : ""}`} viewBox={mini ? "28 28 564 564" : "8 8 604 604"} role="img" aria-label={M.copy.chart}>
-      <Frame mini={mini} sky={M.copy.sky} earth={M.copy.earth} ages={M.ages} />
-      <g className="lm-routes">{list.map((c, i) => <path key={i} className={`lm-route${!mini && i === focusI ? " lm-f" : ""}`} d={routePath(c.keys)} stroke={paint(c)} />)}</g>
+      {year ? <YearFrame mini={mini} wheel={M.wheel ?? []} /> : <Frame mini={mini} sky={M.copy.sky} earth={M.copy.earth} ages={M.ages} />}
+      <g className="lm-routes">{list.map((c, i) => <path key={i} className={`lm-route${!mini && i === focusI ? " lm-f" : ""}`} d={routePath(c.keys, pos)} stroke={paint(c)} />)}</g>
       <g className="lm-nodes">{M.nodes.map(node)}</g>
     </svg>;
   };
@@ -211,21 +185,28 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
   return (
     <section id={id} className="lm-host" aria-label={M.copy.section}>
       <div className="lm-night">
-        <div className={`lm-wrap lm-hero${known && !more ? " lm-short" : ""}`}>
+        <div className={`lm-wrap lm-hero${folded && !more ? " lm-short" : ""}`}>
           <div className="lm-hero-copy">
             <div className="lm-kicker">{M.copy.kicker}</div>
-            <h2 className="lm-h1">{M.copy.title}<em>{T.titleAccent[L]}</em></h2>
+            <Title className="lm-h1">{M.copy.title}<em>{M.accent ?? T.titleAccent[L]}</em></Title>
             <p className="lm-sub">{M.copy.sub}</p>
-            {!known && <form className="lm-dform" autoComplete="off" onSubmit={submit}>
-              <label htmlFor="lm-bd">{T.dateLabel[L]}</label>
-              <input id="lm-bd" inputMode="numeric" placeholder={T.placeholder[L]} value={input} maxLength={10} aria-describedby="lm-dnote"
-                onChange={(e) => {
-                  const dgt = e.target.value.replace(/\D/g, "").slice(0, 8);
-                  setInput(dgt.slice(0, 2) + (dgt.length > 2 ? "." + dgt.slice(2, 4) : "") + (dgt.length > 4 ? "." + dgt.slice(4) : ""));
-                }} />
-              <button className="lm-btn lm-btn-gold" type="submit">{T.showLinks[L]}</button>
-              <div className={`lm-dnote${err ? " lm-err" : ""}`} id="lm-dnote">{err ? T.badDate[L] : own ? T.ownNote[L] : T.sampleNote[L]}</div>
-            </form>}
+            {!known && (() => {
+              const fields = <>
+                {formExtra}
+                <label htmlFor={field}>{T.dateLabel[L]}</label>
+                <input id={field} inputMode="numeric" enterKeyHint="go" autoComplete="off" placeholder={T.placeholder[L]} value={input} maxLength={10} aria-describedby={`${field}-note`}
+                  onKeyDown={autoGoal ? undefined : (e) => { if (e.key === "Enter") submit(e); }}
+                  onChange={(e) => {
+                    const dgt = e.target.value.replace(/\D/g, "").slice(0, 8);
+                    setInput(dgt.slice(0, 2) + (dgt.length > 2 ? "." + dgt.slice(2, 4) : "") + (dgt.length > 4 ? "." + dgt.slice(4) : ""));
+                  }} />
+                <button className="lm-btn lm-btn-gold" type={autoGoal ? "submit" : "button"} onClick={autoGoal ? undefined : () => submit()}>{submitLabel ?? T.showLinks[L]}</button>
+                <div className={`lm-dnote${err ? " lm-err" : ""}`} id={`${field}-note`}>{err ? T.badDate[L] : own ? T.ownNote[L] : T.sampleNote[L]}</div>
+              </>;
+              return autoGoal
+                ? <form className="lm-dform" autoComplete="off" onSubmit={submit}>{fields}</form>
+                : <div className="lm-dform" role="group" aria-label={T.dateLabel[L]}>{fields}</div>;
+            })()}
           </div>
 
           <div className="lm-hero-map">
@@ -235,21 +216,21 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
                 {tip?.lines.map((line, i) => i === 0 ? <RichText key={i} text={line} /> : <span key={i}><br />{line}</span>)}
               </div>
               <div className="lm-map-cap">
-                <span><b>{M.caption?.[0] ?? show(date)}</b> · {M.caption?.[1] ?? (own ? T.ownDate[L] : T.sampleDate[L])}</span>
+                <span><b>{M.caption?.[0] ?? show(date)}</b> · {M.caption?.[1] || (own ? T.ownDate[L] : T.sampleDate[L])}</span>
                 <span className="lm-legend"><span><i />{T.legendLink[L]}</span><span><s />{T.legendPoint[L]}</span></span>
               </div>
             </div>
           </div>
 
-          {known && <div className="lm-hero-btns lm-btns lm-fixed-btns">
-            <button className="lm-btn lm-btn-ghost" type="button" aria-expanded={more} data-testid="links-more"
+          {folded && <div className="lm-hero-btns lm-btns lm-fixed-btns">
+            {links.length > 0 && <button className="lm-btn lm-btn-ghost" type="button" aria-expanded={more} data-testid="links-more"
               onClick={() => { if (!more) track("individual_report_more", { place: goalPlace }); setMore(!more); }}>
               {more ? T.hideAll[L] : T.showAll[L](links.length)}
-            </button>
+            </button>}
             {cta}
           </div>}
 
-          {more && <div className="lm-hero-rest">
+          {more && n > 0 && <div className="lm-hero-rest">
             <div className="lm-count">
               <div className="lm-num">{n}</div>
               <h3 className="lm-count-h">{M.countTitle(n, own)}</h3>
@@ -292,8 +273,9 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
                       ? <div className="lm-rule">
                         <span className="lm-kicker">{T.freeKicker[L]}</span>
                         {M.explain(c, arcanumTitle).map((t, j) => <p key={j}><RichText text={t} /></p>)}
-                        <p className="lm-next">{M.next(c)}{!own && <>{T.nextSample[L](sampleFinding)}
-                          <a href="#findFrag">{T.excerpt[L]}</a>{T.or[L]}<Link href={EXAMPLE}>{T.wholeSample[L]}</Link></>}</p>
+                        <p className="lm-next">{M.next(c)}{!own && (M.example
+                          ? <>{M.sampleNext}<Link href={M.example}>{T.wholeSample[L]}</Link></>
+                          : <>{T.nextSample[L](sampleFinding)}<a href="#findFrag">{T.excerpt[L]}</a>{T.or[L]}<Link href={EXAMPLE}>{T.wholeSample[L]}</Link></>)}</p>
                         <p className="lm-src">{M.source(c)}</p>
                       </div>
                       : <div className="lm-lockp"><span className="lm-ic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.6" stroke="currentColor" strokeWidth="1.6" /><path d="M5.2 7V5.2a2.8 2.8 0 015.6 0V7" stroke="currentColor" strokeWidth="1.6" /></svg></span>
@@ -303,7 +285,7 @@ export default function LinksMap({ sample = "", sampleFinding = "", onDate, date
               })}
             </ol>
             <div className="lm-more-cta">
-              <h3>{T.moreTitle[L](n)}</h3>
+              <h3>{M.moreTitle?.(n) ?? T.moreTitle[L](n)}</h3>
               <p>{M.copy.moreText}</p>
               <div className="lm-btns">{endCta ?? cta ?? <>
                 <a className="lm-btn lm-btn-gold" href="#toc">{T.whatInMine[L]}</a>

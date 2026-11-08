@@ -1016,7 +1016,7 @@ select:focus, input:focus { outline: 2px solid rgba(14, 143, 136, 0.45); outline
 .badge { font: 700 11px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold2); background: #e6f2f1; border-radius: 999px; padding: 4px 10px; }
 /* Три состояния доступа к дате. Купленная навсегда выделена рамкой и тёплым фоном: она
    остаётся у человека и после того, как подписка кончится. */
-.badge.own { color: #8a6a12; background: linear-gradient(180deg, #fffdf5 0%, #f7f0de 100%); border: 1px solid var(--accent); }
+.badge.own { display: inline-flex; align-items: center; color: #8a6a12; background: linear-gradient(180deg, #fffdf5 0%, #f7f0de 100%); border: 1px solid var(--accent); }
 .badge.sub { color: var(--gold2); background: #e6f2f1; }
 .badge.off { color: var(--dim2); background: #eef2f5; }
 .badge.down { color: var(--warn); background: #fbecea; }
@@ -1910,7 +1910,9 @@ table.mx td.self { background: var(--card2); }
 .reading-symbol { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #d3e5df; border-radius: 50%; color: var(--gold); background: #f5faf8; font-size: 24px; }
 .cabinet-reading-name { margin-bottom: 4px; }
 .cabinet-reading-name .matname { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font: 600 26px/1.15 var(--ser); overflow-wrap: anywhere; }
-.cabinet-reading-name .matname .badge { font-family: var(--sans); font-size: 10px; }
+.cabinet-reading-tags { display: flex; flex-direction: column; align-items: flex-end; align-self: flex-start; gap: 8px; min-width: 0; padding-top: 6px; text-align: right; }
+.cabinet-reading-tags .badges { justify-content: flex-end; }
+.cabinet-reading-tags .badge { font-family: var(--sans); font-size: 10px; }
 .cabinet-reading-name input { width: 100%; min-width: 0; font: 16px var(--sans); }
 .cabinet-reading > .small { font-size: 12px; margin: 0 0 24px; }
 .cabinet-reading-bottom { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-top: 1px solid var(--line); padding-top: 16px; margin-top: auto; font-size: 12px; }
@@ -2018,8 +2020,8 @@ dialog.individual-request-dialog::backdrop { background: rgba(20,20,20,.45); }
 /* Карта и мини-схема рядом: о какой точке речь, видно без прокрутки к большой схеме. */
 .individual-article-cards > li.with-map { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 16px; align-items: center; }
 .individual-article-cards > li.with-map .postext { grid-column: 1 / -1; }
-.individual-article-cards:not([data-cols]) > li.with-map { flex-basis: min(100%, 560px); }
-.printmode .individual-article-cards > li.with-map { width: min(100%, 560px); justify-self: center; }
+.individual-article-cards:not([data-cols]) > li.with-map { flex-basis: min(100%, 430px); }
+.printmode .individual-article-cards > li.with-map { width: min(100%, 430px); justify-self: center; }
 /* PDF: рамка уже, текст на всю её ширину и по ширине, как статьи энциклопедии на сайте. */
 .printmode .individual-article { max-width: 860px; margin-inline: auto; }
 .printmode .individual-article > h1, .printmode .individual-article > .prose, .printmode .individual-article > .hint,
@@ -2030,6 +2032,43 @@ dialog.individual-request-dialog::backdrop { background: rgba(20,20,20,.45); }
 .individual-card-map svg { display: block; width: 100%; max-width: 260px; height: auto; margin: 0 auto; }
 .individual-card-map .age, .individual-card-map .lbl { display: none; }
 .individual-card-map [data-muted] { opacity: 0.28; }
+/* a scheme on the gold background takes the widget's drawing, not its night block */
+.gold-scheme.lm-host { margin: 0; background: none; color: inherit; scroll-margin-top: 0; }
+.ir-hero-map .gold-scheme .lm-oct { max-width: 460px; }
+/* Sizes of the gold schemes: a scheme is a little wider than the card beside or above it, so its numbers stay readable.
+   The widget's own rule stretches its svg to 100%, so every place states its size here. */
+.individual-card-map .gold-scheme .lm-oct { width: 100%; max-width: 220px; margin: 0 auto; }
+.individual-article-cards .ir-maps .gold-scheme .lm-oct { max-width: 170px; }
+/* beside a card the scheme takes its whole column, the same width as the card's */
+.individual-article-cards > li.with-map > .individual-card-map .gold-scheme .lm-oct { max-width: none; }
+@media (min-width: 861px) { .ir-formula[data-map]:not(:has(> .ir-maps)) { grid-template-columns: auto minmax(180px, 230px); } }
+.ir-formula .ir-formula-map .gold-scheme .lm-oct { max-width: 210px; }
+.ir-maps-paired .ir-formula-map .gold-scheme .lm-oct { max-width: 200px; }
+.ir-sc-map .gold-scheme .lm-oct { width: 120px; max-width: 120px; }
+/* a self-check line: the header shares the grid of the plus and minus blocks under it,
+   the card with its name centred over the plus, the scheme over the minus */
+.ir-sc .ir-sc-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+/* the card stays in the middle of its block whatever the length of the label: label above, name below, as in a formula */
+.ir-sc .ir-sc-id { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; text-align: center; }
+.ir-sc .ir-sc-id .who { max-width: 100%; }
+.ir-sc .ir-sc-head > .individual-card-map { justify-self: center; }
+.ir-sc .ir-sc-card .arccard { width: 88px; }
+.ir-sc .ir-sc-card { flex: none; }
+@media (max-width: 860px) {
+  .ir-formula .ir-formula-map .gold-scheme .lm-oct { max-width: 220px; }
+  .ir-formula > .ir-maps .gold-scheme .lm-oct { max-width: 100%; }
+  .ir-sc-map .gold-scheme .lm-oct { width: 88px; max-width: 88px; }
+  .ir-sc .ir-sc-card .arccard { width: 64px; }
+}
+.individual-card-map .gold-scheme [data-muted] { opacity: .5; }
+.individual-card-map .gold-scheme .lm-oct .lm-side { stroke: #b4964f; stroke-width: 3.2; }
+.individual-card-map .gold-scheme .lm-oct .lm-diag { stroke: #c9ad6e; stroke-width: 2.4; }
+.individual-card-map .gold-scheme .lm-oct .lm-axis { stroke: #cfb67e; stroke-width: 2; }
+.individual-card-map .gold-scheme .lm-oct .lm-wheel, .individual-card-map .gold-scheme .lm-oct .lm-wheel-tick { stroke: #b4964f; stroke-width: 2.6; }
+.individual-card-map .gold-scheme .lm-node .lm-b { stroke: #b4964f; stroke-width: 2.6; }
+.individual-card-map .gold-scheme .lm-node .lm-halo { stroke-width: 7; }
+.individual-card-map .gold-scheme .lm-oct.lm-m .lm-route { stroke-width: 17; }
+.individual-article-cards .ir-maps { grid-template-columns: minmax(0, 1fr); }
 .individual-card-map .focus-ring { fill: none; stroke: var(--focus-color, var(--gold)); stroke-width: 7; }
 /* Чакра: три карты из расчёта и мини-схема с её точками физики и энергии. */
 .individual-chakra { --cols: 3; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 14px 16px; align-items: start; max-width: 720px; margin: 16px auto 22px; }
@@ -2068,6 +2107,17 @@ dialog.individual-request-dialog::backdrop { background: rgba(20,20,20,.45); }
 .ir-hero-map { margin: 0; }
 .ir-hero-map svg { display: block; width: 100%; max-width: 460px; height: auto; margin: 0 auto; }
 .ir-hero-map figcaption { margin-top: 8px; font-size: 13px; line-height: 1.5; color: var(--dim); text-align: center; }
+/* A year reading: the year matrix first, the personal scheme under it; cards of the year show their own matrix. */
+.ir-hero-maps { display: grid; gap: 22px; }
+.ir-hero-maps .ir-hero-map:not(.ir-hero-year) svg { max-width: 300px; }
+.ir-maps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 10px; align-items: start; }
+.ir-year-map figcaption, .ir-own-map figcaption { margin-top: 2px; font-size: 11.5px; line-height: 1.3; color: var(--dim); text-align: center; }
+/* two schemes of a formula stand side by side under the cards: a tall column of maps beside them looked lopsided */
+.ir-formula[data-map]:has(> .ir-maps) { grid-template-columns: minmax(0, 1fr); }
+.ir-formula > .ir-maps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 24px; width: min(100%, 540px); justify-self: center; }
+.ir-formula > .ir-row-paired, .ir-formula > .ir-maps-paired { width: min(100%, 470px); justify-self: center; column-gap: 12px; }
+.ir-row-paired .ir-fcard .arccard { max-width: 165px; }
+.ir-formula .individual-card-map figcaption { grid-column: auto; contain: none; font-size: 11.5px; line-height: 1.3; color: var(--dim); }
 .ir-summary h2, .ir-chapter h2, .ir-faq h2, .ir-sources h2 { margin: 0 0 16px; font: 600 clamp(26px, 3vw, 34px)/1.15 var(--ser); }
 .ir-summary ol { counter-reset: s; list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .ir-summary li { counter-increment: s; position: relative; min-height: 32px; padding-left: 48px; font-size: 16.5px; line-height: 1.6; }
@@ -2082,6 +2132,8 @@ dialog.individual-request-dialog::backdrop { background: rgba(20,20,20,.45); }
 .ir-formula { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px 22px; align-items: center; margin: 22px 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card2); }
 /* cards and their scheme stay together in the middle: in a wide column the scheme used to drift to the far edge */
 .ir-formula[data-map] { grid-template-columns: auto minmax(140px, 210px); justify-content: center; }
+/* a scheme beside five cards leaves them a few pixels at tablet width: it goes under the formula */
+.ir-formula[data-map]:has(.ir-fcard:nth-of-type(5)) { grid-template-columns: minmax(0, 1fr); }
 .ir-formula-row { display: grid; grid-template-rows: repeat(3, auto); justify-content: center; gap: 6px 10px; min-width: 0; }
 .ir-fcard { grid-row: 1 / span 3; min-width: 0; display: grid; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; color: inherit; text-decoration: none; }
 .ir-fcard .arccard { width: 100%; max-width: 132px; height: auto; }
@@ -2096,6 +2148,7 @@ button.ir-fcard:hover .arccard { border-color: var(--gold); }
 .ir-fcard.sel .arccard { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 10px 22px -12px rgba(150, 110, 20, .6); }
 .ir-fcard.sel .nm { color: var(--gold2); }
 .ir-op { grid-row: 2; align-self: center; font: 600 32px var(--ser); line-height: 1; color: var(--accent); }
+.ir-formula-row:has(.ir-fcard:nth-of-type(5)) .ir-fcard .who { font-size: 10px; letter-spacing: 0.02em; }
 /* the caption spans both columns; without containment its long line widened the cards column */
 .ir-formula figcaption { grid-column: 1 / -1; contain: inline-size; font-size: 15px; line-height: 1.6; }
 .ir-formula-map svg { max-width: 210px; }
@@ -2153,6 +2206,12 @@ button.ir-fcard:hover .arccard { border-color: var(--gold); }
   .ir-formula-map svg { max-width: 190px; }
   .ir-fcard .nm { font-size: 11px; hyphens: manual; overflow-wrap: normal; }
   .ir-formula-row:has(.ir-fcard:nth-of-type(4)) .ir-fcard .nm { font-size: 9.5px; hyphens: auto; overflow-wrap: anywhere; }
+  /* five cards squeeze below a readable width on a phone: three to a line, the signs stay at card centre */
+  .ir-formula-row:has(.ir-fcard:nth-of-type(5)) { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; row-gap: 14px; }
+  .ir-formula-row:has(.ir-fcard:nth-of-type(5)) .ir-fcard { flex: 0 0 min(96px, calc((100% - 41px) / 3)); grid-template-rows: auto auto auto; row-gap: 6px; }
+  .ir-formula-row:has(.ir-fcard:nth-of-type(5)) .ir-fcard .who { min-height: 3.75em; font-size: 9px; }
+  .ir-formula-row:has(.ir-fcard:nth-of-type(5)) .ir-fcard .nm { font-size: 10.5px; hyphens: manual; overflow-wrap: normal; }
+  .ir-formula-row:has(.ir-fcard:nth-of-type(5)) .ir-op { align-self: flex-start; margin-top: calc(30.75px + min(64.6px, (100% - 41px) * 0.2243)); }
   .ir-chapter { padding: 16px 12px; }
   .ir-fcard .who { font-size: 9px; letter-spacing: 0.02em; }
   .ir-formula-row { column-gap: 3px; }
@@ -2165,6 +2224,7 @@ button.ir-fcard:hover .arccard { border-color: var(--gold); }
   .ir-tl-card .arccard { width: 40px; }
   .ir-age { padding: 3px 6px; font-size: 11.5px; }
   .ir-sc-cols { grid-template-columns: minmax(0, 1fr); }
+  .ir-sc .ir-sc-head { grid-template-columns: minmax(0, 1fr) auto; }
   .ir-sc-map svg { width: 76px; max-width: 76px; }
 }
 /* Selling individual readings on /pay: the gold section, the builder and the comparison. */
@@ -2355,49 +2415,6 @@ main.theme-gold { animation: gold-in .45s ease both; }
 .printmode .ir .individual-article-cards > li, .printmode .ir-actions { break-inside: avoid; }
 .printmode .ir-body .prose p { text-align: justify; hyphens: auto; }
 
-/* Individual year reading offer on the year pages (reports/individual-sales/prototypes/v7-year-banner). */
-.yb { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: 26px; align-items: start; margin: 30px 0; padding: 24px 26px;
-  border: 1px solid #e2d6bd; border-radius: 18px; background: linear-gradient(135deg, #fffaf0 0%, #f7eedb 100%);
-  box-shadow: inset 0 3px 0 #c9a240, 0 14px 30px -22px rgba(120, 90, 20, .45); }
-.yb-fan { position: relative; width: 196px; height: 170px; margin-top: 18px; }
-.yb-fan img { position: absolute; top: 12px; width: 84px; border-radius: 9px; box-shadow: 0 10px 22px -10px rgba(40, 30, 10, .55); }
-.yb-fan img:nth-child(1) { left: 6px; transform: rotate(-10deg); }
-.yb-fan img:nth-child(2) { left: 56px; top: 0; z-index: 1; }
-.yb-fan img:nth-child(3) { left: 106px; transform: rotate(10deg); }
-.yb-kicker { margin: 0 0 6px; font: 700 12px/1.3 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #94721c; }
-.yb-title { margin: 0 0 10px; font: 600 25px/1.2 var(--ser); letter-spacing: -0.01em; color: #1b2536; }
-.yb-text { margin: 0 0 14px; font-size: 15px; line-height: 1.55; color: #4d4a43; }
-.yb-form label { display: block; margin: 0 0 6px; font: 600 12.5px var(--sans); letter-spacing: 0; text-transform: none; color: #625e56; }
-.yb-row { display: flex; gap: 8px; max-width: 420px; }
-.yb-row input { flex: 1; min-width: 0; height: 44px; padding: 0 14px; border: 1px solid #d6c8aa; border-radius: 11px; background: #fff; font: 600 16px var(--sans); color: #1b2536; }
-.yb-row input:focus { outline: 2px solid rgba(184, 144, 42, .45); border-color: #b8902a; }
-.yb-row button { flex: none; height: 44px; padding: 0 16px; border: 1px solid #b8902a; border-radius: 11px; background: #fff; font: 700 14px var(--sans); color: #7d5e12; cursor: pointer; }
-.yb-row button:hover { background: #fbf4e3; }
-.yb-err { margin: 6px 0 0; font-size: 13.5px; color: #b0443a; }
-.yb-result { margin: 14px 0 0; padding: 12px 14px; border-left: 3px solid #c9a240; border-radius: 0 10px 10px 0; background: rgba(255, 255, 255, .7); font-size: 15px; line-height: 1.55; color: #1b2536; }
-.yb-result p { margin: 0; }
-.yb-result .yb-mean { margin-top: 8px; color: #4d4a43; }
-.yb-result .yb-more { display: inline-block; margin-top: 8px; font: 700 14px var(--sans); color: #94721c; }
-.yb-result small { display: block; margin-top: 10px; font-size: 13.5px; color: #625e56; }
-.yb-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 16px; }
-.yb-btn { display: inline-flex; align-items: center; min-height: 46px; padding: 0 20px; border-radius: 12px; background: linear-gradient(90deg, #a8821f, #c9a240);
-  box-shadow: 0 8px 20px -10px rgba(150, 110, 20, .7); font: 700 15px var(--sans); color: #fff; text-decoration: none; white-space: nowrap; }
-.yb-btn:hover { text-decoration: none; filter: brightness(1.05); }
-.yb-link { display: inline-flex; align-items: center; min-height: 46px; padding: 0 18px; border: 1.5px solid #c9a240; border-radius: 12px; background: #fff; font: 700 14.5px var(--sans); color: #7d5a12; }
-.yb-link:hover { text-decoration: none; background: #fbf4e3; }
-.yb-fine { margin: 10px 0 0; font-size: 13px; color: #96907f; }
-@media (max-width: 620px) {
-  .yb { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 18px 16px 20px; }
-  .yb-fan { width: 180px; height: 140px; margin: 0 auto; }
-  .yb-fan img { width: 74px; }
-  .yb-fan img:nth-child(2) { left: 53px; }
-  .yb-fan img:nth-child(3) { left: 100px; }
-  .yb-title { font-size: 22px; }
-  .yb-row { flex-direction: column; max-width: none; }
-  .yb-row input { flex: none; }
-  .yb-btn, .yb-link { width: 100%; justify-content: center; white-space: normal; text-align: center; }
-}
-.yb-hero .yb { margin-top: 0; }
 .ro-links { margin: 28px 0; }
 /* The individual block under the reading is gold, not the night of the landing. */
 .ro-links .lm-host { margin: 0; border: 1px solid #e2d6bd; border-radius: 20px; overflow: clip; box-shadow: 0 14px 30px -22px rgba(120, 90, 20, .45);
@@ -2410,21 +2427,21 @@ main.theme-gold { animation: gold-in .45s ease both; }
 .ro-links .lm-host .lm-btn-gold:hover { background: linear-gradient(90deg, #b18a24, #d1aa48); }
 .ro-links .lm-host .lm-night .lm-btn-ghost { color: #7d5a12; background: #fff; box-shadow: inset 0 0 0 1.5px #c9a240; }
 .ro-links .lm-host .lm-night .lm-btn-ghost:hover { background: #fbf4e3; }
-.ro-links .lm-host .lm-oct .lm-ring { stroke: #eadbb8; }
-.ro-links .lm-host .lm-oct .lm-side { stroke: #d8c290; }
-.ro-links .lm-host .lm-oct .lm-diag { stroke: #e2cfa2; }
-.ro-links .lm-host .lm-oct .lm-axis { stroke: #e2d0a6; }
-.ro-links .lm-host .lm-oct .lm-tick { stroke: #dcc79a; }
-.ro-links .lm-host .lm-oct .lm-age { fill: #a48d5c; }
-.ro-links .lm-host .lm-oct .lm-lbl { fill: #b39b66; }
-.ro-links .lm-host .lm-node .lm-b { fill: #fffaf0; stroke: #d6bf8a; }
-.ro-links .lm-host .lm-node.lm-big .lm-b { fill: #fff4dc; }
-.ro-links .lm-host .lm-node text { fill: #6b5a35; }
-.ro-links .lm-host .lm-node.lm-on .lm-b { fill: #fff; }
-.ro-links .lm-host .lm-node .lm-halo { fill: #fff; }
-.ro-links .lm-host .lm-route { stroke-width: 6.5; }
-.ro-links .lm-host .lm-oct.lm-m .lm-route { stroke-width: 13; }
-.ro-links .lm-host .lm-node.lm-on text { fill: #121b29; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-ring { stroke: #eadbb8; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-side { stroke: #d8c290; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-diag { stroke: #e2cfa2; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-axis { stroke: #e2d0a6; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-tick { stroke: #dcc79a; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-age { fill: #a48d5c; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-lbl { fill: #b39b66; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-node .lm-b { fill: #fffaf0; stroke: #d6bf8a; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-node.lm-big .lm-b { fill: #fff4dc; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-node text { fill: #6b5a35; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-node.lm-on .lm-b { fill: #fff; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-node .lm-halo { fill: #fff; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-route { stroke-width: 6.5; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct.lm-m .lm-route { stroke-width: 13; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-node.lm-on text { fill: #121b29; }
 .ro-links .lm-host .lm-legend s { background: #fff; }
 .ro-links .lm-host .lm-tip { background: #fff; box-shadow: 0 10px 24px -12px rgba(90, 65, 10, .45); }
 .ro-links .lm-host .lm-st { box-shadow: inset 0 0 0 1px #e8d9b6; }
@@ -2475,3 +2492,23 @@ main.theme-gold { animation: gold-in .45s ease both; }
 .yb-years span { margin-right: 4px; font: 600 12.5px var(--sans); color: #625e56; }
 .yb-years button { min-height: 34px; padding: 0 14px; border: 1px solid #d6c8aa; border-radius: 999px; background: #fff; font: 700 14px var(--sans); color: #625e56; cursor: pointer; }
 .yb-years button.on { border-color: #b8902a; background: #f6e7bf; color: #5f4710; }
+/* The year links block: the date form on the gold card, the thirds of the year on a wheel inside the chart. */
+.yb-hero .ro-links { margin: 0 0 30px; }
+.lm-host .lm-oct .lm-wheel { fill: none; stroke: #4a6283; stroke-width: 1.2; stroke-dasharray: 3 5; }
+.lm-host .lm-oct .lm-wheel-tick { stroke: #4a6283; stroke-width: 1.6; }
+.lm-host .lm-oct .lm-lbl.lm-third { font: 700 22px var(--sans); letter-spacing: .02em; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-lbl.lm-third { fill: #9a7f45; }
+:is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-wheel, :is(.ro-links .lm-host, .gold-scheme) .lm-oct .lm-wheel-tick { stroke: #c9a95c; }
+.ro-links .lm-host .lm-dform { margin-top: 14px; }
+.ro-links .lm-host .lm-dform label { color: var(--ndim); }
+.ro-links .lm-host .lm-dform input { height: 50px; border-color: #d6c8aa; background: #fff; color: var(--non); font-size: 19px; }
+.ro-links .lm-host .lm-dform input:focus { border-color: #b8902a; }
+.ro-links .lm-host .lm-dform .lm-btn { height: 50px; min-height: 50px; }
+.ro-links .lm-host .lm-dform .lm-years { grid-column: 1 / -1; margin: 0 0 6px; }
+.ro-links .lm-host .lm-dnote { min-height: 0; }
+.ro-links .lm-host .lm-dnote.lm-err { color: #c0412a; }
+.yl-links .lm-host .lm-hero-map { max-width: 330px; }
+@media (max-width: 519px) {
+  .ro-links .lm-host .lm-dform { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 1000px) { .yl-links .lm-host .lm-hero-map { max-width: none; } }

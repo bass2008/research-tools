@@ -17,6 +17,11 @@ function dots(markup: string) {
 }
 
 describe("октаграмма", () => {
+  it("рисует точку Q и у матрицы, сохранённой до появления тройки", () => {
+    const { material_karma: _saved, ...legacy } = M;
+    expect(() => renderToStaticMarkup(<Octagram m={legacy as typeof M} />)).not.toThrow();
+  });
+
   it("рисует все точки метода, а не только тринадцать", () => {
     expect(dots(html).length).toBe(MAP_POINTS.length);
   });
@@ -25,7 +30,7 @@ describe("октаграмма", () => {
   it("ставит точки второго порядка туда же, где их показывает энциклопедия", () => {
     const placed = dots(html);
     for (const key of [
-      "karmic_tail_middle", "money_love_crossing", "love_middle", "money_middle",
+      "karmic_tail_middle", "material_attitude", "money_love_crossing", "love_middle", "money_middle",
       "ajna_physics", "ajna_energy", "anahata_physics", "anahata_energy",
     ]) {
       const [x, y] = mapXY(mapPoint(key)!);
@@ -49,6 +54,7 @@ describe("октаграмма", () => {
     expect(shown("money_love_crossing")).toBe(M.love[2]);
     expect(shown("money_middle")).toBe(M.money[1]);
     expect(shown("karmic_tail_middle")).toBe(M.karmic_tail[1]);
+    expect(shown("material_attitude")).toBe(M.material_karma[1]);
     expect(shown("ajna_energy")).toBe(M.talent[1]);
     const anahata = M.chakras.find((c) => c.key === "anahata")!;
     expect(shown("anahata_physics")).toBe(anahata.physics);

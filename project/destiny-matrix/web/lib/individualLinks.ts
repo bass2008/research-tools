@@ -4,9 +4,10 @@ import { D } from "./i18n";
 import type { Lang } from "./i18n/hosts";
 import { MAP_POINTS } from "./matrixMap";
 import { fold, foldYear, fromPoints, type Matrix } from "./matrix";
+import { materialKarmaOf } from "./materialKarmaRow";
 
-export type Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "S" | "T" | "R" | "R1" | "R2";
-export const ORDER: Letter[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "S", "T", "R", "R1", "R2"];
+export type Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "S" | "T" | "R" | "R1" | "R2";
+export const ORDER: Letter[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "S", "T", "R", "R1", "R2"];
 export type Values = Record<Letter, number>;
 
 const KEY_BY_LETTER = Object.fromEntries(MAP_POINTS.map((p) => [p.symbol, p.key])) as Record<Letter, string>;
@@ -18,7 +19,7 @@ export function lettersOf(m: Matrix): Values {
     day: m.day, month: m.month, year: m.year, mission: m.mission, center: m.center,
     father_line: m.father_line, mother_line: m.mother_line, descendants: m.descendants, inheritance: m.inheritance,
     comfort_west: m.comfort_west, comfort_north: m.comfort_north, comfort_east: m.comfort_east, comfort_south: m.comfort_south,
-    karmic_tail_middle: m.karmic_tail[1], ajna_physics: row("ajna").physics, ajna_energy: row("ajna").energy,
+    karmic_tail_middle: m.karmic_tail[1], material_attitude: materialKarmaOf(m)[1], ajna_physics: row("ajna").physics, ajna_energy: row("ajna").energy,
     anahata_physics: row("anahata").physics, anahata_energy: row("anahata").energy,
     money_love_crossing: m.money[2], love_middle: m.love[1], money_middle: m.money[1],
   };
@@ -134,7 +135,7 @@ function rulesFor(L: Lang, keys: string[], sym: string[]): Rule[] {
   const others = (ex: string[]) => joinAnd(L, roles(L, keys.filter((k) => !ex.includes(k))));
   const bold = (ks: string[]) => joinAnd(L, roles(L, ks).map((x) => `**${x}**`));
   const money = ["L", "R2", "R"].filter(has);
-  const linked = ["B", "P", "K", "C", "M", "N", "D", "G"].filter(has);
+  const linked = ["B", "P", "K", "C", "Q", "M", "N", "D", "G"].filter(has);
   const r: Rule[] = [];
   if (has("F") && has("G")) r.push({ w: 4, ch: T.chapter[L]("10"), t: T.ruleInspiration[L] });
   if (money.length && linked.length) r.push({ w: 3, ch: T.chapter[L]("6"), t: T.ruleMoney[L](bold(money), bold(linked)) });

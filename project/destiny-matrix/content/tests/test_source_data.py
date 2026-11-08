@@ -32,12 +32,12 @@ def test_source_preserves_the_complete_content_contract():
     assert len(ARCANA) == 22
     assert len(CHAKRAS_TEXT) == 7
     assert len(POINTS) == 18
-    assert len(SECTIONS_META) == 20
+    assert len(SECTIONS_META) == 21
     assert sorted(IN_POSITIONS) == list(range(1, 23))
     expected_keys = {row["key"] for row in SECTIONS_META} | {row["key"] for row in POINTS}
-    assert len(expected_keys) == 38
+    assert len(expected_keys) == 39
     assert all(set(rows) == expected_keys for rows in IN_POSITIONS.values())
-    assert sum(len(rows) for rows in IN_POSITIONS.values()) == 22 * 38
+    assert sum(len(rows) for rows in IN_POSITIONS.values()) == 22 * 39
     assert len(PAIRS) == 22 * 21 // 2
     assert all(1 <= a < b <= 22 for a, b in PAIRS)
     assert all(row.get("report_label") for row in POINTS)
@@ -71,7 +71,7 @@ def test_section_interpretations_preserve_individual_editorial_voice():
     section_keys = [row["key"] for row in SECTIONS_META]
     texts = [IN_POSITIONS[number][key] for number in range(1, 23) for key in section_keys]
 
-    assert len(texts) == len(set(texts)) == 22 * 20
+    assert len(texts) == len(set(texts)) == 22 * 21
     assert all("Конструктивная сторона заметна" not in text for text in texts)
 
     sentences = [

@@ -165,7 +165,7 @@ def test_chakra_hover_highlights_exact_points_and_resets(page):
     }
     check = '''({keys, color, baseline}) => {
         const nodes = [...document.querySelectorAll('svg.oct [data-map-point]')];
-        return nodes.length === 21 && nodes.every(n => {
+        return nodes.length === 22 && nodes.every(n => {
             const halo = n.querySelector('[data-chakra-halo]');
             const fill = getComputedStyle(n.querySelector('circle:not([data-chakra-halo])')).fill;
             const active = keys.includes(n.dataset.mapPoint);

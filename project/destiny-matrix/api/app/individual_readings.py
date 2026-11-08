@@ -52,6 +52,14 @@ class ChakraFigure(StrictModel):
 
 PointLetter = Literal["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
                       "R", "R1", "R2", "S", "T"]
+# Points of the year matrix ("Prognostics") and of a month matrix; P1–P3 are the thirds of the year.
+YearLetter = Literal["A", "B", "C", "D", "E", "F", "G", "H", "I", "P1", "P2", "P3"]
+MonthLetter = Literal["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+
+
+class MonthPoints(StrictModel):
+    n: int = Field(ge=1, le=12)
+    points: list[MonthLetter] = Field(min_length=1, max_length=6)
 
 
 class ArticleCard(StrictModel):
@@ -59,6 +67,8 @@ class ArticleCard(StrictModel):
     label: str = Field(min_length=1, max_length=150)
     caption: str = Field(min_length=1, max_length=1000)
     points: list[PointLetter] = Field(default_factory=list, max_length=6)
+    year: list[YearLetter] = Field(default_factory=list, max_length=6)
+    month: MonthPoints | None = None
 
 
 class ArticleSource(StrictModel):
@@ -84,6 +94,8 @@ class FormulaItem(StrictModel):
     arcanum: int = Field(ge=1, le=22)
     label: str = Field(min_length=1, max_length=120)
     points: list[PointLetter] = Field(default_factory=list, max_length=6)
+    year: list[YearLetter] = Field(default_factory=list, max_length=6)
+    month: MonthPoints | None = None
 
 
 class Formula(StrictModel):
@@ -122,6 +134,8 @@ class SelfCheckItem(StrictModel):
     arcanum: int = Field(ge=1, le=22)
     label: str = Field(min_length=1, max_length=120)
     points: list[PointLetter] = Field(default_factory=list, max_length=6)
+    year: list[YearLetter] = Field(default_factory=list, max_length=6)
+    month: MonthPoints | None = None
     plus: list[str] = Field(min_length=1, max_length=6)
     minus: list[str] = Field(min_length=1, max_length=6)
 
@@ -281,7 +295,7 @@ def token_allows(token: str, row: IndividualReading) -> bool:
 
 
 # Bump after changing the print layout: PDFs are cached under this key and old files stay in use.
-PDF_REVISION = "v11"
+PDF_REVISION = "v12"
 
 
 def print_token(row: IndividualReading) -> str:

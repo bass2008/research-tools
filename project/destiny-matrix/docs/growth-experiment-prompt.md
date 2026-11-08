@@ -84,7 +84,7 @@ XMLRiver: до 100 ₽ за прогон без спроса, больше — �
 - https://claude.ai/artifact/56gttUFTZSBLSkrauBbM6Z — проверка ниш из отчёта ChatGPT, 10.10.2026.
   Редкие астрологические техники в России почти никто не ищет; где спрос большой, топ занят
   калькуляторами.
-- docs/foreign-acquiring.md, docs/mobile-plan.md — деньги из-за рубежа и мобильное приложение.
+- docs/mobile-plan.md — мобильное приложение и оплата из-за рубежа через Google Play.
 
 Остальные доки проекта — в CLAUDE.md research-tools.
 

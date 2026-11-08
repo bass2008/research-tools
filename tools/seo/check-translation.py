@@ -11,6 +11,11 @@ LINK = re.compile(r"\]\((/[^)\s]*)\)")
 # сборка проверяет блоки толкования чакры по корпусу разборов; без него любой такой блок — ошибка
 _readings = json.load(open(f"{ROOT}/project/destiny-matrix/web/content/en/chakra-personal.json", encoding="utf-8"))
 build.CHAKRA_READINGS.update({key: set(chakra["readings"]) for key, chakra in _readings["chakras"].items()})
+_material = f"{ROOT}/project/destiny-matrix/web/content/en/material-karma.json"
+try:
+    build.CHAKRA_READINGS["material_karma"] = set(json.load(open(_material, encoding="utf-8"))["readings"])
+except FileNotFoundError:
+    build.CHAKRA_READINGS["material_karma"] = set()
 
 
 def load(path):
@@ -47,6 +52,18 @@ CATEGORIES = {
         "query": lambda k: load(f"{ROOT}/tools/seo/content/en/hubs/{k}.json")["seo"]["queries"][0],
         "waite": False,
     },
+    "material-karma": {
+        "source": lambda k: load(f"{ROOT}/tools/seo/content/ru/positions/material_karma.json"),
+        "result": f"{ROOT}/tools/seo/content/en/positions/material_karma.json",
+        "query": lambda k: "material karma in the destiny matrix",
+        "waite": False,
+    },
+    "month": {
+        "source": lambda k: load(f"{ROOT}/tools/seo/content/ru/category-hubs/month.json"),
+        "result": f"{ROOT}/tools/seo/content/en/category-hubs/month.json",
+        "query": lambda k: "arcana of the month",
+        "waite": False,
+    },
     "chakras": {
         "source": lambda k: {f: v for f, v in load(f"{ROOT}/tools/seo/content/ru/chakras/{k}.json").items() if f in build.CHAKRA_ARTICLE},
         "result": "/home/sergey/Personal/chakra-en/{}.json",
@@ -81,6 +98,11 @@ def flat(value):
     return ""
 
 
+def sections_of(item):
+    # статья раздела отчёта лежит в формате позиций: главы — article_sections, первый экран — meaning
+    return item.get("sections", item.get("article_sections", []))
+
+
 def check(category, key):
     conf = CATEGORIES[category]
     ru = conf["source"](key)
@@ -94,9 +116,11 @@ def check(category, key):
             problems.append(f"нет поля {field}")
     if problems:
         return problems, warnings, 0, len(flat(ru).split())
-    if len(en["sections"]) != len(ru["sections"]):
-        problems.append(f"разделов {len(en['sections'])}, в русской {len(ru['sections'])}")
-    for i, (r, e) in enumerate(zip(ru["sections"], en["sections"])):
+    if len(sections_of(en)) != len(sections_of(ru)):
+        problems.append(f"разделов {len(sections_of(en))}, в русской {len(sections_of(ru))}")
+    if "meaning" in ru and len(en.get("meaning", [])) != len(ru["meaning"]):
+        problems.append(f"абзацев meaning {len(en.get('meaning', []))}, в русской {len(ru['meaning'])}")
+    for i, (r, e) in enumerate(zip(sections_of(ru), sections_of(en))):
         if [shape(p) for p in r["paragraphs"]] != [shape(p) for p in e["paragraphs"]]:
             problems.append(f"раздел {i + 1} «{e.get('h2', '')}»: блоки не совпадают с русскими")
     if "intro" in ru and [shape(p) for p in ru["intro"]] != [shape(p) for p in en["intro"]]:
@@ -117,7 +141,7 @@ def check(category, key):
         problems.append(f"seo.description не начинается с «{query}»")
     if not 100 <= len(description) <= 160:
         problems.append(f"seo.description {len(description)} знаков, нужно 100–160")
-    if conf["waite"] and not any(re.search(r"waite", s["h2"], re.I) for s in en["sections"]):
+    if conf["waite"] and not any(re.search(r"waite", s["h2"], re.I) for s in sections_of(en)):
         problems.append("нет раздела с Waite в заголовке")
     cyrillic = len(re.findall(r"[А-Яа-яЁё]", flat(en)))
     if cyrillic > 40:
@@ -125,7 +149,8 @@ def check(category, key):
     elif cyrillic:
         warnings.append(f"кириллицы {cyrillic} знаков (допустимо для русских названий книг)")
     where = f"en/{category}/{key}"
-    build.check_article(en, where, problems)
+    if "sections" in ru:
+        build.check_article(en, where, problems)
     build.check_links(en, where, problems, build.known_paths("en"))
     build.hygiene(en, where, "", warnings, "en")
     return problems, warnings, len(flat(en).split()), len(flat(ru).split())

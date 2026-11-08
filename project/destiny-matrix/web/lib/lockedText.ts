@@ -17,15 +17,20 @@ export function filler(length: number, locale: Lang, from: number, end = ""): st
   return (cut > 0 ? text.slice(0, cut) : text).replace(/[\s,.;:—-]+$/u, "") + end;
 }
 
-/** Закрытый раздел: раскладка та же, но толкование заменено заглушкой той же формы. */
-export function lockChakraReading(reading: LongformReading, locale: Lang): LongformReading {
-  const lock = (row: ChakraReadingRow): ChakraReadingRow => ({
+/** Одна закрытая тройка: раскладка та же, толкование заменено заглушкой той же формы. */
+export function lockReadingRow(row: ChakraReadingRow, locale: Lang): ChakraReadingRow {
+  return {
     ...row,
     heading: filler(row.heading.length, locale, 0),
     cells: row.cells.map((cell, i) => ({ ...cell, caption: filler(cell.caption.length, locale, i + 2) })),
     paragraphs: row.paragraphs.map((paragraph, i) => filler(paragraph.length, locale, i, ".")),
     lockedWords: wordCount(row.paragraphs),
-  });
+  };
+}
+
+/** Закрытый раздел: раскладка та же, но толкование заменено заглушкой той же формы. */
+export function lockChakraReading(reading: LongformReading, locale: Lang): LongformReading {
+  const lock = (row: ChakraReadingRow) => lockReadingRow(row, locale);
   return {
     ...reading,
     testId: "chakras-locked",

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { arcanumImage } from "@/components/matrix/ArcanumCard";
-import { useIndividualTerms } from "@/components/pay/individualTerms";
+import { onePrice, useIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
 import Link from "@/components/ui/LocalizedLink";
 import RichText from "@/components/ui/RichText";
@@ -34,7 +34,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
   const { dateLabel } = localizedI18n(L);
   const r = (n: number) => rub(n, L);
   const terms = useIndividualTerms();
-  const prices = terms.prices;
+  const one = onePrice(terms);
   const year = initialYear || terms.defaultYear || serverYear;
   const mobile = useMobile();
   const stored = useBirth();
@@ -91,7 +91,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
               <a className="lp-btn lp-ghost" href="#map">{TL.enterDate[L]}</a>
             </div>
             <p className="lp-ai-line"><span>{TL.aiLine[L]} <a href="#who">{TL.howLink[L]}</a></span></p>
-            <p className="lp-meta"><RichText text={TL.meta[L](r(prices.first))} /></p>
+            <p className="lp-meta"><RichText text={TL.meta[L](r(one))} /></p>
           </div>
           <div className="lp-fan" aria-hidden="true">
             {KIND_CARDS.personal.map((n) => <img key={n} src={arcanumImage(n)} alt="" />)}
@@ -122,7 +122,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
             <p className="lp-notgpt"><RichText text={TL.notGpt[L](strengthCap)} /></p>
           </div>
           <div className="lp-cmp" role="table" aria-label={TL.cmpLabel[L]}>
-            {TL.cmpHead[L].map(([h, p], i) => <div key={h} className={`lp-hd${i === 1 ? " lp-mid" : ""}`}>{h}<span>{i === 1 ? r(prices.first) : p}</span></div>)}
+            {TL.cmpHead[L].map(([h, p], i) => <div key={h} className={`lp-hd${i === 1 ? " lp-mid" : ""}`}>{h}<span>{i === 1 ? r(one) : p}</span></div>)}
             {TL.cmpRows[L].flatMap(([label, a, b, c]) => [
               <div key={`${label}-l`} className="lp-rl">{label}</div>, <div key={`${label}-a`}>{a}</div>,
               <div key={`${label}-b`} className="lp-mid">{b}</div>, <div key={`${label}-c`}>{c}</div>,
@@ -158,7 +158,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
 
       <div className={`lp-bar${barOn ? " lp-on" : ""}`}>
         <div className="lp-in">
-          <div className="lp-t"><b>{user ? TL.barDate[L](showDate(user.date)) : TL.barSample[L]}</b>{TL.barSub[L](r(prices.first))}</div>
+          <div className="lp-t"><b>{user ? TL.barDate[L](showDate(user.date)) : TL.barSample[L]}</b>{TL.barSub[L](r(one))}</div>
           <a className="lp-btn lp-gold" href="#prices">{TL.order[L]}</a>
         </div>
       </div>

@@ -12,9 +12,9 @@ export const enc = {
     en: "Destiny matrix encyclopedia: arcana, positions, chakras",
   } satisfies Phrase,
   description: {
-    ru: "Справочник по матрице судьбы: значения 22 арканов, 20 разделов отчёта, 17 позиций карты, "
+    ru: "Справочник по матрице судьбы: значения 22 арканов, 21 раздел отчёта, 17 позиций карты, "
       + "7 чакр и 231 сочетание арканов. Все страницы с перекрёстными ссылками.",
-    en: "A reference on the destiny matrix: the meanings of 22 arcana, 20 sections of the reading, "
+    en: "A reference on the destiny matrix: the meanings of 22 arcana, 21 sections of the reading, "
       + "17 positions of the chart, 7 chakras and 231 combinations. Every page is cross-linked.",
   } satisfies Phrase,
   sectionsName: { ru: "Разделы справочника", en: "Sections of the encyclopedia" } satisfies Phrase,
@@ -155,7 +155,7 @@ export const encArcanum = {
       + "family line or in the money channel — the position changes everything. Build your own "
       + "octagram: the calculation is free and runs in the browser.",
   } satisfies PhraseFn<[number, string]>,
-  fullReadingAll: { ru: "Полный разбор всех 20 разделов —", en: "The full reading of all 20 sections —" } satisfies Phrase,
+  fullReadingAll: { ru: "Полный разбор всех 21 раздела —", en: "The full reading of all 21 sections —" } satisfies Phrase,
   eyebrow: {
     ru: (n: number) => `${n} аркан · Старший аркан`,
     en: (n: number) => `Arcanum ${n} · Major Arcana`,
@@ -455,6 +455,11 @@ export const encPosition = {
   levelsHint: {
     ru: "Каждый уровень разобран своей статьёй",
     en: "Every level has an article of its own",
+  } satisfies Phrase,
+  pointLineTitle: { ru: "Линия, в которую входит точка", en: "The line this point belongs to" } satisfies Phrase,
+  pointLineHint: {
+    ru: "Как читать её целиком — в отдельной статье",
+    en: "How to read it as a whole is covered in a separate article",
   } satisfies Phrase,
   sectionPositions: { ru: "Позиции этого раздела", en: "The positions of this section" } satisfies Phrase,
   sectionPositionsHint: {

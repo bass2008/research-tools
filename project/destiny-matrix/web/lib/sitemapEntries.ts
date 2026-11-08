@@ -7,7 +7,7 @@ import { forLocale as localizedServicePages } from "@/lib/servicePages";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { DEFAULT_SITE, type SiteProfile } from "./siteProfile";
 import { buildSettings } from "./settings/build";
-import { ENERGY_FIELD_HREF } from "./readingTypes";
+import { ENERGY_FIELD_HREF, MONTH_HREF } from "./readingTypes";
 import { publicUrl } from "./publicRouting";
 import { EXAMPLE_SLUGS, individualExample } from "./individualExamples";
 
@@ -64,6 +64,7 @@ export function sitemapForSite(site: SiteProfile = DEFAULT_SITE): MetadataRoute.
     })),
     ...CHAKRA_PAGES.map((c) => ({ url: abs(chakraHref(c.key)), priority: 0.6 })),
     ...(categoryHub("energy-field") ? [{ url: abs(ENERGY_FIELD_HREF), priority: 0.6 }] : []),
+    ...(categoryHub("month") ? [{ url: abs(MONTH_HREF), priority: 0.7 }] : []),
     // категории статей: в карту попадает только то, для чего есть написанный контент
     // шапки категорий в карте всегда: у них собственный текст, он не зависит от того, написаны
     // ли статьи внутри. По наличию статей строятся только сами статьи и корневые хабы.

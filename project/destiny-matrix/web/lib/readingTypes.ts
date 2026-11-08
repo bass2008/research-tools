@@ -42,7 +42,7 @@ export interface ReadingConclusion {
 }
 
 export interface ChakraReadingCell {
-  column: "physics" | "energy" | "emotions";
+  column: "physics" | "energy" | "emotions" | "C" | "Q" | "L";
   title: string;
   arcanum: number;
   caption: string;
@@ -51,6 +51,8 @@ export interface ChakraReadingCell {
 export const ENERGY_FIELD_KEY = "energy_field";
 export const CHAKRA_HUB_HREF = "/encyclopedia/chakra";
 export const ENERGY_FIELD_HREF = `${CHAKRA_HUB_HREF}/energy-field`;
+/** Аркан на месяц: статья энциклопедии, шапка категории `month`. */
+export const MONTH_HREF = "/encyclopedia/month";
 
 export interface ChakraReadingRow {
   key: string;

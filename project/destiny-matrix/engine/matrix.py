@@ -83,6 +83,7 @@ class Matrix:
     descendants: int = 0        # H, ЮВ: материальная мужская линия рода
     inheritance: int = 0        # I, ЮЗ: материальная женская линия рода
     karmic_tail: list[int] = field(default_factory=list)
+    material_karma: list[int] = field(default_factory=list)   # C → Q → L, Q = C + L
 
     # внутренние точки между внешними углами и центром J–M
     comfort_west: int = 0
@@ -125,7 +126,7 @@ class Matrix:
         for t in (self.sky, self.ground, self.social_male, self.social_female):
             if t:
                 simple += t.as_list()
-        simple += self.karmic_tail + self.money + self.love + self.talent
+        simple += self.karmic_tail + self.material_karma + self.money + self.love + self.talent
         for row in self.chakras:
             simple += [row.physics, row.energy, row.emotions]
         simple += list(self.chakra_totals.values())
@@ -166,6 +167,11 @@ def _talent_line(m: Matrix) -> list[int]:
     inner = m.comfort_north                                # K = B + E
     middle = fold(m.month + inner)                         # P = B + K
     return [m.month, middle, inner]                        # B, P, K
+
+
+def _material_karma(m: Matrix) -> list[int]:
+    """C → Q → L по правому лучу: материальная задача, отношение к материальному (C + L), вход денег."""
+    return [m.year, fold(m.year + m.comfort_east), m.comfort_east]
 
 
 def _karmic_tail(m: Matrix) -> list[int]:
@@ -249,6 +255,7 @@ def calculate(birth: _dt.date | str, sex: str = "f") -> Matrix:
     m.love = _love_line(m)
     m.talent = _talent_line(m)
     m.karmic_tail = _karmic_tail(m)
+    m.material_karma = _material_karma(m)
     m.chakras, m.chakra_totals = _chakras(m)
     m.age_scale = _age_scale(m)
     return m

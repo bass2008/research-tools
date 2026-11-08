@@ -64,10 +64,11 @@ export const forLocale = localized((L: Locale) => {
     { key: "comfort_east", symbol: "L", label: D.mapPoints.comfort_east[L], angle: 0, radius: R_IN, size: "mid" },
     { key: "comfort_south", symbol: "M", label: D.mapPoints.comfort_south[L], angle: 90, radius: R_IN, size: "mid" },
 
-    // середины между внешней и внутренней точкой одного луча: N = D + M, O = A + J, P = B + K
+    // середины между внешней и внутренней точкой одного луча: N = D + M, O = A + J, P = B + K, Q = C + L
     { key: "karmic_tail_middle", symbol: "N", label: D.mapPoints.karmic_tail_middle[L], angle: 90, radius: R_MID, size: "small" },
     { key: "ajna_physics", symbol: "O", label: D.mapPoints.ajna_physics[L], angle: 180, radius: R_MID, size: "small" },
     { key: "ajna_energy", symbol: "P", label: D.mapPoints.ajna_energy[L], angle: -90, radius: R_MID, size: "small" },
+    { key: "material_attitude", symbol: "Q", label: D.mapPoints.material_attitude[L], angle: 0, radius: R_MID, size: "small" },
 
     // середины между внутренней точкой и центром: S = J + E, T = K + E
     { key: "anahata_physics", symbol: "S", label: D.mapPoints.anahata_physics[L], angle: 180, radius: R_HALF, size: "small" },
@@ -125,6 +126,7 @@ export const forLocale = localized((L: Locale) => {
    *  которой хвост и читают тройкой, — гасла. */
   const LINES: Record<string, readonly string[]> = {
     past_lives: ["comfort_south", "karmic_tail_middle", "mission"],
+    material_karma: ["year", "material_attitude", "comfort_east"],
     money: ["comfort_east", "money_middle", "money_love_crossing"],
     relations: ["comfort_south", "love_middle", "money_love_crossing"],
     profession: ["month", "ajna_energy", "comfort_north"],

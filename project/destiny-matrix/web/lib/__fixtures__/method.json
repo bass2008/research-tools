@@ -280,6 +280,16 @@
       ]
     },
     {
+      "symbol": "Q",
+      "key": "material_attitude",
+      "title": "Отношение к материальному",
+      "formula": "reduce(C+L)",
+      "depends_on": [
+        "C",
+        "L"
+      ]
+    },
+    {
       "symbol": "R",
       "key": "money_love_crossing",
       "title": "Пересечение денег и отношений",
@@ -321,6 +331,18 @@
         "comfort_south",
         "karmic_tail_middle",
         "mission"
+      ]
+    },
+    "material_karma": {
+      "symbols": [
+        "C",
+        "Q",
+        "L"
+      ],
+      "keys": [
+        "year",
+        "material_attitude",
+        "comfort_east"
       ]
     },
     "money": {
@@ -933,6 +955,28 @@
       18,
       19,
       20,
+      22
+    ],
+    "material_attitude": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
       22
     ],
     "money_love_crossing": [

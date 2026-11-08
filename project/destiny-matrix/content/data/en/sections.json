@@ -115,6 +115,23 @@
   "formula": "centre E, the lower inner point M and the upper inner point K"
  },
  {
+  "key": "purpose",
+  "meaning": [
+   "Purpose in the matrix is laid out on four levels, and mixing them up is the main beginner’s mistake. The personal one concerns you alone, the social one is what people know you for, the spiritual one is the agreement between personal and social, and the planetary one is what goes through you further than your own life.",
+   "The levels switch on in turn, not all at once. While the personal one is unfinished, the social one looks forced: a person sets out to save the world while home stands empty. Going the other way round works better and faster, even if it looks more modest."
+  ],
+  "reading": "Go from the bottom up: personal, social, spiritual, planetary. Skipping a level gives you fine words and no result.",
+  "seo_title": "Purpose in the destiny matrix — four levels",
+  "seo_description": "Purpose in the destiny matrix: the personal, social, spiritual and planetary levels. Why they switch on in turn and what happens when you skip one.",
+  "queries": [
+   "purpose in the destiny matrix",
+   "personal and social purpose",
+   "four levels of purpose",
+   "arcanum of purpose"
+  ],
+  "formula": "personal, social, spiritual and planetary purpose"
+ },
+ {
   "key": "profession",
   "meaning": [
    "The talent line answers a dull but profitable question: through which action does a person’s energy turn into a result someone pays for. A gift without that translation stays a hobby, and this is the most common story of the whole section.",
@@ -149,23 +166,6 @@
   "formula": "karmic task D, the personal and the social purpose"
  },
  {
-  "key": "karma40",
-  "meaning": [
-   "The name “task before 40” is a reading frame for the product, not a separate timer inside the formula. The section puts point I, the material female line, next to point J, the step from the personality portrait to the centre of the chart. Together they show which family model has already become everyday life, and which of your own actions can change it.",
-   "Forty years is better read as a marker for the first half of adult life than as a date when something switches over by itself. The arcana do not promise that the task disappears after a birthday. The practical use of the section is to notice someone else’s script in your own actions earlier, and to try a new way before the old one hardens into a habit again."
-  ],
-  "reading": "Read I as the material family model and J as your own way of showing up differently. The age sets the frame of the section, but it does not change the formula of the points.",
-  "seo_title": "Karmic task before 40 in the destiny matrix",
-  "seo_description": "The task before 40 in the destiny matrix: how to read the material female point I and the inner point J without expecting the script to change on a birthday.",
-  "queries": [
-   "karmic task up to 40 years",
-   "destiny matrix tasks before 40 years",
-   "karma before 40 by date of birth",
-   "arcanum of the karmic task"
-  ],
-  "formula": "the material female point I and the inner left point J"
- },
- {
   "key": "resources",
   "meaning": [
    "The resource entry answers one question: where do good things come into your life from. The answer is different for everyone — for one person through people and contacts, for another through craft, for a third through risk and speed. You can spend years knocking at a door that is not yours.",
@@ -183,72 +183,21 @@
   "formula": "the start of the money line L and its middle point R2"
  },
  {
-  "key": "family_gifts",
+  "key": "material_karma",
   "meaning": [
-   "A family line passes on more than scripts — it also passes on strength: the ability to work, to get through hard times, to keep a home, to get along with people. The male and female lines show what came from each side, and the results of the branches show what all of it added up to by your generation.",
-   "Read this section next to the real family history. Where an arcanum matches the actual life of a grandfather or a grandmother, the gift has usually been tested already and can be used straight away. Where it does not match, the gift is still lying unopened — and it goes to the first person who picks it up."
+   "Material karma is the C → Q → L line on the right ray: how a person handles earnings, things, property and their own strength. C is the material task and the main point of the line, Q is the attitude to the material — thoughts and moods about money and things — and L is the entry of the money line, where the theme turns into money.",
+   "The line is read from the minus: it is a familiar scenario that can be noticed and turned into a plus. A common picture is a clear task and an anxious attitude: the person knows how things should be done, yet money gets stuck at the entry because the attitude to the material pulls back."
   ],
-  "reading": "The male and female lines show what was given from both sides; the results of the branches show where it stands by your generation. Check them against real facts about your relatives.",
-  "seo_title": "Family gifts and support in the destiny matrix",
-  "seo_description": "Family support in the destiny matrix: the male and female lines, the results of both branches, and which family gifts are tested and which still lie unopened.",
+  "reading": "Start with the main point C — it sets the theme. Then Q, how you feel about that theme, and L, where it turns into money and where it gets stuck.",
+  "seo_title": "Material karma in the destiny matrix — calculation and meaning",
+  "seo_description": "Material karma in the destiny matrix: where points C, Q and L sit on the chart, how to calculate the line from a date of birth and how to read your triple.",
   "queries": [
-   "family gifts destiny matrix",
-   "family line support by date of birth",
-   "destiny matrix family branch",
-   "arcanum of the family gift"
+   "material karma in the destiny matrix",
+   "material karma destiny matrix",
+   "material karma meaning",
+   "how to calculate material karma"
   ],
-  "formula": "the male and the female line plus the results of both branches"
- },
- {
-  "key": "soul_tasks",
-  "meaning": [
-   "The sky line of the chart is about work that nobody sees from outside: how a person deals with their own conscience, what they are afraid to admit, what they have been dragging along for years. There is no result here in money or job titles — there is inner quiet, or the lack of it.",
-   "Both tasks in this section are almost always uncomfortable: the first one sits closer to character, the second to relations with other people. The point is not to “close” them, but to stop pretending they are not there. That is usually where calm starts."
-  ],
-  "reading": "The result of the sky is the general theme, the two tasks are the concrete steps. Read them as questions to yourself, not as a verdict.",
-  "seo_title": "Spiritual tasks and lessons of the soul in the destiny matrix",
-  "seo_description": "Spiritual tasks in the destiny matrix: the sky line, the two tasks of the soul, and what people usually prefer not to notice. A reading without scare tactics.",
-  "queries": [
-   "spiritual tasks destiny matrix",
-   "sky line in the destiny matrix",
-   "soul lessons by date of birth",
-   "arcanum of the spiritual task"
-  ],
-  "formula": "the sky line B–D and the reducing of B+D"
- },
- {
-  "key": "past_lives",
-  "meaning": [
-   "The karmic tail is the most popular trio in the chart, and it is the thing people ask about most. In the scheme used here it keeps a strict order, M–N–D: the lower inner point, the reduction of D+M, and the root karmic task D.",
-   "You can take the subject any way you like: literally, as past lives, or as a description of habits a person is born with. The practical sense is the same — the tail holds a script that starts on its own, with no decision behind it. Until it is named, people take it for their own character."
-  ],
-  "reading": "Read in the order M–N–D: the entry on the inner ray, the middle point, and the root task D. Swapping the numbers round changes the positions and is no longer the same tail.",
-  "seo_title": "Karmic tail in the destiny matrix — tasks from past lives",
-  "seo_description": "The karmic tail in the destiny matrix: the three arcana it is made of, and the script that starts without your decision. How to read the tail step by step.",
-  "queries": [
-   "karmic tail in the destiny matrix",
-   "karmic tail 9",
-   "past life tasks destiny matrix",
-   "tail in the destiny matrix"
-  ],
-  "formula": "karmic tail M–N–D: M=D+E, N=D+M, then the root point D"
- },
- {
-  "key": "purpose",
-  "meaning": [
-   "Purpose in the matrix is laid out on four levels, and mixing them up is the main beginner’s mistake. The personal one concerns you alone, the social one is what people know you for, the spiritual one is the agreement between personal and social, and the planetary one is what goes through you further than your own life.",
-   "The levels switch on in turn, not all at once. While the personal one is unfinished, the social one looks forced: a person sets out to save the world while home stands empty. Going the other way round works better and faster, even if it looks more modest."
-  ],
-  "reading": "Go from the bottom up: personal, social, spiritual, planetary. Skipping a level gives you fine words and no result.",
-  "seo_title": "Purpose in the destiny matrix — four levels",
-  "seo_description": "Purpose in the destiny matrix: the personal, social, spiritual and planetary levels. Why they switch on in turn and what happens when you skip one.",
-  "queries": [
-   "purpose in the destiny matrix",
-   "personal and social purpose",
-   "four levels of purpose",
-   "arcanum of purpose"
-  ],
-  "formula": "personal, social, spiritual and planetary purpose"
+  "formula": "the material task C, the attitude to the material Q = C + L and the entry of the money line L"
  },
  {
   "key": "money",
@@ -319,6 +268,23 @@
   "formula": "the spiritual family points F and G, the material male point H"
  },
  {
+  "key": "family_gifts",
+  "meaning": [
+   "A family line passes on more than scripts — it also passes on strength: the ability to work, to get through hard times, to keep a home, to get along with people. The male and female lines show what came from each side, and the results of the branches show what all of it added up to by your generation.",
+   "Read this section next to the real family history. Where an arcanum matches the actual life of a grandfather or a grandmother, the gift has usually been tested already and can be used straight away. Where it does not match, the gift is still lying unopened — and it goes to the first person who picks it up."
+  ],
+  "reading": "The male and female lines show what was given from both sides; the results of the branches show where it stands by your generation. Check them against real facts about your relatives.",
+  "seo_title": "Family gifts and support in the destiny matrix",
+  "seo_description": "Family support in the destiny matrix: the male and female lines, the results of both branches, and which family gifts are tested and which still lie unopened.",
+  "queries": [
+   "family gifts destiny matrix",
+   "family line support by date of birth",
+   "destiny matrix family branch",
+   "arcanum of the family gift"
+  ],
+  "formula": "the male and the female line plus the results of both branches"
+ },
+ {
   "key": "ancestry",
   "meaning": [
    "The name “to the seventh generation” sets a wide family frame, but the formula does not count seven generations one by one. The section joins the material female point I, the totals of the male and female branches and the planetary purpose — from one concrete family habit up to the widest level of contribution.",
@@ -334,6 +300,74 @@
    "arcanum of the family line"
   ],
   "formula": "the material female I, the totals of both family branches and the planetary purpose"
+ },
+ {
+  "key": "karma40",
+  "meaning": [
+   "The name “task before 40” is a reading frame for the product, not a separate timer inside the formula. The section puts point I, the material female line, next to point J, the step from the personality portrait to the centre of the chart. Together they show which family model has already become everyday life, and which of your own actions can change it.",
+   "Forty years is better read as a marker for the first half of adult life than as a date when something switches over by itself. The arcana do not promise that the task disappears after a birthday. The practical use of the section is to notice someone else’s script in your own actions earlier, and to try a new way before the old one hardens into a habit again."
+  ],
+  "reading": "Read I as the material family model and J as your own way of showing up differently. The age sets the frame of the section, but it does not change the formula of the points.",
+  "seo_title": "Karmic task before 40 in the destiny matrix",
+  "seo_description": "The task before 40 in the destiny matrix: how to read the material female point I and the inner point J without expecting the script to change on a birthday.",
+  "queries": [
+   "karmic task up to 40 years",
+   "destiny matrix tasks before 40 years",
+   "karma before 40 by date of birth",
+   "arcanum of the karmic task"
+  ],
+  "formula": "the material female point I and the inner left point J"
+ },
+ {
+  "key": "past_lives",
+  "meaning": [
+   "The karmic tail is the most popular trio in the chart, and it is the thing people ask about most. In the scheme used here it keeps a strict order, M–N–D: the lower inner point, the reduction of D+M, and the root karmic task D.",
+   "You can take the subject any way you like: literally, as past lives, or as a description of habits a person is born with. The practical sense is the same — the tail holds a script that starts on its own, with no decision behind it. Until it is named, people take it for their own character."
+  ],
+  "reading": "Read in the order M–N–D: the entry on the inner ray, the middle point, and the root task D. Swapping the numbers round changes the positions and is no longer the same tail.",
+  "seo_title": "Karmic tail in the destiny matrix — tasks from past lives",
+  "seo_description": "The karmic tail in the destiny matrix: the three arcana it is made of, and the script that starts without your decision. How to read the tail step by step.",
+  "queries": [
+   "karmic tail in the destiny matrix",
+   "karmic tail 9",
+   "past life tasks destiny matrix",
+   "tail in the destiny matrix"
+  ],
+  "formula": "karmic tail M–N–D: M=D+E, N=D+M, then the root point D"
+ },
+ {
+  "key": "soul_tasks",
+  "meaning": [
+   "The sky line of the chart is about work that nobody sees from outside: how a person deals with their own conscience, what they are afraid to admit, what they have been dragging along for years. There is no result here in money or job titles — there is inner quiet, or the lack of it.",
+   "Both tasks in this section are almost always uncomfortable: the first one sits closer to character, the second to relations with other people. The point is not to “close” them, but to stop pretending they are not there. That is usually where calm starts."
+  ],
+  "reading": "The result of the sky is the general theme, the two tasks are the concrete steps. Read them as questions to yourself, not as a verdict.",
+  "seo_title": "Spiritual tasks and lessons of the soul in the destiny matrix",
+  "seo_description": "Spiritual tasks in the destiny matrix: the sky line, the two tasks of the soul, and what people usually prefer not to notice. A reading without scare tactics.",
+  "queries": [
+   "spiritual tasks destiny matrix",
+   "sky line in the destiny matrix",
+   "soul lessons by date of birth",
+   "arcanum of the spiritual task"
+  ],
+  "formula": "the sky line B–D and the reducing of B+D"
+ },
+ {
+  "key": "loops",
+  "meaning": [
+   "A program in the destiny matrix is a plot that keeps coming back: the same partners with different names, the same sackings, the same debts. The mechanics are simple — as long as a person makes the familiar choice, the situation repeats, because they put it together themselves.",
+   "The section shows the root of the program, the point where it holds on, and the way out. The way out is almost always uncomfortable: it asks for the very action a person has avoided all their life — to say it straight, to leave, to ask, to refuse. But after that the plot really does close."
+  ],
+  "reading": "The root says where the plot comes from, the centre says what holds it, the exit point says what to do differently. The way out is usually the least pleasant of the options.",
+  "seo_title": "Programs in the destiny matrix: what repeats in circles",
+  "seo_description": "Repeating plots in the destiny matrix: read them by the root, the centre and the exit point. Why the way out always asks for an uncomfortable step.",
+  "queries": [
+   "program in destiny matrix meaning",
+   "program 6 destiny matrix",
+   "repeating scenarios by date of birth",
+   "how to clear a program destiny matrix"
+  ],
+  "formula": "the root point of the tail D, the centre E and the spiritual purpose"
  },
  {
   "key": "body_resource",
@@ -385,23 +419,6 @@
    "destiny matrix rest and recovery"
   ],
   "formula": "emotions of the chakra of joy and the centre of the chart"
- },
- {
-  "key": "loops",
-  "meaning": [
-   "A program in the destiny matrix is a plot that keeps coming back: the same partners with different names, the same sackings, the same debts. The mechanics are simple — as long as a person makes the familiar choice, the situation repeats, because they put it together themselves.",
-   "The section shows the root of the program, the point where it holds on, and the way out. The way out is almost always uncomfortable: it asks for the very action a person has avoided all their life — to say it straight, to leave, to ask, to refuse. But after that the plot really does close."
-  ],
-  "reading": "The root says where the plot comes from, the centre says what holds it, the exit point says what to do differently. The way out is usually the least pleasant of the options.",
-  "seo_title": "Programs in the destiny matrix: what repeats in circles",
-  "seo_description": "Repeating plots in the destiny matrix: read them by the root, the centre and the exit point. Why the way out always asks for an uncomfortable step.",
-  "queries": [
-   "program in destiny matrix meaning",
-   "program 6 destiny matrix",
-   "repeating scenarios by date of birth",
-   "how to clear a program destiny matrix"
-  ],
-  "formula": "the root point of the tail D, the centre E and the spiritual purpose"
  },
  {
   "key": "years",

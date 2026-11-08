@@ -408,6 +408,7 @@
 .lm-host .lm-hero-map { grid-area: map; margin: 22px -8px 0; }
 .lm-host .lm-hero-rest { grid-area: rest; min-width: 0; }
 .lm-host .lm-hero .lm-h1 { font-size: 35px; line-height: 1.06; margin: 14px 0 14px; }
+p.lm-h1 { font-family: var(--ser); font-weight: 600; }
 .lm-host .lm-hero .lm-h1 em { font-style: normal; color: var(--gold); }
 .lm-host .lm-sub { color: var(--ndim); font-size: 16.5px; max-width: 520px; }
 .lm-host .lm-dform { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; max-width: 470px; }

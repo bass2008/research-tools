@@ -1,5 +1,5 @@
 {
- "count": 20,
+ "count": 21,
  "items": [
   {
    "key": "character",
@@ -48,6 +48,11 @@
    ]
   },
   {
+   "key": "purpose",
+   "title": "Your purpose",
+   "access": "paid"
+  },
+  {
    "key": "profession",
    "title": "Profession and work you love",
    "access": "paid"
@@ -58,33 +63,13 @@
    "access": "paid"
   },
   {
-   "key": "karma40",
-   "title": "Karmic task before 40",
-   "access": "paid"
-  },
-  {
    "key": "resources",
    "title": "What opens wealth and resource for you",
    "access": "paid"
   },
   {
-   "key": "family_gifts",
-   "title": "Support and gifts of your family line",
-   "access": "paid"
-  },
-  {
-   "key": "soul_tasks",
-   "title": "Spiritual tasks and lessons of the soul",
-   "access": "paid"
-  },
-  {
-   "key": "past_lives",
-   "title": "Karmic tail",
-   "access": "paid"
-  },
-  {
-   "key": "purpose",
-   "title": "Your purpose",
+   "key": "material_karma",
+   "title": "Material karma in the destiny matrix",
    "access": "paid"
   },
   {
@@ -108,8 +93,33 @@
    "access": "paid"
   },
   {
+   "key": "family_gifts",
+   "title": "Support and gifts of your family line",
+   "access": "paid"
+  },
+  {
    "key": "ancestry",
    "title": "Family tasks down to the seventh generation",
+   "access": "paid"
+  },
+  {
+   "key": "karma40",
+   "title": "Karmic task before 40",
+   "access": "paid"
+  },
+  {
+   "key": "past_lives",
+   "title": "Karmic tail",
+   "access": "paid"
+  },
+  {
+   "key": "soul_tasks",
+   "title": "Spiritual tasks and lessons of the soul",
+   "access": "paid"
+  },
+  {
+   "key": "loops",
+   "title": "Programs: what repeats in circles",
    "access": "paid"
   },
   {
@@ -125,11 +135,6 @@
   {
    "key": "rest",
    "title": "Your ideal way to rest",
-   "access": "paid"
-  },
-  {
-   "key": "loops",
-   "title": "Programs: what repeats in circles",
    "access": "paid"
   },
   {

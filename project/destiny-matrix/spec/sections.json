@@ -47,6 +47,34 @@
       ]
     },
     {
+      "key": "purpose",
+      "title": "Ваше предназначение",
+      "lead": "Четыре уровня: личный, социальный, духовный и планетарный.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Личное предназначение",
+          "selector": "purpose_personal",
+          "position_key": "purpose_personal"
+        },
+        {
+          "label": "Социальное предназначение",
+          "selector": "purpose_social",
+          "position_key": "purpose_social"
+        },
+        {
+          "label": "Духовное предназначение",
+          "selector": "harmony",
+          "position_key": "harmony"
+        },
+        {
+          "label": "Планетарное предназначение",
+          "selector": "planetary",
+          "position_key": "planetary"
+        }
+      ]
+    },
+    {
       "key": "profession",
       "title": "Профессия и дело по душе",
       "lead": "Через какое дело ваша энергия превращается в результат.",
@@ -93,24 +121,6 @@
       ]
     },
     {
-      "key": "karma40",
-      "title": "Кармическая задача до 40 лет",
-      "lead": "Возрастной ракурс точек I и J без автоматического переключения формулы.",
-      "access": "paid",
-      "positions": [
-        {
-          "label": "Материальная женская линия рода",
-          "selector": "I",
-          "position_key": "inheritance"
-        },
-        {
-          "label": "Внутренняя левая точка",
-          "selector": "J",
-          "position_key": "comfort_west"
-        }
-      ]
-    },
-    {
       "key": "resources",
       "title": "Что открывает вам блага и ресурс",
       "lead": "Канал, по которому в жизнь приходит достаток.",
@@ -129,104 +139,25 @@
       ]
     },
     {
-      "key": "family_gifts",
-      "title": "Поддержка и дары вашего рода",
-      "lead": "Что род передал вам как силу.",
+      "key": "material_karma",
+      "title": "Материальная карма в матрице судьбы",
+      "lead": "Как вы обращаетесь с материальным и где деньги застревают на входе.",
       "access": "paid",
       "positions": [
         {
-          "label": "Духовная мужская линия рода",
-          "selector": "F",
-          "position_key": "father_line"
+          "label": "Материальная задача",
+          "selector": "C",
+          "position_key": "year"
         },
         {
-          "label": "Духовная женская линия рода",
-          "selector": "G",
-          "position_key": "mother_line"
+          "label": "Отношение к материальному",
+          "selector": "Q",
+          "position_key": "material_karma"
         },
         {
-          "label": "Итог мужской ветви",
-          "selector": "social_male.total",
-          "position_key": "family_gifts"
-        },
-        {
-          "label": "Итог женской ветви",
-          "selector": "social_female.total",
-          "position_key": "family_gifts"
-        }
-      ]
-    },
-    {
-      "key": "soul_tasks",
-      "title": "Духовные задачи и уроки души",
-      "lead": "Работа, которую видно только изнутри.",
-      "access": "paid",
-      "positions": [
-        {
-          "label": "Первая задача неба",
-          "selector": "B",
-          "position_key": "month"
-        },
-        {
-          "label": "Вторая задача неба",
-          "selector": "D",
-          "position_key": "mission"
-        },
-        {
-          "label": "Итог неба",
-          "selector": "sky.total",
-          "position_key": "soul_tasks"
-        }
-      ]
-    },
-    {
-      "key": "past_lives",
-      "title": "Кармический хвост",
-      "lead": "Кармический хвост: то, что пришло с вами.",
-      "access": "paid",
-      "positions": [
-        {
-          "label": "Вход линии отношений и хвоста",
-          "selector": "M",
-          "position_key": "comfort_south"
-        },
-        {
-          "label": "Средняя точка хвоста",
-          "selector": "N",
-          "position_key": "past_lives"
-        },
-        {
-          "label": "Кармическая задача",
-          "selector": "D",
-          "position_key": "mission"
-        }
-      ]
-    },
-    {
-      "key": "purpose",
-      "title": "Ваше предназначение",
-      "lead": "Четыре уровня: личный, социальный, духовный и планетарный.",
-      "access": "paid",
-      "positions": [
-        {
-          "label": "Личное предназначение",
-          "selector": "purpose_personal",
-          "position_key": "purpose_personal"
-        },
-        {
-          "label": "Социальное предназначение",
-          "selector": "purpose_social",
-          "position_key": "purpose_social"
-        },
-        {
-          "label": "Духовное предназначение",
-          "selector": "harmony",
-          "position_key": "harmony"
-        },
-        {
-          "label": "Планетарное предназначение",
-          "selector": "planetary",
-          "position_key": "planetary"
+          "label": "Вход денежной линии",
+          "selector": "L",
+          "position_key": "comfort_east"
         }
       ]
     },
@@ -328,6 +259,34 @@
       ]
     },
     {
+      "key": "family_gifts",
+      "title": "Поддержка и дары вашего рода",
+      "lead": "Что род передал вам как силу.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Духовная мужская линия рода",
+          "selector": "F",
+          "position_key": "father_line"
+        },
+        {
+          "label": "Духовная женская линия рода",
+          "selector": "G",
+          "position_key": "mother_line"
+        },
+        {
+          "label": "Итог мужской ветви",
+          "selector": "social_male.total",
+          "position_key": "family_gifts"
+        },
+        {
+          "label": "Итог женской ветви",
+          "selector": "social_female.total",
+          "position_key": "family_gifts"
+        }
+      ]
+    },
+    {
       "key": "ancestry",
       "title": "Родовые задачи до седьмого колена",
       "lead": "Широкий родовой ракурс без буквального расчёта семи поколений.",
@@ -352,6 +311,93 @@
           "label": "Планетарное предназначение",
           "selector": "planetary",
           "position_key": "planetary"
+        }
+      ]
+    },
+    {
+      "key": "karma40",
+      "title": "Кармическая задача до 40 лет",
+      "lead": "Возрастной ракурс точек I и J без автоматического переключения формулы.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Материальная женская линия рода",
+          "selector": "I",
+          "position_key": "inheritance"
+        },
+        {
+          "label": "Внутренняя левая точка",
+          "selector": "J",
+          "position_key": "comfort_west"
+        }
+      ]
+    },
+    {
+      "key": "past_lives",
+      "title": "Кармический хвост",
+      "lead": "Кармический хвост: то, что пришло с вами.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Вход линии отношений и хвоста",
+          "selector": "M",
+          "position_key": "comfort_south"
+        },
+        {
+          "label": "Средняя точка хвоста",
+          "selector": "N",
+          "position_key": "past_lives"
+        },
+        {
+          "label": "Кармическая задача",
+          "selector": "D",
+          "position_key": "mission"
+        }
+      ]
+    },
+    {
+      "key": "soul_tasks",
+      "title": "Духовные задачи и уроки души",
+      "lead": "Работа, которую видно только изнутри.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Первая задача неба",
+          "selector": "B",
+          "position_key": "month"
+        },
+        {
+          "label": "Вторая задача неба",
+          "selector": "D",
+          "position_key": "mission"
+        },
+        {
+          "label": "Итог неба",
+          "selector": "sky.total",
+          "position_key": "soul_tasks"
+        }
+      ]
+    },
+    {
+      "key": "loops",
+      "title": "Программы: что повторяется по кругу",
+      "lead": "Сюжеты, которые возвращаются, пока не пройдены.",
+      "access": "paid",
+      "positions": [
+        {
+          "label": "Кармическая задача",
+          "selector": "D",
+          "position_key": "mission"
+        },
+        {
+          "label": "Центр карты",
+          "selector": "E",
+          "position_key": "center"
+        },
+        {
+          "label": "Духовное предназначение",
+          "selector": "harmony",
+          "position_key": "harmony"
         }
       ]
     },
@@ -420,29 +466,6 @@
           "label": "Центр карты",
           "selector": "E",
           "position_key": "center"
-        }
-      ]
-    },
-    {
-      "key": "loops",
-      "title": "Программы: что повторяется по кругу",
-      "lead": "Сюжеты, которые возвращаются, пока не пройдены.",
-      "access": "paid",
-      "positions": [
-        {
-          "label": "Кармическая задача",
-          "selector": "D",
-          "position_key": "mission"
-        },
-        {
-          "label": "Центр карты",
-          "selector": "E",
-          "position_key": "center"
-        },
-        {
-          "label": "Духовное предназначение",
-          "selector": "harmony",
-          "position_key": "harmony"
         }
       ]
     },

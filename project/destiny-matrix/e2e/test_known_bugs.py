@@ -188,7 +188,7 @@ def test_a7_back_after_payment_shows_the_paid_report(page, mail):
     flows.calculate(page, 8, 8, 1988)
     page.goto(f"{BASE}/report", wait_until="networkidle")
     page.wait_for_timeout(800)
-    assert flows.locked_sections(page) == 18
+    assert flows.locked_sections(page) == 19
 
     flows.open_pay(page)
     flows.pay(page, mail)

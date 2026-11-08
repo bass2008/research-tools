@@ -7,6 +7,8 @@ import { forLocale as localizedPublicLabels } from "./i18n/publicLabels";
 import type { Matrix } from "./matrix";
 import { ENERGY_FIELD_KEY, type ChakraReadingRow } from "./readingTypes";
 import { chakraAtlas } from "./i18n/dict/chakraAtlas";
+import { report } from "./i18n/dict/report";
+import { materialKarmaRowFrom, type MaterialKarmaCorpus } from "./materialKarmaRow";
 import { plainText } from "./richText";
 
 type Bag = Record<string, unknown>;
@@ -240,6 +242,7 @@ export function createContent(L: Locale, source: ContentSource) {
   }
 
   let chakraCorpus: ChakraCorpus | undefined;
+  let materialCorpus: MaterialKarmaCorpus | undefined;
   let chakraNumbers: Map<string, number> | undefined;
 
   function chakraReadingOf(v: unknown): ChakraReadingItem | null {
@@ -248,6 +251,16 @@ export function createContent(L: Locale, source: ContentSource) {
     if (Object.keys(rest).length || typeof chakra !== "string" || typeof triple !== "string" ||
         !/^\d+-\d+-\d+$/.test(triple) || (note !== undefined && (typeof note !== "string" || !note.trim()))) {
       return null;
+    }
+    if (chakra === "material_karma") {
+      materialCorpus ??= source.read("material-karma.json", L) as MaterialKarmaCorpus;
+      const copy = materialCorpus.readings[triple];
+      if (!copy) return null;
+      return {
+        id: `material-karma-${triple}`, ...(note ? { note: note.trim() } : {}),
+        row: materialKarmaRowFrom(triple.split("-").map(Number), copy, report.materialKarmaTitle[L],
+          report.materialKarmaTopic[L], report.materialKarmaRoles[L]),
+      };
     }
     chakraCorpus ??= source.read("chakra-personal.json", L) as ChakraCorpus;
     chakraNumbers ??= new Map(readItems("chakras.json").map((row) => [String(row.key), Number(row.number)]));
@@ -478,13 +491,15 @@ export function createContent(L: Locale, source: ContentSource) {
 
   for (const [name, actual, expected] of [
     ["arcana.json", ARCANA_JSON.size, 22],
-    ["positions.json", POSITIONS_JSON.size, 38],
+    // материальная карма приходит в язык целиком — страница раздела вместе с корпусом толкований
+    ["positions.json", POSITIONS_JSON.size, POSITIONS_JSON.has("material_karma") ? 39 : 38],
     ["chakras.json", CHAKRAS_JSON.size, 7],
     ["combinations.json", COMBINATIONS_JSON.size, 231],
     ["karmic-tails.json", KARMIC_TAILS.size, 26],
     ["year-arcana.json", YEAR_ARCANA.size, 23],
     // раздел «Арканы в совместимости» язык получает целиком: шапка и все 21 страница, либо ничего
-    ["category-hubs.json", CATEGORY_HUBS.size, (CATEGORY_HUBS.has("compatibility") ? 8 : 7) + (CATEGORY_HUBS.has("compatibility-tails") ? 1 : 0)],
+    ["category-hubs.json", CATEGORY_HUBS.size, (CATEGORY_HUBS.has("compatibility") ? 8 : 7) + (CATEGORY_HUBS.has("compatibility-tails") ? 1 : 0)
+      + (CATEGORY_HUBS.has("month") ? 1 : 0)],
     ["compatibility-arcana.json", COMPATIBILITY_ARCANA.size, CATEGORY_HUBS.has("compatibility") ? 21 : 0],
     ["hubs.json", HUBS.size, 10 + COMPATIBILITY_HUBS.filter((key) => HUBS.has(key)).length],
   ] as const) {
@@ -596,7 +611,8 @@ export function createContent(L: Locale, source: ContentSource) {
       keywords.length < 3 ||
       !meaning ||
       !inPositions ||
-      Object.keys(inPositions).length !== 38 ||
+      // 18 точек и разделы метода; материальная карма приходит в язык вместе со своей страницей
+      Object.keys(inPositions).length !== ("material_karma" in inPositions ? 39 : 38) ||
       plus.length < 3 ||
       minus.length < 3 ||
       repeat.length < 200 ||
@@ -854,6 +870,11 @@ export function createContent(L: Locale, source: ContentSource) {
     return generated;
   }
 
+  /** Есть ли у языка этот текст: материальная карма приходит в язык отдельным релизом перевода. */
+  function hasArcanumInPosition(n: number, key: string): boolean {
+    return (arcanumContent(n)?.inPositions[key]?.length ?? 0) > 40;
+  }
+
   // 11 МБ JSON: читается один раз на процесс и только когда его действительно спросили,
   // чтобы страницы энциклопедии не платили за файл, который им не нужен.
   let MATRICES: Map<string, MatrixItem> | null = null;
@@ -904,5 +925,5 @@ export function createContent(L: Locale, source: ContentSource) {
       hubs: HUBS.size,
     };
   }
-  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, pairTail, pairTailKeys, indexedPairTailKeys, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, matrixSlugs, matrixItem, contentStats };
+  return { karmicTail, karmicTailKeys, indexedKarmicTailKeys, karmicTails, pairTail, pairTailKeys, indexedPairTailKeys, yearArcanum, yearKeys, compatibilityArcanum, compatibilityKeys, categoryHub, hub, hubKeys, arcanumContent, indexedPositionArcanumRows, positionArcanumRows, positionContent, chakraContent, combinationContent, arcanumInPosition, hasArcanumInPosition, matrixSlugs, matrixItem, contentStats };
 }

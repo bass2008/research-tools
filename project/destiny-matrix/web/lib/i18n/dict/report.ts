@@ -127,6 +127,12 @@ export const report = {
     en: "This text opens together with the full reading. It describes how the three arcana work together on this level of the matrix. The reading is written for your combination of numbers and reads as one connected story. It shows what gives support, where strength is wasted and what can be done about it. At the end there is an observation that is easy to check against your own experience.",
   } satisfies Phrase,
   tripleSummary: { ru: "Как складывается тройка", en: "How the three work together" } satisfies Phrase,
+  materialKarmaTopic: { ru: "Задача, отношение и вход в деньги", en: "Task, attitude and the entry to money" } satisfies Phrase,
+  materialKarmaTitle: { ru: "Материальная карма", en: "Material karma" } satisfies Phrase,
+  materialKarmaRoles: {
+    ru: ["Материальная задача", "Отношение к материальному", "Вход денежной линии"],
+    en: ["Material task", "Attitude to the material", "Entry of the money line"],
+  } satisfies Record<"ru" | "en", string[]>,
   // кнопки сохранения
   saveMatrix: { ru: "Сохранить матрицу в кабинет", en: "Save the matrix to your account" } satisfies Phrase,
   savedToAccount: { ru: "Сохранено в кабинете", en: "Saved to your account" } satisfies Phrase,

@@ -51,7 +51,7 @@ describe("эталон из engine/matrix.py", () => {
   // живёт только во фронте: корпус написан для сайта, в Python-движке его нет, поэтому
   // поле text из сравнения убирается.
   const withoutText = (rows: ReturnType<typeof build>) =>
-    rows.map(({ personalHref: _personalHref, longform: _longform, tailReading: _tailReading, locked: _locked, ...s }) => ({
+    rows.map(({ personalHref: _personalHref, longform: _longform, tailReading: _tailReading, tripleReading: _tripleReading, locked: _locked, ...s }) => ({
       ...s,
       positions: s.positions.map(({ text, ...p }) => p),
     }));
@@ -305,11 +305,11 @@ describe("инварианты на многих датах", () => {
 describe("разделы", () => {
   const m = calculate("1987-06-14", "f");
 
-  it("два бесплатных, восемнадцать платных", () => {
+  it("два бесплатных, девятнадцать платных", () => {
     // Бесплатна витрина: как устроен человек и где ему комфортно. Профессия, предназначение,
     // кармическая задача и денежный канал — продукт, за него платят.
     expect(FREE_KEYS).toEqual(["character", "comfort"]);
-    expect(PAID_KEYS).toHaveLength(18);
+    expect(PAID_KEYS).toHaveLength(19);
     for (const key of ["profession", "realisation", "karma40", "resources"]) {
       expect(PAID_KEYS).toContain(key);
     }
@@ -329,9 +329,9 @@ describe("разделы", () => {
     }
   });
 
-  it("открытый отчёт даёт позиции всем двадцати разделам", () => {
+  it("открытый отчёт даёт позиции всем двадцати одному разделу", () => {
     const all = build(m, true);
-    expect(all).toHaveLength(20);
+    expect(all).toHaveLength(21);
     for (const s of all) expect(s.positions.length).toBeGreaterThan(0);
   });
 

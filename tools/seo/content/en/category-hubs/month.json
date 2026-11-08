@@ -1,0 +1,609 @@
+{
+  "key": "month",
+  "crumb": "Arcana of the month",
+  "seo": {
+    "title": "Arcana of the month: destiny matrix calculation and meanings",
+    "description": "Arcana of the month: calculate your monthly centre with Lisovskaya’s method, explore its meaning and see why calculators give different results.",
+    "queries": [
+      "arcana of the month",
+      "destiny matrix for the month",
+      "monthly arcanum in the destiny matrix",
+      "how to calculate your monthly arcanum",
+      "monthly arcanum by date of birth"
+    ]
+  },
+  "related": [
+    "year/20",
+    "position/month",
+    "position/center",
+    "energies"
+  ],
+  "title": "Your monthly arcanum in the destiny matrix: what sets the tone",
+  "short": "Your monthly arcanum is the centre of your personal matrix for the month. It is calculated using Yuliana Lisovskaya’s method from her book on forecasting: add a constructed ‘date’ for the chosen month to your date of birth, then calculate the points as you would in an ordinary matrix. The centre names the month’s main theme: the backdrop to what you do, rather than an event that must happen. This is different from your birth month arcanum, which stays in your star chart for life. It is also different from ‘year arcanum plus month number’, a formula some calculators use that gives a different answer in 94 months out of a hundred. You can calculate your own month in three minutes; the worked example is below. There are 17 possible monthly centres. Five arcana, from The Chariot to Strength, account for more than half of all months, while The Magician, The High Priestess, The Star, The Sun and The World never appear at the monthly centre for any birth date.",
+  "sections": [
+    {
+      "h2": "Where to find your monthly arcanum",
+      "paragraphs": [
+        "Your monthly arcanum is not on your matrix star chart. Every point there is calculated from your date of birth and stays the same from year to year and month to month. Each calendar month has a separate matrix, calculated afresh using your birth date.",
+        "The point most often mistaken for it is B at the top of the star, labelled ‘Spiritual task’. People searching online call this the birth month arcanum: it is the number of the month you were born in, from 1 to 12, and stays with you for life. Everyone born in January has The Magician there. This point does not describe the theme of the current month.",
+        "On our site, the personal year reading calculates your monthly matrices. Each month has its own chapter, beginning with a card labelled ‘Centre of January’, ‘Centre of February’ and so on. That is your monthly arcanum. Below it is a table of the month’s other points: the plus, the minus, people, the weak spot and the lower corners. You can see the layout in the sample year reading for an example birth date.",
+        "The free matrix calculation does not include months, and there is no monthly calculator on this page either. But you can easily work it out yourself: four additions and one rule."
+      ]
+    },
+    {
+      "h2": "How to calculate your monthly arcanum from your birth date",
+      "paragraphs": [
+        "One rule applies throughout: **if a number is greater than 22, add its digits together**. 30 → 3, 44 → 4 + 4 = 8, 4,001 → 4 + 0 + 0 + 1 = 5. Do not subtract 22: this method reduces numbers by adding their digits, so 30 becomes 3, not 8.",
+        "Let’s work out January 2026 for someone born on 19 January 1975.",
+        "**Step 1. Construct the month’s date.** A month has no birthday of its own, so we build a date for it:",
+        {
+          "ul": [
+            "**day** — the sum of the year’s digits plus the month number: 2 + 0 + 2 + 6 = 10; January is the first month, so 10 + 1 = 11;",
+            "**month** — the month number: 1;",
+            "**year** — the year itself: 2026."
+          ]
+        },
+        "The month’s date is 11.01.2026. In 2026, its day runs from 11 in January to 22 in December.",
+        "**Step 2. Add the month’s date to your birth date** — day to day, month to month, year to year:",
+        {
+          "ul": [
+            "**A** = 11 + 19 = 30 → 3. Use your birth day in full: the 19th means 19, the 30th means 30.",
+            "**B** = 1 + 1 = 2. The rule that a month cannot exceed 12 does not apply here: for someone born in October, November gives 11 + 10 = 21, which stays at 21.",
+            "**C** = 1975 + 2026 = 4,001 → 4 + 0 + 0 + 1 = 5. If the digit sum exceeds 22 (1973 + 2026 = 3,999 → 30), add the digits again: 30 → 3."
+          ]
+        },
+        "**Step 3. The bottom point.** D = A + B + C = 3 + 2 + 5 = 10.",
+        "**Step 4. The centre.** E = A + B + C + D = 3 + 2 + 5 + 10 = 20. **For 19.01.1975, the arcanum for January 2026 is 20, Judgement.**",
+        {
+          "table": {
+            "head": [
+              "Point",
+              "Calculation",
+              "19.01.1975, January 2026"
+            ],
+            "rows": [
+              [
+                "Month’s date",
+                "day — sum of the year’s digits + month number; month — month number; year — the year itself",
+                "11.01.2026"
+              ],
+              [
+                "A",
+                "day of the constructed date + birth day",
+                "11 + 19 = 30 → 3"
+              ],
+              [
+                "B",
+                "month number + birth month",
+                "1 + 1 = 2"
+              ],
+              [
+                "C",
+                "year + birth year, then add the digits",
+                "4,001 → 5"
+              ],
+              [
+                "D",
+                "A + B + C",
+                "10"
+              ],
+              [
+                "**E — monthly centre**",
+                "A + B + C + D",
+                "**20 · Judgement**"
+              ]
+            ]
+          }
+        },
+        "The letters occupy the same places as on our diagram, but the monthly points have their own roles. Lisovskaya’s book labels these points with Cyrillic letters, using Д for the centre: do not confuse it with our bottom point D.",
+        "**Putting it to use.** Judgement at the centre makes unfinished business the theme of the month. Suppose something has been left half-done since autumn: a renovation stopped midway, a course you abandoned, a letter you never sent. January’s task is to return to that particular thing and decide whether to finish it or close it honestly, rather than start something new. There is more on Judgement as a monthly theme in the meanings section.",
+        "This example is rare: only 23 birth dates have Judgement at the monthly centre in 2026. A more typical calculation looks like this.",
+        {
+          "h3": "A second example: reducing two sums"
+        },
+        "07.10.1988, November 2026. The month’s date: 10 + 11 = 21, giving 21.11.2026.",
+        {
+          "ul": [
+            "A = 21 + 7 = 28 → 10;",
+            "B = 11 + 10 = 21;",
+            "C = 1988 + 2026 = 4,014 → 9;",
+            "D = 10 + 21 + 9 = 40 → 4;",
+            "E = 10 + 21 + 9 + 4 = 44 → 8."
+          ]
+        },
+        "November’s arcanum is 8, Justice: a month for an honest reckoning and putting agreements in writing.",
+        "From December 2027, the day in the month’s constructed date can exceed 22: 11 + 12 = 23. Do not reduce it immediately: add your birth day first, then reduce the sum. That is how our year reading calculates it. The book does not cover this case, and other guides may reduce the number earlier.",
+        {
+          "h3": "Check your calculation with the rule of nine"
+        },
+        "**The centre minus twice the bottom point is always divisible by nine.** 20 − 2 × 10 = 0. 8 − 2 × 4 = 0. In Lisovskaya’s worked example (30.06.1998, June 2023), the bottom point is 8 and the centre is 7: 7 − 16 = −9. If the result is not divisible by nine, one of the reductions is wrong. The reason is simple: adding a number’s digits does not change its remainder when divided by nine. The centre is A + B + C added to D, which is the same sum in reduced form.",
+        "The second check is the answer itself. **If your centre is 1, 2, 17, 19 or 21, something has gone wrong**: these rules never produce those numbers for any birth date.",
+        "The third check is a completed example. The sample year reading on our site uses 07.10.1988 and includes January 2027: 12.01.2027, A = 12 + 7 = 19, B = 1 + 10 = 11, C = 1988 + 2027 = 4,015 → 10, D = 40 → 4, centre 44 → 8, Justice, matching the ‘Centre of January’ card. Our calculation also reproduces the book’s example: 30.06.1998, June 2023 — centre 7."
+      ]
+    },
+    {
+      "h2": "Monthly arcanum, birth month and year arcanum: six numbers for one date",
+      "paragraphs": [
+        "Online, ‘monthly arcanum’ can mean several different numbers, and two yearly numbers can easily be mistaken for the starting point of a monthly calculation. Here are all six for the same birth date: 19.01.1975, January 2026.",
+        {
+          "table": {
+            "head": [
+              "What it is",
+              "How it is calculated",
+              "19.01.1975, January 2026"
+            ],
+            "rows": [
+              [
+                "**Centre of the monthly matrix** — this article",
+                "Lisovskaya’s monthly matrix",
+                "**20 · Judgement**"
+              ],
+              [
+                "Birth month arcanum, point B",
+                "birth month number, fixed for life",
+                "1 · The Magician"
+              ],
+              [
+                "Year arcanum on the ‘Destiny matrix for the year’ page",
+                "birth day + birth month + sum of the year’s digits",
+                "3 · The Empress"
+              ],
+              [
+                "Centre of the yearly matrix in the year reading",
+                "Lisovskaya’s yearly matrix",
+                "5 · The Hierophant"
+              ],
+              [
+                "‘Year arcanum plus month number’",
+                "the formula used by some calculators",
+                "4 · The Emperor"
+              ],
+              [
+                "‘Month number plus sum of the year’s digits’",
+                "one number for everyone",
+                "11 · Strength"
+              ]
+            ]
+          }
+        },
+        {
+          "ul": [
+            "**Your birth month** is a point in your permanent star chart. It describes what you are born with, rather than the current thirty days.",
+            "**The year arcanum on the ‘for the year’ page** is a simple sum of three numbers: 19 + 1 + 10 = 30 → 3. It stays the same for the whole calendar year.",
+            "**The centre of the yearly matrix** works like the monthly centre, but for a year: in the year reading, it sets the backdrop for all twelve months. It matches the centre of an individual month in 8% of months.",
+            "**‘Year arcanum plus month number’** adds the month number to the simple year arcanum: 3 + 1 = 4. This is a different method, matching the monthly centre in just 6% of months. You cannot add the month number to the arcanum on the ‘for the year’ page and interpret the result as the monthly centre.",
+            "**‘Month number plus sum of the year’s digits’** gives everyone the same answer: 11 for January 2026, 20 for October, 21 for November. In Lisovskaya’s method, this is only the day in the month’s constructed date, the first step of the calculation."
+          ]
+        },
+        "None of these numbers is a ‘calculator error’: they answer different questions. The error comes when a number from one method is interpreted using the rules of another. So if you get a different monthly arcanum elsewhere, find out how it was calculated before comparing meanings. Another common source of disagreement is reduction: subtracting 22 rather than adding the digits turns a sum of 30 into 8 instead of 3.",
+        "Two related ideas have their own pages: [your year arcanum](/year), the theme of the whole year, and [your birth month](/encyclopedia/position/month), point B of your personal matrix."
+      ]
+    },
+    {
+      "h2": "What the monthly centre tells you",
+      "paragraphs": [
+        "In Lisovskaya’s book, forecast points are read in the same way for a year, a month or a day. The centre covers the period’s main events and overall backdrop: its positive and negative possibilities, and what deserves closer attention. Some other points cover just one side: the top point and upper left corner show only the positive, while the right and bottom points show only the negative. The centre is the only point where the card speaks in full, with both sides present at once.",
+        "A month is a short time, and that changes the question. A year under one card can take many forms; a month has room for one or two substantial undertakings. So the most useful way to read the monthly centre is as **a task for thirty days**: what theme comes to the fore, where you might stumble over it, and what step you can take before the month ends. That is how the meanings below are organised.",
+        "The monthly centre sits over your personal matrix rather than rewriting it. If it matches your personal centre, the month speaks your own language: this happens in 7% of months, and almost nine birth dates out of ten have at least one such month in 2026. If the card is absent from your star chart altogether, the month hands you a tool you rarely use; the task is to put it to work."
+      ]
+    },
+    {
+      "h2": "What each arcanum means at the monthly centre",
+      "paragraphs": [
+        "Below are all seventeen arcana that can appear at the monthly centre, in numerical order. Their positive and negative sides come from Lisovskaya’s lists in her chapter on the twenty-two energies in forecasts; the underlying meanings of the cards draw on Waite and Wen. The monthly tasks and action steps are our adaptation. We have not turned the events in Lisovskaya’s lists, from weddings to inheritances, into tasks: one card cannot predict an event. Arcana 7 to 11 are the most common, each appearing in exactly one month out of nine.",
+        {
+          "h3": "3 · The Empress: nurture and harvest"
+        },
+        "A month for seeing things bear fruit. What you have spent time investing in — work, home, relationships, a project of your own — may begin to give something back, and there is no shame in accepting help this month. The other half of the task is to feed what is growing with time and care, as well as money. Two extremes can trip you up: generosity without limits, and austerity that leaves everything cold. **Your step this month:** choose one undertaking or one person, give a little every day, then see what has grown on the last day of the month.",
+        {
+          "h3": "4 · The Emperor: put your own house in order"
+        },
+        "A month of structure and responsibility. Set plans, rules and deadlines; take charge of something that has long lacked an owner; settle issues that have dragged on. The Emperor’s difficult side is rivalry, power struggles, scrutiny and rigidity where clarity would be enough. The task is to bring order to what you are responsible for, rather than defeat everyone else. **Your step this month:** put one practical framework on paper — a budget, timetable or division of responsibilities — and resolve one issue you have been putting off.",
+        {
+          "h3": "5 · The Hierophant: learn, teach and check the rules"
+        },
+        "A month of mentorship. Study, courses, public speaking, sharing experience, seeing family, returning to traditions that still sustain you. Lisovskaya also notes a way out of stagnation: someone else’s experience can get a stalled situation moving. The difficult side is false authority, blindly following rules, and confusion over documents and formalities. **Your step this month:** one session where you learn and one where you teach; check when your documents expire while you are at it.",
+        {
+          "h3": "6 · The Lovers: choose and commit"
+        },
+        "A month of choices: offers, new connections, partnerships, collaboration and contracts. There are plenty of options, and that is the catch: saying ‘we’ll see’ endlessly turns abundance into exhaustion. The card’s difficult side is emotional swings, spending on a whim and overlooking details in agreements. The task is to decide who to go with and where, then make the decision stick. **Your step this month:** make the choice between two options that you have been putting off, and formalise it.",
+        {
+          "h3": "7 · The Chariot: stay on course"
+        },
+        "A month of movement: travel, a major project, a team, a push forward at work, sport. Waite sees The Chariot as victory in the outer world: command that does not yet bring inner peace. The difficult side is a race without restraint: unjustified risks, arguments over who leads, debts taken on for the sake of speed. The task is to choose one goal for the month and steer towards it without changing route every week. **Your step this month:** name the finish line you will aim for by the last day, divide the journey into four weekly stages, and delegate what you can.",
+        {
+          "h3": "8 · Justice: an honest reckoning"
+        },
+        "A month for paperwork and settling accounts. Its positive side includes the results of your work, signed contracts, repayments and compensation; its negative side includes papers signed without reading, fines, debts and failed deals. The task for thirty days is to balance the books: whom do you owe, who owes you, and which agreements rest on someone’s word alone? The trap is holding others to a standard you do not apply to yourself. **Your step this month:** put one verbal agreement in writing, with figures and a deadline.",
+        {
+          "h3": "9 · The Hermit: quiet time for one thing"
+        },
+        "A month for yourself: concentrate, study, reflect on your path, set boundaries, attend to something that has long been calling you. In Waite’s account, The Hermit has reached an understanding that can light the way for others; he is not fleeing from people. The difficult side is shutting yourself away completely: apathy, anxiety, not wanting to see anyone, financial constraints, a pause that never ends. **Your step this month:** protect a few hours each week when you are unavailable to everyone, and devote them to one main undertaking.",
+        {
+          "h3": "10 · The Wheel of Fortune: seize the opening, avoid the old cycle"
+        },
+        "A month of opportunities: news, new connections, fortunate coincidences, debts repaid. For Waite, The Wheel of Fortune represents the changing nature of life, with an underlying order. The difficult side is repetition: old patterns, people from the past, impulsive decisions, misplaced trust, borrowing while riding a wave of optimism. The task is to tell a real opportunity from another turn on a familiar merry-go-round. **Your step this month:** leave a full day between an impulse and a major decision, and prepare for opportunities in advance with a CV, a portfolio or money set aside.",
+        {
+          "h3": "11 · Strength: composure over pressure"
+        },
+        "A demanding month: a heavy workload, leadership, exams and competitions, rebuilding your strength. For Waite, Strength is the higher nature taming the passions; for Wen, it is mastery of yourself through gentle rather than forceful influence. The difficult side is aggression, overwork, burnout, manipulation and delays with paperwork. The task is to manage work and people with a steady hand. **Your step this month:** keep an even pace instead of working in bursts, schedule rest, and have one difficult conversation without raising your voice.",
+        {
+          "h3": "12 · The Hanged Man: see it from another angle"
+        },
+        "A month for changing priorities: stop, reconsider what matters, clear your space, rethink your social circle, rest. The pause itself can bring fresh ideas. The difficult side is limbo and stagnation, helping everyone except yourself, and trying to begin something new without letting go of the old. The Hanged Man does not require you to endure: the pause is there to change your view, rather than keep you stuck. **Your step this month:** rewrite your list of priorities and cross off one thing you are carrying on with out of habit.",
+        {
+          "h3": "13 · Death: finish something and make room"
+        },
+        "A month of endings and change: a new project, a job transfer, a move, leaving something that has run its course. Things begin to move when the old is released. The difficult side is clinging to the past, returning to what was already closed, and being caught off guard by changes you put off for too long. In the matrix, Death is a card of transition, rather than disaster. **Your step this month:** close one chapter properly — finish and hand it over, decline it, or say goodbye.",
+        {
+          "h3": "14 · Temperance: balance and a steady rhythm"
+        },
+        "A rare centre: roughly one month in 140, with one birth date in twelve getting it at least once in 2026. A month of balance: bring work and rest together, at least balance income and spending, find people on your wavelength, spend time in nature, do something creative. The difficult side is losing your sense of proportion: unexpected spending, extremes, a creative block, too much trust. **Your step this month:** keep one rhythm for all four weeks and leave room in your budget for the unexpected.",
+        {
+          "h3": "15 · The Devil: let desire drive you without chaining you"
+        },
+        "The Devil cannot appear at your personal centre, but it can at the monthly centre: around two months in a thousand. A month of strong desire: to earn, sell, get promoted, throw yourself into something with passion. The difficult side is that same desire becoming a chain: debt, gambling, dependent relationships, scrutiny, aggression. Waite reminds us that the figure holding the chains on this card will not be master for ever. **Your step this month:** name what you want, and one line you will not cross to get it.",
+        {
+          "h3": "16 · The Tower: rebuild rather than demolish"
+        },
+        "An exceptionally rare centre: in 2026, just one birth date out of 46,000 produces it, for a single month. A month of repair and rebuilding: something resting on a false foundation — a plan, a way of working, a living space — needs to be reassembled. For Waite, The Tower is the collapse of a false foundation, above all in understanding. The difficult side is tearing things down in the heat of the moment: urgent decisions forced on you, cancelled plans, failed deals, unjustified risk. **Your step this month:** draw up a plan for rebuilding, and avoid irreversible decisions on a day when you are angry.",
+        {
+          "h3": "18 · The Moon: make sense of what is unclear"
+        },
+        "An exceptionally rare centre: five birth dates in 2026, only in January and February. A month when much is seen in half-light: details emerge, inspiration arrives, a pause and work on yourself can help. For Waite, The Moon represents imagination and fear of the unknown. The difficult side is deciding out of fear or fantasy: unclear prospects, mistaken conclusions, uncontrolled spending. **Your step this month:** for each worry, write down what you know for certain, and leave major decisions until you have the facts.",
+        {
+          "h3": "20 · Judgement: finish what you put off"
+        },
+        "Judgement is very rare at the monthly centre: in 2026, it appears for 23 birth dates, and only in January, February or March. If you arrived at 20 by another calculation — for example, ‘month number plus sum of the year’s digits’ gives everyone 20 in October 2026 — that is a shared number rather than your personal centre. The card’s meaning as a monthly theme remains the same.",
+        "This is a month to take stock. In Lisovskaya’s list, Judgement’s positive side includes earlier actions bearing results, rapid changes, family reunions and looking for a new occupation; its negative side includes people and situations from the past, family quarrels, loss of control and difficult choices. Waite sees Judgement as a call heard and answered from within. For a month, that means returning to something you once began and left unfinished, then deciding honestly whether to finish it or close it. Responsibility here is no punishment: you can set down the outcome as a list of facts, without passing sentence on yourself or anyone else. Old arguments are an easy trap: the past has returned, and you want to prove who was right at last. **Your step this month:** list three unfinished undertakings, complete one by the last day, and speak to one person from your past without settling scores.",
+        {
+          "h3": "22 · The Fool: start afresh and travel light"
+        },
+        "A rare centre: 79 birth dates in 2026, roughly one month in seven thousand. A month of new beginnings: study, work, new connections, a trip, shedding what you no longer need, trying something with little at stake. The difficult side is carelessness: vague promises, frantic activity, broken agreements — or the opposite extreme, refusing anything new out of fear. **Your step this month:** try one small experiment with little at stake, promising neither yourself nor others more than you are prepared to deliver.",
+        {
+          "h3": "1, 2, 17, 19, 21: when another calculator gives one of these"
+        },
+        "These five arcana never appear at the monthly centre for any birth date; the section on frequencies explains why. If you have one of them, your number came from a different calculation. Check the method against the table of six numbers above. Looking up the card’s meaning does not validate another calculation, but neither is the card itself ‘wrong’. As a monthly theme within that other system, it means the following:",
+        {
+          "ul": [
+            "**1 · The Magician** — begin: gather your tools, start something new, put an idea forward. The difficult side is scattering your efforts across ten new ventures.",
+            "**2 · The High Priestess** — uncover what is hidden: observe, listen, take your time before drawing conclusions. The difficult side is passivity and shutting yourself off.",
+            "**17 · The Star** — show what you have done: recognition, allies, a new qualification. The difficult side is empty hopes and resentment at being undervalued.",
+            "**19 · The Sun** — step into the light: launch something openly, be active, rest in a way that truly restores you. The difficult side is overdoing it and vanity.",
+            "**21 · The World** — broaden your horizons: travel, new places and people, completing a major cycle. The difficult side is external constraints and postponed plans."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "Read the centre alongside the month’s other points",
+      "paragraphs": [
+        "The centre is the main one of the month’s nine points, but it is not the only one. The others are just as easy to calculate: F = A + B, G = B + C, H = C + D, I = D + A, reducing each sum where needed. Their roles come from Lisovskaya’s book; the labels follow the year reading on our site:",
+        {
+          "table": {
+            "head": [
+              "Point",
+              "Role",
+              "19.01.1975, January 2026"
+            ],
+            "rows": [
+              [
+                "E, centre",
+                "the month’s backdrop, positive and negative together",
+                "20 · Judgement"
+              ],
+              [
+                "B, top",
+                "plus: what to notice, how to express yourself",
+                "2 · The High Priestess"
+              ],
+              [
+                "F, upper left corner",
+                "plus: what supports and inspires you",
+                "5 · The Hierophant"
+              ],
+              [
+                "C, right",
+                "minus in material matters",
+                "5 · The Hierophant"
+              ],
+              [
+                "D, bottom",
+                "minus: the month’s trials",
+                "10 · The Wheel of Fortune"
+              ],
+              [
+                "A, left",
+                "people: what others expect of you",
+                "3 · The Empress"
+              ],
+              [
+                "G, upper right corner",
+                "weak spot: what is best postponed",
+                "7 · The Chariot"
+              ],
+              [
+                "H and I, lower corners",
+                "what the month is good for and what to watch out for",
+                "15 · The Devil and 13 · Death"
+              ]
+            ]
+          }
+        },
+        "Here is how to bring them together:",
+        {
+          "ol": [
+            "**The centre names the theme.** Here it is Judgement: old undertakings come up for review.",
+            "**The plus suggests how to approach it.** The High Priestess calls for quiet, private reflection first. The Hierophant favours following the rules, drawing on advice from someone knowledgeable and on agreements already in place.",
+            "**The minus shows where you might stumble.** The Hierophant is here too, in the material point: the source of support is also a risk — documents, formalities, an authority you trust without checking. The bottom point is The Wheel of Fortune: the temptation to repeat an old pattern and decide on impulse. Judgement asks you to close that very loop.",
+            "**People and corners add detail.** With people, it is The Empress: they expect warmth and care from you, rather than a strict audit. The lower corners are The Devil and Death: the month is good for releasing what you keep out of habit, while old attachments and debts call for caution.",
+            "**Read each repeated card in its own role.** Lisovskaya advises noting which energies repeat in a forecast matrix and which points they occupy. The Hierophant in the plus and the minus is one theme with two sides, rather than a ‘double Hierophant’.",
+            "**Put it into one sentence.** For this birth date, January 2026 brings unfinished business up for review; it goes best when you sort through the old calmly, by the rules and without sudden bursts of effort, because the month’s weak spot is The Chariot — the urge to finish everything in one dash."
+          ]
+        },
+        "The meanings in the previous section are written for the centre. At positive points, read the card through its strengths; at negative points, through its difficulties. This is our way of bringing the book’s roles into a coherent reading, rather than a ready-made interpretation by Lisovskaya."
+      ]
+    },
+    {
+      "h2": "How many monthly arcana are possible, and how often does yours appear?",
+      "paragraphs": [
+        "We checked every birth date from 1 January 1900 to 31 December 2025 — 46,021 dates — and calculated all twelve months of 2026 for each, giving 552,252 months in total. There are **17** possible centres: 3 to 16, plus 18, 20 and 22.",
+        {
+          "table": {
+            "head": [
+              "Monthly centre",
+              "Share of months",
+              "At least once in 2026"
+            ],
+            "rows": [
+              [
+                "7 · The Chariot, 8 · Justice, 9 · The Hermit, 10 · The Wheel of Fortune, 11 · Strength",
+                "11.1% each",
+                "everyone"
+              ],
+              [
+                "6 · The Lovers",
+                "10.9%",
+                "98% of birth dates"
+              ],
+              [
+                "5 · The Hierophant",
+                "10.4%",
+                "95%"
+              ],
+              [
+                "12 · The Hanged Man",
+                "8.4%",
+                "82%"
+              ],
+              [
+                "13 · Death",
+                "5.9%",
+                "60%"
+              ],
+              [
+                "4 · The Emperor",
+                "5.2%",
+                "53%"
+              ],
+              [
+                "3 · The Empress",
+                "2.7%",
+                "31%"
+              ],
+              [
+                "14 · Temperance",
+                "0.73%",
+                "8%"
+              ],
+              [
+                "15 · The Devil",
+                "0.19%",
+                "2.3%"
+              ],
+              [
+                "22 · The Fool",
+                "79 months",
+                "79 birth dates"
+              ],
+              [
+                "20 · Judgement",
+                "23 months",
+                "23 birth dates"
+              ],
+              [
+                "18 · The Moon",
+                "5 months",
+                "5 birth dates"
+              ],
+              [
+                "16 · The Tower",
+                "1 month",
+                "one birth date: 19.01.1973, January"
+              ],
+              [
+                "1 · The Magician, 2 · The High Priestess, 17 · The Star, 19 · The Sun, 21 · The World",
+                "never occurs",
+                "no one"
+              ]
+            ]
+          }
+        },
+        "The calculations also showed:",
+        {
+          "ul": [
+            "**Five arcana account for more than half of all months.** The Chariot, Justice, The Hermit, The Wheel of Fortune and Strength each appear in exactly one month out of nine: together, 55.6% of months. Add The Hierophant, The Lovers and The Hanged Man, and the share reaches 85%.",
+            "**The Magician, The High Priestess, The Star, The Sun and The World never appear at the monthly centre.** The centre is A + B + C added to D, and D is that same sum in reduced form. While A + B + C is no greater than 22, D equals it, so the centre is exactly twice the sum: an even number. When the sum exceeds 22, the reduced centre cannot rise above 15: the largest number before reduction is 78, and 7 + 8 = 15. There is no way to produce the odd numbers 17, 19 and 21, and neither route gives 1 or 2.",
+            "**The Tower, The Moon, Judgement and The Fool almost never appear.** They can only come from doubling A + B + C when it equals exactly 8, 9, 10 or 11. Judgement requires a sum of 10, which always puts The Wheel of Fortune at the bottom point, as in our example. In 2026, a sum this small occurs in 108 months out of 552,000; the most common value of A + B + C is 33.",
+            "**The Devil can appear at the monthly centre, but not at the personal centre.** Fifteen can only come from A + B + C totalling 57 or 66, which requires B to be at least 13. In a personal matrix, B is the birth month and cannot exceed 12. In a monthly matrix, B is the sum of two month numbers and can reach 22.",
+            "**Very little changes from year to year.** Across 2024–2028, the five arcana from The Chariot to Strength account for the same 55.6%; the impossible numbers remain the same; Judgement still appears only in January–March. Only the rare centres shift gradually: Temperance appeared in 0.91% of months in 2024 and 0.56% in 2028."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "Twelve months, nine themes",
+      "paragraphs": [
+        "Here is the whole of 2026 for the same birth date, 19.01.1975:",
+        {
+          "table": {
+            "head": [
+              "Month",
+              "Centre",
+              "Month",
+              "Centre"
+            ],
+            "rows": [
+              [
+                "January",
+                "20 · Judgement",
+                "July",
+                "8 · Justice"
+              ],
+              [
+                "February",
+                "6 · The Lovers",
+                "August",
+                "3 · The Empress"
+              ],
+              [
+                "March",
+                "10 · The Wheel of Fortune",
+                "September",
+                "7 · The Chariot"
+              ],
+              [
+                "April",
+                "5 · The Hierophant",
+                "October",
+                "11 · Strength"
+              ],
+              [
+                "May",
+                "9 · The Hermit",
+                "November",
+                "6 · The Lovers"
+              ],
+              [
+                "June",
+                "4 · The Emperor",
+                "December",
+                "10 · The Wheel of Fortune"
+              ]
+            ]
+          }
+        },
+        "February and November have The Lovers; March and December have The Wheel of Fortune. This follows from the calculation itself, rather than coincidence.",
+        {
+          "ul": [
+            "**Months nine apart repeat each other.** January and October, February and November, March and December have the same centre for 90% of birth dates. No other pair of months within a year ever matches.",
+            "**That gives a year nine, ten or eleven themes, rather than twelve.** Exactly nine distinct centres occur for 73% of birth dates, ten for 25%, eleven for 2%. No one gets twelve distinct centres, and no card occupies the centre for more than two months in a year.",
+            "**Why it works.** Each new month adds one to both the day in the constructed date and the month number, adding two to A + B + C. The centre’s remainder when divided by nine therefore shifts each month, returning to its starting point only after nine months. The same remainder almost always means the same centre. In one case out of ten, two cards share a remainder, as Judgement in January and Strength in October do for our birth date: 20 and 11.",
+            "**The year gives all its months a common note.** Point C — birth year plus current year — stays the same throughout the year. For people born on the same day and month in different years, only this point changes, and their months differ: those born on 19 January in different years receive thirteen different centres for January 2026."
+          ]
+        },
+        "This suggests a simple practice: the theme you worked with in January is likely to return in October — it does for nine birth dates out of ten. You can compare how you approached it the first time and the second."
+      ]
+    },
+    {
+      "h2": "What your monthly arcanum cannot tell you",
+      "paragraphs": [
+        {
+          "ul": [
+            "**What will happen.** Lisovskaya herself writes that this kind of forecast ‘has nothing to do with fortune-telling’, and that events follow from actions. The centre names a theme, rather than something that must happen.",
+            "**Whether a month is good or bad.** The number names a card; it does not give the month a rating. A Tower month need not be destructive, and a Wheel of Fortune month does not promise good luck.",
+            "**Your body or wellbeing.** These numbers do not support medical conclusions.",
+            "**What someone else will do.** The centre describes your month, rather than other people’s intentions.",
+            "**The whole story of the month.** A monthly matrix has nine points. The centre alone cannot show where the month is strongest or where difficulties lie: that takes the positive and negative points too.",
+            "**That two people will have the same month.** The same centre sits over different personal charts and is experienced differently."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "Try it for a month and see what you notice",
+      "paragraphs": [
+        {
+          "ol": [
+            "**On the first day of the month,** calculate your centre and write down its theme and action step from the meanings section.",
+            "**Give the step a date** — a specific day, rather than ‘sometime this month’.",
+            "**Once a week, write two lines:** where the month’s theme showed up, and where you stumbled over it.",
+            "**On the last day,** reread your notes. If nothing rings true, do not force a fit: other points or your own chart may have spoken more loudly this month.",
+            "**Nine months later,** the centre will probably repeat. Take out your notes and compare."
+          ]
+        }
+      ]
+    },
+    {
+      "h2": "What you will find in the year reading",
+      "paragraphs": [
+        "The free calculation shows your permanent matrix; it does not include months. Those are calculated in the personal year reading: your yearly matrix from Lisovskaya’s book — the centre, the year divided into thirds, and all twelve months — read alongside your personal chart. Each month has its own chapter:",
+        {
+          "ul": [
+            "a ‘Monthly centre’ card and a table of the other points: the plus, the minus, people, the weak spot and the lower corners;",
+            "matches between the month and your star chart, such as a month whose centre equals your personal centre;",
+            "connections between months, including pairs nine months apart;",
+            "several concrete things to do that month."
+          ]
+        },
+        "The reading is written for your birth date, runs to around 15,000 words, and has every conclusion checked by a person. The full sample for an example birth date is open to read: it covers all of 2027 for 07.10.1988, the same date used in our second worked calculation."
+      ]
+    },
+    {
+      "h2": "The sources behind this article",
+      "paragraphs": [
+        {
+          "ul": [
+            "**Calculation** — Yuliana Lisovskaya, Matritsa Sudby: Prognoz. Prognostika po Matritse Sudby (Destiny Matrix: Forecast. Prognostics Using the Destiny Matrix) (2024), ‘Monthly forecast’ section: the month’s constructed date (day = sum of the year’s digits plus month number), addition to the birth date, point D and the centre, and the roles of the points. The twelve-month limit does not apply in forecasts. Our calculation reproduces the author’s example: 30.06.1998, June 2023 — centre 7. Leaving a day greater than 22 unreduced until it has been added to the birth day is a choice made for our year reading; the book does not cover that case.",
+            "**Meanings** — the lists of positive and negative expressions of the twenty-two energies in chapter 3 of the same book. The underlying card meanings draw on A. E. Waite, The Pictorial Key to the Tarot (1910, reissued 1922), and Benebell Wen, Holistic Tarot (2015). The monthly tasks, potential stumbling blocks and action steps are our own adaptation.",
+            "**Numbers** — the site’s calculation engine: 46,021 birth dates from 1900–2025, all twelve months of 2026, and 2024–2028 to check consistency across years. This gives the 17 possible centres, their frequencies, the rule of nine and the pairs of months nine apart.",
+            "**Method** — Lisovskaya’s school, rather than Natalia Ladini’s canon, which is used for the site’s main matrix calculation. Neither Waite nor Wen wrote about the destiny matrix.",
+            "The destiny matrix is an esoteric model for self-observation, with no scientific evidence base. It does not predict events or provide medical information."
+          ]
+        }
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "q": "How do I find my monthly arcanum from my birth date?",
+      "a": "Construct the month’s date: the day is the sum of the year’s digits plus the month number, the month is the month number, and the year is the year itself. Add it to your birth date: day to day, month to month, year to year (then add the digits of the year sum). This gives A, B and C. The bottom point D = A + B + C; the centre = A + B + C + D. Reduce anything greater than 22 by adding its digits. Example: 19.01.1975, January 2026 — 11.01.2026, A = 3, B = 2, C = 5, D = 10, centre 20, Judgement."
+    },
+    {
+      "q": "How is my monthly arcanum different from my birth month arcanum?",
+      "a": "Your birth month arcanum is B, the top point of your star chart, labelled ‘Spiritual task’. It is the number of the month you were born in, from 1 to 12, and never changes during your life. Your monthly arcanum is the centre of a separate matrix, calculated afresh for each calendar month. The two match in only 8% of months."
+    },
+    {
+      "q": "Why does another calculator give me a different monthly arcanum?",
+      "a": "Usually it uses a different formula: adding the month number to the simple year arcanum, adding the month number to the sum of the year’s digits, or simply showing your birth month. The first method matches the monthly matrix centre in 6% of months, the second in 2%. Another common reason is reduction: subtracting 22 instead of adding the digits turns 30 into 8 rather than 3. Compare methods first, then meanings."
+    },
+    {
+      "q": "Can The Magician, The High Priestess, The Star, The Sun or The World appear at the monthly centre?",
+      "a": "No. Under Lisovskaya’s rules, no birth date produces 1, 2, 17, 19 or 21 at the monthly centre. The centre is either twice A + B + C, an even number, or a reduced number no greater than 15. If you get one of these numbers, check your reductions or your calculation method."
+    },
+    {
+      "q": "Is there one monthly arcanum for everyone?",
+      "a": "Not in this method: the centre is calculated personally. The number sometimes called the universal monthly arcanum — month number plus sum of the year’s digits, giving 11 + 10 = 21, The World, for November 2026 — is the same for everyone. For Lisovskaya, it is the day in the month’s constructed date, the first step of the calculation. The same formula gives 22 for December 2026 and 12 for January 2027. The World never appears at a personal monthly centre at all."
+    },
+    {
+      "q": "When does the monthly arcanum take effect?",
+      "a": "From the first to the last day of the calendar month. The method covers the chosen month in full; your birthday does not shift its boundaries."
+    },
+    {
+      "q": "Is the monthly arcanum connected to the year arcanum?",
+      "a": "Yes, but not by simple addition. The year enters each monthly calculation twice: through the sum of its digits in the day of the constructed date, and through point C, which stays the same all year. But the monthly centre does not equal the year arcanum plus the month number. The yearly matrix centre sets the backdrop for twelve months; the monthly centre names the theme of thirty days within it."
+    },
+    {
+      "q": "Are there bad months?",
+      "a": "No. The number at the centre names a card; it does not rate the month. Every arcanum has a strong side and a difficult side, and the centre shows both. A Death or Tower month asks you to finish or rebuild something; it does not promise loss."
+    },
+    {
+      "q": "Is the monthly arcanum different for men and women?",
+      "a": "No. Sex is not part of the calculation: a man and a woman with the same birth date have the same centre for any given month."
+    },
+    {
+      "q": "Why is 8 Justice and 11 Strength?",
+      "a": "The destiny matrix uses Marseille numbering: 8 is Justice, 11 is Strength and 22 is The Fool. In Waite’s system and many Tarot books, 8 and 11 are swapped, and The Fool is numbered zero. When using another reference, match the card by name rather than number."
+    }
+  ]
+}

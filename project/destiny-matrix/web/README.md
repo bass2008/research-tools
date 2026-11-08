@@ -22,7 +22,7 @@ npm run typecheck
 | Путь | Что |
 |---|---|
 | `lib/matrix.ts` | порт `engine/matrix.py` в TypeScript — расчёт идёт в браузере, дата не уходит на сервер |
-| `lib/sections.ts` | порт `engine/sections.py`: 20 разделов, 2 бесплатных |
+| `lib/sections.ts` | порт `engine/sections.py`: 21 раздел, 2 бесплатных |
 | `lib/__fixtures__/golden.json` | golden-векторы для сверки с Python; полный parity-снимок отдельно обновляется по текущий день |
 | `lib/arcana.ts` | корпус 22 арканов (нумерация матрицы, Шут — 22-й) |
 | `lib/encyclopedia.ts` | каталоги и адреса сущностей энциклопедии; базовый набор из 299 страниц не включает все редакционные и персональные маршруты |

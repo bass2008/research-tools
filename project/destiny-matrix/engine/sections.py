@@ -49,7 +49,7 @@ class Section:
 
 _SELECTORS = frozenset({
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
-    "P", "R", "R1", "R2", "reduce(C+D)", "reduce(L+M)", "sky.total", "ground.total",
+    "P", "Q", "R", "R1", "R2", "reduce(C+D)", "reduce(L+M)", "sky.total", "ground.total",
     "social_male.total", "social_female.total", "harmony", "planetary",
     "purpose_personal", "purpose_social", "chakra_totals.physics", "chakra_totals.energy",
     "chakra_totals.emotions",
@@ -74,6 +74,7 @@ def _resolve(matrix: Matrix, selector: str) -> int:
         "M": matrix.comfort_south,
         "N": matrix.karmic_tail[1],
         "P": matrix.talent[1],
+        "Q": matrix.material_karma[1],
         "R": matrix.money[2],
         "R1": matrix.love[1],
         "R2": matrix.money[1],
@@ -116,8 +117,8 @@ def _positions(matrix: Matrix, definition: dict) -> list[Position]:
 
 def _validate_definitions() -> list[dict]:
     rows = REPORT_SECTIONS.get("sections")
-    if not isinstance(rows, list) or len(rows) != 20:
-        raise ValueError("spec/sections.json must contain exactly 20 sections")
+    if not isinstance(rows, list) or len(rows) != 21:
+        raise ValueError("spec/sections.json must contain exactly 21 sections")
     keys: set[str] = set()
     for definition in rows:
         key = definition.get("key")

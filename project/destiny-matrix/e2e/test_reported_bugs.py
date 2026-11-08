@@ -134,7 +134,7 @@ def test_refunded_date_keeps_the_exact_payment_target(page: Page):
 def test_recalculating_a_paid_date_opens_it_on_the_landing(page: Page, browser: Browser):
     """Повторный расчёт купленной даты открывает её полный разбор прямо на главной.
 
-    Раньше главная снова печатала два бесплатных раздела и 18 замков, хотя ниже сама же
+    Раньше главная снова печатала два бесплатных раздела и 19 замков, хотя ниже сама же
     признавала оплату. Уводить человека на отдельный экран «Мой разбор» тоже не надо. При
     нескольких покупках нельзя просто открыть первую доступную дату.
     """
@@ -175,7 +175,7 @@ def test_recalculating_a_paid_date_opens_it_on_the_landing(page: Page, browser: 
     page.get_by_test_id("calc-submit").click()
     page.wait_for_url(f"{BASE}/#result", timeout=15_000)
     expect(page.locator("#result")).to_contain_text("8 августа 1978")
-    assert flows.locked_sections(page) == 18
+    assert flows.locked_sections(page) == 19
 
 
 def test_refund_refreshes_users_and_payments_from_the_same_moment(page: Page, browser: Browser):

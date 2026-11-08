@@ -6,6 +6,7 @@ import { arcanumInPosition, karmicTail } from "./content";
 import { paragraphText } from "./contentReader";
 import { calculate } from "./matrix";
 import { wordCount } from "./lockedText";
+import { materialKarmaOf } from "./materialKarmaRow";
 import type { SectionOut } from "./publicSpec";
 import { SPEC, build, freePositionTexts, withLockedPreview } from "./sections";
 
@@ -173,7 +174,7 @@ describe("разделы разбора", () => {
   });
 
   it("каждый формульный раздел получает персональную статью и тот же PDF-источник", () => {
-    const excluded = new Set(["character", "past_lives"]);
+    const excluded = new Set(["character", "past_lives", "material_karma"]);
     for (const item of build(m, true)) {
       if (excluded.has(item.key)) continue;
       if (item.key === "chakras") {
@@ -281,5 +282,45 @@ describe("закрытые разделы: что внутри, без толк�
 
   it("открытый разбор проход не трогает", () => {
     expect(withLockedPreview(m, full)).toEqual(full);
+  });
+});
+
+describe("материальная карма", () => {
+  const triple = m.material_karma;
+
+  it("матрица, сохранённая без тройки, получает её из C и L", () => {
+    const { material_karma: _saved, ...legacy } = m;
+    expect(materialKarmaOf(legacy)).toEqual(triple);
+    expect(() => build(legacy as typeof m, true)).not.toThrow();
+  });
+
+  it("тройка C–Q–L: Q = C + L по правому лучу", () => {
+    const [c, q, l] = triple;
+    expect(c).toBe(m.year);
+    expect(l).toBe(m.comfort_east);
+    const sum = c + l;
+    expect(q).toBe(sum > 22 ? String(sum).split("").reduce((a, d) => a + Number(d), 0) : sum);
+  });
+
+  it("стоит перед деньгами и в полном разборе даёт связное толкование своей тройки", () => {
+    const keys = build(m, true).map((s) => s.key);
+    expect(keys.indexOf("material_karma")).toBe(keys.indexOf("money") - 1);
+    const s = section("material_karma");
+    expect(s.positions.map((p) => p.arcanum)).toEqual(triple);
+    expect(s.positions.every((p) => (p.text ?? "").length > 40)).toBe(true);
+    expect(s.tripleReading?.cells.map((cell) => cell.arcanum)).toEqual(triple);
+    expect(s.tripleReading?.paragraphs).toHaveLength(3);
+    expect(s.tripleReading?.lockedWords).toBeUndefined();
+  });
+
+  it("закрытый раздел: карты и заглушка той же формы, без платных слов", () => {
+    const open = section("material_karma").tripleReading!;
+    const locked = withLockedPreview(m, build(m, false)).find((s) => s.key === "material_karma")!;
+    expect(locked.locked).toBe(true);
+    expect(locked.positions.map((p) => p.arcanum)).toEqual(triple);
+    expect(locked.positions.every((p) => p.text === undefined)).toBe(true);
+    expect(locked.tripleReading?.lockedWords).toBe(wordCount(open.paragraphs));
+    const shown = JSON.stringify(locked.tripleReading);
+    for (const paragraph of open.paragraphs) expect(shown.includes(paragraph.slice(0, 40))).toBe(false);
   });
 });

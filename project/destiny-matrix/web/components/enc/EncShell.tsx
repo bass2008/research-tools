@@ -14,6 +14,7 @@ import { localized } from "@/lib/i18n/localized";
 import { defaultYearFor } from "@/lib/individualPricing";
 import { individualPrices } from "@/lib/tariffs.server";
 import type { ReactNode } from "react";
+import { MONTH_HREF } from "@/lib/readingTypes";
 
 export const forLocale = localized((L: Locale) => {
   const { ARCANA } = localizedArcana(L);
@@ -56,6 +57,8 @@ export const forLocale = localized((L: Locale) => {
     const cats = [
       { key: "karmic-tail", href: KARMIC_TAIL_HUB },
       { key: "year", href: YEAR_HUB },
+      // статья о месяце приходит в язык отдельно: пока её нет, в списке её тоже нет
+      ...(categoryHub("month") ? [{ key: "month", href: MONTH_HREF }] : []),
     ].map(({ key, href }) => {
       const item = categoryHub(key);
       if (!item?.crumb) throw new Error(`нет канонического материала или crumb хаба ${key}`);

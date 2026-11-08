@@ -1,7 +1,8 @@
 // Серверная половина спецификации отчёта. Платные подписи и ключи позиций не попадают
 // в клиентский чанк; сам корпус трактовок читается строго из web/content/arcana.json.
 import sectionSpec from "./__fixtures__/sections.json";
-import { lockChakraReading } from "./lockedText";
+import { lockChakraReading, lockReadingRow } from "./lockedText";
+import { materialKarmaRow } from "./materialKarma";
 import { forLocale as localizedCharacter } from "./character";
 import { forLocale as localizedCharacterTypes, type CharacterPositionKey } from "./characterTypes";
 import { forLocale as localizedContent } from "./content";
@@ -57,7 +58,7 @@ export const forLocale = localized((L: Locale) => {
   const { sectionLabels } = localizedMethodLabels(L);
   const { buildCharacterReading, characterRoleTemplate } = localizedCharacter(L);
   const { characterHref } = localizedCharacterTypes(L);
-  const { arcanumInPosition, karmicTail } = localizedContent(L);
+  const { arcanumInPosition, hasArcanumInPosition, karmicTail } = localizedContent(L);
   const { buildSectionReading, sectionReadingHref, sectionRoleTemplate } = localizedSectionReadings(L);
   const { PERSONAL_SECTION_KEYS } = localizedSectionReadingShared(L);
   const { CATALOG, FREE_POSITION_KEYS, arcanumHref } = localizedPublicSpec(L);
@@ -82,11 +83,11 @@ export const forLocale = localized((L: Locale) => {
 
   const PRIVATE_BY_KEY = new Map(PRIVATE_ROWS.map((row) => [row.key, row]));
 
-  if (PRIVATE_ROWS.length !== 20 || PRIVATE_BY_KEY.size !== 20) {
-    throw new Error(`sections.json: ожидалось 20 уникальных разделов, получено ${PRIVATE_ROWS.length}`);
+  if (PRIVATE_ROWS.length !== 21 || PRIVATE_BY_KEY.size !== 21) {
+    throw new Error(`sections.json: ожидался 21 уникальный раздел, получено ${PRIVATE_ROWS.length}`);
   }
 
-  /** Двадцать разделов: публичные метаданные и серверная схема сверяются при импорте. */
+  /** Разделы: публичные метаданные и серверная схема сверяются при импорте. */
   const SPEC: SectionSpec[] = CATALOG.map((meta) => {
     const row = PRIVATE_BY_KEY.get(meta.key);
     if (!row || row.title !== meta.title || row.access !== meta.access || !row.positions.length) {
@@ -121,7 +122,7 @@ export const forLocale = localized((L: Locale) => {
           href: arcanumHref(arcanum),
           text: spec.key === "chakras" ? "" : first
             ? D.report.sameArcanum[L](first)
-            : arcanumInPosition(arcanum, positionKey),
+            : positionText(spec.key, arcanum, positionKey),
         };
       });
       const personalSection = (PERSONAL_SECTION_KEYS as readonly string[]).includes(spec.key)
@@ -139,6 +140,11 @@ export const forLocale = localized((L: Locale) => {
             personalHref: characterHref(matrix),
             longform: buildCharacterReading(matrix),
           }
+          : spec.key === "material_karma"
+            ? (() => {
+              const row = hasLongform ? materialKarmaReading(spec, matrix) : null;
+              return row ? { tripleReading: row } : {};
+            })()
           : spec.key === "past_lives" && hasLongform
             ? (() => {
               const key = matrix.karmic_tail.join("-");
@@ -164,6 +170,19 @@ export const forLocale = localized((L: Locale) => {
       }
       return out;
     });
+  }
+
+  /** Толкование позиции раздела. У материальной кармы язык может ещё не иметь перевода точки Q:
+   *  тогда карта остаётся без текста, а не роняет весь разбор. */
+  function positionText(sectionKey: string, arcanum: number, positionKey: string): string {
+    if (sectionKey === "material_karma" && !hasArcanumInPosition(arcanum, positionKey)) return "";
+    return arcanumInPosition(arcanum, positionKey);
+  }
+
+  /** Связное толкование тройки C–Q–L: заголовок, три карты с подписями ролей, три абзаца. */
+  function materialKarmaReading(spec: SectionSpec, matrix: Matrix) {
+    const labels = spec.positions(matrix).map(([label]) => label);
+    return materialKarmaRow(matrix, L, D.report.materialKarmaTitle[L], D.report.materialKarmaTopic[L], labels);
   }
 
   /** Ссылки «карточка → статья» для готового разбора.
@@ -200,12 +219,16 @@ export const forLocale = localized((L: Locale) => {
     return sections.map((section) => {
       const spec = section.locked ? SPEC.find((row) => row.key === section.key) : undefined;
       if (!spec) return section;
+      // Тексты точек C и L платные и в «Деньгах», поэтому до покупки у материальной кармы — только
+      // карты и заглушка связного толкования той же формы, как у чакр.
+      const reading = section.key === "material_karma" ? materialKarmaReading(spec, matrix) : null;
       return {
         ...section,
         positions: spec.positions(matrix).map(([label, arcanum]) => ({ label, arcanum, href: arcanumHref(arcanum) })),
         ...(section.key === "chakras"
           ? { longform: lockChakraReading(buildSectionReading("chakras", matrix), L) }
           : {}),
+        ...(reading ? { tripleReading: lockReadingRow(reading, L) } : {}),
       };
     });
   }

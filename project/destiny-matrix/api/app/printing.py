@@ -35,8 +35,9 @@ _report_locks: dict[tuple[int, int, str], tuple[threading.Lock, int]] = {}
 
 # Bump when the printed content changes: older PDFs are reprinted on the next owner download,
 # historical objects stay. v2: internal print Host links; v3: rewritten chakra readings;
-# v7: no access label in the file; v8: full couple corpus, couple links to the document's language.
-PDF_REVISION = "v9"
+# v7: no access label in the file; v8: full couple corpus, couple links to the document's language;
+# v10: material karma — point Q on the chart and its own section.
+PDF_REVISION = "v10"
 
 
 @contextmanager

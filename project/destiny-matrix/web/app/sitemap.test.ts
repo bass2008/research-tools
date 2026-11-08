@@ -2,7 +2,7 @@ import { splitPublicPath } from "@/lib/publicRouting";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sitemapForSite as sitemap } from "@/lib/sitemapEntries";
-import { indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
+import { categoryHub, indexedKarmicTailKeys, karmicTailKeys } from "@/lib/content";
 import { SPEC } from "@/lib/sections";
 import {
   SERVICE_PAGES,
@@ -72,11 +72,15 @@ describe("карта сайта", () => {
   // Тест утверждал только отсутствие персональных разборов. Потеря раздела из positions.json
   // делала карту тихо короче, и он оставался зелёным — а общая статья и есть то единственное,
   // что этот релиз отдаёт в индекс.
-  it("содержит общую статью каждого из 20 разделов отчёта", () => {
-    expect(SPEC).toHaveLength(20);
+  it("содержит общую статью каждого из 21 раздела отчёта", () => {
+    expect(SPEC).toHaveLength(21);
     const missing = SPEC.map((section) => section.key)
       .filter((key) => !paths.includes(`/encyclopedia/position/${key}`));
     expect(missing, "разделов нет в карте сайта").toEqual([]);
+  });
+
+  it("содержит статью «Аркан на месяц», если она есть у языка", () => {
+    expect(paths.includes("/encyclopedia/month")).toBe(Boolean(categoryHub("month")));
   });
 
   it("не содержит персональных статей разделов отчёта", () => {

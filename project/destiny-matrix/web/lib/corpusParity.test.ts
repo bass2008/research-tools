@@ -31,7 +31,7 @@ const keysOf = (L: string, file: string) =>
 
 describe("корпуса на всех языках", () => {
   it("у каждого корпуса из content/ru есть правило ключа", () => {
-    const files = fs.readdirSync(path.join(ROOT, "ru")).filter((f) => !["text-policy.json", "pair-units.json", "chakra-personal.json"].includes(f));
+    const files = fs.readdirSync(path.join(ROOT, "ru")).filter((f) => !["text-policy.json", "pair-units.json", "chakra-personal.json", "material-karma.json"].includes(f));
     expect(files.filter((f) => !KEYS[f])).toEqual([]);
   });
 

@@ -45,7 +45,7 @@ def test_sex_switch_keeps_the_paid_report_open(page: Page, mail: str) -> None:
     flows.calculate(page, 22, 11, 1993, "f")
     page.wait_for_timeout(2500)
     locked = flows.locked_sections(page)
-    assert locked == 0, f"после переключения пола под замком {locked} разделов из 20"
+    assert locked == 0, f"после переключения пола под замком {locked} разделов из 21"
 
 
 def test_account_report_link_opens_the_paid_matrix(page: Page, mail: str) -> None:
