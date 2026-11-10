@@ -10,6 +10,7 @@ from __future__ import annotations
 from . import sites
 
 import urllib.parse
+import re
 from pathlib import Path
 from typing import Protocol
 
@@ -23,6 +24,19 @@ class ReportStore(Protocol):
     def link(self, key: str, filename: str | None = None) -> str: ...
 
     def exists(self, key: str) -> bool: ...
+
+    def delete(self, key: str) -> None: ...
+
+    def delete_account(self, user_id: int, individual_ids: set[int]) -> None: ...
+
+
+def account_key(key: str, user_id: int, individual_ids: set[int]) -> bool:
+    """Include historical revisions whose keys were cleared from report_jobs."""
+    parts = key.split("/")
+    if len(parts) >= 3 and re.fullmatch(r"v\d+", parts[0]) and parts[1] == str(user_id):
+        return True
+    return (len(parts) >= 4 and parts[0] == "individual" and re.fullmatch(r"v\d+", parts[1]) is not None
+            and parts[2].isdigit() and int(parts[2]) in individual_ids)
 
 
 def disposition(filename: str) -> str:
@@ -42,6 +56,19 @@ class S3Store:
     def upload(self, key: str, pdf: bytes) -> None:
         self._client().put_object(Bucket=settings.s3_reports_bucket, Key=key, Body=pdf,
                                   ContentType="application/pdf")
+
+    def delete(self, key: str) -> None:
+        self._client().delete_object(Bucket=settings.s3_reports_bucket, Key=key)
+
+    def delete_account(self, user_id: int, individual_ids: set[int]) -> None:
+        client = self._client()
+        for page in client.get_paginator("list_objects_v2").paginate(Bucket=settings.s3_reports_bucket):
+            keys = [{"Key": item["Key"]} for item in page.get("Contents", [])
+                    if account_key(item["Key"], user_id, individual_ids)]
+            if keys:
+                result = client.delete_objects(Bucket=settings.s3_reports_bucket, Delete={"Objects": keys})
+                if result.get("Errors"):
+                    raise RuntimeError("Account PDF cleanup did not finish")
 
     def exists(self, key: str) -> bool:
         """Есть ли файл. Сомнение трактуем в пользу «есть»: на таймауте или 5xx хранилища ответ
@@ -106,6 +133,14 @@ class LocalStore:
 
     def read(self, key: str) -> bytes:
         return self._path(key).read_bytes()
+
+    def delete(self, key: str) -> None:
+        self._path(key).unlink(missing_ok=True)
+
+    def delete_account(self, user_id: int, individual_ids: set[int]) -> None:
+        for path in self.root.rglob("*.pdf"):
+            if account_key(path.relative_to(self.root).as_posix(), user_id, individual_ids):
+                path.unlink(missing_ok=True)
 
     def link(self, key: str, filename: str | None = None) -> str:
         token = create_file_token(key, filename)

@@ -13,7 +13,7 @@ vi.mock("next/headers", () => ({
   cookies: async () => ({ get: cookieGet, set: vi.fn() }),
 }));
 
-import { credentials, payment } from "./routes";
+import { credentials, individualOrder, payment } from "./routes";
 import { POST as receipt } from "../payments/receipt/route";
 
 interface Corpus {
@@ -176,4 +176,17 @@ describe("BFF: чек без входа", () => {
       expect(upstream).not.toHaveBeenCalled();
     });
   }
+});
+
+describe("BFF: индивидуальный заказ", () => {
+  it("передаёт тег «Детская матрица» только у личного разбора как true", async () => {
+    const req = new Request(`${SITE_HOSTS[L]}/api/individual-orders/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept-Language": L },
+      body: JSON.stringify({ email: "user@mail.ru", persons: [{ birth: "2016-04-12", sex: "f" }],
+        readings: [{ kind: "personal", who: [0], child: true }], question: "" }),
+    });
+    await individualOrder(req, "/individual-orders/start");
+    expect(sentBody().readings).toEqual([{ kind: "personal", who: [0], child: true }]);
+  });
 });

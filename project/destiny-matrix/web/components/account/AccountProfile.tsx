@@ -7,6 +7,7 @@ import { ApiError, forLocale, type MeResponse } from "@/lib/api";
 import { useMessage } from "@/lib/i18n/useMessage";
 import { operationText, profileNotices } from "@/lib/i18n/dict/accountOperations";
 import { useSession } from "./useSession";
+import PasswordSetup from "./PasswordSetup";
 
 export default function AccountProfile() {
   const L = useLocale();
@@ -110,6 +111,7 @@ export default function AccountProfile() {
 
   const remaining = Math.max(0, Math.ceil((retryAt - now) / 1000));
   const pending = me?.pending_email_change;
+  const hasPassword = me?.user.has_password !== false;
   const verified = Boolean(me?.user.email_verified_at);
   const verificationLabel = verified
     ? (en ? "Verified" : "Подтверждена")
@@ -160,7 +162,8 @@ export default function AccountProfile() {
           </div>
         )}
         {form !== "email" && message("email")}
-        {form === "email" && (
+        {form === "email" && !hasPassword && <PasswordSetup email={me!.user.email} locale={L} />}
+        {form === "email" && hasPassword && (
           <form className="profile-form" onSubmit={e => { e.preventDefault(); void changeEmail(); }}>
             <label>
               {en ? "New email" : "Новая почта"}
@@ -186,11 +189,12 @@ export default function AccountProfile() {
             <strong>{en ? "Password" : "Пароль"}</strong>
           </div>
           <button className="btn ghost sm" disabled={busy} onClick={() => changeForm(form === "password" ? null : "password")}>
-            {en ? "Change" : "Изменить"}
+            {hasPassword ? (en ? "Change" : "Изменить") : (en ? "Set password" : "Создать пароль")}
           </button>
         </div>
         {form !== "password" && message("password")}
-        {form === "password" && (
+        {form === "password" && !hasPassword && <PasswordSetup email={me!.user.email} locale={L} />}
+        {form === "password" && hasPassword && (
           <form className="profile-form" onSubmit={e => { e.preventDefault(); void changePassword(); }}>
             <label>
               {en ? "Current password" : "Текущий пароль"}
@@ -210,6 +214,25 @@ export default function AccountProfile() {
           </form>
         )}
       </div>
+      {me?.google_play_subscriptions?.some(row => row.access) && <div className="cabinet-profile-panel">
+        <h2>Google Play</h2>
+        {me.google_play_subscriptions.filter(row => row.access).map(row => <p key={row.order_id}>
+          {row.auto_renewing ? (en ? "Renews automatically" : "Продлевается автоматически") : (en ? "Renewal is disabled" : "Автопродление выключено")}
+          {row.expires_at && <> · {new Date(row.expires_at).toLocaleDateString(en ? "en-GB" : "ru-RU")}</>}
+        </p>)}
+        <a href="https://play.google.com/store/account/subscriptions">{en ? "Manage in Google Play" : "Управлять в Google Play"}</a>
+      </div>}
+      {!session.admin && <div className="cabinet-profile-panel">
+        <h2>{en ? "Delete account" : "Удаление аккаунта"}</h2>
+        <div className="profile-row">
+          <div>
+            <p className="small">{en
+              ? "Saved dates, pairs and readings are deleted after 30 days. Until then the account can be restored."
+              : "Через 30 дней удалятся сохранённые даты, пары и разборы. До этого аккаунт можно восстановить."}</p>
+          </div>
+          <Link className="btn ghost sm" href="/account/delete" data-testid="profile-delete-account">{en ? "Delete" : "Удалить"}</Link>
+        </div>
+      </div>}
     </section>
   );
 }

@@ -170,6 +170,7 @@ export const ADMIN_EN = {
   "Вшита в образ на сборке — совпадает с тем, что реально запущено": "Embedded in the image at build time: matches the running version",
   "Коммит": "Commit",
   "Собрано": "Built",
+  "Выложено": "Deployed",
   "Проверить снаружи": "Check externally",
   "Пользователи": "Users",
   "{0} всего": "{0} total",

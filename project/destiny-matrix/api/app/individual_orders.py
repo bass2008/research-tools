@@ -11,6 +11,7 @@ import datetime as dt
 import json
 from collections import Counter
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import func, select
@@ -22,6 +23,7 @@ from .http_errors import error
 from .models import IndividualReading, Purchase, User, utcnow
 
 OFFER_ID = "individual"
+MOSCOW = ZoneInfo("Europe/Moscow")
 TYPICAL_DAYS = 1
 MAX_DAYS = 3
 
@@ -36,6 +38,7 @@ ROLES = {"individual_1": "first", "individual_2": "second", "individual_3": "thi
          "individual_next": "next", "individual_after_three": "after_three"}
 KINDS = ("personal", "pair", "year")
 MAX_PER_KIND = 10
+ADULT_AGE = 18
 
 
 def price_list(db: Session) -> dict[str, int]:
@@ -87,6 +90,8 @@ class ReadingIn(BaseModel):
     who: list[int] = Field(min_length=1, max_length=2)
     year: int | None = Field(default=None, ge=1900, le=2200)
     relation: str = Field(default="", max_length=200)
+    # "child's matrix": the author writes the child skeleton for the parent (individual-reading-prompt.md)
+    child: bool = False
 
 
 class OrderIn(BaseModel):
@@ -106,6 +111,11 @@ class OrderIn(BaseModel):
 
 def _refuse(ru: str, en: str):
     raise error(422, ru, en)
+
+
+def age(birth: str, today: dt.date | None = None) -> int:
+    born, today = dt.date.fromisoformat(birth), today or dt.date.today()
+    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
 
 def snapshot_key(kind: str, who: list[int]) -> str:
@@ -131,9 +141,13 @@ def order_of(payload: OrderIn) -> dict:
         n = 2 if r.kind == "pair" else 1
         if len(r.who) != n or len(set(r.who)) != n or not all(0 <= i < len(persons) for i in r.who):
             _refuse("Проверьте, для кого каждый разбор.", "Check who each reading is for.")
+        if r.child and (r.kind != "personal" or age(persons[r.who[0]]["birth"]) >= ADULT_AGE):
+            _refuse("Детская матрица — личный разбор по дате моложе 18 лет.",
+                    "A child's matrix is a personal reading for a date under 18.")
         rows.append({"kind": r.kind, "who": list(r.who),
                      "year": (r.year or default_year()) if r.kind == "year" else None,
-                     "relation": r.relation.strip() if r.kind == "pair" else ""})
+                     "relation": r.relation.strip() if r.kind == "pair" else "",
+                     **({"child": True} if r.child else {})})
     if {i for r in rows for i in r["who"]} != set(range(len(persons))):
         _refuse("Проверьте, для кого каждый разбор.", "Check who each reading is for.")
     same = {(r["kind"], tuple(sorted(r["who"])), r["year"]) for r in rows}
@@ -184,9 +198,15 @@ def _plan(order: dict) -> list[dict]:
         else:
             product, inputs = "personal", persons[who[0]]
         relation = f"\nКто друг другу: {r['relation']}." if r["relation"] else ""
-        rows.append({"product": product, "kind": product, "year": r["year"], "inputs": inputs,
-                     "snapshot": snaps[snapshot_key(r["kind"], who)], "comment": summary + relation})
+        child = "\nДетская матрица: отчёт для родителя." if r.get("child") else ""
+        rows.append({"product": product, "kind": product, "year": r["year"], "inputs": inputs, "child": bool(r.get("child")),
+                     "snapshot": snaps[snapshot_key(r["kind"], who)], "comment": summary + relation + child})
     return rows
+
+
+def order_day(now: dt.datetime | None = None) -> dt.date:
+    # Deadlines count working days in Moscow, as the order form does; the container clock is UTC.
+    return (now or dt.datetime.now(dt.timezone.utc)).astimezone(MOSCOW).date()
 
 
 def _workdays(start: dt.date, days: int) -> dt.date:
@@ -241,7 +261,7 @@ def fulfil(db: Session, purchase_id: int) -> int:
     rows = _plan(order)
     locale = body.get("locale", "ru")
     for r in rows:
-        inputs = products.PRODUCTS[r["product"]].normalize(r["inputs"])
+        inputs = products.PRODUCTS[r["product"]].normalize(r["inputs"]) | ({"child": True} if r["child"] else {})
         db.add(IndividualReading(user_id=purchase.user_id, product=r["product"], kind=r["kind"], year=r["year"],
                                  inputs=json.dumps(inputs), locale=locale, comment=r["comment"],
                                  automatic_reading=json.dumps(r["snapshot"], ensure_ascii=False),
@@ -251,7 +271,7 @@ def fulfil(db: Session, purchase_id: int) -> int:
                  for r in rows}
     for product, raw in sorted(automatic):
         _open_automatic(db, purchase, product, json.loads(raw))
-    today = dt.date.today()
+    today = order_day()
     ids = notifications.emit(db, "individual_order_accepted", f"individual-order:{purchase.id}",
         {"locale": locale, "site_origin": body.get("site_origin"),
          "parts": {"ru": _parts(order, False), "en": _parts(order, True)},

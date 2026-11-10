@@ -12,10 +12,10 @@ export const enc = {
     en: "Destiny matrix encyclopedia: arcana, positions, chakras",
   } satisfies Phrase,
   description: {
-    ru: "Справочник по матрице судьбы: значения 22 арканов, 21 раздел отчёта, 17 позиций карты, "
+    ru: "Справочник по матрице судьбы: значения 22 арканов, 22 раздела отчёта, 18 позиций карты, "
       + "7 чакр и 231 сочетание арканов. Все страницы с перекрёстными ссылками.",
-    en: "A reference on the destiny matrix: the meanings of 22 arcana, 21 sections of the reading, "
-      + "17 positions of the chart, 7 chakras and 231 combinations. Every page is cross-linked.",
+    en: "A reference on the destiny matrix: the meanings of 22 arcana, 22 sections of the reading, "
+      + "18 positions of the chart, 7 chakras and 231 combinations. Every page is cross-linked.",
   } satisfies Phrase,
   sectionsName: { ru: "Разделы справочника", en: "Sections of the encyclopedia" } satisfies Phrase,
   articles: { ru: "Статьи", en: "Articles" } satisfies Phrase,
@@ -155,7 +155,7 @@ export const encArcanum = {
       + "family line or in the money channel — the position changes everything. Build your own "
       + "octagram: the calculation is free and runs in the browser.",
   } satisfies PhraseFn<[number, string]>,
-  fullReadingAll: { ru: "Полный разбор всех 21 раздела —", en: "The full reading of all 21 sections —" } satisfies Phrase,
+  fullReadingAll: { ru: "Полный разбор всех 22 разделов —", en: "The full reading of all 22 sections —" } satisfies Phrase,
   eyebrow: {
     ru: (n: number) => `${n} аркан · Старший аркан`,
     en: (n: number) => `Arcanum ${n} · Major Arcana`,

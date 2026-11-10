@@ -108,6 +108,8 @@ def render(notification: Notification, locale: str, *, email: bool = False,
             body += " Granted by an administrator." if en else " Выдана администратором."
         if d.get("source") == "purchase":
             body += " Activated after purchase." if en else " Активирована после оплаты."
+        if d.get("google_play"):
+            body += (" Renews automatically in Google Play." if en else " Продлевается автоматически в Google Play.") if d.get("auto_renewing") else (" Google Play renewal is disabled." if en else " Автопродление Google Play выключено.")
         href, action = account, "My readings" if en else "Мои разборы"
     elif kind == "subscription_expired":
         title = "Subscription expired" if en else "Подписка закончилась"

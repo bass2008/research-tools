@@ -15,7 +15,7 @@ export function useSets() {
     r: (n: number) => rub(n, L),
     priceOf: (c: Cart) => quote(c, terms.bought, terms.prices).total,
     plans: { self: SETS.selfYear("personal"), couple: SETS.couple("personal") },
-    kindName: { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindAnyYear[L] } as Record<Kind, string>,
+    kindName: { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindAnyYear[L], child: T.childTag[L] } as Record<Kind | "child", string>,
   };
 }
 

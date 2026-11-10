@@ -60,6 +60,9 @@ def run(db: Session | None = None) -> PaymentSweep | None:
     own = db is None
     session = db or SessionLocal()
     try:
+        from . import play_billing, account_deletion
+        play_billing.reconcile(session)
+        account_deletion.sweep(session)
         waiting = pending(session)
         if not waiting:
             return None

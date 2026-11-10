@@ -8,6 +8,7 @@ import method from "./__fixtures__/method.json";
 import { forLocale as localizedArcana } from "./arcana";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
+import { positionPageCount } from "./lineReadingRow";
 
 export interface PositionPage {
   key: string;
@@ -46,7 +47,7 @@ export const forLocale = localized((L: Locale) => {
   const POSITIONS: PositionPage[] = unique(
     positions.items.map((row) => ({ key: row.key, kind: row.kind as PositionPage["kind"], title: row.title })),
     (row) => row.key,
-    positions.items.some((row) => row.key === "material_karma") ? 39 : 38,
+    positionPageCount((key) => positions.items.some((row) => row.key === key)),
     "positions.json",
   );
 
@@ -119,7 +120,7 @@ export const forLocale = localized((L: Locale) => {
 
   const KARMIC_TAIL_HUB = "/encyclopedia/karmic-tail";
 
-  const YEAR_HUB = "/year";
+  const YEAR_HUB = "/encyclopedia/year";
 
   const COMPATIBILITY_HUB = "/encyclopedia/compatibility";
   const PAIR_TAIL_HUB = `${COMPATIBILITY_HUB}/tails`;
@@ -169,7 +170,7 @@ export const forLocale = localized((L: Locale) => {
   }
 
   function hubHref(key: string): string {
-    return `/${key}`;
+    return `/encyclopedia/${key}`;
   }
 
   function hasHubRoute(key: string): boolean {

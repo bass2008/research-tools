@@ -27,7 +27,7 @@ export const forLocale = localized((L: Locale) => {
     { key: "pts", title: D.encSections.pts.title[L], hint: D.encSections.pts.hint[L], hub: "/encyclopedia/position", anchor: "tochki" },
     { key: "chk", title: D.encSections.chk.title[L], hint: D.encSections.chk.hint[L], segment: "chakra", hub: "/encyclopedia/chakra" },
     { key: "tls", title: D.encSections.tls.title[L], hint: D.encSections.tls.hint[L], segment: "karmic-tail", hub: "/encyclopedia/karmic-tail" },
-    { key: "yer", title: D.encSections.yer.title[L], hint: D.encSections.yer.hint[L], externalRoot: "year", hub: "/year" },
+    { key: "yer", title: D.encSections.yer.title[L], hint: D.encSections.yer.hint[L], segment: "year", hub: "/encyclopedia/year" },
     { key: "cmp", title: D.encSections.cmp.title[L], hint: D.encSections.cmp.hint[L], segment: "compatibility", hub: "/encyclopedia/compatibility" },
     { key: "ptl", title: D.encSections.ptl.title[L], hint: D.encSections.ptl.hint[L], hub: "/encyclopedia/compatibility/tails" },
     { key: "cmb", title: D.encSections.cmb.title[L], hint: D.encSections.cmb.hint[L], segment: "combination", hub: "/encyclopedia/combination" },
@@ -43,11 +43,6 @@ export const forLocale = localized((L: Locale) => {
 
   const HUB_PATHS = new Set<string>(
     ENCYCLOPEDIA_SECTIONS.flatMap((section) => ("hub" in section ? [section.hub] : [])),
-  );
-
-  const BY_EXTERNAL_ROOT = new Map<string, EncyclopediaSectionKey>(
-    ENCYCLOPEDIA_SECTIONS.flatMap((section) =>
-      "externalRoot" in section ? [[section.externalRoot, section.key] as const] : []),
   );
 
   function encyclopediaSection(key: EncyclopediaSectionKey): EncyclopediaSectionMeta {
@@ -87,10 +82,6 @@ export const forLocale = localized((L: Locale) => {
     return segment ? BY_SEGMENT.get(segment) ?? null : null;
   }
 
-  function encyclopediaSectionFromExternalRoot(root: string | undefined): EncyclopediaSectionKey | null {
-    return root ? BY_EXTERNAL_ROOT.get(root) ?? null : null;
-  }
-
   /** Resolve the active encyclopedia section for both nested and external article routes. */
   function encyclopediaSectionFromPath(
     path: string,
@@ -98,13 +89,11 @@ export const forLocale = localized((L: Locale) => {
     articlePaths: readonly string[],
   ): EncyclopediaSectionKey | null {
     // Шапка раздела — не статья, а голова своей ветки: раньше `/encyclopedia/karmic-tail` и
-    // `/year` попадали в «Статьи», и меню утверждало, что человек в статьях, пока рядом стоял
+    // `/encyclopedia/year` попадали в «Статьи», и меню утверждало, что человек в статьях, пока рядом стоял
     // неподсвеченным пункт его собственного раздела. Четыре новые шапки такого поведения не
     // унаследовали, и разъезд был виден только на этих двух.
     if (articlePaths.includes(path) && !HUB_PATHS.has(path)) return "art";
     const parts = path.split("/").filter(Boolean);
-    const external = encyclopediaSectionFromExternalRoot(parts[0]);
-    if (external) return external;
     if (parts[0] !== "encyclopedia" || parts.length === 1) return null;
     // Шапка раздела подсвечивает «Позиции карты» — то же имя стоит и в её крошке. Лист выбирает
     // половину по виду позиции: «Разделы отчёта» и «Позиции карты» лежат в одном роуте.
@@ -115,8 +104,8 @@ export const forLocale = localized((L: Locale) => {
     if (parts[1] === "compatibility" && parts[2] === "tails") return "ptl";
     return encyclopediaSectionFromSegment(parts[1]);
   }
-  return { ENCYCLOPEDIA_SECTIONS, encyclopediaSection, encyclopediaSectionHub, encyclopediaSectionHref, encyclopediaSectionCrumb, encyclopediaSectionFromSegment, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromPath };
+  return { ENCYCLOPEDIA_SECTIONS, encyclopediaSection, encyclopediaSectionHub, encyclopediaSectionHref, encyclopediaSectionCrumb, encyclopediaSectionFromSegment, encyclopediaSectionFromPath };
 });
 
 // Compatibility for callers that explicitly use the deployment default.
-export const { ENCYCLOPEDIA_SECTIONS, encyclopediaSection, encyclopediaSectionHub, encyclopediaSectionHref, encyclopediaSectionCrumb, encyclopediaSectionFromSegment, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromPath } = forLocale(defaultLocale);
+export const { ENCYCLOPEDIA_SECTIONS, encyclopediaSection, encyclopediaSectionHub, encyclopediaSectionHref, encyclopediaSectionCrumb, encyclopediaSectionFromSegment, encyclopediaSectionFromPath } = forLocale(defaultLocale);

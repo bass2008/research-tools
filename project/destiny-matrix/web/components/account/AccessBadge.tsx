@@ -36,12 +36,13 @@ export default function AccessBadge({ locale: requestedLocale, item, reading = f
     return <span className="badge sub" data-testid="access-badge">{D.account.badgeGranted[L]}</span>;
   }
   if (item.access === "subscription") {
-    return (
+    const sub = (
       <span className="badge sub" data-testid="access-badge">
         {D.account.badgeSubscription[L](item.access_until ? dayLabel(item.access_until) : "")}
-        {item.access_granted ? D.account.grantedTail[L] : ""}
       </span>
     );
+    if (!item.access_granted) return sub;
+    return <span className="badges">{sub}<span className="badge sub" data-testid="granted-badge">{D.account.badgeGranted[L]}</span></span>;
   }
   return <span className="badge off" data-testid="access-badge">{D.account.badgeClosed[L]}</span>;
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import KindSwitch from "@/components/individual/landing/KindSwitch";
 import OrderSection from "@/components/individual/landing/OrderSection";
-import type { Kind, SetKey } from "@/components/individual/landing/types";
+import type { Kind, OneKind, SetKey } from "@/components/individual/landing/types";
 import { setOf } from "@/components/individual/landing/useSets";
 import { useIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
@@ -14,22 +15,22 @@ import RichText from "@/components/ui/RichText";
 import { arcanumImage } from "@/components/matrix/ArcanumCard";
 import { forLocale as arcanaForLocale } from "@/lib/arcana";
 import {
-  COUPLE_CARDS, EMPTY_CART, KIND_CARDS, SELF_YEAR_CARDS, SETS, quote, workdaysFrom, type Cart,
+  COUPLE_CARDS, EMPTY_CART, KIND_CARDS, SELF_YEAR_CARDS, SETS, quote, workdaysFrom, type Cart, type OrderPreset,
 } from "@/lib/individualPricing";
 import { SAMPLE_BIRTH } from "@/lib/individualSample";
 import { useBirth } from "@/lib/useBirth";
 import { usePair } from "@/lib/usePair";
 import { yearMatrix } from "@/lib/yearMatrix";
 import { priceWords, rub } from "@/lib/individualMoney";
-import { browserDay } from "@/lib/today";
+import { moscowDay } from "@/lib/today";
 import type { Lang } from "@/lib/i18n/hosts";
 import type { PaymentProvider } from "@/lib/tariffs";
 
 const Cards = ({ ns }: { ns: number[] }) => <div className="pw-cardrow">{ns.map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div>;
 
 /** Gold section of /pay: ready sets, the builder and the perk for those who bought three (reports/individual-sales, paywall.html). */
-export default function IndividualOffer({ providers, initialCart, initialYear }: {
-  providers: PaymentProvider[]; initialCart?: Cart | null; initialYear?: number;
+export default function IndividualOffer({ providers, initialCart, initialYear, preset }: {
+  providers: PaymentProvider[]; initialCart?: Cart | null; initialYear?: number; preset?: OrderPreset;
 }) {
   const L = useLocale();
   const { dateLabel } = localizedI18n(L);
@@ -43,19 +44,22 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
   const storedPair = usePair();
   const year = initialYear || terms.defaultYear;
   const asked = initialCart ? setOf(initialCart) : null;
-  const [oneKind, setOneKind] = useState<Kind>(asked?.kind ?? "personal");
+  // "child's matrix" is a personal reading tagged for the parent, not a kind of its own
+  const [oneKind, setOneKind] = useState<OneKind>(asked?.kind === "personal" && preset?.childFirst ? "child" : asked?.kind ?? "personal");
+  const [childPick, setChildPick] = useState(Boolean(preset?.childFirst));
   const [custom, setCustom] = useState<Cart>(initialCart ?? { ...EMPTY_CART, personal: 2 });
   // the order form of the landing, opened here by the chosen set (docs/individual-reading.md)
   const [open, setOpen] = useState(Boolean(asked));
   const [set, setSet] = useState<SetKey>(asked?.set ?? "one");
   const [formKind, setFormKind] = useState<Kind>(asked?.kind ?? "personal");
   const [latest, setLatest] = useState("");
-  useEffect(() => { setLatest(dateLabel(workdaysFrom(browserDay(), 3), L)); }, [L, dateLabel]);
-  const choose = (s: SetKey, place: string, kind?: Kind) => (e: React.MouseEvent) => {
+  useEffect(() => { setLatest(dateLabel(workdaysFrom(moscowDay(), 3), L)); }, [L, dateLabel]);
+  const choose = (s: SetKey, place: string, kind?: Kind | "child") => (e: React.MouseEvent) => {
     e.preventDefault();
     track("individual_set", { place });
     setSet(s);
-    if (kind) setFormKind(kind);
+    setChildPick(kind === "child");
+    if (kind) setFormKind(kind === "child" ? "personal" : kind);
     setOpen(true);
     requestAnimationFrame(() => document.getElementById("order")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
@@ -65,9 +69,9 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
     const regular = quote(c, 0, terms.prices).total;
     return after && regular > price(c) ? <s>{r(regular)}</s> : null;
   };
-  const oneCart = { ...EMPTY_CART, [oneKind]: 1 };
+  const oneBase: Kind = oneKind === "child" ? "personal" : oneKind;
+  const oneCart = { ...EMPTY_CART, [oneBase]: 1 };
   const self = SETS.selfYear("personal"), couple = SETS.couple("personal");
-  const kindName: Record<Kind, string> = { personal: T.kindPersonal[L], pair: T.kindPair[L], year: T.kindAnyYear[L] };
   const birth = stored?.birth ?? SAMPLE_BIRTH;
   const [by, bm, bd] = birth.split("-").map(Number);
   const y = year ? yearMatrix({ y: by, m: bm, d: bd }, year) : null;
@@ -82,10 +86,8 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
           {after && <p className="pw-perk" data-testid="isale-perk"><b>{T.perkThreeStrong[L]}</b> {T.perkThree[L](P)}</p>}
           <div className="pw-iplans">
             <article className="pw-iplan" data-testid="iset-one">
-              <div className="pw-ph"><div><h3>{T.setOne[L]}</h3><p className="pw-tagline">{TL.oneTagline[L]}</p></div><Cards ns={KIND_CARDS[oneKind]} /></div>
-              <div className="pw-kinds">
-                {(["personal", "pair", "year"] as const).map((k) => <button key={k} type="button" className={oneKind === k ? "pw-on" : undefined} onClick={() => setOneKind(k)}>{kindName[k]}</button>)}
-              </div>
+              <div className="pw-ph"><div><h3>{T.setOne[L]}</h3><p className="pw-tagline">{TL.oneTagline[L]}</p></div><Cards ns={KIND_CARDS[oneBase]} /></div>
+              <KindSwitch value={oneKind} onChange={setOneKind} p="pw" testid="iset-one" />
               <p className="pw-desc">{TL.kindDesc[L][oneKind](oneKind === "personal" ? TL.yourDate[L] : String(year))}</p>
               <p className="pw-iprice">{r(price(oneCart))}{was(oneCart)}</p>
               <p className="pw-iprice-sub">{after ? T.afterThreeSub[L](P) : T.setOneSub[L]}</p>
@@ -133,7 +135,7 @@ export default function IndividualOffer({ providers, initialCart, initialYear }:
       </div>
       {open && <div className="ilp isale-order">
         <OrderSection set={set} setSet={setSet} formKind={formKind} setFormKind={setFormKind} custom={custom} setCustom={setCustom}
-          year={year} providers={providers} initialBirth={stored} initialPair={storedPair} latest={latest} />
+          year={year} providers={providers} initialBirth={stored} initialPair={storedPair} latest={latest} preset={preset} child={childPick} setChild={setChildPick} />
       </div>}
     </section>
   );

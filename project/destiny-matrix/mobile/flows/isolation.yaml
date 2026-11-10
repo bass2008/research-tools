@@ -1,0 +1,32 @@
+appId: com.arcanasense.app
+---
+- openLink: 'arcanasense://settings'
+- scrollUntilVisible:
+    element:
+      id: logout
+    direction: DOWN
+- tapOn:
+    id: logout
+- openLink: 'arcanasense://login'
+- tapOn:
+    id: auth-email
+- inputText: '${OTHER_EMAIL}'
+- tapOn:
+    id: auth-password
+- inputText: '${PASSWORD}'
+- hideKeyboard
+- tapOn:
+    id: auth-submit
+- extendedWaitUntil:
+    visible:
+      id: account-profile
+    timeout: 30000
+- openLink: 'arcanasense://report?id=${PAID_ID}'
+- extendedWaitUntil:
+    visible: 'Повторить'
+    timeout: 30000
+- assertNotVisible:
+    id: matrix-summary
+- assertNotVisible:
+    id: reading-pdf
+- takeScreenshot: another-account-no-cache

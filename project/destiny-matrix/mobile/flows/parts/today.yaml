@@ -1,0 +1,52 @@
+appId: com.arcanasense.app
+---
+- tapOn:
+    id: tab-today
+- extendedWaitUntil:
+    visible:
+      id: daily-theme
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 10-today
+- scrollUntilVisible:
+    element:
+      id: open-daily-theme
+    direction: DOWN
+- tapOn:
+    id: open-daily-theme
+- extendedWaitUntil:
+    visible:
+      id: daily-reading
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 11-daily-theme
+- scrollUntilVisible:
+    element:
+      text: 'На главную|Back home|К «Сегодня»|Back to Today'
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 11-daily-theme-end
+- scrollUntilVisible:
+    element:
+      id: share-daily-open
+    direction: UP
+    timeout: 30000
+- tapOn:
+    id: share-daily-open
+- extendedWaitUntil:
+    visible:
+      id: share-daily-card
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 12-share-card
+- tapOn:
+    id: share-daily-send
+- extendedWaitUntil:
+    notVisible:
+      id: share-daily-send
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 12-share-sheet
+- back
+- back
+- back

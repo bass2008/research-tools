@@ -187,8 +187,8 @@ export const forLocale = localized((L: Locale) => {
 
   const ROWS = catalog.items as PublicSectionRow[];
 
-  if (ROWS.length !== 21 || new Set(ROWS.map((row) => row.key)).size !== 21) {
-    throw new Error(`sections.json: ожидался 21 уникальный раздел, получено ${ROWS.length}`);
+  if (ROWS.length !== 22 || new Set(ROWS.map((row) => row.key)).size !== 22) {
+    throw new Error(`sections.json: ожидалось 22 уникальных раздела, получено ${ROWS.length}`);
   }
 
   const CATALOG: SectionMeta[] = ROWS.map((s) => ({

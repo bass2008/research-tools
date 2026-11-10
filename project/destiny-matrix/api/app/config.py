@@ -45,6 +45,17 @@ class Settings(BaseSettings):
     # знает адрес /api/payments/mock. Стенды включают её явно.
     mock_payments: bool = False
 
+    # Native billing is separately enabled. Mock receipts are never accepted in production.
+    google_play_mock: bool = False
+    google_play_enabled: bool = False
+    google_play_package: str = "com.arcanasense.app"
+    google_play_credentials: str = ""
+    google_play_rtdn_audience: str = ""
+    google_play_rtdn_email: str = ""
+
+    # Public Web OAuth audience. Empty means Google Sign-In is unavailable.
+    google_sign_in_client_id: str = Field(default="", max_length=255)
+
     # Общий режим доступа, независимый от языка: при включении разбор открыт всем.
     # По умолчанию выключен. Фронт получает согласованное значение через свою переменную
     # сборки NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT; отдельного бесплатного EN-контура нет.
@@ -229,6 +240,7 @@ SENSITIVE_SETTINGS = frozenset({
     "s3_secret_key",
     "tbank_terminal_key",
     "tbank_password",
+    "google_play_credentials",
     "admin_password",
     "monitoring_folder",
 })

@@ -100,8 +100,8 @@ export const account = {
   badgeOpen: { ru: "Открыта", en: "Open" } satisfies Phrase,
   badgeGranted: { ru: "Выдана", en: "Granted" } satisfies Phrase,
   badgeSubscription: {
-    ru: (until: string) => `По подписке${until ? ` · до ${until}` : ""}`,
-    en: (until: string) => `By subscription${until ? ` · until ${until}` : ""}`,
+    ru: (until: string) => `По подписке${until ? `\u00a0· до ${until}` : ""}`,
+    en: (until: string) => `By subscription${until ? `\u00a0· until ${until}` : ""}`,
   } satisfies PhraseFn<[string]>,
   badgeClosed: { ru: "Закрыта", en: "Closed" } satisfies Phrase,
   unavailable: { ru: "Кабинет недоступен.", en: "The account is unavailable." } satisfies Phrase,

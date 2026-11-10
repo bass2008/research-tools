@@ -175,7 +175,7 @@ def test_recalculating_a_paid_date_opens_it_on_the_landing(page: Page, browser: 
     page.get_by_test_id("calc-submit").click()
     page.wait_for_url(f"{BASE}/#result", timeout=15_000)
     expect(page.locator("#result")).to_contain_text("8 августа 1978")
-    assert flows.locked_sections(page) == 19
+    assert flows.locked_sections(page) == 20
 
 
 def test_refund_refreshes_users_and_payments_from_the_same_moment(page: Page, browser: Browser):

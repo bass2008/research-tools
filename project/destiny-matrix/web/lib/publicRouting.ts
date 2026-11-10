@@ -4,10 +4,7 @@ import type { SiteProfile } from "./siteProfile";
 
 // Release 1: RU home stays at /; EN home moves to /en/. All user pages are localized; API and assets stay put.
 const PUBLIC_ROOTS = new Set([
-  "compatibility", "contacts", "support", "terms", "privacy", "refund", "energies",
-  "programs", "full-reading", "year", "karmic-matrix", "compatibility-center",
-  "how-to-read", "decoding", "business-compatibility", "meaning", "method", "author",
-  "by-birth-date", "encyclopedia", "individual",
+  "compatibility", "contacts", "support", "terms", "privacy", "refund", "encyclopedia", "individual",
 ]);
 
 export function splitPublicPath(path: string): { locale?: Lang; path: string } {
@@ -20,8 +17,7 @@ export function isPublicPath(path: string): boolean {
   const parts = path.split("/").filter(Boolean);
   // Readings under /matrix are private; only the sample readings are public pages.
   if (parts[0] === "matrix") return parts[1] === "individual-example" && parts.length === 3;
-  return PUBLIC_ROOTS.has(parts[0]) &&
-    (parts.length === 1 || parts[0] === "encyclopedia" || (parts[0] === "year" && parts.length === 2));
+  return PUBLIC_ROOTS.has(parts[0]) && (parts.length === 1 || parts[0] === "encyclopedia");
 }
 
 /** Application pages keep their session/payment host while their language lives in the URL. */

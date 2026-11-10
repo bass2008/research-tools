@@ -497,7 +497,9 @@ const paidTexts = paidRows.flatMap((section) => {
 // подписи, которые есть и в публичной части (например «Денежный канал» в главных точках),
 // секретом не являются — сторож смотрит только на то, что бывает лишь в платном разборе
 // подписи точек схемы видит каждый, кто посчитал карту: Q «Отношение к материальному» — имя точки
-const publicSrc = ["lib/publicSpec.ts", "components/matrix/MatrixResult.tsx", "lib/i18n/dict/map.ts"]
+// словарь отчёта уходит в браузер целиком: роли тройки (материальная карма, детско-родительская
+// линия) гость видит подписями карт в закрытом превью раздела
+const publicSrc = ["lib/publicSpec.ts", "components/matrix/MatrixResult.tsx", "lib/i18n/dict/map.ts", "lib/i18n/dict/report.ts"]
   .map((f) => fs.readFileSync(f, "utf8"))
   .join("\n");
 const publicPointLabels = (JSON.parse(fs.readFileSync(`${CORPUS_DIR}/points-catalog.json`, "utf8")).items ?? [])

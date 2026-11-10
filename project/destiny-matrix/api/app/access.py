@@ -19,7 +19,7 @@ from .products import PERSONAL, PRODUCTS
 
 def active_rights(db: Session, user: User | None,
                   now: dt.datetime | None = None) -> list[Entitlement]:
-    if user is None:
+    if user is None or user.deletion_requested_at or user.deleted_at:
         return []
     now = now or utcnow()
     rows = db.scalars(select(Entitlement).where(Entitlement.user_id == user.id)).all()

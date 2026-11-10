@@ -82,6 +82,7 @@ def brief(row_id: int, db: Session = Depends(get_db)):
         "locale": row.locale,
         "inputs": json.loads(row.inputs),
         "comment": row.comment,
+        "created_at": service.iso(row.created_at),
         "automatic_reading": json.loads(row.automatic_reading),
         "prompt": ".agents/skills/arcana-product-skill/prompts/individual-reading-prompt.md",
     }

@@ -79,7 +79,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml pull -q \
   && docker ps -q --filter label=com.docker.compose.project=arcana-test-en | xargs -r docker stop >/dev/null \
   && docker ps -q --filter label=com.docker.compose.project=arcana-test-localized | xargs -r docker stop >/dev/null \
-  && REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml up -d --wait --remove-orphans \
+  && DEPLOYED_AT=\$(date -u +%Y-%m-%dT%H:%M:%SZ) REGISTRY='$REGISTRY' TAG='$TAG' docker compose -p arcana-test -f docker-compose.test.yml up -d --wait --remove-orphans \
   && /usr/local/bin/arcana-prune-images prune"
 
 echo "== проверка"

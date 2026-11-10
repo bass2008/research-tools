@@ -1,0 +1,35 @@
+appId: com.arcanasense.app
+---
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: language-en
+    direction: DOWN
+- tapOn:
+    id: language-en
+- assertVisible: Language
+- waitForAnimationToEnd
+- takeScreenshot: language-en
+- tapOn:
+    id: language-ru
+- assertVisible: Язык
+- back
+- tapOn:
+    id: tab-today
+- runFlow:
+    when:
+      true: ${DEV_CLIENT != '1'}
+    commands:
+      - stopApp
+      - launchApp
+- scrollUntilVisible:
+    element:
+      id: open-settings
+    direction: UP
+    timeout: 30000
+- assertVisible:
+    id: daily-theme
+- assertNotVisible:
+    id: birth-day
+- assertVisible: Сегодня

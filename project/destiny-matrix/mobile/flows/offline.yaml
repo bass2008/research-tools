@@ -1,0 +1,21 @@
+appId: com.arcanasense.app
+---
+- openLink: 'arcanasense://encyclopedia/arcanum/5'
+- extendedWaitUntil:
+    visible: 'Сохранённая версия · нет связи с сервером'
+    timeout: 30000
+- takeScreenshot: article-offline
+- openLink: 'arcanasense://report?id=${PAID_ID}'
+- extendedWaitUntil:
+    visible: 'Сохранённая версия · нет связи с сервером'
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: reading-pdf
+    direction: DOWN
+- takeScreenshot: reading-offline
+- openLink: 'arcanasense://encyclopedia/arcanum/22'
+- extendedWaitUntil:
+    visible: 'Повторить'
+    timeout: 30000
+- takeScreenshot: not-cached-offline

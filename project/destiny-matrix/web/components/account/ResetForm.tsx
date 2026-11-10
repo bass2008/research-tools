@@ -43,9 +43,9 @@ export default function ResetForm({ locale: requestedLocale, ...localeProps }: (
     }
     setBusy(true);
     try {
-      await api.resetApply(token, password);
+      const signedIn = await api.resetApply(token, password);
       await refreshSession();
-      router.push(publicPath("/account", L));
+      router.push(publicPath(signedIn.deletion ? "/account/delete" : "/account", L));
     } catch (err) {
       setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
     } finally {

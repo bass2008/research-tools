@@ -22,14 +22,14 @@ def public_path(path, locale):
 def read(path, host, **headers):
     # Connect only to the local acceptance server; Host simulates the production domain.
     assert BASE.startswith(("http://127.0.0.1:", "http://localhost:"))
-    if path == "/" or path.startswith(("/encyclopedia", "/meaning", "/contacts")):
+    if path == "/" or path.startswith(("/encyclopedia", "/encyclopedia/meaning", "/contacts")):
         path = public_path(path, "ru" if host in ("arcana-sense.ru", "localhost:3000") else "en")
     request = urllib.request.Request(BASE + path, headers={"Host": host, **headers})
     with urllib.request.urlopen(request, timeout=45) as response:
         return response.read().decode(), response.headers
 
 
-@pytest.mark.parametrize("path", ["/", "/encyclopedia/arcanum/4", "/meaning", "/contacts"])
+@pytest.mark.parametrize("path", ["/", "/encyclopedia/arcanum/4", "/encyclopedia/meaning", "/contacts"])
 @pytest.mark.parametrize("host,locale", [("arcana-sense.ru", "ru"), ("arcana-sense.com", "en")])
 def test_public_html_and_metadata_depend_only_on_domain(path, host, locale):
     for agent in ["Mozilla/5.0", "Googlebot", "YandexBot"]:

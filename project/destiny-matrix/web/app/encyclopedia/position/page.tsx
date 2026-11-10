@@ -6,7 +6,7 @@ import CalcPromo from "@/components/matrix/CalcPromo";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
-import { forLocale as localizedContent } from "@/lib/content";
+import { articleContentForLocale as localizedContent } from "@/app/_lib/article";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";

@@ -88,6 +88,12 @@ CHAPTER_KINDS = ("key", "findings", "character", "talents", "money", "relations"
 PERSONAL_SKELETON = ("key", "findings", "character", "talents", "money", "relations", "family", "karma", "body",
                      "chakras", "zodiac", "close", "time", "selfcheck", "plan")
 YEAR_SKELETON = ("key", "year", "time", "quarter", "relations", "money", "plan")
+# the order's "child's matrix" tag picks the skeleton; the inserts are adult texts, so under 18 they go regardless
+CHILD_SKELETON = ("key", "findings", "character", "talents", "relations", "family", "karma", "body", "money", "close",
+                  "time", "selfcheck", "plan")
+ADULT_AGE = 18
+ADULT_TOPICS = re.compile(r"секс|интим|любовн|ипотек|кредит|зарплат|брак|развод|алкогол|sex|intima|lover|mortgage|"
+                          r"\bloan|salary|marriage|divorce|alcohol", re.I)
 PAIR_SKELETON = ("key", "findings", "talents", "character", "body", "money", "relations", "family", "karma", "close",
                  "selfcheck", "plan")
 OPERATORS = ("+", "=", "↔", "→")
@@ -590,9 +596,41 @@ def dedupe(lines):
     return out
 
 
+def age(task):
+    """Full years of the person in a personal reading on the order day; None for pairs and year readings."""
+    task = task or {}
+    birth = (task.get("inputs") or {}).get("birth")
+    if task.get("kind") != "personal" or task.get("year") or not birth:
+        return None
+    born = dt.date.fromisoformat(birth)
+    on = dt.date.fromisoformat(task["created_at"][:10]) if task.get("created_at") else dt.date.today()
+    return on.year - born.year - ((on.month, on.day) < (born.month, born.day))
+
+
+def child_matrix(task):
+    return bool(task) and task.get("kind") == "personal" and not task.get("year") and (task.get("inputs") or {}).get("child") is True
+
+
+def audience_block(task):
+    years = age(task)
+    if child_matrix(task):
+        return [f"## Детская матрица: ребёнку {years} лет на день заказа", "",
+                "Покупатель отметил «Детская матрица»: скелет — «Детская матрица» в задании, не взрослый. Читатель — "
+                "взрослый заказчик. Вставок чакр и кармического хвоста нет: это взрослые тексты. Тексты автоматического "
+                "разбора ниже написаны для взрослых — деньги, брак, близость, работа; бери из них только числа и смысл точек.", ""]
+    if years is None or years >= ADULT_AGE:
+        return []
+    return [f"## Взрослый разбор человека {years} лет", "",
+            "«Детскую матрицу» покупатель не отметил: скелет взрослый, правила — «Взрослый разбор младше 18 лет» в задании: "
+            "без близости и брака, деньги — первые заработки и выбор дела. Вставок чакр и кармического хвоста нет: "
+            "это взрослые тексты, главы пишешь сам.", ""]
+
+
 def brief(task):
     auto = task.get("automatic_reading") or {}
     name = names("ru")
+    years = age(task)
+    minor = years is not None and years < ADULT_AGE
     head = [f"# Заявка {task['id']}: {task['kind']}",
             "",
             f"- Язык статьи: {task['locale']}",
@@ -601,6 +639,7 @@ def brief(task):
             f"- Комментарий заказчика: {task['comment'] or 'нет'}",
             f"- Статус: {task['status']}{' (черновик уже сдан)' if task.get('article') else ''}",
             "",
+            *audience_block(task),
             "## Расчёт",
             "",
             "Числа верные: это выход движка сайта. Пересчитывать их не нужно.",
@@ -612,10 +651,11 @@ def brief(task):
             "## Автоматический разбор: подарок рядом с отчётом",
             "",
             "Тексты собраны калькулятором из готовых кусков по каждой позиции и паре позиций. Отчёт самодостаточен: "
-            "основы можно назвать своими словами, но ценность — в связях и выводах, которых здесь нет. Два блока "
-            "отчёт показывает как есть: тексты чакр (`{\"insert\": \"chakras\"}`) и текст кармического хвоста "
-            "(`{\"insert\": \"karmic_tail\"}`) — они ниже, в разделах «Чакры» и «Кармический хвост»; их не пересказывай. "
-            "Повторы убраны: каждая фраза оставлена один раз, а (×N) значит, что читатель встретил её N раз.",
+            "основы можно назвать своими словами, но ценность — в связях и выводах, которых здесь нет. "
+            + ("" if minor else "Два блока отчёт показывает как есть: тексты чакр (`{\"insert\": \"chakras\"}`) и текст "
+               "кармического хвоста (`{\"insert\": \"karmic_tail\"}`) — они ниже, в разделах «Чакры» и «Кармический "
+               "хвост»; их не пересказывай. ")
+            + "Повторы убраны: каждая фраза оставлена один раз, а (×N) значит, что читатель встретил её N раз.",
             ""]
     body = []
     for s in auto.get("sections", []):
@@ -1030,14 +1070,24 @@ def check_report(a, task, online):
     inserted = {b["insert"] for b in blocks if "insert" in b}
     if (pair or not matrix.get("chakras")) and ({b.get("chakra") for b in blocks} - {None} or "chakras" in inserted):
         errors.append("чакры есть только у личной схемы")
+    years = age(task) if task else None
+    if years is not None and years < ADULT_AGE:
+        if inserted:
+            errors.append(f"вставки {sorted(inserted)} — взрослые тексты автоматического разбора; человеку {years} лет, "
+                          "главы пишутся своим текстом")
+        adult = sorted({m.group(0).lower() for t in texts for m in ADULT_TOPICS.finditer(t)})
+        if adult:
+            warnings.append(f"взрослые темы в разборе человека {years} лет: {adult} — оставь, только если о них спросили")
     if task and task.get("kind") == "personal" and not task.get("year"):
-        missing = [k for k in PERSONAL_SKELETON if k not in kinds]
+        skeleton = CHILD_SKELETON if child_matrix(task) else PERSONAL_SKELETON
+        missing = [k for k in skeleton if k not in kinds]
         if missing:
-            errors.append(f"в полном личном разборе нет глав: {missing}")
-        if "chakras" not in inserted:
-            errors.append("нет вставки {\"insert\": \"chakras\"} — блок чакр автоматического разбора")
-        if "karmic_tail" not in inserted:
-            warnings.append("нет вставки {\"insert\": \"karmic_tail\"} — текст кармического хвоста")
+            errors.append(f"в {'детской матрице' if skeleton is CHILD_SKELETON else 'полном личном разборе'} нет глав: {missing}")
+        if years is None or years >= ADULT_AGE:
+            if "chakras" not in inserted:
+                errors.append("нет вставки {\"insert\": \"chakras\"} — блок чакр автоматического разбора")
+            if "karmic_tail" not in inserted:
+                warnings.append("нет вставки {\"insert\": \"karmic_tail\"} — текст кармического хвоста")
         if not any("formula" in b or b.get("finding", {}).get("formula") for b in blocks):
             warnings.append("нет ни одной формулы: совпадения и суммы показываются картами (4 = 4, 8 ↔ 8, 14 + 8 = 22)")
         if not any("timeline" in b for b in blocks):
@@ -1109,6 +1159,8 @@ def check_report(a, task, online):
         warnings.append(f"слов {words}: совместимость — 16–20 тысяч слов своего текста")
     elif task and task.get("year") and words < 12000:
         warnings.append(f"слов {words}: разбор на год — 14–18 тысяч слов своего текста")
+    elif child_matrix(task) and words < 14000:
+        warnings.append(f"слов {words}: детская матрица — 16–18 тысяч слов своего текста, вставок нет")
     elif task and task.get("kind") == "personal" and words < 9000:
         warnings.append(f"слов {words}: полный личный отчёт — 12–16 тысяч слов своего текста")
     per = {f"{i}. {c['kind']}": sum(len(t.split()) for t in [c["conclusion"], *map(block_text, c["blocks"]), *c.get("actions", []),
@@ -1297,6 +1349,8 @@ def export_example(base, row_id, slug):
     if not row.get("article"):
         raise SystemExit("у заявки нет статьи")
     keep = ("product", "kind", "year", "inputs", "locale", "title", "article", "matrix", "inserts")
+    used = {b["insert"] for c in row["article"].get("chapters", []) for b in c.get("blocks", []) if isinstance(b, dict) and "insert" in b}
+    row["inserts"] = {k: v for k, v in (row.get("inserts") or {}).items() if k in used}
     example = {**{k: row.get(k) for k in keep}, "id": 0, "status": "done", "created_at": row.get("created_at"),
                "approved_at": row.get("approved_at") or row.get("created_at"), "href": f"/matrix/individual-example/{slug}",
                "can_pdf": False}
@@ -1366,7 +1420,7 @@ def main():
         p = sub.add_parser(cmd)
         p.add_argument("id", type=int)
         if cmd == "export":
-            p.add_argument("slug", choices=("personal", "pair", "year"))
+            p.add_argument("slug", choices=("personal", "pair", "year", "child"))
         if cmd in ("check", "submit"):
             p.add_argument("article", nargs="?")
             p.add_argument("--offline", action="store_true", help="не проверять ссылки")

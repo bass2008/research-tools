@@ -34,13 +34,14 @@ def shared(token: str, db: Session = Depends(get_db)) -> dict:
     kind, row_id, user_id = read_share_token(token) or ("", 0, 0)
     if kind == "reading":
         row, user = db.get(Reading, row_id), db.get(User, user_id)
-        if row and user and row.user_id == user.id and row.removed_at is None:
+        if row and user and not user.deletion_requested_at and not user.deleted_at and row.user_id == user.id and row.removed_at is None:
             # the link shows what its owner sees: the paid sections open only if the owner can open them
             rights = access.active_rights(db, user)
             return {**row.item(), "shared": "reading", "unlocked": access.can_open(db, user, row, rights=rights),
                     "plan": access.plan_label(db, rights, row)}
     if kind == "individual":
         row = db.get(IndividualReading, row_id)
-        if row and row.user_id == user_id and row.status == "done" and row.article:
+        user = db.get(User, user_id)
+        if row and user and not user.deletion_requested_at and not user.deleted_at and row.user_id == user_id and row.status == "done" and row.article:
             return {**individual.item(row, article=True), "shared": "individual"}
     raise error(404, "Ссылка недействительна или разбор удалён.", "The link is invalid or the reading was removed.")

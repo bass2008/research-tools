@@ -196,11 +196,11 @@ def test_pair_is_open_in_english(browser):
 def test_compatibility_articles_are_linked_and_lead_to_the_pair_calculator(page: Page):
     page.goto(f"{BASE}/compatibility", wait_until="domcontentloaded")
     articles = page.get_by_test_id("compatibility-articles")
-    for href in ("/compatibility-center", "/encyclopedia/compatibility/tails", "/business-compatibility"):
+    for href in ("/encyclopedia/compatibility-center", "/encyclopedia/compatibility/tails", "/encyclopedia/business-compatibility"):
         expect(articles.locator(f"a[href='/ru{href}']")).to_have_count(1)
     expect(page.locator("#sec-atmosphere").get_by_test_id("pair-article-atmosphere")).to_have_attribute(
-        "href", "/ru/compatibility-center")
-    expect(page.get_by_test_id("pair-article-business")).to_have_attribute("href", "/ru/business-compatibility")
+        "href", "/ru/encyclopedia/compatibility-center")
+    expect(page.get_by_test_id("pair-article-business")).to_have_attribute("href", "/ru/encyclopedia/business-compatibility")
 
     for key in ("compatibility-center", "business-compatibility"):
         page.goto(f"{BASE}/{key}", wait_until="domcontentloaded")
@@ -208,7 +208,7 @@ def test_compatibility_articles_are_linked_and_lead_to_the_pair_calculator(page:
         expect(page.get_by_test_id("calc-promo")).to_have_count(0)
 
     page.goto(f"{BASE}/encyclopedia/compatibility/16", wait_until="domcontentloaded")
-    for href in ("/compatibility-center", "/encyclopedia/compatibility/tails"):
+    for href in ("/encyclopedia/compatibility-center", "/encyclopedia/compatibility/tails"):
         expect(page.locator(f"main a[href='/ru{href}']").first).to_be_visible()
     page.goto(f"{BASE}/encyclopedia/karmic-tail/18-9-9", wait_until="domcontentloaded")
     expect(page.get_by_test_id("tail-compatibility").locator("a[href='/ru/encyclopedia/compatibility/tails']")).to_have_count(1)

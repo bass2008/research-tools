@@ -3,12 +3,14 @@ from __future__ import annotations
 from .. import sites
 
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..i18n import say, current_locale
 from .. import access, audit, account_operations as operations
+from .. import google_sign_in
 from ..http_errors import LocalizedHTTPException, error
 from ..config import settings
 from ..db import get_db, begin_write
@@ -21,6 +23,26 @@ from ..security import (create_reset_token, create_token, hash_password,
                         password_fingerprint, read_reset_token, verify_password)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/google/config")
+def google_config(request: Request) -> dict:
+    google_sign_in.throttle(request, "config", cap=120, seconds=60)
+    return google_sign_in.configuration()
+
+
+@router.post("/google/challenge")
+def google_challenge(request: Request, db: Session = Depends(get_db)) -> dict:
+    return google_sign_in.challenge(db, request)
+
+
+@router.post("/google")
+def google_login(payload: google_sign_in.CredentialIn, request: Request, db: Session = Depends(get_db)):
+    try:
+        return google_sign_in.sign_in(db, request, payload)
+    except (google_sign_in.LinkRequired, google_sign_in.EmailVerificationRequired) as exc:
+        return JSONResponse({"detail": exc.detail, "messages": exc.messages,
+                             "code": exc.code}, status_code=exc.status_code)
 
 
 @router.post("/register")
@@ -49,11 +71,14 @@ def register(payload: Credentials, request: Request, db: Session = Depends(get_d
 @router.post("/login")
 def login(payload: Credentials, request: Request, db: Session = Depends(get_db)) -> dict:
     user = db.scalar(select(User).where(User.email == payload.email))
-    ok = user is not None and verify_password(payload.password, user.password_hash)
+    ok = user is not None and not user.deleted_at and user.has_password and verify_password(payload.password, user.password_hash)
     audit.record("login", "success" if ok else "failed", email=payload.email,
                  ip=audit.client_ip(request))
     if not ok:
         raise LocalizedHTTPException(status.HTTP_401_UNAUTHORIZED, detail=lambda: say("auth.bad_credentials"))
+    if user.deletion_requested_at:
+        from ..account_deletion import session_response
+        return session_response(db, user)
     return {"token": create_token(user.id, user.password_hash, auth_version=user.auth_version), "user": user.public()}
 
 
@@ -64,6 +89,10 @@ def me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dic
     used = db.scalar(select(func.count(Reading.id)).where(Reading.user_id == user.id,
                                                           Reading.product == "personal", Reading.removed_at.is_(None))) or 0
     rights = access.summary(db, user)
+    from ..models import PlayOrder, PlayPurchase
+    from ..play_billing import result as play_result
+    subscriptions = db.scalars(select(PlayPurchase).join(PlayOrder).where(
+        PlayOrder.user_id == user.id, PlayOrder.product_id == "month")).all()
     return {
         "user": user.public(),
         "pending_email_change": operations.pending(db, user.id),
@@ -78,6 +107,7 @@ def me(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dic
         "can_store": rights["can_store"],
         "unlimited": rights["unlimited_matrices"],
         "until": rights["until"],
+        "google_play_subscriptions": [play_result(db, row) for row in subscriptions],
     }
 
 
@@ -106,15 +136,19 @@ def reset_apply(payload: ResetApply, db: Session = Depends(get_db)) -> dict:
     begin_write(db)
     user = db.get(User, user_id)
     # отпечаток старого пароля в подписи: ссылкой нельзя воспользоваться дважды
-    if user is None or password_fingerprint(user.password_hash) != fingerprint or user.email != email or user.auth_version != version:
+    if user is None or user.deleted_at or password_fingerprint(user.password_hash) != fingerprint or user.email != email or user.auth_version != version:
         raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
                             detail=lambda: say("auth.link_used"))
     user.password_hash = hash_password(payload.password)
+    user.has_password = True
     user.auth_version += 1
     user.email_verified_at = utcnow()
     operations.cancel_pending(db, user.id)
     db.commit()
     operations.service_mail(user.email, "password")
+    if user.deletion_requested_at:
+        from ..account_deletion import session_response
+        return session_response(db, user)
     return {"token": create_token(user.id, user.password_hash, auth_version=user.auth_version), "user": user.public()}
 
 

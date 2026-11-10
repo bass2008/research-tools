@@ -68,6 +68,7 @@ services:
       NEXT_PUBLIC_SITE_LANG: ru
       NEXT_PUBLIC_ALL_FREE_WITHOUT_PAYMENT: 0
       SESSION_COOKIE_SECURE: 1
+      DEPLOYED_AT: ${DEPLOYED_AT:-}
     ports:
       # наружу смотрит nginx хоста; порт другой, чтобы не спорить с продом
       - "127.0.0.1:${TEST_WEB_PORT:-3100}:3000"

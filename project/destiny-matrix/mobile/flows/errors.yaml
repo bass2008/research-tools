@@ -1,0 +1,25 @@
+appId: com.arcanasense.app
+---
+- openLink: 'arcanasense://settings'
+- scrollUntilVisible:
+    element:
+      id: error-probe
+    direction: DOWN
+    timeout: 30000
+- tapOn:
+    id: error-probe
+- scrollUntilVisible:
+    element: 'Тестовая ошибка отправлена.'
+    direction: UP
+    timeout: 30000
+- takeScreenshot: error-sent
+- scrollUntilVisible:
+    element:
+      id: native-error-probe
+    direction: DOWN
+- tapOn:
+    id: native-error-probe
+- tapOn: 'Вызвать тестовый сбой'
+- launchApp
+- assertVisible:
+    id: tab-today

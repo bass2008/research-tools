@@ -238,7 +238,7 @@ def test_empty_base_is_created_in_the_final_shape(tmp_path, monkeypatch):
     with engine.connect() as conn:
         applied = conn.exec_driver_sql("SELECT id FROM schema_migrations").scalars().all()
     assert applied == ["001_products", "002_subscription_price", "003_granted_beside_bought",
-                       "004_subscription_rename", "005_subscription_price_390", "006_prices_390_590", "007_unique_purchase_right", "008_static_pair_chakras", "010_account_notifications", "012_remove_task_queue", "013_individual_orders"], \
+                       "004_subscription_rename", "005_subscription_price_390", "006_prices_390_590", "007_unique_purchase_right", "008_static_pair_chakras", "010_account_notifications", "012_remove_task_queue", "013_individual_orders", "014_mobile_accounts", "015_google_sign_in"], \
         "новая база не должна потом мигрировать сама себя"
     with maker() as db:
         assert {o.id: o.price for o in db.query(Offer)} == {"single": 39000, "month": 59000, "pair": 39000, "individual": 199000}

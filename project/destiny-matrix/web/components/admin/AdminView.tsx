@@ -24,14 +24,14 @@ const USER_SIZES = [10, 25, 50, 100];
 
 // Access is checked before any admin request: a guest or a regular account never fires them.
 // The session is rechecked on every return to the tab; until it settles the panel stays mounted.
-export default function AdminView() {
+export default function AdminView({ deployedAt }: { deployedAt: string }) {
   const { t } = useAdminLocale();
   const session = useSession();
   const [granted, setGranted] = useState(false);
   const settled = session.status === "user" || session.status === "guest";
   const admin = session.status === "user" && session.admin;
   if (settled && granted !== admin) setGranted(admin);
-  if (admin || (granted && !settled)) return <AdminData />;
+  if (admin || (granted && !settled)) return <AdminData deployedAt={deployedAt} />;
   if (session.status === "loading") return <p className="dim">{t("Смотрим…")}</p>;
   const reason = session.status === "guest" ? t("Войдите под учётной записью администратора.")
     : session.status === "user" ? t("У этой учётной записи нет прав администратора.")
@@ -46,7 +46,7 @@ export default function AdminView() {
   );
 }
 
-function AdminData() {
+function AdminData({ deployedAt }: { deployedAt: string }) {
   const { L, t, api, when, money, paymentTargetLabel, counted } = useAdminLocale();
   const { holdingLines } = localizedHoldings(L);
 /** Что у пользователя открыто — одной строкой, из той же сводки прав, что и кабинет. */
@@ -264,6 +264,8 @@ function accessLine(u: AdminUser): string {
           </dd>
           <dt>{t("Собрано")}</dt>
           <dd>{build.builtAt}</dd>
+          <dt>{t("Выложено")}</dt>
+          <dd data-testid="deployed-at">{deployedAt}</dd>
           <dt>{t("Проверить снаружи")}</dt>
           <dd>
             <a href="/version/current.txt" target="_blank" rel="noreferrer">

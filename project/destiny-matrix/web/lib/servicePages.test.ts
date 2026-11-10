@@ -22,7 +22,7 @@ describe("реестр служебных страниц", () => {
     expect(new Set(paths).size).toBe(paths.length);
     for (const key of KEYS) {
       expect(SERVICE_PAGES[key].langs.length, key).toBeGreaterThan(0);
-      expect(SERVICE_PAGES[key].path, key).toMatch(/^\/[a-z-]+$/);
+      expect(SERVICE_PAGES[key].path, key).toMatch(/^(\/encyclopedia)?\/[a-z-]+$/);
     }
   });
 

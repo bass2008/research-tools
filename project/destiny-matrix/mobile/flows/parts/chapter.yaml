@@ -1,0 +1,81 @@
+appId: com.arcanasense.app
+---
+- tapOn:
+    id: matrix-point-E
+- extendedWaitUntil:
+    visible:
+      id: point-sheet
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 04-point
+- scrollUntilVisible:
+    element:
+      id: point-read-chapter
+    direction: DOWN
+- tapOn:
+    id: point-read-chapter
+- extendedWaitUntil:
+    visible:
+      id: chapter-comfort
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 05-free-chapter
+- scrollUntilVisible:
+    element:
+      id: chapter-next
+    direction: DOWN
+    timeout: 60000
+    speed: 80
+- takeScreenshot: 05-free-chapter-end
+- assertVisible:
+    id: reader-toolbar
+- tapOn:
+    id: reader-contents
+- assertVisible:
+    id: contents-purpose
+- assertVisible:
+    id: chapter-contents
+- takeScreenshot: personal-toc-open
+- tapOn:
+    id: reader-close-contents
+- tapOn:
+    id: reader-next
+- extendedWaitUntil:
+    visible:
+      id: chapter-purpose
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      text: 'Уже купленное — в кабинете|Find purchased readings in your account'
+    direction: DOWN
+- assertNotVisible:
+    id: chapter-purchase
+- assertNotVisible: '€5.00'
+- takeScreenshot: 06-locked-ru-store
+- back
+- tapOn:
+    id: tab-account
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: mock-country-us
+    direction: DOWN
+- tapOn:
+    id: mock-country-us
+- back
+- tapOn:
+    id: tab-matrix
+- scrollUntilVisible:
+    element:
+      id: contents-purpose
+    direction: DOWN
+- tapOn:
+    id: contents-purpose
+- scrollUntilVisible:
+    element:
+      id: chapter-purchase
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
+- takeScreenshot: 06-locked-chapter

@@ -34,7 +34,7 @@ def test_subscriber_is_offered_nothing_and_sees_everything(page: Page, mail: str
 
     page.goto(f"{BASE}/report", wait_until="networkidle")
     expect(page.locator("[data-locked=true]")).to_have_count(0)
-    expect(page.locator("details.acc")).to_have_count(21)
+    expect(page.locator("details.acc")).to_have_count(22)
 
 
 def test_subscriber_reads_the_whole_pair_in_the_calculator(page: Page, mail: str):

@@ -17,7 +17,7 @@ import { cardColumns } from "@/lib/cardColumns";
 import type { Paragraph } from "@/lib/contentReader";
 import type { Lang } from "@/lib/i18n/lang";
 import {
-  CHAPTER_LABEL, individualDates, individualKind, type ChapterKind, type Finding, type ForecastPoints, type Formula,
+  CHAPTER_LABEL, CHILD_LABEL, individualDates, isChildMatrix, individualKind, type ChapterKind, type Finding, type ForecastPoints, type Formula,
   type FormulaItem, type IndividualCard, type IndividualReading, type IndividualReport, type ReportBlock, type SelfCheckItem,
   type TimelineItem,
 } from "@/lib/individualReading";
@@ -274,6 +274,7 @@ export default function IndividualReportView({ row, report, printing = false, li
   const { birthLabel } = localizedMatrixResult(L);
   const matrix = row.matrix;
   const pair = Boolean(matrix && "p" in matrix);
+  const child = isChildMatrix(row);
   // Cards name points by brief letters; on the personal scheme they map to site keys, the centre is E.
   const pointKeys = (letters: string[] = []) => pair ? letters
     : letters.map((s) => s === "E" ? "center" : mapPointsBySymbol([s])[0]?.key).filter((k): k is string => Boolean(k));
@@ -320,7 +321,7 @@ export default function IndividualReportView({ row, report, printing = false, li
       </section>
       {report.chapters.map((chapter, i) => <section key={i} className="ir-chapter panel" data-kind={chapter.kind}>
         <p className="ir-chapter-kicker"><span className="ir-num">{pad(i + 1)}</span>{(chapter.kind === "key" && row.year ? ["Ключ года", "The key of the year"]
-          : (pair && PAIR_LABEL[chapter.kind]) || CHAPTER_LABEL[chapter.kind])?.[en ? 1 : 0]}</p>
+          : (pair && PAIR_LABEL[chapter.kind]) || (child && CHILD_LABEL[chapter.kind]) || CHAPTER_LABEL[chapter.kind])?.[en ? 1 : 0]}</p>
         <TocHeading id={`c${i + 1}`}>{chapter.h2}</TocHeading>
         <p className="ir-conclusion"><RichText text={chapter.conclusion} /></p>
         {Boolean(chapter.cards?.length) && <Cards ctx={ctx} cards={chapter.cards!} eager={i === 0} />}

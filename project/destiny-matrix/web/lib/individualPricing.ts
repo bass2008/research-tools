@@ -59,24 +59,39 @@ export function quote(cart: Cart, bought: number, p: Prices = DEFAULT_PRICES): Q
   };
 }
 
-export function cartQuery(cart: Cart, year?: number): string {
+/** Who a couple is to each other, in the order of the form buttons (`D.individualSale.relations`). */
+export const RELATION_CODES = ["couple", "spouses", "business", "parent_child", "friends"] as const;
+export type RelationCode = (typeof RELATION_CODES)[number];
+
+/** What a page that sends to the order already knows: who the couple is, and that the first personal reading
+ *  is a child's matrix — tagged so, without the visitor's own saved date. */
+export interface OrderPreset { relation?: RelationCode; childFirst?: boolean }
+
+export function cartQuery(cart: Cart, year?: number, preset: OrderPreset = {}): string {
   const parts = CART_KINDS.filter((k) => cart[k] > 0).map((k) => `${k}=${cart[k]}`);
   if (cart.year > 0 && year) parts.push(`y=${year}`);
+  if (cart.pair > 0 && preset.relation) parts.push(`rel=${preset.relation}`);
+  if (preset.childFirst) parts.push("for=child");
   return parts.join("&");
 }
 
 // A set in the address (`personal=2&pair=1&y=2027`): the landing and /pay open it in the order form.
-export function cartFromQuery(one: (key: string) => string): { cart: Cart | null; year?: number } {
+export function cartFromQuery(one: (key: string) => string): { cart: Cart | null; year?: number; preset: OrderPreset } {
   const cart: Cart = { ...EMPTY_CART };
   for (const k of CART_KINDS) cart[k] = Math.max(0, Math.min(MAX_PER_KIND, Math.trunc(Number(one(k))) || 0));
-  return { cart: CART_KINDS.some((k) => cart[k]) ? cart : null, year: /^\d{4}$/.test(one("y")) ? Number(one("y")) : undefined };
+  const relation = (RELATION_CODES as readonly string[]).includes(one("rel")) ? one("rel") as RelationCode : undefined;
+  return {
+    cart: CART_KINDS.some((k) => cart[k]) ? cart : null,
+    year: /^\d{4}$/.test(one("y")) ? Number(one("y")) : undefined,
+    preset: { ...(relation ? { relation } : {}), ...(one("for") === "child" ? { childFirst: true } : {}) },
+  };
 }
 
 export interface IndividualTerms { bought: number; default_year: number; prices: Prices; typical_days: number; max_days: number; payable: boolean }
 
 export interface OrderPerson { birth: string; sex: "f" | "m" }
 /** `who` — indexes in `persons`: one person, two for a couple. */
-export interface OrderReading { kind: IndividualKindKey; who: number[]; year?: number; relation?: string }
+export interface OrderReading { kind: IndividualKindKey; who: number[]; year?: number; relation?: string; child?: boolean }
 
 export interface IndividualOrder {
   email: string;

@@ -1,3 +1,4 @@
+import child from "@/content/individual-examples/child.json";
 import pair from "@/content/individual-examples/pair.json";
 import personal from "@/content/individual-examples/personal.json";
 import year from "@/content/individual-examples/year.json";
@@ -7,13 +8,14 @@ import yearEn from "@/content/individual-examples/en/year.json";
 import type { Lang } from "./i18n/hosts";
 import type { IndividualReading } from "./individualReading";
 
-export const EXAMPLE_SLUGS = ["personal", "pair", "year"] as const;
+export const EXAMPLE_SLUGS = ["personal", "pair", "year", "child"] as const;
 export type ExampleSlug = typeof EXAMPLE_SLUGS[number];
 
-// Each sample reading is written in every language of the site, like the readings themselves.
+// Each sample reading is written in every language of the site, like the readings themselves; the child's matrix
+// is sold in Russian only, so English shows the Russian text out of the index.
 const EXAMPLES = {
-  ru: { personal, pair, year },
-  en: { personal: personalEn, pair: pairEn, year: yearEn },
+  ru: { personal, pair, year, child },
+  en: { personal: personalEn, pair: pairEn, year: yearEn, child: null },
 } as unknown as Record<Lang, Record<ExampleSlug, IndividualReading | null>>;
 
 export function individualExample(slug: string, locale: Lang = "ru"): IndividualReading | null {
@@ -31,4 +33,5 @@ export const EXAMPLE_LABEL: Record<ExampleSlug, [string, string]> = {
   personal: ["Личный разбор", "Personal reading"],
   pair: ["Совместимость пары", "Couple compatibility"],
   year: ["Разбор года", "Year reading"],
+  child: ["Детская матрица", "Child’s matrix"],
 };

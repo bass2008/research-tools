@@ -11,6 +11,23 @@ function request(origin = "https://arcana-sense.ru", contentType = "application/
 beforeEach(() => cookieGet.mockReturnValue({ value: "old-session" }));
 afterEach(() => { vi.unstubAllGlobals(); cookieGet.mockReset(); });
 describe("cookie account mutations", () => {
+  it("does not bypass cookie origin checks by adding a native header", async () => {
+    const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
+    const req = request("https://other.example");
+    req.headers.set("X-Arcana-Session", "other-session");
+    expect((await accountMutation(req, "/auth/password/change", true, true)).status).toBe(403);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("returns a rotated token to an explicit native session without setting a cookie", async () => {
+    cookieGet.mockReturnValue(undefined);
+    const spy = vi.fn(async () => Response.json({ token: "rotated-session", user: { id: 1 } }));
+    vi.stubGlobal("fetch", spy);
+    const req = request("null");
+    req.headers.set("X-Arcana-Session", "old-session");
+    const result = await accountMutation(req, "/auth/password/change", true, true);
+    expect(await result.json()).toMatchObject({ token: "rotated-session" });
+    expect(result.headers.get("set-cookie")).toBeNull();
+  });
   it("rejects cross-origin and non-JSON before contacting API", async () => {
     const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
     expect((await accountMutation(request("https://other.example"), "/auth/password/change")).status).toBe(403);

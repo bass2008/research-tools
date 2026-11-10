@@ -34,6 +34,14 @@ export function defaultChoices(cart: Cart): Choices {
   return choices;
 }
 
+/** A changed set keeps who the buyer picked by hand; the other roles take the defaults of the new set. */
+export function carryChoices(cart: Cart, prev: Choices, picked: Iterable<string>): Choices {
+  const next = defaultChoices(cart);
+  const roles = new Set(slotsOf(cart).flatMap((s) => s.roles));
+  for (const role of picked) if (roles.has(role) && role in prev) next[role] = prev[role];
+  return next;
+}
+
 /** Person index of every role; a choice of someone who no longer brings a person falls back to a new one. */
 export function resolve(slots: Slot[], choices: Choices): { owners: string[]; person: Record<string, number> } {
   const owners: string[] = [];
@@ -60,14 +68,24 @@ export function defaultYears(slots: Slot[], person: Record<string, number>, base
 }
 
 export function readingsOf(slots: Slot[], person: Record<string, number>, year: (role: string) => number,
-  relation: (role: string) => string): OrderReading[] {
+  relation: (role: string) => string, child: (role: string) => boolean = () => false): OrderReading[] {
   return slots.map((s) => ({
     kind: s.kind,
     who: s.roles.map((r) => person[r]),
     ...(s.kind === "year" ? { year: year(s.roles[0]) } : {}),
     ...(s.kind === "pair" && relation(s.roles[0]) ? { relation: relation(s.roles[0]) } : {}),
+    ...(s.kind === "personal" && child(s.roles[0]) ? { child: true } : {}),
   }));
 }
+
+/** Full years on `today`: the child's matrix is for dates under 18, the form suggests it under 15. */
+export function ageOn(birth: string, today: string): number {
+  const [by, bm, bd] = birth.split("-").map(Number);
+  const [ty, tm, td] = today.split("-").map(Number);
+  return ty - by - (tm < bm || (tm === bm && td < bd) ? 1 : 0);
+}
+export const CHILD_TAG_MAX_AGE = 17;
+export const CHILD_HINT_AGE = 15;
 
 export type OrderProblem = "samePerson" | "duplicate" | null;
 

@@ -109,20 +109,20 @@ def test_locked_sections_show_cards_but_not_paid_text(page, browser, mail):
 
     guest.on("response", keep)
     flows.calculate(guest, 15, 6, 1990, "f")
-    expect(guest.locator("[data-locked=true] .mp")).to_have_count(18)
-    expect(guest.locator("[data-testid^=section-buy-]")).to_have_count(19)
+    expect(guest.locator("[data-locked=true] .mp")).to_have_count(19)
+    expect(guest.locator("[data-testid^=section-buy-]")).to_have_count(20)
     for link in guest.locator("[data-testid^=section-buy-]").all():
         assert link.get_attribute("href") == "/ru/pay"
 
     chakras = next(s for s in paid["ru"] if s["key"] == "chakras")["longform"]
-    # восемь замков чакр и замок связного толкования материальной кармы
-    expect(guest.locator("[data-testid^=chakra-lock-]")).to_have_count(9)
+    # восемь замков чакр и замки связных толкований материальной кармы и детско-родительской линии
+    expect(guest.locator("[data-testid^=chakra-lock-]")).to_have_count(10)
     for row in [*chakras["chakraRows"], chakras["energyField"]]:
         plate = guest.get_by_test_id(f"chakra-lock-{row['key']}").inner_text()
         assert re.search(rf"\b{words(row['paragraphs'])}\b", plate), (row["key"], plate)
 
     guest.goto(BASE + "/report", wait_until="networkidle")
-    expect(guest.locator("[data-locked=true] .mp")).to_have_count(18)
+    expect(guest.locator("[data-locked=true] .mp")).to_have_count(19)
     for path in ("/", "/report"):
         bodies.append(guest.request.get(BASE + path, headers={"RSC": "1"}).text())
 
@@ -150,9 +150,9 @@ def test_saved_locked_matrix_shows_the_same_preview(page, browser, mail):
     response = page.goto(f"{BASE}/matrices/{saved['id']}", wait_until="networkidle")
     html = response.text()
     rsc = page.request.get(f"{BASE}/matrices/{saved['id']}", headers={"RSC": "1"}).text()
-    expect(page.locator("[data-locked=true]")).to_have_count(19)
-    expect(page.locator("[data-locked=true] .mp")).to_have_count(18)
-    expect(page.locator("[data-testid^=chakra-lock-]")).to_have_count(9)
+    expect(page.locator("[data-locked=true]")).to_have_count(20)
+    expect(page.locator("[data-locked=true] .mp")).to_have_count(19)
+    expect(page.locator("[data-testid^=chakra-lock-]")).to_have_count(10)
     assert page.get_by_test_id("section-buy-profession").get_attribute("href") == f"/ru/pay?m={saved['id']}"
     assert leaks(html + rsc, secret) == []
     assert leaks(html + rsc, chakra_pieces()) == []

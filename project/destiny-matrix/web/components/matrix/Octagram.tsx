@@ -4,7 +4,7 @@ import { D } from "@/lib/i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import type { Matrix } from "@/lib/matrix";
-import { materialKarmaOf } from "@/lib/materialKarmaRow";
+import { materialKarmaOf } from "@/lib/lineReadingRow";
 import { forLocale as localizedMatrixMap } from "@/lib/matrixMap";
 import { forLocale as localizedSite } from "@/lib/site";
 import chakraLevels from "@/lib/__fixtures__/chakras.json";

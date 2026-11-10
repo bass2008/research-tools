@@ -1,5 +1,5 @@
 {
- "count": 21,
+ "count": 22,
  "items": [
   {
    "key": "character",
@@ -85,6 +85,11 @@
   {
    "key": "relations",
    "title": "Relationships in the destiny matrix",
+   "access": "paid"
+  },
+  {
+   "key": "parent_child_line",
+   "title": "The parent-child line in the destiny matrix",
    "access": "paid"
   },
   {

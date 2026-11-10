@@ -44,12 +44,12 @@ export const forLocale = localized((L: Locale, site) => {
   return { arcanumTitle, publicHref, gridColumns };
 });
 
-/** Закрытая материальная карма: карты тройки и заглушка связного толкования той же формы. */
-function MaterialKarmaPreview({ locale: L, site, section, unlock }: {
+/** Закрытый раздел-тройка: карты тройки и заглушка связного толкования той же формы. */
+function LinePreview({ locale: L, site, section, unlock }: {
   locale: Locale; site?: SiteProfile; section: SectionOut; unlock: UnlockLink;
 }) {
   return (
-    <div data-testid="material-karma-preview">
+    <div data-testid={`${section.key.replaceAll("_", "-")}-preview`}>
       <LockedCards locale={L} cards={section.positions.map((p) => ({ n: p.arcanum, who: p.label, href: p.href }))} />
       {section.tripleReading ? (
         <ChakraReadingBlock row={section.tripleReading} locale={L} site={site} titleTag="p"
@@ -154,7 +154,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                 })}
               </ul>
               {s.tripleReading ? (
-                <div className="section-gap" data-testid="material-karma-reading">
+                <div className="section-gap" data-testid={`${s.key.replaceAll("_", "-")}-reading`}>
                   <ChakraReadingBlock row={s.tripleReading} locale={L} site={site} printing={printing}
                     labelId={`${s.key}-reading`} titleTag="p" />
                 </div>
@@ -218,7 +218,7 @@ export default function ReportSections({ site = DEFAULT_SITE, locale: requestedL
                       unavailable={<span className={className}>{label}</span>}>{label}</UnlockCta>
                   )} />
                   : s.tripleReading
-                  ? <MaterialKarmaPreview locale={L} site={site} section={s} unlock={(className, label) => (
+                  ? <LinePreview locale={L} site={site} section={s} unlock={(className, label) => (
                     <UnlockCta locale={L} className={className} place={place} section={s.key} matrixId={matrixId}
                       unavailable={<span className={className}>{label}</span>}>{label}</UnlockCta>
                   )} />

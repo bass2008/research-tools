@@ -1,0 +1,7 @@
+appId: com.arcanasense.app
+---
+- openLink: 'arcanasense://account'
+- extendedWaitUntil:
+    visible: 'Sign in to open saved dates and purchases.'
+    timeout: 30000
+- takeScreenshot: expired-session

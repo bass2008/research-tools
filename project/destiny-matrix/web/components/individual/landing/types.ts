@@ -2,6 +2,9 @@ import type { Values } from "@/lib/individualLinks";
 
 export type SetKey = "one" | "selfYear" | "couple" | "custom";
 export type Kind = "personal" | "pair" | "year";
+/** A single reading: the child's matrix is a personal reading with the child tag. */
+export type OneKind = Kind | "child";
+export const ONE_KINDS: readonly OneKind[] = ["personal", "pair", "year", "child"];
 export type UserDate = { y: number; m: number; d: number };
 /** The visitor's own date from the links block and what the page shows for it. */
 export interface UserInfo { date: UserDate; v: Values; totals: [number, number, number]; links: number }

@@ -11,7 +11,7 @@ import uuid
 from playwright.sync_api import expect
 
 import flows
-from conftest import ADMIN, BASE, _credentials
+from conftest import ADMIN, BASE, _credentials, absolute
 
 
 def test_pdf_is_generated_and_downloads(page, mail):
@@ -38,7 +38,7 @@ def test_pdf_is_generated_and_downloads(page, mail):
         timeout=180_000)
 
     assert answer.get("status") == "done", answer
-    url = answer.get("url", "")
+    url = absolute(answer.get("url", ""))
     assert url.startswith("http"), url
     with urllib.request.urlopen(url, timeout=60) as file:
         assert file.read(5).startswith(b"%PDF")
@@ -49,7 +49,7 @@ def test_pdf_is_generated_and_downloads(page, mail):
             lambda r: r.url.endswith("/api/reports/pdf") and r.status == 200,
             timeout=60_000) as caught:
         button.click()
-    again = caught.value.json().get("url", "")
+    again = absolute(caught.value.json().get("url", ""))
     assert again.startswith("http"), again
     # сравнивать сами ссылки нельзя: подпись хранилища зависит от секунды, и два запроса подряд
     # дают одинаковую строку. Инвариант в другом — запрос вообще состоялся, а не был пропущен.
@@ -255,7 +255,7 @@ def test_pdf_holds_the_paid_report(page, mail):
 
     import re
     import urllib.request
-    with urllib.request.urlopen(answer["url"], timeout=90) as file:
+    with urllib.request.urlopen(absolute(answer["url"]), timeout=90) as file:
         pdf = file.read()
     assert pdf.startswith(b"%PDF")
     assert len(pdf) > 1_000_000, f"файл подозрительно маленький: {len(pdf)} Б"

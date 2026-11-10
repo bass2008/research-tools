@@ -42,10 +42,10 @@ def test_matrices_are_distinct_per_key():
 
 
 def test_content_units_cover_all_matrices():
-    """722 текста покрывают 5544 матрицы: сколько бы ни было матриц, позиций конечное число."""
+    """744 текста покрывают 5544 матрицы: сколько бы ни было матриц, позиций конечное число."""
     positions = len(SPEC) * 22          # раздел x аркан
     pairs = 22 * 21 // 2               # сочетания
-    assert positions + pairs + 22 + 7 == 722
+    assert positions + pairs + 22 + 7 == 744
     m = calculate(sample_date(KEYS[0]))
     keys_in_report = {s["key"] for s in build(m, unlocked=True)}
     assert keys_in_report == {k for k, *_ in SPEC}

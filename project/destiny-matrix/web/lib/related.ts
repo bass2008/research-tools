@@ -26,7 +26,7 @@ interface Source {
 /** A locale-bound view; safe to use alongside other languages. */
 export const forLocale = localized((L: Locale) => {
   const { arcanumTitle } = localizedArcana(L);
-  const { KARMIC_TAIL_HUB, PAIR_TAIL_HUB, ROOT_HUBS, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, arcanumHref, chakraByKey, chakraHref, combinationHref, karmicTailHref, positionByKey, positionHref, yearHref } = localizedEncyclopedia(L);
+  const { KARMIC_TAIL_HUB, PAIR_TAIL_HUB, ROOT_HUBS, YEAR_HUB, ARCANUM_HUB, CHAKRA_HUB, COMBINATION_HUB, POSITION_HUB, arcanumHref, chakraByKey, chakraHref, combinationHref, hubHref, karmicTailHref, positionByKey, positionHref, yearHref } = localizedEncyclopedia(L);
   const { categoryHub, hub, karmicTail, karmicTails, yearArcanum, yearKeys } = localizedContent(L);
   const { positionArcanumHref, positionArcanumLabel, registryItem } = localizedPositionArcanum(L);
 
@@ -123,7 +123,7 @@ export const forLocale = localized((L: Locale) => {
     if (TRIPLE.test(value)) return tailLink(value);
     if (ROOT_HUBS.includes(value)) {
       const item = hub(value);
-      return item ? { href: `/${value}`, title: item.title } : null;
+      return item ? { href: hubHref(value), title: item.title } : null;
     }
     return null;
   }
@@ -150,7 +150,7 @@ export const forLocale = localized((L: Locale) => {
     }
     for (const key of ROOT_HUBS) {
       const item = hub(key);
-      if (item) out.push({ path: `/${key}`, title: item.title, related: item.related });
+      if (item) out.push({ path: hubHref(key), title: item.title, related: item.related });
     }
     for (const [key, path] of [
       ["karmic-tail", KARMIC_TAIL_HUB],

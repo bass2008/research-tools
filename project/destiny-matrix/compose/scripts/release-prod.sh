@@ -84,6 +84,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SSH_USER@$IP" "cd /srv/arcana \
   && (docker network create arcana-print >/dev/null 2>&1 || true) \
   && /usr/local/bin/arcana-registry-login \
   && docker compose pull -q \
+  && sed -i '/^DEPLOYED_AT=/d' .env && echo \"DEPLOYED_AT=\$(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .env \
   && docker ps -q --filter label=com.docker.compose.project=arcana-prod-en | xargs -r docker stop >/dev/null \
   && docker compose up -d --wait --remove-orphans \
   && /usr/local/bin/arcana-prune-images prune"

@@ -49,6 +49,25 @@ export const CHAPTER_LABEL: Record<ChapterKind, [string, string]> = {
   month: ["Месяц", "Month"],
   other: ["Глава", "Chapter"],
 };
+// the "child's matrix" tag of the order: the author writes another skeleton (individual-reading-prompt.md)
+export const CHILD_LABEL: Partial<Record<ChapterKind, [string, string]>> = {
+  key: ["Ключ матрицы ребёнка", "The key of the child’s matrix"],
+  character: ["Характер ребёнка", "The child’s character"],
+  talents: ["Способности и интересы", "Abilities and interests"],
+  relations: ["Общение и дружба", "Communication and friendship"],
+  family: ["Ребёнок в семье", "The child in the family"],
+  karma: ["Свои задачи ребёнка", "The child’s own tasks"],
+  body: ["Энергия и отдых", "Energy and rest"],
+  money: ["Вещи, труд и награда", "Things, effort and reward"],
+  close: ["Как договариваться", "How to get along"],
+  time: ["Возрастные периоды", "Stages of growing up"],
+  selfcheck: ["Наблюдение", "Observation"],
+  plan: ["План для родителя", "Plan for the parent"],
+  other: ["Ответ на ваш вопрос", "Your question answered"],
+};
+export const isChildMatrix = (row: Pick<IndividualReading, "kind" | "year" | "inputs">): boolean =>
+  row.kind === "personal" && !row.year && (row.inputs as { child?: boolean }).child === true;
+
 export interface ReportChapter {
   kind: ChapterKind; h2: string; conclusion: string; cards?: IndividualCard[]; blocks: ReportBlock[]; actions?: string[];
 }
@@ -77,8 +96,10 @@ export interface IndividualRequest {
   userId: number; kind: IndividualKind; inputs: Record<string, unknown>; locale: Lang; comment: string;
 }
 
-export function individualKind(row: Pick<IndividualReading, "kind" | "year">, L: Lang): string {
-  return row.year ? (L === "en" ? `Year ${row.year}` : `Год ${row.year}`) : INDIVIDUAL_KINDS[row.kind]?.[L] ?? String(row.kind);
+export function individualKind(row: Pick<IndividualReading, "kind" | "year"> & Partial<Pick<IndividualReading, "inputs">>, L: Lang): string {
+  if (row.year) return L === "en" ? `Year ${row.year}` : `Год ${row.year}`;
+  if (row.inputs && isChildMatrix({ ...row, inputs: row.inputs })) return L === "en" ? "Child’s matrix" : "Детская матрица";
+  return INDIVIDUAL_KINDS[row.kind]?.[L] ?? String(row.kind);
 }
 
 export function individualDates(row: IndividualReading, birthLabel: (birth: string) => string): string {

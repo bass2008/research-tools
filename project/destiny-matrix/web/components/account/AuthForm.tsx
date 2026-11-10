@@ -4,7 +4,7 @@ import { publicPath } from "@/lib/publicRouting";
 
 import { forLocale as localizedUseSession } from "@/components/account/useSession";
 import { useLocale } from "@/components/ui/LocaleProvider";
-import { ApiError, forLocale as localizedApi } from "@/lib/api";
+import { ApiError, forLocale as localizedApi, type AuthResponse } from "@/lib/api";
 import { emailProblem, forLocale as localizedEmail } from "@/lib/email";
 import { reportFormCheck } from "@/lib/errors";
 import { useHydrated } from "@/lib/hydrated";
@@ -15,6 +15,7 @@ import { useMessage } from "@/lib/i18n/useMessage";
 import Link from "@/components/ui/LocalizedLink";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import GoogleSignIn from "./GoogleSignIn";
 
 export const forLocale = localized((L: Locale) => {
   const { api } = localizedApi(L);
@@ -25,6 +26,14 @@ export const forLocale = localized((L: Locale) => {
 });
 
 const ORDER = /^arcana-\d+-[0-9a-f]{8}$/;
+
+export function authDestination(search: string, deletion = false): string {
+  const params = new URLSearchParams(search);
+  if (deletion || params.get("return") === "account-delete") return "/account/delete";
+  const order = params.get("order") ?? "", reading = params.get("reading") ?? "";
+  return ORDER.test(order) ? `/pay/done?order=${order}`
+    : /^[1-9]\d*$/.test(reading) ? `/matrix/individual/${reading}` : "/account";
+}
 
 export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({ mode: "login" | "register" }) & { locale?: Locale }) {
   const activeLocale = useLocale();
@@ -48,8 +57,14 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
   // то, что человек уже сделал, — «нужно согласие» висит с поставленной галочкой.
   const clear = () => setError(null);
 
+  async function signedIn(result: AuthResponse) {
+    await refreshSession();
+    router.replace(publicPath(authDestination(window.location.search, Boolean(result.deletion)), L));
+  }
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
     setError(null);
     const mail = normalizeEmail(email);
     const wrong = emailError(email);
@@ -74,17 +89,7 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
     setBusy(true);
     try {
       // Токен ставит BFF в httpOnly-куку; в ответе его нет, и в localStorage он не попадает.
-      if (isRegister) await api.register(mail, password);
-      else await api.login(mail, password);
-      await refreshSession();
-      // После регистрации пустая форма больше не должна оставаться в истории: «Назад» на неё
-      // приводил уже вошедшего человека, которому повторная отправка отвечала «почта занята».
-      // Вход с чека оплаты возвращает к этому заказу, а не в общий кабинет.
-      const order = new URLSearchParams(window.location.search).get("order") ?? "";
-      const reading = new URLSearchParams(window.location.search).get("reading") ?? "";
-      const destination = ORDER.test(order) ? `/pay/done?order=${order}`
-        : /^[1-9]\d*$/.test(reading) ? `/matrix/individual/${reading}` : "/account";
-      router.replace(publicPath(destination, L));
+      await signedIn(isRegister ? await api.register(mail, password) : await api.login(mail, password));
     } catch (err) {
       setError((locale) => err instanceof ApiError ? err.messageFor(locale) : D.auth.generic[locale]);
       // Ошибка остаётся объявленной через role=alert, но набор продолжается в поле, которое
@@ -96,11 +101,13 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
   };
 
   return (
-    <form method="post" className="form narrow" onSubmit={submit} noValidate>
+    <div className="form narrow">
       <h1>{isRegister ? D.auth.registerTitle[L] : D.auth.loginTitle[L]}</h1>
       <div className="sub">
         {isRegister ? D.auth.registerLead[L] : D.auth.loginLead[L]}
       </div>
+
+      <form method="post" onSubmit={submit} noValidate>
 
       <label htmlFor="email">{D.auth.email[L]}</label>
       <input
@@ -140,26 +147,12 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
         placeholder={D.auth.passwordPlaceholder[L]}
       />
 
-      {isRegister ? (
-        <label className="consent">
-          <input
-            ref={consentInput}
-            type="checkbox"
-            disabled={!hydrated}
-            checked={agreed}
-            onChange={(e) => {
-              clear();
-              setAgreed(e.target.checked);
-            }}
-          />
-          <span>
-            {D.auth.consentHead[L]}{" "}
-            <Link href="/privacy" target="_blank" rel="noopener">{D.auth.consentPolicy[L]}</Link>{" "}
-            {D.auth.consentAnd[L]}{" "}
-            <Link href="/terms" target="_blank" rel="noopener">{D.auth.consentTerms[L]}</Link>.
-          </span>
-        </label>
-      ) : null}
+      {isRegister && <label className="consent">
+        <input ref={consentInput} type="checkbox" disabled={!hydrated || busy} checked={agreed}
+          onChange={event => { clear(); setAgreed(event.target.checked); }} />
+        <span>{D.auth.consentHead[L]}{" "}<Link href="/privacy" target="_blank" rel="noopener">{D.auth.consentPolicy[L]}</Link>{" "}
+          {D.auth.consentAnd[L]}{" "}<Link href="/terms" target="_blank" rel="noopener">{D.auth.consentTerms[L]}</Link>.</span>
+      </label>}
 
       <button className="btn wide" data-testid="auth-submit" style={{ marginTop: 14 }} disabled={busy || !hydrated}>
         {!hydrated
@@ -176,6 +169,10 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
           {error}
         </div>
       ) : null}
+      </form>
+
+      <GoogleSignIn key={`${L}-${mode}`} locale={L} mode={mode} consent={!isRegister || agreed}
+        disabled={busy || !hydrated} onBusy={setBusy} onAuthenticated={signedIn} />
 
       <p className="hint">
         {isRegister ? (
@@ -189,6 +186,6 @@ export default function AuthForm({ locale: requestedLocale, ...localeProps }: ({
           </>
         )}
       </p>
-    </form>
+    </div>
   );
 }

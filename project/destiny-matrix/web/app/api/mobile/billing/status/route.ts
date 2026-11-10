@@ -1,0 +1,3 @@
+import { forward } from "@/app/api/_lib/upstream";
+export const dynamic = "force-dynamic";
+export async function GET(req: Request) { return forward("/mobile/billing/status", {source: req, auth: false, optionalAuth: true}); }

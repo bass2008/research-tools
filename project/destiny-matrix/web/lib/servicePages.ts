@@ -36,8 +36,8 @@ interface ServicePage {
 export const forLocale = localized((L: Locale) => {
 
   const SERVICE_PAGES: Record<ServiceKey, ServicePage> = {
-    method: { path: "/method", langs: ["ru", "en"], group: "about", nav: "about", priority: 0.6 },
-    author: { path: "/author", langs: ["ru", "en"], group: "about", nav: "author", priority: 0.4 },
+    method: { path: "/encyclopedia/method", langs: ["ru", "en"], group: "about", nav: "about", priority: 0.6 },
+    author: { path: "/encyclopedia/author", langs: ["ru", "en"], group: "about", nav: "author", priority: 0.4 },
     contacts: { path: "/contacts", langs: ["ru", "en"], group: "about", nav: "contacts", priority: 0.3 },
     support: { path: "/support", langs: ["ru", "en"], group: "about", nav: "support", priority: 0.3 },
     terms: { path: "/terms", langs: ["ru", "en"], group: "legal", nav: "terms", priority: 0.3 },

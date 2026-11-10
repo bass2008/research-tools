@@ -233,8 +233,8 @@ export const encYear = {
   } satisfies Phrase,
   allYearArcana: { ru: "Все арканы на год", en: "All arcana for the year" } satisfies Phrase,
   fullReadingAll: {
-    ru: "полный разбор всех 21 раздела карты —",
-    en: "the full reading of all 21 sections of the chart —",
+    ru: "полный разбор всех 22 разделов карты —",
+    en: "the full reading of all 22 sections of the chart —",
   } satisfies Phrase,
   yearFrameLead: {
     ru: "Годовая рамка читается по карте рождения — начните с расчёта по дате. Он бесплатный;",

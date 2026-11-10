@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EMPTY_CART, type Cart } from "./individualPricing";
-import { OWN, defaultChoices, defaultYears, problemOf, readingsOf, resolve, slotsOf } from "./individualOrder";
+import { OWN, carryChoices, defaultChoices, defaultYears, problemOf, readingsOf, resolve, slotsOf } from "./individualOrder";
 
 const plan = (cart: Partial<Cart>, base = 2027) => {
   const full = { ...EMPTY_CART, ...cart };
@@ -41,5 +41,21 @@ describe("для кого каждый разбор заказа", () => {
     expect(problemOf([{ kind: "year", who: [0], year: 2027 }, { kind: "year", who: [0], year: 2027 }])).toBe("duplicate");
     expect(problemOf([{ kind: "pair", who: [0, 1] }, { kind: "pair", who: [1, 0] }])).toBe("duplicate");
     expect(problemOf(plan({ personal: 3, year: 2, pair: 2 }).readings)).toBeNull();
+  });
+});
+
+describe("изменение набора", () => {
+  it("сохраняет выбранного вручную получателя года, остальное — по умолчанию", () => {
+    const before = { ...EMPTY_CART, personal: 2, year: 1 };
+    const chosen = { ...defaultChoices(before), y0: "p1" };
+    const after = carryChoices({ ...before, pair: 1 }, chosen, ["y0"]);
+    expect(after.y0).toBe("p1");
+    expect(after).toMatchObject({ a0: "p0", b0: "p1" });
+    expect(carryChoices({ ...before, pair: 1 }, chosen, []).y0).toBe("p0");
+  });
+
+  it("забывает выбор роли, которой больше нет", () => {
+    const chosen = { ...defaultChoices({ ...EMPTY_CART, personal: 1, year: 2 }), y1: "p0" };
+    expect(carryChoices({ ...EMPTY_CART, personal: 1, year: 1 }, chosen, ["y1"])).not.toHaveProperty("y1");
   });
 });

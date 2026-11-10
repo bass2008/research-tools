@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "path": "/encyclopedia/arcanum/5",
+  "locale": "en",
+  "title": "5 in the destiny matrix — The Hierophant, the arcanum of teachers, tradition and a promise kept",
+  "lead": "In the destiny matrix, 5 is The Hierophant, also known as the Priest and the Teacher. The fifth arcanum governs knowledge that is not kept to oneself but handed on: from teacher to pupil, from elders to the young, from a tradition to those who join it. All of its themes gather around this one idea — study and mentoring, belonging to “your own people” (a school, a family, a profession) and the word you give: a contract, a vow, a marriage. In the plus, a 5 is the kind of person you talk to and walk away with everything clear. In the minus, it is the one who lectures uninvited and defends a rule that lost its meaning long ago. It is one of the most common arcana in the matrix: 83.4% of people have a 5 somewhere in their reading, so what matters is not the number itself but the point where it stands.",
+  "breadcrumbs": [
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Encyclopedia",
+      "href": "/encyclopedia"
+    },
+    {
+      "label": "5 in the destiny matrix — The Hierophant, the arcanum of teachers, tradition and a promise kept"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "cards",
+      "cards": [
+        {
+          "arcanum": 5,
+          "label": "The Hierophant",
+          "href": "/encyclopedia/arcanum/5"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "Arcanum 5 at a glance",
+      "level": 2
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Names:** The Hierophant, the Priest, the Teacher; in old decks, the Pope.",
+        "**Essence:** knowledge that has become common property — a teaching, a tradition, a rule, a rite.",
+        "**In the plus:** explains hard things clearly, studies seriously, keeps their word, gathers their own people around them.",
+        "**In the minus:** lectures uninvited, hides behind authority, lives “the proper way”, keeps the truth back “for your own good”.",
+        "**Without a calculator:** born on the 5th or the 23rd — your personality portrait is a 5; born in May — your spiritual task; born in 1949, 1958, 1967, 1976, 1985, 1994, 2003, 2012 or 2021 — your material task."
+      ],
+      "ordered": false
+    }
+  ],
+  "access": "public",
+  "accessUntil": null
+}

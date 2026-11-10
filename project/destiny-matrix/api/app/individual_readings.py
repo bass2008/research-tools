@@ -265,7 +265,8 @@ def create(db: Session, payload: RequestIn) -> dict:
     # The automatic reading of the same dates comes as a gift and opens at once.
     grants.grant_reading(db, user, products.PRODUCTS[product], inputs)
     user = db.get(User, payload.user_id)
-    row = IndividualReading(user_id=user.id, product=product, kind=payload.kind, year=payload.year, inputs=json.dumps(inputs),
+    child = {"child": True} if product == "personal" and payload.inputs.get("child") is True else {}
+    row = IndividualReading(user_id=user.id, product=product, kind=payload.kind, year=payload.year, inputs=json.dumps(inputs | child),
         locale=payload.locale, comment=payload.comment.strip(),
         automatic_reading=json.dumps(payload.automatic_reading, ensure_ascii=False))
     db.add(row)
@@ -291,7 +292,8 @@ def link_token(row_id: int, user_id: int) -> str:
 
 
 def token_allows(token: str, row: IndividualReading) -> bool:
-    return read_individual_token(token, "individual_reading") == (row.id, row.user_id) and row.status == "done"
+    return (not row.user.deletion_requested_at and not row.user.deleted_at and
+            read_individual_token(token, "individual_reading") == (row.id, row.user_id) and row.status == "done")
 
 
 # Bump after changing the print layout: PDFs are cached under this key and old files stay in use.
@@ -376,7 +378,7 @@ def pdf(db: Session, row_id: int, user: User) -> dict:
 
 
 EXAMPLE_NAMES = {"personal": ("личный разбор", "personal reading"), "pair": ("совместимость пары", "couple compatibility"),
-                 "year": ("разбор года", "year reading")}
+                 "year": ("разбор года", "year reading"), "child": ("детская матрица", "child’s matrix")}
 
 
 def example_pdf(slug: str, locale: str) -> dict:

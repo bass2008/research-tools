@@ -7,7 +7,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 import flows
-from conftest import BASE
+from conftest import BASE, absolute
 
 pytestmark = pytest.mark.bug
 
@@ -81,7 +81,7 @@ def test_printed_report_has_no_container_host_links(page: Page, mail: str, tmp_p
     ) as info:
         button.click()
     path = tmp_path / "report.pdf"
-    with urllib.request.urlopen(info.value.json()["url"], timeout=60) as source:
+    with urllib.request.urlopen(absolute(info.value.json()["url"]), timeout=60) as source:
         path.write_bytes(source.read())
 
     reader = PdfReader(str(path))

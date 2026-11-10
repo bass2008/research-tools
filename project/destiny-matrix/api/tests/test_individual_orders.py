@@ -136,6 +136,19 @@ def test_the_chosen_year_goes_into_the_request(client, db):
     assert db.scalar(select(IndividualReading.year)) == 2031
 
 
+def test_a_childs_matrix_reaches_the_author_and_only_for_a_minor(client, db):
+    kid = [{"birth": "2016-04-12", "sex": "f"}]
+    response = client.post("/api/individual-orders/mock", json=order(persons=kid, readings=[{"kind": "personal", "who": [0], "child": True}]))
+    assert response.status_code == 200, response.text
+    row = db.scalars(select(IndividualReading)).one()
+    assert json.loads(row.inputs) == {"birth": "2016-04-12", "sex": "f", "child": True}
+    assert "Детская матрица" in row.comment
+    assert json.loads(db.scalars(select(Reading)).one().inputs) == {"birth": "2016-04-12", "sex": "f"}
+    for body in (order(readings=[{"kind": "personal", "who": [0], "child": True}]),
+                 order(readings=[{"kind": "year", "who": [0], "year": 2031, "child": True}], persons=kid)):
+        assert client.post("/api/individual-orders/mock", json=body).status_code == 422, body
+
+
 def test_admin_counts_one_payment_for_an_individual_order(client, auth):
     # the order also writes free purchases for its automatic readings; they are not payments
     body = order(persons=TWO, readings=COUPLE, snapshots={"personal_0": SNAP, "personal_1": SNAP, "pair_0_1": PAIR_SNAP})
@@ -144,3 +157,12 @@ def test_admin_counts_one_payment_for_an_individual_order(client, auth):
     rows = client.get("/api/admin/users", headers=auth(settings.admins[0])).json()["items"]
     buyer = next(r for r in rows if r["email"] == "buyer@example.ru")
     assert (buyer["payments"], buyer["spent"]) == (1, 359_000)
+
+
+def test_order_deadline_counts_from_the_moscow_day():
+    import datetime as dt
+    from app.individual_orders import order_day
+    # 02:30 in Moscow on 10.11 is still 09.11 by the UTC clock of the container.
+    assert order_day(dt.datetime(2026, 11, 9, 23, 30, tzinfo=dt.timezone.utc)) == dt.date(2026, 11, 10)
+    assert order_day(dt.datetime(2026, 11, 9, 20, 59, tzinfo=dt.timezone.utc)) == dt.date(2026, 11, 9)
+

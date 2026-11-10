@@ -4,6 +4,7 @@ import { INTERACTIVE_HEADER, PATH_HEADER, LOCALE_HEADER, selectedLocale } from "
 import { resolveSite } from "./lib/siteProfile.config";
 import { missingContentRoute } from "./lib/contentRoute";
 import { isPublicPath, isUserPath, publicPath, splitPublicPath } from "./lib/publicRouting";
+import { redirectTarget } from "./lib/redirects";
 
 // Кроме выбора языка из ссылки, приводим Next к RFC 9110 в двух местах. Условными запросами
 // занимается сам Next: `ETag` он считает от отданного тела, соврать такой отпечаток не может.
@@ -27,6 +28,13 @@ export function middleware(request: NextRequest) {
   const incoming = request.nextUrl.pathname;
   const parsed = splitPublicPath(incoming);
   const path = parsed.path;
+  // Moved addresses (lib/redirects.ts) go straight to the final URL with the site language: 301 —
+  // the code every crawler reads as a page move (Next's `permanent` gives 308).
+  const moved = redirectTarget(path);
+  if (moved && (!parsed.locale || site.locales.includes(parsed.locale))) {
+    const target = new URL(publicPath(moved, parsed.locale ?? site.defaultLocale, site) + request.nextUrl.search, site.origin);
+    return NextResponse.redirect(target, 301);
+  }
   const userPage = isUserPath(path);
   const publicPage = isPublicPath(path);
   const chosen = normalizeLocale(request.nextUrl.searchParams.get("lang"));

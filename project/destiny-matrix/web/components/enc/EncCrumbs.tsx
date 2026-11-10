@@ -11,9 +11,9 @@ import { splitPublicPath } from "@/lib/publicRouting";
 import { usePathname } from "next/navigation";
 
 export const forLocale = localized((L: Locale) => {
-  const { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
+  const { encyclopediaSection, encyclopediaSectionFromSegment, encyclopediaSectionHref } = localizedEncyclopediaNavigation(L);
 
-  return { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref };
+  return { encyclopediaSection, encyclopediaSectionFromSegment, encyclopediaSectionHref };
 });
 
 // Путь показывается один раз, над каркасом: последний шаг выводится из адреса, поэтому
@@ -33,7 +33,7 @@ export default function EncCrumbs({ locale: requestedLocale, ...localeProps }: (
     chakras,
     articles,
   } = localeProps;
-  const { encyclopediaSection, encyclopediaSectionFromExternalRoot, encyclopediaSectionFromSegment, encyclopediaSectionHref } = forLocale(L);
+  const { encyclopediaSection, encyclopediaSectionFromSegment, encyclopediaSectionHref } = forLocale(L);
 
   const path = splitPublicPath(usePathname()).path;
   const parts = path.split("/").filter(Boolean);
@@ -48,13 +48,13 @@ export default function EncCrumbs({ locale: requestedLocale, ...localeProps }: (
     const section = encyclopediaSection("art");
     trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     trail.push({ name: articles[path] });
-  } else if (encyclopediaSectionFromExternalRoot(parts[0])) {
-    const section = encyclopediaSection(encyclopediaSectionFromExternalRoot(parts[0])!);
+  } else if (parts[1] === "year" && parts[2]) {
+    const section = encyclopediaSection("yer");
     trail.push({ name: section.title, href: encyclopediaSectionHref(section.key) });
     trail.push({
-      name: /^\d{4}$/.test(parts[1])
-        ? D.encYear.matrixForYear[L](parts[1])
-        : D.encYear.yearOf[L](parts[1]),
+      name: /^\d{4}$/.test(parts[2])
+        ? D.encYear.matrixForYear[L](parts[2])
+        : D.encYear.yearOf[L](parts[2]),
     });
   } else if (positions[parts[1]]) {
     const key = parts[1];

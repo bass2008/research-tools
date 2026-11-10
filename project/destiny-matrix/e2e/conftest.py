@@ -17,6 +17,12 @@ from target import is_remote
 from urllib.parse import urlsplit
 
 BASE = os.environ.get("E2E_URL", "http://localhost:3000")
+
+
+def absolute(url: str) -> str:
+    """Signed downloads come back site-relative (they must also work on emulator/LAN host aliases)."""
+    import urllib.parse
+    return urllib.parse.urljoin(BASE + "/", url)
 REMOTE = is_remote(BASE)
 ADMIN = (os.environ.get("E2E_ADMIN", "snborodaenko@mail.ru"), os.environ.get("E2E_ADMIN_PASSWORD", "123"))
 

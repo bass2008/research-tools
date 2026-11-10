@@ -127,6 +127,7 @@ export const forLocale = localized((L: Locale) => {
   const LINES: Record<string, readonly string[]> = {
     past_lives: ["comfort_south", "karmic_tail_middle", "mission"],
     material_karma: ["year", "material_attitude", "comfort_east"],
+    parent_child_line: ["day", "ajna_physics", "comfort_west"],
     money: ["comfort_east", "money_middle", "money_love_crossing"],
     relations: ["comfort_south", "love_middle", "money_love_crossing"],
     profession: ["month", "ajna_energy", "comfort_north"],

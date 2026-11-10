@@ -11,7 +11,7 @@ import { D, forLocale as localizedI18n } from "./i18n";
 import { SITE_LANG as defaultLocale, type Lang as Locale } from "./i18n/lang";
 import { localized } from "./i18n/localized";
 import { forLocale as localizedPublicLabels } from "./i18n/publicLabels";
-import { materialKarmaOf } from "./materialKarmaRow";
+import { materialKarmaOf } from "./lineReadingRow";
 
 export type Sex = "m" | "f";
 

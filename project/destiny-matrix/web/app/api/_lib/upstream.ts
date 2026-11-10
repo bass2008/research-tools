@@ -6,7 +6,7 @@ import { requestLocale } from "@/lib/i18n/request";
 import { D } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n/hosts";
 import { apiUpstream, serverSettings } from "@/lib/settings/server";
-import { cookies } from "next/headers";
+import { cookies, headers as requestHeaders } from "next/headers";
 import { NextResponse } from "next/server";
 import { isIP } from "node:net";
 
@@ -32,9 +32,18 @@ export function upstreamUrl(path: string): string {
   return `${upstreamBase()}/api${path}`;
 }
 
-export async function sessionToken(): Promise<string | null> {
+export async function sessionToken(request?: Request): Promise<string | null> {
   const jar = await cookies();
-  return jar.get(SESSION_COOKIE)?.value ?? null;
+  // A cookie always wins, including when an attacker supplies a second credential.
+  const cookie = jar.get(SESSION_COOKIE);
+  if (cookie) return cookie.value || null;
+  const source = request?.headers ?? await requestHeaders();
+  return source.get("X-Arcana-Session")?.trim() || null;
+}
+
+/** Explicit credentials do not need cookie CSRF checks. The API still verifies the JWT. */
+export async function isNativeSessionRequest(request: Request): Promise<boolean> {
+  return !(await cookies()).get(SESSION_COOKIE) && Boolean(request.headers.get("X-Arcana-Session")?.trim());
 }
 
 export function json(body: unknown, status = 200): NextResponse {
@@ -111,7 +120,7 @@ export async function forward(path: string, opts: ForwardOptions = {}): Promise<
   if (clientIp) headers["X-Real-IP"] = clientIp;
 
   if (opts.auth || opts.optionalAuth) {
-    const token = await sessionToken();
+    const token = await sessionToken(opts.source);
     if (!token && opts.auth) return jsonError(D.bffErrors.noSession, L, 401);
     if (token) headers.Authorization = `Bearer ${token}`;
   }

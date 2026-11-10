@@ -33,7 +33,7 @@ INFO_PAGES = (
     "/encyclopedia/combination/7-18",
     "/encyclopedia/karmic-tail",
     "/encyclopedia/karmic-tail/18-9-9",
-    "/year",
+    "/encyclopedia/year",
 )
 
 
@@ -108,10 +108,10 @@ def test_arcanum_links_back_to_its_karmic_tails():
     "page_path,expected",
     (
         # автор ставит связь односторонне и указателем; обратную сторону строит рендер
-        ("/year/7", "/encyclopedia/arcanum/7"),
-        ("/encyclopedia/arcanum/7", "/year/7"),
-        ("/programs", "/encyclopedia/position/loops"),
-        ("/encyclopedia/position/loops", "/programs"),
+        ("/encyclopedia/year/7", "/encyclopedia/arcanum/7"),
+        ("/encyclopedia/arcanum/7", "/encyclopedia/year/7"),
+        ("/encyclopedia/programs", "/encyclopedia/position/loops"),
+        ("/encyclopedia/position/loops", "/encyclopedia/programs"),
     ),
 )
 def test_related_works_both_ways(page_path, expected):
@@ -143,7 +143,8 @@ def test_concept_hub_gets_an_incoming_link_when_written():
         pytest.skip("статей-хабов ещё нет")
     html = _html("/encyclopedia")
     for item in hubs:
-        assert f'href="/ru/{item["key"]}"' in html, f"на хаб /{item['key']} не ведёт ни одна ссылка"
+        path = f"/encyclopedia/{item['key']}"
+        assert f'href="/ru{path}"' in html, f"на хаб {path} не ведёт ни одна ссылка"
 
 
 @pytest.mark.parametrize("path", INFO_PAGES)
@@ -237,9 +238,9 @@ def test_faq_markup_appears_only_with_visible_questions():
 @pytest.mark.parametrize(
     "path,target",
     (
-        ("/programs", "/encyclopedia/position/loops"),
-        ("/energies", "/encyclopedia/position/chakras"),
-        ("/karmic-matrix", "/encyclopedia/karmic-tail"),
+        ("/encyclopedia/programs", "/encyclopedia/position/loops"),
+        ("/encyclopedia/energies", "/encyclopedia/position/chakras"),
+        ("/encyclopedia/karmic-matrix", "/encyclopedia/karmic-tail"),
     ),
 )
 def test_hub_serves_a_page_or_leads_somewhere_useful(path, target):
@@ -248,7 +249,7 @@ def test_hub_serves_a_page_or_leads_somewhere_useful(path, target):
     склеил бы адреса, и появление статьи потребовало бы расклейки)."""
     written = {item["key"] for item in _hubs()}
     r = requests.get(f"{BASE}/ru{path}", timeout=30, allow_redirects=False)
-    if path.lstrip("/") in written:
+    if path.rsplit("/", 1)[-1] in written:
         assert r.status_code == 200, f"{path}: статья есть, но страница отдаёт {r.status_code}"
         assert 'class="crumbs' in r.text and "BreadcrumbList" in r.text
     else:
@@ -266,7 +267,7 @@ CONDITIONAL_PAGES = (
     "/encyclopedia/combination/7-18",
     "/encyclopedia/position/comfort",
     "/encyclopedia/karmic-tail/18-9-9",
-    "/year/13",
+    "/encyclopedia/year/13",
 )
 
 
@@ -348,7 +349,7 @@ SECTION_HUBS = (
     ("/encyclopedia/chakra", "Семь чакр"),
     ("/encyclopedia/combination", "Сочетания арканов"),
     ("/encyclopedia/karmic-tail", "Кармические хвосты"),
-    ("/year", "Матрица судьбы на год"),
+    ("/encyclopedia/year", "Матрица судьбы на год"),
     ("/encyclopedia/compatibility/tails", "Кармические хвосты пары"),
 )
 
@@ -360,7 +361,7 @@ LEAF_PARENTS = (
     ("/encyclopedia/position/center", "/encyclopedia/position"),
     ("/encyclopedia/position/character", "/encyclopedia/position"),
     ("/encyclopedia/karmic-tail/18-9-9", "/encyclopedia/karmic-tail"),
-    ("/year/13", "/year"),
+    ("/encyclopedia/year/13", "/encyclopedia/year"),
 )
 
 
@@ -411,7 +412,7 @@ def test_section_address_comes_only_from_the_registry():
     `/encyclopedia` и складывал его в исключённые — 889 страниц сборки на один лишний адрес.
     Теперь раздел без своей ветки ведёт на якорь оглавления. Сам адрес с параметром продолжает
     открываться: по нему приходят из выдачи и из закладок."""
-    for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/method"):
+    for path in ("/", "/encyclopedia", "/encyclopedia/arcanum/7", "/encyclopedia/position/center", "/encyclopedia/method"):
         body = re.sub(r"(?is)<script.*?</script>", "", _html(path))
         found = set(re.findall(r'href="(/ru/encyclopedia\?sec=[a-z]+)"', body))
         assert found == set(), (path, found)
@@ -420,7 +421,7 @@ def test_section_address_comes_only_from_the_registry():
 def test_articles_section_leads_to_the_anchor_of_the_index():
     """«Статьи» — единственный раздел без своей шапки, и ведёт он на свой блок в оглавлении.
     Якорь нового адреса поиску не создаёт, в отличие от параметра."""
-    body = re.sub(r"(?is)<script.*?</script>", "", _html("/method"))
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/encyclopedia/method"))
     assert 'href="/ru/encyclopedia#stati"' in body, "ссылка на блок статей пропала"
     assert 'id="stati"' in _html("/encyclopedia"), "на оглавлении нет якоря блока статей"
 
@@ -500,11 +501,11 @@ def test_crossings_are_reachable_without_the_sitemap():
 # на руках хочет её прочитанной. Топ-10 по головному запросу до этого держали страницы расчёта,
 # ювелирный магазин и медиа «Столото» — то есть отвечали не на тот вопрос.
 DECODING_PAGES = (
-    "/decoding",
-    "/by-birth-date",
-    "/meaning",
-    "/how-to-read",
-    "/full-reading",
+    "/encyclopedia/decoding",
+    "/encyclopedia/by-birth-date",
+    "/encyclopedia/meaning",
+    "/encyclopedia/how-to-read",
+    "/encyclopedia/full-reading",
 )
 
 
@@ -525,9 +526,9 @@ def test_decoding_page_is_an_article(path):
 def test_decoding_hub_leads_to_its_variants():
     """Хаб и варианты связаны: иначе пять страниц конкурируют между собой вместо того, чтобы
     делить кластер."""
-    body = re.sub(r"(?is)<script.*?</script>", "", _html("/decoding"))
-    linked = set(re.findall(r'href="(/ru/[a-z-]+)"', body))
-    missing = [p for p in DECODING_PAGES if p != "/decoding" and "/ru" + p not in linked]
+    body = re.sub(r"(?is)<script.*?</script>", "", _html("/encyclopedia/decoding"))
+    linked = set(re.findall(r'href="(/ru/[a-z-]+(?:/[a-z-]+)?)"', body))
+    missing = [p for p in DECODING_PAGES if p != "/encyclopedia/decoding" and "/ru" + p not in linked]
     assert missing == [], missing
 
 
@@ -535,7 +536,7 @@ def test_decoding_pages_are_reachable_and_indexable():
     """В карте сайта и со ссылками из справочника — иначе поиск о них не узнает."""
     xml = requests.get(f"{BASE}/sitemap.xml", timeout=30).text
     body = re.sub(r"(?is)<script.*?</script>", "", _html("/encyclopedia"))
-    linked = set(re.findall(r'href="(/ru/[a-z-]+)"', body))
+    linked = set(re.findall(r'href="(/ru/[a-z-]+(?:/[a-z-]+)?)"', body))
     for path in DECODING_PAGES:
         assert requests.get(f"{BASE}{path}", timeout=30).status_code == 200, path
         assert "/ru" + path in linked, f"{path}: нет ссылки с оглавления справочника"

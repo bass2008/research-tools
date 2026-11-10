@@ -17,7 +17,7 @@ import {
 const SERVICE_PATHS = servicePages().map((key) => SERVICE_PAGES[key].path);
 // адреса первого уровня, которые не являются концепт-хабами
 // the Individual tab is a product page with its own route, not a content hub
-const STATIC_PATHS = ["/", "/encyclopedia", "/year", "/compatibility", "/individual", ...SERVICE_PATHS];
+const STATIC_PATHS = ["/", "/encyclopedia", "/encyclopedia/year", "/compatibility", "/individual", ...SERVICE_PATHS];
 
 describe("карта сайта", () => {
   const paths = sitemap().map((entry) => splitPublicPath(new URL(entry.url).pathname).path);
@@ -47,7 +47,7 @@ describe("карта сайта", () => {
     "/encyclopedia/position",
     "/encyclopedia/chakra",
     "/encyclopedia/karmic-tail",
-    "/year",
+    "/encyclopedia/year",
   ])("содержит шапку раздела %s", (path) => {
     expect(paths).toContain(path);
   });
@@ -72,8 +72,8 @@ describe("карта сайта", () => {
   // Тест утверждал только отсутствие персональных разборов. Потеря раздела из positions.json
   // делала карту тихо короче, и он оставался зелёным — а общая статья и есть то единственное,
   // что этот релиз отдаёт в индекс.
-  it("содержит общую статью каждого из 21 раздела отчёта", () => {
-    expect(SPEC).toHaveLength(21);
+  it("содержит общую статью каждого из 22 разделов отчёта", () => {
+    expect(SPEC).toHaveLength(22);
     const missing = SPEC.map((section) => section.key)
       .filter((key) => !paths.includes(`/encyclopedia/position/${key}`));
     expect(missing, "разделов нет в карте сайта").toEqual([]);
@@ -107,7 +107,7 @@ describe("карта сайта", () => {
   });
 
   it("держит шапки категорий независимо от наличия статей", () => {
-    expect(paths).toContain("/year");
+    expect(paths).toContain("/encyclopedia/year");
     expect(paths).toContain("/encyclopedia/karmic-tail");
   });
 

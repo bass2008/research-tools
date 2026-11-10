@@ -39,6 +39,7 @@ def test_only_admin_creates_and_only_worker_reads_the_task(client, auth, request
     task = client.get(f"/api/internal/individual-readings/{rid}", headers=worker).json()
     assert task["status"] == "pending" and task["automatic_reading"]["matrix"] == {"day": 4}
     assert task["prompt"].endswith("individual-reading-prompt.md") and "email" not in task
+    assert task["created_at"][:4].isdigit()  # the author's check takes the child's age on the order day from it
     assert [x["id"] for x in client.get("/api/internal/individual-readings?status=pending", headers=worker).json()["items"]] == [rid]
 
 

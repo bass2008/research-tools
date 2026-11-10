@@ -2,7 +2,8 @@
 // в клиентский чанк; сам корпус трактовок читается строго из web/content/arcana.json.
 import sectionSpec from "./__fixtures__/sections.json";
 import { lockChakraReading, lockReadingRow } from "./lockedText";
-import { materialKarmaRow } from "./materialKarma";
+import { isLineSection, type LineSection } from "./lineReadingRow";
+import { lineReadingRow } from "./lineReadings";
 import { forLocale as localizedCharacter } from "./character";
 import { forLocale as localizedCharacterTypes, type CharacterPositionKey } from "./characterTypes";
 import { forLocale as localizedContent } from "./content";
@@ -83,8 +84,8 @@ export const forLocale = localized((L: Locale) => {
 
   const PRIVATE_BY_KEY = new Map(PRIVATE_ROWS.map((row) => [row.key, row]));
 
-  if (PRIVATE_ROWS.length !== 21 || PRIVATE_BY_KEY.size !== 21) {
-    throw new Error(`sections.json: ожидался 21 уникальный раздел, получено ${PRIVATE_ROWS.length}`);
+  if (PRIVATE_ROWS.length !== 22 || PRIVATE_BY_KEY.size !== 22) {
+    throw new Error(`sections.json: ожидалось 22 уникальных раздела, получено ${PRIVATE_ROWS.length}`);
   }
 
   /** Разделы: публичные метаданные и серверная схема сверяются при импорте. */
@@ -140,9 +141,9 @@ export const forLocale = localized((L: Locale) => {
             personalHref: characterHref(matrix),
             longform: buildCharacterReading(matrix),
           }
-          : spec.key === "material_karma"
+          : isLineSection(spec.key)
             ? (() => {
-              const row = hasLongform ? materialKarmaReading(spec, matrix) : null;
+              const row = hasLongform ? lineReading(spec.key, spec, matrix) : null;
               return row ? { tripleReading: row } : {};
             })()
           : spec.key === "past_lives" && hasLongform
@@ -172,17 +173,17 @@ export const forLocale = localized((L: Locale) => {
     });
   }
 
-  /** Толкование позиции раздела. У материальной кармы язык может ещё не иметь перевода точки Q:
+  /** Толкование позиции раздела. У раздела-тройки язык может ещё не иметь перевода средней точки:
    *  тогда карта остаётся без текста, а не роняет весь разбор. */
   function positionText(sectionKey: string, arcanum: number, positionKey: string): string {
-    if (sectionKey === "material_karma" && !hasArcanumInPosition(arcanum, positionKey)) return "";
+    if (isLineSection(sectionKey) && !hasArcanumInPosition(arcanum, positionKey)) return "";
     return arcanumInPosition(arcanum, positionKey);
   }
 
-  /** Связное толкование тройки C–Q–L: заголовок, три карты с подписями ролей, три абзаца. */
-  function materialKarmaReading(spec: SectionSpec, matrix: Matrix) {
+  /** Связное толкование тройки раздела: заголовок, три карты с подписями ролей, три абзаца. */
+  function lineReading(key: LineSection, spec: SectionSpec, matrix: Matrix) {
     const labels = spec.positions(matrix).map(([label]) => label);
-    return materialKarmaRow(matrix, L, D.report.materialKarmaTitle[L], D.report.materialKarmaTopic[L], labels);
+    return lineReadingRow(key, matrix, L, labels);
   }
 
   /** Ссылки «карточка → статья» для готового разбора.
@@ -219,9 +220,9 @@ export const forLocale = localized((L: Locale) => {
     return sections.map((section) => {
       const spec = section.locked ? SPEC.find((row) => row.key === section.key) : undefined;
       if (!spec) return section;
-      // Тексты точек C и L платные и в «Деньгах», поэтому до покупки у материальной кармы — только
-      // карты и заглушка связного толкования той же формы, как у чакр.
-      const reading = section.key === "material_karma" ? materialKarmaReading(spec, matrix) : null;
+      // До покупки у раздела-тройки — только карты и заглушка связного толкования той же формы,
+      // как у чакр: тексты его точек платные и в соседних разделах.
+      const reading = isLineSection(section.key) ? lineReading(section.key, spec, matrix) : null;
       return {
         ...section,
         positions: spec.positions(matrix).map(([label, arcanum]) => ({ label, arcanum, href: arcanumHref(arcanum) })),

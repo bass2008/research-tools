@@ -128,6 +128,15 @@
     "Inner point of talent"
    ]
   },
+  "parent_child_line": {
+   "title": "The parent-child line in the destiny matrix",
+   "lead": "What atmosphere of childhood you carried with you and how it sounds in your attitude to children.",
+   "positions": [
+    "Outer expression",
+    "Attitude to children",
+    "Parents and the atmosphere of childhood"
+   ]
+  },
   "parents_children": {
    "title": "Karma of relationships with parents and children",
    "lead": "Which family rules you received and which habits you pass on.",

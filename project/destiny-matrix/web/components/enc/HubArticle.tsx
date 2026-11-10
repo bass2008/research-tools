@@ -9,7 +9,7 @@ import JsonLd from "@/components/ui/JsonLd";
 import type { ArticleContent } from "@/lib/content";
 import { COMPATIBILITY_HUBS } from "@/lib/contentReader";
 import { forLocale as localizedContent } from "@/lib/content";
-import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
+import { forLocale as localizedEncyclopedia, YEAR_HUB } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
 import { DP } from "@/lib/i18n/dict/pair";
@@ -19,6 +19,7 @@ import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSeo } from "@/lib/seo";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "@/components/ui/LocalizedLink";
 
 export const forLocale = localized((L: Locale, site) => {
@@ -48,9 +49,9 @@ export const forLocale = localized((L: Locale, site) => {
 
 export const { hubMeta } = forLocale(defaultLocale);
 
-export default async function HubArticle({ locale: requestedLocale, ...localeProps }: ({ item: ArticleContent }) & { locale?: Locale }) {
+export default async function HubArticle({ locale: requestedLocale, ...localeProps }: ({ item: ArticleContent; offer?: ReactNode }) & { locale?: Locale }) {
   const L = requestedLocale ?? defaultLocale;
-  const { item } = localeProps;
+  const { item, offer } = localeProps;
   const { hubCrumb, hubHref, hub, hubKeys, articleLd, encyclopediaSectionCrumb } = forLocale(L, await requestSite());
 
   const path = hubHref(item.key);
@@ -81,6 +82,8 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
 
       <Sections items={item.sections} locale={L} />
 
+      {offer}
+
       {pair ? (
         <div className="allbox section-gap" data-testid="hub-pair-calc">
           <h3>{DP.encCompat.calcTitle[L]}</h3>
@@ -109,7 +112,7 @@ export default async function HubArticle({ locale: requestedLocale, ...localePro
           {pair && <Link href="/encyclopedia/compatibility">{DP.encCompat.all[L]}</Link>}
           <Link href="/encyclopedia">{D.octagram.encTitle[L]}</Link>
           <Link href="/encyclopedia/karmic-tail">{D.octagram.karmicTail[L]}</Link>
-          <Link href="/year">{D.octagram.matrixForYear[L]}</Link>
+          <Link href={YEAR_HUB}>{D.octagram.matrixForYear[L]}</Link>
           {hubKeys()
             .filter((key) => key !== item.key)
             .map((key) => (

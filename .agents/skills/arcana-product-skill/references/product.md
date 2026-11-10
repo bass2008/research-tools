@@ -1,7 +1,7 @@
 # Продукт глазами читателя
 
 Сайт arcana-sense.ru: бесплатный расчёт матрицы судьбы по дате рождения (метод Наталии Ладини) и
-платный полный разбор из 21 раздела; совместимость пары по двум датам (`/compatibility`,
+платный полный разбор из 22 разделов; совместимость пары по двум датам (`/compatibility`,
 книга Юлианы Лисовской) с разделом «Совместимость в работе». Вокруг расчёта — энциклопедия:
 страницы арканов, позиций, пересечений, хвостов, сочетаний, чакр, годов и арканов в совместимости.
 
@@ -52,7 +52,7 @@
 | M | `comfort_south` | Вход отношений и хвоста | |
 | N | `karmic_tail_middle` | Середина кармического хвоста | |
 | Q | `material_attitude` | Отношение к материальному | середина правого луча между C и L (с 08.11.2026 на схеме сайта) |
-| O, P | `ajna_physics`, `ajna_energy` | Аджна, физика / энергия | |
+| O, P | `ajna_physics`, `ajna_energy` | Аджна, физика / энергия | O — ещё и «отношение к детям», середина детско-родительской линии A → O → J (раздел отчёта и подпись на схеме с 09.11.2026) |
 | S, T | `anahata_physics`, `anahata_energy` | Анахата, физика / энергия | |
 | R | `money_love_crossing` | Скрещение линий | |
 | R1 | `love_middle` | Под сердцем | под сердцем, сердце, сердечко |
@@ -74,7 +74,7 @@
 | Кармический хвост | `/encyclopedia/karmic-tail/A-B-C` | 26 | `web/content/ru/karmic-tails.json` |
 | Сочетание | `/encyclopedia/combination/A-B` | 231 | `web/content/ru/combinations.json` |
 | Чакра | `/encyclopedia/chakra/KEY` | 7 | `web/content/ru/chakras.json` |
-| Аркан на год | `/year/N` | 22 | `web/content/ru/year-arcana.json` |
+| Аркан на год | `/encyclopedia/year/N` | 22 | `web/content/ru/year-arcana.json` |
 | Аркан в совместимости | `/encyclopedia/compatibility/N` | 21 (2–22) | `tools/seo/content/ru/compatibility-arcana/N.json`; хаб — `category-hubs/compatibility.json` |
 | Хабы категорий и концепт-хабы | `/encyclopedia/...`, корневые | 8 + 10 | `category-hubs.json`, `hubs.json` |
 

@@ -10,25 +10,27 @@ import { forLocale as arcanaForLocale } from "@/lib/arcana";
 import { D } from "@/lib/i18n";
 import { COUPLE_CARDS, EMPTY_CART, KIND_CARDS, SELF_YEAR_CARDS, quote, type Cart } from "@/lib/individualPricing";
 import { yearMatrix } from "@/lib/yearMatrix";
-import { showDate, type Kind, type SetKey, type UserInfo } from "./types";
+import KindSwitch from "./KindSwitch";
+import { showDate, type Kind, type OneKind, type SetKey, type UserInfo } from "./types";
 import { useSets } from "./useSets";
 
 /** Ready sets and the builder; "Choose" puts the set into the order form below. */
 export default function PricesSection({ user, sampleBirth, year, oneKind, setOneKind, custom, setCustom, goOrder }: {
-  user: UserInfo | null; sampleBirth: string; year: number; oneKind: Kind; setOneKind: (k: Kind) => void;
-  custom: Cart; setCustom: (c: Cart) => void; goOrder: (s: SetKey, kind?: Kind) => void;
+  user: UserInfo | null; sampleBirth: string; year: number; oneKind: OneKind; setOneKind: (k: OneKind) => void;
+  custom: Cart; setCustom: (c: Cart) => void; goOrder: (s: SetKey, kind?: OneKind) => void;
 }) {
   const L = useLocale();
   const T = D.individualSale;
   const TL = D.individualLanding;
   const { arcanumTitle } = arcanaForLocale(L);
-  const { terms, prices, PW, r, priceOf, plans, kindName } = useSets();
+  const { terms, prices, PW, r, priceOf, plans } = useSets();
   const after = terms.bought >= 3;
   const was = (c: Cart) => {
     const regular = quote(c, 0, prices).total;
     return after && regular > priceOf(c) ? <s>{r(regular)}</s> : null;
   };
-  const oneCart = { ...EMPTY_CART, [oneKind]: 1 };
+  const oneBase: Kind = oneKind === "child" ? "personal" : oneKind;
+  const oneCart = { ...EMPTY_CART, [oneBase]: 1 };
   const sampleYear = useMemo(() => {
     const [y, m, d] = sampleBirth.split("-").map(Number);
     return yearMatrix(user?.date ?? { y, m, d }, year);
@@ -43,10 +45,8 @@ export default function PricesSection({ user, sampleBirth, year, oneKind, setOne
       <div className="lp-plans">
         <article className="lp-plan" data-testid="iset-one">
           <div className="lp-ph"><div><h3>{T.setOne[L]}</h3><p className="lp-tagline">{TL.oneTagline[L]}</p></div>
-            <div className="lp-cardrow">{KIND_CARDS[oneKind].map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div></div>
-          <div className="lp-kinds">
-            {(["personal", "pair", "year"] as const).map((k) => <button key={k} type="button" className={oneKind === k ? "lp-on" : undefined} onClick={() => setOneKind(k)}>{kindName[k]}</button>)}
-          </div>
+            <div className="lp-cardrow">{KIND_CARDS[oneBase].map((n) => <img key={n} src={arcanumImage(n, true)} alt="" />)}</div></div>
+          <KindSwitch value={oneKind} onChange={setOneKind} p="lp" testid="iset-one" />
           <p className="lp-desc">{TL.kindDesc[L][oneKind](oneKind === "personal" ? (user ? TL.theDate[L](showDate(user.date)) : TL.yourDate[L]) : String(year))}</p>
           <p className="lp-price">{r(priceOf(oneCart))}{was(oneCart)}</p>
           <p className="lp-price-sub">{after ? T.afterThreeSub[L](PW) : T.setOneSub[L]}</p>

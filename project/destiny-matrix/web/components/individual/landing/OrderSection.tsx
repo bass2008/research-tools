@@ -7,18 +7,20 @@ import { useLocale } from "@/components/ui/LocaleProvider";
 import RichText from "@/components/ui/RichText";
 import { track } from "@/lib/analytics";
 import { D } from "@/lib/i18n";
-import { EMPTY_CART, KIND_CARDS, SETS, quote, type Cart } from "@/lib/individualPricing";
+import { EMPTY_CART, KIND_CARDS, SETS, quote, type Cart, type OrderPreset } from "@/lib/individualPricing";
 import type { StoredBirth, StoredPair } from "@/lib/storage";
 import type { Trio } from "@/lib/arcanaTrio";
 import type { PaymentProvider } from "@/lib/tariffs";
 import OrderForm from "./OrderForm";
-import type { Kind, SetKey } from "./types";
+import KindSwitch from "./KindSwitch";
+import type { Kind, OneKind, SetKey } from "./types";
 import { useSets } from "./useSets";
 
 /** The order on the landing: which set, the form with the people of every reading, the order card beside it. */
-export default function OrderSection({ set, setSet, formKind, setFormKind, custom, setCustom, year, providers, initialBirth, initialPair, latest }: {
+export default function OrderSection({ set, setSet, formKind, setFormKind, custom, setCustom, year, providers, initialBirth, initialPair, latest, preset, child, setChild }: {
   set: SetKey; setSet: (s: SetKey) => void; formKind: Kind; setFormKind: (k: Kind) => void; custom: Cart; setCustom: (c: Cart) => void;
   year: number; providers: PaymentProvider[]; initialBirth: StoredBirth | null; initialPair?: StoredPair | null; latest: string;
+  preset?: OrderPreset; child: boolean; setChild: (on: boolean) => void;
 }) {
   const L = useLocale();
   const T = D.individualSale;
@@ -32,7 +34,9 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
   const shownYear = orderYears[0] ?? year;
   const cart: Cart = useMemo(() => set === "custom" ? custom
     : set === "one" ? { ...EMPTY_CART, [formKind]: 1 } : SETS[set === "selfYear" ? "selfYear" : "couple"]("personal"), [set, custom, formKind]);
-  const oneKind = formKind === "year" ? T.kindYear[L](shownYear) : kindName[formKind];
+  const oneChild = formKind === "personal" && child;
+  const oneKind = formKind === "year" ? T.kindYear[L](shownYear) : kindName[oneChild ? "child" : formKind];
+  const pickOne = (k: OneKind) => { setFormKind(k === "child" ? "personal" : k); setChild(k === "child"); };
   const setTitle = set === "one" ? `${T.setOne[L]} · ${oneKind.toLowerCase()}` : set === "selfYear" ? T.setSelfYear[L](shownYear)
     : set === "couple" ? T.setCouple[L] : `${TL.optCustom[L]} · ${T.readings[L](quote(custom, 0, prices).count)}`;
   const total = r(priceOf(cart));
@@ -73,7 +77,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
           </div>
           {set === "one" && <div className="lp-fl">
             <span>{TL.whichKind[L]}</span>
-            <div className="lp-kinds">{(["personal", "pair", "year"] as const).map((k) => <button key={k} type="button" className={formKind === k ? "lp-on" : undefined} onClick={() => setFormKind(k)}>{kindName[k]}</button>)}</div>
+            <KindSwitch value={oneChild ? "child" : formKind} onChange={pickOne} p="lp" testid="iorder-kind" />
           </div>}
           {set === "custom" && <div className="lp-fl">
             <span>{TL.buildSet[L]}</span>
@@ -81,6 +85,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
             <Ladder count={quote(custom, 0, prices).count} bought={terms.bought} prices={prices} p="lp" />
           </div>}
           <OrderForm cart={cart} baseYear={year} total={total} providers={providers} payable={terms.payable} initialBirth={initialBirth} initialPair={initialPair}
+            preset={{ ...preset, childFirst: set === "one" ? oneChild : child }} childBySwitch={set === "one"}
             question={question} setQuestion={setQuestion} latest={latest} onDates={setOrderDates} onYears={setOrderYears} onTrio={setTrio}
             summary={`**${setTitle}**${byDates ? ` · ${byDates}` : ""} · ${TL.summaryWhen[L](latest)}`}
             topics={<>
@@ -99,7 +104,7 @@ export default function OrderSection({ set, setSet, formKind, setFormKind, custo
               {fits && <p className="lp-topic-note">{TL.topicNote[L](fits.s === "one"
                 ? `${T.setOne[L]}${fits.k ? ` · ${kindName[fits.k].toLowerCase()}` : ""}`
                 : fits.s === "selfYear" ? T.setSelfYear[L](year) : T.setCouple[L])}{" "}
-                <button type="button" onClick={() => { setSet(fits.s); if (fits.k) setFormKind(fits.k); }}>{TL.topicChoose[L]}</button></p>}
+                <button type="button" onClick={() => { setSet(fits.s); if (fits.k) pickOne(fits.k); }}>{TL.topicChoose[L]}</button></p>}
             </>} />
         </div>
         <aside className="lp-summary-card">

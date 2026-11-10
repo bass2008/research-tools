@@ -19,7 +19,7 @@ export const forLocale = localized((L: Locale) => {
     "/pay",
     encyclopediaSectionHref("pts"),
     encyclopediaSectionHref("arc"),
-    "/year",
+    "/encyclopedia/year",
     encyclopediaSectionHref("sec"),
   ];
 

@@ -260,5 +260,7 @@ export const forLocale = localized((locale: Lang) => ({
 
 /** Действующая подписка открывает этот продукт: кнопок покупки для него быть не должно. */
 export function subscribedTo(session: Session, product = "personal"): boolean {
-  return session.status === "user" && session.subscribed.includes(product);
+  // A recheck on returning to the tab keeps the known subscription: dropping it for the request's
+  // 0.1 s re-rendered the report as a guest's and collapsed every opened section.
+  return (session.status === "user" || session.status === "loading") && session.subscribed.includes(product);
 }

@@ -6,7 +6,7 @@ import { config, middleware } from "./middleware";
 const forwarded = (response: ReturnType<typeof middleware>) =>
   response.headers.get("x-middleware-override-headers");
 
-function call(headers: Record<string, string>, pathname = "/ru/method") {
+function call(headers: Record<string, string>, pathname = "/ru/encyclopedia/method") {
   const request = {
     url: new URL(pathname, "https://arcana-sense.ru").toString(),
     method: "GET",
@@ -20,14 +20,14 @@ describe("missing content keeps its localized HTML before streaming", () => {
   it.each(["arcana-sense.ru", "arcana-sense.com"])("returns the standalone 404 for %s", (host) => {
     for (const path of ["/encyclopedia/arcanum/99", "/encyclopedia/chakra/nope",
       "/encyclopedia/position/not-real/7", "/encyclopedia/position/center/99",
-      "/year/99", "/encyclopedia/combination/1-99",
+      "/encyclopedia/year/99", "/encyclopedia/combination/1-99",
       "/encyclopedia/karmic-tail/1-2-3"]) {
       const response = call({ host }, path);
       expect(response.status, path).toBe(404);
       expect(response.headers.get("x-middleware-rewrite"), path).toContain("/_missing-content");
     }
     for (const path of ["/encyclopedia/arcanum/7", "/encyclopedia/chakra/anahata",
-      "/year/7", "/encyclopedia/combination/7-18", "/api/matrices"]) {
+      "/encyclopedia/year/7", "/encyclopedia/combination/7-18", "/api/matrices"]) {
       expect(call({ host }, path).headers.get("x-middleware-rewrite"), path).toBeNull();
     }
   });

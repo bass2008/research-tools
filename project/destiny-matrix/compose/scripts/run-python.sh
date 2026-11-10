@@ -36,13 +36,14 @@ import json, os
 port = os.environ["WEB_PORT"]
 provider = os.environ.get("PAYMENT_PROVIDER", "mock")
 ru = f"http://localhost:{port}"
+mobile_hosts = [f"{host.strip()}:{port}" for host in os.environ.get("MOBILE_LOCAL_HOSTS", "").split(",") if host.strip()]
 print(json.dumps([
     {"origin": ru, "hosts": [f"localhost:{port}", f"ru.localhost:{port}"],
      "defaultLocale": "ru", "locales": ["ru", "en"],
      "payments": [{"id": provider, "provider": provider,
                    "notificationUrl": f"{ru}/api/payments/notify/{provider}"}]},
     {"origin": f"http://127.0.0.1:{port}",
-     "hosts": [f"127.0.0.1:{port}", f"com.localhost:{port}", f"host.docker.internal:{port}"],
+     "hosts": [f"127.0.0.1:{port}", f"com.localhost:{port}", f"host.docker.internal:{port}", *mobile_hosts],
      "defaultLocale": "en", "locales": ["en", "ru"], "payments": []},
 ]))
 CONFIG

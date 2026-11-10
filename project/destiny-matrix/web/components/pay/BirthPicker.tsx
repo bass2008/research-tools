@@ -19,11 +19,11 @@ function parse(iso: string | undefined): PickedDate | null {
   return year && month && day ? { day, month, year } : null;
 }
 
-function useSeed() {
+function useSeed(yearsAgo = 30) {
   const seed = useMemo(exampleDay, []);
   const [maxYear, setMaxYear] = useState(seed.year);
   useEffect(() => setMaxYear(browserDay().year), []);
-  return { start: { day: seed.day, month: seed.month, year: seed.year - 30 }, maxYear };
+  return { start: { day: seed.day, month: seed.month, year: seed.year - yearsAgo }, maxYear };
 }
 
 // Поля стартуют с даты, с которой человек пришёл (`initial`), но только пока он их не трогал:
@@ -38,16 +38,18 @@ function usePrefill(ready: boolean, initial: unknown, apply: () => void) {
 }
 
 /** Дата и пол для разбора одной даты — те же поля, что в калькуляторе на главной. */
-export function BirthPicker({ locale: L, initial, ready, disabled, onChange, idPrefix = "pay" }: {
+export function BirthPicker({ locale: L, initial, ready, disabled, onChange, idPrefix = "pay", yearsAgo }: {
   locale: Locale;
   initial: StoredBirth | null;
+  /** where the empty fields start: an adult's date, or a child's for the child's matrix */
+  yearsAgo?: number;
   /** several pickers on one form: a label must point at its own field */
   idPrefix?: string;
   ready: boolean;
   disabled: boolean;
   onChange: (value: { date: PickedDate; sex: Sex }) => void;
 }) {
-  const { start, maxYear } = useSeed();
+  const { start, maxYear } = useSeed(yearsAgo);
   const [date, setDate] = useState<PickedDate>(start);
   const [sex, setSex] = useState<Sex>("f");
   const touch = usePrefill(ready, initial, () => {

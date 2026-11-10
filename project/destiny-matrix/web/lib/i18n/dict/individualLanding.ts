@@ -152,12 +152,12 @@ export const individualLanding = {
   cmpRows: {
     ru: [
       ["Когда", "мгновенно", "обычно через 1 рабочий день, максимум 3", "по записи, час разговора"],
-      ["Что внутри", "21 раздел, каждый отдельно", "около 15 тыс. слов о вас: связи, главный узел, план", "разговор; запись или PDF дают не всегда"],
+      ["Что внутри", "22 раздела, каждый отдельно", "около 15 тыс. слов о вас: связи, главный узел, план", "разговор; запись или PDF дают не всегда"],
       ["Ваш вопрос", "—", "ответят главы и раздел вопросов", "да"],
     ],
     en: [
       ["When", "instantly", "usually in 1 working day, at most 3", "by appointment, an hour of talk"],
-      ["What is inside", "21 sections, each on its own", "about 15,000 words about you: links, the main knot, a plan", "a talk; a recording or a PDF not always"],
+      ["What is inside", "22 sections, each on its own", "about 15,000 words about you: links, the main knot, a plan", "a talk; a recording or a PDF not always"],
       ["Your question", "—", "answered by the chapters and the questions section", "yes"],
     ],
   } satisfies Pair<[string, string, string, string][]>,
@@ -244,19 +244,21 @@ export const individualLanding = {
       personal: (who: string) => `Характер, дело, деньги, отношения, род, хвост, тело, время и план — по ${who}.`,
       pair: () => "Ключ пары, деньги, задачи, ссоры и как их чинить, план для двоих — по двум датам.",
       year: () => "Матрица любого года, три периода и двенадцать глав-месяцев: когда начинать, когда закрывать.",
+      child: () => "Разбор по дате ребёнка для вас как для родителя: характер, способности, общение, возрастные периоды и как договариваться.",
     },
     en: {
       personal: (who: string) => `Character, work, money, relationships, lineage, tail, body, time and a plan — for ${who}.`,
       pair: () => "The key of the couple, money, tasks, quarrels and how to mend them, a plan for two — for two dates.",
       year: () => "The matrix of any year, three periods and twelve month chapters: when to start, when to close.",
+      child: () => "A reading from the child’s date for you as a parent: character, abilities, friendships, stages of growing up and how to get along.",
     },
-  } satisfies Pair<Record<"personal" | "pair" | "year", (x: string) => string>>,
+  } satisfies Pair<Record<"personal" | "pair" | "year" | "child", (x: string) => string>>,
   yourDate: { ru: "вашей дате", en: "your date" } satisfies Phrase,
   theDate: { ru: (d: string) => `дате ${d}`, en: (d: string) => d } satisfies PhraseFn<[string]>,
   exLabel: {
-    ru: { personal: "Пример личного разбора", pair: "Пример разбора пары", year: "Пример разбора на год" },
-    en: { personal: "Example of a personal reading", pair: "Example of a couple reading", year: "Example of a year reading" },
-  } satisfies Pair<Record<"personal" | "pair" | "year", string>>,
+    ru: { personal: "Пример личного разбора", pair: "Пример разбора пары", year: "Пример разбора на год", child: "Пример детской матрицы" },
+    en: { personal: "Example of a personal reading", pair: "Example of a couple reading", year: "Example of a year reading", child: "Example of a child’s matrix" },
+  } satisfies Pair<Record<"personal" | "pair" | "year" | "child", string>>,
   ribbon: { ru: "Рекомендуем до конца января", en: "Recommended until the end of January" } satisfies Phrase,
   selfYearTagline: { ru: (y: number) => `Личный + Год ${y}`, en: (y: number) => `Personal + Year ${y}` } satisfies PhraseFn<[number]>,
   selfYearDesc: {

@@ -37,7 +37,7 @@ export default async function IndividualPage({ searchParams }: { searchParams: S
   const { providers } = await getBilling();
   const params = await searchParams;
   const one = (key: string) => String((Array.isArray(params[key]) ? params[key]![0] : params[key]) ?? "");
-  const { cart: initialCart, year: initialYear } = cartFromQuery(one);
+  const { cart: initialCart, year: initialYear, preset } = cartFromQuery(one);
   const now = new Date();
   const { faqLd } = localizedSchema(L, site);
   // the service and its starting price; the FAQ markup stands next to the visible answers
@@ -52,7 +52,7 @@ export default async function IndividualPage({ searchParams }: { searchParams: S
       <JsonLd data={serviceLd} />
       <JsonLd data={faqLd(T.faq[L].map(([q, a]) => ({ q, a })))} />
       <CrumbsLd locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.individual[L] }]} />
-      <IndividualLanding data={landingData(L)} providers={providers ?? []} initialCart={initialCart} initialYear={initialYear}
+      <IndividualLanding data={landingData(L)} providers={providers ?? []} initialCart={initialCart} initialYear={initialYear} preset={preset}
         serverYear={defaultYearFor({ month: now.getMonth() + 1, year: now.getFullYear() })} />
     </main>
   );

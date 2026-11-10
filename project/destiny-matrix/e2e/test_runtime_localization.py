@@ -8,7 +8,7 @@ import subprocess
 import pytest
 from playwright.sync_api import expect
 
-from conftest import BASE
+from conftest import BASE, absolute
 
 
 @pytest.fixture(autouse=True)
@@ -122,7 +122,7 @@ def test_paid_pdf_is_rendered_and_cached_per_locale(page, mail, tmp_path):
     en = page.request.post(BASE + "/api/reports/pdf", data={"matrix_id": matrix_id},
                            headers={"Accept-Language": "en"}, timeout=180_000)
     assert en.ok, en.text()
-    pdf = page.request.get(en.json()["url"])
+    pdf = page.request.get(absolute(en.json()["url"]))
     assert pdf.ok and pdf.body().startswith(b"%PDF")
     file = tmp_path / "english.pdf"
     file.write_bytes(pdf.body())

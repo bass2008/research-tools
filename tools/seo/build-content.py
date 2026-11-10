@@ -42,6 +42,10 @@ CHAKRA_ARTICLE = ("title", "short", "seo", "intro", "sections", "faq")
 KEY_FIELD = {"year-arcana": "n", "compatibility-arcana": "n"}
 
 
+def hub_path(key: str) -> str:
+    return f"/encyclopedia/{key}"
+
+
 def fail(problems: list[str], where: str, text: str) -> None:
     problems.append(f"{where}: {text}")
 
@@ -137,7 +141,7 @@ def check_chakra_reading(value: object, where: str, at: str, problems: list[str]
     triple = value.get("triple") if isinstance(value, dict) else None
     if (not isinstance(chakra, str) or not isinstance(triple, str) or set(value) - {"chakra", "triple", "note"}
             or triple not in CHAKRA_READINGS.get(chakra, ())):
-        fail(problems, where, f"{at}: chakra_reading — chakra и triple из chakra-personal.json или material-karma.json, плюс необязательный note")
+        fail(problems, where, f"{at}: chakra_reading — chakra и triple из корпуса чакр или раздела-тройки, плюс необязательный note")
         return
     note = value.get("note")
     if note is None:
@@ -377,17 +381,17 @@ def check_chakra_article(item: dict, where: str, base_keys: set, key: str, probl
 def known_paths(lang: str) -> set[str]:
     dst = DST_ROOT / lang
     paths = {"/encyclopedia", "/encyclopedia/arcanum", "/encyclopedia/karmic-tail", "/encyclopedia/combination",
-             "/encyclopedia/position", "/encyclopedia/chakra", "/encyclopedia/chakra/energy-field", "/encyclopedia/month", "/year",
+             "/encyclopedia/position", "/encyclopedia/chakra", "/encyclopedia/chakra/energy-field", "/encyclopedia/month", "/encyclopedia/year",
              "/encyclopedia/compatibility", "/compatibility"}
     paths |= {f"/encyclopedia/compatibility/{x['n']}" for x in base_items(dst, "compatibility-arcana.json")}
     paths |= {f"/encyclopedia/arcanum/{x['n']}" for x in base_items(dst, "arcana.json")}
-    paths |= {f"/year/{x['n']}" for x in base_items(dst, "year-arcana.json")}
+    paths |= {f"/encyclopedia/year/{x['n']}" for x in base_items(dst, "year-arcana.json")}
     paths |= {f"/encyclopedia/karmic-tail/{x['key']}" for x in base_items(dst, "karmic-tails.json")}
     paths |= {f"/encyclopedia/combination/{x['key']}" for x in base_items(dst, "combinations.json")}
     paths |= {f"/encyclopedia/position/{x['key']}" for x in base_items(dst, "positions.json")}
     paths |= {f"/encyclopedia/position/{x['position']}/{x['arcanum']}" for x in base_items(dst, "position-arcanum.json")}
     paths |= {f"/encyclopedia/chakra/{x['key']}" for x in base_items(dst, "chakras.json")}
-    paths |= {f"/{x['key']}" for x in base_items(dst, "hubs.json")}
+    paths |= {hub_path(x['key']) for x in base_items(dst, "hubs.json")}
     return paths
 
 
@@ -428,9 +432,10 @@ def main() -> int:
     corpus = json.loads((dst / "chakra-personal.json").read_text())
     CHAKRA_READINGS.update({key: set(chakra["readings"]) for key, chakra in corpus["chakras"].items()})
     CHAKRA_READINGS["energy_field"] = set(corpus.get("energy_field", {}).get("readings", {}))
-    # Связные толкования материальной кармы вставляются в статьи тем же блоком, что и чакры.
-    material = dst / "material-karma.json"
-    CHAKRA_READINGS["material_karma"] = set(json.loads(material.read_text())["readings"]) if material.exists() else set()
+    # Связные толкования разделов-троек вставляются в статьи тем же блоком, что и чакры.
+    for key in ("material_karma", "parent_child_line"):
+        corpus_file = dst / f"{key.replace('_', '-')}.json"
+        CHAKRA_READINGS[key] = set(json.loads(corpus_file.read_text())["readings"]) if corpus_file.exists() else set()
 
     problems: list[str] = []
     warnings: list[str] = []

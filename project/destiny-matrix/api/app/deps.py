@@ -24,7 +24,7 @@ def optional_user(
         return None
     user_id, fingerprint, _, version = read
     user = db.get(User, user_id)
-    if user is None or password_fingerprint(user.password_hash) != fingerprint or user.auth_version != version:
+    if user is None or user.deletion_requested_at or user.deleted_at or password_fingerprint(user.password_hash) != fingerprint or user.auth_version != version:
         return None
     return user
 
@@ -47,6 +47,6 @@ def writable_user(db: Session, user_id: int, version: int, ghost: bool) -> User:
     if ghost:
         raise error(403, "Изменять реквизиты в чужом кабинете нельзя.", "Account changes are unavailable while impersonating.")
     user = db.get(User, user_id, populate_existing=True)
-    if not user or user.auth_version != version:
+    if not user or user.deletion_requested_at or user.deleted_at or user.auth_version != version:
         raise error(401, "Войдите снова.", "Please sign in again.")
     return user

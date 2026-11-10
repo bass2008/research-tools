@@ -1,21 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSession } from "@/components/account/useSession";
 import { BirthPicker, isoOf, type PickedDate } from "@/components/pay/BirthPicker";
 import { YearInput, forgetIndividualTerms } from "@/components/pay/individualTerms";
 import { useLocale } from "@/components/ui/LocaleProvider";
+import { useMessage } from "@/lib/i18n/useMessage";
 import Link from "@/components/ui/LocalizedLink";
 import RichText from "@/components/ui/RichText";
 import { track } from "@/lib/analytics";
 import { ApiError, forLocale as localizedApi } from "@/lib/api";
 import { D, forLocale as localizedI18n } from "@/lib/i18n";
-import { OWN, defaultChoices, defaultYears, problemOf, readingsOf, resolve, slotsOf, type Choices } from "@/lib/individualOrder";
-import { workdaysFrom, type Cart } from "@/lib/individualPricing";
+import {
+  CHILD_HINT_AGE, CHILD_TAG_MAX_AGE, OWN, ageOn, carryChoices, defaultChoices, defaultYears, problemOf, readingsOf, resolve, slotsOf, type Choices,
+} from "@/lib/individualOrder";
+import { RELATION_CODES, workdaysFrom, type Cart, type OrderPreset } from "@/lib/individualPricing";
 import type { Sex } from "@/lib/matrix";
 import type { StoredBirth, StoredPair } from "@/lib/storage";
 import type { PaymentProvider } from "@/lib/tariffs";
-import { browserDay } from "@/lib/today";
+import { browserDay, moscowDay } from "@/lib/today";
 import { pairTrio, personalTrio, yearTrio, type Trio } from "@/lib/arcanaTrio";
 
 const MIN_PASSWORD = 3;
@@ -28,8 +31,9 @@ function validDate(d: PickedDate): boolean {
 }
 
 /** Who each reading is for, a question, the account and the payment — everything before paying. */
-export default function OrderForm({ cart, baseYear, total, providers, payable, initialBirth, initialPair, question, setQuestion, topics, latest, onDates, onYears, onTrio, summary }: {
+export default function OrderForm({ cart, baseYear, total, providers, payable, initialBirth, initialPair, preset = {}, childBySwitch = false, question, setQuestion, topics, latest, onDates, onYears, onTrio, summary }: {
   cart: Cart; baseYear: number; total: string; providers: PaymentProvider[]; payable: boolean; initialBirth: StoredBirth | null; initialPair?: StoredPair | null;
+  preset?: OrderPreset; childBySwitch?: boolean;
   question: string; setQuestion: (q: string) => void; topics: ReactNode; latest: string;
   onDates: (dates: string[]) => void; onYears: (years: number[]) => void; onTrio?: (trio: Trio | null) => void; summary: string;
 }) {
@@ -43,27 +47,39 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   const [choices, setChoices] = useState<Choices>(() => defaultChoices(cart));
   const [people, setPeople] = useState<Record<string, { date: PickedDate; sex: Sex }>>({});
   const [years, setYears] = useState<Record<string, number>>({});
-  const [relations, setRelations] = useState<Record<string, string>>({});
+  const [relations, setRelations] = useState<Record<string, string>>(() => preset.relation
+    ? Object.fromEntries(slots.filter((s) => s.kind === "pair").map((s) => [s.roles[0], T.relations[L][RELATION_CODES.indexOf(preset.relation!)]]))
+    : {});
+  const [childTags, setChildTags] = useState<Record<string, boolean>>(() => ({ p0: Boolean(preset.childFirst) }));
+  useEffect(() => { setChildTags((c) => ({ ...c, p0: Boolean(preset.childFirst) })); }, [preset.childFirst]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useMessage(L);
   const [lostPassword, setLostPassword] = useState(false);
   const [done, setDone] = useState<[string, string] | null>(null);
-  const signedIn = session.status === "user";
+  // A recheck on returning to the tab keeps the known account: the guest fields flashed for its 0.1 s.
+  const signedIn = session.status === "user" || (session.status === "loading" && Boolean(session.email));
   const mail = signedIn && session.email ? session.email : email.trim().toLowerCase();
 
-  useEffect(() => { setChoices(defaultChoices(cart)); }, [cart]);
+  const picked = useRef(new Set<string>());
+  useEffect(() => { setChoices((c) => carryChoices(cart, c, picked.current)); }, [cart]);
 
   const roles = slots.flatMap((s) => s.roles);
   // the couple calculated last fills the first pair; everyone else starts empty, the first one from the stored date
   const initialOf = (role: string): StoredBirth | null => initialPair && role === "a0" ? { birth: initialPair.a.birth, sex: "f" }
-    : initialPair && role === "b0" ? { birth: initialPair.b.birth, sex: "f" } : role === roles[0] ? initialBirth : null;
+    : initialPair && role === "b0" ? { birth: initialPair.b.birth, sex: "f" } : role === roles[0] && !preset.childFirst ? initialBirth : null;
   const { owners, person } = resolve(slots, choices);
   const fallbackYears = defaultYears(slots, person, baseYear);
   const yearOf = (role: string) => years[role] || fallbackYears[role];
-  const readings = readingsOf(slots, person, yearOf, (role) => relations[role] ?? "");
+  const readings = readingsOf(slots, person, yearOf, (role) => relations[role] ?? "", (role) => Boolean(childTags[role]));
+  const ageOf = (role: string) => {
+    if (!people[role] || !validDate(people[role].date)) return null;
+    const { year, month, day } = browserDay();
+    return ageOn(isoOf(people[role].date), `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
+  };
+  const tooOld = (role: string) => Boolean(childTags[role]) && (ageOf(role) ?? 0) > CHILD_TAG_MAX_AGE;
   const dateOf = (role: string) => people[role] ? dateLabel(isoOf(people[role].date), L) : "";
   const sourceOf = (role: string) => {
     const key = role[0] as "p" | "y" | "a" | "b";
@@ -83,7 +99,7 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
   const trioKey = trio ? trio.join("-") : "";
   useEffect(() => { onTrio?.(trioKey ? trioKey.split("-").map(Number) as Trio : null); }, [trioKey, onTrio]);
 
-  const choose = (role: string, target: string) => { setError(""); setChoices((c) => ({ ...c, [role]: target })); };
+  const choose = (role: string, target: string) => { setError(null); picked.current.add(role); setChoices((c) => ({ ...c, [role]: target })); };
   const who = (role: string, label?: string) => {
     const before = owners.filter((o) => roles.indexOf(o) < roles.indexOf(role));
     if (!before.length) return null;
@@ -100,24 +116,41 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
       </div>
     );
   };
+  // the buyer decides what the reading is; the age only suggests the tag and limits it to minors
+  const childTag = (role: string) => {
+    const on = Boolean(childTags[role]);
+    const age = ageOf(role);
+    const note = on ? (tooOld(role) ? T.errChildAdult[L] : T.childTagNote[L]) : age !== null && age < CHILD_HINT_AGE ? T.childHint[L] : "";
+    if (childBySwitch && !note) return null;
+    return (
+      <div className="lp-fl lp-child">
+        {!childBySwitch && <div className="lp-topics">
+          <button type="button" className={on ? "lp-on" : undefined} aria-pressed={on} disabled={busy} data-testid={`iorder-child-${role}`}
+            onClick={() => { setError(null); setChildTags((c) => ({ ...c, [role]: !on })); }}>{T.childTag[L]}</button>
+        </div>}
+        {note && <small data-testid={`iorder-child-note-${role}`}>{note}</small>}
+      </div>
+    );
+  };
   // kept mounted while someone else is chosen: switching back must not lose the typed date
   const picker = (role: string) => (
     <div hidden={!owners.includes(role)}>
-      <BirthPicker locale={L} idPrefix={`lp-${role}`} initial={initialOf(role)} ready disabled={busy}
+      <BirthPicker locale={L} idPrefix={`lp-${role}`} initial={initialOf(role)} ready disabled={busy} yearsAgo={childTags[role] ? 8 : undefined}
         onChange={(value) => setPeople((p) => ({ ...p, [role]: value }))} />
     </div>
   );
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setLostPassword(false);
-    if (!readings.length) return setError(T.errEmpty[L]);
-    if (owners.some((o) => !people[o] || !validDate(people[o].date))) return setError(T.errDate[L]);
+    if (!readings.length) return setError(T.errEmpty);
+    if (owners.some((o) => !people[o] || !validDate(people[o].date))) return setError(T.errDate);
     const problem = problemOf(readings);
-    if (problem) return setError(problem === "samePerson" ? T.errSamePerson[L] : T.errDuplicate[L]);
-    if (!signedIn && password.length < MIN_PASSWORD) return setError(D.payForm.errors.shortPassword[L](MIN_PASSWORD));
-    if (!agreed) return setError(D.payForm.errors.consent[L]);
+    if (problem) return setError(problem === "samePerson" ? T.errSamePerson : T.errDuplicate);
+    if (slots.some((s) => s.kind === "personal" && tooOld(s.roles[0]))) return setError(T.errChildAdult);
+    if (!signedIn && password.length < MIN_PASSWORD) return setError((l) => D.payForm.errors.shortPassword[l](MIN_PASSWORD));
+    if (!agreed) return setError(D.payForm.errors.consent);
     setBusy(true);
     track("individual_order_submit", { count: readings.length });
     try {
@@ -137,15 +170,15 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
         window.location.href = res.payment_url;
         return;
       }
-      const today = browserDay();
-      setDone([dateLabel(workdaysFrom(today, 1), L), dateLabel(workdaysFrom(today, 3), L)]);
+      const today = moscowDay();
+      setDone([workdaysFrom(today, 1), workdaysFrom(today, 3)]);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setError(D.payForm.errors.wrongPassword[L]);
+        setError(D.payForm.errors.wrongPassword);
         setLostPassword(true);
       }
-      else if (err instanceof ApiError) setError(err.messageFor(L).replace(/[.!…]?$/, ".") + (err.status ? D.payForm.errors.notCharged[L] : ""));
-      else setError(D.payForm.errors.generic[L]);
+      else if (err instanceof ApiError) setError((l) => err.messageFor(l).replace(/[.!…]?$/, ".") + (err.status ? D.payForm.errors.notCharged[l] : ""));
+      else setError(D.payForm.errors.generic);
     } finally {
       setBusy(false);
     }
@@ -155,7 +188,7 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
     return (
       <div className="lp-form lp-ff lp-done" data-testid="iorder-done">
         <h3>{T.doneTitle[L]}</h3>
-        <p>{T.doneText[L](done[0], done[1])}</p>
+        <p>{T.doneText[L](dateLabel(done[0], L), dateLabel(done[1], L))}</p>
         <Link className="lp-btn lp-gold" href="/account?filter=individual">{T.toGolden[L]}</Link>
       </div>
     );
@@ -165,11 +198,11 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
     <form className="lp-form lp-ff" onSubmit={submit} noValidate data-testid="iorder">
       {slots.map((s) => (
         <fieldset className="lp-person" key={s.roles[0]} data-testid={`iorder-${s.roles[0]}`}>
-          <legend>{T.slotTitle[L][s.kind]}{cart[s.kind] > 1 ? ` ${s.n + 1}` : ""}</legend>
+          <legend>{s.kind === "personal" && childTags[s.roles[0]] ? T.childTag[L] : T.slotTitle[L][s.kind]}{cart[s.kind] > 1 ? ` ${s.n + 1}` : ""}</legend>
           {s.kind === "pair" ? s.roles.map((role, i) => {
             const side = i ? T.secondPerson[L] : T.firstPerson[L];
             return <div className="lp-side" key={role}><span className="lp-lbl2">{side}</span>{who(role, side)}{picker(role)}</div>;
-          }) : <>{s.kind === "year" && who(s.roles[0])}{picker(s.roles[0])}</>}
+          }) : <>{s.kind === "year" && who(s.roles[0])}{picker(s.roles[0])}{s.kind === "personal" && childTag(s.roles[0])}</>}
           {s.kind === "year" && (
             <label className="lp-fl lp-yrow">
               <span>{T.yearLabel[L]}</span>
@@ -206,7 +239,7 @@ export default function OrderForm({ cart, baseYear, total, providers, payable, i
         </label>
       </>}
       <label className="lp-check">
-        <input type="checkbox" checked={agreed} onChange={(e) => { setError(""); setAgreed(e.target.checked); }} data-testid="iorder-consent" />
+        <input type="checkbox" checked={agreed} onChange={(e) => { setError(null); setAgreed(e.target.checked); }} data-testid="iorder-consent" />
         <span>
           {D.payForm.consentHead[L]}{" "}
           <Link href="/privacy" target="_blank" rel="noopener">{D.payForm.consentPolicy[L]}</Link>

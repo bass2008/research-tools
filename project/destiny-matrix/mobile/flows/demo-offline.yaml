@@ -1,0 +1,64 @@
+appId: com.arcanasense.app
+---
+# The shell runner has disabled connectivity and removed Metro's adb reverse.
+# This flow must use the standalone APK, never a Metro-dependent dev client.
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: home-demo-preview
+    timeout: 15000
+- assertNotVisible:
+    id: account-profile
+- tapOn:
+    id: home-demo-preview
+- extendedWaitUntil:
+    visible:
+      id: demo-persistent-label
+    timeout: 8000
+- takeScreenshot: offline-demo-entry-ru
+- tapOn:
+    id: reader-contents
+- tapOn:
+    id: contents-character
+- assertVisible:
+    id: section-character
+- assertVisible: 'Как вы устроены и что в вас видят люди с первого взгляда.'
+- assertNotVisible:
+    id: auth-email
+- assertNotVisible:
+    id: 'buy-(single|pair|month)'
+- takeScreenshot: offline-demo-reading-ru
+- tapOn:
+    id: reader-contents
+- scrollUntilVisible:
+    element:
+      id: contents-years
+    direction: DOWN
+- tapOn:
+    id: contents-years
+- assertVisible:
+    id: demo-chapter-years
+- assertVisible: 'Разбор по десятилетиям до 80 лет'
+- takeScreenshot: offline-demo-last-ru
+- openLink: 'arcanasense://en/encyclopedia/demo?view=reading'
+- extendedWaitUntil:
+    visible:
+      id: section-character
+    timeout: 8000
+- assertVisible: 'How you are built and what people see in you at first glance.'
+- assertVisible:
+    id: demo-persistent-label
+- assertNotVisible:
+    id: auth-email
+- takeScreenshot: offline-demo-reading-en
+- tapOn:
+    id: reader-contents
+- scrollUntilVisible:
+    element:
+      id: contents-years
+    direction: DOWN
+- tapOn:
+    id: contents-years
+- assertVisible: 'Reading by decades up to 80'
+- takeScreenshot: offline-demo-last-en

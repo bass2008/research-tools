@@ -5,9 +5,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from engine.lisovskaya import (age_points, family_lines, family_strength, material_karma, month_matrix,  # noqa: E402
+from engine.lisovskaya import (age_points, family_lines, family_strength, material_karma, month_matrix, parent_child_line,  # noqa: E402
                                year_matrix, year_periods, year_ring)
 from engine.matrix import Matrix, calculate  # noqa: E402
+
+
+def test_parent_child_line_matches_author_example():
+    # her line 9-12-3 is read from the parents: J 9, O 12, A 3; 03.05.2002 has A 3 and J 9
+    m = calculate("2002-05-03")
+    assert parent_child_line(m) == [3, 12, 9]
+    assert m.chakras[1].physics == 12
 
 
 def test_material_karma_matches_author_example():

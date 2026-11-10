@@ -4,8 +4,10 @@ import type { Metadata } from "next";
 import Link from "@/components/ui/LocalizedLink";
 
 import AdminView from "@/components/admin/AdminView";
+import { serverSettings } from "@/lib/settings/server";
 import { forLocale } from "@/lib/site";
 import { requestSite } from "@/lib/siteProfile.server";
+import { deployLabel } from "@/lib/version";
 
 // Данные приходят в браузер по куке, поэтому страница печатается на запрос и в индекс не идёт.
 export const dynamic = "force-dynamic";
@@ -31,7 +33,7 @@ export default async function AdminPage() {
           <Link href="/account">{t("Кабинет")}</Link> <span>/</span> <span>{t("Админка")}</span>
         </p>
         <h1>{t("Админка")}</h1>
-        <AdminView />
+        <AdminView deployedAt={deployLabel(serverSettings.get("deployedAt"))} />
       </div>
     </main>
   );

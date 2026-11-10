@@ -24,11 +24,11 @@ describe("состав энциклопедии", () => {
     expect(ARCANA.map((a) => a.n)).toEqual(Array.from({ length: 22 }, (_, i) => i + 1));
   });
 
-  it("39 позиций: 21 раздел и 18 точек матрицы", () => {
-    expect(POSITIONS).toHaveLength(39);
-    expect(POSITIONS.filter((p) => p.kind === "section")).toHaveLength(21);
+  it("40 позиций: 22 раздела и 18 точек матрицы", () => {
+    expect(POSITIONS).toHaveLength(40);
+    expect(POSITIONS.filter((p) => p.kind === "section")).toHaveLength(22);
     expect(POSITIONS.filter((p) => p.kind === "point")).toHaveLength(18);
-    expect(new Set(POSITION_KEYS).size).toBe(39);
+    expect(new Set(POSITION_KEYS).size).toBe(40);
     for (const key of SECTION_KEYS) expect(positionByKey(key)).toBeDefined();
   });
 
@@ -72,8 +72,8 @@ describe("состав энциклопедии", () => {
     expect(CHAKRA_PAGES.map((c) => c.index)).toEqual([7, 6, 5, 4, 3, 2, 1]);
   });
 
-  it("итого 300 статических страниц", () => {
-    expect(ENCYCLOPEDIA_PAGE_COUNT).toBe(300);
+  it("итого 301 статическая страница", () => {
+    expect(ENCYCLOPEDIA_PAGE_COUNT).toBe(301);
   });
 });
 
@@ -91,7 +91,7 @@ describe("канонический контент по контракту", () =
       expect(e.plus.length).toBeGreaterThanOrEqual(3);
       expect(e.minus.length).toBeGreaterThanOrEqual(3);
       expect(e.combinations).toHaveLength(21);
-      expect(Object.keys(e.inPositions)).toHaveLength(39);
+      expect(Object.keys(e.inPositions)).toHaveLength(40);
       expect(e.seo.title).toContain(String(n));
       expect(e.seo.description.length).toBeGreaterThan(60);
     }
@@ -120,7 +120,7 @@ describe("перелинковка без тупиков", () => {
   it("индекс ведёт на все арканы, позиции и чакры", () => {
     const idx = encyclopediaIndex();
     expect(idx.arcana).toHaveLength(22);
-    expect(idx.positions).toHaveLength(39);
+    expect(idx.positions).toHaveLength(40);
     expect(idx.chakras).toHaveLength(7);
     expect(idx.combinations_count).toBe(231);
     for (const a of idx.arcana) expect(a.href).toBe(`/encyclopedia/arcanum/${a.n}`);

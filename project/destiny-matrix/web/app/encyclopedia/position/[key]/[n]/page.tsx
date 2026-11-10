@@ -1,4 +1,5 @@
 import { requestSite } from "@/lib/siteProfile.server";
+import { articleSource } from "@/app/_lib/article";
 import PositionMap from "@/components/enc/PositionMap";
 import Sections from "@/components/enc/Sections";
 import CalcPromo from "@/components/matrix/CalcPromo";
@@ -42,7 +43,7 @@ const forLocale = localized((L: Locale, site) => {
     const arcanum = Number(params.n);
     if (!Number.isInteger(arcanum)) return null;
     if (!registryItem(params.key, arcanum)) return null;
-    return buildPositionArcanum(params.key, arcanum);
+    return articleSource(`/encyclopedia/position/${params.key}/${arcanum}`, { locale: L }, "intersection");
   }
   return { arcanumTitle, arcanumHref, positionByKey, buildPositionArcanum, positionArcanumHref, positionArcanumLabel, positionArcanumSiblings, registryItem, registryItems, encyclopediaSectionCrumb, articleLd, faqLd, NOT_FOUND_META, mapPointsFor, pageMeta, data };
 });

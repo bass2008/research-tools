@@ -1,0 +1,30 @@
+appId: com.arcanasense.app
+---
+- assertVisible: 'Начните с себя|Begin with yourself'
+- waitForAnimationToEnd
+- takeScreenshot: 01-first-launch
+- tapOn:
+    id: birth-day
+- inputText: '14'
+- tapOn:
+    id: birth-month
+- inputText: '06'
+- tapOn:
+    id: birth-year
+- inputText: '1987'
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 02-date
+- scrollUntilVisible:
+    element:
+      id: calculate
+    direction: DOWN
+- tapOn:
+    id: calculate
+- extendedWaitUntil:
+    visible:
+      id: matrix-chart
+    timeout: 30000
+- assertVisible: '14 июня 1987|14 June 1987'
+- waitForAnimationToEnd
+- takeScreenshot: 03-chart

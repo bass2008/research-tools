@@ -1,4 +1,5 @@
 import PersonalSectionArticle from "@/components/matrix/PersonalSectionArticle";
+import { articleSource } from "@/app/_lib/article";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
@@ -39,9 +40,10 @@ export const forLocale = localized((L: Locale, site) => {
     const matrix = sectionReadingMatrix(key, params.slug, query);
     const section = sectionByKey(key);
     if (!matrix || !section) return null;
-    const reading = buildSectionReading(key, matrix);
     const suffix = key === "years" && query.birth ? `?birth=${query.birth}` : "";
     const path = `/encyclopedia/${key}/${params.slug}${suffix}`;
+    const reading = articleSource(path, { locale: L }, "reading");
+    if (!reading) return null;
     // Без параметра `birth` линия отдаётся без персонального возраста и `matrix.birth` пуст:
     // `birthLabel("")` давал «для даты undefined undefined 0» в трёх метатегах и в JSON-LD
     // на всех 5 544 адресах раздела.

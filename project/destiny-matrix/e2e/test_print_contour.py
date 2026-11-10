@@ -25,7 +25,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 import flows
-from conftest import BASE, _credentials
+from conftest import BASE, _credentials, absolute
 
 
 def _register(page: Page) -> str:
@@ -100,7 +100,7 @@ def test_report_prints_on_this_contour(page: Page):
     )
     assert answer.get("status") == "done", f"печать не дошла до готового файла: {answer}"
 
-    url = answer.get("url", "")
+    url = absolute(answer.get("url", ""))
     assert url.startswith("http"), url
     opener = urllib.request.build_opener()
     credentials = _credentials()

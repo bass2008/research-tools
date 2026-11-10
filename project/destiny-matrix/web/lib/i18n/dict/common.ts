@@ -31,9 +31,9 @@ export const meta = {
   } satisfies Phrase,
   siteDescription: {
     ru: "Калькулятор матрицы судьбы: октаграмма 22 арканов, карта энергий по чакрам и разбор "
-      + "по 21 разделу. Расчёт карты и два раздела разбора — бесплатно и без регистрации.",
+      + "по 22 разделам. Расчёт карты и два раздела разбора — бесплатно и без регистрации.",
     en: "Destiny matrix calculator: the octagram of 22 arcana, the chakra energy map and a "
-      + "reading in 21 sections. The chart and two sections are free, with no sign-up.",
+      + "reading in 22 sections. The chart and two sections are free, with no sign-up.",
   } satisfies Phrase,
   notFoundTitle: { ru: "Страница не найдена", en: "Page not found" } satisfies Phrase,
   notFoundDescription: {

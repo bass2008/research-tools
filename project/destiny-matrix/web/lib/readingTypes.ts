@@ -42,7 +42,7 @@ export interface ReadingConclusion {
 }
 
 export interface ChakraReadingCell {
-  column: "physics" | "energy" | "emotions" | "C" | "Q" | "L";
+  column: "physics" | "energy" | "emotions" | "C" | "Q" | "L" | "A" | "O" | "J";
   title: string;
   arcanum: number;
   caption: string;

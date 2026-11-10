@@ -16,6 +16,11 @@ def material_karma(m: Matrix) -> list[int]:
     return _material_karma(m)
 
 
+def parent_child_line(m: Matrix) -> list[int]:
+    """A → O → J: внешнее проявление, отношение к детям (A + J), родители."""
+    return [m.day, fold(m.day + m.comfort_west), m.comfort_west]
+
+
 def family_strength(m: Matrix) -> int:
     """Центр родового квадрата: сумма четырёх угловых точек."""
     return fold(sum(getattr(m, key) for key in CORNERS))

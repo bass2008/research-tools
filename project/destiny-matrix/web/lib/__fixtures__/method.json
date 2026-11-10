@@ -345,6 +345,18 @@
         "comfort_east"
       ]
     },
+    "parent_child_line": {
+      "symbols": [
+        "A",
+        "O",
+        "J"
+      ],
+      "keys": [
+        "day",
+        "ajna_physics",
+        "comfort_west"
+      ]
+    },
     "money": {
       "symbols": [
         "L",

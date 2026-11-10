@@ -32,7 +32,7 @@ describe("загрузчик сгенерированного контента",
     }
   });
 
-  it("у всех 21 раздела отчёта есть полноценная SEO-статья", () => {
+  it("у всех 22 разделов отчёта есть полноценная SEO-статья", () => {
     const templateOpening = /^(Смысл|Формула|Порядок|Связи|Пример|Практика|Границы|Соседние темы) (для )?[«"]/;
     for (const position of POSITIONS.filter((item) => item.kind === "section")) {
       const article = positionContent(position.key)!;
@@ -93,7 +93,7 @@ describe("загрузчик сгенерированного контента",
 
   it("статистика показывает, сколько записей нашлось", () => {
     const s = contentStats();
-    expect(s).toMatchObject({ arcana: 22, positions: 39, chakras: 7, combinations: 231 });
+    expect(s).toMatchObject({ arcana: 22, positions: 40, chakras: 7, combinations: 231 });
     for (const v of Object.values(s)) expect(v).toBeGreaterThanOrEqual(0);
   });
 
@@ -156,7 +156,7 @@ describe("загрузчик сгенерированного контента",
     }
   });
 
-  it("каждый аркан имеет полный корпус 39 позиционных трактовок", () => {
+  it("каждый аркан имеет полный корпус 40 позиционных трактовок", () => {
     const expected = new Set(POSITIONS.map((position) => position.key));
     for (let n = 1; n <= 22; n++) {
       const content = arcanumContent(n)!;

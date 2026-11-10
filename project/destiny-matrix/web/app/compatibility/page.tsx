@@ -2,7 +2,7 @@ import { requestSite } from "@/lib/siteProfile.server";
 import PairCalculator, { type MinePair } from "@/components/pair/PairCalculator";
 import { pairView } from "@/components/pair/pairView";
 import Crumbs from "@/components/ui/Crumbs";
-import JsonLd from "@/components/ui/JsonLd";
+import Faq from "@/components/ui/Faq";
 import { D } from "@/lib/i18n";
 import { DP } from "@/lib/i18n/dict/pair";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -11,7 +11,6 @@ import { publicLocale, requestLocale } from "@/lib/i18n/request";
 import { pairUnits } from "@/lib/pair/corpus";
 import { computePair } from "@/lib/pair/engine";
 import { forLocale as localizedContent } from "@/lib/content";
-import { forLocale as localizedSchema } from "@/lib/schema";
 import { forLocale as localizedSite } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "@/components/ui/LocalizedLink";
@@ -39,13 +38,12 @@ const forLocale = localized((L: Locale, site) => {
 
 export default async function CompatibilityPage() {
   const L = await requestLocale();
-  const { faqLd } = localizedSchema(L, await requestSite());
   const faq = DP.seo.faq.map((item) => ({ q: item.q[L], a: item.a[L] }));
   const { hub, categoryHub } = localizedContent(L);
   const articles = [
-    { href: "/compatibility-center", item: hub("compatibility-center") },
+    { href: "/encyclopedia/compatibility-center", item: hub("compatibility-center") },
     { href: "/encyclopedia/compatibility/tails", item: categoryHub("compatibility-tails") },
-    { href: "/business-compatibility", item: hub("business-compatibility") },
+    { href: "/encyclopedia/business-compatibility", item: hub("business-compatibility") },
   ].flatMap(({ href, item }) => item ? [{ href, label: item.crumb ?? item.title }] : []);
   const example = { ...EXAMPLE, units: pairUnits(L, computePair(EXAMPLE.a, EXAMPLE.b, L), EXAMPLE, false) };
   // без способа оплаты в регионе кнопок покупки нет — как у личного разбора
@@ -67,20 +65,13 @@ export default async function CompatibilityPage() {
   } : null;
   return (
     <main id="content">
-      <JsonLd data={faqLd(faq)} />
       <TariffsProvider product="pair" locale={L} server={pairOffers} providers={providers}>
         <PairCalculator example={example} mine={mine} lead={DP.lead[L]} sells={providers === null || providers.length > 0}
           top={<Crumbs locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: DP.navTitle[L] }]} />} />
       </TariffsProvider>
       <div className="wrap">
+        <Faq locale={L} items={faq} title={DP.seo.faqTitle[L]} />
         <section className="prose section-gap" data-testid="compatibility-about">
-          <h2>{DP.seo.faqTitle[L]}</h2>
-          {faq.map((item) => (
-            <div key={item.q}>
-              <h3>{item.q}</h3>
-              <p>{item.a}</p>
-            </div>
-          ))}
           {localizedContent(L).categoryHub("compatibility") ? (
             <p>
               {DP.seo.arcanaLine[L]} <Link href="/encyclopedia/compatibility">{DP.encCompat.all[L].toLowerCase()}</Link>.

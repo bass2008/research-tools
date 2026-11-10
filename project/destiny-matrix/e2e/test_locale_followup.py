@@ -8,7 +8,7 @@ from conftest import BASE
 @pytest.mark.parametrize("width", [320, 390])
 @pytest.mark.parametrize("path", [
     "/encyclopedia/position/center", "/encyclopedia/chakra", "/encyclopedia/karmic-tail",
-    "/year", "/encyclopedia/combination", "/method",
+    "/encyclopedia/year", "/encyclopedia/combination", "/encyclopedia/method",
 ])
 def test_translated_active_section_stays_visible(page, width, path):
     page.set_viewport_size({"width": width, "height": 844})

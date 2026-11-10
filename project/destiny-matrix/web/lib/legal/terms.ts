@@ -42,7 +42,7 @@ export const TERMS: LegalDocs = {
         p: ["Расчёт карты (октаграмма, все позиции, карта энергий по чакрам) и два раздела "
           + "страницы — «Характер и личные качества» и «Центр и внутренние точки» — исполнитель "
           + "выполняет бесплатно и без регистрации, в демонстрационных целях. Остальные "
-          + "девятнадцать разделов входят в оплачиваемый объём работ."],
+          + "двадцать разделов входят в оплачиваемый объём работ."],
       },
       { tariffs: "table" },
       {
@@ -161,7 +161,7 @@ export const TERMS: LegalDocs = {
       { h2: "2. What the service is" },
       {
         p: ["The service builds a destiny matrix chart from a date of birth and prepares a "
-          + "reading of that chart in up to 21 sections; from two dates of birth it builds a "
+          + "reading of that chart in up to 22 sections; from two dates of birth it builds a "
           + "couple compatibility matrix and its reading. The chart itself is calculated in the "
           + "browser; the text of the reading is written by us and shown on the website."],
       },

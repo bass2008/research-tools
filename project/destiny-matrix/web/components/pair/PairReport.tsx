@@ -24,7 +24,7 @@ import PairChakras from "./PairChakras";
 import PairOctagram from "./PairOctagram";
 import styles from "./Pair.module.css";
 
-const SPHERE_ARTICLE = { tasks: "/encyclopedia/compatibility/tails", atmosphere: "/compatibility-center", characters: "/encyclopedia/compatibility" } as const;
+const SPHERE_ARTICLE = { tasks: "/encyclopedia/compatibility/tails", atmosphere: "/encyclopedia/compatibility-center", characters: "/encyclopedia/compatibility" } as const;
 const hasArticle = (id: SphereId): id is keyof typeof SPHERE_ARTICLE => id in SPHERE_ARTICLE;
 
 export interface PairReportProps {
@@ -299,7 +299,7 @@ export default function PairReport(props: PairReportProps) {
           </details>
         );
       })}
-      <p className="encref"><Link href={href("/business-compatibility")} data-testid="pair-article-business">
+      <p className="encref"><Link href={href("/encyclopedia/business-compatibility")} data-testid="pair-article-business">
         {DP.article.business[L]}</Link></p>
       {bizLocked.length ? (
         <div className={styles.locks} data-testid="pair-business-locks">

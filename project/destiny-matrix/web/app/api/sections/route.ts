@@ -29,12 +29,13 @@ export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const only = params.get("section");
   const id = params.get("m");
-  if (params.get("preview") === "locked") {
+  if (params.get("preview") === "locked" || params.get("preview") === "free") {
     const slug = params.get("slug") ?? "";
     const item = matrixItem(slug);
     if (!item) return new NextResponse("Not found", { status: 404 });
     return NextResponse.json(
-      { sections: withLockedPreview(item.matrix, build(item.matrix, false)).filter((s) => s.locked) },
+      { schemaVersion: 1, sections: withPositionArticles(item.matrix, withLockedPreview(item.matrix, build(item.matrix, false)))
+        .filter((s) => params.get("preview") === "free" || s.locked) },
       { headers: { "Cache-Control": "private, no-store", "Content-Language": locale } },
     );
   }
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
     const matrix = matrixForLocale(locale).calculate(chosen.birth, chosen.sex);
     const sections = withPositionArticles(matrix, build(matrix, true)).filter((s) => !only || s.key === only);
     return NextResponse.json(
-      { sections },
+      { schemaVersion: 1, sections },
       { headers: { "Cache-Control": "private, no-store", "Content-Language": locale } },
     );
   }
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
   if (!item) return new NextResponse("Not found", { status: 404 });
   const matrix = item.matrix;
   return NextResponse.json(
-    { sections: withPositionArticles(matrix, build(matrix, true)) },
+    { schemaVersion: 1, sections: withPositionArticles(matrix, build(matrix, true)) },
     { headers: { "Cache-Control": "private, no-store", "Content-Language": locale } },
   );
 }

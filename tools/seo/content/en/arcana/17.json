@@ -95,7 +95,7 @@
       {
         "h2": "Where 17 sits in your matrix",
         "paragraphs": [
-          "67.1% of people have 17 somewhere in their report — roughly two in three; for other arcana the share ranges from 13.4% to 85%. In each place on the chart it answers its own question. Apart from the personal chart, 17 can also be the arcanum of the year — a year of direction, when what matters is to work out where to go next and to take the first steps; that is covered on the page [the year under The Star](/year/17).",
+          "67.1% of people have 17 somewhere in their report — roughly two in three; for other arcana the share ranges from 13.4% to 85%. In each place on the chart it answers its own question. Apart from the personal chart, 17 can also be the arcanum of the year — a year of direction, when what matters is to work out where to go next and to take the first steps; that is covered on the page [the year under The Star](/encyclopedia/year/17).",
           "In the table the letters are points of the chart. A is the day of birth (numbers above 22 are reduced: 23 → 5), B is the month, C is the sum of the digits of the year (1987 → 25 → 7), D is the sum A + B + C, and the centre is the sum A + B + C + D; sums above 22 are reduced too. The number 17 itself is not reduced to 1 + 7 = 8: in the matrix only numbers above 22 are reduced. And 17 has a handy property: you can hardly get it by reduction, because the first number whose digits add up to 17 is 89. So at points made up of two or three numbers, 17 appears only as an exact sum, and that is easy to check in your head.",
           {
             "table": {
@@ -236,7 +236,7 @@
       {
         "h2": "Why 17 never appears in the centre of the matrix",
         "paragraphs": [
-          "People often search for “17 in the centre”, but nobody has 17 in the centre of a personal matrix. The centre is the sum of the four outer points A + B + C + D, and D is itself the sum A + B + C. So the centre is the same sum added to itself. As long as the doubled number is no more than 22, the centre is simply even. If it is more, it is reduced by adding its digits, and the result is no more than 14. That is why the centre can only hold 3–14, 16, 18, 20 and 22, and there are no odd numbers above 13 there. This is a property of the classic calculation by the [Ladini method](/method), not a quirk of one calculator.",
+          "People often search for “17 in the centre”, but nobody has 17 in the centre of a personal matrix. The centre is the sum of the four outer points A + B + C + D, and D is itself the sum A + B + C. So the centre is the same sum added to itself. As long as the doubled number is no more than 22, the centre is simply even. If it is more, it is reduced by adding its digits, and the result is no more than 14. That is why the centre can only hold 3–14, 16, 18, 20 and 22, and there are no odd numbers above 13 there. This is a property of the classic calculation by the [Ladini method](/encyclopedia/method), not a quirk of one calculator.",
           "So where does “17 in the centre” come from? Usually it is one of three things.",
           {
             "ul": [

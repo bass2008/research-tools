@@ -10,10 +10,10 @@ import { D, forLocale as localizedI18n } from "@/lib/i18n";
 import type { LandingData } from "@/lib/individualLanding";
 import { lettersOf, linksOf } from "@/lib/individualLinks";
 import { rub } from "@/lib/individualMoney";
-import { EMPTY_CART, KIND_CARDS, workdaysFrom, type Cart } from "@/lib/individualPricing";
+import { EMPTY_CART, KIND_CARDS, workdaysFrom, type Cart, type OrderPreset } from "@/lib/individualPricing";
 import { calculate } from "@/lib/matrix";
 import type { PaymentProvider } from "@/lib/tariffs";
-import { browserDay } from "@/lib/today";
+import { moscowDay } from "@/lib/today";
 import { useBirth } from "@/lib/useBirth";
 import { usePair } from "@/lib/usePair";
 import { FindingSheet, SummarySheet, TocSheet, ToggleSheet, useMobile } from "./ExampleSheets";
@@ -21,13 +21,13 @@ import LinksMap from "./LinksMap";
 import OrderSection from "./OrderSection";
 import { setOf } from "./useSets";
 import PricesSection from "./PricesSection";
-import { pad, showDate, type Kind, type SetKey, type UserDate, type UserInfo } from "./types";
+import { pad, showDate, type Kind, type OneKind, type SetKey, type UserDate, type UserInfo } from "./types";
 
 export interface IndividualLandingProps {
-  data: LandingData; providers: PaymentProvider[]; serverYear: number; initialCart?: Cart | null; initialYear?: number;
+  data: LandingData; providers: PaymentProvider[]; serverYear: number; initialCart?: Cart | null; initialYear?: number; preset?: OrderPreset;
 }
 
-export default function IndividualLanding({ data, providers, serverYear, initialCart, initialYear }: IndividualLandingProps) {
+export default function IndividualLanding({ data, providers, serverYear, initialCart, initialYear, preset }: IndividualLandingProps) {
   const L = useLocale();
   const T = D.individualSale;
   const TL = D.individualLanding;
@@ -42,13 +42,14 @@ export default function IndividualLanding({ data, providers, serverYear, initial
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const asked = initialCart ? setOf(initialCart) : null;
-  const [oneKind, setOneKind] = useState<Kind>(asked?.kind ?? "personal");
+  const [oneKind, setOneKind] = useState<OneKind>(asked?.kind === "personal" && preset?.childFirst ? "child" : asked?.kind ?? "personal");
+  const [child, setChild] = useState(Boolean(preset?.childFirst));
   const [set, setSet] = useState<SetKey>(asked?.set ?? "one");
   const [formKind, setFormKind] = useState<Kind>(asked?.kind ?? "personal");
   const [custom, setCustom] = useState<Cart>(initialCart ?? { ...EMPTY_CART, personal: 2 });
   const [dates, setDates] = useState<[string, string]>(["", ""]);
   useEffect(() => {
-    const t = browserDay();
+    const t = moscowDay();
     setDates([dateLabel(workdaysFrom(t, 1), L), dateLabel(workdaysFrom(t, 3), L)]);
   }, [L, dateLabel]);
   const latest = dates[1];
@@ -59,9 +60,10 @@ export default function IndividualLanding({ data, providers, serverYear, initial
   }, []);
   const userBirth = user ? { birth: `${user.date.y}-${pad(user.date.m)}-${pad(user.date.d)}`, sex: stored?.sex ?? "f" as const } : stored;
 
-  const goOrder = (s: SetKey, kind?: Kind) => {
+  const goOrder = (s: SetKey, kind?: OneKind) => {
     setSet(s);
-    if (kind) { setFormKind(kind); setOneKind(kind); }
+    setChild(kind === "child");
+    if (kind) { setFormKind(kind === "child" ? "personal" : kind); setOneKind(kind); }
     document.getElementById("order")?.scrollIntoView();
   };
 
@@ -147,7 +149,7 @@ export default function IndividualLanding({ data, providers, serverYear, initial
       </section>
 
       <OrderSection set={set} setSet={setSet} formKind={formKind} setFormKind={setFormKind} custom={custom} setCustom={setCustom}
-        year={year} providers={providers} initialBirth={userBirth} initialPair={storedPair} latest={latest} />
+        year={year} providers={providers} initialBirth={userBirth} initialPair={storedPair} latest={latest} preset={preset} child={child} setChild={setChild} />
 
       <section className="lp-sec lp-faq" id="faq">
         <div className="lp-wrap" style={{ maxWidth: 820 }}>

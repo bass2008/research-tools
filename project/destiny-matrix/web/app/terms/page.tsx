@@ -1,4 +1,4 @@
-import { INTERNATIONAL_RU } from "@/lib/legal/international";
+import { legalDocument } from "@/app/_lib/legalArticle";
 import { requestSite } from "@/lib/siteProfile.server";
 import LegalDocView from "@/components/legal/LegalDoc";
 import { ALL_FREE } from "@/lib/access";
@@ -6,7 +6,6 @@ import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
 import { localized } from "@/lib/i18n/localized";
 import { requestLocale, publicLocale } from "@/lib/i18n/request";
-import { TERMS } from "@/lib/legal/terms";
 import { forLocale as localizedSite } from "@/lib/site";
 import { forLocale as localizedTariffs } from "@/lib/tariffs";
 import { allOffers } from "@/lib/tariffs.server";
@@ -41,5 +40,5 @@ export default async function OfertaPage() {
   const L = await requestLocale();
 
   const tariffs = await allOffers();
-  return <LegalDocView locale={L} doc={(await requestSite()).legalLocale === "en" && L === "ru" ? INTERNATIONAL_RU.terms : TERMS[L]} crumb={D.nav.terms[L]} tariffs={tariffs} />;
+  return <LegalDocView locale={L} doc={legalDocument("/terms", L, await requestSite())!} crumb={D.nav.terms[L]} tariffs={tariffs} />;
 }

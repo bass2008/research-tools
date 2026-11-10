@@ -192,7 +192,7 @@ export default function Notifications() {
       <button className="btn" onClick={() => void read()} disabled={busy || loading || !data?.unread_count}>{en ? "Read all" : "Прочитать все"}</button>
     </div>
     {error && <p className="err" role="alert">{error} <button className="iconbtn" onClick={() => void load()}>{en ? "Retry" : "Повторить"}</button></p>}
-    {loading ? <p className="skeleton">{en ? "Loading…" : "Загружаем…"}</p> : data?.items.length === 0 ? <div className="cabinet-empty">{en ? "No notifications here yet" : "Здесь пока нет уведомлений"}</div> : data?.items.map((item, index) => <div key={item.delivery_id}>
+    {loading && !data ? <p className="skeleton">{en ? "Loading…" : "Загружаем…"}</p> : data?.items.length === 0 ? <div className="cabinet-empty">{en ? "No notifications here yet" : "Здесь пока нет уведомлений"}</div> : data?.items.map((item, index) => <div key={item.delivery_id}>
       {(index === 0 || dateKey(data.items[index - 1].delivered_at) !== dateKey(item.delivered_at)) && <h3 className="notification-date">{groupLabel(item.delivered_at)}</h3>}
       <article className={`notification-card${item.read_at ? "" : " unread"}`}>
         <div className="notification-title"><h4>{item.title}</h4><time dateTime={item.delivered_at}>{new Date(item.delivered_at).toLocaleTimeString(en ? "en-GB" : "ru-RU", { hour: "2-digit", minute: "2-digit" })}</time></div>

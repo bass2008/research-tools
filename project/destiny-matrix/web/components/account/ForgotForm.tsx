@@ -56,7 +56,7 @@ export default function ForgotForm({ locale: requestedLocale, ...localeProps }: 
     return (
       <div className="panel narrow" data-testid="forgot-sent">
         <h1 className="panel-h1">{D.auth.mailSent[L]}</h1>
-        <p className="dim">
+        <p className="dim" style={{ overflowWrap: "anywhere" }}>
           {D.auth.mailSentText[L](normalizeEmail(email))}
         </p>
         <p className="hint">

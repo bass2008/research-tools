@@ -27,6 +27,12 @@ export function exampleDay(): DayParts {
   return parts(new Date(`${CONTENT_PUBLISHED}T00:00:00Z`));
 }
 
+/** Moscow calendar day: order deadlines count working days in the author's calendar, as the API does. */
+export function moscowDay(now = new Date()): DayParts {
+  const [year, month, day] = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Moscow" }).format(now).split("-").map(Number);
+  return { day, month, year };
+}
+
 export function browserDay(): DayParts {
   const now = new Date();
   return { day: now.getDate(), month: now.getMonth() + 1, year: now.getFullYear() };

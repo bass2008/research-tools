@@ -34,14 +34,40 @@ const TRANSLITERATED: Array<[string, string]> = [
   ["na-god", "year"],
 ];
 
+/** Статьи-хабы и раздел года переехали из корня в энциклопедию 10.11.2026: все статьи живут в
+ *  `/encyclopedia/` (AGENTS.md). */
+const MOVED_TO_ENCYCLOPEDIA = [
+  "author", "business-compatibility", "by-birth-date", "compatibility-center", "decoding", "energies",
+  "full-reading", "how-to-read", "karmic-matrix", "meaning", "method", "programs", "year",
+];
+
+const encyclopediaPath = (key: string) => MOVED_TO_ENCYCLOPEDIA.includes(key) ? `/encyclopedia/${key}` : `/${key}`;
+
 export const REDIRECTS: Redirect[] = [
   ...HEART_MOVED.map((n) => ({
     source: `/encyclopedia/position/comfort_south/${n}`,
     destination: `/encyclopedia/position/love_middle/${n}`,
   })),
-  ...TRANSLITERATED.map(([from, to]) => ({ source: `/${from}`, destination: `/${to}` })),
+  ...TRANSLITERATED.map(([from, to]) => ({ source: `/${from}`, destination: encyclopediaPath(to) })),
   // Страницы года: 22 аркана плюс страница календарного года — одно правило на весь путь.
-  { source: "/na-god/:key", destination: "/year/:key" },
+  { source: "/na-god/:key", destination: "/encyclopedia/year/:key" },
+  ...MOVED_TO_ENCYCLOPEDIA.map((key) => ({ source: `/${key}`, destination: `/encyclopedia/${key}` })),
+  { source: "/year/:key", destination: "/encyclopedia/year/:key" },
   // Обзор хвоста пары стал шапкой раздела хвостов пары: та же статья, список 97 хвостов под ней.
   { source: "/karmic-compatibility", destination: "/encyclopedia/compatibility/tails" },
 ];
+
+/** New address for a moved one. Sources carry no language prefix: middleware strips it and adds
+ *  the site's language back, so the visitor reaches the final URL in one 301. */
+export function redirectTarget(path: string): string | null {
+  for (const { source, destination } of REDIRECTS) {
+    if (!source.endsWith("/:key")) {
+      if (path === source) return destination;
+      continue;
+    }
+    const base = source.slice(0, -":key".length);
+    const key = path.startsWith(base) ? path.slice(base.length) : "";
+    if (key && !key.includes("/")) return destination.replace(":key", key);
+  }
+  return null;
+}

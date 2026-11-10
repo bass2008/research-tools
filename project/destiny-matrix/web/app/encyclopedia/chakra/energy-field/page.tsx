@@ -7,7 +7,7 @@ import Price, { OfferText } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
-import { forLocale as localizedContent } from "@/lib/content";
+import { articleContentForLocale as localizedContent } from "@/app/_lib/article";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";

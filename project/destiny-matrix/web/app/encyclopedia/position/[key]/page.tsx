@@ -3,6 +3,7 @@ import PositionMap from "@/components/enc/PositionMap";
 import Related from "@/components/enc/Related";
 import Sections from "@/components/enc/Sections";
 import TocHeading from "@/components/enc/TocHeading";
+import FamilyReadingOffer from "@/components/individual/FamilyReadingOffer";
 import CalcPromo from "@/components/matrix/CalcPromo";
 import ChakraAtlasExample from "@/components/matrix/ChakraAtlasExample";
 import Price, { OfferText } from "@/components/pay/Price";
@@ -11,7 +12,7 @@ import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
 import { ALL_FREE } from "@/lib/access";
 import { forLocale as localizedArcana } from "@/lib/arcana";
-import { forLocale as localizedContent } from "@/lib/content";
+import { articleContentForLocale as localizedContent } from "@/app/_lib/article";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
@@ -192,6 +193,8 @@ export default async function PositionPage({ params }: { params: Promise<Params>
       </div>
 
       <Sections items={extra.sections} locale={L} slots={slots} />
+
+      {p.key === "parent_child_line" ? <FamilyReadingOffer variant="line" /> : null}
 
       {p.key === "day" ? (
         <p className="encref">

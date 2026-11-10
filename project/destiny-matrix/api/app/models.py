@@ -100,6 +100,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    has_password: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True,
+                                               server_default=text("1"))
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False,
                                                     default=utcnow, server_default=func.now())
     # Пульс приходит каждые 45 секунд, но это поле обновляется пакетно раз в час: иначе одна
@@ -107,6 +109,10 @@ class User(Base):
     last_seen_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     email_verified_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     auth_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    deletion_requested_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    deletion_locale: Mapped[str | None] = mapped_column(String(2))
+    deletion_origin: Mapped[str | None] = mapped_column(String(200))
 
     readings: Mapped[list["Reading"]] = relationship(back_populates="user",
                                                      cascade="all, delete-orphan")
@@ -119,7 +125,33 @@ class User(Base):
 
     def public(self) -> dict:
         return {"id": self.id, "email": self.email, "created_at": iso(self.created_at),
-                "email_verified_at": iso(self.email_verified_at)}
+                "email_verified_at": iso(self.email_verified_at), "has_password": self.has_password}
+
+
+class GoogleIdentity(Base):
+    """A verified Google subject identifies one existing shared account, never its email."""
+    __tablename__ = "google_identities"
+    subject: Mapped[str] = mapped_column(String(255), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
+                                         nullable=False, unique=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
+
+
+class GoogleAuthChallenge(Base):
+    __tablename__ = "google_auth_challenges"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)  # SHA-256, not the bearer challenge
+    nonce_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    client_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    site_origin: Mapped[str] = mapped_column(String(200), nullable=False)
+    ip_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
+    expires_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    consumed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # A password retry cannot switch identities/accounts after the initial 409.
+    subject_hash: Mapped[str | None] = mapped_column(String(64))
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    auth_version: Mapped[int | None] = mapped_column(Integer)
 
 
 class MetrikaClient(Base):
@@ -344,6 +376,44 @@ class Payment(Base):
 
 
 PAYMENT_STATES = ("new", "paid", "refunded", "failed", "abandoned")
+
+
+class PlayOrder(Base):
+    """The profile ID passed to Billing binds one purchase to one server-side subject."""
+    __tablename__ = "play_orders"
+    id: Mapped[str] = mapped_column(String(48), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    purchase_id: Mapped[int] = mapped_column(ForeignKey("purchases.id"), nullable=False, unique=True)
+    product_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    account_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    provider: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+    purchase: Mapped[Purchase] = relationship()
+
+
+class PlayPurchase(Base):
+    """Tokens are private provider credentials: never included in history/status responses."""
+    __tablename__ = "play_purchases"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    order_id: Mapped[str] = mapped_column(ForeignKey("play_orders.id"), nullable=False, unique=True)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    token: Mapped[str] = mapped_column(Text, nullable=False)
+    state: Mapped[str] = mapped_column(String(24), nullable=False, default="pending")
+    expires_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    auto_renewing: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    finalized: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    cancellation_pending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    cancellation_completed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    checked_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    # Only the isolated mock provider writes these normalized, non-personal fields.
+    mock_snapshot: Mapped[str | None] = mapped_column(Text)
+    order: Mapped[PlayOrder] = relationship()
+
+
+class PlayNotification(Base):
+    __tablename__ = "play_notifications"
+    message_id: Mapped[str] = mapped_column(String(200), primary_key=True)
+    processed_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
 
 
 class Entitlement(Base):

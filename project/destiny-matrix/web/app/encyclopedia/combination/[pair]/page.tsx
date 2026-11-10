@@ -1,11 +1,12 @@
 import { requestSite } from "@/lib/siteProfile.server";
+import { articleSource } from "@/app/_lib/article";
 import ArcanumCard from "@/components/matrix/ArcanumCard";
 import { PriceOrFree } from "@/components/pay/Price";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import { forLocale as localizedArcana } from "@/lib/arcana";
 import { forLocale as localizedCombinationReading } from "@/lib/combinationReading";
-import { forLocale as localizedContent } from "@/lib/content";
+import { articleContentForLocale as localizedContent } from "@/app/_lib/article";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
@@ -82,7 +83,7 @@ export default async function CombinationPage({ params }: { params: Promise<Para
   const xContent = arcanumContent(a);
   const yContent = arcanumContent(b);
   if (!xContent || !yContent) throw new Error(`нет канонических материалов арканов ${a} и ${b}`);
-  const article = buildCombinationArticle(a, b);
+  const article = articleSource(`/encyclopedia/combination/${a}-${b}`, { locale: L }, "combination")!.reading;
 
   const neighbours = [
     a > 1 ? combinationHref(a - 1, b) : null,

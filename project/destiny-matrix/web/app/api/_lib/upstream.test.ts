@@ -88,6 +88,29 @@ describe("доверенный IP в цепочке nginx → BFF → API", () =
 });
 
 describe("необязательная сессия BFF", () => {
+  it("accepts a native session without overwriting Basic Auth at the edge", async () => {
+    const spy = stubUpstream();
+    const source = new Request("https://arcana-sense.com/api/auth/me", { headers: {
+      "X-Arcana-Session": "mobile-jwt", Authorization: "Basic dGVzdDp0ZXN0",
+    } });
+    await forward("/auth/me", { auth: true, source });
+    expect(new Headers(spy.mock.calls[0][1]?.headers).get("authorization")).toBe("Bearer mobile-jwt");
+  });
+
+  it("prefers a cookie over a conflicting native credential", async () => {
+    const spy = stubUpstream();
+    cookieGet.mockReturnValue({ value: "cookie-jwt" });
+    const source = new Request("https://arcana-sense.com/api/auth/me", { headers: { "X-Arcana-Session": "mobile-jwt" } });
+    await forward("/auth/me", { auth: true, source });
+    expect(new Headers(spy.mock.calls[0][1]?.headers).get("authorization")).toBe("Bearer cookie-jwt");
+  });
+
+  it("does not treat a rejected native credential as authenticated", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ detail: "Invalid token" }, { status: 401 })));
+    const source = new Request("https://arcana-sense.com/api/auth/me", { headers: { "X-Arcana-Session": "expired" } });
+    expect((await forward("/auth/me", { auth: true, source })).status).toBe(401);
+  });
+
   it("передаёт JWT авторизованного pulse", async () => {
     const spy = stubUpstream();
     cookieGet.mockReturnValue({ value: "signed-session" });

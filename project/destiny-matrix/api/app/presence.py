@@ -77,6 +77,7 @@ def flush(session_factory=None) -> int:
                 result = db.execute(
                     update(User)
                     .where(User.id == user_id)
+                    .where(User.deletion_requested_at.is_(None), User.deleted_at.is_(None))
                     .where(or_(User.last_seen_at.is_(None), User.last_seen_at < stamp))
                     .values(last_seen_at=stamp)
                 )

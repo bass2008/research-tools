@@ -94,6 +94,24 @@ def read_token(token: str) -> tuple[int, str, bool, int] | None:
         return None
 
 
+def create_restore_token(user_id: int, password_hash: str, auth_version: int) -> str:
+    now = dt.datetime.now(dt.timezone.utc)
+    return jwt.encode({"typ": "restore", "sub": str(user_id), "ver": auth_version,
+                       "pwd": password_fingerprint(password_hash), "iat": int(now.timestamp()),
+                       "exp": int((now + dt.timedelta(hours=2)).timestamp())},
+                      settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def read_restore_token(token: str) -> tuple[int, str, int] | None:
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        if payload.get("typ") != "restore":
+            return None
+        return int(payload["sub"]), str(payload["pwd"]), int(payload["ver"])
+    except (jwt.PyJWTError, KeyError, TypeError, ValueError):
+        return None
+
+
 def create_file_token(key: str, filename: str | None = None) -> str:
     """Пропуск к готовому файлу локального хранилища: замена подписанной ссылке S3. В PDF есть
     дата рождения, поэтому путь не должен открываться без подписи."""

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { D } from "@/lib/i18n";
 import { forLocale as arcanaForLocale } from "@/lib/arcana";
+import { isLineSection } from "@/lib/lineReadingRow";
 import { forLocale as matrixForLocale } from "@/lib/matrix";
 import { forLocale as sectionsForLocale } from "@/lib/sections";
 
@@ -25,17 +26,17 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
     const sections = withLockedPreview(matrix, build(matrix, false));
     const html = renderToStaticMarkup(
       <ReportSections locale={locale} sections={sections} place="report" matrixId={7} />);
-    expect(html.match(/data-locked="true"/g)).toHaveLength(19);
-    expect(html.match(/class="mp"/g)).toHaveLength(18);
+    expect(html.match(/data-locked="true"/g)).toHaveLength(20);
+    expect(html.match(/class="mp"/g)).toHaveLength(19);
     const cards = sections.filter((s) => s.locked && s.key !== "chakras").flatMap((s) => s.positions);
     expect(html.match(/class="mpc"/g)).toHaveLength(cards.length);
     const gist = arcanumShort(cards[0].arcanum);
     expect(html).toContain(gist.charAt(0).toLocaleUpperCase(locale) + gist.slice(1));
-    expect(html.match(/data-testid="section-buy-/g)).toHaveLength(19);
-    // по две ссылки на раздел, восемь замков чакр и замок связного толкования материальной кармы,
+    expect(html.match(/data-testid="section-buy-/g)).toHaveLength(20);
+    // по две ссылки на раздел, восемь замков чакр и замок связного толкования каждого раздела-тройки,
     // если у языка уже есть её корпус
-    const tripleLock = sections.find((s) => s.key === "material_karma")?.tripleReading ? 1 : 0;
-    expect(html.match(/href="\/(?:ru|en)\/pay\?m=7"/g)).toHaveLength(38 + 8 + tripleLock);
+    const tripleLock = sections.filter((s) => isLineSection(s.key) && s.tripleReading).length;
+    expect(html.match(/href="\/(?:ru|en)\/pay\?m=7"/g)).toHaveLength(40 + 8 + tripleLock);
     expect(html).toContain(D.report.unlockSection[locale]);
 
     const chakras = sections.find((s) => s.key === "chakras")!.longform!;
@@ -60,7 +61,7 @@ describe.each(["ru", "en"] as const)("закрытые разделы (%s)", (lo
   it("печать закрытого разбора — только строки разделов", () => {
     const sections = withLockedPreview(matrix, build(matrix, false));
     const html = renderToStaticMarkup(<ReportSections locale={locale} sections={sections} printing />);
-    expect(html.match(/data-locked="true"/g)).toHaveLength(19);
+    expect(html.match(/data-locked="true"/g)).toHaveLength(20);
     expect(html).not.toContain('class="mp"');
     expect(html).not.toContain("chakras-locked");
   });

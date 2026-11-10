@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 import { CONTENT_PUBLISHED } from "./corpusDates";
-import { browserDay, exampleDay } from "./today";
+import { browserDay, exampleDay, moscowDay } from "./today";
 
 // Дата-пример вшита в разметку каждой страницы с формой. Пока она шла от метки сборки, каждая
 // сборка в новый день меняла тело ответа, а с ним встроенный `ETag`, — поиск качал заново то,
@@ -100,5 +100,12 @@ describe("клиентские компоненты не берут дату у 
       expect(code, file).toContain('from "@/lib/today"');
       expect(code, file).toContain("exampleDay");
     }
+  });
+});
+
+describe("день срока заказа", () => {
+  it("считается по Москве, как на сервере, а не по часам браузера", () => {
+    expect(moscowDay(new Date("2026-11-09T23:30:00Z"))).toEqual({ day: 10, month: 11, year: 2026 });
+    expect(moscowDay(new Date("2026-11-09T20:59:00Z"))).toEqual({ day: 9, month: 11, year: 2026 });
   });
 });

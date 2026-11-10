@@ -1,0 +1,37 @@
+appId: com.arcanasense.app
+name: New buyer — chart, chapters, purchase and daily use
+# Supply a new EMAIL for each run. Purchases use the local mock storefront.
+---
+- runFlow:
+    when:
+      true: ${DEV_CLIENT != '1'}
+    commands:
+      - launchApp:
+          clearState: true
+- extendedWaitUntil:
+    visible:
+      id: home-demo-preview
+    timeout: 60000
+- runFlow:
+    when:
+      true: ${LANG == 'en'}
+    commands:
+      - tapOn:
+          id: tab-account
+      - tapOn:
+          id: open-settings
+      - scrollUntilVisible:
+          element:
+            id: language-en
+          direction: DOWN
+      - tapOn:
+          id: language-en
+      - back
+      - tapOn:
+          id: tab-today
+- runFlow: parts/onboarding.yaml
+- runFlow: parts/chapter.yaml
+- runFlow: parts/purchase.yaml
+- runFlow: parts/today.yaml
+- runFlow: parts/explore.yaml
+- runFlow: parts/language.yaml

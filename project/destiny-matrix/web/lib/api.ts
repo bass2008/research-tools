@@ -13,18 +13,27 @@ import { localized } from "./i18n/localized";
 import type { Sex } from "./matrix";
 
 export interface User {
+  /** Missing on older servers means an existing password account. */
+  has_password?: boolean;
   email_verified_at?: string | null;
   id: number;
   email: string;
 }
 
+export interface AccountDeletion { requested_at: string; delete_at: string; renewal_cancellation: "pending" | "complete" }
+
 export interface AuthResponse {
   authenticated: boolean;
   user: User;
+  deletion?: AccountDeletion;
 }
+
+export interface GoogleAuthConfig { enabled: boolean; client_id: string | null }
+export interface GoogleAuthChallenge { challenge: string; nonce: string; client_id: string }
 
 /** Что открыто — решают действующие права, поле тарифа у пользователя не хранится. */
 export interface MeResponse {
+  google_play_subscriptions?: Array<{ order_id: string; expires_at: string | null; auto_renewing: boolean; access: boolean }>;
   pending_email_change?: PendingEmailChange | null;
   user: User;
   /** виды доступа: single | matrix | all */
@@ -226,6 +235,7 @@ export class ApiError extends Error {
     readonly status: number,
     readonly locale: Locale = defaultLocale,
     readonly messages: Partial<Record<Locale, string>> = {},
+    readonly code?: string,
   ) {
     super(message);
   }
@@ -377,7 +387,8 @@ export const forLocale = localized((L: Locale) => {
           messages[locale] = res.status === 404 ? D.apiErrors.missing[locale] : D.apiErrors.status[locale](res.status);
         }
       }
-      throw new ApiError(detail, res.status, L, messages);
+      const code = data && typeof data === "object" && "code" in data && typeof data.code === "string" ? data.code : undefined;
+      throw new ApiError(detail, res.status, L, messages, code);
     }
     if (res.status === 204) return undefined as T;
     if (!parsed) {
@@ -398,6 +409,16 @@ export const forLocale = localized((L: Locale) => {
 
     login: (email: string, password: string) =>
       request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }), retry: "long" }),
+
+    googleConfig: () => request<GoogleAuthConfig>("/auth/google/config", { cache: "no-store" }),
+    googleChallenge: () => request<GoogleAuthChallenge>("/auth/google/challenge", { method: "POST", body: "{}" }),
+
+    accountDeletion: () => request<{ deletion: AccountDeletion; user: User }>("/mobile/account/deletion", { cache: "no-store" }),
+    deleteAccount: (current_password: string) =>
+      request<{ deletion: AccountDeletion }>("/mobile/account/delete", { method: "POST", body: JSON.stringify({ current_password }) }),
+    restoreAccount: () => request<AuthResponse>("/mobile/account/restore", { method: "POST", body: "{}" }),
+    googleLogin: (credential: string, challenge: string, current_password?: string) =>
+      request<AuthResponse>("/auth/google", { method: "POST", body: JSON.stringify({ credential, challenge, current_password }) }),
 
     logout: () => request<{ ok: true }>("/auth/logout", { method: "POST" }),
 
@@ -424,6 +445,7 @@ export const forLocale = localized((L: Locale) => {
       return {
         user: raw.user as User,
         pending_email_change: raw.pending_email_change as PendingEmailChange | null,
+        google_play_subscriptions: Array.isArray(raw.google_play_subscriptions) ? raw.google_play_subscriptions : [],
         scopes: scopeList(rights.scopes),
         can_store: raw.can_store === true,
         unlimited: raw.unlimited === true,

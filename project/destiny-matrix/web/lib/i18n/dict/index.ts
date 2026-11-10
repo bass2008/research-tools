@@ -22,6 +22,7 @@ import { individualLinks } from "./individualLinks";
 import { pairLinks } from "./pairLinks";
 import { yearLinks } from "./yearLinks";
 import { individualSale } from "./individualSale";
+import { familyOffer } from "./familyOffer";
 import { common, meta } from "./common";
 import { home, homeMeta, quote, slides, unlockBox } from "./home";
 import { legal } from "./legal";
@@ -49,6 +50,7 @@ export const D = {
   pairLinks,
   yearLinks,
   individualSale,
+  familyOffer,
   mapPoints,
   octagram,
   matrixPages,

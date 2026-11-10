@@ -4,7 +4,7 @@ import { D } from "./i18n";
 import type { Lang } from "./i18n/hosts";
 import { MAP_POINTS } from "./matrixMap";
 import { fold, foldYear, fromPoints, type Matrix } from "./matrix";
-import { materialKarmaOf } from "./materialKarmaRow";
+import { materialKarmaOf } from "./lineReadingRow";
 
 export type Letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "S" | "T" | "R" | "R1" | "R2";
 export const ORDER: Letter[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "S", "T", "R", "R1", "R2"];

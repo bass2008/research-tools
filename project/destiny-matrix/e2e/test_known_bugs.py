@@ -18,7 +18,7 @@ from playwright.sync_api import expect
 import pypdf
 
 import flows
-from conftest import ADMIN, BASE
+from conftest import ADMIN, BASE, absolute
 
 pytestmark = pytest.mark.bug
 
@@ -188,7 +188,7 @@ def test_a7_back_after_payment_shows_the_paid_report(page, mail):
     flows.calculate(page, 8, 8, 1988)
     page.goto(f"{BASE}/report", wait_until="networkidle")
     page.wait_for_timeout(800)
-    assert flows.locked_sections(page) == 19
+    assert flows.locked_sections(page) == 20
 
     flows.open_pay(page)
     flows.pay(page, mail)
@@ -244,7 +244,7 @@ def test_a11_pdf_keeps_the_footer(page, mail, print_site):
         lambda r: "/api/reports/pdf" in r.url and r.status == 200, timeout=180_000
     ) as caught:
         button.click()
-    url = caught.value.json()["url"]
+    url = absolute(caught.value.json()["url"])
     from urllib.parse import urlsplit
     if urlsplit(url).path == "/api/reports/file":
         assert urlsplit(url).netloc == urlsplit(BASE).netloc, "скачивание ушло на другой домен"

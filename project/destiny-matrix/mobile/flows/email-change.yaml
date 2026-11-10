@@ -1,0 +1,29 @@
+appId: com.arcanasense.app
+---
+- openLink: 'arcanasense://settings'
+- scrollUntilVisible:
+    element:
+      id: current-password
+    direction: DOWN
+- tapOn:
+    id: current-password
+- eraseText
+- inputText: '${PASSWORD}'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: new-email
+    direction: DOWN
+- tapOn:
+    id: new-email
+- eraseText
+- inputText: '${NEW_EMAIL}'
+- hideKeyboard
+- scrollUntilVisible:
+    element: 'Change email'
+    direction: DOWN
+- tapOn: 'Change email'
+- scrollUntilVisible:
+    element: 'Confirmation emails sent. Your address changes after the required confirmations.'
+    direction: UP
+- takeScreenshot: email-change-requested

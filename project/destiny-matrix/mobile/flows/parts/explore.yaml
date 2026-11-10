@@ -1,0 +1,100 @@
+appId: com.arcanasense.app
+---
+- tapOn:
+    id: tab-pair
+- extendedWaitUntil:
+    visible:
+      id: partner-a-year
+    timeout: 10000
+- assertVisible: '1987'
+- waitForAnimationToEnd
+- takeScreenshot: 13-pair-dates
+- scrollUntilVisible:
+    element:
+      id: partner-b-day
+    direction: DOWN
+- tapOn:
+    id: partner-b-day
+- inputText: '27'
+- tapOn:
+    id: partner-b-month
+- inputText: '05'
+- tapOn:
+    id: partner-b-year
+- inputText: '1999'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: calculate-pair
+    direction: DOWN
+- tapOn:
+    id: calculate-pair
+- extendedWaitUntil:
+    visible:
+      id: calculation-result
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 13-pair
+- assertVisible:
+    id: reader-toolbar
+- tapOn:
+    id: reader-next
+- assertVisible:
+    id: section-pair-meet
+- tapOn:
+    id: reader-contents
+- assertVisible:
+    id: chapter-contents
+- assertVisible:
+    id: contents-pair-meet
+- takeScreenshot: pair-toc-open
+- tapOn:
+    id: contents-pair-atmosphere
+- assertVisible:
+    id: section-pair-atmosphere
+- tapOn:
+    id: reader-next
+- assertVisible: 'Полный текст доступен с покупкой или подпиской.|The full text is available with a purchase or subscription.'
+- tapOn:
+    id: tab-today
+- scrollUntilVisible:
+    element:
+      id: today-year-chart
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: 10-today-forecast
+- tapOn:
+    id: today-year-chart
+- extendedWaitUntil:
+    visible:
+      id: calculation-result
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 14-year
+- back
+- back
+- tapOn:
+    id: tab-library
+- extendedWaitUntil:
+    visible:
+      id: library-search
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 15-library
+- tapOn:
+    id: library-arcanum-1
+- extendedWaitUntil:
+    visible:
+      id: article-hero
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 15-article
+- back
+- tapOn:
+    id: tab-account
+- extendedWaitUntil:
+    visible:
+      id: account-profile
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 16-account

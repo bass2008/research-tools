@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from ..i18n import say, say_for, current_locale, using_locale
 from .. import access, individual_orders, mail, offers, payments, printing, products, readings, sites, notifications
-from ..http_errors import LocalizedHTTPException
+from ..http_errors import LocalizedHTTPException, error
 from ..config import settings
 from ..db import get_db
 from ..deps import current_user
@@ -70,6 +70,8 @@ def _refuse_held(db: Session, user: User, offer: Offer, reading: Reading | None)
 def _buyer(db: Session, email: str) -> tuple[User, bool]:
     user = db.scalar(select(User).where(User.email == email))
     if user is not None:
+        if user.deletion_requested_at or user.deleted_at:
+            raise error(403, "Сначала восстановите аккаунт.", "Restore the account before making purchases.")
         return user, False
     user = User(email=email, password_hash=hash_password(random_password()))
     db.add(user)
@@ -81,6 +83,8 @@ def _buyer(db: Session, email: str) -> tuple[User, bool]:
         if user is None:
             raise LocalizedHTTPException(status.HTTP_400_BAD_REQUEST,
                                 detail=lambda: say("pay.user_failed")) from None
+        if user.deletion_requested_at or user.deleted_at:
+            raise error(403, "Сначала восстановите аккаунт.", "Restore the account before making purchases.")
         return user, False
     return user, True
 

@@ -1,0 +1,100 @@
+appId: com.arcanasense.app
+---
+- tapOn:
+    id: chapter-purchase
+- extendedWaitUntil:
+    visible:
+      id: purchase-contents
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: sign-in-single
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
+- takeScreenshot: 07-purchase-offer
+- tapOn:
+    id: sign-in-single
+- scrollUntilVisible:
+    element:
+      text: 'Создать аккаунт|Create account'
+    direction: DOWN
+- tapOn: 'Создать аккаунт|Create account'
+- scrollUntilVisible:
+    element:
+      id: auth-email
+    direction: DOWN
+- tapOn:
+    id: auth-email
+- inputText: '${EMAIL}'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-password
+    direction: DOWN
+- tapOn:
+    id: auth-password
+- inputText: 'Buyer05!Test'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-submit
+    direction: DOWN
+- tapOn:
+    id: auth-submit
+- extendedWaitUntil:
+    visible: 'Полный разбор|Full reading'
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: buy-single
+    direction: DOWN
+- assertNotVisible:
+    id: purchase-complete
+- tapOn:
+    id: buy-single
+- extendedWaitUntil:
+    visible:
+      id: purchase-complete
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 08-purchase-complete
+- scrollUntilVisible:
+    element:
+      id: purchase-read
+    direction: DOWN
+- tapOn:
+    id: purchase-read
+- extendedWaitUntil:
+    visible:
+      id: chapter-purpose
+    timeout: 30000
+- assertNotVisible:
+    id: chapter-purchase
+- waitForAnimationToEnd
+- takeScreenshot: 09-full-text
+- swipe:
+    direction: UP
+    duration: 600
+- waitForAnimationToEnd
+- takeScreenshot: 09-full-text-body
+- scrollUntilVisible:
+    element:
+      id: chapter-next
+    direction: DOWN
+    timeout: 60000
+    speed: 80
+- takeScreenshot: 09-full-text-end
+- scrollUntilVisible:
+    element:
+      id: reading-pdf
+    direction: DOWN
+- assertVisible:
+    id: reading-pdf
+- back
+- extendedWaitUntil:
+    visible:
+      id: tab-today
+    timeout: 10000
+- assertNotVisible:
+    id: auth-email

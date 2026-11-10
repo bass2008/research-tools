@@ -1,0 +1,27 @@
+appId: com.arcanasense.app
+---
+- openLink: '${FIRST_URL}'
+- tapOn: 'Confirm address'
+- extendedWaitUntil:
+    visible: 'Address confirmed. Confirmation of the other address is still required.'
+    timeout: 30000
+- openLink: '${SECOND_URL}'
+- tapOn: 'Confirm address'
+- extendedWaitUntil:
+    visible: 'Email changed. Sign in with the new address.'
+    timeout: 30000
+- takeScreenshot: email-changed
+- openLink: 'arcanasense://login'
+- tapOn:
+    id: auth-email
+- inputText: '${NEW_EMAIL}'
+- tapOn:
+    id: auth-password
+- inputText: '${PASSWORD}'
+- hideKeyboard
+- tapOn:
+    id: auth-submit
+- extendedWaitUntil:
+    visible:
+      id: account-profile
+    timeout: 30000

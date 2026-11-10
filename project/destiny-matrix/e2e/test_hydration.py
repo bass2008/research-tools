@@ -17,7 +17,7 @@ from conftest import BASE, _credentials
 # Пояса восточнее UTC: в них локальная дата обгоняет дату сборки в вечерние часы по UTC.
 ZONES = ["UTC", "Europe/Moscow", "Asia/Vladivostok", "Pacific/Kiritimati", "America/Los_Angeles"]
 
-PAGES = ["/", "/year/4", "/pay", "/login", "/report"]
+PAGES = ["/", "/encyclopedia/year/4", "/pay", "/login", "/report"]
 
 
 def errors(page) -> list[str]:

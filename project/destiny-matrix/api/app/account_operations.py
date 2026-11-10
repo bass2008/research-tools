@@ -62,7 +62,7 @@ def pending(db: Session, user_id: int) -> dict | None:
 
 
 def check_password(user: User, raw: str) -> None:
-    if not verify_password(raw, user.password_hash):
+    if not user.has_password or not verify_password(raw, user.password_hash):
         raise error(400, "Текущий пароль неверен.", "The current password is incorrect.")
 
 
@@ -183,6 +183,7 @@ def confirm_email(db: Session, token: str, expected: str) -> dict:
 def change_password(db: Session, user: User, current_password: str, new_password: str) -> None:
     check_password(user, current_password)
     user.password_hash = hash_password(new_password)
+    user.has_password = True
     user.auth_version += 1
     cancel_pending(db, user.id)
     db.commit()

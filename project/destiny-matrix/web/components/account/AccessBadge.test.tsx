@@ -9,12 +9,12 @@ const badge = (item: Parameters<typeof AccessBadge>[0]["item"]) => renderToStati
 it("marks every granted access as granted", () => {
   expect(badge({ access: "granted" })).toContain("Выдана");
   expect(badge({ access: "subscription", access_until: "2027-01-07T12:00:00+00:00", access_granted: true }))
-    .toContain("По подписке · до 07.01.2027 · выдана");
+    .toMatch(/По подписке · до 07\.01\.2027<\/span><span[^>]*>Выдана</);
 });
 
 it("keeps bought and paid subscriptions unmarked", () => {
   expect(badge({ access: "forever" })).toContain("Куплена");
   expect(renderToStaticMarkup(<AccessBadge item={{ access: "forever" }} reading />)).toContain("Куплен<");
   expect(badge({ access: "subscription", access_until: "2027-01-07T12:00:00+00:00", access_granted: false }))
-    .not.toContain("выдана");
+    .not.toContain("Выдана");
 });

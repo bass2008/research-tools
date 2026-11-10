@@ -1,4 +1,5 @@
 import { requestSite } from "@/lib/siteProfile.server";
+import { articleSource } from "@/app/_lib/article";
 import PersonalSectionArticle from "@/components/matrix/PersonalSectionArticle";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
@@ -34,8 +35,9 @@ const forLocale = localized((L: Locale, site) => {
   function data(triple: string) {
     const item = sectionReadingItem("comfort", triple);
     if (!item) return null;
-    const reading = buildSectionReading("comfort", item.matrix);
     const path = `/encyclopedia/comfort/${triple}`;
+    const reading = articleSource(path, { locale: L }, "reading");
+    if (!reading) return null;
     const description =
       D.encLinks.comfortDescription[L](triple);
     return { reading, path, description };

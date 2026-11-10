@@ -53,7 +53,7 @@ STATIC_INDEXED = {
     "/encyclopedia/chakra": "chakra_hub",
     "/encyclopedia/chakra/energy-field": "energy_field",
     "/encyclopedia/month": "month_article",
-    "/encyclopedia/karmic-tail": "tail_hub", "/year": "year_hub",
+    "/encyclopedia/karmic-tail": "tail_hub", "/encyclopedia/year": "year_hub",
     "/contacts": "legal", "/terms": "legal", "/privacy": "legal", "/refund": "legal",
 }
 # Публичная страница вне индекса — не то же, что личная.
@@ -62,6 +62,13 @@ STATIC_NOINDEX = {
     "/account", "/admin", "/forgot", "/login", "/register", "/reset", "/report",
     "/matrices", "/pay", "/pay/done", "/pay/fail", "/print/report",
 }
+
+def hub_path(key: str) -> str:
+    return f"/encyclopedia/{key}"
+
+
+MOVED = "статья переехала из корня в энциклопедию 10.11.2026"
+
 
 def read_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
@@ -176,7 +183,7 @@ def classify(row: dict, valid: set[str], indexed: set[str], pair: set[str]) -> d
             evidence.append("точный порядок совпал с хвостом пары")
     elif re.search(r"\b(?:19|20)\d{2}\b", low) or " на год" in low:
         intent = "year"
-        landing = "/year"
+        landing = "/encyclopedia/year"
         evidence.append("явный годовой интент")
     elif "хвост" in low or "кармическ" in low:
         intent = "tail"
@@ -208,7 +215,7 @@ def classify(row: dict, valid: set[str], indexed: set[str], pair: set[str]) -> d
             evidence.append("полная программа совпала с хвостом пары; в личной матрице такой тройки нет")
         else:
             context = "loops"
-            landing = "/programs"
+            landing = "/encyclopedia/programs"
             entity = f"occurrence:loops:{key}"
             evidence.append("явное слово программа; это не делает тройку хвостом")
     else:
@@ -318,7 +325,9 @@ def url_registry(tails: list[dict]) -> list[dict]:
     # отставал от hubs.json, и каждый раз это ловила только приёмка корпуса.
     for item in read_json(WEB_CONTENT / "hubs.json")["items"]:
         entity = {"avtor": "author", "o-metode": "method"}.get(item["key"], "concept")
-        add(f"/{item['key']}", entity, "keep", True, "статья первого уровня из hubs.json")
+        add(hub_path(item["key"]), entity, "keep", True, "статья первого уровня из hubs.json")
+        if item["key"] != "child-matrix":
+            add(f"/{item['key']}", "redirect", "redirect", False, MOVED, canonical=hub_path(item["key"]))
     for url, entity in sorted(STATIC_PUBLIC_NOINDEX.items()):
         add(url, entity, "noindex", False, "публичная страница вне индекса: спроса на список нет")
     for url in sorted(STATIC_NOINDEX):
@@ -350,7 +359,9 @@ def url_registry(tails: list[dict]) -> list[dict]:
             bool(item["publication"]["index"]),
             "ordered-хвост метода; индексируется только после demand gate")
     for item in item_list("year-arcana.json"):
-        add(f"/year/{item['n']}", "year", "keep", True, "каноническая годовая статья")
+        add(f"/encyclopedia/year/{item['n']}", "year", "keep", True, "каноническая годовая статья")
+        add(f"/year/{item['n']}", "redirect", "redirect", False, MOVED, canonical=f"/encyclopedia/year/{item['n']}")
+    add("/year", "redirect", "redirect", False, MOVED, canonical="/encyclopedia/year")
     add("/compatibility", "pair_calculator", "keep", True, "калькулятор совместимости пары")
     add("/encyclopedia/compatibility", "compatibility_hub", "keep", True, "шапка раздела «Арканы в совместимости»")
     for item in item_list("compatibility-arcana.json"):

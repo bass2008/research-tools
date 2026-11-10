@@ -12,7 +12,7 @@ function email(body: Record<string, unknown>): string {
 }
 
 /** Вход и регистрация: наружу уходит только `authenticated`, токен — в куку. */
-export async function credentials(req: Request, action: "login" | "register") {
+export async function credentials(req: Request, action: "login" | "register", capture = true) {
   const L = await requestLocale(req);
   const { emailError } = emailForLocale(L);
   const body = await readJson(req);
@@ -26,7 +26,7 @@ export async function credentials(req: Request, action: "login" | "register") {
   return forward(`/auth/${action}`, {
     method: "POST",
     body: { email: mail, password },
-    capture: true,
+    capture,
     source: req,
   });
 }
@@ -115,6 +115,7 @@ export async function individualOrder(req: Request, path: string) {
       who: (Array.isArray(r?.who) ? r.who : []).slice(0, 2).map((i) => Math.trunc(Number(i))),
       ...(r?.year !== undefined ? { year: Math.trunc(Number(r.year)) || undefined } : {}),
       ...(r?.relation ? { relation: String(r.relation).slice(0, 200) } : {}),
+      ...(r?.child === true ? { child: true } : {}),
     }));
   // a reading the API would refuse anyway; dropping it here would charge for a different order
   if (readings.some((r) => !kinds.includes(r.kind) || !r.who.length || r.who.some((i) => !(i >= 0 && i < persons.length)))) {

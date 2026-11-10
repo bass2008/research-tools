@@ -118,6 +118,12 @@ def test_anyone_gets_the_example_pdf_printed_once_per_language(client, printer):
     assert len(rendered) == 2 and len(files) == 2
 
 
+def test_every_public_example_has_its_pdf(client, printer):
+    response = client.post("/api/individual-examples/child/pdf", headers={"Accept-Language": "ru"})
+    assert response.status_code == 200, response.text
+    assert response.json()["url"].endswith("name=Пример разбора — детская матрица.pdf")
+
+
 def test_an_unknown_example_prints_nothing(client, printer):
     assert client.post("/api/individual-examples/secret/pdf").status_code == 404
     assert printer[1] == []

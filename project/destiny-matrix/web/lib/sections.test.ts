@@ -6,7 +6,7 @@ import { arcanumInPosition, karmicTail } from "./content";
 import { paragraphText } from "./contentReader";
 import { calculate } from "./matrix";
 import { wordCount } from "./lockedText";
-import { materialKarmaOf } from "./materialKarmaRow";
+import { materialKarmaOf } from "./lineReadingRow";
 import type { SectionOut } from "./publicSpec";
 import { SPEC, build, freePositionTexts, withLockedPreview } from "./sections";
 
@@ -174,7 +174,7 @@ describe("разделы разбора", () => {
   });
 
   it("каждый формульный раздел получает персональную статью и тот же PDF-источник", () => {
-    const excluded = new Set(["character", "past_lives", "material_karma"]);
+    const excluded = new Set(["character", "past_lives", "material_karma", "parent_child_line"]);
     for (const item of build(m, true)) {
       if (excluded.has(item.key)) continue;
       if (item.key === "chakras") {

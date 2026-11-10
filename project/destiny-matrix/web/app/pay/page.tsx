@@ -65,7 +65,7 @@ export default async function PayChoicePage({ searchParams }: { searchParams: Se
             <p className="dim">{D.encLinks.priceUnknownText[L]}</p>
           </div>
         )}
-        <IndividualOffer providers={providers ?? []} initialCart={ordered.cart} initialYear={ordered.year} />
+        <IndividualOffer providers={providers ?? []} initialCart={ordered.cart} initialYear={ordered.year} preset={ordered.preset} />
         <IndividualCompare />
       </div>
     </main>

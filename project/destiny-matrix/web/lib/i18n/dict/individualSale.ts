@@ -42,6 +42,19 @@ export const individualSale = {
   kindPair: { ru: "Пара", en: "Couple" } satisfies Phrase,
   kindYear: { ru: (y: number) => `Год ${y}`, en: (y: number) => `Year ${y}` } satisfies PhraseFn<[number]>,
   kindAnyYear: { ru: "На год", en: "Year" } satisfies Phrase,
+  childTag: { ru: "Детская матрица", en: "Child’s matrix" } satisfies Phrase,
+  childTagNote: {
+    ru: "Отчёт для вас как для родителя, главы под возраст ребёнка. Укажите дату ребёнка.",
+    en: "A report for you as a parent, chapters suited to the child’s age. Enter the child’s date.",
+  } satisfies Phrase,
+  childHint: {
+    ru: "Похоже, это дата ребёнка. Если отчёт для вас как для родителя, выберите «Детская матрица».",
+    en: "This looks like a child’s date. If the report is for you as a parent, choose “Child’s matrix”.",
+  } satisfies Phrase,
+  errChildAdult: {
+    ru: "Детская матрица — для дат моложе 18 лет: проверьте дату или выберите обычный личный разбор.",
+    en: "A child’s matrix is for dates under 18: check the date or choose a regular personal reading.",
+  } satisfies Phrase,
   builderText: {
     ru: (P: PriceWords) => `Для себя, близких, пары и на любой год — в одном заказе. Чем больше разборов, тем дешевле каждый: третий стоит ${P.thirdStep}, с четвёртого — по ${P.next}. Купили три — дальше любой разбор для вас стоит ${P.after}, и в следующих заказах.`,
     en: (P: PriceWords) => `For yourself, your family, a couple and any year — in one order. The more readings, the cheaper each one: the third costs ${P.thirdStep}, from the fourth on ${P.next} each. Once you have bought three, any further reading costs you ${P.after}, in later orders too.`,

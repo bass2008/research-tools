@@ -305,11 +305,11 @@ describe("инварианты на многих датах", () => {
 describe("разделы", () => {
   const m = calculate("1987-06-14", "f");
 
-  it("два бесплатных, девятнадцать платных", () => {
+  it("два бесплатных, двадцать платных", () => {
     // Бесплатна витрина: как устроен человек и где ему комфортно. Профессия, предназначение,
     // кармическая задача и денежный канал — продукт, за него платят.
     expect(FREE_KEYS).toEqual(["character", "comfort"]);
-    expect(PAID_KEYS).toHaveLength(19);
+    expect(PAID_KEYS).toHaveLength(20);
     for (const key of ["profession", "realisation", "karma40", "resources"]) {
       expect(PAID_KEYS).toContain(key);
     }
@@ -329,9 +329,9 @@ describe("разделы", () => {
     }
   });
 
-  it("открытый отчёт даёт позиции всем двадцати одному разделу", () => {
+  it("открытый отчёт даёт позиции всем двадцати двум разделам", () => {
     const all = build(m, true);
-    expect(all).toHaveLength(21);
+    expect(all).toHaveLength(22);
     for (const s of all) expect(s.positions.length).toBeGreaterThan(0);
   });
 

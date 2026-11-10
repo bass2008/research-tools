@@ -15,7 +15,7 @@ export const home = {
   // промо-блок справочника
   promoTitle: { ru: "Постройте свою матрицу", en: "Build your own matrix" } satisfies Phrase,
   // витрина
-  chipSections: { ru: "21 раздел отчёта", en: "21 sections of the reading" } satisfies Phrase,
+  chipSections: { ru: "22 раздела отчёта", en: "22 sections of the reading" } satisfies Phrase,
   chipChakras: { ru: "Карта энергий по чакрам", en: "Chakra energy map" } satisfies Phrase,
   chipDecades: { ru: "Разбор по десятилетиям до 80 лет", en: "Reading by decades up to 80" } satisfies Phrase,
   subscribedLead: { ru: "Открыто по подписке", en: "Open with your subscription" } satisfies Phrase,
@@ -62,12 +62,12 @@ export const homeMeta = {
     en: "Free destiny matrix calculator: your date of birth gives the octagram of 22 arcana, the chakra map, ",
   } satisfies Phrase,
   descriptionFree: {
-    ru: "21 раздел разбора. Расчёт и весь разбор — бесплатно, без регистрации.",
-    en: "21 sections of the reading — all free, no sign-up.",
+    ru: "22 раздела разбора. Расчёт и весь разбор — бесплатно, без регистрации.",
+    en: "22 sections of the reading — all free, no sign-up.",
   } satisfies Phrase,
   descriptionPaidHead: {
-    ru: "21 раздел разбора. Расчёт и два раздела бесплатно",
-    en: "21 sections of the reading. The calculation and two sections are free",
+    ru: "22 раздела разбора. Расчёт и два раздела бесплатно",
+    en: "22 sections of the reading. The calculation and two sections are free",
   } satisfies Phrase,
   descriptionPaidPrice: {
     ru: (price: string) => `, полный разбор — ${price}.`,
@@ -78,8 +78,8 @@ export const homeMeta = {
     en: "Destiny matrix — the full reading",
   } satisfies Phrase,
   productDescription: {
-    ru: "Персональный разбор по дате рождения: октаграмма арканов, карта энергий по чакрам, 21 раздел.",
-    en: "A personal reading by date of birth: the octagram of arcana, the chakra energy map, 21 sections.",
+    ru: "Персональный разбор по дате рождения: октаграмма арканов, карта энергий по чакрам, 22 раздела.",
+    en: "A personal reading by date of birth: the octagram of arcana, the chakra energy map, 22 sections.",
   } satisfies Phrase,
 };
 
@@ -102,7 +102,7 @@ export const slides = {
       link: { ru: "Что входит в разбор", en: "What the reading includes" } satisfies Phrase,
     },
     {
-      eyebrow: { ru: "17 позиций карты", en: "17 positions of the chart" } satisfies Phrase,
+      eyebrow: { ru: "18 позиций карты", en: "18 positions of the chart" } satisfies Phrase,
       heading: { ru: "Октаграмма: где какой аркан стоит именно у вас",
                  en: "The octagram: which arcanum stands where in your chart" } satisfies Phrase,
       link: { ru: "Позиции карты", en: "Positions of the chart" } satisfies Phrase,
@@ -122,7 +122,7 @@ export const slides = {
       link: { ru: "Матрица на год", en: "Matrix for the year" } satisfies Phrase,
     },
     {
-      eyebrow: { ru: "21 раздел отчёта", en: "21 sections of the reading" } satisfies Phrase,
+      eyebrow: { ru: "22 раздела отчёта", en: "22 sections of the reading" } satisfies Phrase,
       heading: { ru: "Деньги, отношения, род и предназначение — в одном разборе",
                  en: "Money, relationships, family and purpose — in one reading" } satisfies Phrase,
       link: { ru: "Разделы отчёта", en: "Sections of the reading" } satisfies Phrase,
@@ -136,7 +136,7 @@ export const slides = {
       link: { ru: "Что входит в разбор", en: "What the reading includes" } satisfies Phrase,
     },
     {
-      eyebrow: { ru: "17 позиций карты", en: "17 positions of the chart" } satisfies Phrase,
+      eyebrow: { ru: "18 позиций карты", en: "18 positions of the chart" } satisfies Phrase,
       heading: { ru: "Посмотрите свои арканы в октаграмме",
                  en: "See your own arcana in the octagram" } satisfies Phrase,
       link: { ru: "Позиции карты", en: "Positions of the chart" } satisfies Phrase,
@@ -156,7 +156,7 @@ export const slides = {
       link: { ru: "Матрица на год", en: "Matrix for the year" } satisfies Phrase,
     },
     {
-      eyebrow: { ru: "21 раздел отчёта", en: "21 sections of the reading" } satisfies Phrase,
+      eyebrow: { ru: "22 раздела отчёта", en: "22 sections of the reading" } satisfies Phrase,
       heading: { ru: "Весь справочник — на вашей дате рождения",
                  en: "The whole encyclopedia — applied to your date of birth" } satisfies Phrase,
       link: { ru: "Разделы отчёта", en: "Sections of the reading" } satisfies Phrase,
@@ -169,20 +169,20 @@ export const unlockBox = {
   exampleTitleFree: { ru: "Так выглядит полный разбор", en: "This is what the full reading looks like" } satisfies Phrase,
   openTitleFree: { ru: "Разбор открыт полностью", en: "The reading is fully open" } satisfies Phrase,
   exampleLeadFree: {
-    ru: "Это карта-пример: выберите свою дату выше, и все 21 раздел пересчитаются по ней. ",
-    en: "This is an example chart: pick your own date above and all 21 sections will be recalculated. ",
+    ru: "Это карта-пример: выберите свою дату выше, и все 22 раздела пересчитаются по ней. ",
+    en: "This is an example chart: pick your own date above and all 22 sections will be recalculated. ",
   } satisfies Phrase,
   openLeadFree: {
-    ru: "Все 21 раздел по вашей дате открыты без оплаты. ",
-    en: "All 21 sections for your date are open without payment. ",
+    ru: "Все 22 раздела по вашей дате открыты без оплаты. ",
+    en: "All 22 sections for your date are open without payment. ",
   } satisfies Phrase,
   openLeadSubscribed: {
-    ru: "Все 21 раздел по вашей дате открыты по подписке. ",
-    en: "All 21 sections for your date are open with your subscription. ",
+    ru: "Все 22 раздела по вашей дате открыты по подписке. ",
+    en: "All 22 sections for your date are open with your subscription. ",
   } satisfies Phrase,
   reportOpenSubscribed: {
-    ru: "Все 21 раздел по этой дате открыты по подписке. Чтобы вернуться к ним с другого устройства и скачать PDF, сохраните дату в кабинет.",
-    en: "All 21 sections for this date are open with your subscription. To come back to them from another device and download the PDF, save the date to your account.",
+    ru: "Все 22 раздела по этой дате открыты по подписке. Чтобы вернуться к ним с другого устройства и скачать PDF, сохраните дату в кабинет.",
+    en: "All 22 sections for this date are open with your subscription. To come back to them from another device and download the PDF, save the date to your account.",
   } satisfies Phrase,
   saveForPdf: {
     ru: "Чтобы вернуться к разбору с другого устройства и скачать PDF, сохраните дату в кабинет.",
@@ -192,12 +192,12 @@ export const unlockBox = {
   exampleTitle: { ru: "Что покажет полный разбор", en: "What the full reading shows" } satisfies Phrase,
   openTitle: { ru: "Открыть полный разбор", en: "Open the full reading" } satisfies Phrase,
   exampleLead: {
-    ru: "Это карта-пример. Выберите свою дату выше — и те же 21 раздел пересчитаются по ней: ",
-    en: "This is an example chart. Pick your own date above and the same 21 sections will be recalculated: ",
+    ru: "Это карта-пример. Выберите свою дату выше — и те же 22 раздела пересчитаются по ней: ",
+    en: "This is an example chart. Pick your own date above and the same 22 sections will be recalculated: ",
   } satisfies Phrase,
   openLead: {
-    ru: "Все 21 раздел по вашей дате: ",
-    en: "All 21 sections for your date: ",
+    ru: "Все 22 раздела по вашей дате: ",
+    en: "All 22 sections for your date: ",
   } satisfies Phrase,
   contents: {
     ru: "деньги, отношения, род до седьмого колена, толкование карты энергий и разбор по десятилетиям до 80 лет.",
@@ -231,8 +231,8 @@ export const unlockBox = {
   signIn: { ru: "Войдите", en: "Sign in" } satisfies Phrase,
   // страница «Мой разбор»
   reportOpenFree: {
-    ru: "Все 21 раздел по этой дате открыты без оплаты. Чтобы вернуться к ним с другого устройства и скачать PDF, сохраните дату в кабинет.",
-    en: "All 21 sections for this date are open without payment. To come back to them from another device and download the PDF, save the date to your account.",
+    ru: "Все 22 раздела по этой дате открыты без оплаты. Чтобы вернуться к ним с другого устройства и скачать PDF, сохраните дату в кабинет.",
+    en: "All 22 sections for this date are open without payment. To come back to them from another device and download the PDF, save the date to your account.",
   } satisfies Phrase,
   grantedTitle: {
     ru: "Полный разбор по этой дате собирает сервер",

@@ -16,18 +16,29 @@ describe("Release 1 public URL migration", () => {
     ["arcana-sense.ru", "/", 200, null],
     ["arcana-sense.ru", "/ru/", 302, "https://arcana-sense.ru/"],
     ["arcana-sense.com", "/", 302, "https://arcana-sense.com/en/"],
-    ["arcana-sense.ru", "/year/16?tab=x", 301, "https://arcana-sense.ru/ru/year/16?tab=x"],
+    ["arcana-sense.ru", "/encyclopedia/year/16?tab=x", 301, "https://arcana-sense.ru/ru/encyclopedia/year/16?tab=x"],
     ["arcana-sense.com", "/encyclopedia/arcanum/4", 301, "https://arcana-sense.com/en/encyclopedia/arcanum/4"],
     ["arcana-sense.com", "/en/", 200, null],
-    ["arcana-sense.com", "/en/year/16", 200, null],
-    ["arcana-sense.ru", "/ru/year/99", 404, null],
-    ["arcana-sense.ru", "/year/99", 404, null],
-    ["arcana-sense.ru", "/en/year/16", 200, null],
-    ["arcana-sense.com", "/ru/year/16", 200, null],
+    ["arcana-sense.com", "/en/encyclopedia/year/16", 200, null],
+    ["arcana-sense.ru", "/ru/encyclopedia/year/99", 404, null],
+    ["arcana-sense.ru", "/encyclopedia/year/99", 404, null],
+    ["arcana-sense.ru", "/en/encyclopedia/year/16", 200, null],
+    ["arcana-sense.com", "/ru/encyclopedia/year/16", 200, null],
     ["arcana-sense.ru", "/ru/api/payments/notify/tbank", 404, null],
     ["arcana-sense.ru", "/api/payments/notify/tbank", 200, null],
     ["arcana-sense.com", "/pay/done?paid=123", 302, "https://arcana-sense.com/en/pay/done?paid=123"],
     ["arcana-sense.com", "/robots.txt", 200, null],
+    // Moved addresses reach the final URL with the site language in one 301.
+    ["arcana-sense.ru", "/ru/full-reading", 301, "https://arcana-sense.ru/ru/encyclopedia/full-reading"],
+    ["arcana-sense.ru", "/full-reading", 301, "https://arcana-sense.ru/ru/encyclopedia/full-reading"],
+    ["arcana-sense.com", "/full-reading", 301, "https://arcana-sense.com/en/encyclopedia/full-reading"],
+    ["arcana-sense.com", "/en/year/5?tab=x", 301, "https://arcana-sense.com/en/encyclopedia/year/5?tab=x"],
+    ["arcana-sense.ru", "/year/2026", 301, "https://arcana-sense.ru/ru/encyclopedia/year/2026"],
+    ["arcana-sense.ru", "/energii", 301, "https://arcana-sense.ru/ru/encyclopedia/energies"],
+    ["arcana-sense.ru", "/na-god/5", 301, "https://arcana-sense.ru/ru/encyclopedia/year/5"],
+    ["arcana-sense.ru", "/oferta", 301, "https://arcana-sense.ru/ru/terms"],
+    ["arcana-sense.ru", "/karmic-compatibility", 301, "https://arcana-sense.ru/ru/encyclopedia/compatibility/tails"],
+    ["arcana-sense.ru", "/ru/year/5/x", 404, null],
   ])("%s%s => %s", (host, path, status, location) => {
     const r = response(host, path);
     expect(r.status).toBe(status);
@@ -35,11 +46,11 @@ describe("Release 1 public URL migration", () => {
   });
 
   it("rewrites to existing routes without changing public URLs or trusting forged context", () => {
-    const r = response("arcana-sense.com", "/en/year/16", {
+    const r = response("arcana-sense.com", "/en/encyclopedia/year/16", {
       cookie: "arcana_locale=ru", "x-arcana-path": "/account", rsc: "1",
     });
-    expect(r.headers.get("x-middleware-rewrite")).toBe("https://arcana-sense.com/year/16");
-    expect(r.headers.get("x-middleware-request-x-arcana-path")).toBe("/year/16");
+    expect(r.headers.get("x-middleware-rewrite")).toBe("https://arcana-sense.com/encyclopedia/year/16");
+    expect(r.headers.get("x-middleware-request-x-arcana-path")).toBe("/encyclopedia/year/16");
   });
 
   it("opens the sample readings to search and keeps the bought ones closed", () => {
@@ -55,8 +66,8 @@ describe("Release 1 public URL migration", () => {
   });
 
   it("maps only public navigation, preserves query/fragment and never doubles prefixes", () => {
-    expect(publicPath("/year/16?tab=meaning#text", "ru")).toBe("/ru/year/16?tab=meaning#text");
-    expect(publicPath("/ru/year/16", "ru")).toBe("/ru/year/16");
+    expect(publicPath("/encyclopedia/year/16?tab=meaning#text", "ru")).toBe("/ru/encyclopedia/year/16?tab=meaning#text");
+    expect(publicPath("/ru/encyclopedia/year/16", "ru")).toBe("/ru/encyclopedia/year/16");
     expect(publicPath("/en/", "en")).toBe("/en/");
     for (const path of ["/api/session", "/img/card.webp", "#result", "https://example.org/", "//example.org/"]) {
       expect(publicPath(path, "en")).toBe(path);
@@ -71,11 +82,11 @@ describe("Release 1 public URL migration", () => {
       expect(path === "/" && site.defaultLocale === "ru" || path.startsWith(`/${site.defaultLocale}/`), url).toBe(true);
       expect(response(new URL(url).host, path).status, url).toBe(200);
     }
-    const meta = siteView(site.defaultLocale, site).pageMeta({ path: "/year/16", title: "Year", description: "Year" });
+    const meta = siteView(site.defaultLocale, site).pageMeta({ path: "/encyclopedia/year/16", title: "Year", description: "Year" });
     expect(meta.alternates?.languages).toEqual({
-      ru: "https://arcana-sense.ru/ru/year/16",
-      en: "https://arcana-sense.com/en/year/16",
-      "x-default": "https://arcana-sense.com/en/year/16",
+      ru: "https://arcana-sense.ru/ru/encyclopedia/year/16",
+      en: "https://arcana-sense.com/en/encyclopedia/year/16",
+      "x-default": "https://arcana-sense.com/en/encyclopedia/year/16",
     });
     const common = [robotsForSite(site).rules].flat().find((r) => r.userAgent === "*")!;
     expect(common.disallow).toContain(`/${site.defaultLocale}/encyclopedia/character/`);
@@ -93,7 +104,7 @@ describe("Release 1 public URL migration", () => {
       { origin: "https://test.arcana-sense.com", defaultLocale: "en", locales: ["ru", "en"] },
     ]));
     const site = sites.find((s) => s.origin === "https://test.arcana-sense.ru")!;
-    expect(publicUrl("/year/16", site, "en")).toBe("https://test.arcana-sense.com/en/year/16");
+    expect(publicUrl("/encyclopedia/year/16", site, "en")).toBe("https://test.arcana-sense.com/en/encyclopedia/year/16");
   });
 });
 

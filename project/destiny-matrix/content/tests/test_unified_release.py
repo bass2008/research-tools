@@ -127,7 +127,7 @@ def test_every_material_has_review_card_and_all_report_sections_are_covered():
     for row in items(WEB / "karmic-tails.json"):
         assert f"karmic_tail:{row['key']}" in covered
     sections = items(WEB / "sections.json")
-    assert len(sections) == 21
+    assert len(sections) == 22
     for section in sections:
         assert f"position:{section['key']}" in covered
     assert all(row["decision"] in {"keep", "noindex"} for row in cards)

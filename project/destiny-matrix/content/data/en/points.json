@@ -7,11 +7,12 @@
   "formula": "The day of birth reduced to 1–22 by adding its digits: the 27th gives 9, the 22nd stays 22.",
   "meaning": [
    "The calling card in the destiny matrix is outer point A, worked out from the day of birth. It describes the first impression and the manner people notice: how someone opens a conversation, meets something new, marks a boundary and takes a place among strangers. This is not the whole personality, only its fastest-read layer.",
-   "The arcanum of the calling card shows up without any preparation, yet it can be used in different ways. When a person is calm, the strong qualities of that energy are visible; under strain the same manner turns sharp, closed or excessive. That is why the description is worth checking not only against your own view of yourself, but against repeated feedback from different people."
+   "The arcanum of the calling card shows up without any preparation, yet it can be used in different ways. When a person is calm, the strong qualities of that energy are visible; under strain the same manner turns sharp, closed or excessive. That is why the description is worth checking not only against your own view of yourself, but against repeated feedback from different people. A also opens the parent-child line A → O → J on the left ray: the outer expression through which family experience comes out."
   ],
   "reading": "Compare the day arcanum with what people say about you when they first meet you — the match is usually more accurate than your own estimate.",
   "sections": [
    "character",
+   "parent_child_line",
    "years"
   ],
   "seo_title": "Calling card in the destiny matrix — the birth day arcanum",
@@ -320,10 +321,11 @@
   "formula": "The day arcanum plus the centre arcanum.",
   "meaning": [
    "J stands between the personality portrait A and the centre E. It shows the step from an inner state to a visible action: how a person comes across when there is no time to prepare a role. The gap between the impression they make and what they are really protecting is especially clear here.",
-   "In the layout J is counted as A+E, belongs to the J–K pair at the Vishuddha level and takes part in the calculation of O and S. In the product section about the first half of the path, J is used as a way to work with the theme of I, but the formula itself gives the point no age and says nothing about its influence switching off by itself after forty."
+   "In the layout J is counted as A+E, belongs to the J–K pair at the Vishuddha level and takes part in the calculation of O and S. In the product section about the first half of the path, J is used as a way to work with the theme of I, but the formula itself gives the point no age and says nothing about its influence switching off by itself after forty. J is the parents' point of the parent-child line A → O → J: the atmosphere a person was born and raised in; the line is read from it."
   ],
   "reading": "Compare how you look when you are calm and how you act under pressure. Arcanum J is most visible in the move between those two modes.",
   "sections": [
+   "parent_child_line",
    "karma40"
   ],
   "seo_title": "Inner left point J in the destiny matrix",

@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 import { buildId } from "./lib/buildId";
-import { REDIRECTS } from "./lib/redirects";
 import { serverSettings } from "./lib/settings/server";
 
 // Фронт — node-сервер Next.js на той же машине, что api. Статического экспорта нет: BFF обязан
@@ -60,12 +59,6 @@ const config: NextConfig = {
       source: `${prefix}/encyclopedia/${section}/:slug`,
       headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
     })))];
-  },
-  async redirects() {
-    // Переезды адресов энциклопедии, по одному правилу на адрес: список и правило — в lib/redirects.ts.
-    // Код задан числом, а не `permanent: true`: тот отдаёт 308, а переезд страницы поиску принято
-    // объявлять кодом 301 — его понимают все обходчики без оговорок.
-    return REDIRECTS.map((rule) => ({ ...rule, statusCode: 301 }));
   },
   async rewrites() {
     // Всё, что не покрыто BFF (app/api/**), уходит в api: файловые маршруты

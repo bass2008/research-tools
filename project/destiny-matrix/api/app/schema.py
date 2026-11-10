@@ -353,6 +353,28 @@ def individual_orders(cur: sqlite3.Cursor) -> dict:
     return {"individual_readings.purchase_id": "есть"}
 
 
+def mobile_accounts(cur: sqlite3.Cursor) -> dict:
+    existing = {r[1] for r in cur.execute("PRAGMA table_info(users)")}
+    for column, ddl in {"deletion_requested_at": "DATETIME", "deleted_at": "DATETIME",
+                        "deletion_locale": "VARCHAR(2)", "deletion_origin": "VARCHAR(200)"}.items():
+        if column not in existing:
+            cur.execute(f"ALTER TABLE users ADD COLUMN {column} {ddl}")
+    for table in ("play_orders", "play_purchases", "play_notifications"):
+        if table not in _tables(cur):
+            _create(cur, table)
+    return {"mobile_accounts": "created"}
+
+
+def google_sign_in(cur: sqlite3.Cursor) -> dict:
+    existing = {r[1] for r in cur.execute("PRAGMA table_info(users)")}
+    if "has_password" not in existing:
+        cur.execute("ALTER TABLE users ADD COLUMN has_password BOOLEAN NOT NULL DEFAULT 1")
+    for table in ("google_identities", "google_auth_challenges"):
+        if table not in _tables(cur):
+            _create(cur, table)
+    return {"google_sign_in": "created"}
+
+
 MIGRATIONS: list[tuple[str, Callable[[sqlite3.Cursor], dict]]] = [
     ("001_products", migrate_products),
     ("002_subscription_price", subscription_price),
@@ -365,6 +387,8 @@ MIGRATIONS: list[tuple[str, Callable[[sqlite3.Cursor], dict]]] = [
     ("010_account_notifications", account_notifications),
     ("012_remove_task_queue", remove_task_queue),
     ("013_individual_orders", individual_orders),
+    ("014_mobile_accounts", mobile_accounts),
+    ("015_google_sign_in", google_sign_in),
 ]
 
 

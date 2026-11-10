@@ -26,6 +26,8 @@ from .source import Corpus, corpus
 OUT_ROOT = Path(__file__).resolve().parents[1] / "web" / "content"
 
 SECTION_KEYS = [key for key, *_ in SPEC]
+# Report sections read as one connected triple: the corpus file holds a reading per exact triple.
+LINE_CORPORA = {"material_karma": "material-karma.json", "parent_child_line": "parent-child-line.json"}
 SECTION_ACCESS = {key: access for key, _title, _lead, access, *_ in SPEC}
 
 
@@ -238,7 +240,7 @@ def build_positions(ctx: Ctx) -> list[dict]:
         }
         # A point page lists no report sections; the line article is the one it must lead to.
         links = [{"label": ctx.text.section_title(k), "href": position_href(k)}
-                 for k in point["sections"] if k == "material_karma"]
+                 for k in point["sections"] if k in LINE_CORPORA]
         if links:
             item["links"] = links
         if point.get("article_sections"):
@@ -352,9 +354,9 @@ def build_all(lang: str = DEFAULT_LANG) -> dict[str, list[dict]]:
     # на этапе редакционной переработки и не заменяются общими значениями аркана.
     personal = Path(__file__).parent / "data" / lang / "chakra-personal.json"
     write_raw(lang, "chakra-personal.json", json.loads(personal.read_text(encoding="utf-8")))
-    # Связные толкования материальной кармы — тоже по точной тройке C–Q–L.
-    material = Path(__file__).parent / "data" / lang / "material-karma.json"
-    write_raw(lang, "material-karma.json", json.loads(material.read_text(encoding="utf-8")))
+    for name in LINE_CORPORA.values():
+        corpus = Path(__file__).parent / "data" / lang / name
+        write_raw(lang, name, json.loads(corpus.read_text(encoding="utf-8")))
     pages = sum(len(items) for items in parts.values()) + 1
     print(f"[{lang}] страниц энциклопедии: {pages}")
     return parts

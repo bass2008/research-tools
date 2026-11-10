@@ -8,7 +8,7 @@ import type { Matrix } from "./matrix";
 import { ENERGY_FIELD_KEY, type ChakraReadingRow } from "./readingTypes";
 import { chakraAtlas } from "./i18n/dict/chakraAtlas";
 import { report } from "./i18n/dict/report";
-import { materialKarmaRowFrom, type MaterialKarmaCorpus } from "./materialKarmaRow";
+import { isLineSection, labelsFrom, lineCorpusFile, lineRowFrom, positionPageCount, type LineCorpus, type LineSection } from "./lineReadingRow";
 import { plainText } from "./richText";
 
 type Bag = Record<string, unknown>;
@@ -242,7 +242,7 @@ export function createContent(L: Locale, source: ContentSource) {
   }
 
   let chakraCorpus: ChakraCorpus | undefined;
-  let materialCorpus: MaterialKarmaCorpus | undefined;
+  const lineCorpora: Partial<Record<LineSection, LineCorpus>> = {};
   let chakraNumbers: Map<string, number> | undefined;
 
   function chakraReadingOf(v: unknown): ChakraReadingItem | null {
@@ -252,14 +252,13 @@ export function createContent(L: Locale, source: ContentSource) {
         !/^\d+-\d+-\d+$/.test(triple) || (note !== undefined && (typeof note !== "string" || !note.trim()))) {
       return null;
     }
-    if (chakra === "material_karma") {
-      materialCorpus ??= source.read("material-karma.json", L) as MaterialKarmaCorpus;
-      const copy = materialCorpus.readings[triple];
+    if (isLineSection(chakra)) {
+      const corpus = lineCorpora[chakra] ??= source.read(lineCorpusFile(chakra), L) as LineCorpus;
+      const copy = corpus.readings[triple];
       if (!copy) return null;
       return {
-        id: `material-karma-${triple}`, ...(note ? { note: note.trim() } : {}),
-        row: materialKarmaRowFrom(triple.split("-").map(Number), copy, report.materialKarmaTitle[L],
-          report.materialKarmaTopic[L], report.materialKarmaRoles[L]),
+        id: `${chakra.replaceAll("_", "-")}-${triple}`, ...(note ? { note: note.trim() } : {}),
+        row: lineRowFrom(chakra, triple.split("-").map(Number), copy, labelsFrom(report.lines[chakra], L)),
       };
     }
     chakraCorpus ??= source.read("chakra-personal.json", L) as ChakraCorpus;
@@ -491,8 +490,7 @@ export function createContent(L: Locale, source: ContentSource) {
 
   for (const [name, actual, expected] of [
     ["arcana.json", ARCANA_JSON.size, 22],
-    // материальная карма приходит в язык целиком — страница раздела вместе с корпусом толкований
-    ["positions.json", POSITIONS_JSON.size, POSITIONS_JSON.has("material_karma") ? 39 : 38],
+    ["positions.json", POSITIONS_JSON.size, positionPageCount((key) => POSITIONS_JSON.has(key))],
     ["chakras.json", CHAKRAS_JSON.size, 7],
     ["combinations.json", COMBINATIONS_JSON.size, 231],
     ["karmic-tails.json", KARMIC_TAILS.size, 26],
@@ -501,7 +499,7 @@ export function createContent(L: Locale, source: ContentSource) {
     ["category-hubs.json", CATEGORY_HUBS.size, (CATEGORY_HUBS.has("compatibility") ? 8 : 7) + (CATEGORY_HUBS.has("compatibility-tails") ? 1 : 0)
       + (CATEGORY_HUBS.has("month") ? 1 : 0)],
     ["compatibility-arcana.json", COMPATIBILITY_ARCANA.size, CATEGORY_HUBS.has("compatibility") ? 21 : 0],
-    ["hubs.json", HUBS.size, 10 + COMPATIBILITY_HUBS.filter((key) => HUBS.has(key)).length],
+    ["hubs.json", HUBS.size, 10 + (HUBS.has("child-matrix") ? 1 : 0) + COMPATIBILITY_HUBS.filter((key) => HUBS.has(key)).length],
   ] as const) {
     if (actual !== expected) throw new Error(`[content] ${name}: ожидалось ${expected}, получено ${actual}`);
   }
@@ -611,8 +609,7 @@ export function createContent(L: Locale, source: ContentSource) {
       keywords.length < 3 ||
       !meaning ||
       !inPositions ||
-      // 18 точек и разделы метода; материальная карма приходит в язык вместе со своей страницей
-      Object.keys(inPositions).length !== ("material_karma" in inPositions ? 39 : 38) ||
+      Object.keys(inPositions).length !== positionPageCount((key) => key in inPositions) ||
       plus.length < 3 ||
       minus.length < 3 ||
       repeat.length < 200 ||

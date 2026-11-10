@@ -1,0 +1,286 @@
+{
+  "character": [
+    {
+      "selector": "A",
+      "position_key": "day"
+    },
+    {
+      "selector": "B",
+      "position_key": "month"
+    },
+    {
+      "selector": "C",
+      "position_key": "year"
+    }
+  ],
+  "comfort": [
+    {
+      "selector": "E",
+      "position_key": "center"
+    },
+    {
+      "selector": "M",
+      "position_key": "comfort_south"
+    },
+    {
+      "selector": "K",
+      "position_key": "comfort_north"
+    }
+  ],
+  "purpose": [
+    {
+      "selector": "purpose_personal",
+      "position_key": "purpose_personal"
+    },
+    {
+      "selector": "purpose_social",
+      "position_key": "purpose_social"
+    },
+    {
+      "selector": "harmony",
+      "position_key": "harmony"
+    },
+    {
+      "selector": "planetary",
+      "position_key": "planetary"
+    }
+  ],
+  "profession": [
+    {
+      "selector": "B",
+      "position_key": "month"
+    },
+    {
+      "selector": "P",
+      "position_key": "profession"
+    },
+    {
+      "selector": "K",
+      "position_key": "comfort_north"
+    }
+  ],
+  "realisation": [
+    {
+      "selector": "D",
+      "position_key": "mission"
+    },
+    {
+      "selector": "purpose_personal",
+      "position_key": "purpose_personal"
+    },
+    {
+      "selector": "purpose_social",
+      "position_key": "purpose_social"
+    }
+  ],
+  "resources": [
+    {
+      "selector": "L",
+      "position_key": "comfort_east"
+    },
+    {
+      "selector": "R2",
+      "position_key": "resources"
+    }
+  ],
+  "material_karma": [
+    {
+      "selector": "C",
+      "position_key": "year"
+    },
+    {
+      "selector": "Q",
+      "position_key": "material_karma"
+    },
+    {
+      "selector": "L",
+      "position_key": "comfort_east"
+    }
+  ],
+  "money": [
+    {
+      "selector": "L",
+      "position_key": "comfort_east"
+    },
+    {
+      "selector": "R2",
+      "position_key": "money"
+    },
+    {
+      "selector": "R",
+      "position_key": "money"
+    },
+    {
+      "selector": "ground.total",
+      "position_key": "money"
+    }
+  ],
+  "money40": [
+    {
+      "selector": "R2",
+      "position_key": "money40"
+    },
+    {
+      "selector": "L",
+      "position_key": "comfort_east"
+    }
+  ],
+  "relations": [
+    {
+      "selector": "M",
+      "position_key": "comfort_south"
+    },
+    {
+      "selector": "R1",
+      "position_key": "love_middle"
+    },
+    {
+      "selector": "R",
+      "position_key": "relations"
+    },
+    {
+      "selector": "K",
+      "position_key": "comfort_north"
+    }
+  ],
+  "parent_child_line": [
+    {
+      "selector": "A",
+      "position_key": "day"
+    },
+    {
+      "selector": "O",
+      "position_key": "parent_child_line"
+    },
+    {
+      "selector": "J",
+      "position_key": "comfort_west"
+    }
+  ],
+  "parents_children": [
+    {
+      "selector": "F",
+      "position_key": "father_line"
+    },
+    {
+      "selector": "G",
+      "position_key": "mother_line"
+    },
+    {
+      "selector": "H",
+      "position_key": "descendants"
+    }
+  ],
+  "family_gifts": [
+    {
+      "selector": "F",
+      "position_key": "father_line"
+    },
+    {
+      "selector": "G",
+      "position_key": "mother_line"
+    },
+    {
+      "selector": "social_male.total",
+      "position_key": "family_gifts"
+    },
+    {
+      "selector": "social_female.total",
+      "position_key": "family_gifts"
+    }
+  ],
+  "ancestry": [
+    {
+      "selector": "I",
+      "position_key": "inheritance"
+    },
+    {
+      "selector": "social_male.total",
+      "position_key": "ancestry"
+    },
+    {
+      "selector": "social_female.total",
+      "position_key": "ancestry"
+    },
+    {
+      "selector": "planetary",
+      "position_key": "planetary"
+    }
+  ],
+  "karma40": [
+    {
+      "selector": "I",
+      "position_key": "inheritance"
+    },
+    {
+      "selector": "J",
+      "position_key": "comfort_west"
+    }
+  ],
+  "past_lives": [
+    {
+      "selector": "M",
+      "position_key": "comfort_south"
+    },
+    {
+      "selector": "N",
+      "position_key": "past_lives"
+    },
+    {
+      "selector": "D",
+      "position_key": "mission"
+    }
+  ],
+  "soul_tasks": [
+    {
+      "selector": "B",
+      "position_key": "month"
+    },
+    {
+      "selector": "D",
+      "position_key": "mission"
+    },
+    {
+      "selector": "sky.total",
+      "position_key": "soul_tasks"
+    }
+  ],
+  "loops": [
+    {
+      "selector": "D",
+      "position_key": "mission"
+    },
+    {
+      "selector": "E",
+      "position_key": "center"
+    },
+    {
+      "selector": "harmony",
+      "position_key": "harmony"
+    }
+  ],
+  "body_resource": [
+    {
+      "selector": "C",
+      "position_key": "year"
+    },
+    {
+      "selector": "D",
+      "position_key": "mission"
+    },
+    {
+      "selector": "reduce(C+D)",
+      "position_key": "body_resource"
+    }
+  ],
+  "rest": [
+    {
+      "selector": "reduce(L+M)",
+      "position_key": "rest"
+    },
+    {
+      "selector": "E",
+      "position_key": "center"
+    }
+  ]
+}

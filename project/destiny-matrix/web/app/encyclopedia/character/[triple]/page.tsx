@@ -1,9 +1,10 @@
 import { requestSite } from "@/lib/siteProfile.server";
+import { articleSource } from "@/app/_lib/article";
 import CharacterReadingView from "@/components/matrix/CharacterReadingView";
 import CrumbsLd from "@/components/ui/CrumbsLd";
 import JsonLd from "@/components/ui/JsonLd";
 import { forLocale as localizedCharacter } from "@/lib/character";
-import { forLocale as localizedContent } from "@/lib/content";
+import { articleContentForLocale as localizedContent } from "@/app/_lib/article";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";
 import { type Lang as Locale } from "@/lib/i18n/lang";
@@ -36,8 +37,9 @@ const forLocale = localized((L: Locale, site) => {
   function data(triple: string) {
     const item = matrixItem(triple);
     if (!item) return null;
-    const reading = buildCharacterReading(item.matrix);
     const path = `/encyclopedia/character/${triple}`;
+    const reading = articleSource(path, { locale: L }, "reading");
+    if (!reading) return null;
     const description =
       D.encCharacter.description[L](triple);
     return { item, reading, path, description };

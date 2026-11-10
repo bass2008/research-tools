@@ -6,6 +6,7 @@ import re
 import os
 import shutil
 import urllib.request
+from conftest import absolute
 from pathlib import Path
 
 import pypdf
@@ -82,7 +83,7 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
     )
 
     pdf_path = tmp_path / "31-03-1993-m.pdf"
-    with urllib.request.urlopen(answer["url"], timeout=60) as source:
+    with urllib.request.urlopen(absolute(answer["url"]), timeout=60) as source:
         pdf_path.write_bytes(source.read())
     assert pdf_path.read_bytes().startswith(b"%PDF")
     if artifact_dir:
@@ -126,7 +127,7 @@ def test_golden_date_is_identical_on_landing_paid_report_and_pdf(page, mail, tmp
     # Лист один и всегда упирается в предел формата: сервис печати сам сжимает страницу под
     # 19 190 px (≈14 392 pt). Так и задумано — файл читают с экрана, а текст остаётся вектором,
     # поэтому увеличение ничего не портит. Держим здесь состав и целостность: один лист, высота в
-    # пределах формата, все 21 раздел внутри.
+    # пределах формата, все 22 раздела внутри.
     assert len(pages) == 1, f"в PDF {len(pages)} страниц, ожидался один лист"
     height = float(pages[0].mediabox.height)
     assert height <= 14_400, f"лист {height} pt выше предела формата PDF"

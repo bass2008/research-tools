@@ -39,7 +39,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const row = individualExample(slug, L);
   if (!row) notFound();
   const T = D.individualSale;
-  const tab = (s: ExampleSlug) => s === "year" ? T.kindYear[L](individualExample("year", L)?.year ?? 0) : s === "pair" ? T.kindPair[L] : T.kindPersonal[L];
+  const tab = (s: ExampleSlug) => s === "year" ? T.kindYear[L](individualExample("year", L)?.year ?? 0) : s === "pair" ? T.kindPair[L]
+    : s === "child" ? T.childTag[L] : T.kindPersonal[L];
   return <main id="content" className="page individual-page theme-gold">
     <ExampleGoal example={slug} />
     <CrumbsLd locale={L} trail={[{ name: D.nav.home[L], path: "/" }, { name: D.nav.individual[L], path: "/individual" },

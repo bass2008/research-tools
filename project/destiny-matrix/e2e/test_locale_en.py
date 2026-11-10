@@ -17,8 +17,8 @@ CYRILLIC = re.compile(r"[а-яёА-ЯЁ]")
 # намеренно: его тексты приходят из корпуса, и их проверяет `content.validate`.
 PAGES = (
     "/",
-    "/method",
-    "/author",
+    "/encyclopedia/method",
+    "/encyclopedia/author",
     "/contacts",
     "/terms",
     "/privacy",
@@ -29,8 +29,8 @@ PAGES = (
     "/encyclopedia/chakra/anahata",
     "/encyclopedia/combination/7-18",
     "/encyclopedia/karmic-tail/18-9-9",
-    "/year",
-    "/year/7",
+    "/encyclopedia/year",
+    "/encyclopedia/year/7",
     "/login",
     "/account",
 )

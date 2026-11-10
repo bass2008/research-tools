@@ -34,6 +34,7 @@
     "money": "Money comes for speed and for a direct offer. Short deals, projects of your own and payment for results all work well here. A fixed salary with a promotion somewhere ahead kills the pace: with no movement the income stands still. Say the price and the deadline out loud to one person, before you agree to work “as a trial”.",
     "money40": "Mature money for the first arcanum rests on a name rather than on speed. There are fewer sprints, and the entry price is higher: the record already shows that this person finishes what they begin. That price drops when the record is twenty things started and abandoned — then every new start is counted from zero again. Write down three pieces of work carried to the end over the last five years and set the price from those, not from a readiness to take on anything at all.",
     "relations": "Into a couple this brings initiative and excitement: courts fast, decides fast, gets bored just as fast. The bond stays alive only where there is a shared undertaking and shared plans, not habit alone. Silent waiting goes unread: until a request is said out loud, as far as they are concerned nothing is happening.",
+    "parent_child_line": "Showing a younger person how an idea becomes something real may appeal to you: building a model, inventing a game, demonstrating a skill. Here, the Magician connects your role as an adult with sharing what you can do. The difficulty comes when your skill takes over. You might finish a child's craft project because it is quicker. A more helpful approach leaves them room to try and own the result. Are you helping them discover a method, or showing how well you can do it?",
     "parents_children": "What was carried out of the family is the demand to cope alone, and early. Later the person leads younger ones like a coach: shows how it is done and expects independence ahead of time — with a child, a student or a newcomer on the team alike. Permission to do it their own way helps; endless comparison with a previous result gets in the way.",
     "family_gifts": "The family line passed down the ability to start with nothing to lean on. Most likely there was someone who left for another city with a single suitcase, or opened a business first among everyone they knew and asked nobody for permission. What is inherited is not their route but the right to take the first step before everything is ready.",
     "ancestry": "For the family line the task is to bring the family craft out of the shadows and into the open. The elders knew how but never dared to show it — hence the task of naming a price out loud and putting your own name on the work. Begin with one step: sign your name to work that the family used to hand over in silence.",
@@ -114,6 +115,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -385,7 +391,7 @@
         }
        },
        "Altogether, 13.8% of people have a 1 somewhere in their matrix — about one in seven. We counted this across all 46,300 dates from 1 January 1900 to October 2026. Only The High Priestess is rarer (13.4%), while each of the other twenty arcana turns up in the charts of 59–85% of people. So The Magician is no mark of the chosen and no “main card” — but it is not something everyone gets either.",
-       "In every other point nobody ever has a 1: not in the centre, not in the karmic tail, not in the money or relationship lines, not in the purposes, not in the family lines. Why people sometimes “find” it there is explained below, in the section on where people look for The Magician in vain. 1 as the arcanum of the year is calculated differently and has a page of its own: [1 for the year in the destiny matrix](/year/1).",
+       "In every other point nobody ever has a 1: not in the centre, not in the karmic tail, not in the money or relationship lines, not in the purposes, not in the family lines. Why people sometimes “find” it there is explained below, in the section on where people look for The Magician in vain. 1 as the arcanum of the year is calculated differently and has a page of its own: [1 for the year in the destiny matrix](/encyclopedia/year/1).",
        "One more clarification. A 1 in the matrix is the number of a card, not a numerological “life path number”. Numerology adds all the digits of a date into one, while the matrix keeps each point separate, and each has its own role. So reading a 1 always starts with the question of where it stands."
       ]
      },
@@ -606,6 +612,7 @@
     "money": "What is paid for is access to knowledge: consultations, readings, expert opinion, analysis. The money comes in more quietly than for the neighbours, but without the race. The brake is shyness — waiting in silence to be valued. Name the sum first, before the client asks about it: silence costs more here than awkwardness.",
     "money40": "By arcanum two, years of practice make the same observations noticeably dearer: behind the instinct now stand hundreds of other people’s cases. The best move is out of doing the work and into being called in to look at a situation and say what is really going on. One thing holds it back — the habit of keeping quiet until asked: an unspoken observation does not get paid for. Take one case from practice and sell the reading separately from the work itself.",
     "relations": "In a relationship they give depth and patience, but they need room. People near them get used to pauses and to answers that do not come at once. Pressure on such a person shuts them down for a month. One direct question works better here than a month of guessing, but the answer has to be waited for in silence.",
+    "parent_child_line": "Quiet attention may feel more natural to you around children than constant activity. The High Priestess here suggests an interest in experiences that are hard to put into words. The difficulty is assuming you already understand them. A younger person's silence might seem like hurt feelings before you have asked. A more open approach lets sensitivity coexist with uncertainty: an impression becomes a starting point for conversation. You can notice a mood without treating your interpretation as someone else's answer.",
     "parents_children": "Understanding without words is the family rule of this arcanum: the mood of the house was read from the steps in the hallway, and nothing was named aloud. The same way carries on — they feel the state of a younger one before that one dares to say it. There is a single danger: silent closeness easily turns into a home where everyone guesses and nobody talks anything through.",
     "family_gifts": "The family line passed down a fine ear and the ability to keep things. There was a woman who knew everything about everyone and said nothing: people came to her with what they could not say aloud. That gift still holds them up today — in negotiations and in hard conversations, where hearing matters more than answering.",
     "ancestry": "The family line needs someone to finally say it aloud. Family secrets, unnamed stories, we-do-not-talk-about-that — the task is to stop guarding them and give the events their names back. Write down one story the family only hinted at, separating known facts from guesses and other people’s versions.",
@@ -686,6 +693,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -1159,7 +1171,7 @@
      {
       "h2": "More to read about 2",
       "paragraphs": [
-       "If 2 has come up as your arcanum of the year, that is a separate story: a High Priestess year is a time to gather, observe and choose your moment. The details are on the page [2 for the year in the destiny matrix](/year/2).",
+       "If 2 has come up as your arcanum of the year, that is a separate story: a High Priestess year is a time to gather, observe and choose your moment. The details are on the page [2 for the year in the destiny matrix](/encyclopedia/year/2).",
        "The High Priestess in combination with every arcanum: [The Magician](/encyclopedia/combination/1-2), [The Empress](/encyclopedia/combination/2-3), [The Emperor](/encyclopedia/combination/2-4), [The Hierophant](/encyclopedia/combination/2-5), [The Lovers](/encyclopedia/combination/2-6), [The Chariot](/encyclopedia/combination/2-7), [Justice](/encyclopedia/combination/2-8), [The Hermit](/encyclopedia/combination/2-9), [The Wheel of Fortune](/encyclopedia/combination/2-10), [Strength](/encyclopedia/combination/2-11), [The Hanged Man](/encyclopedia/combination/2-12), [Death](/encyclopedia/combination/2-13), [Temperance](/encyclopedia/combination/2-14), [The Devil](/encyclopedia/combination/2-15), [The Tower](/encyclopedia/combination/2-16), [The Star](/encyclopedia/combination/2-17), [The Moon](/encyclopedia/combination/2-18), [The Sun](/encyclopedia/combination/2-19), [Judgement](/encyclopedia/combination/2-20), [The World](/encyclopedia/combination/2-21), [The Fool](/encyclopedia/combination/2-22).",
        "If you were looking for a destiny matrix for two people, that is a different calculation: compatibility, where the matching points of two personal matrices are added together. A 2 is even rarer there. By Yuliana Lisovskaya’s calculation it is possible in only two points, and only when both partners have ones there: if both were born on the 1st (the point about how others see the couple) or both in January (the point about why the couple met). Such a couple keeps a great deal to themselves, and they meet in order to learn to talk about their feelings instead of storing them up. More on the page [“2 in compatibility”](/encyclopedia/compatibility/2)."
       ]
@@ -1200,6 +1212,7 @@
     "money": "Money likes beauty and care: interiors, food, children, looking after people, everything bodily and pleasant. It arrives through people who stay for years. The leak is usually in the price — the work is done well and billed below the market. Add up one whole job, together with the preparation and the clearing up, and do not hide that figure behind the word “help”.",
     "money40": "By the mature years the third arcanum has plenty to lean on: clients by word of mouth, its own students, property, a name earned in a narrow circle. Bringing in the harvest goes easier than new sprints — what was planted earlier starts feeding you on its own. What gets in the way is generosity with no account kept: free consultations for old acquaintances eat exactly the hours that are worth the most. Count how many hours a month went to unpaid work and move half of them into paid ones.",
     "relations": "In a couple this person gives home, warmth and patience, and asks for recognition in return. The dangerous tilt is caring instead of talking: everything is done, everyone is fed, and nobody understands what they are unhappy about. Recognition comes not for the volume of care, but for asking in time what the other one actually wants.",
+    "parent_child_line": "Creating a warm, welcoming space may be how you express care around a child. The Empress here connects your involvement with helping an interest, a game, or trust develop. Care can become overwhelming when it fills every available space. You might bring drawing materials, then choose both the subject and the colours yourself. A more generous approach offers possibilities while leaving room to use them freely. How much space remains for a child or younger person to come up with something of their own?",
     "parents_children": "Care here is handed out together with control: that is how it was done in the family, and that is how it comes out with anyone this person takes under their wing. Plenty of warmth, and plenty of safety nets. It helps to leave the younger one the right to fail — this arcanum loves to spread straw in advance, then wonders why the one who grew up beside it cannot decide anything alone.",
     "family_gifts": "The family line gave fertility and the skill of keeping a household running in any times. Somewhere back there was a woman who fed five through a hungry year and lost no one. That reserve is still available, with one catch: along with the warmth, the line also passes down the habit of giving yourself away to the last drop.",
     "ancestry": "The family line asks for the endless sacrifice to stop. If giving yourself away to the end is the family rule and a point of pride, the task is to show that you can live well without wrecking yourself. Break the habit of helping until you disappear, in one single episode: keep the warmth, but name the limit.",
@@ -1280,6 +1293,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -1791,7 +1809,7 @@
          "**In the spiritual purpose** (14.5%), the three is not a trap but the way out. Whatever your circle, it is broken by the three’s own kind of action: planting something of your own, investing in slow growth, caring for yourself as well."
         ]
        },
-       "A typical three program looks like a merry-go-round: give everything — wait to be noticed — go unnoticed — take offence — give even more, so as to be noticed after all. It is easiest to break at the very first point, before your hand reaches out to help: ask whether help is wanted, and answer honestly to yourself what you expect in return. How programs work in general is explained in the article [“Programs in the destiny matrix”](/programs), and the section of the reading itself is [here](/encyclopedia/position/loops)."
+       "A typical three program looks like a merry-go-round: give everything — wait to be noticed — go unnoticed — take offence — give even more, so as to be noticed after all. It is easiest to break at the very first point, before your hand reaches out to help: ask whether help is wanted, and answer honestly to yourself what you expect in return. How programs work in general is explained in the article [“Programs in the destiny matrix”](/encyclopedia/programs), and the section of the reading itself is [here](/encyclopedia/position/loops)."
       ]
      },
      {
@@ -1807,7 +1825,7 @@
         ]
        },
        "The other decades depend on the family lines, and the calculation shows them. In all, 28.8% of people have a decade under the three. It is a time of planting: what is started in these years — a family, a home, a business, a profession, a circle of people — grows for a long time and feeds you later. Such a decade carries one risk: spending it tending only other people’s gardens.",
-       "A personal year under the three is a separate subject with its own page: [3 for the year](/year/3). In short, it is a year of tending, not of leaps, and anything that ripens slowly goes well in it. If, though, by “year arcanum 3” you mean the arcanum of your birth year, that is point C from the check above — for people born in 2001 and 2010."
+       "A personal year under the three is a separate subject with its own page: [3 for the year](/encyclopedia/year/3). In short, it is a year of tending, not of leaps, and anything that ripens slowly goes well in it. If, though, by “year arcanum 3” you mean the arcanum of your birth year, that is point C from the check above — for people born in 2001 and 2010."
       ]
      },
      {
@@ -1885,6 +1903,7 @@
     "money": "Income follows responsibility and system: management, production, property, long contracts. Quick schemes do not fit. The channel narrows when the person takes everything on and grows no deputies. Work out what your hour costs on somebody else’s task, and give that task to whoever’s hour costs less.",
     "money40": "The mature value of the four is the person as a safe pair of hands: a name for reliability is worth more than any sprint. Over the years the price rises for the plain fact that with this person around things hold and nobody checks twice. The break comes when control burns the owner out: they pull it all alone, and the support falls apart along with their strength. Go through last month’s calendar, see which part of your work somebody else already does, and hand over one more task.",
     "relations": "In a couple this gives protection, a settled home and confidence about tomorrow, and asks for respect towards its rules. The weak spot is talking about feelings: the person solves problems by doing things and is surprised that this is not enough. Check whether the other one agreed to the house rule or simply got tired of arguing.",
+    "parent_child_line": "Knowing what you have agreed to and what you are responsible for may help you feel steady as the adult. The Emperor here connects your attitude towards children with clear structure. The difficulty arises when order matters more than its purpose. You might insist that a game start exactly on schedule despite changed circumstances. A more flexible authority rests on consistency and a willingness to explain. A rule can offer support when you understand what it serves and when it might need revisiting.",
     "parents_children": "Order and demands are what came from the elders: at home everyone knew where the line was, and were reminded of it often. Boundaries and support this person hands on in turn, but the demands are easy to overdo — with the youngest in the family and with anyone placed under their charge. A simple measure works: fewer rules than conversations.",
     "family_gifts": "Toughness is what came down this line: the ability to take a blow, to provide, to stay whole through a bad year. Someone pulled everybody through a hard time, and that firmness is in this person. The habit of carrying it alone comes with it; firmness lasts where the weight is shared.",
     "ancestry": "What the family never had is what this person has to build: stability, a home, a business that can be passed on. The elders lost things and started again; it fell to this person to make it stick. Put on paper what has been held by word alone: a contract, property properly registered, an agreement written down.",
@@ -1965,6 +1984,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -2402,7 +2426,7 @@
        "The loop itself is recognised by repetition. With overcontrol it goes like this: anxiety — a new rule — resistance from others — a stricter rule — the person is left alone with their order and grows even more anxious. With abdication it runs differently: didn’t decide — someone decided for them — lives by other people’s rules — stores up resentment — leaves or explodes — and in the new place waits once again for someone to decide for them. From the outside these are two different lives, but the story is the same: power over one’s own life is either clenched into a fist or given away.",
        "**If 4 stands in the karmic task D**, the person’s centre is always Justice (8), and the entry of the tail is 12. So everyone with a four in D has 4, 8 and 12 side by side, and the karmic tail 12-16-4. The root and the state combine into a pairing of “order plus being right”: the story rests on the conviction that by the rules means fair. For three people in four with this, the way out is The Lovers (6); for the rest, The Devil (15). That means a choice made with the heart rather than by the rulebook, or an honest look at what control itself gives a person and why it is so hard to let go.",
        "**If 4 stands in the centre**, the root of the story is Strength (11) or Judgement (20), and the Emperor works as fuel: the program runs on the need for order and predictability. The way out here is The Empress (3) for slightly more than half, The Hanged Man (12) for over a third, The World (21) for a few. Through warmth and care, through a change of viewpoint, through accepting the whole instead of controlling every part.",
-       "How programs work in general and how they differ from character traits — on the page [“Programs in the destiny matrix”](/programs)."
+       "How programs work in general and how they differ from character traits — on the page [“Programs in the destiny matrix”](/encyclopedia/programs)."
       ]
      },
      {
@@ -2479,7 +2503,7 @@
      {
       "h2": "A year under the Emperor",
       "paragraphs": [
-       "A year with a four asks you not to start new things but to strengthen what has already been started: formalise it, fine-tune it, turn it into a system — and not shoulder everything yourself along the way. What to expect from such a year and where its traps lie — in the reading [“4 for the year in the destiny matrix”](/year/4)."
+       "A year with a four asks you not to start new things but to strengthen what has already been started: formalise it, fine-tune it, turn it into a system — and not shoulder everything yourself along the way. What to expect from such a year and where its traps lie — in the reading [“4 for the year in the destiny matrix”](/encyclopedia/year/4)."
       ]
      },
      {
@@ -2562,6 +2586,7 @@
     "money": "People pay for understanding: courses, readings, expert opinion, the right to say “do it this way”. The money is usually even, without spikes. The channel stays blocked while the person believes they have to know everything before charging for it. Put a price on one hour of consulting and sell it before you feel completely ready.",
     "money40": "For a Five with experience, a name in the profession does more of the work: the same knowledge costs more where a proven reputation stands behind it. Years give the right to speak from yourself — that is where your own school, a book, an author’s method come from. The price drops wherever the person keeps hiding behind somebody else’s programme: people are paying the source being quoted, not the speaker. Put together one course or one reading under your own name, without leaning on another person’s method.",
     "relations": "What this person looks for in a couple is shared meaning and conversation. Daily life without talk is dull here, and talk without respect is impossible. The tilt is taking the senior seat and teaching the partner instead of simply being there. Experience is worth more when it is waited for, not handed out in answer to every complaint.",
+    "parent_child_line": "Passing on what matters to you may be an important part of your relationship with younger people. The Hierophant brings teaching, shared customs, and guidance into focus. The difficulty is losing sight of their meaning. Asked about a family ritual, you might answer only, “That is what we do.” A more open response explains why the custom matters to you and allows questions without feeling that your authority is threatened. Sharing experience can then become a conversation that makes room for fresh understanding.",
     "parents_children": "At home there was explaining and teaching: asking was fine, arguing less so. A mentor comes out of this by itself — with a child, an intern, a junior colleague the person explains, shows the point, trains them to think. The danger is lecturing instead of taking part: the younger one needs room to get it wrong, not the correct version handed over in advance.",
     "family_gifts": "Respect for learning came down this line, along with an ability to hold on to meaning. There were probably teachers, lawyers or priests in the family, or simply people others came to for advice — that line still works now. The inheritance comes back when at least one craft is handed further on in your own words.",
     "ancestry": "Meaning and knowledge have to be given back to the family. The line survived and had no time to study — the task here is to study yourself and pass that on as the normal thing to do. Teach one person what you can do yourself: that way knowledge stops being a private trophy.",
@@ -2642,6 +2667,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -3093,7 +3123,7 @@
        {
         "h3": "The program of the 5: what goes round in circles"
        },
-       "When people search for “program 5”, they usually mean a 5 in the points that make up a program — the karmic task or the centre of the chart (how programs work is explained [on a separate page](/programs)). A program is a storyline that repeats itself, with different people and in different settings. The 5 has four such storylines, and each one is recognised by its ending.",
+       "When people search for “program 5”, they usually mean a 5 in the points that make up a program — the karmic task or the centre of the chart (how programs work is explained [on a separate page](/encyclopedia/programs)). A program is a storyline that repeats itself, with different people and in different settings. The 5 has four such storylines, and each one is recognised by its ending.",
        "**The uninvited teacher.** You see how it ought to be done, and you explain. Nobody listens. You step back with a bitter “I told you so” — and next time you explain even harder. At a family dinner your brother hears not advice about his business but yet another lecture, and next time he simply won’t tell you what is going on. The way out is to answer the question you were asked, not the one you think they should have asked.",
        "**The eternal student.** One more course, one more book, one more mentor — while your own business, your own consulting, your own writing keep being put off because “it’s too early”. Whatever the question, the person answers in someone else’s words. The way out is to release one thing into the world, imperfect as it may be, and sign it with your own name.",
        "**The proper way.** Life runs by someone else’s rulebook: a profession the parents approved of, a marriage because “it’s time”, rules nobody ever checked. The person tries hard to do everything right and waits for it to be noticed and appreciated — and it isn’t. The way out is to test every rule with the question “why?” and keep the ones that have a living answer.",
@@ -3136,7 +3166,7 @@
      {
       "h2": "A Hierophant year",
       "paragraphs": [
-       "A year under the 5 is a time to lean on what others have already tested: to go and study, to find a mentor, to put agreements in writing. What it brings and where it gets stuck is covered in [arcanum 5 for the year](/year/5)."
+       "A year under the 5 is a time to lean on what others have already tested: to go and study, to find a mentor, to put agreements in writing. What it brings and where it gets stuck is covered in [arcanum 5 for the year](/encyclopedia/year/5)."
       ]
      },
      {
@@ -3230,6 +3260,7 @@
     "money": "Money arrives here through people and connections: partnership, commission, sales, a shared business. A solo scheme brings in less. The hole is usually in boundaries, because it feels awkward to talk about money with people you like. Before a joint venture starts, write down who puts in how much, who takes out how much, and on what terms each side can walk away.",
     "money40": "After forty the Six leans on the circle it has gathered: old clients, partnerships, a reputation as someone easy to deal with. Former connections bring in more than new acquaintances, because over the years it is already clear who pays and who comes back. The circle stops feeding the moment choosing is avoided: a scattered ‘nice to everybody’ turns it into a list of people you feel awkward quoting a price to. Pick five people out of that circle and offer each of them a specific piece of work for a specific sum.",
     "relations": "Relationships are the central theme of this life, and the person gives a lot of warmth and attention inside them. The risk is well known: falling in love with being in love, and swinging between two people until both are tired of waiting for an answer. A choice postponed out of pity for both turns out in the end to be a decision somebody else made.",
+    "parent_child_line": "The chance to love and share simple pleasures may be what draws you towards a close bond with a child. Here, the Lovers card draws attention to the connection itself. Wanting affection in return can turn into a need to be liked at every moment. You might agree to another purchase you intended to decline, simply to avoid disappointment. A steadier warmth allows disagreement without making it a test of love. You can value the bond without needing immediate approval of every decision you make.",
     "parents_children": "In this family the elders shared their worries as with an equal, and the difference in age wore off early. Friendship with a younger person starts easily for the same reason: they become a confidant before they are ready for it, whether that is a child, a student or a younger sister. It helps to keep the line of age rather than look in a younger person for a companion in worries.",
     "family_gifts": "Charm and the knack of coming to terms arrived by inheritance. There was someone who settled matters through people rather than through force, and doors opened where others were battering at them. The ability still works, but it lives only in connections that are kept up: a contact nobody has called for years stops being an inheritance.",
     "ancestry": "Along the family line runs an inability to come to terms. People parted for good and did not speak for decades; the lesson here is to stay in contact. After the next quarrel, be the one who comes back first, if that is safe: one restored conversation is enough for the rule to stop being the only one.",
@@ -3310,6 +3341,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -3743,14 +3779,14 @@
         }
        },
        "Most often, the six lands in the middle of the material karma line. This line runs inwards along the right-hand ray from the material task towards the centre, C → Q → L. The Lovers can appear at all three points: Q holds it for 9.3% of dates, L for 7% and C for 6.3%. At C the six sets the theme: the material side of life comes together through people and choices made from the heart, while the usual trap is to value possessions for the status and approval they bring. At Q it becomes a matter of “I like it” or “I don’t”: you picture showing a purchase to guests before deciding whether you need it yourself. At L money comes through conversation, contacts and beauty, and gets stuck in a drawn-out “yes or no”. The “Money: L, R2, R” row in the table asks a different question — how income reaches you. Material karma is about what you feel and do around purchases, possessions and earnings; the two lines share only L. To read your three numbers as a whole, see [“Material karma in the destiny matrix”](/encyclopedia/position/material_karma).",
-       "A year can also pass under the 6. It is a year of people and of choosing between them: options turn up on their own, and the year demands that you decide with whom and in what to invest. In detail: [on the year page](/year/6).",
+       "A year can also pass under the 6. It is a year of people and of choosing between them: options turn up on their own, and the year demands that you decide with whom and in what to invest. In detail: [on the year page](/encyclopedia/year/6).",
        "Next to other arcana the 6 changes its shade. With The Hanged Man (12) love gets stuck in waiting; with The Devil (15) attraction pulls hard and not always in the right direction; with The Hermit (9) the person reaches out to people and at once withdraws into themselves; with Strength (11) attraction turns into reliability. These and other pairs are covered on the combination pages: [6 and 12](/encyclopedia/combination/6-12), [6 and 15](/encyclopedia/combination/6-15), [6 and 9](/encyclopedia/combination/6-9), [6 and 11](/encyclopedia/combination/6-11)."
       ]
      },
      {
       "h2": "Program 6: circling round the unchosen",
       "paragraphs": [
-       "A search for “program 6” means that a 6 stands in a point where the matrix reads repeating scripts. In our reading this is the section “Programs: what repeats in circles”, made of three lines: the karmic task D is the root of the storyline, the centre E is the state in which the autopilot switches on, and the spiritual purpose is the way out. 40.7% of people have a 6 in at least one of them. How programs work in general is covered on the [page about programs](/programs) and in the [report section](/encyclopedia/position/loops); here the subject is how the 6 in particular goes round.",
+       "A search for “program 6” means that a 6 stands in a point where the matrix reads repeating scripts. In our reading this is the section “Programs: what repeats in circles”, made of three lines: the karmic task D is the root of the storyline, the centre E is the state in which the autopilot switches on, and the spiritual purpose is the way out. 40.7% of people have a 6 in at least one of them. How programs work in general is covered on the [page about programs](/encyclopedia/programs) and in the [report section](/encyclopedia/position/loops); here the subject is how the 6 in particular goes round.",
        "Its loop is recognised by the ending: someone else makes the decision. A second option appears — a person, a job, a city. To choose means to disappoint someone, so the person stalls: tells both “almost yes”, waits for a sign, asks everyone’s advice. The options get tired of waiting. One leaves of its own accord, the other issues an ultimatum, or circumstances decide for everyone. What remains is the feeling “it’s always like this with me” — and next time the person is even more careful about choosing, which means they stall even longer. The storyline can be entirely mundane, too: spending six months choosing between two flats until both are let to someone else, or weighing two job offers for so long that both are withdrawn.",
        "The role of the 6 depends on the line.",
        {
@@ -3934,6 +3970,7 @@
     "money": "Earnings rest on speed and risk: deals, projects with a deadline, a percentage for the result. A salary with no competition kills motivation. The weak spot is losses from haste: they signed without reading to the end. Count the money twice before you sign — half an hour on a second reading of the contract is cheaper than any deal that falls apart.",
     "money40": "Now the route matters more than the speed for the Seven: the same force aimed at one niche gives more than ten dashes in different directions. Experience has shown which road actually carries you, and a project built around one thing keeps going on its own. The run-up gathered over years is wiped out by the habit of dropping the wheel halfway and jumping to a new topic. Count how many directions you are running right now, and close all but one main one and one spare.",
     "relations": "A partner gets fire, initiative and protection, and in return needs ground of their own. Long closeness holds up while both have movement; in a still relationship this arcanum starts fighting the partner out of boredom. Closeness does not have to move at the speed of that run-up, and a step put off by one conversation saves more than the pace gained.",
+    "parent_child_line": "Helping a younger person learn and move towards a goal may be exciting for you. The Chariot connects your role as the adult with direction, effort, and visible progress. The difficulty is turning the experience into a race. You might suggest another competition before asking whether the activity still interests them. Your ability to organise can be more helpful when it also allows for their pace. Whose goal are you working towards, and how much say does the child have in choosing it?",
     "parents_children": "The demand at home was short: a result, pull yourself together, no whining. The same tone switches on with whoever they lead — plenty of movement and a high bar. The other half is needed too: the right to lose without a debriefing, otherwise the younger one beside them grows up afraid to try.",
     "family_gifts": "Drive and staying power came down the family line. Someone lived through a war, a move, a start from nothing in a strange city — that force to break through was inherited and switches on at the critical moment. The run-up is handed over; the finish each person picks for themselves.",
     "ancestry": "What the family line needs from this person is a finish. The elders stopped half a step short of the result — they are the ones asked to get there and show that it can be done. Take one “almost ready” thing and close it this week, even if it comes out more modest than planned.",
@@ -4014,6 +4051,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -4380,7 +4422,7 @@
           [
            "Personal year",
            "—",
-           "A breakthrough year: what had stalled starts moving, and you set the route. [The seven as your year](/year/7)"
+           "A breakthrough year: what had stalled starts moving, and you set the route. [The seven as your year](/encyclopedia/year/7)"
           ]
          ]
         }
@@ -4393,7 +4435,7 @@
      {
       "h2": "Program 7 in the destiny matrix: The Chariot’s loop",
       "paragraphs": [
-       "When people ask about “program 7”, they mean the seven in a karmic point — where an arcanum describes not a character trait but a plot that keeps replaying by itself. In the reading, the programs section looks at the karmic task, the centre of the chart and the spiritual purpose; the seven can stand in the first two, and does for one person in five (20.6%). In the karmic tail it appears for 14%, and the two groups partly overlap: the last number of the tail is the karmic task itself. How programs work in general is covered [in the article on programs](/programs); here is what the loop looks like for The Chariot.",
+       "When people ask about “program 7”, they mean the seven in a karmic point — where an arcanum describes not a character trait but a plot that keeps replaying by itself. In the reading, the programs section looks at the karmic task, the centre of the chart and the spiritual purpose; the seven can stand in the first two, and does for one person in five (20.6%). In the karmic tail it appears for 14%, and the two groups partly overlap: the last number of the tail is the karmic task itself. How programs work in general is covered [in the article on programs](/encyclopedia/programs); here is what the loop looks like for The Chariot.",
        {
         "h3": "How the loop turns"
        },
@@ -4640,6 +4682,7 @@
     "money": "Steady income starts with accuracy: contract, calculation, check, a fair price. Debts and unclear sums put this arcanum out faster than anything else, so clean accounts are literally a way of earning for it. Recount one arrangement on paper and say the figure out loud before the work starts — fairness rarely grows out of silence.",
     "money40": "By mature years the eighth arcanum brings the reputation of an honest one: referrals, long-standing clients, the role of arbiter in disputes. Such a person’s word begins to cost money — they are called in when someone has to judge and call things by their names. Anything built on half-truths falls apart under that test: an old unsaid thing surfaces exactly when a big deal is being settled. Look over your agreements and rewrite the one whose terms still rest on a spoken “we will sort it out somehow”.",
     "relations": "A couple holds on equal contributions. This person keeps an inner count, and if the tilt lasts, the relationship ends without a scene — simply by decision. What saves it is the habit of talking about balance before it collapses. A conversation about one specific episode works here; a conversation that sentences the whole person does not.",
+    "parent_child_line": "Fairness with children may mean taking agreements seriously, including promises you make as the adult. Justice here asks how responsibility works on both sides. The difficulty is keeping a running tally of good behaviour and mistakes. When explaining why you arrived late, you might bring up every request a younger person has ignored. A fairer response considers this particular situation and acknowledges your part without presenting a counterclaim. Clear expectations can coexist with a willingness to hear circumstances you do not yet know.",
     "parents_children": "Honesty and what is earned — that is what this family valued: praise came for a deed, not just so. The person goes on judging fairly: with a child, a student, the youngest on the team there are sometimes more rules than warmth. A younger one needs to know that they are accepted apart from their behaviour, so praise has to be said separately from the verdict.",
     "family_gifts": "Somewhere in the family there was a person who restored the truth or stood their ground — in court and in life. That straight backbone came down by inheritance and holds this person where everyone else gives in. A sense of measure is useful in your own agreements; the role of household judge is already too much.",
     "ancestry": "An old debt or dispute in the line has to be closed. Often it is undivided property, an inheritance never put on paper, a grudge between relatives — and sorting it out falls to this person. Close one dispute that is within your reach with a document, a calculation or an honest agreement, without taking on the role of judge for the whole line.",
@@ -4720,6 +4763,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -5024,7 +5072,7 @@
      {
       "h2": "Program 8: the scenarios that go round in circles",
       "paragraphs": [
-       "“Program 8” is one of the most common searches about the eight. There is no separate entity behind it: in the destiny matrix a program is a scenario that repeats with different people and in different circumstances, and “program 8” is an eight that has landed in a karmic point of the chart. In our reading, the programs section reads the karmic task D as the root of the repetition and the centre E as the state that keeps it going. The eight can stand in both points, and one person in five has a program with it — 20.5% of people. How programs work in general is covered [on a separate page](/programs). Below are four loops typical of the eight in particular.",
+       "“Program 8” is one of the most common searches about the eight. There is no separate entity behind it: in the destiny matrix a program is a scenario that repeats with different people and in different circumstances, and “program 8” is an eight that has landed in a karmic point of the chart. In our reading, the programs section reads the karmic task D as the root of the repetition and the centre E as the state that keeps it going. The eight can stand in both points, and one person in five has a program with it — 20.5% of people. How programs work in general is covered [on a separate page](/encyclopedia/programs). Below are four loops typical of the eight in particular.",
        {
         "h3": "The “But I promised” loop"
        },
@@ -5153,7 +5201,7 @@
      {
       "h2": "A year under the eight",
       "paragraphs": [
-       "A personal year with an eight is a time when imbalances rise to the surface and ask to be recounted: who put in how much, what was promised to whom, which agreement has stopped being fair. Decisions made in such a year last a long time. How to calculate your year and what to do with it is on the page [the 8th arcanum for the year](/year/8)."
+       "A personal year with an eight is a time when imbalances rise to the surface and ask to be recounted: who put in how much, what was promised to whom, which agreement has stopped being fair. Decisions made in such a year last a long time. How to calculate your year and what to do with it is on the page [the 8th arcanum for the year](/encyclopedia/year/8)."
       ]
      },
      {
@@ -5282,6 +5330,7 @@
     "money": "Payment comes for expertise and for a rare skill: a narrow niche, difficult cases, long research. The hole is in self-promotion — the person does it better than anyone and tells nobody. Put out one finished sample of the work with a price and a deadline, so that its quality is judged by more than the inner critic.",
     "money40": "For the nine, accumulated mastery gives a steadier income: in time the person becomes the one people bring the hard cases to. The price grows rather than the volume — an hour of the expert costs what a day used to cost. It all falls apart in seclusion: if nobody knows about the mastery, depth stays a private pleasure. Say out loud to three people which difficult case is worth bringing to you.",
     "relations": "Loyalty and depth are both here, and with them a demand for space and silence. The partner needs to understand that withdrawing is not coldness and not punishment but a way to get the reserve back. A stretch of silence named in advance removes more worry than any explanation offered afterwards.",
+    "parent_child_line": "Personal space may matter to you even when you feel warmly towards children. The Hermit here connects your involvement with thoughtful attention and sharing experience away from constant bustle. Needing quiet can become being unavailable. You might postpone a conversation with a nephew until a perfectly peaceful evening that never arrives. A more workable approach recognises your limits while finding a manageable way to connect. Enjoying time alone does not, by itself, tell you whether you want children or how you might relate to them.",
     "parents_children": "At home people talked seriously and to the point, and noise was not welcome. The person behaves the same way with a child: listens closely, explains as to an equal, never waves them off with “later”. What is usually missing is romping and nonsense — a meaningful talk before bed is no substitute.",
     "family_gifts": "From the family came patience and the ability to work long. The family line had craftsmen, bookish people or silent stubborn ones who did a single thing for decades — all of that is in this person. A quiet master is worth more here than a loud hero: the gift survives in work you are not ashamed to sign.",
     "ancestry": "The family task is to bring into the light what the family used to hide. Often it is a talent or a piece of knowledge that the elders thought improper or useless. Find that skill its first viewer or its first customer — provided it really is yours and not a family legend.",
@@ -5362,6 +5411,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -5718,7 +5772,7 @@
        "If the nine falls in several points, that does not make a “double Hermit”: each position is read separately, and in each one the energy solves its own task.",
        "The row for the material task covers only the first of three points where the nine deals with money and possessions. Material karma starts at C and runs along the right-hand ray, C → Q → L. Further along the line, the nine is twice as common as at C itself: Q holds it for 8.3% of dates, L for 7.4% and C for 3.9%. So “material karma 9” has three different meanings; first check which point holds your nine. At C it sets the theme: the material side of life rests on mastery and working at your own pace, while the old habit is to shut others out and keep your affairs to yourself. At Q the mood is cautious: money is quietly put aside for a rainy day, while spending on your own needs feels like an indulgence. At L it marks the entry: people pay for what you understand more deeply than others, but the money cannot come in while nobody knows about your expertise. To find your three numbers and read them together, see [“Material karma in the destiny matrix”](/encyclopedia/position/material_karma).",
        "**People born in September** get the nine in several sections at once: point B is the spiritual task, the start of the talent line and the arcanum of the decade from 20 to 30. For those born on the 9th and the 27th, the nine leads the first decade of life; for those born in 1989, 1998, 2007, 2016 and 2025, the decade from 40 to 50. The calculator works out the other points. The nine turns up even more often in the chakras, where 56.5% of people have it on at least one of the seven levels, and in the reading by decades (44.8%).",
-       "**The Hermit year** arrives by the calendar, not by age. Add the day of your birth (if it is greater than 22, add up its digits first) to the number of the month. If the sum is 17 or 26, 2026 is your year under the nine; if it is 16, 25 or 34, 2027 is. What to do in such a year is covered on the page [9 for the year](/year/9)."
+       "**The Hermit year** arrives by the calendar, not by age. Add the day of your birth (if it is greater than 22, add up its digits first) to the number of the month. If the sum is 17 or 26, 2026 is your year under the nine; if it is 16, 25 or 34, 2027 is. What to do in such a year is covered on the page [9 for the year](/encyclopedia/year/9)."
       ]
      },
      {
@@ -5765,7 +5819,7 @@
      {
       "h2": "Program 9: the script that keeps coming round",
       "paragraphs": [
-       "“Program 9” usually means a nine in a karmic point of the chart. In our reading, the programs section reads three positions: the karmic task D, the centre E and the spiritual purpose. 27.4% of people have a nine in at least one of them, and only those whose date digits add up to a multiple of 3. How programs work in general and how they differ from character traits is explained on the page [programs in the destiny matrix](/programs).",
+       "“Program 9” usually means a nine in a karmic point of the chart. In our reading, the programs section reads three positions: the karmic task D, the centre E and the spiritual purpose. 27.4% of people have a nine in at least one of them, and only those whose date digits add up to a multiple of 3. How programs work in general and how they differ from character traits is explained on the page [programs in the destiny matrix](/encyclopedia/programs).",
        "The nine’s script is recognisable by its sequence. Things get hard or hurtful, and the person shuts themselves away to work it out alone. The working-out drags on, ties weaken, nobody calls. This is taken as proof: “nobody needed me anyway”. The next withdrawal goes deeper than the last. The loop feeds itself: the longer the silence, the more reasons there seem to be that there is no one to talk to.",
        "It is broken not at the moment of leaving (a nine may withdraw, and should) but at the moment of return, while the pause is still short. Three moves that work:",
        {
@@ -5877,6 +5931,7 @@
     "money": "Money comes in waves and through openings: a deal, a season, a lucky hit. A steady salary keeps the income here lower than it could be. The weak spot is spending it all on the way up, with nothing put by for the dip. Set aside a share of every large sum on the same day it arrives: in a dip there is nothing left to set aside from.",
     "money40": "After forty the ten leans not on catching waves but on what has been built up: a share, rent, interest, a right to somebody else’s result. The feel for the moment does not go anywhere, but now it works for assets rather than for a single bet. Playing on luck does not stop by itself: forty is a change of reading angle, not a switch, and nothing moves until the person decides. Count what part of the income arrives without your daily involvement, and add one more source to it.",
     "relations": "Lightness and the ability to start over are what comes into a couple here, and freedom is what it asks in return. The bond lives where there is shared movement; in still water this arcanum starts looking for change on the side. A turn announced in advance is walked through together; an unannounced one is walked alone.",
+    "parent_child_line": "Changing interests and moods may stir your curiosity around children, or make you wish for a familiar rhythm. The Wheel of Fortune here concerns what you cannot fully plan. The difficulty comes when a surprise seems to ruin the whole day. Rain might cancel a walk, leaving you struggling to imagine anything else to do together. A more flexible response preserves what matters through the change: the plan can shift while your intention to spend time together remains. What is within your influence now?",
     "parents_children": "Family life ran in bursts: feast one month, famine the next, and the timetable held badly. The same trait stayed in their own behaviour — with a child it is fun and unpredictable, but order limps. Firm rules have to be kept on purpose here: with this arcanum they never appear by themselves.",
     "family_gifts": "What this line hands down is luck and the knack of getting up after a fall. Someone in the family lost everything and got back on their feet; the skill travelled on together with the story. Take the quality from it, not the plot: nobody needs to repeat another person’s losses to earn the right to rise.",
     "ancestry": "Stopping the swing is what this line asks for. The family rose and then lost everything again; this person’s part is to lock in a result and pass on a reserve rather than debts. Put aside the same sum every month: regularity matters more than size here.",
@@ -5957,6 +6012,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -6319,7 +6379,7 @@
          "**E, centre**: the sum A + B + C + D."
         ]
        },
-       "Example: 10.05.1988. A = 10, B = 5, C = 1 + 9 + 8 + 8 = 26 → 8, D = 10 + 5 + 8 = 23 → 5, E = 10 + 5 + 8 + 5 = 28 → 10. The ten appears twice, in the calling card and in the centre. The other points (the money and relationship lines, the tail, the chakras, the decades) are easier to [calculate in full from your date of birth](/by-birth-date).",
+       "Example: 10.05.1988. A = 10, B = 5, C = 1 + 9 + 8 + 8 = 26 → 8, D = 10 + 5 + 8 = 23 → 5, E = 10 + 5 + 8 + 5 = 28 → 10. The ten appears twice, in the calling card and in the centre. The other points (the money and relationship lines, the tail, the chakras, the decades) are easier to [calculate in full from your date of birth](/encyclopedia/by-birth-date).",
        {
         "h3": "Where the ten never appears"
        },
@@ -6343,7 +6403,7 @@
          "**Relationships and the point under the heart** (R1, the partner point): a union with a ten lasts as long as the couple has shared plans and changes, while frozen relationships feel cramped to it. A difficult conversation is better scheduled than left waiting for a convenient moment. In detail: [10 in relationships](/encyclopedia/position/relations/10) and [10 under the heart](/encyclopedia/position/love_middle/10).",
          "**Body resource** (18.9%): a ten’s strength also goes in circles: there are days when heavy work seems to do itself, and days when even simple things get bogged down. The winner is the one who does not argue with this rhythm but plans around it.",
          "**Rest** (17.8%): what recharges a ten is whatever has not happened yet: an unfamiliar city, a new activity, a trip decided on in a day. The best rest for a ten is a small turn made with its own hands.",
-         "**The year.** If your personal year is a ten, it is a year of turns and short windows of opportunity: [10 for the year](/year/10). The general arcanum of 2026 is also 10 (2 + 0 + 2 + 6); read about it in [the destiny matrix for 2026](/year/2026)."
+         "**The year.** If your personal year is a ten, it is a year of turns and short windows of opportunity: [10 for the year](/encyclopedia/year/10). The general arcanum of 2026 is also 10 (2 + 0 + 2 + 6); read about it in [the destiny matrix for 2026](/encyclopedia/year/2026)."
         ]
        }
       ]
@@ -6400,7 +6460,7 @@
      {
       "h2": "Program 10: the loop the ten keeps repeating",
       "paragraphs": [
-       "A search for “program 10” usually means a ten in a karmic point of the chart. In the reading this is the section “Programs: what repeats in circles”: it reads the karmic task D as the source of the recurring theme, and the centre E as the state that keeps it going. 20% of people have the ten in one of these two points. How programs work in general is covered [in a separate article](/programs).",
+       "A search for “program 10” usually means a ten in a karmic point of the chart. In the reading this is the section “Programs: what repeats in circles”: it reads the karmic task D as the source of the recurring theme, and the centre E as the state that keeps it going. 20% of people have the ten in one of these two points. How programs work in general is covered [in a separate article](/encyclopedia/programs).",
        "The loop of the ten is easy to recognise:",
        {
         "ol": [
@@ -6655,6 +6715,7 @@
     "money": "Endurance and reliability are what get paid for: long jobs, heavy projects, first-class physical work. What slows things down is modesty — this person does more than anyone and asks for less than anyone. Put a price on your reliability, and name separately which help no longer comes inside that price.",
     "money40": "With the years the eleventh arcanum sells calm: people come when everything is on fire and pay for the fact that they do not panic. That is worth more than any hourly rate — staying power proven by deeds counts higher than a diploma. The angle fails where staying power is confused with putting up with things: the person hauls for free what should have been charged for long ago. Raise the price on the single hardest service and see whether even one client walks away.",
     "relations": "Life beside such a person is calm: reliability and patience, sometimes too much of it. The partner gets used to not trying, and for years the person pulls the relationship along alone, until they switch off completely. Strength here sounds like a border named quietly, not like patience piling up towards an explosion.",
+    "parent_child_line": "Strong feelings around a child may bring your own use of strength into focus. Strength here suggests gentle influence and the ability to pause rather than meet one impulse with another. The difficulty comes when calm becomes something you must enforce. During a noisy game, you might raise your voice to demand silence. A steadier firmness allows you to notice irritation, state a limit, and stay in contact. A child's obedience does not have to become the proof that your authority matters.",
     "parents_children": "From the elders came steady support and an unspoken ban on showing weakness. The support gets passed on — it is safe beside this person; along with it comes the heavy weight of authority. It helps to talk about your own weak spots: otherwise the younger ones grow up feeling that being tired or afraid is not allowed.",
     "family_gifts": "A sturdy breed came down this line: someone in it bore the unbearable and did not break. The reserve works almost by itself, and that is the trap — enduring starts before the person has asked themselves why. The inheritance holds as long as patience has a border, beyond which a request or a refusal is spoken.",
     "ancestry": "Silent endurance counts as a virtue in this family line — and that is exactly what it is time to stop. Bearing everything without a word is the house rule, and the job is to show that you can leave, refuse, ask. Say one plain ‘this does not suit me’ where before you would have kept quiet, and watch what actually happens.",
@@ -6735,6 +6796,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -7127,7 +7193,7 @@
         "h3": "Decades and the arcanum of the year"
        },
        "In the reading by decades, age runs round the outer points of the chart: A — from birth to 10, F — from 10 to 20, B — from 20 to 30, G — from 30 to 40, C — from 40 to 50, H — from 50 to 60, D — from 60 to 70, I — from 70 to 80. So for everyone born in November the decade from 20 to 30 runs under Strength, and for those born on the 11th or the 29th the first ten years of life do. Such years are seldom light: life piles on responsibility and watches how the person handles it — carries it, presses others with it or wears themselves out.",
-       "If 11 has come up not in the chart but as the arcanum of the year, that is a different calculation and a different conversation — there is [a separate page on 11 for the year](/year/11)."
+       "If 11 has come up not in the chart but as the arcanum of the year, that is a different calculation and a different conversation — there is [a separate page on 11 for the year](/encyclopedia/year/11)."
       ]
      },
      {
@@ -7220,6 +7286,7 @@
     "money": "Income comes unevenly, with pauses, and that is not a fault: between one piece of work and the next there can be quiet months. A reserve for those stretches helps, and so does refusing loans taken against fast money that has not arrived yet. Count your income by the year, not by the month: in a quiet month that keeps you away from a loan taken out of fright.",
     "money40": "In the mature money of the twelfth arcanum, what pays back is what was won slowly: depth, a rare view, the reputation of someone who does not hurry and does not lie. A pause held for decades turns out to have been a maturing time: this kind of view is paid for by people who are tired of quick answers. In endless waiting for the right moment the same pause becomes downtime instead of preparation. Set a date by which you will bring your long-standing work out in public, and do not move it.",
     "relations": "Love here works through acceptance: this person can wait and does not push. The other side is years in a relationship with no movement, where everything hangs because nobody dares to name things plainly. A pause with a stated end is more honest than silent sacrifice and disappearing without a word.",
+    "parent_child_line": "Pausing before your usual response may change how you relate to children. The Hanged Man here invites a different view of being the adult. The difficulty comes when pausing your plans becomes putting your whole life on hold. You might cancel an entire weekend when a younger person only asked for a little time together. A fresh perspective can separate their request from your idea of unlimited giving. Your involvement can change without making either their experience or your own wishes less significant.",
     "parents_children": "Patience and gentleness were carried out of the parents’ home: pressure was not liked in that family. With younger people it comes out the same way — no pushing, calm, ready to wait. What is sometimes missing is firmness: boundaries have to be set on purpose, because for this arcanum they blur by themselves.",
     "family_gifts": "From the ancestors came patience and the skill of sitting out bad times. Someone in the family lived through a long trouble without breaking and without losing themselves in the waiting. That reserve is available where the usual push settles nothing and a pause with a different angle does.",
     "ancestry": "Down the family line runs the theme of sacrifice: someone gave up a life for others and was proud of it. The task is to stop passing that price on and to live without it. Drop one family duty that holds together only because you deny yourself, and offer instead a share of the work you can really carry.",
@@ -7300,6 +7367,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -7662,7 +7734,7 @@
        },
        "The most common place is point M, the entry to two lines at once: relationships and the karmic tail. Twelve can stand there only for people whose karmic task is The Chariot (7) or The Emperor (4), that is, arcana of movement and power. In such a chart the first reaction and the root pull in different directions: at the entry you want to wait and adjust, while the task demands that you lead and decide.",
        "Three places can be checked without any calculation at all. Point A is the day of birth, so everyone born on the 12th has 12 as their calling card. Point B is the number of the month, so everyone born in December has spiritual task 12. Point C is the sum of the digits of the year, and it gives 12 only for 1902, 1911, 1920 and 2019. Among people alive today these are mostly children born in 2019; the next will be the children of 2028.",
-       "In the reading by decades, 12 in the calling card colours childhood up to age 10, in the spiritual task the years from 20 to 30, in the material task from 40 to 50, in the karmic task from 60 to 70. A year under the twelfth arcanum is a separate story: [what a year of The Hanged Man brings](/year/12)."
+       "In the reading by decades, 12 in the calling card colours childhood up to age 10, in the spiritual task the years from 20 to 30, in the material task from 40 to 50, in the karmic task from 60 to 70. A year under the twelfth arcanum is a separate story: [what a year of The Hanged Man brings](/encyclopedia/year/12)."
       ]
      },
      {
@@ -7823,6 +7895,7 @@
     "money": "Money likes clean endings: debts paid off, loss-making ventures stopped, things sold in time. The channel is blocked by the habit of dragging a dead project along out of pity for what was put into it. Close one loss-making format completely: a new venture starts not with inspiration but with free space in the budget.",
     "money40": "For the thirteenth arcanum the crashes already lived through become capital: this person counts risks faster than others and sees a dead thing before it has officially ended. That ability raises the price of the work — it is paid for where something has to be closed, not launched. The angle breaks when they keep dragging a loss-making thing along out of pity for the years already spent. Close one project that holds on only by past investment, and free the budget for a new one.",
     "relations": "In relationships this arcanum is honest to the point of discomfort: the feelings are over — they say so. The warmth here is real, but a partner needs strong nerves: the past is discussed head-on and there are few half-tones. A new stage begins only after an honest full stop in the old one, not instead of it.",
+    "parent_child_line": "Watching a younger person grow can remind you that closeness changes shape. Death here concerns the end of one stage of relating and the transition to another. The difficulty is holding on to a familiar role. You might keep choosing a child's books after they have begun wanting to browse for themselves. A more open response lets mutual interest continue while an outdated form of care falls away. What remains valuable in your involvement, and what continues only because it used to be necessary?",
     "parents_children": "Losses were spoken about plainly here, with no comforting versions, and the truth of life arrived early. The person hands the same honesty on, sometimes before the younger one is ready for it. It helps to give it in doses: a child needs a fairy tale too, not only the sober view of an adult.",
     "family_gifts": "What the line passes on is endurance in the face of loss. In the family people lost a home or close ones and started again; along with that came the ability to finish what has outlived itself and go on living. The right to close your own chapter came by inheritance — someone else’s pain does not have to be your script.",
     "ancestry": "Silenced losses are worth bringing back into the family history only through known names, dates and evidence. The practical point here is not hunting for a secret but carefully restoring the facts and names that are actually known. Gather the known names, dates and documents about one loss, leaving the unknown unknown and not building a mystery out of the arcanum.",
@@ -7903,6 +7976,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -8363,7 +8441,7 @@
        "The chakra map is where 13 appears most often: 45.9% of people have it there. The map lays out a person’s strengths across seven levels, from the body and grounding up to a connection with the bigger design, and each level has physics, energy and emotions. 13 at a level means that strength returns there through letting go: in grounding, through changing an established way of life; in love, through bringing old feelings to a close; in speech, through being able to say “no” and “that’s it”. How to read your own map is explained in the section on [chakras](/encyclopedia/position/chakras).",
        "In the [reading by decades](/encyclopedia/position/years), 13 leads at least one decade for 21.8% of people. The scale moves through eight points, ten years each, and 13 can stand almost anywhere except in two places: 20–30 is the month of birth, and 40–50 is the year, where 13 occurs only for those born in 1903, 1912, 1921 and 1930.",
        "A decade under 13 is read as a time when a big chapter closes. Your age will suggest which one: at 10–20 it is a goodbye to childhood and the parental home, at 30–40 a rebuild of your first adult life, at 50–60 a way out of roles held for decades, at 70–80 a time to take stock and let go. This is a direction, not a schedule of events.",
-       "A personal year under arcanum 13 has its own page — [13 for the year](/year/13). In short, it is a year of parting with the old, and it goes more easily if you let go of what has had its day yourself, without waiting for life to do it for you.",
+       "A personal year under arcanum 13 has its own page — [13 for the year](/encyclopedia/year/13). In short, it is a year of parting with the old, and it goes more easily if you let go of what has had its day yourself, without waiting for life to do it for you.",
        "Of the four purposes, 13 occurs in the personal (for 0.9% of people) and the [planetary](/encyclopedia/position/planetary) (for 2.9%). Wen calls 13 “the card of revolutions” — the waning of one authority and the rise of another. In planetary purpose, this is the role of someone who helps the world around them let go of the outdated: reform, close down old orders, guide people through change."
       ]
      },
@@ -8497,6 +8575,7 @@
     "money": "Money comes here for long steady work: support, repair, teaching, anything that takes patience. Quick schemes do not suit this arcanum, while a stable flow it holds better than most. Set up one repeating payment — a pass, a subscription, a monthly contract — and leave the terms alone for at least six months.",
     "money40": "By forty this arcanum arrives with a built-up client base and a reputation for being calm. An even pace held for years brings people by itself: they come back to someone who does not blow up and does not disappear. Income does not grow from age alone — the base ages if it is not refreshed, and in five years it brings in half as much. Call five clients who have not been in touch for over a year and offer them something new.",
     "relations": "With a partner like this it is calm: they are patient, make no scenes and know how to come to terms. The risk is lukewarm water: a bond with no passion and no conversations, because nobody dares to start them. Warmth here rests on small repeated things, and that only becomes visible a year or two later.",
+    "parent_child_line": "Making room for both a child's company and your own activities may be an important theme for you. Temperance here concerns finding a way for different needs to coexist. The difficulty is smoothing over a clash without resolving it. You might promise to play while finishing work, then struggle to give either activity your attention. A clearer agreement about time can make both possible. Closeness need not mean disappearing into someone else's activities, and having interests of your own need not mean being entirely absent.",
     "parents_children": "At home it was even and without shouting, and a conflict counted as something unnecessary. That evenness passes on: a child feels calm beside this person, who never raises their voice. What is sometimes missing is a clear “no” — this arcanum avoids collisions and so leaves the boundaries blurred.",
     "family_gifts": "Peacemaking came down the line, and with it the skill of keeping ties. Somewhere in the family line there was a person everyone else talked through, and the gift still works, especially at big gatherings. What is worth repeating is not their sacrifice but their method: join the extremes without becoming the target between them.",
     "ancestry": "Reconciliation is what this line is waiting for. Relatives have scattered into different camps, and their role is to be the one who gets everybody back around one table. Make one step towards them, but do not appoint yourself responsible for making peace between people who do not want it.",
@@ -8577,6 +8656,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -9027,7 +9111,7 @@
        {
         "h3": "14 across the decades"
        },
-       "In the reading by decades, 14 appears for 23% of people. The age scale goes round the eight outer points of the chart, ten years for each, and 14 can stand over any decade except the third: the stretch from 20 to 30 is led by the month of birth, and there are only twelve months. The stretch from 40 to 50 is led by the year of birth, so 14 is possible there only for those same people born between 1904 and 1940. A decade under 14 is a time not of dashes but of assembly: bringing back together what drifted apart, finding a rhythm that will last the years ahead. Don’t confuse it with the personal year: the year under arcanum 14 has [a reading of its own](/year/14).",
+       "In the reading by decades, 14 appears for 23% of people. The age scale goes round the eight outer points of the chart, ten years for each, and 14 can stand over any decade except the third: the stretch from 20 to 30 is led by the month of birth, and there are only twelve months. The stretch from 40 to 50 is led by the year of birth, so 14 is possible there only for those same people born between 1904 and 1940. A decade under 14 is a time not of dashes but of assembly: bringing back together what drifted apart, finding a rhythm that will last the years ahead. Don’t confuse it with the personal year: the year under arcanum 14 has [a reading of its own](/encyclopedia/year/14).",
        {
         "h3": "The karmic task and the tails"
        },
@@ -9155,7 +9239,7 @@
          "The modern reading — Benebell Wen, Holistic Tarot (2015), the section on Key 14.",
          "The name “Time” and the reading of the cups — P. D. Ouspensky, Simvoly Taro (The Symbolism of the Tarot, 1912).",
          "The couple’s matrix — Yu. Lisovskaya, Matritsa sudby: sovmestimost (The Destiny Matrix: Compatibility, 2024), the chapter on the 14th energy.",
-         "Positions and shares — calculated with Natalia Ladini’s classic destiny matrix scheme, running through every birth date from 1 January 1900 to 2026. How the calculation works is explained on the page [about the method](/method).",
+         "Positions and shares — calculated with Natalia Ladini’s classic destiny matrix scheme, running through every birth date from 1 January 1900 to 2026. How the calculation works is explained on the page [about the method](/encyclopedia/method).",
          "The readings of positions are our adaptation of the card’s meaning to the role of each point: a way to understand yourself, not a prediction of events."
         ]
        }
@@ -9197,6 +9281,7 @@
     "money": "What gets paid for is drive and an eye for profit: trade, services, property, everything bodily and pleasant. There can be a lot of money here, and the weak spot is spending that eats the earnings faster than they arrive. Turn the wanting into a budget: how much is needed, for what exactly, and what you are ready to give up — without pretending that money leaves you cold.",
     "money40": "Mature money of the fifteenth arcanum rests on what is formalised: property, shares, income from assets, not spoken promises. The powerful pull towards matter finally takes shape with experience — what used to burn up in bets now goes on paper. The taste for a gamble does not leave on its own: a bet stays a bet at twenty and at fifty, and the calendar does not cancel it. Check whose name the things you use every day are in, and put the papers in order.",
     "relations": "Passion here is real and strong, and it is also the main risk: jealousy, control, freedom traded for comfort. Good relationships for this arcanum are the ones where both could leave and stay by their own choice. A wish said out loud is easy to test: if it matches the other’s, that is closeness; if it does not, it is a deal.",
+    "parent_child_line": "Wanting a child to need you can feel warm while quietly tying your involvement to an expected reward. The Devil here raises the question of freedom within attachment. Care can become an unspoken bargain: after giving a present, you might expect a younger person to choose your company over everyone else's. A freer response notices that expectation and separates your wish for closeness from their supposed duty to provide it. What are you offering freely, and where are you already waiting for something in return?",
     "parents_children": "Generosity in this family always came together with holding on: they gave a lot and did not let go. It works the same way further down — liveliness, presents and attention reach the youngest along with too much control. It helps to hand over the right to their own decisions earlier than you feel like doing it: this arcanum loves to keep hold.",
     "family_gifts": "From the family line came a grip and the knack of surviving in hard conditions. Someone rose from nothing by means that were not the cleanest — that force is in the person, and owning it is more honest than hiding it. The grip is inherited; the price once paid for it does not have to be.",
     "ancestry": "A theme of debt and unfreedom runs through the family line: someone was in bondage, in dependence, under another’s power. The task is to live your own life without it and not pass it on. Review one arrangement that has long rested on a sense of duty, and name the condition under which taking part stays voluntary.",
@@ -9277,6 +9362,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -9777,7 +9867,7 @@
        {
         "h3": "Programs"
        },
-       "People who search for “15 program” usually mean scripts that repeat in circles. In the reading, the [programs](/programs) section reads the karmic task D, the centre E and the spiritual purpose. Fifteen never appears in the centre, so in this section it comes in through D or through the spiritual purpose — for 14.9% of people in all. The script of fifteen follows one recognisable path: get, get attached, fail to let go, and pay with freedom for what once brought joy. A program does not mean this will happen. It means this is your most well-worn path, and it switches on by itself when you are tired, frightened or bored.",
+       "People who search for “15 program” usually mean scripts that repeat in circles. In the reading, the [programs](/encyclopedia/programs) section reads the karmic task D, the centre E and the spiritual purpose. Fifteen never appears in the centre, so in this section it comes in through D or through the spiritual purpose — for 14.9% of people in all. The script of fifteen follows one recognisable path: get, get attached, fail to let go, and pay with freedom for what once brought joy. A program does not mean this will happen. It means this is your most well-worn path, and it switches on by itself when you are tired, frightened or bored.",
        "If 15 stands in the karmic task D, your centre is always 3, The Empress, and your tail is 18-6-15. The root task here is learning to let go of what you love without ceasing to love it.",
        {
         "h3": "Family line and body"
@@ -9790,7 +9880,7 @@
       "h2": "Decades of life under 15",
       "paragraphs": [
        "On the matrix’s age scale, each ten-year span is led by one outer point. Fifteen can lead childhood up to 10 (point A), the years from 10 to 20 (F), from 30 to 40 (G), from 40 to 50 (C), from 50 to 60 (H), from 60 to 70 (D) and from 70 to 80 (I). The decade from 20 to 30 falls on the birth month, so 15 never appears there. A decade under the fifteenth arcanum comes up for 24.2% of people.",
-       "Such a period is usually one in which desires speak louder: money, the body, passion, power, ambition. In these years it is easy to pile things up — connections, commitments, habits, possessions — and it becomes especially clear which of them start to hold you. The decade-by-decade reading is in the section [on the age scale](/encyclopedia/position/years), and if you are interested in 15 as the energy of a single year, there is a [separate page](/year/15) for that."
+       "Such a period is usually one in which desires speak louder: money, the body, passion, power, ambition. In these years it is easy to pile things up — connections, commitments, habits, possessions — and it becomes especially clear which of them start to hold you. The decade-by-decade reading is in the section [on the age scale](/encyclopedia/position/years), and if you are interested in 15 as the energy of a single year, there is a [separate page](/encyclopedia/year/15) for that."
       ]
      },
      {
@@ -9860,6 +9950,7 @@
     "money": "Earnings come in jumps: a lot, then nothing at all. A reserve helps, and so does refusing debts taken against the future, because with this arcanum plans get wiped out suddenly and through no fault of their own. Keep three quiet months of money aside from the working funds and do not touch it while things are going up.",
     "money40": "After a run of their own collapses, the sixteenth arcanum arrives at an expensive skill: taking other people’s catastrophes apart. Where everyone else is lost, this person already knows the order of the steps, and that is paid for separately. It does not turn into steady income: work in emergency mode ends together with the emergency, and between emergencies it can be empty. Write one page about how you pulled someone else’s failure out, and show it to those whose house is on fire now.",
     "relations": "This arcanum cannot stand a false note and speaks bluntly in relationships: better a row than polite silence. A partner needs stamina, but with this person there is never a lie that lasts for years. In every quarrel that got out of hand there was a point where the same truth could have been said without pulling the whole house down.",
+    "parent_child_line": "Your idea of how an adult should behave may become too rigid for a real conversation with a child. The Tower here concerns a familiar explanation that no longer holds up. The difficulty is trying to conceal that failure. You might defend an obviously mistaken answer simply because you gave it confidently. Admitting a mistake can instead become a chance to reconsider what your authority rests on. Does your importance depend on never being wrong, or can it include an honest willingness to investigate?",
     "parents_children": "Here the truth is said at once and not always gently, and the family could get loud. The same discharge lands on whoever is younger and depends on this person. Being predictable matters more than how strongly a thing is put, so an even tone has to be kept here on purpose.",
     "family_gifts": "Firmness in a catastrophe is what came down this line. Someone in the line went through losing everything and did not break, and that reserve switches on exactly when things fall apart. The same courage works on a cracked structure too: you take it down to the support instead of pulling the house down with it.",
     "ancestry": "The task along the family line is to break a run of destruction. The family lost a home, a business or a reputation, and the job here is to stop and hold what there is instead of tearing it down once more. Next time you want to level everything at once, put the decision off for three days and repair one detail.",
@@ -9940,6 +10031,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -10378,7 +10474,7 @@
          "**[21-10-16](/encyclopedia/karmic-tail/21-10-16)** — 1.5% of people, The Tower at the root. The script of a person who assembles a finished whole on a turning base, and the task of keeping that whole flexible while rebuilding is still a repair and not a collapse."
         ]
        },
-       "Many people search for “16 program”, but a program in the matrix is not a single number — it is a script read across positions. In our reading, the section “Programs: what repeats in circles” is made up of the karmic task D, the centre and the spiritual purpose, and The Tower gets into it rarely, for 1.6% of people — through D or through the centre. The triple 8-8-16, which people ask about more than any other, is in the chart of everyone with 8 in the centre: that is what the Manipura row of the chakra table looks like — two eights and their sum. How a program differs from a single arcanum and how to read one is covered on the page [about programs](/programs)."
+       "Many people search for “16 program”, but a program in the matrix is not a single number — it is a script read across positions. In our reading, the section “Programs: what repeats in circles” is made up of the karmic task D, the centre and the spiritual purpose, and The Tower gets into it rarely, for 1.6% of people — through D or through the centre. The triple 8-8-16, which people ask about more than any other, is in the chart of everyone with 8 in the centre: that is what the Manipura row of the chakra table looks like — two eights and their sum. How a program differs from a single arcanum and how to read one is covered on the page [about programs](/encyclopedia/programs)."
       ]
      },
      {
@@ -10448,7 +10544,7 @@
          ]
         }
        },
-       "A decade under The Tower is a time of rebuilding: the old shape of life stops fitting and has to be put together again. This is not a forecast of misfortune. In such years you can change your profession, your city or your circle of your own free will — and the energy of the decade is more likely to help than to hinder. The arcanum of a personal year is calculated differently, and it has its own article: [16 as the arcanum of the year](/year/16).",
+       "A decade under The Tower is a time of rebuilding: the old shape of life stops fitting and has to be put together again. This is not a forecast of misfortune. In such years you can change your profession, your city or your circle of your own free will — and the energy of the decade is more likely to help than to hinder. The arcanum of a personal year is calculated differently, and it has its own article: [16 as the arcanum of the year](/encyclopedia/year/16).",
        {
         "h3": "Chakras"
        },
@@ -10563,6 +10659,7 @@
     "money": "Taste and ideas are what gets paid for: the concept, the look, the name, an elegant solution. The weak spot is counting and asking — this arcanum is shy about money and sells itself below the market. Turn one beautiful idea into a single paid pilot: with a client, a scope and a date after which demand is visible.",
     "money40": "For the seventeenth arcanum mature income comes from a name built up over years: old work brings in new audience on its own. What was made ten years ago keeps working without fresh investment — the trail is visible and people walk along it. The trail grows over within a couple of years if the person waits for inspiration instead of releasing. Publish one piece of your own work under your own name this month, without waiting for the perfect idea.",
     "relations": "Love here gets idealised: first the image, then the person. A relationship survives where the partner stays alive and is not obliged to match the picture in someone’s head. The dream works as an invitation and wrecks things as a script where the other one has already been given a part.",
+    "parent_child_line": "Encouraging a child's dream may be a way for you to share inspiration. The Star here suggests generous support that leaves the other person their own path. The difficulty is replacing that path with an attractive picture of the future. You might already imagine a younger person on a grand stage when they simply enjoy singing at home. A more open encouragement values what interests them now, without promising fame or requiring an impressive result. There is room for dreams and for trying something without further obligation.",
     "parents_children": "In this family inspiration was respected more than any routine. It carries on: the younger one gets plenty of belief and very little timetable. It helps to add the boring parts — a daily order, chores, keeping count of money: this arcanum finds them dull, and the child it leads needs them.",
     "family_gifts": "What the line hands down is hope that never goes out. Someone in a hopeless time kept believing and pulled the rest along: with a song, a craft, a stubborn dream. That light still works today, but it rests on a small visible deed the person keeps doing, not on words.",
     "ancestry": "Hope has to be brought back into this line. The elders lived in joyless survival and forgot how to want anything, so this person’s task is to show that dreaming is nothing to be ashamed of. Say one of your own wishes out loud in front of the people who usually laugh at such words, and take the first step on it.",
@@ -10643,6 +10740,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -10927,7 +11029,7 @@
      {
       "h2": "Where 17 sits in your matrix",
       "paragraphs": [
-       "67.1% of people have 17 somewhere in their report — roughly two in three; for other arcana the share ranges from 13.4% to 85%. In each place on the chart it answers its own question. Apart from the personal chart, 17 can also be the arcanum of the year — a year of direction, when what matters is to work out where to go next and to take the first steps; that is covered on the page [the year under The Star](/year/17).",
+       "67.1% of people have 17 somewhere in their report — roughly two in three; for other arcana the share ranges from 13.4% to 85%. In each place on the chart it answers its own question. Apart from the personal chart, 17 can also be the arcanum of the year — a year of direction, when what matters is to work out where to go next and to take the first steps; that is covered on the page [the year under The Star](/encyclopedia/year/17).",
        "In the table the letters are points of the chart. A is the day of birth (numbers above 22 are reduced: 23 → 5), B is the month, C is the sum of the digits of the year (1987 → 25 → 7), D is the sum A + B + C, and the centre is the sum A + B + C + D; sums above 22 are reduced too. The number 17 itself is not reduced to 1 + 7 = 8: in the matrix only numbers above 22 are reduced. And 17 has a handy property: you can hardly get it by reduction, because the first number whose digits add up to 17 is 89. So at points made up of two or three numbers, 17 appears only as an exact sum, and that is easy to check in your head.",
        {
         "table": {
@@ -11068,7 +11170,7 @@
      {
       "h2": "Why 17 never appears in the centre of the matrix",
       "paragraphs": [
-       "People often search for “17 in the centre”, but nobody has 17 in the centre of a personal matrix. The centre is the sum of the four outer points A + B + C + D, and D is itself the sum A + B + C. So the centre is the same sum added to itself. As long as the doubled number is no more than 22, the centre is simply even. If it is more, it is reduced by adding its digits, and the result is no more than 14. That is why the centre can only hold 3–14, 16, 18, 20 and 22, and there are no odd numbers above 13 there. This is a property of the classic calculation by the [Ladini method](/method), not a quirk of one calculator.",
+       "People often search for “17 in the centre”, but nobody has 17 in the centre of a personal matrix. The centre is the sum of the four outer points A + B + C + D, and D is itself the sum A + B + C. So the centre is the same sum added to itself. As long as the doubled number is no more than 22, the centre is simply even. If it is more, it is reduced by adding its digits, and the result is no more than 14. That is why the centre can only hold 3–14, 16, 18, 20 and 22, and there are no odd numbers above 13 there. This is a property of the classic calculation by the [Ladini method](/encyclopedia/method), not a quirk of one calculator.",
        "So where does “17 in the centre” come from? Usually it is one of three things.",
        {
         "ul": [
@@ -11171,6 +11273,7 @@
     "money": "Income is uneven and follows the inner state: in a bright phase it arrives easily, in a dark one the person simply stops acting. Planning ahead helps, rather than going by how you feel that morning. Send invoices and set meetings two weeks ahead on the bright days — on the dark ones all that is left is to carry out what is already booked.",
     "money40": "By the mature years this arcanum reaches money through what used to be called odd: instinct, experience with people, accumulated depth. By then the oddity has become a craft — people pay for understanding others, not for speed. The weak spot is fog in everyday matters: a mess in bills and contracts eats up what the understanding earned. Keep one simple record of income and spending and fill it in once a week.",
     "relations": "People next to them feel understood without words. The risk is fog: things left unsaid, jealousy built out of imagination, grievances the partner never hears about. A guess that nobody checks with one question grows in a week into a whole story the partner never took part in.",
+    "parent_child_line": "Thinking about children may awaken a vivid imagination, including unsettling pictures of the unknown. The Moon here concerns the gap between an inner image and what you actually know. A guess can begin to direct the conversation: a younger person's short reply might seem like withdrawal, prompting more and more checking questions. A clearer approach acknowledges uncertainty and asks what is happening. Your feelings deserve attention, but they cannot reveal someone else's intentions or, on their own, settle whether you want children.",
     "parents_children": "The habit of reading hints came from home: little was said directly, but the mood was read instantly. The sensitivity stayed — they notice a child’s state before any words. What is missing is clear rules: not everyone catches a hint, and a younger person needs it said plainly.",
     "family_gifts": "The mother’s line brought sensitivity and a gift for dreams. There was a woman in the family who, people said, knew everything in advance — that line is still alive. The resource here is not prediction but noticing: a hunch is worth checking against facts, otherwise the old family legend starts deciding for you.",
     "ancestry": "Secrets and things left unsaid run through the family line: unnamed stories, relatives kept hidden, explanations cut off halfway. The task is to give events their names back. Finding out the truth and saying it out loud matters more here than building a pretty version out of it. Name one fact you actually know instead of the usual hint, and stop where guesswork begins.",
@@ -11251,6 +11354,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -11805,7 +11913,7 @@
      {
       "h2": "Years under The Moon: the personal year and decades",
       "paragraphs": [
-       "When 18 comes up as your personal year, the year moves in waves: intuition speaks louder than usual, but so do fears. How to live through such a period is covered on the page [18 for the year](/year/18).",
+       "When 18 comes up as your personal year, the year moves in waves: intuition speaks louder than usual, but so do fears. How to live through such a period is covered on the page [18 for the year](/encyclopedia/year/18).",
        "The Moon can also lead a whole decade in the reading up to 80 — 27.5% of people have at least one decade under it. Each decade is calculated from its own point of the chart, so from the date it is easy to tell when yours comes:",
        {
         "ul": [
@@ -11964,6 +12072,7 @@
     "money": "What gets paid for is openness and a name: public work, teaching, sales, a personal brand. The weak spot is spending on the good life that runs ahead of the income. Once a month put two figures side by side: what the name brought in and what keeping it up cost.",
     "money40": "In the money of the mature years the nineteenth arcanum leans on reputation and recognition: people come because they already know them. The name goes ahead of them, and introducing themselves from scratch happens less and less often. Quiet work for a percentage does not turn bad because of that: the calendar does not order anyone onto a stage, and the choice stays theirs. Make one appearance under your own name and compare the response with the old format.",
     "relations": "A partner gets warmth, generosity and lightness. The risk is a hunger for admiration: once the admiring stops, this arcanum looks for attention somewhere else. Nobody beside them has to glow all the time, and whoever is allowed not to stays the longest.",
+    "parent_child_line": "Shared enjoyment may be your most familiar way of connecting with children: laughing at a joke, playing, or enjoying a small discovery together. The Sun here suggests openness and simple contact. The difficulty comes when happiness becomes a requirement. You might rush to cheer up a sad child because everything is supposed to feel good around you. A more welcoming warmth makes room for different feelings. You do not have to create a celebration or receive a smile for your presence to matter.",
     "parents_children": "Joy in this house was a shared job, and sadness was allowed only briefly. Warmth and attention come in plenty, and the person warms the younger ones around them the same way. Leave them the right to be sad and not to cheer the elder up, or being pleased all the time turns into a duty.",
     "family_gifts": "A love of life came down the line, together with the knack of finding joy in hard years. Someone held everyone together by mood alone, and still does, through this person and often without their noticing. The gift does not ask them to be cheerful always: it is measured by the people who warmed up beside them, not by how loud the laughing was.",
     "ancestry": "Along this line the task is to bring things out into the light: to make visible what the family quietly did for generations, and to stop being ashamed of success. Quiet pride in your own, instead of the familiar ‘keep your head down’, is the result. Show one family achievement openly and calmly, without shrinking it with the usual ‘nothing special’.",
@@ -12044,6 +12153,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -12469,7 +12583,7 @@
       "paragraphs": [
        "**Money.** In the money section 19 stands for 15% of people, most often on the money line itself. The point other charts mark with a dollar sign is usually exactly the middle point of the money line, R2. The Sun is paid for openness and a name — for being visible and making it clear what people are paying for. The weak spot is spending on image that outpaces income. In detail — in the reading [19 in the money channel](/encyclopedia/position/money/19).",
        "**Love.** In relationships 19 occurs for 13% of people. To a partner The Sun brings warmth, generosity and lightness: next to such a person you do not have to decode their mood. The risk is a need for admiration. When the admiration stops, The Sun either dims or starts looking for attention elsewhere. More on this — the pages [19 in the line of relationships](/encyclopedia/position/relations/19) and [19 under the heart](/encyclopedia/position/love_middle/19), the partner point around which the couple revolves.",
-       "**The year.** A year or a decade under The Sun brings out into the open what was being done quietly, and tests whether a person can stand the light. That is a separate topic — [19 for the year in the destiny matrix](/year/19). On the age scale The Sun can lead any decade except 20–30, and most often it leads the fifth, from 40 to 50."
+       "**The year.** A year or a decade under The Sun brings out into the open what was being done quietly, and tests whether a person can stand the light. That is a separate topic — [19 for the year in the destiny matrix](/encyclopedia/year/19). On the age scale The Sun can lead any decade except 20–30, and most often it leads the fifth, from 40 to 50."
       ]
      },
      {
@@ -12583,6 +12697,7 @@
     "money": "Income comes through work the person believes in: there they are heard and paid for it. Working only for money runs into a ceiling and into irritation fast with this arcanum. Explain the price through the use one particular person gets, not through the strength of your own belief in the cause.",
     "money40": "In mature money the twentieth arcanum joins calling and payment: what used to look impractical now brings both income and standing. Years of work add up into one line, and from the outside that line becomes visible. It will not assemble by itself: until the person names their subject out loud, it stays a hobby with an unclear status. Put in one sentence what you do, and place that sentence everywhere people find you.",
     "relations": "Closeness here goes through a shared cause and shared values: this person looks for agreement on the main things, not for convenience. The weak spot is the habit of assessing a partner and quietly giving marks. A silent assessment gets spoken sooner or later, and it is better if that happens before the account is closed.",
+    "parent_child_line": "Questions about children may prompt you to listen to your own wishes again and reconsider being the adult. Judgement here connects a new understanding with the urge to respond. The difficulty is losing that inner response beneath a loud sense that “it is time.” After talking with friends, you might begin making plans before asking whether you want them. A more personal decision draws on what you understand about yourself now, including permission to want children or to have no wish for them.",
     "parents_children": "Assessment was heard in the family more often than praise, and the bar stood high. This person takes a younger one seriously too: asks to the point and expects a level — with a student or a subordinate it shows just as much as at home. It helps to say more often that the attitude does not depend on achievements, otherwise a child grows up beside you who never quite measures up.",
     "family_gifts": "A sense of duty came down this line, and with it the ability to gather everyone around you. Someone there held a large family or a community together, and that role comes naturally to this person too. What is inherited is not the duty itself but the value it was carried for; the value is what is worth continuing.",
     "ancestry": "A summing-up is what the line waits for from this person: put the story together, bring back the names, close old debts. They are often the first in the family to start working out who came from where. Put together a small piece of that story from sources you can check — documents, records, accounts of living witnesses.",
@@ -12663,6 +12778,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -13081,7 +13201,7 @@
       "paragraphs": [
        "The karmic task D is a plot that keeps coming back in new scenery until the person gives it a grown-up answer. 20 stands here for 2.5% of people, and all of them share the same construction: [The Emperor](/encyclopedia/arcanum/4), 4, in the centre, and the karmic tail [6-8-20](/encyclopedia/karmic-tail/6-8-20). The calculation allows no other variant. How 4 and 20 work together is on the page of [their combination](/encyclopedia/combination/4-20).",
        "The plot of this task is a trial that repeats. Again and again the person finds themselves now in the dock, now on the bench: family showdowns over who is right, exams that life sets in different disguises. The grown-up answer is to stop waiting for an acquittal from outside and start answering your own call.",
-       "When people search for “program 20”, this is usually what they are after — 20 in the karmic point. In the report, the section “Programs: what repeats in circles” brings together three points: the root of the program (D), the place where it holds (the centre) and the way out (spiritual purpose). 20 can be the root or the centre, but never the way out. How programs work is explained [on a separate page](/programs).",
+       "When people search for “program 20”, this is usually what they are after — 20 in the karmic point. In the report, the section “Programs: what repeats in circles” brings together three points: the root of the program (D), the place where it holds (the centre) and the way out (spiritual purpose). 20 can be the root or the centre, but never the way out. How programs work is explained [on a separate page](/encyclopedia/programs).",
        "The program of 20 is judgement going round in circles, and it has three steps.",
        {
         "ol": [
@@ -13159,7 +13279,7 @@
       "paragraphs": [
        "**Chakras.** In the energy map, 20 appears for 26% of people. Most often it is in the emotions of [Manipura](/encyclopedia/chakra/manipura), at 11%: this happens to everyone whose centre is 10. Here 20 turns will and status into the question “what for?”. Next comes the physics of [Muladhara](/encyclopedia/chakra/muladhara), at 7.1%: this is the same point C, so 20 stands there for everyone born in the years listed above.",
        "**Decades.** In the reading by years, 20 leads one of the eight periods for 28.3% of people. Every decade is possible except 20–30: that period is taken from the month of birth, and the month never reaches 20. A decade under 20 is a time of review and change of position: sum up what came before and choose what to live by next.",
-       "**Year.** A personal year under arcanum 20 is a separate topic with [its own page](/year/20): a time to settle accounts and hear your call."
+       "**Year.** A personal year under arcanum 20 is a separate topic with [its own page](/encyclopedia/year/20): a time to settle accounts and hear your call."
       ]
      },
      {
@@ -13242,7 +13362,7 @@
          "**The card’s symbolism** — from Arthur Edward Waite’s book The Pictorial Key to the Tarot (1910, reissued 1922): the description of the card, its inner meaning and its divinatory meanings. Quotations are in Waite’s own words.",
          "**Modern interpretation** — from Benebell Wen’s book Holistic Tarot (2015): Judgement as awakening, how it differs from Justice and The Tower, mistaken judgement as the card’s minus.",
          "**20 in a couple** — from Yuliana Lisovskaya’s book Matritsa sudby: sovmestimost (Destiny Matrix: Compatibility, 2024), retold in our own words.",
-         "**The scheme of points and the calculation** — by [Natalia Ladini’s method](/method), as implemented in the calculator on this site. The reading of positions and the links between arcana are our own synthesis, not a quotation from books.",
+         "**The scheme of points and the calculation** — by [Natalia Ladini’s method](/encyclopedia/method), as implemented in the calculator on this site. The reading of positions and the links between arcana are our own synthesis, not a quotation from books.",
          "**Shares and patterns** — our calculation over all birth dates from 1 January 1900 to October 2026. This is where rules such as “20 in the centre occurs only with karmic task 10” come from.",
          "**The origin of the Russian word sudba** — from etymological dictionaries: a Proto-Slavic derivative of sud, “judgement”."
         ]
@@ -13286,6 +13406,7 @@
     "money": "Money arrives through wide arrangements: several sources, different countries and markets, income that does not come from one job. A single bet in a single place is almost always under-priced for this arcanum. Test one extra market or one extra source with a small launch, instead of scattering across five countries and platforms at once.",
     "money40": "Experience gathered so far folds into a system for the twenty-first arcanum: they are paid for a whole, not for separate pieces. The scale that looked inflated in youth is now backed by what has been done. Things stall wherever everything rests on personal presence: a system rebuilt from scratch each time never became one. Find at least one result of your own that keeps working for a week without you.",
     "relations": "A partnership here holds on shared movement: studying together, travelling, building something big. A settled life with no growth turns such a couple into polite neighbours. Both need their own circle and their own space, otherwise the wide world becomes a way of leaving home.",
+    "parent_child_line": "How time with younger people fits into a full life may matter to you. The World here concerns bringing different parts of experience together. The difficulty is requiring everything to be perfectly ready. You might put off seeing a niece until you can plan an impeccable day of activities. A more accepting view allows ordinary time together to be enough. Your involvement does not have to cover everything, and having children or not having them is no measure of how complete your life is.",
     "parents_children": "The home here was a wide one: guests, trips, different languages and people. The same scale is what they open up for a child — showing the world and introducing them to it. What is sometimes missing is plain presence nearby, which matters more than any impressions or far routes.",
     "family_gifts": "What the family line hands down is breadth and the knack of settling in anywhere. People here moved, changed country or trade and found their own people again; the skill came through intact. What repeats is the gesture of going out — a trip, a course, a new circle — not someone else’s route.",
     "ancestry": "A way out is what this line asks for: where the family lived in one place and one way of life, this person needs to step wider. Showing that the world is bigger than the yard is not a betrayal of that way of life but its continuation at a new scale. Take one step past the usual limit: another city, another trade, another circle of people.",
@@ -13366,6 +13487,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -13885,7 +14011,7 @@
        {
         "h3": "Decades"
        },
-       "The age scale runs along the eight outer points of the matrix, ten years for each. 21 can lead any decade except the period from 20 to 30: that one is read from the month of birth. A decade under The World is a time for expansion and big completions: step into a new environment, bring long stories to an end, take stock of a whole chapter. The energy of a single year is covered in the article [21 for the year](/year/21).",
+       "The age scale runs along the eight outer points of the matrix, ten years for each. 21 can lead any decade except the period from 20 to 30: that one is read from the month of birth. A decade under The World is a time for expansion and big completions: step into a new environment, bring long stories to an end, take stock of a whole chapter. The energy of a single year is covered in the article [21 for the year](/encyclopedia/year/21).",
        {
         "h3": "Chakras, body and rest"
        },
@@ -13958,6 +14084,7 @@
     "money": "The market pays here for the unusual and for risk: own ventures, creative work, brokering, anything new. The weak spot is bookkeeping: money disappears without a trace and without any bad intent. Keep a simple record for one month: one line for every sum in and every sum out, no categories and no pretty reports.",
     "money40": "In mature money the twenty-second arcanum needs a frame: without a reserve and without rights put on paper, rich experience never turns into steady income. Ease at the entrance becomes an advantage once there is experience behind it — this person starts again where others are afraid to. The other side shows at once: freedom without a cushion turns into dependence on the next order. Put three months of living costs into a separate account and leave it alone when a new venture comes up.",
     "relations": "This arcanum picks its person by lightness: whoever is funny to be with and never heavy. It needs a partner who does not hold on, but who also does not carry the whole household alone. A few agreements that no mood can cancel hold such a couple together better than promises do.",
+    "parent_child_line": "Play and surprise may draw you towards spending time with children: younger company can make it easier to try something without a script. The Fool here suggests openness to new experience. The difficulty comes when freedom becomes a promise with no follow-through. You might enthusiastically suggest going out for ice cream, then forget the agreement. A more dependable spontaneity leaves room for fun while remembering commitments. You can stay curious without expecting a younger person to carry the responsibility for plans you made.",
     "parents_children": "Lightness is the main thing carried out of the family: hard moments were turned into jokes there. With someone younger this person plays and invents, while the daily order and the boring duties fall through. It helps to agree in advance who takes the routine on — they will not hold it themselves.",
     "family_gifts": "Staying power came down the line, along with the knack of not sinking when things go badly. Someone in the line pulled the others through hard years with laughter: they did not deny the hard part, but refused to let it become the whole of life. That still works now — lightness holds where it has a time limit and a safe boundary.",
     "ancestry": "Lightness is what the family story asks for: where the line lived in fear and by the rules, it matters that this person shows another way is possible. Staying on your feet while doing it is part of the task: freedom with no supports quickly becomes the old chaos under a new name. Try one freer way of living, and name in advance the supports it rests on.",
@@ -14038,6 +14165,11 @@
      "key": "relations",
      "title": "Relationships in the destiny matrix",
      "href": "/encyclopedia/position/relations"
+    },
+    {
+     "key": "parent_child_line",
+     "title": "The parent-child line in the destiny matrix",
+     "href": "/encyclopedia/position/parent_child_line"
     },
     {
      "key": "parents_children",
@@ -14459,7 +14591,7 @@
        "**Under the heart.** This point shows what a person becomes in closeness. With 22 there, they give their partner a lot of freedom and expect the same in return. The difficulty is constancy: as soon as an agreement is pinned down, they feel the pull to vanish. Gender does not affect the calculation: for a man and for a woman, 22 under the heart is calculated and read the same way. The breakdown — [22 under the heart](/encyclopedia/position/love_middle/22).",
        "**Money.** On the money line, including its middle point, the one called “under the dollar”, 22 brings income through the unusual: your own ventures, risk, anything new. The weak spot is keeping track: money melts away unnoticed, and nobody is to blame. In detail — [the money channel with 22](/encyclopedia/position/money/22).",
        "**Centre.** 22 in the centre of the matrix is rare. Here freedom is not a character trait but what the whole personality rests on: to stay themselves, a person needs the chance to start everything over. The breakdown — [22 in the centre](/encyclopedia/position/center/22).",
-       "**Year.** “22 for the year” is a different calculation: not a point in the chart but the energy of a year when the old frames stop holding. About it — [22 for the year in the destiny matrix](/year/22)."
+       "**Year.** “22 for the year” is a different calculation: not a point in the chart but the energy of a year when the old frames stop holding. About it — [22 for the year in the destiny matrix](/encyclopedia/year/22)."
       ]
      },
      {

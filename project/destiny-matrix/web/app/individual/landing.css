@@ -232,9 +232,10 @@
 .ilp .lp-plan .lp-desc { margin: 0; font-size: 14.5px; color: var(--ink2); }
 .ilp .lp-y2027 { margin: 0; padding: 9px 11px; border-radius: 10px; background: var(--paper2); border: 1px dashed var(--edge2); font-size: 13px; line-height: 1.45; color: var(--ink2); }
 .ilp .lp-y2027 b { color: var(--gold2); }
-.ilp .lp-kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; border-radius: 999px; background: var(--linen); }
-.ilp .lp-kinds button { min-height: 36px; border: 0; border-radius: 999px; background: none; font: 700 12.5px var(--sans); color: var(--dim); cursor: pointer; }
+.ilp .lp-kinds { display: flex; gap: 3px; padding: 3px; border-radius: 999px; background: var(--linen); }
+.ilp .lp-kinds button { flex: 1 1 auto; min-height: 36px; padding: 0 8px; white-space: nowrap; border: 0; border-radius: 999px; background: none; font: 700 12.5px var(--sans); color: var(--dim); cursor: pointer; }
 .ilp .lp-kinds button.lp-on { background: var(--paper); color: var(--ink); box-shadow: 0 2px 6px -3px rgba(40, 30, 10, .35); }
+@container (max-width: 252px) { .ilp .lp-kinds { display: grid; grid-template-columns: repeat(2, 1fr); border-radius: 20px; } }
 .ilp .lp-price { margin: 4px 0 0; font: 700 30px/1 var(--sans); letter-spacing: -.02em; }
 .ilp .lp-price s { margin-left: 8px; font-size: 16px; font-weight: 600; color: var(--dim2); }
 .ilp .lp-price-sub { margin: -2px 0 2px; font-size: 13px; color: var(--dim); }

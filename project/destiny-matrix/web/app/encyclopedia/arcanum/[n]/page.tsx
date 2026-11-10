@@ -10,7 +10,7 @@ import Faq from "@/components/ui/Faq";
 import JsonLd from "@/components/ui/JsonLd";
 import Tabs from "@/components/ui/Tabs";
 import { forLocale as localizedArcana } from "@/lib/arcana";
-import { forLocale as localizedContent } from "@/lib/content";
+import { articleContentForLocale as localizedContent } from "@/app/_lib/article";
 import { forLocale as localizedEncyclopedia } from "@/lib/encyclopedia";
 import { forLocale as localizedEncyclopediaNavigation } from "@/lib/encyclopediaNavigation";
 import { D } from "@/lib/i18n";

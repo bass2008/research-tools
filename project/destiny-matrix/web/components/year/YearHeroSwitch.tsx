@@ -10,7 +10,7 @@ import YearLinksOffer from "./YearLinksOffer";
 export default function YearHeroSwitch({ children, year, years, price }: { children: ReactNode; year: number; years: [number, number]; price: number }) {
   const L = useLocale();
   const path = splitPublicPath(usePathname() ?? "/").path;
-  const page = L === "ru" ? /^\/(?:year(?:\/\d{1,2})?|encyclopedia\/month)\/?$/.exec(path) : null;
+  const page = L === "ru" ? /^\/encyclopedia\/(?:year(?:\/\d{1,2})?|month)\/?$/.exec(path) : null;
   if (!page) return <>{children}</>;
   return <div className="wrap yb-hero">
     <YearLinksOffer key={path} place="top" year={year} years={years} price={price} />

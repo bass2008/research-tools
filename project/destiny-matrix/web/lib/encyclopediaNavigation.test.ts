@@ -7,7 +7,6 @@ import { describe, expect, it } from "vitest";
 import {
   ENCYCLOPEDIA_SECTIONS,
   encyclopediaSectionFromPath,
-  encyclopediaSectionFromExternalRoot,
   encyclopediaSectionFromSegment,
   encyclopediaSectionCrumb,
   encyclopediaSectionHref,
@@ -34,7 +33,7 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionHub("chk")).toBe("/encyclopedia/chakra");
     expect(encyclopediaSectionHub("cmb")).toBe("/encyclopedia/combination");
     expect(encyclopediaSectionHub("tls")).toBe("/encyclopedia/karmic-tail");
-    expect(encyclopediaSectionHub("yer")).toBe("/year");
+    expect(encyclopediaSectionHub("yer")).toBe("/encyclopedia/year");
     expect(encyclopediaSectionHub("ptl")).toBe("/encyclopedia/compatibility/tails");
   });
 
@@ -78,13 +77,12 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionFromSegment("combination")).toBe("cmb");
     expect(encyclopediaSectionFromSegment("karmic-tail")).toBe("tls");
     expect(encyclopediaSectionFromSegment("unknown")).toBeNull();
-    expect(encyclopediaSectionFromExternalRoot("year")).toBe("yer");
-    expect(encyclopediaSectionFromExternalRoot("unknown")).toBeNull();
+    expect(encyclopediaSectionFromSegment("year")).toBe("yer");
   });
 
   it("выбирает раздел для всех форм маршрутов без отдельных таблиц в компонентах", () => {
     const positions = { character: "sec", day: "pts" } as const;
-    const articles = ["/encyclopedia/karmic-tail", "/year", "/method"];
+    const articles = ["/encyclopedia/karmic-tail", "/encyclopedia/year", "/encyclopedia/method"];
     expect(encyclopediaSectionFromPath("/encyclopedia", positions, articles)).toBeNull();
     expect(encyclopediaSectionFromPath("/encyclopedia/arcanum/15", positions, articles)).toBe("arc");
     expect(encyclopediaSectionFromPath("/encyclopedia/position/character", positions, articles)).toBe("sec");
@@ -104,10 +102,10 @@ describe("единый реестр навигации энциклопедии"
     expect(encyclopediaSectionFromPath("/encyclopedia/chakra", positions, articles)).toBe("chk");
     expect(encyclopediaSectionFromPath("/encyclopedia/combination", positions, articles)).toBe("cmb");
     expect(encyclopediaSectionFromPath("/encyclopedia/position", positions, articles)).toBe("pts");
-    expect(encyclopediaSectionFromPath("/year/2026", positions, articles)).toBe("yer");
-    expect(encyclopediaSectionFromPath("/year", positions, articles)).toBe("yer");
+    expect(encyclopediaSectionFromPath("/encyclopedia/year/2026", positions, articles)).toBe("yer");
+    expect(encyclopediaSectionFromPath("/encyclopedia/year", positions, articles)).toBe("yer");
     // Настоящая статья — адрес первого уровня без своей ветки: она остаётся в «Статьях».
-    expect(encyclopediaSectionFromPath("/method", positions, articles)).toBe("art");
+    expect(encyclopediaSectionFromPath("/encyclopedia/method", positions, articles)).toBe("art");
   });
 
   // Адрес раздела зашивали в карусель первого экрана и в подвал листа позиции, и после переезда

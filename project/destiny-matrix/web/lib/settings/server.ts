@@ -11,6 +11,7 @@ interface ServerSettings extends Record<string, string | number | boolean> {
   hostname: string;
   telemetryDisabled: boolean;
   siteProfiles: string;
+  deployedAt: string;
 }
 
 // Эта структура не импортируется клиентскими компонентами. next.config и server-only BFF
@@ -26,6 +27,7 @@ const startupEnvironment = {
   HOSTNAME: process.env.HOSTNAME,
   NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED,
   SITE_PROFILES: process.env.SITE_PROFILES,
+  DEPLOYED_AT: process.env.DEPLOYED_AT,
 };
 
 const definitions: SettingDefinitions<ServerSettings> = {
@@ -47,6 +49,8 @@ const definitions: SettingDefinitions<ServerSettings> = {
   hostname: { env: "HOSTNAME", fallback: "0.0.0.0" },
   telemetryDisabled: { env: "NEXT_TELEMETRY_DISABLED", fallback: false, parse: parseBoolean },
   siteProfiles: { env: "SITE_PROFILES", fallback: "" },
+  // set by the release script at container start, unlike the build labels baked into the image
+  deployedAt: { env: "DEPLOYED_AT", fallback: "" },
 };
 
 export const serverSettings = new SettingManager(definitions, startupEnvironment);

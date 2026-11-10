@@ -251,6 +251,32 @@
   "formula": "the relationship line M–R1–R and the inner upper point K"
  },
  {
+  "key": "parent_child_line",
+  "meaning": [
+   "The parent-child line is the left ray of the matrix, A → O → J: the atmosphere of childhood a person carries and how it echoes in their attitude to children and in the way they show up in the world. J is the parents' point: upbringing, the mood at home, the relationship between father and mother. O is the attitude to children: one's own, younger people, the very role of the elder. A is the outer expression through which family experience comes out.",
+   "The line is read from the parents: J sets the atmosphere, O shows what the person carried from it to children — a repeat of the script or its opposite — and A shows how it looks from the outside. This is a symbolic reading of a theme, not a story about a real family: everyone has the line, including people without children."
+  ],
+  "reading": "Start with the parents' point J — what the atmosphere of childhood was. Then O — what of it you carry into your attitude to children, and A — how this experience shows in the world.",
+  "seo_title": "The parent-child line in the destiny matrix: calculation and meaning",
+  "seo_description": "The parent-child line in the destiny matrix: where points A, O and J sit on the chart, how to calculate the line from a birth date and how to read your triple.",
+  "queries": [
+   "parent-child karma destiny matrix",
+   "parent child line destiny matrix",
+   "destiny matrix parents and children"
+  ],
+  "formula": "outer expression A, attitude to children O = A + J and the parents' point J = A + E",
+  "links": [
+   [
+    "Parents and children: the family square F, G and H",
+    "/encyclopedia/position/parents_children"
+   ],
+   [
+    "The child matrix: personal and with a parent",
+    "/encyclopedia/child-matrix"
+   ]
+  ]
+ },
+ {
   "key": "parents_children",
   "meaning": [
    "The section gathers three family positions: the spiritual male F, the spiritual female G and the material male H. They show which rules a person heard at home and how one of the branches turned those rules into action. This is material for a talk about passed-on scripts, not a separate formula for a child and not a forecast of the child’s character.",
@@ -265,7 +291,13 @@
    "arcanum of children in the matrix",
    "relationship with mother destiny matrix"
   ],
-  "formula": "the spiritual family points F and G, the material male point H"
+  "formula": "the spiritual family points F and G, the material male point H",
+  "links": [
+   [
+    "The parent-child line: points A, O and J",
+    "/encyclopedia/position/parent_child_line"
+   ]
+  ]
  },
  {
   "key": "family_gifts",

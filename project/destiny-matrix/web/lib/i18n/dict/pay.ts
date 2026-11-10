@@ -28,8 +28,8 @@ export const pay = {
   subscription: { ru: "Подписка", en: "Subscription" } satisfies Phrase,
   pageTitle: { ru: "Оплата разбора", en: "Paying for the reading" } satisfies Phrase,
   pageDescription: {
-    ru: "Оплата полного разбора матрицы судьбы: 21 раздел по вашей дате рождения.",
-    en: "Paying for the full destiny matrix reading: 21 sections for your date of birth.",
+    ru: "Оплата полного разбора матрицы судьбы: 22 раздела по вашей дате рождения.",
+    en: "Paying for the full destiny matrix reading: 22 sections for your date of birth.",
   } satisfies Phrase,
   tariffTitle: {
     ru: (name: string, price: string) => `Оплата тарифа «${name}» — ${price}`,
@@ -50,7 +50,7 @@ export const pay = {
   pairTitle: { ru: "Совместимость пары", en: "Couple compatibility" } satisfies Phrase,
   onePayment: { ru: "один платёж", en: "one payment" } satisfies Phrase,
   // тарифная карточка
-  allSections: { ru: "Все 21 раздел автоматического разбора", en: "All 21 sections of the automatic reading" } satisfies Phrase,
+  allSections: { ru: "Все 22 раздела автоматического разбора", en: "All 22 sections of the automatic reading" } satisfies Phrase,
   unlimitedDates: { ru: "Любое число дат рождения", en: "Any number of birth dates" } satisfies Phrase,
   singleDate: { ru: "Одна дата рождения", en: "One date of birth" } satisfies Phrase,
   storedInAccount: { ru: "Матрицы хранятся в кабинете", en: "Matrices are kept in your account" } satisfies Phrase,
@@ -111,13 +111,13 @@ export const payForm = {
   } satisfies PhraseFn<[string]>,
   whatWeBuy: { ru: "Что покупаем", en: "What you are buying" } satisfies Phrase,
   manyPlans: {
-    ru: "Все 21 раздел разбора открывает любой из тарифов — разница в числе дат и сроке.",
-    en: "Every plan opens all 21 sections — they differ in the number of dates and in the term.",
+    ru: "Все 22 раздела разбора открывает любой из тарифов — разница в числе дат и сроке.",
+    en: "Every plan opens all 22 sections — they differ in the number of dates and in the term.",
   } satisfies Phrase,
   onePlan: {
-    ru: (price: string) => `Все 21 раздел разбора по одной дате рождения. Стоимость — ${price}, `
+    ru: (price: string) => `Все 22 раздела разбора по одной дате рождения. Стоимость — ${price}, `
       + "один платёж без подписки; разбор скачивается в PDF.",
-    en: (price: string) => `All 21 sections of the reading for one date of birth. The price is ${price}, `
+    en: (price: string) => `All 22 sections of the reading for one date of birth. The price is ${price}, `
       + "one payment with no subscription; the reading downloads as a PDF.",
   } satisfies PhraseFn<[string]>,
   onePlanPair: {
@@ -129,11 +129,11 @@ export const payForm = {
   onePlanAll: {
     ru: (price: string, period: string, everything: boolean) => (everything
       ? `Все разделы личных разборов и разборов пары — для любых дат и пар ${period}. `
-      : `Все 21 раздел разбора — для любых дат ${period}. `)
+      : `Все 22 раздела разбора — для любых дат ${period}. `)
       + `Стоимость — ${price}, без автосписаний.`,
     en: (price: string, period: string, everything: boolean) => (everything
       ? `All sections of personal and couple readings, for any dates and couples, ${period}. `
-      : `All 21 sections of the reading, for any dates, ${period}. `)
+      : `All 22 sections of the reading, for any dates, ${period}. `)
       + `The price is ${price}, with no automatic charges.`,
   } satisfies PhraseFn<[string, string, boolean]>,
   planGroup: { ru: "Тариф", en: "Plan" } satisfies Phrase,
