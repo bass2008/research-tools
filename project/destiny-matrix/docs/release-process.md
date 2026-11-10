@@ -278,6 +278,22 @@ scripts/assert-release-candidate.sh
 поддерживается (`decisions.md`, Decision 17). Снимок базы перед релизом остаётся страховкой
 данных, а не путём назад.
 
+### Очистить Hawk
+
+Сразу после `release-prod.sh`, до приёмки прода — оба проекта, полностью. Всё, что появится в
+Hawk после этого, относится к новой сборке, и ошибки приёмки прода видны сразу, без старых групп.
+
+```bash
+cd ..   # корень проекта
+set -a; . ~/.config/arcana/hawk.env; set +a
+for p in "acrana-sense.ru prod" "acrana-sense.ru test"; do
+  python compose/scripts/hawk-clear.py "$p"            # список: что удаляем
+  python compose/scripts/hawk-clear.py "$p" --apply
+done
+```
+
+В отчёт — одна строка: сколько групп и событий удалено в каждом проекте (последняя строка списка).
+
 ## 6. Приёмка прода
 
 ```bash
